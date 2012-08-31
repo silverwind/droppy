@@ -6,9 +6,18 @@ html,body {
 	background-color: #eee;
 }
 
-* {	margin:0; padding:0;}
-a { color: #222; text-decoration: none;}
-a#foot {color: #ddd}
+* {
+	margin:0;
+	padding:0;
+}
+a {
+	color: #222;
+	text-decoration: none;
+}
+
+a#foot {
+	color: #ddd
+}
 
 span#fileicon, span#filedelete {
 	line-height:32px;
