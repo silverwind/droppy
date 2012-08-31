@@ -92,7 +92,7 @@ function HTML(res,req) {
 				'<div id=right></div></div>');
 	}
 	res.write('</div></div>');
-	res.write('<div id="footer"> created on <a id="foot" href="http://nodejs.org/">node.js</a> by <a id="foot" href="https://github.com/silverwind/">silverwind</a></div>');
+	res.write('<div id="footer"> Created on <a id="foot" href="http://nodejs.org/">node.js</a> by <a id="foot" href="https://github.com/silverwind/">silverwind</a></div>');
 	res.end('</body></html>');
 }
 //-----------------------------------------------------------------------------
