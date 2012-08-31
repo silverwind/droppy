@@ -58,7 +58,6 @@ http.createServer(function(req, res) {
 Log("Droppy: Listening on port " + port + ".")
 //-----------------------------------------------------------------------------
 function RedirectToRoot(res,req) {
-	//res.writeHead(307, {'Location': 'http://' + req.headers.host});
 	try {
 		res.statusCode = 301;
 		res.setHeader('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
@@ -96,10 +95,6 @@ function HTML(res,req) {
 	res.write('<div id="footer"> created on <a id="foot" href="http://nodejs.org/">node.js</a> by <a id="foot" href="https://github.com/silverwind/">silverwind</a></div>');
 	res.end('</body></html>');
 }
-
-
-'<script type="text/javascript" src="/jquery"></script>'
-
 //-----------------------------------------------------------------------------
 function Log(msg) {
 	console.log(GetTimestamp() + msg)
