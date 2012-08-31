@@ -1,8 +1,8 @@
 Droppy
 =======
-A HTTP fileserver built on [node.js](http://nodejs.org/).
+A simple HTTP fileserver built on [node.js](http://nodejs.org/).
 
-First, make sure you have [formidable](https://github.com/felixge/node-formidable) installed
+First, make sure you have [formidable](https://github.com/felixge/node-formidable) installed:
 
     npm install formidable
 
@@ -10,4 +10,4 @@ To start the server, execute server.js with node:
 
     node server.js
 
-Files will be placed in **./files/**. This folder and the listening port (default 80) can be changed in the source.
+Files will be placed in **./files/**. The server will listen on [127.0.0.1:80](http://127.0.0.1/). These two settings can be changed on the first few lines in the source.
