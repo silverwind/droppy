@@ -2,10 +2,11 @@ Droppy
 =======
 A simple HTTP fileserver built on [node.js](http://nodejs.org/).
 
-First, make sure you have [formidable](https://github.com/felixge/node-formidable) and [mime](https://github.com/broofa/node-mime) installed:
+First, make sure you have the following node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime),[socket.io](https://github.com/learnboost/socket.io):
 
     npm install formidable
     npm install mime
+    npm install socket.io
 
 To start the server, execute server.js with node (or use the included bat file on windows):
 
