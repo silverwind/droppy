@@ -1,5 +1,6 @@
 var http = require('http');
 var fs = require('fs');
+var mime = require('mime');
 var formidable = require('formidable');
 
 //Configuration
@@ -26,9 +27,9 @@ http.createServer(function(req, res) {
 			}
 		} else {
 			if (req.url.match(/css\.css$/g)) {
-				res.end(fs.readFileSync('./css.css'));
+				res.end(fs.readFileSync('./res/css.css'));
 			} else if (req.url.match(/droppy\.png$/g)) {
-				res.end(fs.readFileSync('droppy.png'));
+				res.end(fs.readFileSync('./res/droppy.png'));
 			} else if (req.url.indexOf('deletefile') >= 0) {
 				filenames = fs.readdirSync(fileDir);
 				num = req.url.match(/\d+/g)
@@ -41,7 +42,15 @@ http.createServer(function(req, res) {
 			} else if (req.url.indexOf('files') >= 0 ) {
 				var file = req.url;
 				if (file != null) {
-					fs.createReadStream("." + unescape(file), {
+					var path = "." + unescape(file);
+					var mime = mime.lookup(path);
+					var size = fs.statSync(path).size;
+					Log ("Sending " + path + " to " + req.socket.remoteAddress + " (" + BytesToSI(size) + " bytes).");
+					res.writeHead(200, {
+						'Content-Type' : mime,
+						'Content-Length' : size
+					});
+					fs.createReadStream(path, {
 					  'bufferSize': 4 * 1024
 					}).pipe(res)
 
@@ -82,7 +91,7 @@ function HTML(res,req) {
 	);
 	filenames = fs.readdirSync(fileDir);
 	for (i = 0; i < filenames.length; i++) {
-		var size = BytesToSI(fs.statSync(fileDir + unescape(filenames[i])).size,2);
+		var size = BytesToSI(fs.statSync(fileDir + unescape(filenames[i])).size);
 		var href = fileDir + unescape(filenames[i]) + '">' + filenames[i];
 		res.write(  '<div id="filerow">' +
 					'<span id="fileicon">&#x25B6;</span>' +
@@ -110,7 +119,7 @@ function GetTimestamp() {
 	return day + "/" + month + "/" + year + " "+ hours + ":" + minutes + " -> ";
 }
 //-----------------------------------------------------------------------------
-function BytesToSI(bytes, precision)
+function BytesToSI(bytes)
 {
 	var kib = 1024;
 	var mib = kib * 1024;
@@ -120,13 +129,13 @@ function BytesToSI(bytes, precision)
 	if ((bytes >= 0) && (bytes < kib)) {
 		return bytes + ' B';
 	} else if ((bytes >= kib) && (bytes < mib)) {
-		return (bytes / kib).toFixed(precision) + ' KiB';
+		return (bytes / kib).toFixed(2) + ' KiB';
 	} else if ((bytes >= mib) && (bytes < gib)) {
-		return (bytes / mib).toFixed(precision) + ' MiB';
+		return (bytes / mib).toFixed(2) + ' MiB';
 	} else if ((bytes >= gib) && (bytes < tib)) {
-		return (bytes / gib).toFixed(precision) + ' GiB';
+		return (bytes / gib).toFixed(2) + ' GiB';
 	} else if (bytes >= tib) {
-		return (bytes / tib).toFixed(precision) + ' TiB';
+		return (bytes / tib).toFixed(2) + ' TiB';
 	} else {
 		return bytes + ' B';
 	}
