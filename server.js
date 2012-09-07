@@ -43,16 +43,16 @@ http.createServer(function(req, res) {
 				var file = req.url;
 				if (file != null) {
 					var path = "." + unescape(file);
-					var mime = mime.lookup(path);
+					var mimeType = mime.lookup(path);
 					var size = fs.statSync(path).size;
-					Log ("Sending " + path + " to " + req.socket.remoteAddress + " (" + BytesToSI(size) + " bytes).");
+					Log("Sending " + path + " to " + req.socket.remoteAddress + " (" + BytesToSI(size) + " bytes).");
 					res.writeHead(200, {
-						'Content-Type' : mime,
+						'Content-Type' : mimeType,
 						'Content-Length' : size
 					});
 					fs.createReadStream(path, {
 					  'bufferSize': 4 * 1024
-					}).pipe(res)
+					}).pipe(res);
 
 				}
 			} else {
