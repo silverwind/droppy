@@ -20,6 +20,7 @@ http.createServer(function(req, res) {
 				form.parse(req);
 				form.on('fileBegin', function(name, file){
 					file.path = form.uploadDir + "/" + file.name;
+					Log("Receiving " + file.path + " from " + req.socket.remoteAddress + ".");
 				})
 				form.on('end', function(name, file){
 					RedirectToRoot(res,req);
@@ -45,7 +46,7 @@ http.createServer(function(req, res) {
 					var path = "." + unescape(file);
 					var mimeType = mime.lookup(path);
 					var size = fs.statSync(path).size;
-					Log("Sending " + path + " to " + req.socket.remoteAddress + " (" + BytesToSI(size) + " bytes).");
+					Log("Sending " + path + " to " + req.socket.remoteAddress + " (" + BytesToSI(size) + ").");
 					res.writeHead(200, {
 						'Content-Type' : mimeType,
 						'Content-Length' : size
