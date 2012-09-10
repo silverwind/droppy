@@ -2,7 +2,7 @@ Droppy
 =======
 A simple HTTP fileserver built on [node.js](http://nodejs.org/).
 
-First, make sure you have the following node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime),[socket.io](https://github.com/learnboost/socket.io):
+First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io):
 
     npm install formidable
     npm install mime
