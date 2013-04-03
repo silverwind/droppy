@@ -158,11 +158,12 @@ function getHTML(res,req) {
 		generate('</head>');
 		generate('<body>');
 		generate('<div id="container"><div id="buttons">');
+		generate('<div id="logo"><p id="logotext">Droppy</p></div>');
 		generate('<form action="/upload" enctype="multipart/form-data" method="post">');
-		generate('<div class="file-upload"><span>Upload file(s)</span><input type="file" name="file" id="file" onchange="this.form.submit()" multiple="multiple" /></div>');
+		generate('<div class="file-upload"><span><span id="symbol">&#11014;</span> Upload file(s)</span><input type="file" name="file" id="file" onchange="this.form.submit()" multiple="multiple" /></div>');
 		generate('</form>');
-		generate('<div class="file-upload"><span>Create Folder</span></div></div>')
-		generate('<div id="content"><div id="progress"><div id="progressBar"></div></div>');
+		generate('<div class="add-folder"><span><span id="symbol">&#9733;</span> Create Folder</span></div><div id="progress"><div id="progressBar"></div></div></div>')
+		generate('<div id="content">');
 		generate(getFileList());
 		generate('</div></div>');
 		generate('<footer> Created on <a class="foot" href="http://nodejs.org/">node.js</a> by <a class="foot" href="https://github.com/silverwind/">silverwind</a></footer>');
