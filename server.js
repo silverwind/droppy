@@ -3,13 +3,13 @@
 // https://github.com/silverwind/Droppy
 //-----------------------------------------------------------------------------
 // Configuration
-var filesDir = "./files/";	// Location to store the files. Will be created when necessary.
-var port = "80";			// The listening port.
+var filesDir	= "./files/";	// Location to store the files. Will be created when necessary.
+var port	 	= "80";			// The listening port.
 //-----------------------------------------------------------------------------
 // Internal variables
-var fileList = {};
-var resDir = "./res/";
-var HTML = "";
+var fileList	= {};
+var resDir		= "./res/";
+var HTML		= ""; //cached HTML code
 //-----------------------------------------------------------------------------
 "use strict";
 
@@ -21,7 +21,7 @@ var server = require("http").createServer(onRequest),
 	util = require("util")
 
 // Read the HTML and strip whitespace
-HTML = fs.readFileSync(resDir + "html.html",{"encoding": "utf8"});
+HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
 HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
 // Set up the directory for file and start the server
@@ -42,7 +42,7 @@ fs.mkdir(filesDir, function (err) {
 		logError(err);
 	}
 });
-
+//-----------------------------------------------------------------------------
 function createWatcher() {
 	fs.watch(filesDir,{ persistent: true }, function(event,filename){
 		//Watch the directory for changes. "rename" triggers on deletes too.
@@ -53,11 +53,13 @@ function createWatcher() {
 		}
 	});
 }
-
+//-----------------------------------------------------------------------------
+//Send file list HTML over websocket
 function SendUpdate() {
 	io.sockets.emit("UPDATE_FILES", getFileList());
 }
-
+//-----------------------------------------------------------------------------
+// websocket listener
 io.sockets.on("connection", function (socket) {
 	socket.on("REQUEST_UPDATE", function (data) {
 		SendUpdate();
@@ -68,7 +70,7 @@ io.sockets.on("connection", function (socket) {
 		});
 	});
 });
-
+//-----------------------------------------------------------------------------
 function onRequest(req, res) {
 	var method = req.method.toUpperCase();
 	var remoteSocket = req.socket.remoteAddress + ":" + req.socket.remotePort;
@@ -106,7 +108,7 @@ function onRequest(req, res) {
 	} else if (method == "GET"){
 		// Resource request
 		if(req.url.match(/^\/res\//)) {
-			var path = resDir + req.url.substring(resDir.length -1);
+			var path = resDir + unescape(req.url.substring(resDir.length -1));
 			fs.readFile(path, function (err, data) {
 				if(!err) {
 					fs.stat(path, function(err,stats){
@@ -148,22 +150,22 @@ function onRequest(req, res) {
 
 					logIt("Deleting " + path);
 					try{
-						var stats = fs.statSync(path);
+						if(path.match(/%\d+/g)) //TODO: rare case when filename contains escape codes
+							var stats = fs.statSync(unescape(path));
+						if (stats.isFile()) {
+							fs.unlink(unescape(path), function(err){
+								if(err) logError(err);
+								backToRoot(res);
+							});
+						} else if (stats.isDirectory()){
+							fs.rmdir(unescape(path), function(err){
+								if(err) logError(err);
+								backToRoot(res);
+							});
+						}
 					} catch(err) {
 						logError(err);
 						backToRoot(res);
-					}
-
-					if (stats.isFile()) {
-						fs.unlink(path, function(err){
-							if(err) logError(err);
-							backToRoot(res);
-						});
-					} else if (stats.isDirectory()){
-						fs.rmdir(path, function(err){
-							if(err) logError(err);
-							backToRoot(res);
-						});
 					}
 				} else {
 					logError(err);

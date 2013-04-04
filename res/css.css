@@ -216,12 +216,12 @@ div#add-folder:hover {
 
 div#overlay {
 	display: none;
-	height: 300px;
+	height: 200px;
     width: 400px;
 	position:absolute;
     left: 50%;
     top: 50%;
-    margin-top: -150px;
+    margin-top: -100px;
     margin-left: -200px;
 	background-color: #000;
 	opacity: .9;
