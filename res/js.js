@@ -40,8 +40,8 @@
 			}
 			if(e.keyCode == 13 && input && valid) { // Return Key
 				socket.emit("CREATE_FOLDER",input);
+				$("#info-filename").hide();
 				$("#overlay").hide();
-				$("#overlay").toggle();
 			}
 		});
 		//Initial update of files

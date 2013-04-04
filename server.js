@@ -201,7 +201,7 @@ function prepareFileList(callback){
 		for(i=0,len=files.length;i<len;i++){
 			var name = files[i], type;
 			try{
-				var stats = fs.statSync(ilesDir + name);
+				var stats = fs.statSync(filesDir + name);
 			} catch(err) {
 				logError(err);
 				backToRoot(res);
