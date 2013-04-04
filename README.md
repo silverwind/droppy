@@ -12,4 +12,6 @@ To start the server, execute server.js with node (or use the included bat file o
 
     node server.js
 
+You can also use the provided scripts **droppy.sh**/**droppy.bat** to set up dependancies and start the server.
+
 Files will be placed in **./files/**. The server will listen on [localhost:80](http://localhost/). These two settings can be changed on the first few lines in the source.
