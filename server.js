@@ -195,7 +195,7 @@ function prepareFileList(callback){
 		if(err) logError(err);
 		for(i=0,len=files.length;i<len;i++){
 			var name = files[i], type;
-			var stats = fs.statSync(filesDir);
+			var stats = fs.statSync(filesDir + name);
 			if (stats.isFile())
 				type = "f";
 			if (stats.isDirectory())
