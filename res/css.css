@@ -1,99 +1,89 @@
-html,body
-{
+html,body {
 	font-family: 'Open Sans', sans-serif;
 	font-size: 100%;
 	color:#666;
 	background-color:#f2f2f2;
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-	text-shadow: 0px 1px 0px rgba(128, 128, 128, 0.28);
+	margin: 0px;
+	padding: 0px;
 }
 
-a
-{
+a {
 	color:#111;
 	text-decoration:none;
 }
 
-a.foot
-{
-	font-size: 1.2em;
-}
-
-span.fileicon, span.filedelete, span.filename, span.filesize
-{
+span.fileicon, span.filedelete, span.filename, span.filesize {
 	line-height:2em;
 }
 
-#progress
-{
+div#progress {
 	margin-top: 20px;
 	background-color:#d5d5d5;
-	border: 2px solid black;
 	width:100%;
 	height:20px;
 	float: left;
-    background:#cfcfcf;
-    border-width:1px;
-    border-style:solid;
-    border-color: #aaa #bbb #ccc #bbb;
-    box-shadow:inset 0px 2px 3px #bbb;
-    border-radius:8px;
-    -moz-border-radius:8px;
-    -webkit-border-radius:8px;
-    -o-border-radius:8px;
+	background:#cfcfcf;
+	border-width:1px;
+	border-style:solid;
+	border-color: #aaa #bbb #ccc #bbb;
+	box-shadow:inset 0px 2px 3px #bbb;
+	border-radius:8px;
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
+	-o-border-radius:8px;
 }
 
-#progressBar
-{
+div#progressBar {
 	width:66%;
 	height:20px;
 	background-color:#f67;
 	border-radius:8px;
-    -moz-border-radius:8px;
-    -webkit-border-radius:8px;
-    -o-border-radius:8px;
-    background:#999;
-    background-size:18px 18px;
-    background-color: #f47;
-    box-shadow:inset 0px 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0px rgba(0, 0, 0, .2);
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
+	-o-border-radius:8px;
+	background:#999;
+	background-size:18px 18px;
+	background-color: #ff9147;
+	box-shadow:inset 0px 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0px rgba(0, 0, 0, .2);
 }
 
-div.filerow
-{
-	display:block;
-	width:100%;
+div.filerow {
+	height: auto;
+	width: auto;
 }
 
-div.filerow:hover
-{
+div.filerow:hover {
 	background-color:#fff;
+	box-shadow:inset 0px 0px 1px rgba(0, 0, 0, 1);
 }
 
-a.filelink
-{
+a.filelink {
 	display:block;
 	width:100%;
 }
 
-div#container
-{
-	min-height:100%;
+div#container {
+	min-height: 100%;
+	position: relative;
+	overflow: auto;
+	margin-top: 5px;
 }
 
-div#buttons
-{
-	background-color: transparent;
-	text-align:center;
-	height:auto;
-	width:200px;
-	font-size: 1.2em;
-	text-shadow: 0px 0px 2px rgba(128,128,128, 0.5);
-	margin-top: 10px;
-	margin-left: 20px;
+section,aside{
 	display: block;
+}
+
+#left {
+	z-index: 2555;
+	float: left;
+	width: 200px;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	text-align:center;
+	font-size: 1.2em;
+	position: fixed;
+	text-shadow: 0px 0px 2px rgba(128,128,128, 0.5);
 	-webkit-touch-callout:none;
 	-webkit-user-select:none;
 	-khtml-user-select:none;
@@ -102,77 +92,63 @@ div#buttons
 	user-select:none;
 }
 
-div#content
-{
-	overflow:auto;
-	width:auto;
-	position: relative;
-	padding-bottom:2em;
-	display:block;
-}
-
-footer
-{
-	position:relative;
-	background-color:transparent;
-	margin-top:-2em;
-	height:2em;
-	font-size: 0.8em;
-	clear:both;
-	text-align:center;
-	vertical-align: middle;
-}
-
-img
-{
-	vertical-align:middle; margin:-100px 0;
-	position:relative; top:-2px;
-}
-
-span#symbol {
-	vertical-align:middle; margin:-100px 0;
-	position:relative; top:-4px;
-	color: #444;
-	font-size: 2em;
-}
-span.fileicon
-{
-	text-align:right;
-	margin-right:0.5%;
-	width:5%;
-	float:left;
-}
-
-span.filename
-{
-	width:67%;
-	float:left;
-	display:block;
-}
-
-span.filesize
-{
-	width:20%;
-	float:left;
-	text-align:right;
-}
-
-span.filedelete
-{
-	text-align:left;
-	margin-left:2.5%;
-	width:5%;
-	float:left;
-}
-
 div.right
 {
 	clear:left;
 	max-width:0;
 }
 
-.file-upload input
-{
+div#content {
+	padding-left: 200px;
+	text-shadow: 0px 0px 2px rgba(128,128,128, 0.2);
+}
+
+footer {
+	position:absolute;
+	bottom: 0px;
+	width: 100%;
+	font-size: 0.6em;
+	text-align:center;
+}
+
+img {
+	vertical-align:middle; margin:-100px 0;
+	position:relative; top:-2px;
+}
+
+span.symbol {
+	vertical-align:middle; margin:-100px 0;
+	position:relative; top:-4px;
+	color: #444;
+	font-size: 2em;
+
+}
+span.fileicon {
+	text-align:right;
+	margin-right:0.5%;
+	width:3%;
+	float:left;
+}
+
+span.filename {
+	width:80%;
+	float:left;
+}
+
+span.filesize {
+	width:12%;
+	float:left;
+	text-align:right;
+}
+
+span.filedelete {
+	text-align:left;
+	margin-left:2.5%;
+	width:2%;
+	float:left;
+}
+
+div#file-upload input {
 	cursor:pointer;
 	position:absolute;
 	right:0;
@@ -182,8 +158,7 @@ div.right
 	font-size:100px;
 }
 
-.file-upload
-{
+div#file-upload {
 	position:relative;
 	overflow:hidden;
 	cursor:pointer;
@@ -195,35 +170,32 @@ div.right
 
 }
 
-.file-upload:hover
-{
+div#file-upload:hover {
 	color:#000;
 }
 
-#logo
-{
+div#logo {
 	float:left;
-	width: 100%;
-	height: 133px;
+	width: 50px;
+	height: 80px;
 	margin-bottom: 10px;
 	margin-left: 20px;
-	margin-right: -15px;
+	margin-top:5px;
 	background-image:url('/res/drop.png');
 	background-repeat:no-repeat;
 }
 
-#logotext {
+p#logotext {
 	float:left;
-	padding-left:40px;
-	padding-top:25px;
-	font-size: 2em;
+	margin-left:15px;
+	margin-top:25px;
+	font-size: 2.25em;
 	font-weight: 900;
-	text-shadow: 0px 1px 5px rgba(255, 255, 255, 1);
+	text-shadow: 0px 1px 6px rgba(255, 255, 255, 1);
 	color:#444;
 }
 
-.add-folder
-{
+div#add-folder {
 	position:relative;
 	cursor:pointer;
 	width:100%;
@@ -231,7 +203,16 @@ div.right
 	color:#666;
 	background:transparent;
 }
-.add-folder:hover
-{
+
+div#add-folder:hover {
 	color:#000;
+}
+
+div#inputbox {
+	position:absolute;
+	top:33%;
+	height: 33%;
+	width: 100%;
+	background-color: #222;
+	opacity: .8;
 }
