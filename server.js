@@ -147,8 +147,13 @@ function onRequest(req, res) {
 					var path = filesDir + req.url.replace(/^\/delete\//,"");
 
 					logIt("Deleting " + path);
+					try{
+						var stats = fs.statSync(path);
+					} catch(err) {
+						logError(err);
+						backToRoot(res);
+					}
 
-					var stats = fs.statSync(path);
 					if (stats.isFile()) {
 						fs.unlink(path, function(err){
 							if(err) logError(err);
@@ -195,7 +200,12 @@ function prepareFileList(callback){
 		if(err) logError(err);
 		for(i=0,len=files.length;i<len;i++){
 			var name = files[i], type;
-			var stats = fs.statSync(filesDir + name);
+			try{
+				var stats = fs.statSync(ilesDir + name);
+			} catch(err) {
+				logError(err);
+				backToRoot(res);
+			}
 			if (stats.isFile())
 				type = "f";
 			if (stats.isDirectory())

@@ -26,6 +26,7 @@
 		});
 
 		$("#name").keyup(function(e){
+			if(e.keyCode == 27) $("#overlay").toggle(); // Escape Key
 			var input = $("#name").val();
 			var valid = !input.match(/[\\*{}\/<>?|]/);
 			if (!valid){
@@ -37,10 +38,10 @@
 				$("#name").css("background-color","#eee");
 				$("#name").css("border-color","#ff9147");
 			}
-			if(e.keyCode == 13 && input && valid) {
+			if(e.keyCode == 13 && input && valid) { // Return Key
 				socket.emit("CREATE_FOLDER",input);
 				$("#overlay").hide();
-				$("#info-filename").hide();
+				$("#overlay").toggle();
 			}
 		});
 		//Initial update of files
