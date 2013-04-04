@@ -7,6 +7,10 @@ html,body {
 	padding: 0px;
 }
 
+input:focus,select:focus,textarea:focus,button:focus {
+    outline: none;
+}
+
 a {
 	color:#111;
 	text-decoration:none;
@@ -17,6 +21,7 @@ span.fileicon, span.filedelete, span.filename, span.filesize {
 }
 
 div#progress {
+	display: none;
 	margin-top: 20px;
 	background-color:#d5d5d5;
 	width:100%;
@@ -27,20 +32,20 @@ div#progress {
 	border-style:solid;
 	border-color: #aaa #bbb #ccc #bbb;
 	box-shadow:inset 0px 2px 3px #bbb;
-	border-radius:8px;
 	-moz-border-radius:8px;
-	-webkit-border-radius:8px;
 	-o-border-radius:8px;
+	-webkit-border-radius:8px;
+	border-radius:8px;
 }
 
 div#progressBar {
-	width:66%;
+	width:0%;
 	height:20px;
 	background-color:#f67;
-	border-radius:8px;
 	-moz-border-radius:8px;
-	-webkit-border-radius:8px;
 	-o-border-radius:8px;
+	-webkit-border-radius:8px;
+	border-radius:8px;
 	background:#999;
 	background-size:18px 18px;
 	background-color: #ff9147;
@@ -131,12 +136,12 @@ span.fileicon {
 }
 
 span.filename {
-	width:80%;
+	width:77%;
 	float:left;
 }
 
 span.filesize {
-	width:12%;
+	width:15%;
 	float:left;
 	text-align:right;
 }
@@ -167,6 +172,7 @@ div#file-upload {
 	color:#666;
 	background:transparent;
 	border-bottom: 1px solid #555;
+
 
 }
 
@@ -208,11 +214,44 @@ div#add-folder:hover {
 	color:#000;
 }
 
-div#inputbox {
+div#overlay {
+	height: 300px;
+    width: 400px;
 	position:absolute;
-	top:33%;
-	height: 33%;
-	width: 100%;
-	background-color: #222;
-	opacity: .8;
+    left: 50%;
+    top: 50%;
+    margin-top: -150px;
+    margin-left: -200px;
+	background-color: #000;
+	opacity: .9;
+	text-align: center;
+	-moz-border-radius: 10px;
+	-o-border-radius:10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+
+}
+
+#question {
+	color: #ddd;
+	text-shadow: 0px 1px 5px rgba(255, 255, 255, 0.3);
+	font-size: 2em;
+}
+
+#info-filename {
+	display: none;
+	text-shadow: 0px 1px 5px rgba(255, 0, 0, 0.3);
+	color: #f55;
+	font-size: 1em;
+}
+
+input {
+	font-size: 1.5em;
+	width: 260px;
+	border: 2px solid #ff9147;
+	background-color: #eee;
+	-moz-border-radius: 8px;
+	-o-border-radius:8px;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
 }

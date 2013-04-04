@@ -59,9 +59,14 @@ function SendUpdate() {
 }
 
 io.sockets.on("connection", function (socket) {
-  socket.on("REQUEST_UPDATE", function (data) {
-  	SendUpdate();
-  });
+	socket.on("REQUEST_UPDATE", function (data) {
+		SendUpdate();
+	});
+	socket.on("CREATE_FOLDER", function (name) {
+		fs.mkdir(filesDir + name, null, function(err){
+			if(err) logError(err);
+		});
+	});
 });
 
 function onRequest(req, res) {
@@ -78,9 +83,16 @@ function onRequest(req, res) {
 				logIt("Receiving from " + req.socket.remoteAddress + ":\t\t" + file.name );
 				file.path = form.uploadDir + "/" + file.name;
 			});
+
+			var lastPerc = 0, perc = 0;
 			form.on("progress", function(bytesReceived, bytesExpected) {
-				percent = (bytesReceived / bytesExpected * 100) | 0;
-				io.sockets.emit("UPLOAD_PROGRESS", percent);
+				perc = Math.abs((bytesReceived / bytesExpected * 100)) | 0;
+				if (perc > lastPerc){
+					lastPerc = perc;
+					io.sockets.emit("UPLOAD_PROGRESS", perc);
+					logIt(perc);
+					if (perc == 100) lastPerc = 0;
+				}
 			});
 			form.on("end", function(name, file) {
 				backToRoot(res);

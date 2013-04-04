@@ -23,7 +23,7 @@
 			</a>
 			<form action="/upload" enctype="multipart/form-data" method="post">
 				<div id="file-upload">
-					<span><span class="symbol">&#10133;&nbsp;</span>Upload file(s)</span>
+					<span><span class="symbol">+&nbsp;</span>Upload file(s)</span>
 					<input type="file" name="file" id="file" onchange="this.form.submit()" multiple="multiple" />
 				</div>
 			</form>
@@ -38,6 +38,10 @@
 			</footer>
 		</aside>
 
-		<!--<div id="inputbox"></div>-->
+		<div id="overlay">
+			<p id="question">Folder name?</p>
+			<input type="text" id="name"/>
+			<p id="info-filename">Invalid character(s) in filename!</p>
+		</div>
 	</body>
 </html>
