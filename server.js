@@ -209,7 +209,8 @@ function prepareFileList(callback){
 }
 //-----------------------------------------------------------------------------
 function getFileList() {
-	var html = "";
+	var htmlfiles = "";
+	var htmlDirs = "";
 	var i = 0;
 	while(fileList[i]) {
 		var file = fileList[i];
@@ -217,25 +218,25 @@ function getFileList() {
 			var size = convertToSI(file.size);
 			var name = file.name;
 			var href = filesDir.substring(1) + unescape(file.name);
-			html += '<div class="filerow">';
-			html += '<span class="fileicon" title="File"><img src="res/file.png" alt="File"></span>';
-			html += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
-			html += '<span class="filesize">' + size + '</span>';
-			html += '<span class="filedelete" title="Delete file"><a href="delete/' + name + '">&#x2716;</a></span>';
-			html += '<div class=right></div></div>';
+			htmlfiles += '<div class="filerow">';
+			htmlfiles += '<span class="fileicon" title="File"><img src="res/file.png" alt="File"></span>';
+			htmlfiles += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
+			htmlfiles += '<span class="filesize">' + size + '</span>';
+			htmlfiles += '<span class="filedelete" title="Delete file"><a href="delete/' + name + '">&#x2716;</a></span>';
+			htmlfiles += '<div class=right></div></div>';
 		} else {
 			var name = file.name;
 			var href = '#'; //TODO
-			html += '<div class="filerow">';
-			html += '<span class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></span>';
-			html += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
-			html += '<span class="filesize">-</span>';
-			html += '<span class="filedelete" title="Delete directory">' +'<a href="delete/' + name + '/">&#x2716;</a>' + '</span>';
-			html += '<div class=right></div></div>';
+			htmlDirs += '<div class="filerow">';
+			htmlDirs += '<span class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></span>';
+			htmlDirs += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
+			htmlDirs += '<span class="filesize">-</span>';
+			htmlDirs += '<span class="filedelete" title="Delete directory">' +'<a href="delete/' + name + '/">&#x2716;</a>' + '</span>';
+			htmlDirs += '<div class=right></div></div>';
 		}
 		i++;
 	}
-	return html;
+	return htmlDirs + htmlfiles;
 }
 //-----------------------------------------------------------------------------
 function logIt(msg) {
