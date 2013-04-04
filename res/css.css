@@ -215,6 +215,7 @@ div#add-folder:hover {
 }
 
 div#overlay {
+	display: none;
 	height: 300px;
     width: 400px;
 	position:absolute;

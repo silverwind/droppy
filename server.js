@@ -144,16 +144,21 @@ function onRequest(req, res) {
 		else if (req.url.match(/^\/delete\//)) {
 			fs.readdir(filesDir, function(err, files){
 				if(!err) {
-					for (i = 0; i < files.length; i++) {
-						if (i == req.url.match(/\d+/)) {
-							var path = filesDir + files[i];
-							logIt("Deleting " + path);
-							fs.unlink(path, function(err){
-								if(err) logError(err);
-								backToRoot(res);
-							});
-							break;
-						}
+					var path = filesDir + req.url.replace(/^\/delete\//,"");
+
+					logIt("Deleting " + path);
+
+					var stats = fs.statSync(path);
+					if (stats.isFile()) {
+						fs.unlink(path, function(err){
+							if(err) logError(err);
+							backToRoot(res);
+						});
+					} else if (stats.isDirectory()){
+						fs.rmdir(path, function(err){
+							if(err) logError(err);
+							backToRoot(res);
+						});
 					}
 				} else {
 					logError(err);
@@ -190,7 +195,7 @@ function prepareFileList(callback){
 		if(err) logError(err);
 		for(i=0,len=files.length;i<len;i++){
 			var name = files[i], type;
-			stats = fs.statSync(filesDir + unescape(name));
+			var stats = fs.statSync(filesDir);
 			if (stats.isFile())
 				type = "f";
 			if (stats.isDirectory())
@@ -216,7 +221,7 @@ function getFileList() {
 			html += '<span class="fileicon" title="File"><img src="res/file.png" alt="File"></span>';
 			html += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
 			html += '<span class="filesize">' + size + '</span>';
-			html += '<span class="filedelete" title="Delete file"><a href="delete/' + i + '/">&#x2716;</a></span>';
+			html += '<span class="filedelete" title="Delete file"><a href="delete/' + name + '">&#x2716;</a></span>';
 			html += '<div class=right></div></div>';
 		} else {
 			var name = file.name;
@@ -225,7 +230,7 @@ function getFileList() {
 			html += '<span class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></span>';
 			html += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
 			html += '<span class="filesize">-</span>';
-			html += '<span class="filedelete" title="Delete directory">' +'<a href="delete/' + i + '/">&#x2716;</a>' + '</span>';
+			html += '<span class="filedelete" title="Delete directory">' +'<a href="delete/' + name + '/">&#x2716;</a>' + '</span>';
 			html += '<div class=right></div></div>';
 		}
 		i++;
