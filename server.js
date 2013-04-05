@@ -9,7 +9,6 @@ var port	 	= "80";			// The listening port.
 //-----------------------------------------------------------------------------
 // TODOs:
 // - Remove 301 redirections and make it completely async
-// - Add drag & drop support for uploads
 // - Send JSON instead of the whole HTML to the client
 // - Test cases with special characters in filenames in both Windows and Linux
 // - Add ability to navigate to subfolders
@@ -230,7 +229,7 @@ function prepareFileList(callback,res){
 function getFileList() {
 	var htmlFiles = "";
 	var htmlDirs = "";
-	var header = '<div class="fileheader"><span class="fileicon">Name</span><span class="filename">&nbsp;</span><span class="filesize">Size</span><span class="filedelete"  title="Delete">D</span><div class=right></div></div>'
+	var header = '<div class="fileheader"><span class="fileicon">Name</span><span class="filename">&nbsp;</span><span class="filesize">Size</span><span class="filedelete" title="Delete">D</span><div class=right></div></div>';
 	var i = 0;
 	while(fileList[i]) {
 		var file = fileList[i];

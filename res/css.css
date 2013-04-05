@@ -1,6 +1,7 @@
 html,body {
 	font-family: 'Open Sans', sans-serif;
 	font-size: 100%;
+	height: 100%;
 	color:#666;
 	background-color:#f2f2f2;
 	margin: 0px;
@@ -136,7 +137,6 @@ img {
 	font-weight: 400;
 	width:150px !important;
 	margin-left: 25px !important;
-
 	-moz-border-radius: 4px;
 	-o-border-radius: 4px;
 	-webkit-border-radius: 4px;
@@ -266,3 +266,4 @@ input {
 	-webkit-border-radius: 8px;
 	border-radius: 8px;
 }
+

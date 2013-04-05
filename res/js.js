@@ -6,6 +6,7 @@
 	var isUploading = false;
 
 	$(document).ready(function() {
+		new Dropzone(document.body, {clickable: false,url: "/upload"});
 
 		socket.on('UPDATE_FILES', function (data) {
 			if (!isUploading)
