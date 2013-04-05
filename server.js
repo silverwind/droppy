@@ -200,10 +200,10 @@ function getHTML(res) {
 		function generate(data) {res.write(data)}
 		res.writeHead(200, {"content-type": "text/html"});
 		res.end(HTML);
-	});
+	},res);
 }
 //-----------------------------------------------------------------------------
-function prepareFileList(callback){
+function prepareFileList(callback,res){
 	fileList = {};
 	fs.readdir(filesDir, function(err,files) {
 		if(err) logError(err);
@@ -211,16 +211,16 @@ function prepareFileList(callback){
 			var name = files[i], type;
 			try{
 				var stats = fs.statSync(filesDir + name);
+				if (stats.isFile())
+					type = "f";
+				if (stats.isDirectory())
+					type = "d";
+				if (type == "f" || type == "d") {
+					fileList[i] = {"name": name, "type": type, "size" : stats.size};
+				}
 			} catch(err) {
 				logError(err);
 				backToRoot(res);
-			}
-			if (stats.isFile())
-				type = "f";
-			if (stats.isDirectory())
-				type = "d";
-			if (type == "f" || type == "d") {
-				fileList[i] = {"name": name, "type": type, "size" : stats.size};
 			}
 		}
 		callback();
