@@ -8,7 +8,7 @@ html,body {
 }
 
 input:focus,select:focus,textarea:focus,button:focus {
-    outline: none;
+	outline: none;
 }
 
 a {
@@ -33,7 +33,7 @@ div#progress {
 	border-color: #aaa #bbb #ccc #bbb;
 	box-shadow:inset 0px 2px 3px #bbb;
 	-moz-border-radius:8px;
-	-o-border-radius:8px;
+	8-o-border-radius: 8px;
 	-webkit-border-radius:8px;
 	border-radius:8px;
 }
@@ -43,13 +43,24 @@ div#progressBar {
 	height:20px;
 	background-color:#f67;
 	-moz-border-radius:8px;
-	-o-border-radius:8px;
+	-o-border-radius: 8px;
 	-webkit-border-radius:8px;
 	border-radius:8px;
 	background:#999;
 	background-size:18px 18px;
 	background-color: #ff9147;
 	box-shadow:inset 0px 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0px rgba(0, 0, 0, .2);
+}
+
+div.fileheader {
+	border-bottom: 1px solid black;
+
+}
+
+.fileheader > .fileicon, .fileheader > .filename, .fileheader > .filesize, .fileheader > .filedelete {
+	color: #444 !important;
+	font-weight: 400;
+
 }
 
 div.filerow {
@@ -60,6 +71,10 @@ div.filerow {
 div.filerow:hover {
 	background-color:#fff;
 	box-shadow:inset 0px 0px 1px rgba(0, 0, 0, 1);
+	-moz-border-radius: 4px;
+	-o-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
 
 a.filelink {
@@ -74,12 +89,8 @@ div#container {
 	margin-top: 5px;
 }
 
-section,aside{
-	display: block;
-}
-
 #left {
-	z-index: 2555;
+	display: block;
 	float: left;
 	width: 200px;
 	height: 100%;
@@ -121,13 +132,22 @@ img {
 	position:relative; top:-2px;
 }
 
-span.symbol {
-	vertical-align:middle; margin:-100px 0;
-	position:relative; top:-4px;
-	color: #444;
-	font-size: 2em;
-
+.button {
+	font-weight: 400;
+	width:150px !important;
+	margin-left: 25px !important;
+	-moz-border-radius: 4px;
+	-o-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
+
+.button:hover {
+	color: #000 !important;
+	background-color: #fff !important;
+	box-shadow:inset 0px 0px 1px rgba(0, 0, 0, 1);
+}
+
 span.fileicon {
 	text-align:right;
 	margin-right:0.5%;
@@ -144,6 +164,7 @@ span.filesize {
 	width:15%;
 	float:left;
 	text-align:right;
+
 }
 
 span.filedelete {
@@ -171,13 +192,6 @@ div#file-upload {
 	float:left;
 	color:#666;
 	background:transparent;
-	border-bottom: 1px solid #555;
-
-
-}
-
-div#file-upload:hover {
-	color:#000;
 }
 
 div#logo {
@@ -196,7 +210,7 @@ p#logotext {
 	margin-left:15px;
 	margin-top:25px;
 	font-size: 2.25em;
-	font-weight: 900;
+	font-weight: 800;
 	text-shadow: 0px 1px 6px rgba(255, 255, 255, 1);
 	color:#444;
 }
@@ -210,27 +224,22 @@ div#add-folder {
 	background:transparent;
 }
 
-div#add-folder:hover {
-	color:#000;
-}
-
 div#overlay {
 	display: none;
 	height: 200px;
-    width: 400px;
+	width: 400px;
 	position:absolute;
-    left: 50%;
-    top: 50%;
-    margin-top: -100px;
-    margin-left: -200px;
+	left: 50%;
+	top: 50%;
+	margin-top: -100px;
+	margin-left: -200px;
 	background-color: #000;
 	opacity: .9;
 	text-align: center;
 	-moz-border-radius: 10px;
-	-o-border-radius:10px;
+	-o-border-radius: 10px;
 	-webkit-border-radius: 10px;
 	border-radius: 10px;
-
 }
 
 #question {
@@ -252,7 +261,7 @@ input {
 	border: 2px solid #ff9147;
 	background-color: #eee;
 	-moz-border-radius: 8px;
-	-o-border-radius:8px;
+	-o-border-radius: 8px;
 	-webkit-border-radius: 8px;
 	border-radius: 8px;
 }

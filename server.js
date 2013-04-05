@@ -1,3 +1,4 @@
+// vim: ts=4:sw=4
 //-----------------------------------------------------------------------------
 // Droppy - File server in node.js
 // https://github.com/silverwind/Droppy
@@ -6,12 +7,19 @@
 var filesDir	= "./files/";	// Location to store the files. Will be created when necessary.
 var port	 	= "80";			// The listening port.
 //-----------------------------------------------------------------------------
-// Internal variables
+// TODOs:
+// - Remove 301 redirections and make it completely async
+// - Add drag & drop support for uploads
+// - Send JSON instead of the whole HTML to the client
+// - Test cases with special characters in filenames in both Windows and Linux
+// - Add ability to navigate to subfolders
+// - Multiple File selection
+//-----------------------------------------------------------------------------
+"use strict";
+
 var fileList	= {};
 var resDir		= "./res/";
 var HTML		= ""; //cached HTML code
-//-----------------------------------------------------------------------------
-"use strict";
 
 var server = require("http").createServer(onRequest),
 	formidable = require("formidable"),
@@ -24,17 +32,17 @@ var server = require("http").createServer(onRequest),
 HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
 HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
-// Set up the directory for file and start the server
+// Set up the directory for files and start the server
 fs.mkdir(filesDir, function (err) {
 	if ( !err || err.code === "EEXIST") {
 		server.listen(port);
 		server.on("listening", function() {
-			logIt("Listening on " + server.address().address + ":" + port + ".");
+			log("Listening on " + server.address().address + ":" + port + ".");
 			createWatcher();
 		});
 		server.on("error", function (err) {
 			if (err.code === "EADDRINUSE")
-				logIt("Failed to bind to port " + port + ".");
+				log("Failed to bind to port " + port + ".");
 			else
 				logError(err);
 		});
@@ -43,9 +51,9 @@ fs.mkdir(filesDir, function (err) {
 	}
 });
 //-----------------------------------------------------------------------------
+// Watch the directory for realtime changes and send them to the client.
 function createWatcher() {
 	fs.watch(filesDir,{ persistent: true }, function(event,filename){
-		//Watch the directory for changes. "rename" triggers on deletes too.
 		if(event == "change" || event == "rename") {
 			prepareFileList(function(){
 				SendUpdate();
@@ -54,12 +62,12 @@ function createWatcher() {
 	});
 }
 //-----------------------------------------------------------------------------
-//Send file list HTML over websocket
+// Send file list HTML over websocket
 function SendUpdate() {
 	io.sockets.emit("UPDATE_FILES", getFileList());
 }
 //-----------------------------------------------------------------------------
-// websocket listener
+// Websocket listener
 io.sockets.on("connection", function (socket) {
 	socket.on("REQUEST_UPDATE", function (data) {
 		SendUpdate();
@@ -74,7 +82,7 @@ io.sockets.on("connection", function (socket) {
 function onRequest(req, res) {
 	var method = req.method.toUpperCase();
 	var remoteSocket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-	logIt("Request from " + remoteSocket + "\t" + method + "\t" + req.url);
+	log("Request from " + remoteSocket + "\t" + method + "\t" + req.url);
 	// Upload
 	if (method === "POST") {
 		if (req.url == "/upload" ) {
@@ -82,7 +90,7 @@ function onRequest(req, res) {
 			form.uploadDir = filesDir;
 			form.parse(req);
 			form.on("fileBegin", function(name, file) {
-				logIt("Receiving from " + req.socket.remoteAddress + ":\t\t" + file.name );
+				log("Receiving from " + req.socket.remoteAddress + ":\t\t" + file.name );
 				file.path = form.uploadDir + "/" + file.name;
 			});
 
@@ -92,7 +100,7 @@ function onRequest(req, res) {
 				if (perc > lastPerc){
 					lastPerc = perc;
 					io.sockets.emit("UPLOAD_PROGRESS", perc);
-					logIt(perc);
+					log(perc);
 					if (perc == 100) lastPerc = 0;
 				}
 			});
@@ -113,7 +121,7 @@ function onRequest(req, res) {
 				if(!err) {
 					fs.stat(path, function(err,stats){
 						if(err) logError(err);
-						logIt("Serving to " + remoteSocket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
+						log("Serving to " + remoteSocket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
 					});
 					res.end(data);
 				} else {
@@ -132,7 +140,7 @@ function onRequest(req, res) {
 						backToRoot(res);
 						SendUpdate();
 					}
-					logIt("Serving to " + remoteSocket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
+					log("Serving to " + remoteSocket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
 					res.writeHead(200, {
 						"Content-Type"		: mimeType,
 						"Content-Length"	: stats.size
@@ -148,10 +156,9 @@ function onRequest(req, res) {
 				if(!err) {
 					var path = filesDir + req.url.replace(/^\/delete\//,"");
 
-					logIt("Deleting " + path);
+					log("Deleting " + path);
 					try{
-						if(path.match(/%\d+/g)) //TODO: rare case when filename contains escape codes
-							var stats = fs.statSync(unescape(path));
+						var stats = fs.statSync(unescape(path));
 						if (stats.isFile()) {
 							fs.unlink(unescape(path), function(err){
 								if(err) logError(err);
@@ -221,8 +228,9 @@ function prepareFileList(callback){
 }
 //-----------------------------------------------------------------------------
 function getFileList() {
-	var htmlfiles = "";
+	var htmlFiles = "";
 	var htmlDirs = "";
+	var header = '<div class="fileheader"><span class="fileicon">Name</span><span class="filename">&nbsp;</span><span class="filesize">Size</span><span class="filedelete"  title="Delete">D</span><div class=right></div></div>'
 	var i = 0;
 	while(fileList[i]) {
 		var file = fileList[i];
@@ -230,12 +238,12 @@ function getFileList() {
 			var size = convertToSI(file.size);
 			var name = file.name;
 			var href = filesDir.substring(1) + unescape(file.name);
-			htmlfiles += '<div class="filerow">';
-			htmlfiles += '<span class="fileicon" title="File"><img src="res/file.png" alt="File"></span>';
-			htmlfiles += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
-			htmlfiles += '<span class="filesize">' + size + '</span>';
-			htmlfiles += '<span class="filedelete" title="Delete file"><a href="delete/' + name + '">&#x2716;</a></span>';
-			htmlfiles += '<div class=right></div></div>';
+			htmlFiles += '<div class="filerow">';
+			htmlFiles += '<span class="fileicon" title="File"><img src="res/file.png" alt="File"></span>';
+			htmlFiles += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
+			htmlFiles += '<span class="filesize">' + size + '</span>';
+			htmlFiles += '<span class="filedelete" title="Delete file"><a href="delete/' + name + '">&#x2716;</a></span>';
+			htmlFiles += '<div class=right></div></div>';
 		} else {
 			var name = file.name;
 			var href = '#'; //TODO
@@ -248,23 +256,24 @@ function getFileList() {
 		}
 		i++;
 	}
-	return htmlDirs + htmlfiles;
+	return header + htmlDirs + htmlFiles;
 }
 //-----------------------------------------------------------------------------
-function logIt(msg) {
+function log(msg) {
 	console.log(getTimestamp() + msg);
 }
 
 function logError(err) {
 	if (typeof err === "object") {
 		if (err.message)
-			logIt(err.message);
+			log(err.message);
 		if (err.stack)
-			logIt(err.stack);
+			log(err.stack);
 	}
 }
+
 process.on("uncaughtException", function (err) {
-	logIt("=============== Uncaught exception! ===============");
+	log("=============== Uncaught exception! ===============");
 	logError(err);
 });
 //-----------------------------------------------------------------------------

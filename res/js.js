@@ -1,7 +1,10 @@
 (function () {
+	"use strict";
+
 	var baseURL = location.protocol + "//" + location.host;
 	var socket = io.connect(baseURL);
 	var isUploading = false;
+
 	$(document).ready(function() {
 
 		socket.on('UPDATE_FILES', function (data) {
@@ -9,11 +12,11 @@
 				$("#content").html(data);
 		});
 
-		socket.on("UPLOAD_PROGRESS", function(percentage) {
+		socket.on("UPLOAD_PROGRESS", function(perc) {
 			isUploading = true;
 			$("#progress").show();
-			$("#progressBar").width(percentage + "%");
-			if(percentage == 100) {
+			$("#progressBar").width(perc + "%");
+			if(perc == 100) {
 				$("#progress").hide();
 				isUploading = false;
 			}

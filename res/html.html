@@ -6,7 +6,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<link rel="stylesheet" href="/res/css.css">
 		<link rel="shortcut icon" href="/res/icon.png" type="image/png">
-		<link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,800' rel='stylesheet' type='text/css'>
 		<script src="/socket.io/socket.io.js" type="text/javascript"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script>
 		<script src="/res/js.js" type="text/javascript"></script>
@@ -22,13 +22,13 @@
 				</div>
 			</a>
 			<form action="/upload" enctype="multipart/form-data" method="post">
-				<div id="file-upload">
-					<span><span class="symbol">+&nbsp;</span>Upload file(s)</span>
+				<div id="file-upload" class="button">
+					<p>Upload file(s)</p>
 					<input type="file" name="file" id="file" onchange="this.form.submit()" multiple="multiple" />
 				</div>
 			</form>
-			<div id="add-folder" title="Add a new folder">
-				<span><span class="symbol">&#9733;&nbsp;</span>Create Folder</span>
+			<div id="add-folder" class="button" title="Add a new folder">
+				<p>Create Folder</p>
 			</div>
 			<div id="progress">
 				<div id="progressBar"></div>
