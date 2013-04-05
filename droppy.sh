@@ -1,22 +1,30 @@
 #!/bin/bash
-echo "Droppy: checking dependancies..."
-npm list  | grep socket.io
+echo ""
+echo "===================="
+echo "Droppy - Fileserver"
+echo "===================="
+echo ""
+echo ">>> Checking dependancies..."
+npm list  | grep socket.io > /dev/null
 if [ $? -eq 1 ]
 then
-	npm install socket.io
+	echo ">>> Installing socket.io"
+	npm install socket.io@latest
 fi
 
-npm list | grep mime 2>&1
+npm list | grep mime > /dev/null
 if [ $? -eq 1 ]
 then
-	npm install mime
+	echo ">>> Installing mime"
+	npm install mime@latest
 fi
 
-npm list | grep formidable 2>&1
+npm list | grep formidable > /dev/null
 if [ $? -eq 1 ]
 then
-	npm install formidable
+	echo ">>> Installing formidable"
+	npm install formidable@latest
 fi
 
-echo "Droppy: starting up..."
+echo ">>> Starting up..."
 node server.js
