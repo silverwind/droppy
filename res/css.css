@@ -88,7 +88,7 @@ div#container {
 	min-height: 100%;
 	position: relative;
 	overflow: auto;
-	margin-top: 5px;
+	padding-right: 5px;
 }
 
 #left {
@@ -158,12 +158,12 @@ span.fileicon {
 }
 
 span.filename {
-	width:77%;
+	width:70%;
 	float:left;
 }
 
 span.filesize {
-	width:15%;
+	width:22%;
 	float:left;
 	text-align:right;
 
