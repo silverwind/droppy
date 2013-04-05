@@ -55,7 +55,7 @@ function createWatcher() {
 	fs.watch(filesDir,{ persistent: true }, function(event,filename){
 		if(event == "change" || event == "rename") {
 			prepareFileList(function(){
-				SendUpdate();
+				throttle(SendUpdate(),500);
 			});
 		}
 	});
@@ -275,6 +275,28 @@ process.on("uncaughtException", function (err) {
 	log("=============== Uncaught exception! ===============");
 	logError(err);
 });
+//-----------------------------------------------------------------------------
+//Throttle helper function
+//Source: http://remysharp.com/2010/07/21/throttling-function-calls/
+function throttle(fn, threshhold, scope) {
+	threshhold || (threshhold = 250);
+	var last,deferTimer;
+	return function () {
+		var context = scope || this;
+		var now = +new Date;
+		var args = arguments;
+		if (last && now < last + threshhold) {
+			clearTimeout(deferTimer);
+			deferTimer = setTimeout(function () {
+				last = now;
+				fn.apply(context, args);
+			}, threshhold);
+		} else {
+			last = now;
+			fn.apply(context, args);
+		}
+	};
+}
 //-----------------------------------------------------------------------------
 function getTimestamp() {
 	var currentDate = new Date();
