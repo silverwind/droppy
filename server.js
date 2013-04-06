@@ -229,7 +229,7 @@ function prepareFileList(callback,res){
 function getFileList() {
 	var htmlFiles = "";
 	var htmlDirs = "";
-	var header = '<div class="fileheader"><span class="fileicon">Name</span><span class="filename">&nbsp;</span><span class="filesize">Size</span><span class="filedelete" title="Delete">D</span><div class=right></div></div>';
+	var header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
 	var i = 0;
 	while(fileList[i]) {
 		var file = fileList[i];
@@ -238,19 +238,17 @@ function getFileList() {
 			var name = file.name;
 			var href = filesDir.substring(1) + unescape(file.name);
 			htmlFiles += '<div class="filerow">';
-			htmlFiles += '<span class="fileicon" title="File"><img src="res/file.png" alt="File"></span>';
-			htmlFiles += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
-			htmlFiles += '<span class="filesize">' + size + '</span>';
-			htmlFiles += '<span class="filedelete" title="Delete file"><a href="delete/' + name + '">&#x2716;</a></span>';
+			htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
+			htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
+			htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
 			htmlFiles += '<div class=right></div></div>';
 		} else {
 			var name = file.name;
 			var href = '#'; //TODO
 			htmlDirs += '<div class="filerow">';
-			htmlDirs += '<span class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></span>';
-			htmlDirs += '<span class="filename"><a class="filelink" href="' + href + '">' + name + '</a></span>';
-			htmlDirs += '<span class="filesize">-</span>';
-			htmlDirs += '<span class="filedelete" title="Delete directory">' +'<a href="delete/' + name + '/">&#x2716;</a>' + '</span>';
+			htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></div>';
+			htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
+			htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
 			htmlDirs += '<div class=right></div></div>';
 		}
 		i++;
@@ -311,7 +309,7 @@ function getTimestamp() {
 	if (minutes < 10) minutes = "0" + minutes;
 	if (seconds < 10) seconds = "0" + seconds;
 
-	return day + "." + month + "." + year + " "+ hours + ":" + minutes + ":" + seconds + " ";
+	return month + "/" + day + "/" + year + " "+ hours + ":" + minutes + ":" + seconds + " ";
 }
 //-----------------------------------------------------------------------------
 function convertToSI(bytes)

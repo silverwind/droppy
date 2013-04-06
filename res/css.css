@@ -1,12 +1,20 @@
+/* vim: ts=4:sw=4 */
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,800&subset=latin,latin-ext);
+
+* {
+	margin: 0;
+	padding: 0;
+}
 
 html,body {
 	font-family: 'Open Sans', sans-serif;
+	font-weight: 400;
+	text-shadow: 0 1px 0 #fff;
+	background-image: url("./bg.png");
+	background-color:#f2f2f2;
 	font-size: 100%;
 	height: 100%;
 	color:#666;
-	background-color:#f2f2f2;
-	margin: 0px;
-	padding: 0px;
 }
 
 input:focus,select:focus,textarea:focus,button:focus {
@@ -16,10 +24,6 @@ input:focus,select:focus,textarea:focus,button:focus {
 a {
 	color:#111;
 	text-decoration:none;
-}
-
-span.fileicon, span.filedelete, span.filename, span.filesize {
-	line-height:2em;
 }
 
 div#progress {
@@ -56,32 +60,21 @@ div#progressBar {
 
 div.fileheader {
 	border-bottom: 1px solid black;
-
+	margin-bottom: 1px;
 }
 
-.fileheader > .fileicon, .fileheader > .filename, .fileheader > .filesize, .fileheader > .filedelete {
+.fileheader > .fileicon, .fileheader > .filename, .fileheader > .fileinfo {
 	color: #444 !important;
 	font-weight: 400;
-
-}
-
-div.filerow {
-	height: auto;
-	width: auto;
-}
-
-div.filerow:hover {
-	background-color:#fff;
-	box-shadow:inset 0px 0px 1px rgba(0, 0, 0, 1);
-	-moz-border-radius: 4px;
-	-o-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
 }
 
 a.filelink {
 	display:block;
 	width:100%;
+	overflow: hidden;
+	white-space: nowrap;
+	-o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
 }
 
 div#container {
@@ -96,7 +89,6 @@ div#container {
 	float: left;
 	width: 200px;
 	height: 100%;
-	position: absolute;
 	top: 0px;
 	text-align:center;
 	font-size: 1.2em;
@@ -108,12 +100,6 @@ div#container {
 	-moz-user-select:none;
 	-ms-user-select:none;
 	user-select:none;
-}
-
-div.right
-{
-	clear:left;
-	max-width:0;
 }
 
 div#content {
@@ -150,30 +136,60 @@ img {
 	box-shadow:inset 0px 0px 1px rgba(0, 0, 0, 1);
 }
 
-span.fileicon {
+.fileicon, .filename, .fileinfo {
+	line-height:2em;
+}
+
+.filerow {
+	margin: 0px auto;
+	width: 100%;
+}
+
+.filerow:hover {
+	background-color:#fff;
+	box-shadow:inset 0px 0px 1px rgba(0, 0, 0, 1);
+	-moz-border-radius: 4px;
+	-o-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+
+.fileicon {
 	text-align:right;
-	margin-right:0.5%;
-	width:3%;
+	width:16px;
+	margin-left: 10px;
 	float:left;
 }
 
-span.filename {
-	width:70%;
-	float:left;
+.filename {
+	margin-left: 5px;
+	width: 70%;
+	float: left;
+	overflow: hidden;
+	white-space: nowrap;
+	-o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
 }
 
-span.filesize {
-	width:22%;
-	float:left;
+
+.fileinfo {
+	margin-left: -50px;
+	width:auto;
+	float:right;
 	text-align:right;
-
+	margin-right: 10px;
 }
 
-span.filedelete {
-	text-align:left;
-	margin-left:2.5%;
-	width:2%;
-	float:left;
+.spacer {
+	margin-left: 30px;
+}
+.headerspacer {
+	margin-left: 40px;
+}
+
+.right {
+	clear:left;
+	width: 5%;
 }
 
 div#file-upload input {
@@ -228,14 +244,14 @@ div#add-folder {
 
 div#overlay {
 	display: none;
-	height: 200px;
-	width: 400px;
+	height: 140px;
+	width: 300px;
 	position:absolute;
 	left: 50%;
 	top: 50%;
-	margin-top: -100px;
-	margin-left: -200px;
-	background-color: #000;
+	margin-top: -70px;
+	margin-left: -150px;
+	background-color: #222;
 	opacity: .9;
 	text-align: center;
 	-moz-border-radius: 10px;
@@ -245,12 +261,14 @@ div#overlay {
 }
 
 #question {
-	color: #ddd;
-	text-shadow: 0px 1px 5px rgba(255, 255, 255, 0.3);
-	font-size: 2em;
+	margin: 15px;
+	color: #eee;
+	text-shadow: 0px 1px 5px rgba(255, 255, 255, 0.2);
+	font-size: 1.5em;
 }
 
 #info-filename {
+	margin:10px;
 	display: none;
 	text-shadow: 0px 1px 5px rgba(255, 0, 0, 0.3);
 	color: #f55;
@@ -267,4 +285,3 @@ input {
 	-webkit-border-radius: 8px;
 	border-radius: 8px;
 }
-
