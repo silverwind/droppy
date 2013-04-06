@@ -49,6 +49,7 @@
 				$("#overlay").hide();
 			}
 		});
+
 		//Initial update of files
 		socket.emit("REQUEST_UPDATE");
 	});

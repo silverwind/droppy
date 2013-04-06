@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------
 // Configuration
 var filesDir	= "./files/";	// Location to store the files. Will be created when necessary.
-var port	 	= "80";			// The listening port.
+var port		= "80";			// The listening port.
 //-----------------------------------------------------------------------------
 // TODOs:
 // - Remove 301 redirections and make it completely async
@@ -25,7 +25,7 @@ var server = require("http").createServer(onRequest),
 	fs = require("fs"),
 	io = require("socket.io").listen(server, {"log level": 1});
 	mime = require("mime"),
-	util = require("util")
+	util = require("util");
 
 // Read the HTML and strip whitespace
 HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
@@ -109,13 +109,14 @@ function onRequest(req, res) {
 			form.on("error", function(err) {
 				logError(err);
 				backToRoot(res);
-			})
+			});
 		}
 	// Download
 	} else if (method == "GET"){
+		var path;
 		// Resource request
 		if(req.url.match(/^\/res\//)) {
-			var path = resDir + unescape(req.url.substring(resDir.length -1));
+			path = resDir + unescape(req.url.substring(resDir.length -1));
 			fs.readFile(path, function (err, data) {
 				if(!err) {
 					fs.stat(path, function(err,stats){
@@ -130,7 +131,7 @@ function onRequest(req, res) {
 			});
 		// File request
 		} else if (req.url.match(/^\/files\//)) {
-			var path = filesDir + unescape(req.url.substring(filesDir.length -1));
+			path = filesDir + unescape(req.url.substring(filesDir.length -1));
 			if (path) {
 				var mimeType = mime.lookup(path);
 				fs.stat(path, function(err,stats){
@@ -153,10 +154,9 @@ function onRequest(req, res) {
 		else if (req.url.match(/^\/delete\//)) {
 			fs.readdir(filesDir, function(err, files){
 				if(!err) {
-					var path = filesDir + req.url.replace(/^\/delete\//,"");
-
+					path = filesDir + req.url.replace(/^\/delete\//,"");
 					log("Deleting " + path);
-					try{
+					try {
 						var stats = fs.statSync(unescape(path));
 						if (stats.isFile()) {
 							fs.unlink(unescape(path), function(err){
@@ -169,8 +169,8 @@ function onRequest(req, res) {
 								backToRoot(res);
 							});
 						}
-					} catch(err) {
-						logError(err);
+					} catch(error) {
+						logError(error);
 						backToRoot(res);
 					}
 				} else {
@@ -196,7 +196,9 @@ function backToRoot(res) {
 //-----------------------------------------------------------------------------
 function getHTML(res) {
 	prepareFileList(function () {
-		function generate(data) {res.write(data)}
+		function generate(data) {
+			res.write(data);
+		}
 		res.writeHead(200, {"content-type": "text/html"});
 		res.end(HTML);
 	},res);
@@ -217,8 +219,8 @@ function prepareFileList(callback,res){
 				if (type == "f" || type == "d") {
 					fileList[i] = {"name": name, "type": type, "size" : stats.size};
 				}
-			} catch(err) {
-				logError(err);
+			} catch(error) {
+				logError(error);
 				backToRoot(res);
 			}
 		}
@@ -231,20 +233,21 @@ function getFileList() {
 	var htmlDirs = "";
 	var header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
 	var i = 0;
+	var name, href;
 	while(fileList[i]) {
 		var file = fileList[i];
 		if(file.type == "f") {
 			var size = convertToSI(file.size);
-			var name = file.name;
-			var href = filesDir.substring(1) + unescape(file.name);
+			name = file.name;
+			href = filesDir.substring(1) + unescape(file.name);
 			htmlFiles += '<div class="filerow">';
 			htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
 			htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
 			htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
 			htmlFiles += '<div class=right></div></div>';
 		} else {
-			var name = file.name;
-			var href = '#'; //TODO
+			name = file.name;
+			href = '#'; //TODO
 			htmlDirs += '<div class="filerow">';
 			htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></div>';
 			htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
@@ -277,11 +280,11 @@ process.on("uncaughtException", function (err) {
 //Throttle helper function
 //Source: http://remysharp.com/2010/07/21/throttling-function-calls/
 function throttle(fn, threshhold, scope) {
-	threshhold || (threshhold = 250);
+	if(!threshhold) threshhold = 250;
 	var last,deferTimer;
 	return function () {
 		var context = scope || this;
-		var now = +new Date;
+		var now = new Date();
 		var args = arguments;
 		if (last && now < last + threshhold) {
 			clearTimeout(deferTimer);
@@ -324,5 +327,5 @@ function convertToSI(bytes)
 	else if ((bytes >= mib) && (bytes < gib))	return (bytes / mib).toFixed(2) + " MiB";
 	else if ((bytes >= gib) && (bytes < tib))	return (bytes / gib).toFixed(2) + " GiB";
 	else if (bytes >= tib)						return (bytes / tib).toFixed(2) + " TiB";
-	else 										return bytes + " B";
+	else										return bytes + " B";
 }
