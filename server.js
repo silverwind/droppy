@@ -5,7 +5,10 @@
 //-----------------------------------------------------------------------------
 // Configuration
 var filesDir	= "./files/";	// Location to store the files. Will be created when necessary.
-var port		= "80";			// The listening port.
+var useSSL		= false;		// Enables HTTPS over SSL (requires Cert and Key files)
+var port		= "80";			// The listening port. (443 for SSL)
+var httpsKey	= "./key.pem";	// Path to SSL private key file
+var httpsCert	= "./cert.pem"; // Path to SSL Certificate file
 //-----------------------------------------------------------------------------
 // TODOs:
 // - Remove 301 redirections and make it completely async
@@ -16,28 +19,41 @@ var port		= "80";			// The listening port.
 //-----------------------------------------------------------------------------
 "use strict";
 
-var fileList	= {};
-var resDir		= "./res/";
-var HTML		= ""; //cached HTML code
+var fileList	= {},
+	resDir		= "./res/",
+	server		= null;
+	fs			= require("fs"),
+	formidable	= require("formidable"),
+	io			= require("socket.io");
+	mime		= require("mime"),
+	util		= require("util");
 
-var server = require("http").createServer(onRequest),
-	formidable = require("formidable"),
-	fs = require("fs"),
-	io = require("socket.io").listen(server, {"log level": 1});
-	mime = require("mime"),
-	util = require("util");
-
-// Read the HTML and strip whitespace
-HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
+// Read and cache the HTML and strip whitespace
+var HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
 HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
 // Set up the directory for files and start the server
 fs.mkdir(filesDir, function (err) {
 	if ( !err || err.code === "EEXIST") {
+		if(!useSSL) {
+			server = require("http").createServer(onRequest);
+		} else {
+			var key,cert;
+			try {
+				key = fs.readFileSync(httpsKey);
+				cert = fs.readFileSync(httpsCert);
+			} catch(error) {
+				logIt("Error reading required SSL certificate or key.");
+				logError(error);
+			}
+			server = require("https").createServer({key: key, cert: cert}, onRequest);
+		}
 		server.listen(port);
 		server.on("listening", function() {
 			log("Listening on " + server.address().address + ":" + port + ".");
+			io = io.listen(server, {"log level": 1});
 			createWatcher();
+			setupSockets();
 		});
 		server.on("error", function (err) {
 			if (err.code === "EADDRINUSE")
@@ -48,7 +64,12 @@ fs.mkdir(filesDir, function (err) {
 	} else {
 		logError(err);
 	}
+
 });
+
+function setUpServer() {
+
+}
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the client.
 function createWatcher() {
@@ -67,16 +88,18 @@ function SendUpdate() {
 }
 //-----------------------------------------------------------------------------
 // Websocket listener
-io.sockets.on("connection", function (socket) {
-	socket.on("REQUEST_UPDATE", function (data) {
-		SendUpdate();
-	});
-	socket.on("CREATE_FOLDER", function (name) {
-		fs.mkdir(filesDir + name, null, function(err){
-			if(err) logError(err);
+function setupSockets() {
+	io.sockets.on("connection", function (socket) {
+		socket.on("REQUEST_UPDATE", function (data) {
+			SendUpdate();
+		});
+		socket.on("CREATE_FOLDER", function (name) {
+			fs.mkdir(filesDir + name, null, function(err){
+				if(err) logError(err);
+			});
 		});
 	});
-});
+}
 //-----------------------------------------------------------------------------
 function onRequest(req, res) {
 	var method = req.method.toUpperCase();
