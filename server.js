@@ -12,7 +12,6 @@ var httpsCert	= "./cert.pem"; // Path to SSL Certificate file
 //-----------------------------------------------------------------------------
 // TODOs:
 // - Remove 301 redirections and make it completely async
-// - Send JSON instead of the whole HTML to the client
 // - Test cases with special characters in filenames in both Windows and Linux
 // - Add ability to navigate to subfolders
 // - Multiple File selection
@@ -79,10 +78,10 @@ function createWatcher() {
 	});
 }
 //-----------------------------------------------------------------------------
-// Send file list HTML over websocket
+// Send file list JSON over websocket
 function SendUpdate() {
 	if(!isUploading)
-		io.sockets.emit("UPDATE_FILES", getFileList());
+		io.sockets.emit("UPDATE_FILES", JSON.stringify(fileList));
 }
 //-----------------------------------------------------------------------------
 // Websocket listener
@@ -147,7 +146,6 @@ function handleFileRequest(req,res,socket) {
 			if(err) logError(err);
 			if (!stats){
 				backToRoot(res);
-				console.log(update);
 				SendUpdate();
 			}
 			log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
@@ -212,7 +210,6 @@ function handleUploadRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 function backToRoot(res) {
-	console.log("redir");
 	res.writeHead(301, {
 		"Cache-Control":	"no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
 		"Location" :		"/"
@@ -260,36 +257,7 @@ function prepareFileList(callback,res){
 	throttle(ReadDir(),500);
 }
 //-----------------------------------------------------------------------------
-function getFileList() {
-	var htmlFiles = "";
-	var htmlDirs = "";
-	var header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
-	var i = 0;
-	var name, href;
-	while(fileList[i]) {
-		var file = fileList[i];
-		if(file.type == "f") {
-			var size = convertToSI(file.size);
-			name = file.name;
-			href = filesDir.substring(1) + unescape(file.name);
-			htmlFiles += '<div class="filerow">';
-			htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
-			htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
-			htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
-			htmlFiles += '<div class=right></div></div>';
-		} else {
-			name = file.name;
-			href = '#'; //TODO
-			htmlDirs += '<div class="filerow">';
-			htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></div>';
-			htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
-			htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
-			htmlDirs += '<div class=right></div></div>';
-		}
-		i++;
-	}
-	return header + htmlDirs + htmlFiles;
-}
+
 //-----------------------------------------------------------------------------
 function log(msg) {
 	console.log(getTimestamp() + msg);
@@ -347,17 +315,12 @@ function getTimestamp() {
 	return month + "/" + day + "/" + year + " "+ hours + ":" + minutes + ":" + seconds + " ";
 }
 //-----------------------------------------------------------------------------
-function convertToSI(bytes)
-{
-	var kib = 1024;
-	var mib = kib * 1024;
-	var gib = mib * 1024;
-	var tib = gib * 1024;
+function convertToSI(bytes) {
+	var suffix = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"], tier = 0;
 
-	if ((bytes >= 0) && (bytes < kib))			return bytes + " B";
-	else if ((bytes >= kib) && (bytes < mib))	return (bytes / kib).toFixed(2) + " KiB";
-	else if ((bytes >= mib) && (bytes < gib))	return (bytes / mib).toFixed(2) + " MiB";
-	else if ((bytes >= gib) && (bytes < tib))	return (bytes / gib).toFixed(2) + " GiB";
-	else if (bytes >= tib)						return (bytes / tib).toFixed(2) + " TiB";
-	else										return bytes + " B";
+	while(bytes >= 1024) {
+		bytes /= 1024;
+		tier++;
+	}
+	return Math.round(bytes * 10) / 10 + " " + suffix[tier];
 }

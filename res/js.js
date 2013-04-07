@@ -7,12 +7,14 @@
 
 	$(document).ready(function() {
 		new Dropzone(document.body, {clickable: false,url: "/upload"});
+//-----------------------------------------------------------------------------
 		$("form").change(function() {
 			$("form").submit();
 		});
 
 		var bar = $("#progressBar");
 		var percent = $("#percent");
+
 		$("form").ajaxForm({
 			beforeSend: function() {
 				$("#progress").show();
@@ -34,17 +36,19 @@
 				$("#progress").hide();
 			}
 		});
-
+//-----------------------------------------------------------------------------
 		socket.on("UPDATE_FILES", function (data) {
-			$("#content").html(data);
+			var json = JSON.parse(data);
+			var html = getFileList(json);
+			$("#content").html(html);
 		});
-
+//-----------------------------------------------------------------------------
 		$("#add-folder").click(function (){
 			$("#overlay").toggle();
 			$("#name").val("");
 			$("#name").focus();
 		});
-
+//-----------------------------------------------------------------------------
 		$("#name").keyup(function(e){
 			if(e.keyCode == 27) $("#overlay").toggle(); // Escape Key
 			var input = $("#name").val();
@@ -68,4 +72,45 @@
 		//Initial update of files
 		socket.emit("REQUEST_UPDATE");
 	});
+//-----------------------------------------------------------------------------
+	function getFileList(fileList) {
+		var htmlFiles = "";
+		var htmlDirs = "";
+		var header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
+		var i = 0;
+		var name, href;
+		while(fileList[i]) {
+			var file = fileList[i];
+			if(file.type == "f") {
+				var size = convertToSI(file.size);
+				name = file.name;
+				href = "/files" + unescape(file.name);
+				htmlFiles += '<div class="filerow">';
+				htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
+				htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
+				htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
+				htmlFiles += '<div class=right></div></div>';
+			} else {
+				name = file.name;
+				href = '#'; //TODO
+				htmlDirs += '<div class="filerow">';
+				htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></div>';
+				htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
+				htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
+				htmlDirs += '<div class=right></div></div>';
+			}
+			i++;
+		}
+		return header + htmlDirs + htmlFiles;
+	}
+//-----------------------------------------------------------------------------
+	function convertToSI(bytes) {
+		var suffix = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"], tier = 0;
+
+		while(bytes >= 1024) {
+			bytes /= 1024;
+			tier++;
+		}
+		return Math.round(bytes * 10) / 10 + " " + suffix[tier];
+	}
 }());
