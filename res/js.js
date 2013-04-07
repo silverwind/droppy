@@ -1,13 +1,21 @@
 // vim: ts=4:sw=4
 (function () {
     "use strict";
-
+//-----------------------------------------------------------------------------
+// Initialize WebSocket
     var baseURL = location.protocol + "//" + location.host;
     var socket = io.connect(baseURL);
-
-    $(document).ready(function() {
-        new Dropzone(document.body, {clickable: false,url: "/upload"});
 //-----------------------------------------------------------------------------
+    $(document).ready(function() {
+        var bar = $("#progressBar"),
+            percent = $("#percent"),
+            progress = $("#progress"),
+            content = $("#content");
+//-----------------------------------------------------------------------------
+// Mark the body as destination for file drops
+        new Dropzone(document.body, {clickable: false, url: "/upload"});
+//-----------------------------------------------------------------------------
+// Delete calls run over xhr
         $("body").on("click", ".delete", function(e) {
             e.preventDefault();
             $.ajax({
@@ -16,17 +24,16 @@
             });
         });
 //-----------------------------------------------------------------------------
-//Attach jquery.form and handle progress updates
+// Attach jquery.form to the form and handle progress updates
+//(seems to also work on the dropzone)
         $("form").change(function() {
             $("form").submit();
         });
-
-        var bar = $("#progressBar");
-        var percent = $("#percent");
-
+//-----------------------------------------------------------------------------
+// Upload event handling
         $("form").ajaxForm({
             beforeSend: function() {
-                $("#progress").show();
+                progress.show();
                 var perc = "0%";
                 bar.width(perc);
                 percent.html(perc);
@@ -42,34 +49,40 @@
                 percent.html(perc);
             },
             complete: function(xhr) {
-                $("#progress").hide();
+                progress.hide();
             }
         });
 //-----------------------------------------------------------------------------
+// Handle WebSocket updates from server
         socket.on("UPDATE_FILES", function (data) {
             var json = JSON.parse(data);
-            var html = getFileList(json);
-            $("#content").html(html);
+            var html = buildHTML(json);
+            content.html(html);
         });
 //-----------------------------------------------------------------------------
+// Show popup for folder creation
         $("#add-folder").click(function (){
             $("#overlay").toggle();
             $("#name").val("");
             $("#name").focus();
         });
 //-----------------------------------------------------------------------------
+// Handler for the input of the folder name
+// TODO: Sanitize on server
         $("#name").keyup(function(e){
-            if(e.keyCode == 27) $("#overlay").toggle(); // Escape Key
-            var input = $("#name").val();
+            var name = $("#name");
+            if(e.keyCode == 27)
+                $("#overlay").toggle(); // Escape Key
+            var input = name.val();
             var valid = !input.match(/[\\*{}\/<>?|]/);
             if (!valid){
                 $("#info-filename").show();
-                $("#name").css("background-color","#f55");
-                $("#name").css("border-color","#f00");
+                name.css("background-color","#f55");
+                name.css("border-color","#f00");
             } else {
                 $("#info-filename").hide();
-                $("#name").css("background-color","#eee");
-                $("#name").css("border-color","#ff9147");
+                name.css("background-color","#eee");
+                name.css("border-color","#ff9147");
             }
             if(e.keyCode == 13 && input && valid) { // Return Key
                 socket.emit("CREATE_FOLDER",input);
@@ -77,12 +90,13 @@
                 $("#overlay").hide();
             }
         });
-
-        //Initial update of files
+//-----------------------------------------------------------------------------
+//Initial update of files
         socket.emit("REQUEST_UPDATE");
     });
 //-----------------------------------------------------------------------------
-    function getFileList(fileList) {
+// Convert the fileList object into HTML
+    function buildHTML(fileList) {
         var htmlFiles = "",
             htmlDirs = "",
             header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>',
@@ -115,6 +129,7 @@
         return header + htmlDirs + htmlFiles;
     }
 //-----------------------------------------------------------------------------
+// Helper function for size values
     function convertToSI(bytes) {
         var suffix = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"], tier = 0;
 
