@@ -1,295 +1,295 @@
 /* vim: ts=4:sw=4 */
 * {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 html,body {
-	font-family: 'Open Sans', sans-serif;
-	font-weight: 400;
-	text-shadow: 0 1px 0 #fff;
-	background-image: url("/res/bg.png");
-	background-color: #f2f2f2;
-	font-size: 100%;
-	height: 100%;
-	color: #666;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    text-shadow: 0 1px 0 #fff;
+    background-image: url("/res/bg.png");
+    background-color: #f2f2f2;
+    font-size: 100%;
+    height: 100%;
+    color: #666;
 }
 
 input:focus,select:focus,textarea:focus,button:focus {
-	outline: none;
+    outline: none;
 }
 
 a {
-	color: #111;
-	text-decoration: none;
+    color: #111;
+    text-decoration: none;
 }
 
 #progress{
-	display: none;
-	margin-top: 20px;
-	background-color: #d5d5d5;
-	width: 92%;
-	margin-left: 4%;
-	height: 20px;
-	float: left;
-	background: #cfcfcf;
-	border-width: 1px;
-	border-style: solid;
-	border-color: #aaa #bbb #ccc #bbb;
-	box-shadow:inset 0 2px 3px #bbb;
-	-moz-border-radius: 8px;
-	-o-border-radius: 8px;
-	-webkit-border-radius: 8px;
-	border-radius: 8px;
+    display: none;
+    margin-top: 20px;
+    background-color: #d5d5d5;
+    width: 92%;
+    margin-left: 4%;
+    height: 20px;
+    float: left;
+    background: #cfcfcf;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa #bbb #ccc #bbb;
+    box-shadow:inset 0 2px 3px #bbb;
+    -moz-border-radius: 8px;
+    -o-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
 }
 
 #progressBar {
-	width: 0;
-	height: 20px;
-	background-color: #f72;
-	-moz-border-radius: 8px;
-	-o-border-radius: 8px;
-	-webkit-border-radius: 8px;
-	border-radius: 8px;
-	background-size: 18px 18px;
-	box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
+    width: 0;
+    height: 20px;
+    background-color: #f72;
+    -moz-border-radius: 8px;
+    -o-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+    background-size: 18px 18px;
+    box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
 }
 
 div.fileheader {
-	border-bottom: 1px solid black;
-	margin-bottom: 1px;
+    border-bottom: 1px solid black;
+    margin-bottom: 1px;
 }
 
 .fileheader > .fileicon, .fileheader > .filename, .fileheader > .fileinfo {
-	color: #444;
-	font-weight: 400;
+    color: #444;
+    font-weight: 400;
 }
 
 .filelink {
-	display: block;
-	width: 100%;
-	overflow: hidden;
-	white-space: nowrap;
-	-o-text-overflow: ellipsis;
-	text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
 }
 
 #container {
-	min-height: 100%;
-	position: relative;
-	overflow: auto;
-	padding-right: 5px;
+    min-height: 100%;
+    position: relative;
+    overflow: auto;
+    padding-right: 5px;
 }
 
 aside {
-	display: block;
-	float: left;
-	width: 200px;
-	height: 100%;
-	top: 0;
-	text-align: center;
-	font-size: 1.2em;
-	position: fixed;
-	text-shadow: 0 0 2px rgba(128,128,128, 0.5);
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
+    display: block;
+    float: left;
+    width: 200px;
+    height: 100%;
+    top: 0;
+    text-align: center;
+    font-size: 1.2em;
+    position: fixed;
+    text-shadow: 0 0 2px rgba(128,128,128, 0.5);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 #content {
-	font-size: 1.25em;
-	padding-left: 200px;
-	text-shadow: 0 0 2px rgba(128,128,128, 0.2);
+    font-size: 1.25em;
+    padding-left: 200px;
+    text-shadow: 0 0 2px rgba(128,128,128, 0.2);
 }
 
 footer {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	font-size: 0.65em;
-	text-align: center;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    font-size: 0.65em;
+    text-align: center;
 }
 
 img {
-	vertical-align: middle;
-	margin:-100px 0;
-	position: relative;
-	top:-2px;
+    vertical-align: middle;
+    margin:-100px 0;
+    position: relative;
+    top:-2px;
 }
 
 .button {
-	font-weight: 400;
-	width: 150px !important;
-	margin-left: 25px;
-	-moz-border-radius: 4px;
-	-o-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
+    font-weight: 400;
+    width: 150px !important;
+    margin-left: 25px;
+    -moz-border-radius: 4px;
+    -o-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
 }
 
 .button:hover {
-	color: #000 !important;
-	background-color: #fa6 !important;
-	box-shadow: inset 0 0 1px rgba(0, 0, 0, 1);
-	-moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-	-webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-	transition: all .5s cubic-bezier(0,.48,.27,.99);
+    color: #000 !important;
+    background-color: #fa6 !important;
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 1);
+    -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
+    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
+    transition: all .5s cubic-bezier(0,.48,.27,.99);
 }
 
 .fileicon, .filename, .fileinfo {
-	line-height: 1.5em;
+    line-height: 1.5em;
 }
 
 .filerow:hover {
-	background-color: #fa6;
-	box-shadow:inset 0 0 1px rgba(0, 0, 0, 1);
-	-moz-border-radius: 4px;
-	-o-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
-	-moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-	-webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-	transition: all .5s cubic-bezier(0,.48,.27,.99);
+    background-color: #fa6;
+    box-shadow:inset 0 0 1px rgba(0, 0, 0, 1);
+    -moz-border-radius: 4px;
+    -o-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
+    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
+    transition: all .5s cubic-bezier(0,.48,.27,.99);
 }
 
 .fileicon {
-	text-align: right;
-	width: 16px;
-	margin-left: 10px;
-	float: left;
+    text-align: right;
+    width: 16px;
+    margin-left: 10px;
+    float: left;
 }
 
 .filename {
-	margin-left: 5px;
-	width: 70%;
-	float: left;
-	overflow: hidden;
-	white-space: nowrap;
-	-o-text-overflow: ellipsis;
-	text-overflow: ellipsis;
+    margin-left: 5px;
+    width: 70%;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
 }
 
 .fileinfo {
-	margin-left: -50px;
-	width: auto;
-	float: right;
-	text-align: right;
-	margin-right: 10px;
+    margin-left: -50px;
+    width: auto;
+    float: right;
+    text-align: right;
+    margin-right: 10px;
 }
 
 .spacer {
-	margin-left: 30px;
+    margin-left: 30px;
 }
 .headerspacer {
-	margin-left: 20px;
+    margin-left: 20px;
 }
 
 .right {
-	clear: left;
-	width: 5%;
+    clear: left;
+    width: 5%;
 }
 
 #file-upload input {
-	cursor: pointer;
-	position: absolute;
-	right: 0;
-	height: 100%;
-	top: 0;
-	opacity: 0;
-	font-size: 100px;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    height: 100%;
+    top: 0;
+    opacity: 0;
+    font-size: 100px;
 }
 
 #file-upload {
-	position: relative;
-	overflow: hidden;
-	cursor: pointer;
-	width: 100%;
-	float: left;
-	color: #666;
-	background: transparent;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    width: 100%;
+    float: left;
+    color: #666;
+    background: transparent;
 }
 
 #logo {
-	float: left;
-	width: 100%;
-	height: 80px;
-	margin-bottom: 10px;
-	background-position: 15px 0px, center;
-	margin-top:10px;
-	background-image: url('/res/drop.png');
-	background-repeat: no-repeat;
+    float: left;
+    width: 100%;
+    height: 80px;
+    margin-bottom: 10px;
+    background-position: 15px 0px, center;
+    margin-top:10px;
+    background-image: url('/res/drop.png');
+    background-repeat: no-repeat;
 }
 
 #logotext {
-	padding-top: 20px;
-	position: absolute;
-	width: 100%;
-	height: 80px;
-	text-align: center;
-	font-size: 2.1em;
-	font-weight: 800;
-	text-shadow: 0 1px 6px rgba(255, 255, 255, 1);
-	color: #444;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
+    padding-top: 20px;
+    position: absolute;
+    width: 100%;
+    height: 80px;
+    text-align: center;
+    font-size: 2.1em;
+    font-weight: 800;
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 1);
+    color: #444;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 #add-folder {
-	position: relative;
-	cursor: pointer;
-	width: 100%;
-	float: left;
-	color: #666;
-	background: transparent;
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+    float: left;
+    color: #666;
+    background: transparent;
 }
 
 #overlay {
-	display: none;
-	height: 140px;
-	width: 300px;
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	margin-top: -70px;
-	margin-left: -150px;
-	background-color: #222;
-	opacity: .9;
-	text-align: center;
-	-moz-border-radius: 10px;
-	-o-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-radius: 10px;
+    display: none;
+    height: 140px;
+    width: 300px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-top: -70px;
+    margin-left: -150px;
+    background-color: #222;
+    opacity: .9;
+    text-align: center;
+    -moz-border-radius: 10px;
+    -o-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
 }
 
 #question {
-	margin: 15px;
-	color: #eee;
-	text-shadow: 0 1px 5px rgba(255, 255, 255, 0.2);
-	font-size: 1.5em;
+    margin: 15px;
+    color: #eee;
+    text-shadow: 0 1px 5px rgba(255, 255, 255, 0.2);
+    font-size: 1.5em;
 }
 
 #info-filename {
-	margin: 10px;
-	display: none;
-	text-shadow: 0 1px 5px rgba(255, 0, 0, 0.3);
-	color: #f55;
-	font-size: 1em;
+    margin: 10px;
+    display: none;
+    text-shadow: 0 1px 5px rgba(255, 0, 0, 0.3);
+    color: #f55;
+    font-size: 1em;
 }
 
 input {
-	font-size: 1.5em;
-	width: 260px;
-	border: 2px solid #ff9147;
-	background-color: #eee;
-	-moz-border-radius: 8px;
-	-o-border-radius: 8px;
-	-webkit-border-radius: 8px;
-	border-radius: 8px;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
+    font-size: 1.5em;
+    width: 260px;
+    border: 2px solid #ff9147;
+    background-color: #eee;
+    -moz-border-radius: 8px;
+    -o-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }

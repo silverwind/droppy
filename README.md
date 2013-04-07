@@ -1,6 +1,6 @@
 #Droppy
 
-A simple HTTP fileserver built on [node.js](http://nodejs.org/).
+A modern HTTP fileserver built on [node.js](http://nodejs.org/) utilizing WebSockets for realtime updates. A fairly recent browser is required (For IE, that's 10).
 
 First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts **droppy.sh** or **droppy.bat** to set up dependancies and start the server.
 
