@@ -11,16 +11,17 @@
 // - Media queries
 // - Check for any XSS
 //-----------------------------------------------------------------------------
-var fileList    = {},
-    resDir      = "./res/",
-    server      = null,
-    oldLen      = 0,
-    fs          = require("fs"),
-    formidable  = require("formidable"),
-    io          = require("socket.io"),
-    mime        = require("mime"),
-    util        = require("util"),
-    config      = require("./config.json");
+var fileList     = {},
+    resDir       = "./res/",
+    readInterval = 500,
+    server       = null,
+    last         = null,
+    fs           = require("fs"),
+    formidable   = require("formidable"),
+    io           = require("socket.io"),
+    mime         = require("mime"),
+    util         = require("util"),
+    config       = require("./config.json");
 
 "use strict";
 
@@ -50,8 +51,8 @@ fs.mkdir(config.filesDir, function (err) {
             log("Listening on " + server.address().address + ":" + config.port + ".");
             io = io.listen(server, {"log level": 1});
             createWatcher();
-            setupSockets();
             prepareFileList();
+            setupSockets();
         });
         server.on("error", function (err) {
             if (err.code === "EADDRINUSE")
@@ -78,7 +79,7 @@ function createWatcher() {
 //-----------------------------------------------------------------------------
 // Send file list JSON over websocket
 function SendUpdate() {
-        io.sockets.emit("UPDATE_FILES", JSON.stringify(fileList));
+    io.sockets.emit("UPDATE_FILES", JSON.stringify(fileList));
 }
 //-----------------------------------------------------------------------------
 // Websocket listener
@@ -214,10 +215,10 @@ function getHTML(res) {
 }
 //-----------------------------------------------------------------------------
 function prepareFileList(callback){
-    throttle(500,function(){
+    function run(){
+        last = new Date();
         fileList = {};
         fs.readdir(config.filesDir, function(err,files) {
-            if (oldLen === files.len) return; //skip if no new files added/removed
             if(err) logError(err);
             for(i=0,len=files.length;i<len;i++){
                 var name = files[i], type;
@@ -234,13 +235,15 @@ function prepareFileList(callback){
                     logError(error);
                 }
             }
-            oldlen = files.length;
             if(callback !== undefined) callback();
         });
-    });
+    }
+    // Simple throttling
+    var now = new Date();
+    if(!last || (now - readInterval > last)) {
+        run();
+    }
 }
-//-----------------------------------------------------------------------------
-
 //-----------------------------------------------------------------------------
 function log(msg) {
     console.log(getTimestamp() + msg);
@@ -259,28 +262,6 @@ process.on("uncaughtException", function (err) {
     log("=============== Uncaught exception! ===============");
     logError(err);
 });
-//-----------------------------------------------------------------------------
-//Throttle helper function
-//Source: http://remysharp.com/2010/07/21/throttling-function-calls/
-function throttle(threshhold, fn, scope) {
-    if(!threshhold) threshhold = 250;
-    var last,deferTimer;
-    return function () {
-        var context = scope || this;
-        var now = new Date();
-        var args = arguments;
-        if (last && now < last + threshhold) {
-            clearTimeout(deferTimer);
-            deferTimer = setTimeout(function () {
-                last = now;
-                fn.apply(context, args);
-            }, threshhold);
-        } else {
-            last = now;
-            fn.apply(context, args);
-        }
-    };
-}
 //-----------------------------------------------------------------------------
 function getTimestamp() {
     var currentDate = new Date();
