@@ -126,7 +126,8 @@ function handleResourceRequest(req,res,socket) {
                 var mimeType = mime.lookup(path);
                 res.writeHead(200, {
                     "Content-Type"      : mimeType,
-                    "Content-Length"    : stats.size
+                    "Content-Length"    : stats.size,
+                    "Cache-Control"     : "max-age=2592000"
                 });
                 res.end(data);
             });
