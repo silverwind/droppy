@@ -1,7 +1,7 @@
 {
-	"filesDir" : "./files/",
-	"useSSL" : false,
-	"port" : 80,
-	"httpsKey" : "./key.pem",
-	"httpsCert" : "./cert.pem"
+    "filesDir"  : "./files/",
+    "useSSL"    : false,
+    "port"      : 80,
+    "httpsKey"  : "./key.pem",
+    "httpsCert" : "./cert.pem"
 }

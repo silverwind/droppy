@@ -8,7 +8,7 @@ First, make sure you have the required node modules installed: [formidable](http
     npm install mime
     npm install socket.io
 
-To start the server, execute server.js with node (or use the included bat file on windows):
+To start the server, execute server.js with node:
 
     node server.js
 
@@ -18,10 +18,10 @@ Files will be placed in **./files/**. The server will listen on [localhost:80](h
 
 ````javascript
 {
-    "filesDir" : "./files/",
-    "port" : 80,
-    "useSSL" : false,
-    "httpsKey" : "./key.pem",
+    "filesDir"  : "./files/",
+    "port"      : 80,
+    "useSSL"    : false,
+    "httpsKey"  : "./key.pem",
     "httpsCert" : "./cert.pem"
 }
 ````
