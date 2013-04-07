@@ -27,7 +27,7 @@ Files will be placed in **./files/**. The server will listen on [localhost:80](h
 ````
 
 ######"filesDir"
-The directory which servers as the server's root. Can be relative or absolute.
+The directory which serves as the server's root. Can be relative or absolute.
 
 ######"port"
 The listening port.
