@@ -127,7 +127,7 @@ function handleResourceRequest(req,res,socket) {
                 res.writeHead(200, {
                     "Content-Type"      : mimeType,
                     "Content-Length"    : stats.size,
-                    "Cache-Control"     : "max-age=2592000"
+                    "Cache-Control"     : "max-age=3600, public"
                 });
                 res.end(data);
             });
