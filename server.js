@@ -11,7 +11,6 @@ var httpsKey	= "./key.pem";	// Path to SSL private key file
 var httpsCert	= "./cert.pem"; // Path to SSL Certificate file
 //-----------------------------------------------------------------------------
 // TODOs:
-// - Remove 301 redirections and make it completely async
 // - Test cases with special characters in filenames in both Windows and Linux
 // - Add ability to navigate to subfolders
 // - Multiple File selection
@@ -133,7 +132,8 @@ function handleResourceRequest(req,res,socket) {
 			});
 		} else {
 			logError(err);
-			backToRoot(res);
+			res.writeHead(404);
+			res.end();
 		}
 	});
 }
@@ -144,10 +144,6 @@ function handleFileRequest(req,res,socket) {
 		var mimeType = mime.lookup(path);
 		fs.stat(path, function(err,stats){
 			if(err) logError(err);
-			if (!stats){
-				backToRoot(res);
-				SendUpdate();
-			}
 			log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
 			res.writeHead(200, {
 				"Content-Type"		: mimeType,
@@ -168,21 +164,25 @@ function handleDeleteRequest(req,res,socket) {
 				if (stats.isFile()) {
 					fs.unlink(unescape(path), function(err){
 						if(err) logError(err);
-						backToRoot(res);
 					});
 				} else if (stats.isDirectory()){
 					fs.rmdir(unescape(path), function(err){
 						if(err) logError(err);
-						backToRoot(res);
 					});
 				}
+				res.writeHead(200, {
+					"Content-Type" : "text/html"
+				});
+				res.end();
 			} catch(error) {
 				logError(error);
-				backToRoot(res);
+				res.writeHead(500);
+				res.end();
 			}
 		} else {
 			logError(err);
-			backToRoot(res);
+			res.writeHead(500);
+			res.end();
 		}
 	});
 }
@@ -204,17 +204,12 @@ function handleUploadRequest(req,res,socket) {
 		form.on("error", function(err) {
 			logError(err);
 		});
-		res.writeHead(200);
+
+		res.writeHead(200, {
+			"Content-Type" : "text/html"
+		});
 		res.end();
 	}
-}
-//-----------------------------------------------------------------------------
-function backToRoot(res) {
-	res.writeHead(301, {
-		"Cache-Control":	"no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
-		"Location" :		"/"
-	});
-	res.end();
 }
 //-----------------------------------------------------------------------------
 function getHTML(res) {
@@ -247,7 +242,6 @@ function prepareFileList(callback,res){
 					}
 				} catch(error) {
 					logError(error);
-					backToRoot(res);
 				}
 			}
 			oldlen = files.length;

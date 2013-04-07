@@ -8,6 +8,15 @@
 	$(document).ready(function() {
 		new Dropzone(document.body, {clickable: false,url: "/upload"});
 //-----------------------------------------------------------------------------
+		$("body").on("click", ".delete", function(e) {
+			e.preventDefault();
+			$.ajax({
+				type: "GET",
+				url: $(this).attr("href")
+			});
+		});
+//-----------------------------------------------------------------------------
+//Attach jquery.form and handle progress updates
 		$("form").change(function() {
 			$("form").submit();
 		});
@@ -74,11 +83,13 @@
 	});
 //-----------------------------------------------------------------------------
 	function getFileList(fileList) {
-		var htmlFiles = "";
-		var htmlDirs = "";
-		var header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
-		var i = 0;
-		var name, href;
+		var htmlFiles = "",
+			htmlDirs = "",
+			header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>',
+			i = 0,
+			name,
+			href;
+
 		while(fileList[i]) {
 			var file = fileList[i];
 			if(file.type == "f") {
@@ -88,7 +99,7 @@
 				htmlFiles += '<div class="filerow">';
 				htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
 				htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
-				htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
+				htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
 				htmlFiles += '<div class=right></div></div>';
 			} else {
 				name = file.name;
@@ -96,7 +107,7 @@
 				htmlDirs += '<div class="filerow">';
 				htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></div>';
 				htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
-				htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a href="delete/' + name + '">&#x2716;</div>';
+				htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
 				htmlDirs += '<div class=right></div></div>';
 			}
 			i++;
