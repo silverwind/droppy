@@ -95,7 +95,7 @@
 			if(file.type == "f") {
 				var size = convertToSI(file.size);
 				name = file.name;
-				href = "/files" + unescape(file.name);
+				href = "/files/" + unescape(file.name);
 				htmlFiles += '<div class="filerow">';
 				htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
 				htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
