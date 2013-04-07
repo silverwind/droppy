@@ -111,7 +111,7 @@
                 name = file.name;
                 href = "/files/" + unescape(file.name);
                 htmlFiles += '<div class="filerow">';
-                htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" alt="File"></div>';
+                htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
                 htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
                 htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
                 htmlFiles += '<div class=right></div></div>';
@@ -119,7 +119,7 @@
                 name = file.name;
                 href = '#'; //TODO
                 htmlDirs += '<div class="filerow">';
-                htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" alt="Directory"></div>';
+                htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
                 htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
                 htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
                 htmlDirs += '<div class=right></div></div>';

@@ -10,6 +10,7 @@
 // - Put the upload progress bar inside the file's list entry
 // - Media queries
 // - Authentication
+// - gzip compression
 // - Check for any XSS
 //-----------------------------------------------------------------------------
 var fileList     = {},
@@ -212,7 +213,10 @@ function handleUploadRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 function getHTML(res) {
-    res.writeHead(200, {"content-type": "text/html"});
+    res.writeHead(200, {
+        "content-type"  : "text/html",
+        "Cache-Control" : "max-age=3600, public"
+    });
     res.end(HTML);
 }
 //-----------------------------------------------------------------------------
