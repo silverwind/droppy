@@ -31,7 +31,7 @@ var fileList	= {},
 // Read and cache the HTML and strip whitespace
 var HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
 HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
-
+//-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
 fs.mkdir(filesDir, function (err) {
 	if ( !err || err.code === "EEXIST") {
@@ -66,10 +66,6 @@ fs.mkdir(filesDir, function (err) {
 	}
 
 });
-
-function setUpServer() {
-
-}
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the client.
 function createWatcher() {
@@ -103,111 +99,122 @@ function setupSockets() {
 //-----------------------------------------------------------------------------
 function onRequest(req, res) {
 	var method = req.method.toUpperCase();
-	var remoteSocket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-	log("Request from " + remoteSocket + "\t" + method + "\t" + req.url);
-	// Upload
-	if (method === "POST") {
-		if (req.url == "/upload" ) {
-			var form = new formidable.IncomingForm();
-			form.uploadDir = filesDir;
-			form.parse(req);
-			form.on("fileBegin", function(name, file) {
-				log("Receiving from " + req.socket.remoteAddress + ":\t\t" + file.name );
-				file.path = form.uploadDir + "/" + file.name;
-			});
+	var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
 
-			var lastPerc = 0, perc = 0;
-			form.on("progress", function(bytesReceived, bytesExpected) {
-				perc = Math.abs((bytesReceived / bytesExpected * 100)) | 0;
-				if (perc > lastPerc){
-					lastPerc = perc;
-					io.sockets.emit("UPLOAD_PROGRESS", perc);
-					log(perc);
-					if (perc == 100) lastPerc = 0;
-				}
-			});
-			form.on("end", function(name, file) {
-				backToRoot(res);
-			});
-			form.on("error", function(err) {
-				logError(err);
-				backToRoot(res);
-			});
-		}
-	// Download
-	} else if (method == "GET"){
-		var path;
-		// Resource request
-		if(req.url.match(/^\/res\//)) {
-			path = resDir + unescape(req.url.substring(resDir.length -1));
-			fs.readFile(path, function (err, data) {
-				if(!err) {
-					fs.stat(path, function(err,stats){
-						if(err) logError(err);
-						log("Serving to " + remoteSocket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
-					});
-					res.end(data);
-				} else {
-					logError(err);
-					backToRoot(res);
-				}
-			});
-		// File request
-		} else if (req.url.match(/^\/files\//)) {
-			path = filesDir + unescape(req.url.substring(filesDir.length -1));
-			if (path) {
-				var mimeType = mime.lookup(path);
-				fs.stat(path, function(err,stats){
-					if(err) logError(err);
-					if (!stats){
-						backToRoot(res);
-						SendUpdate();
-					}
-					log("Serving to " + remoteSocket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
-					res.writeHead(200, {
-						"Content-Type"		: mimeType,
-						"Content-Length"	: stats.size
-					});
-					fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
-				});
-
-			}
-		}
-		// Delete request
-		else if (req.url.match(/^\/delete\//)) {
-			fs.readdir(filesDir, function(err, files){
-				if(!err) {
-					path = filesDir + req.url.replace(/^\/delete\//,"");
-					log("Deleting " + path);
-					try {
-						var stats = fs.statSync(unescape(path));
-						if (stats.isFile()) {
-							fs.unlink(unescape(path), function(err){
-								if(err) logError(err);
-								backToRoot(res);
-							});
-						} else if (stats.isDirectory()){
-							fs.rmdir(unescape(path), function(err){
-								if(err) logError(err);
-								backToRoot(res);
-							});
-						}
-					} catch(error) {
-						logError(error);
-						backToRoot(res);
-					}
-				} else {
-					logError(err);
-					backToRoot(res);
-				}
-			});
-		// Serve the page
-		} else {
-			getHTML(res,req);
-		}
+	log("Request from " + socket + "\t" + method + "\t" + req.url);
+	if (method == "GET") {
+		if (req.url.match(/^\/res\//))
+			handleResourceRequest(req,res,socket);
+		else if (req.url.match(/^\/files\//))
+			handleFileRequest(req,res,socket);
+		else if (req.url.match(/^\/delete\//))
+			handleDeleteRequest(req,res,socket);
+		else
+			getHTML(res);
+	} else if (method === "POST") {
+		handleUploadRequest(req,res,socket);
 	}
 }
+//-----------------------------------------------------------------------------
+function handleResourceRequest(req,res,socket) {
+	var path = resDir + unescape(req.url.substring(resDir.length -1));
+	fs.readFile(path, function (err, data) {
+		if(!err) {
+			fs.stat(path, function(err,stats){
+				if(err) logError(err);
+				log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
+				var mimeType = mime.lookup(path);
+				res.writeHead(200, {
+					"Content-Type"		: mimeType,
+					"Content-Length"	: stats.size
+				});
+				res.end(data);
+			});
+		} else {
+			logError(err);
+			backToRoot(res);
+		}
+	});
+}
+//-----------------------------------------------------------------------------
+function handleFileRequest(req,res,socket) {
+	var path = filesDir + unescape(req.url.substring(filesDir.length -1));
+	if (path) {
+		var mimeType = mime.lookup(path);
+		fs.stat(path, function(err,stats){
+			if(err) logError(err);
+			if (!stats){
+				backToRoot(res);
+				SendUpdate();
+			}
+			log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
+			res.writeHead(200, {
+				"Content-Type"		: mimeType,
+				"Content-Length"	: stats.size
+			});
+			fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
+		});
+	}
+}
+//-----------------------------------------------------------------------------
+function handleDeleteRequest(req,res,socket) {
+	fs.readdir(filesDir, function(err, files){
+		if(!err) {
+			var path = filesDir + req.url.replace(/^\/delete\//,"");
+			log("Deleting " + path);
+			try {
+				var stats = fs.statSync(unescape(path));
+				if (stats.isFile()) {
+					fs.unlink(unescape(path), function(err){
+						if(err) logError(err);
+						backToRoot(res);
+					});
+				} else if (stats.isDirectory()){
+					fs.rmdir(unescape(path), function(err){
+						if(err) logError(err);
+						backToRoot(res);
+					});
+				}
+			} catch(error) {
+				logError(error);
+				backToRoot(res);
+			}
+		} else {
+			logError(err);
+			backToRoot(res);
+		}
+	});
+}
+//-----------------------------------------------------------------------------
+function handleUploadRequest(req,res,socket) {
+	if (req.url == "/upload" ) {
+		var form = new formidable.IncomingForm();
+		form.uploadDir = filesDir;
+		form.parse(req);
+		form.on("fileBegin", function(name, file) {
+			log("Receiving from " + socket + ":\t\t" + file.name );
+			file.path = form.uploadDir + "/" + file.name;
+		});
 
+		var lastPerc = 0, perc = 0;
+		form.on("progress", function(bytesReceived, bytesExpected) {
+			perc = Math.abs((bytesReceived / bytesExpected * 100)) | 0;
+			if (perc > lastPerc){
+				lastPerc = perc;
+				io.sockets.emit("UPLOAD_PROGRESS", perc);
+				log(perc);
+				if (perc == 100) lastPerc = 0;
+			}
+		});
+		form.on("end", function(name, file) {
+			backToRoot(res);
+		});
+		form.on("error", function(err) {
+			logError(err);
+			backToRoot(res);
+		});
+	}
+}
 //-----------------------------------------------------------------------------
 function backToRoot(res) {
 	res.writeHead(301, {
