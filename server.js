@@ -22,6 +22,7 @@ var httpsCert	= "./cert.pem"; // Path to SSL Certificate file
 var fileList	= {},
 	resDir		= "./res/",
 	server		= null;
+	isUploading	= false;
 	fs			= require("fs"),
 	formidable	= require("formidable"),
 	io			= require("socket.io");
@@ -72,7 +73,7 @@ function createWatcher() {
 	fs.watch(filesDir,{ persistent: true }, function(event,filename){
 		if(event == "change" || event == "rename") {
 			prepareFileList(function(){
-				throttle(SendUpdate(),500);
+				SendUpdate();
 			});
 		}
 	});
@@ -80,7 +81,8 @@ function createWatcher() {
 //-----------------------------------------------------------------------------
 // Send file list HTML over websocket
 function SendUpdate() {
-	io.sockets.emit("UPDATE_FILES", getFileList());
+	if(!isUploading)
+		io.sockets.emit("UPDATE_FILES", getFileList());
 }
 //-----------------------------------------------------------------------------
 // Websocket listener
@@ -111,7 +113,7 @@ function onRequest(req, res) {
 			handleDeleteRequest(req,res,socket);
 		else
 			getHTML(res);
-	} else if (method === "POST") {
+	} else if (method === "POST" && req.url === "/upload") {
 		handleUploadRequest(req,res,socket);
 	}
 }
@@ -145,6 +147,7 @@ function handleFileRequest(req,res,socket) {
 			if(err) logError(err);
 			if (!stats){
 				backToRoot(res);
+				console.log(update);
 				SendUpdate();
 			}
 			log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
@@ -192,31 +195,24 @@ function handleUploadRequest(req,res,socket) {
 		form.uploadDir = filesDir;
 		form.parse(req);
 		form.on("fileBegin", function(name, file) {
+			isUploading = true;
 			log("Receiving from " + socket + ":\t\t" + file.name );
 			file.path = form.uploadDir + "/" + file.name;
 		});
+		form.on('end', function() {
+			isUploading = false;
+		});
 
-		var lastPerc = 0, perc = 0;
-		form.on("progress", function(bytesReceived, bytesExpected) {
-			perc = Math.abs((bytesReceived / bytesExpected * 100)) | 0;
-			if (perc > lastPerc){
-				lastPerc = perc;
-				io.sockets.emit("UPLOAD_PROGRESS", perc);
-				log(perc);
-				if (perc == 100) lastPerc = 0;
-			}
-		});
-		form.on("end", function(name, file) {
-			backToRoot(res);
-		});
 		form.on("error", function(err) {
 			logError(err);
-			backToRoot(res);
 		});
+		res.writeHead(200);
+		res.end();
 	}
 }
 //-----------------------------------------------------------------------------
 function backToRoot(res) {
+	console.log("redir");
 	res.writeHead(301, {
 		"Cache-Control":	"no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0",
 		"Location" :		"/"
@@ -234,28 +230,34 @@ function getHTML(res) {
 	},res);
 }
 //-----------------------------------------------------------------------------
+var oldLen = 0;
 function prepareFileList(callback,res){
-	fileList = {};
-	fs.readdir(filesDir, function(err,files) {
-		if(err) logError(err);
-		for(i=0,len=files.length;i<len;i++){
-			var name = files[i], type;
-			try{
-				var stats = fs.statSync(filesDir + name);
-				if (stats.isFile())
-					type = "f";
-				if (stats.isDirectory())
-					type = "d";
-				if (type == "f" || type == "d") {
-					fileList[i] = {"name": name, "type": type, "size" : stats.size};
+	function ReadDir(){
+		fileList = {};
+		fs.readdir(filesDir, function(err,files) {
+			if (oldLen === files.len) return; //skip if no new files added/removed
+			if(err) logError(err);
+			for(i=0,len=files.length;i<len;i++){
+				var name = files[i], type;
+				try{
+					var stats = fs.statSync(filesDir + name);
+					if (stats.isFile())
+						type = "f";
+					if (stats.isDirectory())
+						type = "d";
+					if (type == "f" || type == "d") {
+						fileList[i] = {"name": name, "type": type, "size" : stats.size};
+					}
+				} catch(error) {
+					logError(error);
+					backToRoot(res);
 				}
-			} catch(error) {
-				logError(error);
-				backToRoot(res);
 			}
-		}
-		callback();
-	});
+			oldlen = files.length;
+			callback();
+		});
+	}
+	throttle(ReadDir(),500);
 }
 //-----------------------------------------------------------------------------
 function getFileList() {

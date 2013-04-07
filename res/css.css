@@ -1,6 +1,4 @@
 /* vim: ts=4:sw=4 */
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,800&subset=latin,latin-ext);
-
 * {
 	margin: 0;
 	padding: 0;
@@ -101,6 +99,7 @@ aside {
 }
 
 #content {
+	font-size: 1.25em;
 	padding-left: 200px;
 	text-shadow: 0 0 2px rgba(128,128,128, 0.2);
 }
@@ -109,7 +108,7 @@ footer {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-	font-size: 0.6em;
+	font-size: 0.65em;
 	text-align: center;
 }
 
@@ -278,4 +277,7 @@ input {
 	-o-border-radius: 8px;
 	-webkit-border-radius: 8px;
 	border-radius: 8px;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 }

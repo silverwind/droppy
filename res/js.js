@@ -4,24 +4,39 @@
 
 	var baseURL = location.protocol + "//" + location.host;
 	var socket = io.connect(baseURL);
-	var isUploading = false;
 
 	$(document).ready(function() {
 		new Dropzone(document.body, {clickable: false,url: "/upload"});
-
-		socket.on('UPDATE_FILES', function (data) {
-			if (!isUploading)
-				$("#content").html(data);
+		$("form").change(function() {
+			$("form").submit();
 		});
 
-		socket.on("UPLOAD_PROGRESS", function(perc) {
-			isUploading = true;
-			$("#progress").show();
-			$("#progressBar").width(perc + "%");
-			if(perc == 100) {
+		var bar = $("#progressBar");
+		var percent = $("#percent");
+		$("form").ajaxForm({
+			beforeSend: function() {
+				$("#progress").show();
+				var perc = "0%";
+				bar.width(perc);
+				percent.html(perc);
+			},
+			uploadProgress: function(e, pos, total, completed) {
+				var perc = completed + "%";
+				bar.width(perc);
+				percent.html(perc);
+			},
+			success: function() {
+				var perc = "100%";
+				bar.width(perc);
+				percent.html(perc);
+			},
+			complete: function(xhr) {
 				$("#progress").hide();
-				isUploading = false;
 			}
+		});
+
+		socket.on("UPDATE_FILES", function (data) {
+			$("#content").html(data);
 		});
 
 		$("#add-folder").click(function (){
