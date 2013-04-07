@@ -1,18 +1,22 @@
 #Droppy
 
-A modern HTTP fileserver built on [node.js](http://nodejs.org/) utilizing WebSockets for realtime updates. A fairly recent browser is required (For IE, that's 10).
+A modern HTTP/HTTPS fileserver built on [node.js](http://nodejs.org/) utilizing [WebSockets](https://en.wikipedia.org/wiki/WebSocket) for realtime updates. A fairly recent browser is required (For IE, that's 10).
 
 ###Installation
 
-First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts **droppy.sh** or **droppy.bat** to set up dependancies and start the server.
+First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts, **droppy.sh** or **droppy.bat** to set up dependancies and start the server.
 
-    npm install formidable
-    npm install mime
-    npm install socket.io
+````
+npm install formidable
+npm install mime
+npm install socket.io
+````
 
 To start the server, execute server.js with node:
 
-    node server.js
+````
+node server.js
+````
 
 Files will be placed in **./files/**. The server will listen on [localhost:80](http://localhost/). These and other settings can be changes in **config.json**:
 

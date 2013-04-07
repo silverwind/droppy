@@ -9,6 +9,7 @@
 // - Multiple File operations like delete/move
 // - Put the upload progress bar inside the file's list entry
 // - Media queries
+// - Authentication
 // - Check for any XSS
 //-----------------------------------------------------------------------------
 var fileList     = {},
