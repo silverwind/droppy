@@ -8,6 +8,7 @@
 // - Add ability to navigate to subfolders
 // - Multiple File operations like delete/move
 // - Put the upload progress bar inside the file's list entry
+// - Media queries
 // - Check for any XSS
 //-----------------------------------------------------------------------------
 var fileList	= {},
