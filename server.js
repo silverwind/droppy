@@ -3,60 +3,59 @@
 // Droppy - File server in node.js
 // https://github.com/silverwind/Droppy
 //-----------------------------------------------------------------------------
-// Configuration
-var filesDir	= "./files/";	// Location to store the files. Will be created when necessary.
-var useSSL		= false;		// Enables HTTPS over SSL (requires Cert and Key files)
-var port		= "80";			// The listening port. (443 for SSL)
-var httpsKey	= "./key.pem";	// Path to SSL private key file
-var httpsCert	= "./cert.pem"; // Path to SSL Certificate file
-//-----------------------------------------------------------------------------
 // TODOs:
 // - Test cases with special characters in filenames in both Windows and Linux
 // - Add ability to navigate to subfolders
-// - Multiple File selection
+// - Multiple File operations like delete/move
+// - Put the upload progress bar inside the file's list entry
+// - Check for any XSS
 //-----------------------------------------------------------------------------
-"use strict";
-
 var fileList	= {},
 	resDir		= "./res/",
-	server		= null;
-	isUploading	= false;
+	server		= null,
+	isUploading	= false,
+	oldLen		= 0,
 	fs			= require("fs"),
 	formidable	= require("formidable"),
-	io			= require("socket.io");
+	io			= require("socket.io"),
 	mime		= require("mime"),
-	util		= require("util");
+	util		= require("util"),
+	config		= require("./config.json");
+
+"use strict";
 
 // Read and cache the HTML and strip whitespace
 var HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
 HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
+
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
-fs.mkdir(filesDir, function (err) {
+fs.mkdir(config.filesDir, function (err) {
 	if ( !err || err.code === "EEXIST") {
-		if(!useSSL) {
+		if(!config.useSSL) {
 			server = require("http").createServer(onRequest);
 		} else {
 			var key,cert;
 			try {
-				key = fs.readFileSync(httpsKey);
-				cert = fs.readFileSync(httpsCert);
+				key = fs.readFileSync(config.httpsKey);
+				cert = fs.readFileSync(config.httpsCert);
 			} catch(error) {
 				logIt("Error reading required SSL certificate or key.");
 				logError(error);
 			}
 			server = require("https").createServer({key: key, cert: cert}, onRequest);
 		}
-		server.listen(port);
+		server.listen(config.port);
 		server.on("listening", function() {
-			log("Listening on " + server.address().address + ":" + port + ".");
+			log("Listening on " + server.address().address + ":" + config.port + ".");
 			io = io.listen(server, {"log level": 1});
 			createWatcher();
 			setupSockets();
+			prepareFileList();
 		});
 		server.on("error", function (err) {
 			if (err.code === "EADDRINUSE")
-				log("Failed to bind to port " + port + ".");
+				log("Failed to bind to config.port " + config.port + ".");
 			else
 				logError(err);
 		});
@@ -68,7 +67,7 @@ fs.mkdir(filesDir, function (err) {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the client.
 function createWatcher() {
-	fs.watch(filesDir,{ persistent: true }, function(event,filename){
+	fs.watch(config.filesDir,{ persistent: true }, function(event,filename){
 		if(event == "change" || event == "rename") {
 			prepareFileList(function(){
 				SendUpdate();
@@ -90,7 +89,7 @@ function setupSockets() {
 			SendUpdate();
 		});
 		socket.on("CREATE_FOLDER", function (name) {
-			fs.mkdir(filesDir + name, null, function(err){
+			fs.mkdir(config.filesDir + name, null, function(err){
 				if(err) logError(err);
 			});
 		});
@@ -139,7 +138,7 @@ function handleResourceRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req,res,socket) {
-	var path = filesDir + unescape(req.url.substring(filesDir.length -1));
+	var path = config.filesDir + unescape(req.url.substring(config.filesDir.length -1));
 	if (path) {
 		var mimeType = mime.lookup(path);
 		fs.stat(path, function(err,stats){
@@ -155,9 +154,9 @@ function handleFileRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 function handleDeleteRequest(req,res,socket) {
-	fs.readdir(filesDir, function(err, files){
+	fs.readdir(config.filesDir, function(err, files){
 		if(!err) {
-			var path = filesDir + req.url.replace(/^\/delete\//,"");
+			var path = config.filesDir + req.url.replace(/^\/delete\//,"");
 			log("Deleting " + path);
 			try {
 				var stats = fs.statSync(unescape(path));
@@ -190,7 +189,7 @@ function handleDeleteRequest(req,res,socket) {
 function handleUploadRequest(req,res,socket) {
 	if (req.url == "/upload" ) {
 		var form = new formidable.IncomingForm();
-		form.uploadDir = filesDir;
+		form.uploadDir = config.filesDir;
 		form.parse(req);
 		form.on("fileBegin", function(name, file) {
 			isUploading = true;
@@ -213,26 +212,20 @@ function handleUploadRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 function getHTML(res) {
-	prepareFileList(function () {
-		function generate(data) {
-			res.write(data);
-		}
-		res.writeHead(200, {"content-type": "text/html"});
-		res.end(HTML);
-	},res);
+	res.writeHead(200, {"content-type": "text/html"});
+	res.end(HTML);
 }
 //-----------------------------------------------------------------------------
-var oldLen = 0;
-function prepareFileList(callback,res){
+function prepareFileList(callback){
 	function ReadDir(){
 		fileList = {};
-		fs.readdir(filesDir, function(err,files) {
+		fs.readdir(config.filesDir, function(err,files) {
 			if (oldLen === files.len) return; //skip if no new files added/removed
 			if(err) logError(err);
 			for(i=0,len=files.length;i<len;i++){
 				var name = files[i], type;
 				try{
-					var stats = fs.statSync(filesDir + name);
+					var stats = fs.statSync(config.filesDir + name);
 					if (stats.isFile())
 						type = "f";
 					if (stats.isDirectory())
@@ -245,7 +238,7 @@ function prepareFileList(callback,res){
 				}
 			}
 			oldlen = files.length;
-			callback();
+			if(callback !== undefined) callback();
 		});
 	}
 	throttle(ReadDir(),500);
