@@ -51,7 +51,7 @@ fs.mkdir(config.filesDir, function (err) {
         }
         server.listen(config.port);
         server.on("listening", function() {
-            log("Listening on " + server.address().address + ":" + config.port + ".");
+            log("Listening on " + server.address().address + ":" + config.port);
             io = io.listen(server, {"log level": 1});
             createWatcher();
             prepareFileList();
@@ -103,7 +103,7 @@ function onRequest(req, res) {
     var method = req.method.toUpperCase();
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
 
-    log("Request from " + socket + "\t" + method + "\t" + req.url);
+    log("REQ:  " + socket + "\t" + method + "\t" + req.url);
     if (method == "GET") {
         if (req.url.match(/^\/res\//))
             handleResourceRequest(req,res,socket);
@@ -145,7 +145,7 @@ function handleResourceRequest(req,res,socket) {
     }
 
     function serve() {
-        log("Serving resource to " + resourceName + " to " + socket );
+        log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(cache[resourceName].size) + ")");
         res.writeHead(200, {
             "Content-Type"      : cache[resourceName].mime,
             "Content-Length"    : cache[resourceName].size,
@@ -161,7 +161,7 @@ function handleFileRequest(req,res,socket) {
         var mimeType = mime.lookup(path);
         fs.stat(path, function(err,stats){
             if(err) logError(err);
-            log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
+            log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
             res.writeHead(200, {
                 "Content-Type"      : mimeType,
                 "Content-Length"    : stats.size
@@ -175,7 +175,7 @@ function handleDeleteRequest(req,res,socket) {
     fs.readdir(config.filesDir, function(err, files){
         if(!err) {
             var path = config.filesDir + req.url.replace(/^\/delete\//,"");
-            log("Deleting " + path);
+            log("DEL:  " + path);
             try {
                 var stats = fs.statSync(unescape(path));
                 if (stats.isFile()) {
@@ -210,7 +210,7 @@ function handleUploadRequest(req,res,socket) {
         form.uploadDir = config.filesDir;
         form.parse(req);
         form.on("fileBegin", function(name, file) {
-            log("Receiving from " + socket + ":\t\t" + file.name );
+            log("RECV: " + socket + "\t\t" + file.name );
             file.path = form.uploadDir + "/" + file.name;
         });
         form.on('end', function() {
