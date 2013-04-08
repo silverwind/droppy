@@ -96,13 +96,54 @@ div.fileheader {
     font-weight: 400;
 }
 
-.filelink {
+.filerow:hover, .folderrow:hover{
+    background-color: #fa6;
+    box-shadow:inset 0 0 1px rgba(0, 0, 0, 1);
+    -moz-border-radius: 4px;
+    -o-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
+    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
+    transition: all .5s cubic-bezier(0,.48,.27,.99);
+}
+
+.filelink, .folderlink{
     display: block;
     width: 100%;
     overflow: hidden;
     white-space: nowrap;
     -o-text-overflow: ellipsis;
     text-overflow: ellipsis;
+}
+
+.fileicon, .filename, .fileinfo, .foldericon, .foldername, .folderinfo {
+    line-height: 1.5em;
+}
+
+.fileicon, .foldericon {
+    text-align: right;
+    width: 16px;
+    margin-left: 10px;
+    float: left;
+}
+
+.filename, .foldername {
+    margin-left: 5px;
+    width: 70%;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+}
+
+.fileinfo, .folderinfo {
+    margin-left: -50px;
+    width: auto;
+    float: right;
+    text-align: right;
+    margin-right: 10px;
 }
 
 #container {
@@ -143,50 +184,10 @@ img {
     transition: all .5s cubic-bezier(0,.48,.27,.99);
 }
 
-.fileicon, .filename, .fileinfo {
-    line-height: 1.5em;
-}
-
-.filerow:hover {
-    background-color: #fa6;
-    box-shadow:inset 0 0 1px rgba(0, 0, 0, 1);
-    -moz-border-radius: 4px;
-    -o-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    transition: all .5s cubic-bezier(0,.48,.27,.99);
-}
-
-.fileicon {
-    text-align: right;
-    width: 16px;
-    margin-left: 10px;
-    float: left;
-}
-
-.filename {
-    margin-left: 5px;
-    width: 70%;
-    float: left;
-    overflow: hidden;
-    white-space: nowrap;
-    -o-text-overflow: ellipsis;
-    text-overflow: ellipsis;
-}
-
-.fileinfo {
-    margin-left: -50px;
-    width: auto;
-    float: right;
-    text-align: right;
-    margin-right: 10px;
-}
-
 .spacer {
     margin-left: 30px;
 }
+
 .headerspacer {
     margin-left: 20px;
 }
@@ -254,13 +255,13 @@ img {
 
 #overlay {
     display: none;
-    height: 140px;
-    width: 300px;
+    height: 180px;
+    width: 360px;
     position: absolute;
     left: 50%;
     top: 50%;
-    margin-top: -70px;
-    margin-left: -150px;
+    margin-top: -90px;
+    margin-left: -180px;
     background-color: #222;
     opacity: .9;
     text-align: center;
@@ -271,7 +272,8 @@ img {
 }
 
 #question {
-    margin: 15px;
+    margin-top: 35px;
+    margin-bottom: 25px;
     color: #eee;
     text-shadow: 0 1px 5px rgba(255, 255, 255, 0.2);
     font-size: 1.5em;
@@ -285,11 +287,10 @@ img {
     font-size: 1em;
 }
 
-input {
+#nameinput {
     font-size: 1.5em;
     width: 260px;
-    border: 2px solid #ff9147;
-    background-color: #eee;
+    border: 2px transparent;
     -moz-border-radius: 8px;
     -o-border-radius: 8px;
     -webkit-border-radius: 8px;
@@ -297,4 +298,14 @@ input {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+}
+
+#nameinput.valid {
+    border: 2px solid #ff9147;
+    background-color: #eee;
+}
+
+#nameinput.invalid {
+    border: 2px solid #f00;
+    background-color: #f55;
 }

@@ -1,6 +1,8 @@
 // vim: ts=4:sw=4
 (function () {
     "use strict";
+
+    var entries = [];
 //-----------------------------------------------------------------------------
 // Initialize WebSocket
     var baseURL = location.protocol + "//" + location.host;
@@ -8,9 +10,11 @@
 //-----------------------------------------------------------------------------
     $(document).ready(function() {
         var bar = $("#progressBar"),
+            content = $("#content"),
+            info = $("#info-filename"),
+            name = $("#nameinput"),
             percent = $("#percent"),
-            progress = $("#progress"),
-            content = $("#content");
+            progress = $("#progress");
 //-----------------------------------------------------------------------------
 // Mark the body as destination for file drops
         new Dropzone(document.body, {clickable: false, url: "/upload"});
@@ -63,30 +67,49 @@
 // Show popup for folder creation
         $("#add-folder").click(function (){
             $("#overlay").toggle();
-            $("#name").val("");
-            $("#name").focus();
+            name.val("");
+            name.focus();
+            name.attr("class","valid");
         });
 //-----------------------------------------------------------------------------
 // Handler for the input of the folder name
 // TODO: Sanitize on server
-        $("#name").keyup(function(e){
-            var name = $("#name");
+        name.keyup(function(e){
             if(e.keyCode == 27)
                 $("#overlay").toggle(); // Escape Key
+
             var input = name.val();
             var valid = !input.match(/[\\*{}\/<>?|]/);
-            if (!valid){
-                $("#info-filename").show();
-                name.css("background-color","#f55");
-                name.css("border-color","#f00");
-            } else {
-                $("#info-filename").hide();
-                name.css("background-color","#eee");
-                name.css("border-color","#ff9147");
+            var folderExists = entries[input] === true;
+
+            if (input === "" ) {
+                name.attr("class","valid");
+                info.html("");
+                info.hide();
+                return;
             }
-            if(e.keyCode == 13 && input && valid) { // Return Key
+
+            if (!valid){
+                name.attr("class","invalid");
+                info.html("Invalid character(s) in filename!");
+                info.show();
+                return;
+            }
+
+            if (folderExists) {
+                name.attr("class","invalid");
+                info.html("File/Directory already exists!");
+                info.show();
+                return;
+            }
+
+            name.attr("class","valid");
+            info.html("");
+            info.hide();
+
+            if(e.keyCode == 13) { // Return Key
                 socket.emit("CREATE_FOLDER",input);
-                $("#info-filename").hide();
+                name.hide();
                 $("#overlay").hide();
             }
         });
@@ -104,26 +127,28 @@
             name,
             href;
 
+        entries = [];
+
         while(fileList[i]) {
-            var file = fileList[i];
-            if(file.type == "f") {
-                var size = convertToSI(file.size);
-                name = file.name;
-                href = "/files/" + unescape(file.name);
+            var entry = fileList[i];
+            name = entry.name;
+            if(entry.type == "f") {
+                var size = convertToSI(entry.size);
+                href = "/files/" + unescape(entry.name);
                 htmlFiles += '<div class="filerow">';
                 htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
                 htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
                 htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
                 htmlFiles += '<div class=right></div></div>';
             } else {
-                name = file.name;
                 href = '#'; //TODO
-                htmlDirs += '<div class="filerow">';
-                htmlDirs += '<div class="fileicon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
-                htmlDirs += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
-                htmlDirs += '<div class="fileinfo">-<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
+                htmlDirs += '<div class="folderrow">';
+                htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
+                htmlDirs += '<div class="foldername"><a class="folderlink" href="' + href + '">' + name + '</a></div>';
+                htmlDirs += '<div class="folderinfo">-<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
                 htmlDirs += '<div class=right></div></div>';
             }
+            entries[name] = true;
             i++;
         }
         return header + htmlDirs + htmlFiles;
