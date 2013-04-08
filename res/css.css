@@ -107,6 +107,7 @@ div.fileheader {
     -o-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
+    -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
     -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
     -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
     transition: all .5s cubic-bezier(0,.48,.27,.99);
@@ -186,6 +187,7 @@ img {
     -o-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
+    -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
     -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
     -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
     transition: all .5s cubic-bezier(0,.48,.27,.99);
@@ -233,11 +235,18 @@ img {
     margin-top:10px;
     background-image: url('/res/drop.png');
     background-repeat: no-repeat;
+    -moz-transition: all .1s linear;
+    -o-transition: all .1s linear;
+    -webkit-transition: all .1s linear;
     transition: all .1s linear;
 }
 
 #logo:hover {
-    transform: scale(1.15);
+    -moz-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    -o-transform: scale(1.1);
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
 }
 
 #logotext {
