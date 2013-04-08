@@ -1,4 +1,3 @@
-// vim: ts=4:sw=4
 //-----------------------------------------------------------------------------
 // Droppy - File server in node.js
 // https://github.com/silverwind/Droppy
@@ -12,6 +11,9 @@
 // - gzip compression
 // - Check for any XSS
 //-----------------------------------------------------------------------------
+// vim: ts=4:sw=4
+// jshint indent:4
+"use strict";
 
 var fileList     = {},
     resDir       = "./res/",
@@ -23,10 +25,7 @@ var fileList     = {},
     formidable   = require("formidable"),
     io           = require("socket.io"),
     mime         = require("mime"),
-    util         = require("util"),
     config       = require("./config.json");
-
-"use strict";
 
 // Read and cache the HTML and strip whitespace
 var HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
@@ -44,7 +43,7 @@ fs.mkdir(config.filesDir, function (err) {
                 key = fs.readFileSync(config.httpsKey);
                 cert = fs.readFileSync(config.httpsCert);
             } catch(error) {
-                logIt("Error reading required SSL certificate or key.");
+                log("Error reading required SSL certificate or key.");
                 handleError(error);
             }
             server = require("https").createServer({key: key, cert: cert}, onRequest);
@@ -71,17 +70,17 @@ fs.mkdir(config.filesDir, function (err) {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the client.
 function createWatcher() {
-    fs.watch(config.filesDir,{ persistent: true }, function(event,filename){
-        if(event == "change" || event == "rename") {
+    fs.watch(config.filesDir,{ persistent: true }, function(event){
+        if(event === "change" || event === "rename") {
             prepareFileList(function(){
-                SendUpdate();
+                sendUpdate();
             });
         }
     });
 }
 //-----------------------------------------------------------------------------
 // Send file list JSON over websocket
-function SendUpdate() {
+function sendUpdate() {
     io.sockets.emit("UPDATE_FILES", JSON.stringify(fileList));
 }
 //-----------------------------------------------------------------------------
@@ -89,7 +88,7 @@ function SendUpdate() {
 function setupSockets() {
     io.sockets.on("connection", function (socket) {
         socket.on("REQUEST_UPDATE", function () {
-            SendUpdate();
+            sendUpdate();
         });
         socket.on("CREATE_FOLDER", function (name) {
             fs.mkdir(config.filesDir + name, null, function(err){
@@ -105,14 +104,14 @@ function onRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
 
     log("REQ:  " + socket + "\t" + method + "\t" + req.url);
-    if (method == "GET") {
+    if (method === "GET") {
         if (req.url.match(/^\/res\//))
             handleResourceRequest(req,res,socket);
         else if (req.url.match(/^\/files\//))
             handleFileRequest(req,res,socket);
         else if (req.url.match(/^\/delete\//))
-            handleDeleteRequest(req,res,socket);
-        else if (req.url == "/") {
+            handleDeleteRequest(req,res);
+        else if (req.url === "/") {
             res.writeHead(200, {
                 "content-type"  : "text/html",
                 "Cache-Control" : "max-age=3600, public"
@@ -172,7 +171,7 @@ function handleFileRequest(req,res,socket) {
                 res.writeHead(500);
                 res.end();
                 handleError(err);
-                SendUpdate(); // Send an update so the client's data stays in sync
+                sendUpdate(); // Send an update so the client's data stays in sync
             }
             log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
             res.writeHead(200, {
@@ -184,39 +183,30 @@ function handleFileRequest(req,res,socket) {
     }
 }
 //-----------------------------------------------------------------------------
-function handleDeleteRequest(req,res,socket) {
-    fs.readdir(config.filesDir, function(err, files){
-        if(!err) {
-            var path = config.filesDir + unescape(req.url.replace(/^\/delete\//,""));
-            log("DEL:  " + path);
-            try {
-                var stats = fs.statSync(path);
-                if (stats.isFile()) {
-                    fs.unlink(path);
-                } else if (stats.isDirectory()){
-                    fs.rmdir(path);
-                }
-                res.writeHead(200, {
-                    "Content-Type" : "text/html"
-                });
-                res.end();
-            } catch(error) {
-                res.writeHead(500);
-                res.end();
-                handleError(error);
-                SendUpdate(); // Send an update so the client's data stays in sync
-            }
-        } else {
-            res.writeHead(500);
-            res.end();
-            handleError(err);
-            SendUpdate(); // Send an update so the client's data stays in sync
+function handleDeleteRequest(req,res) {
+    var path = config.filesDir + unescape(req.url.replace(/^\/delete\//,""));
+    log("DEL:  " + path);
+    try {
+        var stats = fs.statSync(path);
+        if (stats.isFile()) {
+            fs.unlink(path);
+        } else if (stats.isDirectory()){
+            fs.rmdir(path);
         }
-    });
+        res.writeHead(200, {
+            "Content-Type" : "text/html"
+        });
+        res.end();
+    } catch(error) {
+        res.writeHead(500);
+        res.end();
+        handleError(error);
+        sendUpdate(); // Send an update so the client's data stays in sync
+    }
 }
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req,res,socket) {
-    if (req.url == "/upload" ) {
+    if (req.url === "/upload" ) {
         var form = new formidable.IncomingForm();
         form.uploadDir = config.filesDir;
         form.parse(req);
@@ -225,12 +215,12 @@ function handleUploadRequest(req,res,socket) {
             file.path = form.uploadDir + "/" + file.name;
         });
         form.on('end', function() {
-            SendUpdate();
+            sendUpdate();
         });
 
         form.on("error", function(err) {
             handleError(err);
-            SendUpdate(); // Send an update so the client's data stays in sync
+            sendUpdate(); // Send an update so the client's data stays in sync
         });
 
         res.writeHead(200, {
@@ -247,7 +237,7 @@ function prepareFileList(callback){
         fileList = {};
         fs.readdir(config.filesDir, function(err,files) {
             if(err) handleError(err);
-            for(i=0,len=files.length;i<len;i++){
+            for(var i=0,len=files.length;i<len;i++){
                 var name = files[i], type;
                 try{
                     var stats = fs.statSync(config.filesDir + name);
@@ -255,7 +245,7 @@ function prepareFileList(callback){
                         type = "f";
                     if (stats.isDirectory())
                         type = "d";
-                    if (type == "f" || type == "d") {
+                    if (type === "f" || type === "d") {
                         fileList[i] = {"name": name, "type": type, "size" : stats.size};
                     }
                 } catch(error) {

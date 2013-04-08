@@ -71,7 +71,7 @@ $(document).ready(function() {
             bar.width("100%");
             percent.html("finished");
         },
-        complete: function(xhr) {
+        complete: function() {
             progress.fadeOut(800);
             isUploading = false;
         }
@@ -96,7 +96,7 @@ $(document).ready(function() {
     // Handler for the input of the folder name
     // TODO: Sanitize on server
     name.keyup(function(e){
-        if(e.keyCode == 27) // Escape Key
+        if(e.keyCode === 27) // Escape Key
             $("#overlay").toggle();
 
         var input = name.val();
@@ -128,7 +128,7 @@ $(document).ready(function() {
         info.html("");
         info.hide();
 
-        if(e.keyCode == 13) { // Return Key
+        if(e.keyCode === 13) { // Return Key
             socket.emit("CREATE_FOLDER",input);
             $("#overlay").hide();
         }
@@ -152,7 +152,7 @@ function buildHTML(fileList) {
     while(fileList[i]) {
         var entry = fileList[i];
         name = entry.name;
-        if(entry.type == "f") {
+        if(entry.type === "f") {
             //Create a file row
             var size = convertToSI(entry.size);
             href = "/files/" + entry.name;
