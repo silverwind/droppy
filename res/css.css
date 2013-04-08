@@ -233,6 +233,11 @@ img {
     margin-top:10px;
     background-image: url('/res/drop.png');
     background-repeat: no-repeat;
+    transition: all .1s linear;
+}
+
+#logo:hover {
+    transform: scale(1.15);
 }
 
 #logotext {
