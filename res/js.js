@@ -3,6 +3,7 @@
     "use strict";
 
     var entries = [];
+    var isUploading = false;
 //-----------------------------------------------------------------------------
 // Initialize WebSocket
     var baseURL = location.protocol + "//" + location.host;
@@ -41,6 +42,7 @@
                 var perc = "0%";
                 bar.width(perc);
                 percent.html(perc);
+                isUploading = true;
             },
             uploadProgress: function(e, pos, total, completed) {
                 var perc = completed + "%";
@@ -54,14 +56,18 @@
             },
             complete: function(xhr) {
                 progress.hide();
+                isUploading = false;
+                setTimeout(socket.emit("REQUEST_UPDATE"),100);
             }
         });
 //-----------------------------------------------------------------------------
 // Handle WebSocket updates from server
         socket.on("UPDATE_FILES", function (data) {
-            var json = JSON.parse(data);
-            var html = buildHTML(json);
-            content.html(html);
+            if (!isUploading) {
+                var json = JSON.parse(data);
+                var html = buildHTML(json);
+                content.html(html);
+            }
         });
 //-----------------------------------------------------------------------------
 // Show popup for folder creation

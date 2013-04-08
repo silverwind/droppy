@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 var fileList     = {},
     resDir       = "./res/",
-    readInterval = 500,
+    readInterval = 100,
     server       = null,
     last         = null,
     cache        = {};
@@ -260,11 +260,12 @@ function prepareFileList(callback){
             if(callback !== undefined) callback();
         });
     }
-    /* Simple throttling
+    // Simple throttling
     var now = new Date();
     if(!last || (now - readInterval > last)) {
-    } */
-    run();
+        run();
+    }
+
 }
 //-----------------------------------------------------------------------------
 function log(msg) {
