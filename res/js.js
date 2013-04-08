@@ -132,7 +132,6 @@
 
             if(e.keyCode == 13) { // Return Key
                 socket.emit("CREATE_FOLDER",input);
-                name.hide();
                 $("#overlay").hide();
             }
         });
@@ -154,7 +153,6 @@
 
         while(fileList[i]) {
             var entry = fileList[i];
-            entries[name] = true;
             name = entry.name;
             if(entry.type == "f") {
                 var size = convertToSI(entry.size);
@@ -172,7 +170,7 @@
                 htmlDirs += '<div class="folderinfo">-<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</div>';
                 htmlDirs += '<div class=right></div></div>';
             }
-
+            entries[name] = true;
             i++;
         }
         return header + htmlDirs + htmlFiles;
