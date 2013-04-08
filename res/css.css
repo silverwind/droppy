@@ -316,3 +316,23 @@ img {
     border: 2px solid #f00;
     background-color: #f55;
 }
+
+#noscript {
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: .9;
+}
+
+#noscript p {
+    font-size: 2.5em;
+    color: #f33;
+    text-shadow: 0 0 2px #f33;
+    margin-top: 25%;
+    vertical-align: middle;
+    text-align: center;
+}
