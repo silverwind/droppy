@@ -167,7 +167,6 @@ function handleFileRequest(req,res,socket) {
                 "Content-Length"    : stats.size
             });
             fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
-            res.end();
         });
     }
 }
