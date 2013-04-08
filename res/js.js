@@ -30,6 +30,11 @@
             });
         });
 //-----------------------------------------------------------------------------
+// TODO: Remove once browsing is implemented
+        $("body").on("click", ".folderlink", function(e) {
+            e.preventDefault();
+        });
+//-----------------------------------------------------------------------------
 // Attach jquery.form to the form and handle progress updates
 //(seems to also work on the dropzone)
         $("form").change(function() {
@@ -160,7 +165,7 @@
                 htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
                 htmlFiles += '<div class=right></div></div>';
             } else {
-                href = '#'; //TODO
+                href = ''; //TODO
                 htmlDirs += '<div class="folderrow">';
                 htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
                 htmlDirs += '<div class="foldername"><a class="folderlink" href="' + href + '">' + name + '</a></div>';

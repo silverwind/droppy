@@ -191,6 +191,7 @@ function handleDeleteRequest(req,res,socket) {
                     "Content-Type" : "text/html"
                 });
                 res.end();
+                SendUpdate();
             } catch(error) {
                 handleError(error);
                 res.writeHead(500);
