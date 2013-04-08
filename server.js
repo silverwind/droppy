@@ -45,7 +45,7 @@ fs.mkdir(config.filesDir, function (err) {
                 cert = fs.readFileSync(config.httpsCert);
             } catch(error) {
                 logIt("Error reading required SSL certificate or key.");
-                logError(error);
+                handleError(error);
             }
             server = require("https").createServer({key: key, cert: cert}, onRequest);
         }
@@ -61,10 +61,10 @@ fs.mkdir(config.filesDir, function (err) {
             if (err.code === "EADDRINUSE")
                 log("Failed to bind to config.port " + config.port + ".");
             else
-                logError(err);
+                handleError(err);
         });
     } else {
-        logError(err);
+        handleError(err);
     }
 
 });
@@ -93,7 +93,7 @@ function setupSockets() {
         });
         socket.on("CREATE_FOLDER", function (name) {
             fs.mkdir(config.filesDir + name, null, function(err){
-                if(err) logError(err);
+                if(err) handleError(err);
             });
         });
     });
@@ -134,7 +134,7 @@ function handleResourceRequest(req,res,socket) {
                 cache[resourceName].mime = mime.lookup(unescape(path));
                 serve();
             } else {
-                logError(err);
+                handleError(err);
                 res.writeHead(404);
                 res.end();
                 return;
@@ -160,13 +160,14 @@ function handleFileRequest(req,res,socket) {
     if (path) {
         var mimeType = mime.lookup(path);
         fs.stat(path, function(err,stats){
-            if(err) logError(err);
+            if(err) handleError(err);
             log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
             res.writeHead(200, {
                 "Content-Type"      : mimeType,
                 "Content-Length"    : stats.size
             });
             fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
+            res.end();
         });
     }
 }
@@ -180,11 +181,11 @@ function handleDeleteRequest(req,res,socket) {
                 var stats = fs.statSync(unescape(path));
                 if (stats.isFile()) {
                     fs.unlink(unescape(path), function(err){
-                        if(err) logError(err);
+                        if(err) handleError(err);
                     });
                 } else if (stats.isDirectory()){
                     fs.rmdir(unescape(path), function(err){
-                        if(err) logError(err);
+                        if(err) handleError(err);
                     });
                 }
                 res.writeHead(200, {
@@ -192,14 +193,14 @@ function handleDeleteRequest(req,res,socket) {
                 });
                 res.end();
             } catch(error) {
-                logError(error);
+                handleError(error);
                 res.writeHead(500);
                 res.end();
             }
         } else {
-            logError(err);
             res.writeHead(500);
             res.end();
+            handleError(err);
         }
     });
 }
@@ -218,7 +219,7 @@ function handleUploadRequest(req,res,socket) {
         });
 
         form.on("error", function(err) {
-            logError(err);
+            handleError(err);
         });
 
         res.writeHead(200, {
@@ -241,7 +242,7 @@ function prepareFileList(callback){
         last = new Date();
         fileList = {};
         fs.readdir(config.filesDir, function(err,files) {
-            if(err) logError(err);
+            if(err) handleError(err);
             for(i=0,len=files.length;i<len;i++){
                 var name = files[i], type;
                 try{
@@ -254,7 +255,7 @@ function prepareFileList(callback){
                         fileList[i] = {"name": name, "type": type, "size" : stats.size};
                     }
                 } catch(error) {
-                    logError(error);
+                    handleError(error);
                 }
             }
             if(callback !== undefined) callback();
@@ -272,7 +273,11 @@ function log(msg) {
     console.log(getTimestamp() + msg);
 }
 
-function logError(err) {
+function handleError(err) {
+    // Send an update so the client won't get confused
+    SendUpdate();
+
+    // Log it
     if (typeof err === "object") {
         if (err.message)
             log(err.message);
@@ -283,7 +288,7 @@ function logError(err) {
 
 process.on("uncaughtException", function (err) {
     log("=============== Uncaught exception! ===============");
-    logError(err);
+    handleError(err);
 });
 //-----------------------------------------------------------------------------
 function getTimestamp() {

@@ -4,6 +4,7 @@
 
     var entries = [];
     var isUploading = false;
+    var start;
 //-----------------------------------------------------------------------------
 // Initialize WebSocket
     var baseURL = location.protocol + "//" + location.host;
@@ -41,21 +42,33 @@
                 progress.show();
                 var perc = "0%";
                 bar.width(perc);
-                percent.html(perc);
+                percent.html("");
                 isUploading = true;
+                start = new Date().getTime();
             },
             uploadProgress: function(e, pos, total, completed) {
                 var perc = completed + "%";
                 bar.width(perc);
-                percent.html(perc);
+
+                var elapsed = (new Date().getTime()) - start;
+                var bpt = pos / elapsed;
+                var est = total / bpt;
+                var secs = (est - elapsed) / 1000;
+                if ( secs > 120) {
+                    percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
+                } else if (secs > 60) {
+                    percent.html("less than 2 minute left");
+                } else {
+                    percent.html(Math.round(secs) + " seconds left");
+                }
             },
             success: function() {
                 var perc = "100%";
                 bar.width(perc);
-                percent.html(perc);
+                percent.html("finished");
             },
             complete: function(xhr) {
-                progress.hide();
+                progress.fadeOut(800);
                 isUploading = false;
                 setTimeout(socket.emit("REQUEST_UPDATE"),100);
             }
