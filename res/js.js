@@ -130,13 +130,25 @@
     }
 //-----------------------------------------------------------------------------
 // Helper function for size values
-    function convertToSI(bytes) {
-        var suffix = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"], tier = 0;
+function convertToSI(bytes)
+{
+    var kib = 1024;
+    var mib = kib * 1024;
+    var gib = mib * 1024;
+    var tib = gib * 1024;
 
-        while(bytes >= 1024) {
-            bytes /= 1024;
-            tier++;
-        }
-        return Math.round(bytes * 10) / 10 + " " + suffix[tier];
+    if ((bytes >= 0) && (bytes < kib)) {
+        return bytes + ' B';
+    } else if ((bytes >= kib) && (bytes < mib)) {
+        return (bytes / kib).toFixed(2) + ' KiB';
+    } else if ((bytes >= mib) && (bytes < gib)) {
+        return (bytes / mib).toFixed(2) + ' MiB';
+    } else if ((bytes >= gib) && (bytes < tib)) {
+        return (bytes / gib).toFixed(2) + ' GiB';
+    } else if (bytes >= tib) {
+        return (bytes / tib).toFixed(2) + ' TiB';
+    } else {
+        return bytes + ' B';
     }
+}
 }());

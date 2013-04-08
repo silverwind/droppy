@@ -18,6 +18,7 @@ var fileList     = {},
     readInterval = 500,
     server       = null,
     last         = null,
+    cache        = {};
     fs           = require("fs"),
     formidable   = require("formidable"),
     io           = require("socket.io"),
@@ -29,7 +30,7 @@ var fileList     = {},
 
 // Read and cache the HTML and strip whitespace
 var HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
-HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
+cache.HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
@@ -118,26 +119,36 @@ function onRequest(req, res) {
 }
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req,res,socket) {
-    var path = resDir + unescape(req.url.substring(resDir.length -1));
-    fs.readFile(path, function (err, data) {
-        if(!err) {
-            fs.stat(path, function(err,stats){
-                if(err) logError(err);
-                log("Serving to " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
-                var mimeType = mime.lookup(path);
-                res.writeHead(200, {
-                    "Content-Type"      : mimeType,
-                    "Content-Length"    : stats.size,
-                    "Cache-Control"     : "max-age=3600, public"
-                });
-                res.end(data);
-            });
-        } else {
-            logError(err);
-            res.writeHead(404);
-            res.end();
-        }
-    });
+    var resourceName = unescape(req.url.substring(resDir.length -1));
+    if (cache[resourceName] === undefined){
+        var path = resDir + resourceName;
+        fs.readFile(path, function (err, data) {
+            if(!err) {
+                cache[resourceName] = {};
+                cache[resourceName].data = data;
+                cache[resourceName].size = fs.statSync(unescape(path)).size;
+                cache[resourceName].mime = mime.lookup(unescape(path));
+                serve();
+            } else {
+                logError(err);
+                res.writeHead(404);
+                res.end();
+                return;
+            }
+        });
+    } else {
+        serve();
+    }
+
+    function serve() {
+        log("Serving resource to " + resourceName + " to " + socket );
+        res.writeHead(200, {
+            "Content-Type"      : cache[resourceName].mime,
+            "Content-Length"    : cache[resourceName].size,
+            "Cache-Control"     : "max-age=3600, public"
+        });
+        res.end(cache[resourceName].data);
+    }
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req,res,socket) {
@@ -199,6 +210,7 @@ function handleUploadRequest(req,res,socket) {
             file.path = form.uploadDir + "/" + file.name;
         });
         form.on('end', function() {
+            SendUpdate();
         });
 
         form.on("error", function(err) {
@@ -217,7 +229,7 @@ function getHTML(res) {
         "content-type"  : "text/html",
         "Cache-Control" : "max-age=3600, public"
     });
-    res.end(HTML);
+    res.end(cache.HTML);
 }
 //-----------------------------------------------------------------------------
 function prepareFileList(callback){
@@ -244,11 +256,11 @@ function prepareFileList(callback){
             if(callback !== undefined) callback();
         });
     }
-    // Simple throttling
+    /* Simple throttling
     var now = new Date();
     if(!last || (now - readInterval > last)) {
-        run();
-    }
+    } */
+    run();
 }
 //-----------------------------------------------------------------------------
 function log(msg) {
