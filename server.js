@@ -6,19 +6,19 @@
 // TODOs:
 // - Test cases with special characters in filenames in both Windows and Linux
 // - Add ability to navigate to subfolders
-// - Multiple File operations like delete/move
-// - Put the upload progress bar inside the file's list entry
-// - Media queries
+// - Multiple file operations like delete/move
+// - Media queries (if needed)
 // - Authentication
 // - gzip compression
 // - Check for any XSS
 //-----------------------------------------------------------------------------
+
 var fileList     = {},
     resDir       = "./res/",
     readInterval = 200,
     server       = null,
     last         = null,
-    cache        = {};
+    cache        = {},
     fs           = require("fs"),
     formidable   = require("formidable"),
     io           = require("socket.io"),
@@ -39,7 +39,7 @@ fs.mkdir(config.filesDir, function (err) {
         if(!config.useSSL) {
             server = require("http").createServer(onRequest);
         } else {
-            var key,cert;
+            var key, cert;
             try {
                 key = fs.readFileSync(config.httpsKey);
                 cert = fs.readFileSync(config.httpsCert);
@@ -88,7 +88,7 @@ function SendUpdate() {
 // Websocket listener
 function setupSockets() {
     io.sockets.on("connection", function (socket) {
-        socket.on("REQUEST_UPDATE", function (data) {
+        socket.on("REQUEST_UPDATE", function () {
             SendUpdate();
         });
         socket.on("CREATE_FOLDER", function (name) {
@@ -99,6 +99,7 @@ function setupSockets() {
     });
 }
 //-----------------------------------------------------------------------------
+// GET/POST handler
 function onRequest(req, res) {
     var method = req.method.toUpperCase();
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
@@ -111,9 +112,13 @@ function onRequest(req, res) {
             handleFileRequest(req,res,socket);
         else if (req.url.match(/^\/delete\//))
             handleDeleteRequest(req,res,socket);
-        else if (req.url == "/")
-            getHTML(res);
-        else {
+        else if (req.url == "/") {
+            res.writeHead(200, {
+                "content-type"  : "text/html",
+                "Cache-Control" : "max-age=3600, public"
+            });
+            res.end(cache.HTML);
+        } else {
             res.writeHead(404);
             res.end();
         }
@@ -122,6 +127,7 @@ function onRequest(req, res) {
     }
 }
 //-----------------------------------------------------------------------------
+// Serve resources. Everything from /res/ will be cached by both the server and client
 function handleResourceRequest(req,res,socket) {
     var resourceName = unescape(req.url.substring(resDir.length -1));
     if (cache[resourceName] === undefined){
@@ -146,6 +152,7 @@ function handleResourceRequest(req,res,socket) {
 
     function serve() {
         log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(cache[resourceName].size) + ")");
+
         res.writeHead(200, {
             "Content-Type"      : cache[resourceName].mime,
             "Content-Length"    : cache[resourceName].size,
@@ -165,6 +172,7 @@ function handleFileRequest(req,res,socket) {
                 res.writeHead(500);
                 res.end();
                 handleError(err);
+                SendUpdate(); // Send an update so the client's data stays in sync
             }
             log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
             res.writeHead(200, {
@@ -173,8 +181,6 @@ function handleFileRequest(req,res,socket) {
             });
             fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
         });
-
-
     }
 }
 //-----------------------------------------------------------------------------
@@ -198,11 +204,13 @@ function handleDeleteRequest(req,res,socket) {
                 res.writeHead(500);
                 res.end();
                 handleError(error);
+                SendUpdate(); // Send an update so the client's data stays in sync
             }
         } else {
             res.writeHead(500);
             res.end();
             handleError(err);
+            SendUpdate(); // Send an update so the client's data stays in sync
         }
     });
 }
@@ -222,6 +230,7 @@ function handleUploadRequest(req,res,socket) {
 
         form.on("error", function(err) {
             handleError(err);
+            SendUpdate(); // Send an update so the client's data stays in sync
         });
 
         res.writeHead(200, {
@@ -231,14 +240,7 @@ function handleUploadRequest(req,res,socket) {
     }
 }
 //-----------------------------------------------------------------------------
-function getHTML(res) {
-    res.writeHead(200, {
-        "content-type"  : "text/html",
-        "Cache-Control" : "max-age=3600, public"
-    });
-    res.end(cache.HTML);
-}
-//-----------------------------------------------------------------------------
+// Read the directory's content and store it in the fileList object
 function prepareFileList(callback){
     function run(){
         last = new Date();
@@ -266,15 +268,12 @@ function prepareFileList(callback){
     debounce(run(),readInterval);
 }
 //-----------------------------------------------------------------------------
+// Logging and error handling helpers
 function log(msg) {
     console.log(getTimestamp() + msg);
 }
 
 function handleError(err) {
-    // Send an update so the client won't get confused
-    SendUpdate();
-
-    // Log it
     if (typeof err === "object") {
         if (err.message)
             log(err.message);
@@ -288,6 +287,7 @@ process.on("uncaughtException", function (err) {
     handleError(err);
 });
 //-----------------------------------------------------------------------------
+// Helper function for log timestamps
 function getTimestamp() {
     var currentDate = new Date();
     var day = currentDate.getDate();
@@ -304,17 +304,30 @@ function getTimestamp() {
     return month + "/" + day + "/" + year + " "+ hours + ":" + minutes + ":" + seconds + " ";
 }
 //-----------------------------------------------------------------------------
+// Helper function for size values
 function convertToSI(bytes) {
-    var suffix = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"], tier = 0;
+    var kib = 1024;
+    var mib = kib * 1024;
+    var gib = mib * 1024;
+    var tib = gib * 1024;
 
-    while(bytes >= 1024) {
-        bytes /= 1024;
-        tier++;
+    if ((bytes >= 0) && (bytes < kib)) {
+        return bytes + ' B';
+    } else if ((bytes >= kib) && (bytes < mib)) {
+        return (bytes / kib).toFixed(2) + ' KiB';
+    } else if ((bytes >= mib) && (bytes < gib)) {
+        return (bytes / mib).toFixed(2) + ' MiB';
+    } else if ((bytes >= gib) && (bytes < tib)) {
+        return (bytes / gib).toFixed(2) + ' GiB';
+    } else if (bytes >= tib) {
+        return (bytes / tib).toFixed(2) + ' TiB';
+    } else {
+        return bytes + ' B';
     }
-    return Math.round(bytes * 10) / 10 + " " + suffix[tier];
 }
 //-----------------------------------------------------------------------------
-// Source: https://github.com/documentcloud/underscore
+// underscore's debounce
+// https://github.com/documentcloud/underscore
 function debounce(func, wait, immediate) {
     var timeout, result;
     return function() {
