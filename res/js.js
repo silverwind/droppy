@@ -75,7 +75,6 @@
             complete: function(xhr) {
                 progress.fadeOut(800);
                 isUploading = false;
-                setTimeout(socket.emit("REQUEST_UPDATE"),100);
             }
         });
 //-----------------------------------------------------------------------------
@@ -155,24 +154,25 @@
 
         while(fileList[i]) {
             var entry = fileList[i];
+            entries[name] = true;
             name = entry.name;
             if(entry.type == "f") {
                 var size = convertToSI(entry.size);
-                href = "/files/" + unescape(entry.name);
+                href = "/files/" + entry.name;
                 htmlFiles += '<div class="filerow">';
                 htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
-                htmlFiles += '<div class="filename"><a class="filelink" href="' + href + '">' + name + '</a></div>';
-                htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
+                htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
+                htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</div>';
                 htmlFiles += '<div class=right></div></div>';
             } else {
                 href = ''; //TODO
                 htmlDirs += '<div class="folderrow">';
                 htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
-                htmlDirs += '<div class="foldername"><a class="folderlink" href="' + href + '">' + name + '</a></div>';
-                htmlDirs += '<div class="folderinfo">-<span class="spacer"></span><a class="delete" href="delete/' + name + '">&#x2716;</div>';
+                htmlDirs += '<div class="foldername"><a class="folderlink" href="' + escape(href) + '">' + name + '</a></div>';
+                htmlDirs += '<div class="folderinfo">-<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</div>';
                 htmlDirs += '<div class=right></div></div>';
             }
-            entries[name] = true;
+
             i++;
         }
         return header + htmlDirs + htmlFiles;

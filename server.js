@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 var fileList     = {},
     resDir       = "./res/",
-    readInterval = 100,
+    readInterval = 200,
     server       = null,
     last         = null,
     cache        = {};
@@ -159,8 +159,13 @@ function handleFileRequest(req,res,socket) {
     var path = config.filesDir + unescape(req.url.substring(config.filesDir.length -1));
     if (path) {
         var mimeType = mime.lookup(path);
+
         fs.stat(path, function(err,stats){
-            if(err) handleError(err);
+            if(err) {
+                res.writeHead(500);
+                res.end();
+                handleError(err);
+            }
             log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
             res.writeHead(200, {
                 "Content-Type"      : mimeType,
@@ -168,34 +173,31 @@ function handleFileRequest(req,res,socket) {
             });
             fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
         });
+
+
     }
 }
 //-----------------------------------------------------------------------------
 function handleDeleteRequest(req,res,socket) {
     fs.readdir(config.filesDir, function(err, files){
         if(!err) {
-            var path = config.filesDir + req.url.replace(/^\/delete\//,"");
+            var path = config.filesDir + unescape(req.url.replace(/^\/delete\//,""));
             log("DEL:  " + path);
             try {
-                var stats = fs.statSync(unescape(path));
+                var stats = fs.statSync(path);
                 if (stats.isFile()) {
-                    fs.unlink(unescape(path), function(err){
-                        if(err) handleError(err);
-                    });
+                    fs.unlink(path);
                 } else if (stats.isDirectory()){
-                    fs.rmdir(unescape(path), function(err){
-                        if(err) handleError(err);
-                    });
+                    fs.rmdir(path);
                 }
                 res.writeHead(200, {
                     "Content-Type" : "text/html"
                 });
                 res.end();
-                SendUpdate();
             } catch(error) {
-                handleError(error);
                 res.writeHead(500);
                 res.end();
+                handleError(error);
             }
         } else {
             res.writeHead(500);
@@ -261,12 +263,7 @@ function prepareFileList(callback){
             if(callback !== undefined) callback();
         });
     }
-    // Simple throttling
-    var now = new Date();
-    if(!last || (now - readInterval > last)) {
-        run();
-    }
-
+    debounce(run(),readInterval);
 }
 //-----------------------------------------------------------------------------
 function log(msg) {
@@ -315,4 +312,21 @@ function convertToSI(bytes) {
         tier++;
     }
     return Math.round(bytes * 10) / 10 + " " + suffix[tier];
+}
+//-----------------------------------------------------------------------------
+// Source: https://github.com/documentcloud/underscore
+function debounce(func, wait, immediate) {
+    var timeout, result;
+    return function() {
+        var context = this, args = arguments;
+        var later = function() {
+            timeout = null;
+            if (!immediate) result = func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) result = func.apply(context, args);
+        return result;
+    };
 }
