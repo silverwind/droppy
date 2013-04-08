@@ -111,8 +111,12 @@ function onRequest(req, res) {
             handleFileRequest(req,res,socket);
         else if (req.url.match(/^\/delete\//))
             handleDeleteRequest(req,res,socket);
-        else
+        else if (req.url == "/")
             getHTML(res);
+        else {
+            res.writeHead(404);
+            res.end();
+        }
     } else if (method === "POST" && req.url === "/upload") {
         handleUploadRequest(req,res,socket);
     }
