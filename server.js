@@ -232,33 +232,30 @@ function handleUploadRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in the fileList object
-function prepareFileList(callback){
-    function run(){
-        last = new Date();
-        fileList = {};
-        fs.readdir(config.filesDir, function(err,files) {
-            if(err) handleError(err);
-            for(var i=0,len=files.length;i<len;i++){
-                var name = files[i], type;
-                try{
-                    var stats = fs.statSync(config.filesDir + name);
-                    if (stats.isFile())
-                        type = "f";
-                    if (stats.isDirectory())
-                        type = "d";
-                    if (type === "f" || type === "d") {
-                        fileList[i] = {"name": name, "type": type, "size" : stats.size};
-                    }
-                } catch(error) {
-                    handleError(error);
+
+var prepareFileList = debounce(function (callback){
+    last = new Date();
+    fileList = {};
+    fs.readdir(config.filesDir, function(err,files) {
+        if(err) handleError(err);
+        for(var i=0,len=files.length;i<len;i++){
+            var name = files[i], type;
+            try{
+                var stats = fs.statSync(config.filesDir + name);
+                if (stats.isFile())
+                    type = "f";
+                if (stats.isDirectory())
+                    type = "d";
+                if (type === "f" || type === "d") {
+                    fileList[i] = {"name": name, "type": type, "size" : stats.size};
                 }
+            } catch(error) {
+                handleError(error);
             }
-            if(callback !== undefined) callback();
-        });
-    }
-    var debounced = debounce(run,config.readInterval);
-    debounced();
-}
+        }
+        if(callback !== undefined) callback();
+    });
+},config.readInterval);
 //-----------------------------------------------------------------------------
 // Logging and error handling helpers
 function log(msg) {
