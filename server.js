@@ -58,7 +58,9 @@ fs.mkdir(config.filesDir, function (err) {
         });
         server.on("error", function (err) {
             if (err.code === "EADDRINUSE")
-                log("Failed to bind to config.port " + config.port + ".");
+                log("Failed to bind to port " + config.port + ". Adress already in use.");
+            else if (err.code === "EACCES")
+                log("Failed to bind to port " + config.port + ". Need root to bind to ports < 1024.");
             else
                 handleError(err);
         });

@@ -335,6 +335,7 @@ img {
 }
 
 #nameinput {
+    color: #222;
     font-size: 1.5em;
     width: 260px;
     border: 2px transparent;
