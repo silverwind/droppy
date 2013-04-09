@@ -45,7 +45,7 @@ $(document).ready(function() {
         if (currentFolder !== "/" ) destination = "/" + destination;
 
         currentFolder += destination;
-        loc.html(currentFolder);
+        loc.html(styleLoc(currentFolder));
 
         socket.emit("SWITCH_FOLDER", currentFolder);
     });
@@ -59,7 +59,7 @@ $(document).ready(function() {
         if (!match.match(/\//)) match = "/";
 
         currentFolder = match;
-        loc.html(currentFolder);
+        loc.html(styleLoc(currentFolder));
 
         socket.emit("SWITCH_FOLDER", currentFolder);
     });
@@ -124,7 +124,10 @@ $(document).ready(function() {
         info.hide();
 
         if(e.keyCode === 13) { // Return Key
-            socket.emit("CREATE_FOLDER",input);
+            if (currentFolder === "/")
+                socket.emit("CREATE_FOLDER","/" + input);
+            else
+                socket.emit("CREATE_FOLDER",currentFolder + "/" + input);
             $("#overlay").hide();
         }
     });
@@ -201,7 +204,11 @@ function uploadDone(){
     progress.fadeOut(800);
     isUploading = false;
 }
-
+//-----------------------------------------------------------------------------
+// Set the path indicator
+function styleLoc(path){
+    return path.replace(/\//g,"<span class='boldtext'>/</span>");
+}
 //-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML
 function buildHTML(fileList) {
@@ -224,15 +231,17 @@ function buildHTML(fileList) {
     while(fileList[i]) {
         var entry = fileList[i];
         name = entry.name;
+
+        if (currentFolder === "/")
+            delhref = "/delete/" +  name;
+        else
+            delhref = "/delete" + currentFolder + "/" +  name;
+
         if(entry.type === "f") {
             //Create a file row
             var size = convertToSI(entry.size);
             href = "/files" + root + "/" + entry.name;
 
-            if (currentFolder === "/")
-                delhref = "/delete/" +  name;
-            else
-                delhref = "/delete" + currentFolder + "/" +  name;
 
             htmlFiles += '<div class="filerow">';
             htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
@@ -244,7 +253,7 @@ function buildHTML(fileList) {
             htmlDirs += '<div class="folderrow">';
             htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
             htmlDirs += '<div class="foldername"><a class="folderlink" href="">' + name + '</a></div>';
-            htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</a></div>';
+            htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
             htmlDirs += '<div class=right></div></div>';
         }
         folderList[name] = true;

@@ -117,9 +117,9 @@ footer {
     transition: all .5s cubic-bezier(0,.48,.27,.99);
 }
 
-.filelink, .folderlink .backlink{
-    display: block;
-    width: 100%;
+.filelink, .folderlink, .backlink{
+    display: block !important;
+    width: 100% !important;
     overflow: hidden;
     white-space: nowrap;
     -o-text-overflow: ellipsis;
@@ -378,14 +378,24 @@ img {
 }
 
 #loc {
-    width: 100%;
+    width: 96%;
+    margin-left: 2%;
     float:left;
     text-align: center;
-    font-size: .8em;
+    font-size: .7em;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
 #current {
-    font-size: 2em;
+    font-size: 1.5em;
+    color: #777;
+    max-width: 96%;
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+}
+
+.boldtext {
+    color: #000;
 }

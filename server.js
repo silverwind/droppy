@@ -84,8 +84,10 @@ function sendUpdate() {
 }
 //-----------------------------------------------------------------------------
 // Workaround for strangely slow updates of the watcher after an action
-function updateClient(address){
-    prepareFileList(sendUpdate,clientFolders[address]);
+function updateClient(address,dir){
+    var dirToSend = clientFolders[address] || dir ;
+    if (!dirToSend) dirToSend = "/";
+    prepareFileList(sendUpdate,dirToSend);
 }
 //-----------------------------------------------------------------------------
 // Create full directory link
@@ -98,14 +100,16 @@ function setupSocket() {
     io.sockets.on("connection", function (socket) {
         var address = socket.handshake.address.address;
         //var remote = address.address + ":" + address.port;
-        socket.on("REQUEST_UPDATE", function (root) {
-            sendUpdate();
-            clientFolders[address] = root;
+        socket.on("REQUEST_UPDATE", function (dir) {
+            updateClient(undefined,dir);
+            clientFolders[address] = dir;
         });
         socket.on("CREATE_FOLDER", function (name) {
-            fs.mkdir(config.filesDir + name, null, function(err){
+            fs.mkdir(prefixBase(name), null, function(err){
                 if(err) handleError(err);
+                updateClient(address);
             });
+
         });
         socket.on("SWITCH_FOLDER", function (root) {
             if ( !root.match(/^\//) || root.match(/\.\./) ) return; // Safeguard
@@ -223,6 +227,7 @@ function handleDeleteRequest(req,res) {
             "Content-Type" : "text/html"
         });
         res.end();
+        updateClient();
     } catch(error) {
         res.writeHead(500);
         res.end();
@@ -269,6 +274,7 @@ var prepareFileList = debounce(function (callback, root){
     fileList = {};
     fs.readdir(realRoot, function(err,files) {
         if(err) handleError(err);
+        if(!files) return;
         fileList[0] = root;
         for(var i=0,len=files.length;i<len;i++){
             var name = files[i], type;
