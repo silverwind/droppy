@@ -95,7 +95,7 @@ $(document).ready(function() {
             $("#overlay").toggle();
 
         var input = name.val();
-        var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/../);
+        var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
         var folderExists = folderList[input] === true;
 
         if (input === "" ) {

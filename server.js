@@ -108,7 +108,7 @@ function setupSocket() {
             });
         });
         socket.on("SWITCH_FOLDER", function (root) {
-            if ( !root.match(/^\//) || root.indexOf("..") >= 0 ) return; // Safeguard
+            if ( !root.match(/^\//) || root.match(/\.\./) ) return; // Safeguard
             clientFolders[address] = root;
             if (!watchedDirs[root]) {
                 createWatcher(prefixBase(root));
