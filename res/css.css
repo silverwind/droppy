@@ -139,26 +139,38 @@ footer {
 
 .filename {
     margin-left: 5px;
-    width: 70%;
     float: left;
     overflow: hidden;
     white-space: nowrap;
     -o-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
     text-overflow: ellipsis;
 }
 
 .foldername {
     margin-left: 5px;
-    width: 90%;
     float: left;
     overflow: hidden;
     white-space: nowrap;
     -o-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
     text-overflow: ellipsis;
 }
 
+.filerow, .folderrow {
+    display: -webkit-flex !important;
+    -webkit-flex-direction: row !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.filename, .foldername {
+    -webkit-flex: 1;
+    flex: 1;
+}
+
 .fileinfo, .folderinfo {
-    margin-left: -50px;
     width: auto;
     float: right;
     text-align: right;
@@ -217,7 +229,7 @@ img {
 
 .right {
     clear: left;
-    width: 5%;
+
 }
 
 #file-upload input {
