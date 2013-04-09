@@ -6,21 +6,46 @@ var entries = [],
     isUploading = false,
     start;
 
+//Element cache
+var bar, content, info, name, percent, progress;
+
 // Initialize WebSocket
 var baseURL = location.protocol + "//" + location.host;
 var socket = io.connect(baseURL);
 
 // DOM is ready
 $(document).ready(function() {
-    var bar = $("#progressBar"),
-        content = $("#content"),
-        info = $("#info-filename"),
-        name = $("#nameinput"),
-        percent = $("#percent"),
-        progress = $("#progress");
+    bar = $("#progressBar"),
+    content = $("#content"),
+    info = $("#info-filename"),
+    name = $("#nameinput"),
+    percent = $("#percent"),
+    progress = $("#progress");
 
-    // Mark the body as destination for file drops
-    new Dropzone(document.body, {clickable: false, url: "/upload"});
+    // Mark the body as destination for file drops; Define upload events
+    var dropZone = new Dropzone(document.body, {clickable: false, url: "/upload"});
+    dropZone.on("sending", function() {
+        uploadInit();
+    });
+    dropZone.on("uploadprogress", function(undefined, progress) {
+        uploadProgress(progress);
+    });
+    dropZone.on("complete", function() {
+        uploadDone();
+    });
+
+    // Attach jquery.form to all forms; Define upload events
+    $("form").ajaxForm({
+        beforeSend: function() {
+            uploadInit();
+        },
+        uploadProgress: function(e, pos, total, completed) {
+            uploadProgress(completed,pos,total);
+        },
+        complete: function() {
+            uploadDone();
+        }
+    });
 
     // Change delete links to xhr
     $("body").on("click", ".delete", function(e) {
@@ -41,41 +66,13 @@ $(document).ready(function() {
         $("form").submit();
     });
 
-    // Attach jquery.form to all forms; Define upload events
-    $("form").ajaxForm({
-        beforeSend: function() {
-            // Initialize a few things
+    function uploadInit() {
             progress.show();
             bar.width("0%");
             percent.html("");
             isUploading = true;
             start = new Date().getTime();
-        },
-        uploadProgress: function(e, pos, total, completed) {
-            // Set progress bar width
-            bar.width(completed + "%");
-
-            // Calculate estimated time left
-            var elapsed = (new Date().getTime()) - start;
-            var estimate = total / (pos / elapsed);
-            var secs = (estimate - elapsed) / 1000;
-            if ( secs > 120) {
-                percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
-            } else if (secs > 60) {
-                percent.html("less than 2 minute left");
-            } else {
-                percent.html(Math.round(secs) + " seconds left");
-            }
-        },
-        success: function() {
-            bar.width("100%");
-            percent.html("finished");
-        },
-        complete: function() {
-            progress.fadeOut(800);
-            isUploading = false;
-        }
-    });
+    }
 
     // Handle WebSocket updates from server
     socket.on("UPDATE_FILES", function (data) {
@@ -137,6 +134,39 @@ $(document).ready(function() {
     //Request initial update of files
     socket.emit("REQUEST_UPDATE");
 });
+
+//-----------------------------------------------------------------------------
+// Progress bar helpers
+    // Initialize a few things
+    function uploadProgress(completed,pos,total) {
+        var perc = Math.round(completed) + "%";
+        // Set progress bar width
+        bar.width(perc);
+        if (arguments.length === 1){
+            // Dropzone doesn't support byte counts yet, so just show the percentage
+            percent.html(perc);
+            return;
+        } else {
+            // Calculate estimated time left
+            var elapsed = (new Date().getTime()) - start;
+            var estimate = total / (pos / elapsed);
+            var secs = (estimate - elapsed) / 1000;
+            if ( secs > 120) {
+                percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
+            } else if (secs > 60) {
+                percent.html("less than 2 minute left");
+            } else {
+                percent.html(Math.round(secs) + " seconds left");
+            }
+        }
+    }
+    function uploadDone(){
+        bar.width("100%");
+        percent.html("finished");
+        progress.fadeOut(800);
+        isUploading = false;
+    }
+
 //-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML
 function buildHTML(fileList) {
