@@ -21,7 +21,7 @@
 			<div id="content"></div>
 		</div>
 		<aside id="left">
-			<a href="/" >
+			<a href="/">
 				<div id="logo">
 					<p id="logotext">Droppy</p>
 				</div>
@@ -29,11 +29,15 @@
 			<form action="/upload" enctype="multipart/form-data" method="post">
 				<div id="file-upload" class="button">
 					<p>Add file(s)</p>
-					<input type="file" name="file" multiple="multiple"/>
+					<input type="file" name="file" id="file" multiple="multiple"/>
 				</div>
 			</form>
 			<div id="add-folder" class="button" title="Add a new folder">
 				<p>Create Folder</p>
+			</div>
+			<div id="loc">
+				<p id="info-current">Current location:</p>
+				<p id="current">/</p>
 			</div>
 			<div id="progress">
 				<div id="progressBar"></div>

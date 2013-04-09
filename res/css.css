@@ -117,7 +117,7 @@ footer {
     transition: all .5s cubic-bezier(0,.48,.27,.99);
 }
 
-.filelink, .folderlink{
+.filelink, .folderlink .backlink{
     display: block;
     width: 100%;
     overflow: hidden;
@@ -375,4 +375,17 @@ img {
     margin-top: 25%;
     vertical-align: middle;
     text-align: center;
+}
+
+#loc {
+    width: 100%;
+    float:left;
+    text-align: center;
+    font-size: .8em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#current {
+    font-size: 2em;
 }

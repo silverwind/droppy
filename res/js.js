@@ -1,13 +1,13 @@
 // vim: ts=4:sw=4
 (function() {
+
 "use strict";
 
-var entries = [],
-    isUploading = false,
-    start;
+var folderList    = [],
+    isUploading   = false,
+    currentFolder = "/";
 
-//Element cache
-var bar, content, info, name, percent, progress;
+var bar, content, info, name, percent, progress, loc, start;
 
 // Initialize WebSocket
 var baseURL = location.protocol + "//" + location.host;
@@ -15,39 +15,18 @@ var socket = io.connect(baseURL);
 
 // DOM is ready
 $(document).ready(function() {
+    // Cache elements
     bar = $("#progressBar"),
     content = $("#content"),
     info = $("#info-filename"),
     name = $("#nameinput"),
     percent = $("#percent"),
-    progress = $("#progress");
+    progress = $("#progress"),
+    loc = $("#current");
 
-    // Mark the body as destination for file drops; Define upload events
-    var dropZone = new Dropzone(document.body, {clickable: false, url: "/upload"});
-    dropZone.on("sending", function() {
-        uploadInit();
-    });
-    dropZone.on("uploadprogress", function(file, progress) {
-        var bytesTotal = file.size;
-        var bytesSent = file.size * progress/100;
-        uploadProgress(bytesSent, bytesTotal, progress);
-    });
-    dropZone.on("complete", function() {
-        uploadDone();
-    });
-
-    // Attach jquery.form to all forms; Define upload events
-    $("form").ajaxForm({
-        beforeSend: function() {
-            uploadInit();
-        },
-        uploadProgress: function(e, bytesSent, bytesTotal, completed) {
-            uploadProgress(bytesSent, bytesTotal, completed);
-        },
-        complete: function() {
-            uploadDone();
-        }
-    });
+    // Initialize and attach plugins
+    attachDropzone();
+    attachForm();
 
     // Change delete links to xhr
     $("body").on("click", ".delete", function(e) {
@@ -58,30 +37,47 @@ $(document).ready(function() {
         });
     });
 
-    // Disable folder links (for now)
+    // Switch into a folder
     $("body").on("click", ".folderlink", function(e) {
         e.preventDefault();
+
+        var destination = $(this).html();
+        if (currentFolder !== "/" ) destination = "/" + destination;
+
+        currentFolder += destination;
+        loc.html(currentFolder);
+
+        socket.emit("SWITCH_FOLDER", currentFolder);
+    });
+
+    // Go back up
+    $("body").on("click", ".backlink", function(e) {
+        e.preventDefault();
+
+        var match = currentFolder.match(/.*(\/)/)[0];
+        match = match.substring(0,match.length - 1);
+        if (!match.match(/\//)) match = "/";
+
+        currentFolder = match;
+        loc.html(currentFolder);
+
+        socket.emit("SWITCH_FOLDER", currentFolder);
     });
 
     // Automatically submit a form once it's data changed
     $("form").change(function() {
         $("form").submit();
+        $("#file").val("");
     });
-
-    function uploadInit() {
-            progress.show();
-            bar.width("0%");
-            percent.html("");
-            isUploading = true;
-            start = new Date().getTime();
-    }
 
     // Handle WebSocket updates from server
     socket.on("UPDATE_FILES", function (data) {
         if (!isUploading) {
             var json = JSON.parse(data);
-            var html = buildHTML(json);
-            content.html(html);
+            if(json[0] === currentFolder) {
+                var html = buildHTML(json);
+                content.html(html);
+            }
         }
     });
     // Show popup for folder creation
@@ -99,8 +95,8 @@ $(document).ready(function() {
             $("#overlay").toggle();
 
         var input = name.val();
-        var valid = !input.match(/[\\*{}\/<>?|]/);
-        var folderExists = entries[input] === true;
+        var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/../);
+        var folderExists = folderList[input] === true;
 
         if (input === "" ) {
             name.attr("class","valid");
@@ -134,83 +130,127 @@ $(document).ready(function() {
     });
 
     //Request initial update of files
-    socket.emit("REQUEST_UPDATE");
+    socket.emit("REQUEST_UPDATE",currentFolder);
 });
+//-----------------------------------------------------------------------------
+// Mark the body as destination for file drops; Define upload events
+function attachDropzone(){
+    var dropZone = new Dropzone(document.body, {clickable: false, url: "/upload"});
+    dropZone.on("sending", function() {
+        uploadInit();
+    });
+    dropZone.on("uploadprogress", function(file, progress) {
+        var bytesTotal = file.size;
+        var bytesSent = file.size * progress/100;
+        uploadProgress(bytesSent, bytesTotal, progress);
+    });
+    dropZone.on("complete", function() {
+        uploadDone();
+    });
+}
+//-----------------------------------------------------------------------------
+// Attach jquery.form to all forms; Define upload events
+function attachForm() {
+    $("form").ajaxForm({
+        beforeSend: function() {
+            uploadInit();
+        },
+        uploadProgress: function(e, bytesSent, bytesTotal, completed) {
+            uploadProgress(bytesSent, bytesTotal, completed);
+        },
+        complete: function() {
+            uploadDone();
+        }
+    });
+}
 
 //-----------------------------------------------------------------------------
-// Progress bar helpers
-    // Update the progress bar and the time left
-    function uploadProgress(bytesSent, bytesTotal, completed) {
-        var perc = Math.round(completed) + "%";
+// Initialize upload by resetting a few things
+function uploadInit() {
+        progress.show();
+        bar.width("0%");
+        percent.html("");
+        isUploading = true;
+        start = new Date().getTime();
+}
+//-----------------------------------------------------------------------------
+// Update the progress bar and the time left
+function uploadProgress(bytesSent, bytesTotal, completed) {
+    var perc = Math.round(completed) + "%";
 
-        // Set progress bar width
-        bar.width(perc);
+    // Set progress bar width
+    bar.width(perc);
 
-        // Calculate estimated time left
-        var elapsed = (new Date().getTime()) - start;
-        var estimate = bytesTotal / (bytesSent / elapsed);
-        var secs = (estimate - elapsed) / 1000;
-        if ( secs > 120) {
-            percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
-        } else if (secs > 60) {
-            percent.html("less than 2 minute left");
-        } else {
-            percent.html(Math.round(secs) + " seconds left");
-        }
+    // Calculate estimated time left
+    var elapsed = (new Date().getTime()) - start;
+    var estimate = bytesTotal / (bytesSent / elapsed);
+    var secs = (estimate - elapsed) / 1000;
+    if ( secs > 120) {
+        percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
+    } else if (secs > 60) {
+        percent.html("less than 2 minute left");
+    } else {
+        percent.html(Math.round(secs) + " seconds left");
     }
-
-    // Initialize a few things before starting the upload
-    function uploadDone(){
-        bar.width("100%");
-        percent.html("finished");
-        progress.fadeOut(800);
-        isUploading = false;
-    }
+}
+//-----------------------------------------------------------------------------
+// Initialize a few things before starting the upload
+function uploadDone(){
+    bar.width("100%");
+    percent.html("finished");
+    progress.fadeOut(800);
+    isUploading = false;
+}
 
 //-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML
 function buildHTML(fileList) {
-    var htmlFiles = "",
-        htmlDirs = "",
-        back = "",
-        header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>',
-        i = 0,
-        name,
-        href;
+    var htmlFiles = "", htmlDirs = "", htmlBack = "";
+    var htmlheader = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
+    var name, href, delhref, root;
 
-    entries = [];
+    folderList = [];
+    root = fileList[0];
 
-    back += '<div class="folderrow">';
-    back += '<div class="foldericon" title="Up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
-    back += '<div id="back"><a class="folderlink backlink" href="">..</a></div>';
-    back += '<div class="folderinfo"></div>';
-    back += '<div class=right></div></div>';
+    if(root !== "/") {
+        htmlBack += '<div class="folderrow">';
+        htmlBack += '<div class="foldericon" title="Up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
+        htmlBack += '<div class="filename"><a class="backlink" href="">..</a></div>';
+        htmlBack += '<div class="folderinfo"></div>';
+        htmlBack += '<div class=right></div></div>';
+    }
 
+    var i = 1;
     while(fileList[i]) {
         var entry = fileList[i];
         name = entry.name;
         if(entry.type === "f") {
             //Create a file row
             var size = convertToSI(entry.size);
-            href = "/files/" + entry.name;
+            href = "/files" + root + "/" + entry.name;
+
+            if (currentFolder === "/")
+                delhref = "/delete/" +  name;
+            else
+                delhref = "/delete" + currentFolder + "/" +  name;
+
             htmlFiles += '<div class="filerow">';
             htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
             htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
-            htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</a></div>';
+            htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
             htmlFiles += '<div class=right></div></div>';
         } else {
             //Create a folder row
-            href = ''; //TODO
             htmlDirs += '<div class="folderrow">';
             htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
-            htmlDirs += '<div class="foldername"><a class="folderlink" href="' + escape(href) + '">' + name + '</a></div>';
+            htmlDirs += '<div class="foldername"><a class="folderlink" href="">' + name + '</a></div>';
             htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</a></div>';
             htmlDirs += '<div class=right></div></div>';
         }
-        entries[name] = true;
+        folderList[name] = true;
         i++;
     }
-    return header + back + htmlDirs + htmlFiles;
+    return htmlheader + htmlBack + htmlDirs + htmlFiles;
 }
 //-----------------------------------------------------------------------------
 // Helper function for size values
