@@ -27,8 +27,10 @@ $(document).ready(function() {
     dropZone.on("sending", function() {
         uploadInit();
     });
-    dropZone.on("uploadprogress", function(undefined, progress) {
-        uploadProgress(progress);
+    dropZone.on("uploadprogress", function(file, progress) {
+        var bytesTotal = file.size;
+        var bytesSent = file.size * progress/100;
+        uploadProgress(bytesSent, bytesTotal, progress);
     });
     dropZone.on("complete", function() {
         uploadDone();
@@ -39,8 +41,8 @@ $(document).ready(function() {
         beforeSend: function() {
             uploadInit();
         },
-        uploadProgress: function(e, pos, total, completed) {
-            uploadProgress(completed,pos,total);
+        uploadProgress: function(e, bytesSent, bytesTotal, completed) {
+            uploadProgress(bytesSent, bytesTotal, completed);
         },
         complete: function() {
             uploadDone();
@@ -138,28 +140,24 @@ $(document).ready(function() {
 //-----------------------------------------------------------------------------
 // Progress bar helpers
     // Initialize a few things
-    function uploadProgress(completed,pos,total) {
+    //bytesSent, bytesTotal, completed
+    function uploadProgress(bytesSent, bytesTotal, completed) {
         var perc = Math.round(completed) + "%";
         // Set progress bar width
         bar.width(perc);
-        if (arguments.length === 1){
-            // Dropzone doesn't support byte counts yet, so just show the percentage
-            percent.html(perc);
-            return;
+        // Calculate estimated time left
+        var elapsed = (new Date().getTime()) - start;
+        var estimate = bytesTotal / (bytesSent / elapsed);
+        var secs = (estimate - elapsed) / 1000;
+        if ( secs > 120) {
+            percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
+        } else if (secs > 60) {
+            percent.html("less than 2 minute left");
         } else {
-            // Calculate estimated time left
-            var elapsed = (new Date().getTime()) - start;
-            var estimate = total / (pos / elapsed);
-            var secs = (estimate - elapsed) / 1000;
-            if ( secs > 120) {
-                percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
-            } else if (secs > 60) {
-                percent.html("less than 2 minute left");
-            } else {
-                percent.html(Math.round(secs) + " seconds left");
-            }
+            percent.html(Math.round(secs) + " seconds left");
         }
     }
+
     function uploadDone(){
         bar.width("100%");
         percent.html("finished");
