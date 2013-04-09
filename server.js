@@ -16,9 +16,9 @@
 "use strict";
 
 var fileList     = {},
+    cache        = {},
     server       = null,
     last         = null,
-    cache        = {},
     fs           = require("fs"),
     formidable   = require("formidable"),
     io           = require("socket.io"),

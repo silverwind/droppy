@@ -139,8 +139,7 @@ $(document).ready(function() {
 
 //-----------------------------------------------------------------------------
 // Progress bar helpers
-    // Initialize a few things
-    //bytesSent, bytesTotal, completed
+    // Update the progress bar and the time left
     function uploadProgress(bytesSent, bytesTotal, completed) {
         var perc = Math.round(completed) + "%";
 
@@ -160,6 +159,7 @@ $(document).ready(function() {
         }
     }
 
+    // Initialize a few things before starting the upload
     function uploadDone(){
         bar.width("100%");
         percent.html("finished");
