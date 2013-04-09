@@ -26,8 +26,8 @@ var fileList     = {},
     config       = require("./config.json");
 
 // Read and cache the HTML and strip whitespace
-var HTML = fs.readFileSync(config.resDir + "html.html", {"encoding": "utf8"});
-cache.HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
+cache.HTML = fs.readFileSync(config.resDir + "html.html", {"encoding": "utf8"});
+cache.HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
@@ -52,7 +52,7 @@ fs.mkdir(config.filesDir, function (err) {
             io = io.listen(server, {"log level": 1});
             createWatcher();
             prepareFileList();
-            setupSockets();
+            setupSocket();
         });
         server.on("error", function (err) {
             if (err.code === "EADDRINUSE")
@@ -83,7 +83,7 @@ function sendUpdate() {
 }
 //-----------------------------------------------------------------------------
 // Websocket listener
-function setupSockets() {
+function setupSocket() {
     io.sockets.on("connection", function (socket) {
         socket.on("REQUEST_UPDATE", function () {
             sendUpdate();
@@ -208,10 +208,13 @@ function handleUploadRequest(req,res,socket) {
         var form = new formidable.IncomingForm();
         form.uploadDir = config.filesDir;
         form.parse(req);
+
+        //Change the path from a temporary to the actual files directory
         form.on("fileBegin", function(name, file) {
             log("RECV: " + socket + "\t\t" + file.name );
             file.path = form.uploadDir + "/" + file.name;
         });
+
         form.on('end', function() {
             sendUpdate();
         });

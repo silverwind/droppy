@@ -172,12 +172,19 @@ $(document).ready(function() {
 function buildHTML(fileList) {
     var htmlFiles = "",
         htmlDirs = "",
+        back = "",
         header = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>',
         i = 0,
         name,
         href;
 
     entries = [];
+
+    back += '<div class="folderrow">';
+    back += '<div class="foldericon" title="Up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
+    back += '<div id="back"><a class="folderlink backlink" href="">..</a></div>';
+    back += '<div class="folderinfo"></div>';
+    back += '<div class=right></div></div>';
 
     while(fileList[i]) {
         var entry = fileList[i];
@@ -189,7 +196,7 @@ function buildHTML(fileList) {
             htmlFiles += '<div class="filerow">';
             htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
             htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
-            htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</div>';
+            htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</a></div>';
             htmlFiles += '<div class=right></div></div>';
         } else {
             //Create a folder row
@@ -197,13 +204,13 @@ function buildHTML(fileList) {
             htmlDirs += '<div class="folderrow">';
             htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
             htmlDirs += '<div class="foldername"><a class="folderlink" href="' + escape(href) + '">' + name + '</a></div>';
-            htmlDirs += '<div class="folderinfo">-<span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</div>';
+            htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="delete/' + escape(name) + '">&#x2716;</a></div>';
             htmlDirs += '<div class=right></div></div>';
         }
         entries[name] = true;
         i++;
     }
-    return header + htmlDirs + htmlFiles;
+    return header + back + htmlDirs + htmlFiles;
 }
 //-----------------------------------------------------------------------------
 // Helper function for size values

@@ -86,7 +86,11 @@ footer {
     box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
 }
 
-div.fileheader {
+#back {
+    width: 100%;
+}
+
+.fileheader {
     border-bottom: 1px solid black;
     margin-bottom: 1px;
 }
@@ -133,9 +137,19 @@ div.fileheader {
     float: left;
 }
 
-.filename, .foldername {
+.filename {
     margin-left: 5px;
     width: 70%;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+}
+
+.foldername {
+    margin-left: 5px;
+    width: 90%;
     float: left;
     overflow: hidden;
     white-space: nowrap;
