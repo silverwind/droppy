@@ -256,7 +256,8 @@ function prepareFileList(callback){
             if(callback !== undefined) callback();
         });
     }
-    debounce(run(),config.readInterval);
+    var debounced = debounce(run,config.readInterval);
+    debounced();
 }
 //-----------------------------------------------------------------------------
 // Logging and error handling helpers
