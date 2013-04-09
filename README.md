@@ -4,7 +4,7 @@ A modern HTTP/HTTPS fileserver built on [node.js](http://nodejs.org/) utilizing 
 
 ###Installation
 
-First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts, **droppy.sh** or **droppy.bat** to set up dependancies and start the server.
+First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts, **droppy.sh** or **droppy.bat** to install the modules and run the server.
 
 ````
 npm install formidable
@@ -18,25 +18,36 @@ To start the server, execute server.js with node:
 node server.js
 ````
 
-Files will be placed in **./files/**. The server will listen on [localhost:80](http://localhost/). These and other settings can be changes in **config.json**:
+Per default, files will be placed in **./files/** and the server will listen on [localhost:80](http://localhost/). These and other settings can be changes in **config.json**:
 
 ###config.json
 
 ````javascript
 {
-    "filesDir"  : "./files/",
-    "port"      : 80,
-    "useSSL"    : false,
-    "httpsKey"  : "./key.pem",
-    "httpsCert" : "./cert.pem"
+    "filesDir"     : "./files/",
+    "resDir"       : "./res/",
+    "useSSL"       : false,
+    "port"         : 80,
+    "readInterval" : 100,
+    "httpsKey"     : "./key.pem",
+    "httpsCert"    : "./cert.pem"
 }
 ````
 
 ######"filesDir"
 The directory which serves as the server's root. Can be relative or absolute.
 
-######"port"
-The listening port.
+######"resDir"
+The directory which contains the server's resources.
 
 ######"useSSL"
-If the server should use HTTPS (SSL). Requires both the key file, `"httpsKey"` and the certificate, `"httpsCert"` to be set.
+Whether the server should use HTTPS (SSL). Requires both the key file, `"httpsKey"` and the certificate, `"httpsCert"` to be set.
+
+######"port"
+The listening port. For HTTPS, you may want to set it to 443.
+
+######"readInterval"
+The time in milliseconds between full directory scans. Reducing it results in a little more responsiveness at the cost of more file I/O.
+
+######"httpsKey" and "httpsCert"
+The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Self-signed certificates are supported, in case you just want end-to-end encryption.

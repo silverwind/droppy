@@ -143,8 +143,10 @@ $(document).ready(function() {
     //bytesSent, bytesTotal, completed
     function uploadProgress(bytesSent, bytesTotal, completed) {
         var perc = Math.round(completed) + "%";
+
         // Set progress bar width
         bar.width(perc);
+
         // Calculate estimated time left
         var elapsed = (new Date().getTime()) - start;
         var estimate = bytesTotal / (bytesSent / elapsed);

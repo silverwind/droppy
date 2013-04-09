@@ -1,7 +1,9 @@
 {
-    "filesDir"  : "./files/",
-    "useSSL"    : false,
-    "port"      : 80,
-    "httpsKey"  : "./key.pem",
-    "httpsCert" : "./cert.pem"
+    "filesDir"     : "./files/",
+    "resDir"       : "./res/",
+    "useSSL"       : false,
+    "port"         : 80,
+    "readInterval" : 100,
+    "httpsKey"     : "./key.pem",
+    "httpsCert"    : "./cert.pem"
 }

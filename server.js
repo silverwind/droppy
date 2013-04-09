@@ -16,8 +16,6 @@
 "use strict";
 
 var fileList     = {},
-    resDir       = "./res/",
-    readInterval = 200,
     server       = null,
     last         = null,
     cache        = {},
@@ -28,7 +26,7 @@ var fileList     = {},
     config       = require("./config.json");
 
 // Read and cache the HTML and strip whitespace
-var HTML = fs.readFileSync(resDir + "html.html", {"encoding": "utf8"});
+var HTML = fs.readFileSync(config.resDir + "html.html", {"encoding": "utf8"});
 cache.HTML = HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
 //-----------------------------------------------------------------------------
@@ -128,9 +126,9 @@ function onRequest(req, res) {
 //-----------------------------------------------------------------------------
 // Serve resources. Everything from /res/ will be cached by both the server and client
 function handleResourceRequest(req,res,socket) {
-    var resourceName = unescape(req.url.substring(resDir.length -1));
+    var resourceName = unescape(req.url.substring(config.resDir.length -1));
     if (cache[resourceName] === undefined){
-        var path = resDir + resourceName;
+        var path = config.resDir + resourceName;
         fs.readFile(path, function (err, data) {
             if(!err) {
                 cache[resourceName] = {};
@@ -255,7 +253,7 @@ function prepareFileList(callback){
             if(callback !== undefined) callback();
         });
     }
-    debounce(run(),readInterval);
+    debounce(run(),config.readInterval);
 }
 //-----------------------------------------------------------------------------
 // Logging and error handling helpers
