@@ -3,7 +3,6 @@
 // https://github.com/silverwind/Droppy
 //-----------------------------------------------------------------------------
 // TODOs:
-// - Test cases with special characters in filenames in both Windows and Linux
 // - Multiple file operations like delete/move
 // - Media queries (if needed)
 // - Authentication
@@ -29,7 +28,7 @@ var fileList       = {},
 
 // Read and cache the HTML and strip whitespace
 cache.HTML = fs.readFileSync(config.resDir + "html.html", {"encoding": "utf8"});
-cache.HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
+cache.HTML = cache.HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
@@ -85,7 +84,7 @@ function sendUpdate() {
     io.sockets.emit("UPDATE_FILES", JSON.stringify(fileList));
 }
 //-----------------------------------------------------------------------------
-// Workaround for strangely slow updates of the watcher after an action
+// Workaround for strangely slow updates of the watcher after an action (node bug?)
 function updateClient(address,dir){
     var dirToSend = clientFolders[address] || dir ;
     if (!dirToSend) dirToSend = "/";
@@ -129,8 +128,7 @@ function setupSocket() {
 // GET/POST handler
 function onRequest(req, res) {
     var method = req.method.toUpperCase();
-    var clientAddress = req.socket.remoteAddress;
-    var socket = clientAddress + ":" + req.socket.remotePort;
+    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
 
     log("REQ:  " + socket + "\t" + method + "\t" + req.url);
     if (method === "GET") {
@@ -150,7 +148,7 @@ function onRequest(req, res) {
             res.end();
         }
     } else if (method === "POST" && req.url === "/upload") {
-        handleUploadRequest(req,res,socket,clientAddress);
+        handleUploadRequest(req,res,socket);
     }
 }
 //-----------------------------------------------------------------------------
@@ -237,9 +235,10 @@ function handleDeleteRequest(req,res) {
     }
 }
 //-----------------------------------------------------------------------------
-function handleUploadRequest(req,res,socket,address) {
+function handleUploadRequest(req,res,socket) {
     if (req.url === "/upload" ) {
         var form = new formidable.IncomingForm();
+        var address = req.socket.remoteAddress;
         form.uploadDir = config.filesDir;
         form.parse(req);
 
@@ -259,7 +258,7 @@ function handleUploadRequest(req,res,socket,address) {
 
         form.on("error", function(err) {
             handleError(err);
-            sendUpdate(); // Send an update so the client's data stays in sync
+            updateClient(address);
         });
 
         res.writeHead(200, {
@@ -278,7 +277,7 @@ var prepareFileList = debounce(function (callback, root){
         if(err) handleError(err);
         if(!files) return;
         fileList[0] = root;
-        for(var i=0,len=files.length;i<len;i++){
+        for(var i = 0, len = files.length; i<len; i++){
             var name = files[i], type;
             try{
                 var stats = fs.statSync(realRoot + "/" + name);
@@ -291,6 +290,7 @@ var prepareFileList = debounce(function (callback, root){
                 }
             } catch(error) {
                 handleError(error);
+                continue;
             }
         }
         if(callback !== undefined) callback();
