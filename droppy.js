@@ -13,22 +13,26 @@
 // jshint indent:4
 "use strict";
 
-// Argument handler
-if (process.argv.length > 2)
-    handleArguments();
-
 var fileList       = {},
     cache          = {},
     server         = null,
     last           = null,
     clientFolders  = {},
     watchedDirs    = {},
+    userDB         = {},
     fs             = require("fs"),
     formidable     = require("formidable"),
     io             = require("socket.io"),
     mime           = require("mime"),
     util           = require("util"),
+    crypto         = require("crypto"),
     config         = require("./config.json");
+
+var userDB = JSON.parse(fs.readFileSync(config.userDB));
+
+// Argument handler
+if (process.argv.length > 2)
+    handleArguments();
 
 // Read and cache the HTML and strip whitespace
 cache.HTML = fs.readFileSync(config.resDir + "html.html", {"encoding": "utf8"});
@@ -329,8 +333,7 @@ function handleArguments() {
     switch(option) {
     case "-adduser":
         if (args.length === 3 ) {
-            //TODO: store user/password
-            process.exit();
+            addUser(args[1],args[2]);
         } else {
             printUsage();
             process.exit(1);
@@ -352,6 +355,14 @@ function handleArguments() {
         process.stdout.write("-help \t\t\t\tPrint this help\n");
         process.stdout.write("-adduser username password\tCreate a new user for authentication\n");
     }
+}
+//-----------------------------------------------------------------------------
+// Create a salted hash and save it to disk
+function addUser (user, password) {
+    var hmac = crypto.createHmac("sha256", new Buffer(password + "!salty!" + user, 'utf8'));
+    userDB[user] = hmac.digest("hex");
+    fs.writeFileSync(config.userDB, JSON.stringify(userDB));
+    process.exit();
 }
 //-----------------------------------------------------------------------------
 // Helper function for log timestamps

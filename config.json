@@ -2,8 +2,10 @@
     "filesDir"     : "./files/",
     "resDir"       : "./res/",
     "useSSL"       : false,
+    "useAuth"      : false,
     "port"         : 80,
     "readInterval" : 100,
     "httpsKey"     : "./key.pem",
-    "httpsCert"    : "./cert.pem"
+    "httpsCert"    : "./cert.pem",
+    "userDB"       : "./userDB.json"
 }
