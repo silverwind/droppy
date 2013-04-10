@@ -2,7 +2,7 @@
 html,body {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    text-shadow: 0 1px 0 #fff;
+
     background-image: url("/res/bg.png");
     background-color: #f2f2f2;
     font-size: 100%;
@@ -34,11 +34,11 @@ aside {
     position: fixed;
     text-shadow: 0 0 2px rgba(128,128,128, 0.5);
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+      -webkit-user-select: none;
+       -khtml-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
 }
 
 #content {
@@ -55,7 +55,7 @@ footer {
     text-align: center;
 }
 
-#progress{
+#progress {
     display: none;
     margin-top: 20px;
     background-color: #d5d5d5;
@@ -68,22 +68,22 @@ footer {
     border-style: solid;
     border-color: #aaa #bbb #ccc #bbb;
     box-shadow:inset 0 2px 3px #bbb;
-    -moz-border-radius: 8px;
-    -o-border-radius: 8px;
     -webkit-border-radius: 8px;
-    border-radius: 8px;
+       -moz-border-radius: 8px;
+         -o-border-radius: 8px;
+            border-radius: 8px;
 }
 
 #progressBar {
     width: 0;
     height: 20px;
     background-color: #f72;
-    -moz-border-radius: 8px;
-    -o-border-radius: 8px;
-    -webkit-border-radius: 8px;
-    border-radius: 8px;
     background-size: 18px 18px;
     box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
+    -webkit-border-radius: 8px;
+       -moz-border-radius: 8px;
+         -o-border-radius: 8px;
+            border-radius: 8px;
 }
 
 #back {
@@ -100,30 +100,32 @@ footer {
     font-weight: 400;
 }
 
+.filerow:hover, .folderrow:hover, .button:hover {
+    color: #fff !important;
+    background-color: #e73 !important;
+    text-shadow: none;
+    -webkit-border-radius: 6px;
+       -moz-border-radius: 6px;
+         -o-border-radius: 6px;
+            border-radius: 6px;
+    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
+       -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
+         -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
+            transition: all .5s cubic-bezier(0,.48,.27,.99);
+}
+
 .filerow:hover *, .folderrow:hover * {
     color: #fff;
-    text-shadow: none;
 }
 
-.filerow:hover, .folderrow:hover{
-    background-color: #e73;
-    -moz-border-radius: 6px;
-    -o-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    border-radius: 6px;
-    -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    transition: all .5s cubic-bezier(0,.48,.27,.99);
-}
 
 .filelink, .folderlink, .backlink{
-    display: block !important;
-    width: 100% !important;
+    display: block;
+    width: 100%;
     overflow: hidden;
     white-space: nowrap;
     -o-text-overflow: ellipsis;
-    text-overflow: ellipsis;
+       text-overflow: ellipsis;
 }
 
 .fileicon, .filename, .fileinfo, .foldericon, .foldername, .folderinfo {
@@ -137,37 +139,26 @@ footer {
     float: left;
 }
 
-.filename {
+.filename, .foldername {
     margin-left: 5px;
     float: left;
     overflow: hidden;
     white-space: nowrap;
-    -o-text-overflow: ellipsis;
     -webkit-text-overflow: ellipsis;
-    text-overflow: ellipsis;
-}
-
-.foldername {
-    margin-left: 5px;
-    float: left;
-    overflow: hidden;
-    white-space: nowrap;
-    -o-text-overflow: ellipsis;
-    -webkit-text-overflow: ellipsis;
-    text-overflow: ellipsis;
+         -o-text-overflow: ellipsis;
+            text-overflow: ellipsis;
 }
 
 .filerow, .folderrow {
-    display: -webkit-flex !important;
-    -webkit-flex-direction: row !important;
-
-    display: flex !important;
-    flex-direction: row !important;
+    display: -webkit-flex;
+    display:         flex;
+    -webkit-flex-direction: row;
+            flex-direction: row;
 }
 
 .filename, .foldername {
     -webkit-flex: 1;
-    flex: 1;
+            flex: 1;
 }
 
 .fileinfo, .folderinfo {
@@ -197,26 +188,14 @@ img {
     margin-left: 5%;
     font-weight: 400;
     font-size: 1.5em;
-    -moz-border-radius: 4px;
-    -o-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    -moz-box-sizing: border-box;
+    -webkit-border-right: 4px;
+       -moz-border-right: 4px;
+        -ms-border-right: 4px;
+         -o-border-right: 4px;
+            border-right: 4px;
     -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.button:hover {
-    color: #fff !important;
-    background-color: #e73 !important;
-    -moz-border-radius: 6px;
-    -o-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    border-radius: 6px;
-    -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-    transition: all .5s cubic-bezier(0,.48,.27,.99);
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 .spacer {
@@ -261,18 +240,18 @@ img {
     margin-top:10px;
     background-image: url('/res/drop.png');
     background-repeat: no-repeat;
-    -moz-transition: all .1s linear;
-    -o-transition: all .1s linear;
     -webkit-transition: all .1s linear;
-    transition: all .1s linear;
+       -moz-transition: all .1s linear;
+         -o-transition: all .1s linear;
+            transition: all .1s linear;
 }
 
 #logo:hover {
-    -moz-transform: scale(1.1);
-    -ms-transform: scale(1.1);
-    -o-transform: scale(1.1);
     -webkit-transform: scale(1.1);
-    transform: scale(1.1);
+       -moz-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+         -o-transform: scale(1.1);
+            transform: scale(1.1);
 }
 
 #logotext {
@@ -286,9 +265,9 @@ img {
     font-weight: 800;
     text-shadow: 0 1px 6px rgba(255, 255, 255, 1);
     color: #444;
-    -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 #add-folder {
@@ -312,10 +291,14 @@ img {
     background-color: #222;
     opacity: .9;
     text-align: center;
-    -moz-border-radius: 10px;
-    -o-border-radius: 10px;
-    -webkit-border-radius: 10px;
-    border-radius: 10px;
+    -webkit-border-right: 10px;
+       -moz-border-right: 10px;
+        -ms-border-right: 10px;
+         -o-border-right: 10px;
+            border-right: 10px;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 #question {
@@ -339,13 +322,14 @@ img {
     font-size: 1.5em;
     width: 260px;
     border: 2px transparent;
-    -moz-border-radius: 8px;
-    -o-border-radius: 8px;
-    -webkit-border-radius: 8px;
-    border-radius: 8px;
-    -moz-box-sizing: border-box;
+    -webkit-border-right: 8px;
+       -moz-border-right: 8px;
+        -ms-border-right: 8px;
+         -o-border-right: 8px;
+            border-right: 8px;
     -webkit-box-sizing: border-box;
-    box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 #nameinput.valid {
@@ -361,20 +345,22 @@ img {
 #noscript {
     z-index: 1;
     position: absolute;
+    display: table;
     left: 0;
     top: 0;
     height: 100%;
     width: 100%;
     background-color: black;
+    vertical-align: middle;
     opacity: .9;
 }
 
 #noscript p {
+    display: table-cell;
+    vertical-align: middle;
     font-size: 2.5em;
     color: #f33;
-    text-shadow: 0 0 2px #f33;
-    margin-top: 25%;
-    vertical-align: middle;
+    line-height: 100%;
     text-align: center;
 }
 
@@ -392,11 +378,10 @@ img {
     font-size: 1.5em;
     color: #777;
     max-width: 96%;
-    white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
     word-wrap: break-word;
+    white-space: -moz-pre-wrap;
+    white-space:   -o-pre-wrap;
+    white-space:      pre-wrap;
 }
 
 .black {

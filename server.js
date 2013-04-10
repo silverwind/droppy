@@ -102,7 +102,8 @@ function setupSocket() {
         var address = socket.handshake.address.address;
         //var remote = address.address + ":" + address.port;
         socket.on("REQUEST_UPDATE", function (dir) {
-            updateClient(undefined,dir);
+            dir = dir.replace(/&amp;/g,"&");
+            updateClient(undefined, dir);
             clientFolders[address] = dir;
         });
         socket.on("CREATE_FOLDER", function (name) {
@@ -112,15 +113,15 @@ function setupSocket() {
             });
 
         });
-        socket.on("SWITCH_FOLDER", function (root) {
-            if ( !root.match(/^\//) || root.match(/\.\./) ) return; // Safeguard
-            clientFolders[address] = root;
-            if (!watchedDirs[root]) {
-                createWatcher(prefixBase(root));
-                watchedDirs[root] = true;
+        socket.on("SWITCH_FOLDER", function (dir) {
+            if ( !dir.match(/^\//) || dir.match(/\.\./) ) return; // Safeguard
+            dir = dir.replace(/&amp;/g,"&");
+            clientFolders[address] = dir;
+            if (!watchedDirs[dir]) {
+                createWatcher(prefixBase(dir));
+                watchedDirs[dir] = true;
             }
-
-            prepareFileList(sendUpdate,root);
+            prepareFileList(sendUpdate,dir);
         });
     });
 }
@@ -315,6 +316,7 @@ process.on("uncaughtException", function (err) {
     log("=============== Uncaught exception! ===============");
     handleError(err);
 });
+
 //-----------------------------------------------------------------------------
 // Helper function for log timestamps
 function getTimestamp() {

@@ -74,12 +74,13 @@ $(document).ready(function() {
     socket.on("UPDATE_FILES", function (data) {
         if (!isUploading) {
             var json = JSON.parse(data);
-            if(json[0] === currentFolder) {
+            if(json[0] === currentFolder.replace(/&amp;/,"&")) { //The client stores "&"" as the html escape code
                 var html = buildHTML(json);
                 content.html(html);
             }
         }
     });
+
     // Show popup for folder creation
     $("#add-folder").click(function (){
         $("#overlay").toggle();
@@ -226,9 +227,9 @@ function buildHTML(fileList) {
         htmlBack += '<div class="folderinfo"></div>';
         htmlBack += '<div class=right></div></div>';
     }
-
     var i = 1;
     while(fileList[i]) {
+
         var entry = fileList[i];
         name = entry.name;
 
