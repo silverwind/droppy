@@ -392,11 +392,13 @@ img {
     font-size: 1.5em;
     color: #777;
     max-width: 96%;
-    overflow: hidden;
-    -o-text-overflow: ellipsis;
-    text-overflow: ellipsis;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
 }
 
-.boldtext {
+.black {
     color: #000;
 }

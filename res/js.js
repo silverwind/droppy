@@ -207,7 +207,7 @@ function uploadDone(){
 //-----------------------------------------------------------------------------
 // Set the path indicator
 function styleLoc(path){
-    return path.replace(/\//g,"<span class='boldtext'>/</span>");
+    return path.replace(/\//g,"<span class='black'>/</span>");
 }
 //-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML
