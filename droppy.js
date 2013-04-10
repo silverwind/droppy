@@ -13,6 +13,10 @@
 // jshint indent:4
 "use strict";
 
+// Argument handler
+if (process.argv.length > 2)
+    handleArguments();
+
 var fileList       = {},
     cache          = {},
     server         = null,
@@ -316,7 +320,39 @@ process.on("uncaughtException", function (err) {
     log("=============== Uncaught exception! ===============");
     handleError(err);
 });
+//-----------------------------------------------------------------------------
+// Argument handler
+function handleArguments() {
+    var args = process.argv.slice(2);
+    var option = args[0];
 
+    switch(option) {
+    case "-adduser":
+        if (args.length === 3 ) {
+            //TODO: store user/password
+            process.exit();
+        } else {
+            printUsage();
+            process.exit(1);
+        }
+        break;
+    case "-help":
+        printUsage();
+        process.exit();
+        break;
+    default:
+        process.stdout.write("Unknown argument. See 'node droppy -? for help.'");
+        process.exit(1);
+        break;
+    }
+
+    function printUsage() {
+        process.stdout.write("Droppy - file server on node.js (https://github.com/silverwind/Droppy)\n");
+        process.stdout.write("Usage: node droppy [option] [option arguments]\n\n");
+        process.stdout.write("-help \t\t\t\tPrint this help\n");
+        process.stdout.write("-adduser username password\tCreate a new user for authentication\n");
+    }
+}
 //-----------------------------------------------------------------------------
 // Helper function for log timestamps
 function getTimestamp() {

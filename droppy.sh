@@ -27,4 +27,4 @@ then
 fi
 
 echo ">>> Starting up..."
-node server.js
+node droppy

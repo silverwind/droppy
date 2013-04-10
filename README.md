@@ -12,13 +12,12 @@ npm install mime
 npm install socket.io
 ````
 
-To start the server, execute server.js with node:
-
+To start the server, execute:
 ````
-node server.js
+node droppy
 ````
 
-Per default, files will be placed in **./files/** and the server will listen on [localhost:80](http://localhost/). These and other settings can be changes in **config.json**:
+Command line arguments are available through `node droppy -help`. Per default, files will be placed in **./files/** and the server will listen on [localhost:80](http://localhost/). These and other settings can be changes in **config.json**:
 
 ###config.json
 

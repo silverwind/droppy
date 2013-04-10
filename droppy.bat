@@ -9,7 +9,7 @@ echo ### Checking dependancies...
 call :FirstCheck
 
 :FirstCheck
-npm list 2>&1 | findstr socket.io > NUL
+npm list | findstr socket.io > NUL
 if %ERRORLEVEL%==1 (
     echo ### Installing socket.io
     npm install socket.io
@@ -17,7 +17,7 @@ if %ERRORLEVEL%==1 (
 )
 
 :SecondCheck
-npm list 2>&1 | findstr mime > NUL
+npm list | findstr mime > NUL
 if %ERRORLEVEL%==1 (
     echo ### Installing mime
     npm install mime
@@ -25,7 +25,7 @@ if %ERRORLEVEL%==1 (
 )
 
 :ThirdCheck
-npm list 2>&1 | findstr formidable > NUL
+npm list | findstr formidable > NUL
 if %ERRORLEVEL%==1 (
     echo ### Installing formidable
     npm install formidable@latest
@@ -34,4 +34,4 @@ if %ERRORLEVEL%==1 (
 
 :Run
 echo ### Droppy: starting up...
-node server.js
+node droppy
