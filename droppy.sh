@@ -27,4 +27,11 @@ then
 fi
 
 echo ">>> Starting up..."
-node droppy
+
+# If a cygwin enviroment is detected, run it with cmd
+if [ `uname -o` = "Cygwin" ]
+then
+    cmd /c node droppy
+else
+    node droppy
+fi
