@@ -15,18 +15,37 @@
 
 var fileList       = {},
     cache          = {},
-    server         = null,
-    last           = null,
     clientFolders  = {},
     watchedDirs    = {},
     userDB         = {},
-    fs             = require("fs"),
+    authClients    = {},
+    server,
+    last,
+    config;
+
+var fs             = require("fs"),
     formidable     = require("formidable"),
     io             = require("socket.io"),
     mime           = require("mime"),
     util           = require("util"),
-    crypto         = require("crypto"),
-    config         = require("./config.json");
+    crypto         = require("crypto");
+
+// Read, parse and validate config.json
+try {
+    config = JSON.parse(fs.readFileSync("./config.json"));
+} catch (e) {
+    console.log("Error reading ./config.json\n\n");
+    console.log(util.inspect(e));
+    process.exit(1);
+}
+var opts = ["filesDir","resDir","useSSL","useAuth","port","readInterval","httpsKey","httpsCert","userDB"];
+for (var i = 0, len = opts.length; i < len; i++) {
+    if (config[opts[i]] === undefined) {
+        console.log("Error: Missing property in config.json: " + opts[i]);
+        process.exit(1);
+    }
+}
+
 
 var userDB = JSON.parse(fs.readFileSync(config.userDB));
 
@@ -35,8 +54,8 @@ if (process.argv.length > 2)
     handleArguments();
 
 // Read and cache the HTML and strip whitespace
-cache.HTML = fs.readFileSync(config.resDir + "html.html", {"encoding": "utf8"});
-cache.HTML = cache.HTML.replace(/(\n)/gm,"").replace(/(\t)/gm,"");
+cache.mainHTML = fs.readFileSync(config.resDir + "main.html", {"encoding": "utf8"});
+cache.authHTML = fs.readFileSync(config.resDir + "auth.html", {"encoding": "utf8"});
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
@@ -151,7 +170,7 @@ function onRequest(req, res) {
             res.writeHead(200, {
                 "content-type"  : "text/html"
             });
-            res.end(cache.HTML);
+            res.end(cache.mainHTML);
         } else {
             res.writeHead(404);
             res.end();
