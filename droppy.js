@@ -177,7 +177,7 @@ function displayLoginForm(req, res) {
             var clientIP = req.socket.remoteAddress;
             if (isValidUser(postData.username, postData.password)) {
                 authClients[clientIP] = true;
-                res.statusCode = 301;
+                res.statusCode = 303;
                 res.setHeader("Location", "/");
                 res.end();
 

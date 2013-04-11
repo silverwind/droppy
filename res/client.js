@@ -217,7 +217,7 @@ function styleLoc(path){
 // Convert the received fileList object into HTML
 function buildHTML(fileList) {
     var htmlFiles = "", htmlDirs = "", htmlBack = "";
-    var htmlheader = '<div class="fileheader"><div class="fileicon">Name</div><div class="filename">&nbsp;</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
+    var htmlheader = '<div class="fileheader"><div class="filename">Name</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
     var name, href, delhref, root;
 
     folderList = [];
@@ -245,8 +245,6 @@ function buildHTML(fileList) {
             //Create a file row
             var size = convertToSI(entry.size);
             href = "/files" + root + "/" + entry.name;
-
-
             htmlFiles += '<div class="filerow">';
             htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
             htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
