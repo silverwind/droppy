@@ -51,4 +51,4 @@ Note: If you're running inside Cygwin, it is advisable to run node with `cmd /c 
 
 - `httpsKey` and `httpsCert` The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Self-signed certificates are supported, in case you just want end-to-end encryption.
 
-- `userDB` Location of the user database
+- `userDB` Location of the user database file.
