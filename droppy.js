@@ -22,7 +22,7 @@ var fileList       = {},
     userDB         = {},
     authClients    = {},
     server,
-    last,
+    lastRead,
     config;
 
 var fs             = require("fs"),
@@ -37,59 +37,74 @@ var fs             = require("fs"),
 if (process.argv.length > 2)
     handleArguments();
 
+// Read config.json into config
 readConfig();
 
 if(config.useAuth) {
     readDB();
     if (Object.keys(userDB).length < 1) {
-        console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'");
+        console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'.");
         process.exit(1);
     }
+    cache.authHTML = fs.readFileSync(config.resDir + "auth.html", {"encoding": "utf8"});
 }
 
-// Read and cache the HTML and strip whitespace
 cache.mainHTML = fs.readFileSync(config.resDir + "main.html", {"encoding": "utf8"});
-cache.authHTML = fs.readFileSync(config.resDir + "auth.html", {"encoding": "utf8"});
+
+// Process with setting up the files folder and bind to the listening port
+setUpFilesDir();
+createListener();
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
-fs.mkdir(config.filesDir, function (err) {
-    if ( !err || err.code === "EEXIST") {
-        if(!config.useSSL) {
-            server = require("http").createServer(onRequest);
+function setUpFilesDir() {
+    fs.mkdir(config.filesDir, function (err) {
+        if ( !err || err.code === "EEXIST") {
+            return true;
         } else {
-            var key, cert;
-            try {
-                key = fs.readFileSync(config.httpsKey);
-                cert = fs.readFileSync(config.httpsCert);
-            } catch(error) {
-                log("Error reading required SSL certificate or key.");
-                handleError(error);
-            }
-            server = require("https").createServer({key: key, cert: cert}, onRequest);
+            console.log("Error accessing " + config.filesDir + ".");
+            console.log(util.inspect(err));
+            process.exit(1);
         }
-        server.listen(config.port);
-        server.on("listening", function() {
-            var address = server.address();
-            log("Listening on " + address.address + ":" + address.port);
-            io = io.listen(server, {"log level": 1});
-            createWatcher("/");
-            prepareFileList(sendUpdate,"/");
-            setupSocket();
-        });
-        server.on("error", function (err) {
-            if (err.code === "EADDRINUSE")
-                log("Failed to bind to port " + config.port + ". Adress already in use.");
-            else if (err.code === "EACCES")
-                log("Failed to bind to port " + config.port + ". Need root to bind to ports < 1024.");
-            else
-                handleError(err);
-        });
+    });
+}
+//-----------------------------------------------------------------------------
+// Bind to listening port
+function createListener() {
+    if(!config.useSSL) {
+        server = require("http").createServer(onRequest);
     } else {
-        handleError(err);
+        var key, cert;
+        try {
+            key = fs.readFileSync(config.httpsKey);
+            cert = fs.readFileSync(config.httpsCert);
+        } catch(error) {
+            console.log("Error reading required SSL certificate or key.");
+            console.log(util.inspect(error));
+            process.exit(1);
+        }
+        server = require("https").createServer({key: key, cert: cert}, onRequest);
     }
-
-});
+    server.listen(config.port);
+    server.on("listening", function() {
+        //We're up - initialize everything
+        var address = server.address();
+        log("Listening on " + address.address + ":" + address.port);
+        io = io.listen(server, {"log level": 1});
+        createWatcher("/");
+        prepareFileList(sendUpdate,"/");
+        setupSocket();
+    });
+    server.on("error", function (err) {
+        if (err.code === "EADDRINUSE")
+            console.log("Failed to bind to port " + config.port + ". Adress already in use.");
+        else if (err.code === "EACCES")
+            console.log("Failed to bind to port " + config.port + ". Need root to bind to ports < 1024.");
+        else
+            console.log("Error:" + util.inspect(err));
+        process.exit(1);
+    });
+}
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the client.
 function createWatcher(folder) {
@@ -333,7 +348,7 @@ function handleUploadRequest(req,res,socket) {
 // Read the directory's content and store it in the fileList object
 var prepareFileList = debounce(function (callback, root){
     var realRoot = prefixBase(root);
-    last = new Date();
+    lastRead = new Date();
     fileList = {};
     fs.readdir(realRoot, function(err,files) {
         if(err) handleError(err);
