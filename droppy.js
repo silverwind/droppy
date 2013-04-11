@@ -38,11 +38,13 @@ if (process.argv.length > 2)
     handleArguments();
 
 readConfig();
-readDB();
 
-if (config.useAuth && Object.keys(userDB).length < 1) {
-    console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'");
-    process.exit(1);
+if(config.useAuth) {
+    readDB();
+    if (Object.keys(userDB).length < 1) {
+        console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'");
+        process.exit(1);
+    }
 }
 
 // Read and cache the HTML and strip whitespace
@@ -159,7 +161,8 @@ function onRequest(req, res) {
     }
 
 }
-
+//-----------------------------------------------------------------------------
+// Show login form for unauthenticated users
 function displayLoginForm(req, res) {
     var method = req.method.toUpperCase();
     if (method === "GET") {

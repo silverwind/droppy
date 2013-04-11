@@ -2,7 +2,7 @@
     "filesDir"     : "./files/",
     "resDir"       : "./res/",
     "useSSL"       : false,
-    "useAuth"      : false,
+    "useAuth"      : true,
     "port"         : 80,
     "readInterval" : 100,
     "httpsKey"     : "./key.pem",
