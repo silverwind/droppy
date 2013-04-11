@@ -3,7 +3,9 @@
 // https://github.com/silverwind/Droppy
 //-----------------------------------------------------------------------------
 // TODOs:
+// - Login form styling
 // - Multiple file operations like delete/move
+// - IE < 10 compatibilty, if possible
 // - Media queries (if needed)
 // - Authentication
 // - gzip compression
@@ -28,42 +30,20 @@ var fs             = require("fs"),
     io             = require("socket.io"),
     mime           = require("mime"),
     util           = require("util"),
-    crypto         = require("crypto");
-
-// Read and validate config.json
-try {
-    config = JSON.parse(fs.readFileSync("./config.json"));
-} catch (e) {
-    console.log("Error reading ./config.json\n\n");
-    console.log(util.inspect(e));
-    process.exit(1);
-}
-var opts = ["filesDir","resDir","useSSL","useAuth","port","readInterval","httpsKey","httpsCert","userDB"];
-for (var i = 0, len = opts.length; i < len; i++) {
-    if (config[opts[i]] === undefined) {
-        console.log("Error: Missing property in config.json: " + opts[i]);
-        process.exit(1);
-    }
-}
-
-// Read and validate the user database
-if (config.useAuth === true) {
-    try {
-        userDB = JSON.parse(fs.readFileSync(config.userDB));
-    } catch (e) {
-        console.log("Error reading "+ config.userDB + "\n\n");
-        console.log(util.inspect(e));
-        process.exit(1);
-    }
-    if (Object.keys(userDB).length < 1) {
-        console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'");
-        process.exit(1);
-    }
-}
+    crypto         = require("crypto"),
+    querystring    = require("querystring");
 
 // Argument handler
 if (process.argv.length > 2)
     handleArguments();
+
+readConfig();
+readDB();
+
+if (config.useAuth && Object.keys(userDB).length < 1) {
+    console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'");
+    process.exit(1);
+}
 
 // Read and cache the HTML and strip whitespace
 cache.mainHTML = fs.readFileSync(config.resDir + "main.html", {"encoding": "utf8"});
@@ -166,11 +146,52 @@ function setupSocket() {
     });
 }
 //-----------------------------------------------------------------------------
-// GET/POST handler
+// Check if remote is authenticated before handing down the request
 function onRequest(req, res) {
+    if (config.useAuth) {
+        if (isClientAuthenticated(req.socket.remoteAddress)) {
+            processRequest(req, res);
+        } else {
+            displayLoginForm(req,res);
+        }
+    } else {
+        processRequest(req, res);
+    }
+
+}
+
+function displayLoginForm(req, res) {
+    var method = req.method.toUpperCase();
+    if (method === "GET") {
+        serveHTML(res, cache.authHTML);
+    } else if (method === "POST") {
+        var body = "";
+        req.on("data", function(data) {
+            body += data;
+        });
+        req.on("end", function() {
+            var postData = querystring.parse(body);
+            var clientIP = req.socket.remoteAddress;
+            if (isValidUser(postData.username, postData.password)) {
+                authClients[clientIP] = true;
+                res.statusCode = 301;
+                res.setHeader("Location", "/");
+                res.end();
+
+            } else {
+                res.writeHead(401);
+                res.write("Unauthorized");
+                res.end();
+            }
+        });
+    }
+}
+
+//-----------------------------------------------------------------------------
+// GET/POST handler
+function processRequest(req, res) {
     var method = req.method.toUpperCase();
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-
     log("REQ:  " + socket + "\t" + method + "\t" + req.url);
     if (method === "GET") {
         if (req.url.match(/^\/res\//))
@@ -180,10 +201,7 @@ function onRequest(req, res) {
         else if (req.url.match(/^\/delete\//))
             handleDeleteRequest(req,res);
         else if (req.url === "/") {
-            res.writeHead(200, {
-                "content-type"  : "text/html"
-            });
-            res.end(cache.mainHTML);
+            serveHTML(res, cache.mainHTML);
         } else {
             res.writeHead(404);
             res.end();
@@ -389,12 +407,85 @@ function handleArguments() {
     }
 }
 //-----------------------------------------------------------------------------
-// Create a salted hash and save it to disk
+// Read and validate config.json
+function readConfig() {
+    try {
+        config = JSON.parse(fs.readFileSync("./config.json"));
+    } catch (e) {
+        console.log("Error reading ./config.json\n\n");
+        console.log(util.inspect(e));
+        process.exit(1);
+    }
+    var opts = ["filesDir","resDir","useSSL","useAuth","port","readInterval","httpsKey","httpsCert","userDB"];
+    for (var i = 0, len = opts.length; i < len; i++) {
+        if (config[opts[i]] === undefined) {
+            console.log("Error: Missing property in config.json: " + opts[i]);
+            process.exit(1);
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+// Read and validate user database
+function readDB() {
+    if (config.useAuth === true) {
+        try {
+            userDB = JSON.parse(fs.readFileSync(config.userDB));
+        } catch (e) {
+            console.log("Error reading "+ config.userDB + "\n\n");
+            console.log(util.inspect(e));
+            process.exit(1);
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+// Get a SHA256 hash of a string
+function getHash(string) {
+    return crypto.createHmac("sha256", new Buffer(string, 'utf8')).digest("hex");
+}
+//-----------------------------------------------------------------------------
+// Add a user to the database save it to disk
 function addUser (user, password) {
-    var hmac = crypto.createHmac("sha256", new Buffer(password + "!salty!" + user, 'utf8'));
-    userDB[user] = hmac.digest("hex");
-    fs.writeFileSync(config.userDB, JSON.stringify(userDB));
-    process.exit();
+    readConfig();
+    readDB();
+    if (userDB[user] !== undefined) {
+        console.log("User " + user + " already exists!");
+        process.exit(1);
+    } else {
+        userDB[user] = getHash(password + "!salty!" + user);
+        try {
+            fs.writeFileSync(config.userDB, JSON.stringify(userDB));
+            console.log("User " + user + " sucessfully added.");
+            process.exit();
+        } catch (e) {
+            console.log("Error writing "+ config.userDB + "\n\n");
+            console.log(util.inspect(e));
+            process.exit(1);
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+// Check if user/password is valid
+function isValidUser(user, password) {
+    if (userDB[user] === getHash(password + "!salty!" + user))
+        return true;
+    else
+        return false;
+}
+//-----------------------------------------------------------------------------
+// Checks if a client is authenticated
+function isClientAuthenticated(IP) {
+    if (authClients[IP] !== undefined)
+        return true;
+    else
+        return false;
+}
+//-----------------------------------------------------------------------------
+// Serve a HTML page
+function serveHTML(res,resource) {
+    res.writeHead(200, {
+        "content-type"  : "text/html"
+    });
+    res.end(resource);
 }
 //-----------------------------------------------------------------------------
 // Helper function for log timestamps
