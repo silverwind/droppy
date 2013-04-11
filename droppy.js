@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Droppy - File server in node.js
+// Droppy - file server on node.js
 // https://github.com/silverwind/Droppy
 //-----------------------------------------------------------------------------
 // TODOs:
@@ -30,7 +30,7 @@ var fs             = require("fs"),
     util           = require("util"),
     crypto         = require("crypto");
 
-// Read, parse and validate config.json
+// Read and validate config.json
 try {
     config = JSON.parse(fs.readFileSync("./config.json"));
 } catch (e) {

@@ -28,6 +28,9 @@ $(document).ready(function() {
     attachDropzone();
     attachForm();
 
+    // Set location
+    loc.html(styleLoc(currentFolder));
+
     // Change delete links to xhr
     $("body").on("click", ".delete", function(e) {
         e.preventDefault();
