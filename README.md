@@ -2,7 +2,7 @@
 A modern HTTP/HTTPS fileserver built on [node.js](http://nodejs.org/) utilizing [WebSockets](https://en.wikipedia.org/wiki/WebSocket) for realtime updates. A fairly recent browser is required (For IE, that's 10).
 
 ###Installation
-First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts, **droppy.sh** or **droppy.bat** to install the modules and run the server.
+First, make sure you have the required node modules installed: [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime), [socket.io](https://github.com/learnboost/socket.io). You can also use the provided shell scripts, `droppy.sh` or `droppy.bat` to install the modules and run the server.
 ````
 npm install formidable
 npm install mime
