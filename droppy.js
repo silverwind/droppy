@@ -202,7 +202,11 @@ function onRequest(req, res) {
 function displayLoginForm(req, res) {
     var method = req.method.toUpperCase();
     if (method === "GET") {
-        serveHTML(res, cache.authHTML);
+        if (req.url.match(/^\/res\//)) {
+            handleResourceRequest(req, res, req.socket.remoteAddress + ":" + req.socket.remotePort);
+        } else {
+            serveHTML(res, cache.authHTML);
+        }
     } else if (method === "POST") {
         var body = "";
         req.on("data", function(data) {

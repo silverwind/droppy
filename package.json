@@ -1,41 +1,44 @@
 {
-    "name": "droppy",
-    "version": "0.1.0",
-    "author": "silverwind <silv3rwind@gmail.com>",
-    "description": "a http/https file server",
-    "homepage": "https://github.com/silverwind/Droppy",
-    "bugs": "https://github.com/silverwind/Droppy/issues",
-    "main": "./droppy.js",
-    "dependencies": {
-        "formidable": "1.0.x",
-        "mime": "1.2.x",
-        "socket.io": "0.9.x"
-    },
-    "directories": {
-        "files": "./files",
-        "res": "./res"
-    },
-    "engines": {
-        "node": ">=0.10"
-    },
-    "keywords": [
-        "http",
-        "https",
-        "file",
-        "server",
-        "websocket"
-    ],
-    "licenses": [
-        {
-            "type": "BSD",
-            "url": "https://github.com/silverwind/Droppy/raw/master/LICENSE"
-        }
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/silverwind/Droppy.git"
-    },
-    "scripts": {
-        "start": "node droppy.js"
+  "name": "droppy",
+  "version": "0.1.0",
+  "author": "silverwind <silv3rwind@gmail.com>",
+  "description": "a http/https file server",
+  "homepage": "https://github.com/silverwind/Droppy",
+  "bugs": "https://github.com/silverwind/Droppy/issues",
+  "main": "./droppy.js",
+  "dependencies": {
+    "formidable": ">=1.0",
+    "mime": ">=1.2",
+    "socket.io": ">=0.9"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "uglify-js:": "*"
+  },
+  "directories": {
+    "res": "./res"
+  },
+  "engines": {
+    "node": ">=0.10"
+  },
+  "keywords": [
+    "http",
+    "https",
+    "file",
+    "server",
+    "websocket"
+  ],
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "https://github.com/silverwind/Droppy/raw/master/LICENSE"
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/silverwind/Droppy.git"
+  },
+  "scripts": {
+    "start": "node droppy.js"
+  }
 }
