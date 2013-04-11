@@ -46,8 +46,20 @@ for (var i = 0, len = opts.length; i < len; i++) {
     }
 }
 
-
-var userDB = JSON.parse(fs.readFileSync(config.userDB));
+// Read and validate the user database
+if (config.useAuth === true) {
+    try {
+        userDB = JSON.parse(fs.readFileSync(config.userDB));
+    } catch (e) {
+        console.log("Error reading "+ config.userDB + "\n\n");
+        console.log(util.inspect(e));
+        process.exit(1);
+    }
+    if (Object.keys(userDB).length < 1) {
+        console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'");
+        process.exit(1);
+    }
+}
 
 // Argument handler
 if (process.argv.length > 2)
@@ -76,7 +88,8 @@ fs.mkdir(config.filesDir, function (err) {
         }
         server.listen(config.port);
         server.on("listening", function() {
-            log("Listening on " + server.address().address + ":" + config.port);
+            var address = server.address();
+            log("Listening on " + address.address + ":" + address.port);
             io = io.listen(server, {"log level": 1});
             createWatcher("/");
             prepareFileList(sendUpdate,"/");
