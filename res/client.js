@@ -93,7 +93,7 @@ $(document).ready(function() {
 
     // Show popup for folder creation
     $("#add-folder").click(function (){
-        $("#overlay").toggle();
+        $("#overlay").fadeToggle(250);
         name.val("");
         name.focus();
         name.attr("class","valid");
