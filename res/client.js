@@ -223,13 +223,11 @@ function setLocation(path){
 function buildHTML(fileList,root) {
     var htmlFiles = "", htmlDirs = "", htmlBack = "";
     var htmlheader = '<div class="fileheader"><div class="filename">Name</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
-
-
     folderList = [];
 
     if(root !== "/") {
         htmlBack += '<div class="folderrow">';
-        htmlBack += '<div class="foldericon" title="Up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
+        htmlBack += '<div class="foldericon" title="Go up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
         htmlBack += '<div class="filename"><a class="backlink" href="">..</a></div>';
         htmlBack += '<div class="folderinfo"></div>';
         htmlBack += '<div class="right"></div></div>';
@@ -248,7 +246,7 @@ function buildHTML(fileList,root) {
             else
                 id = root + "/" + name;
 
-            var href = "/files" + id;
+            var href = "/get" + id;
 
             if(type === "f") {
                 //Create a file row
@@ -275,26 +273,18 @@ function buildHTML(fileList,root) {
 }
 //-----------------------------------------------------------------------------
 // Helper function for size values
-function convertToSI(bytes)
-{
-    var kib = 1024;
-    var mib = kib * 1024;
-    var gib = mib * 1024;
-    var tib = gib * 1024;
+function convertToSI(bytes) {
+    var kib = 1024,
+        mib = kib * 1024,
+        gib = mib * 1024,
+        tib = gib * 1024;
 
-    if ((bytes >= 0) && (bytes < kib)) {
-        return bytes + ' B';
-    } else if ((bytes >= kib) && (bytes < mib)) {
-        return (bytes / kib).toFixed(2) + ' KiB';
-    } else if ((bytes >= mib) && (bytes < gib)) {
-        return (bytes / mib).toFixed(2) + ' MiB';
-    } else if ((bytes >= gib) && (bytes < tib)) {
-        return (bytes / gib).toFixed(2) + ' GiB';
-    } else if (bytes >= tib) {
-        return (bytes / tib).toFixed(2) + ' TiB';
-    } else {
-        return bytes + ' B';
-    }
+    if ((bytes >= 0) && (bytes < kib))         return bytes + ' B';
+    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + ' KiB';
+    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + ' MiB';
+    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + ' GiB';
+    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + ' TiB';
+    else return bytes + ' B';
 }
 
 }).call(this);

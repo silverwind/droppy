@@ -307,7 +307,7 @@ function processRequest(req, res) {
     if (method === "GET") {
         if (req.url.match(/^\/res\//))
             handleResourceRequest(req,res,socket);
-        else if (req.url.match(/^\/files\//))
+        else if (req.url.match(/^\/get\//))
             handleFileRequest(req,res,socket);
         else if (req.url === "/") {
             serveHTML(res, cache.mainHTML);
@@ -356,7 +356,7 @@ function handleResourceRequest(req,res,socket) {
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req,res,socket) {
-    var path = config.filesDir + unescape(req.url.substring(config.filesDir.length -1));
+    var path = prefixBase(req.url.replace("get/",""));
     if (path) {
         var mimeType = mime.lookup(path);
 
