@@ -46,13 +46,13 @@ $(document).ready(function() {
     // Set location
     loc.html(styleLoc(currentFolder));
 
-    // Change delete links to xhr
+    // Delete a folder
     $("body").on("click", ".delete", function(e) {
         e.preventDefault();
-        $.ajax({
-            type: "GET",
-            url: $(this).attr("href")
-        });
+        ws.send(JSON.stringify({
+            type: "DELETE_FILE",
+            "data": $(this).parent().parent().data("id")
+        }));
     });
 
     // Switch into a folder
@@ -237,28 +237,30 @@ function buildHTML(fileList,root) {
             var type = fileList[file].type;
             var size = convertToSI(fileList[file].size);
 
-            var delhref;
-            if (currentFolder === "/")
-                delhref = "/delete/" +  name;
+            var id;
+            if (root === "/")
+                id = "/" + name;
             else
-                delhref = "/delete" + currentFolder + "/" +  name;
+                id = root + "/" + name;
+
+            var href = "/files" + id;
 
             if(type === "f") {
                 //Create a file row
-                var href = "/files" + root + "/" + name;
-                htmlFiles += '<div class="filerow">';
+
+                htmlFiles += '<div class="filerow" data-id="' + id + '">';
                 htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
                 htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
-                htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
+                htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>';
                 htmlFiles += '<div class="right"></div></div>';
 
                 folderList[name] = true;
             } else {
                 //Create a folder row
-                htmlDirs += '<div class="folderrow">';
+                htmlDirs += '<div class="folderrow" data-id="' + id + '">';
                 htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
                 htmlDirs += '<div class="foldername"><a class="folderlink" href="">' + name + '</a></div>';
-                htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
+                htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>';
                 htmlDirs += '<div class="right"></div></div>';
             }
 
@@ -290,4 +292,4 @@ function convertToSI(bytes)
     }
 }
 
-}());
+}).call(this);

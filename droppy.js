@@ -168,31 +168,52 @@ function setupSocket(server) {
         ws.on('message', function(message) {
             var msg = JSON.parse(message);
             var dir = msg.data;
-            var IP = ws._socket.remoteAddress;
+            var remoteIP = ws._socket.remoteAddress;
+            var remotePort = ws._socket.remotePort;
 
             switch(msg.type) {
             case "REQUEST_UPDATE":
                 dir = dir.replace(/&amp;/g,"&");
-                clients[IP] = { "directory": dir, "ws": ws};
+                clients[remoteIP] = { "directory": dir, "ws": ws};
                 readDirectory(dir, function() {
-                    sendMessage(IP, "UPDATE_FILES");
+                    sendMessage(remoteIP, "UPDATE_FILES");
                 });
                 break;
             case "CREATE_FOLDER":
                 fs.mkdir(prefixBase(dir), config.mode, function(err){
                     if(err) handleError(err);
-                    readDirectory(clients[IP].directory, function() {
-                        sendMessage(IP, "UPDATE_FILES");
+                    readDirectory(clients[remoteIP].directory, function() {
+                        sendMessage(remoteIP, "UPDATE_FILES");
                     });
                 });
+                break;
+            case "DELETE_FILE":
+                var path = prefixBase(dir);
+                log("DEL:  " + remoteIP + ":" + remotePort + "\t\t" + path);
+
+                fs.stat(path, function(err, stats) {
+                    if(err) handleError(err);
+
+                    if (stats.isFile()) {
+                        fs.unlink(path, function(err) {
+                            if(err) handleError(err);
+                        });
+                    } else if (stats.isDirectory()) {
+                        fs.rmdir(path, function(err) {
+                            if(err) handleError(err);
+                            // TODO: handle ENOTEMPTY
+                        });
+                    }
+                });
+
                 break;
             case "SWITCH_FOLDER":
                 if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
                 dir = dir.replace(/&amp;/g,"&");
-                clients[IP] = { "directory": dir, "ws": ws};
+                clients[remoteIP] = { "directory": dir, "ws": ws};
                 updateWatchers(dir);
                 readDirectory(dir, function() {
-                    sendMessage(IP, "UPDATE_FILES");
+                    sendMessage(remoteIP, "UPDATE_FILES");
                 });
                 break;
             }
@@ -291,8 +312,6 @@ function processRequest(req, res) {
             handleResourceRequest(req,res,socket);
         else if (req.url.match(/^\/files\//))
             handleFileRequest(req,res,socket);
-        else if (req.url.match(/^\/delete\//))
-            handleDeleteRequest(req,res);
         else if (req.url === "/") {
             serveHTML(res, cache.mainHTML);
         } else {
@@ -357,30 +376,6 @@ function handleFileRequest(req,res,socket) {
             });
             fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
         });
-    }
-}
-//-----------------------------------------------------------------------------
-function handleDeleteRequest(req,res) {
-    var path = config.filesDir + unescape(req.url.replace(/^\/delete\//,""));
-    log("DEL:  " + path);
-    try {
-        var stats = fs.statSync(path);
-        if (stats.isFile()) {
-            fs.unlink(path);
-        } else if (stats.isDirectory()){
-            fs.rmdir(path, function(err){
-                // TODO: handle ENOTEMPTY
-            });
-        }
-        res.writeHead(200, {
-            "Content-Type" : "text/html"
-        });
-        res.end();
-
-    } catch(error) {
-        res.writeHead(500);
-        res.end();
-        handleError(error);
     }
 }
 //-----------------------------------------------------------------------------
