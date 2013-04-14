@@ -5,6 +5,7 @@
     "useAuth"      : false,
     "port"         : 80,
     "readInterval" : 100,
+    "mode"         : 644,
     "httpsKey"     : "./key.pem",
     "httpsCert"    : "./cert.pem",
     "userDB"       : "./userDB.json"

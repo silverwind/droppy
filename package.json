@@ -7,9 +7,9 @@
   "bugs": "https://github.com/silverwind/Droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
-    "formidable": ">=1.0",
-    "mime": ">=1.2",
-    "socket.io": ">=0.9"
+    "ws": "*",
+    "formidable": "*",
+    "mime": "*"
   },
   "devDependencies": {
     "grunt": "*",

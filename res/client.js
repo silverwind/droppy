@@ -9,10 +9,25 @@ var folderList    = [],
 
 var bar, content, info, name, percent, progress, loc, start;
 
-// Initialize WebSocket
-var baseURL = location.protocol + "//" + location.host;
-var socket = io.connect(baseURL);
+//-----------------------------------------------------------------------------
+// Simple Vanilla WebSocket handler
+var ws = new WebSocket('ws://' + window.document.location.host);
 
+//Request initial update of files
+ws.onopen = function() {
+    ws.send(JSON.stringify({type: "REQUEST_UPDATE", data: currentFolder}));
+};
+
+ws.onmessage = function (event) {
+    var msg = JSON.parse(event.data);
+    if (msg.type === "UPDATE_FILES") {
+        if (isUploading) return;
+        if(msg.folder === currentFolder.replace(/&amp;/,"&")) {
+            content.html(buildHTML(msg.data, msg.folder));
+        }
+    }
+};
+//-----------------------------------------------------------------------------
 // DOM is ready
 $(document).ready(function() {
     // Cache elements
@@ -49,8 +64,7 @@ $(document).ready(function() {
 
         currentFolder += destination;
         loc.html(styleLoc(currentFolder));
-
-        socket.emit("SWITCH_FOLDER", currentFolder);
+        ws.send(JSON.stringify({type: "SWITCH_FOLDER", "data": currentFolder}));
     });
 
     // Go back up
@@ -63,25 +77,13 @@ $(document).ready(function() {
 
         currentFolder = match;
         loc.html(styleLoc(currentFolder));
-
-        socket.emit("SWITCH_FOLDER", currentFolder);
+        ws.send(JSON.stringify({type: "SWITCH_FOLDER", "data": currentFolder}));
     });
 
     // Automatically submit a form once it's data changed
     $("form").change(function() {
         $("form").submit();
-        $("#file").val("");
-    });
-
-    // Handle WebSocket updates from server
-    socket.on("UPDATE_FILES", function (data) {
-        if (!isUploading) {
-            var json = JSON.parse(data);
-            if(json[0] === currentFolder.replace(/&amp;/,"&")) { //The client stores "&"" as the html escape code
-                var html = buildHTML(json);
-                content.html(html);
-            }
-        }
+        $("#file").val(""); // Reset file form
     });
 
     // Show popup for folder creation
@@ -129,15 +131,12 @@ $(document).ready(function() {
 
         if(e.keyCode === 13) { // Return Key
             if (currentFolder === "/")
-                socket.emit("CREATE_FOLDER","/" + input);
+                ws.send(JSON.stringify({type: "CREATE_FOLDER", "data": "/" + input}));
             else
-                socket.emit("CREATE_FOLDER",currentFolder + "/" + input);
+                ws.send(JSON.stringify({type: "CREATE_FOLDER", "data": currentFolder + "/" + input}));
             $("#overlay").hide();
         }
     });
-
-    //Request initial update of files
-    socket.emit("REQUEST_UPDATE",currentFolder);
 });
 //-----------------------------------------------------------------------------
 // Mark the body as destination for file drops; Define upload events
@@ -215,51 +214,55 @@ function styleLoc(path){
 }
 //-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML
-function buildHTML(fileList) {
+// TODO: Clean up this mess
+function buildHTML(fileList,root) {
     var htmlFiles = "", htmlDirs = "", htmlBack = "";
     var htmlheader = '<div class="fileheader"><div class="filename">Name</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
-    var name, href, delhref, root;
+
 
     folderList = [];
-    root = fileList[0];
 
     if(root !== "/") {
         htmlBack += '<div class="folderrow">';
         htmlBack += '<div class="foldericon" title="Up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
         htmlBack += '<div class="filename"><a class="backlink" href="">..</a></div>';
         htmlBack += '<div class="folderinfo"></div>';
-        htmlBack += '<div class=right></div></div>';
+        htmlBack += '<div class="right"></div></div>';
     }
-    var i = 1;
-    while(fileList[i]) {
 
-        var entry = fileList[i];
-        name = entry.name;
+    for(var file in fileList) {
+        if (fileList.hasOwnProperty(file)) {
 
-        if (currentFolder === "/")
-            delhref = "/delete/" +  name;
-        else
-            delhref = "/delete" + currentFolder + "/" +  name;
+            var name = file;
+            var type = fileList[file].type;
+            var size = convertToSI(fileList[file].size);
 
-        if(entry.type === "f") {
-            //Create a file row
-            var size = convertToSI(entry.size);
-            href = "/files" + root + "/" + entry.name;
-            htmlFiles += '<div class="filerow">';
-            htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
-            htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
-            htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
-            htmlFiles += '<div class=right></div></div>';
-        } else {
-            //Create a folder row
-            htmlDirs += '<div class="folderrow">';
-            htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
-            htmlDirs += '<div class="foldername"><a class="folderlink" href="">' + name + '</a></div>';
-            htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
-            htmlDirs += '<div class=right></div></div>';
+            var delhref;
+            if (currentFolder === "/")
+                delhref = "/delete/" +  name;
+            else
+                delhref = "/delete" + currentFolder + "/" +  name;
+
+            if(type === "f") {
+                //Create a file row
+                var href = "/files" + root + "/" + name;
+                htmlFiles += '<div class="filerow">';
+                htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
+                htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
+                htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
+                htmlFiles += '<div class="right"></div></div>';
+
+                folderList[name] = true;
+            } else {
+                //Create a folder row
+                htmlDirs += '<div class="folderrow">';
+                htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
+                htmlDirs += '<div class="foldername"><a class="folderlink" href="">' + name + '</a></div>';
+                htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="' + escape(delhref) + '">&#x2716;</a></div>';
+                htmlDirs += '<div class="right"></div></div>';
+            }
+
         }
-        folderList[name] = true;
-        i++;
     }
     return htmlheader + htmlBack + htmlDirs + htmlFiles;
 }

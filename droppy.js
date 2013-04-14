@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 //-----------------------------------------------------------------------------
 // Droppy - file server on node.js
 // https://github.com/silverwind/Droppy
@@ -22,12 +23,18 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 //-----------------------------------------------------------------------------
+// Current limitiations:
+// - When a client has multiple browser windows pointing to differrent folder,
+//   only one of them will get updated. Need to figure out a way to map
+//   WebSocket source ports to source ports of the HTTP connection.
+//-----------------------------------------------------------------------------
 // TODOs:
+// - Recursive folder uploading & deleting
 // - Login form styling
+// - Encrypt login data on client
 // - Multiple file operations like delete/move
+// - Full drag & drop support
 // - IE < 10 compatibilty, if possible
-// - Media queries (if needed)
-// - Authentication
 // - gzip compression
 // - Check for any XSS
 //-----------------------------------------------------------------------------
@@ -36,23 +43,24 @@
 
 "use strict";
 
-var fileList       = {},
-    cache          = {},
-    clientFolders  = {},
+var cache          = {},
+    clients        = {},
     watchedDirs    = {},
+    dirs           = {},
     userDB         = {},
     authClients    = {},
     server,
     lastRead,
     config;
 
-var fs             = require("fs"),
-    formidable     = require("formidable"),
-    io             = require("socket.io"),
-    mime           = require("mime"),
-    util           = require("util"),
-    crypto         = require("crypto"),
-    querystring    = require("querystring");
+
+var fs                 = require("fs"),
+    formidable         = require("formidable"),
+    WebSocketServer    = require("ws").Server,
+    mime               = require("mime"),
+    util               = require("util"),
+    crypto             = require("crypto"),
+    querystring        = require("querystring");
 
 // Argument handler
 if (process.argv.length > 2)
@@ -73,12 +81,12 @@ if(config.useAuth) {
 cache.mainHTML = fs.readFileSync(config.resDir + "main.html", {"encoding": "utf8"});
 
 // Process with setting up the files folder and bind to the listening port
-setUpFilesDir();
+setupFilesDir();
 createListener();
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
-function setUpFilesDir() {
+function setupFilesDir() {
     fs.mkdir(config.filesDir, function (err) {
         if ( !err || err.code === "EEXIST") {
             return true;
@@ -111,10 +119,8 @@ function createListener() {
         //We're up - initialize everything
         var address = server.address();
         log("Listening on " + address.address + ":" + address.port);
-        io = io.listen(server, {"log level": 1});
-        createWatcher("/");
-        prepareFileList(sendUpdate,"/");
-        setupSocket();
+        createWatcher(prefixBase("/"));
+        setupSocket(server);
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
@@ -127,61 +133,102 @@ function createListener() {
     });
 }
 //-----------------------------------------------------------------------------
-// Watch the directory for realtime changes and send them to the client.
+// Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    fs.watch(config.filesDir,{ persistent: true }, function(event){
+    var relativePath = folder.replace(config.filesDir.substring(0, config.filesDir.length - 1),"");
+    var watcher = fs.watch(folder,{ persistent: true }, function(event){
         if(event === "change" || event === "rename") {
-            folder = folder.replace("./files","");
-            prepareFileList(sendUpdate,folder);
+            // Files in a watched directory changed. Figure out which client(s) need updates
+            // This part might be quite costly cpu-wise while files are being written, need
+            // to figure out something better, like an object lookup.
+            for (var client in clients) {
+                if (clients.hasOwnProperty(client)) {
+                    var clientDir = clients[client].directory;
+                    if (clientDir === relativePath) {
+                        readDirectory(clientDir, function() {
+                            sendMessage(client,"UPDATE_FILES");
+                        });
+                    }
+                }
+            }
         }
     });
+    watchedDirs[relativePath] = watcher;
 }
 //-----------------------------------------------------------------------------
-// Send file list JSON over websocket
-function sendUpdate() {
-    io.sockets.emit("UPDATE_FILES", JSON.stringify(fileList));
-}
-//-----------------------------------------------------------------------------
-// Workaround for strangely slow updates of the watcher after an action (node bug?)
-function updateClient(address,dir){
-    var dirToSend = clientFolders[address] || dir ;
-    if (!dirToSend) dirToSend = "/";
-    prepareFileList(sendUpdate,dirToSend);
-}
-//-----------------------------------------------------------------------------
-// Create full directory link
+// Create absolute directory link
 function prefixBase(relativePath) {
     return config.filesDir.substring(0, config.filesDir.length - 1) + relativePath;
 }
 //-----------------------------------------------------------------------------
-// Websocket listener
-function setupSocket() {
-    io.sockets.on("connection", function (socket) {
-        var address = socket.handshake.address.address;
-        //var remote = address.address + ":" + address.port;
-        socket.on("REQUEST_UPDATE", function (dir) {
-            dir = dir.replace(/&amp;/g,"&");
-            updateClient(undefined, dir);
-            clientFolders[address] = dir;
-        });
-        socket.on("CREATE_FOLDER", function (name) {
-            fs.mkdir(prefixBase(name), null, function(err){
-                if(err) handleError(err);
-                updateClient(address);
-            });
+// WebSocket listener
+function setupSocket(server) {
+    var wss = new WebSocketServer({server : server});
+    wss.on('connection', function(ws) {
+        ws.on('message', function(message) {
+            var msg = JSON.parse(message);
+            var dir = msg.data;
+            var IP = ws._socket.remoteAddress;
 
-        });
-        socket.on("SWITCH_FOLDER", function (dir) {
-            if ( !dir.match(/^\//) || dir.match(/\.\./) ) return; // Safeguard
-            dir = dir.replace(/&amp;/g,"&");
-            clientFolders[address] = dir;
-            if (!watchedDirs[dir]) {
-                createWatcher(prefixBase(dir));
-                watchedDirs[dir] = true;
+            switch(msg.type) {
+            case "REQUEST_UPDATE":
+                dir = dir.replace(/&amp;/g,"&");
+                clients[IP] = { "directory": dir, "ws": ws};
+                readDirectory(dir, function() {
+                    sendMessage(IP, "UPDATE_FILES");
+                });
+                break;
+            case "CREATE_FOLDER":
+                fs.mkdir(prefixBase(dir), config.mode, function(err){
+                    if(err) handleError(err);
+                    readDirectory(clients[IP].directory, function() {
+                        sendMessage(IP, "UPDATE_FILES");
+                    });
+                });
+                break;
+            case "SWITCH_FOLDER":
+                if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
+                dir = dir.replace(/&amp;/g,"&");
+                clients[IP] = { "directory": dir, "ws": ws};
+                updateWatchers(dir);
+                readDirectory(dir, function() {
+                    sendMessage(IP, "UPDATE_FILES");
+                });
+                break;
             }
-            prepareFileList(sendUpdate,dir);
         });
     });
+}
+//-----------------------------------------------------------------------------
+// Watch given directory and check if we need the other active watchers
+function updateWatchers(newDir) {
+    if (!watchedDirs[newDir]) {
+        createWatcher(prefixBase(newDir));
+
+        var neededDirs = {};
+        for (var client in clients) {
+            if (clients.hasOwnProperty(client)) {
+                neededDirs[clients[client].directory] = true;
+            }
+        }
+
+        for (var directory in watchedDirs) {
+            if (watchedDirs.hasOwnProperty(directory)) {
+                if (!neededDirs[directory]) {
+                    watchedDirs[directory].close();
+                    delete watchedDirs[directory];
+                }
+            }
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+// Send file list JSON over websocket
+function sendMessage(IP, type) {
+    var folderToSend = clients[IP].directory;
+    var folderContent = dirs[folderToSend];
+    var data = JSON.stringify({"type" : type, "folder": folderToSend, "data" : folderContent});
+    clients[IP].ws.send(data);
 }
 //-----------------------------------------------------------------------------
 // Check if remote is authenticated before handing down the request
@@ -265,7 +312,7 @@ function handleResourceRequest(req,res,socket) {
                 cache[resourceName].data = data;
                 cache[resourceName].size = fs.statSync(unescape(path)).size;
                 cache[resourceName].mime = mime.lookup(unescape(path));
-                serve();
+                serveResource();
             } else {
                 handleError(err);
                 res.writeHead(404);
@@ -274,10 +321,10 @@ function handleResourceRequest(req,res,socket) {
             }
         });
     } else {
-        serve();
+        serveResource();
     }
 
-    function serve() {
+    function serveResource() {
         log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(cache[resourceName].size) + ")");
 
         res.writeHead(200, {
@@ -299,7 +346,6 @@ function handleFileRequest(req,res,socket) {
                 res.writeHead(500);
                 res.end();
                 handleError(err);
-                sendUpdate(); // Send an update so the client's data stays in sync
             }
             log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
             res.writeHead(200, {
@@ -317,19 +363,17 @@ function handleDeleteRequest(req,res) {
     try {
         var stats = fs.statSync(path);
         if (stats.isFile()) {
-            fs.unlink(path,function(){
-                updateClient(req.socket.remoteAddress);
-            });
+            fs.unlink(path);
         } else if (stats.isDirectory()){
-            fs.rmdir(path,function(){
-                updateClient(req.socket.remoteAddress);
+            fs.rmdir(path, function(err){
+                // TODO: handle ENOTEMPTY
             });
         }
         res.writeHead(200, {
             "Content-Type" : "text/html"
         });
         res.end();
-        updateClient();
+
     } catch(error) {
         res.writeHead(500);
         res.end();
@@ -341,26 +385,32 @@ function handleUploadRequest(req,res,socket) {
     if (req.url === "/upload" ) {
         var form = new formidable.IncomingForm();
         var address = req.socket.remoteAddress;
+        var uploadedFiles = [];
         form.uploadDir = config.filesDir;
         form.parse(req);
 
         //Change the path from a temporary to the actual files directory
         form.on("fileBegin", function(name, file) {
-            var clientFolder = clientFolders[address];
-            if (clientFolder === "/")
+            if (clients[address].directory === "/")
                 file.path = form.uploadDir + file.name;
             else
-                file.path = prefixBase(clientFolders[address]) + "/" + file.name;
+                file.path = prefixBase(clients[address].directory) + "/" + file.name;
+            uploadedFiles.push(file.path);
+
             log("RECV: " + socket + "\t\t" + file.path );
         });
 
         form.on('end', function() {
-            updateClient(address);
+            uploadedFiles.forEach(function(file) {
+                fs.chmod(file, config.mode, function(err) {
+                    if(err) handleError(err);
+                });
+            });
         });
 
         form.on("error", function(err) {
             handleError(err);
-            updateClient(address);
+
         });
 
         res.writeHead(200, {
@@ -370,32 +420,48 @@ function handleUploadRequest(req,res,socket) {
     }
 }
 //-----------------------------------------------------------------------------
-// Read the directory's content and store it in the fileList object
-var prepareFileList = debounce(function (callback, root){
-    var realRoot = prefixBase(root);
+// Read the directory's content and store it in "dirs"
+var readDirectory = debounce(function (root, callback){
     lastRead = new Date();
-    fileList = {};
-    fs.readdir(realRoot, function(err,files) {
+    fs.readdir(prefixBase(root), function(err,files) {
         if(err) handleError(err);
         if(!files) return;
-        fileList[0] = root;
-        for(var i = 0, len = files.length; i<len; i++){
-            var name = files[i], type;
-            try{
-                var stats = fs.statSync(realRoot + "/" + name);
+
+        var dirContents = {};
+
+        if (files.length === 0) {
+            dirs[root] = dirContents;
+            callback();
+        }
+
+        var lastFile = files.length;
+        var counter = 0;
+
+        for(var i = 0 ; i < lastFile; i++){
+            var filename = files[i], type;
+            inspectFile(filename);
+        }
+
+        function inspectFile(filename) {
+            fs.stat(prefixBase(root) + "/" + filename, function(err, stats) {
+                counter++;
+                if(err) handleError(err);
                 if (stats.isFile())
                     type = "f";
                 if (stats.isDirectory())
                     type = "d";
-                if (type === "f" || type === "d") {
-                    fileList[i+1] = {"name": name, "type": type, "size" : stats.size};
+                if (type === "f" || type === "d")
+                    dirContents[filename] = {"type": type, "size" : stats.size};
+
+                // All callbacks have fired
+                if (counter === lastFile) {
+                    dirs[root] = dirContents;
+                    callback();
                 }
-            } catch(error) {
-                handleError(error);
-                continue;
-            }
+            });
+
+
         }
-        if(callback !== undefined) callback();
     });
 },config.readInterval);
 //-----------------------------------------------------------------------------
