@@ -3,7 +3,7 @@
 // Droppy - file server on node.js
 // https://github.com/silverwind/Droppy
 //-----------------------------------------------------------------------------
-//Copyright (c) 2013 silverwind
+//Copyright (c) 2012 - 2013 silverwind
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -224,10 +224,13 @@ function updateWatchers(newDir) {
 }
 //-----------------------------------------------------------------------------
 // Send file list JSON over websocket
-function sendMessage(IP, type) {
-    var folderToSend = clients[IP].directory;
-    var folderContent = dirs[folderToSend];
-    var data = JSON.stringify({"type" : type, "folder": folderToSend, "data" : folderContent});
+function sendMessage(IP, messageType) {
+    var dir = clients[IP].directory;
+    var data = JSON.stringify({
+        "type"  : messageType,
+        "folder": dirs[dir],
+        "data"  : content
+    });
     clients[IP].ws.send(data);
 }
 //-----------------------------------------------------------------------------
