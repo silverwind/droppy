@@ -1,23 +1,28 @@
 #Droppy
-A modern HTTP/HTTPS fileserver built on [node.js](http://nodejs.org/) utilizing [WebSockets](https://en.wikipedia.org/wiki/WebSocket) for realtime updates. A fairly recent browser is required (For IE, that's 10).
+A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing [WebSockets](https://en.wikipedia.org/wiki/WebSocket) for realtime updates. A fairly recent browser is required (For IE, that's 10).
 
 ###Installation
-First, make sure you have the required node modules installed: [ws](https://github.com/einaros/ws/), [formidable](https://github.com/felixge/node-formidable), [mime](https://github.com/broofa/node-mime). You can also use the provided shell scripts, `droppy.sh` or `droppy.bat` to install the modules and run the server.
+
+With [node](http://nodejs.org/) installed, run:
 ````
-npm install formidable
-npm install mime
-npm install socket.io
+git clone https://github.com/silverwind/Droppy.git
+cd Droppy
+npm install
 ````
+This will fetch the dependancies, which are [ws](https://github.com/einaros/ws/),[formidable](https://github.com/felixge/node-formidable) and [mime](https://github.com/broofa/node-mime). Alternatively, there are the startup scripts `droppy.sh` or `droppy.bat` which install the modules and start the server.
+
 ###Usage
 
-To start the server, execute:
+To start the server, run either
 ````
 node droppy
 ````
+or just
+````
+./droppy.js
+````
 
-Command line arguments are available through `node droppy -help`. Per default, files will be placed in `./files/` and the server will listen on [localhost:80](http://localhost/).
-
-Note: If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
+Command line arguments are available through appending `-help`. Per default, files will be placed in `files/` and the server will listen on [localhost:80](http://localhost/). Note: If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
 
 ###Configuration
 Configuration is done through  the `config.json` file, located in the same directory as `droppy.js`.

@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "grunt": "*",
-    "uglify-js:": "*"
+    "grunt-exec" : "*",
+    "uglify-js" : "*"
   },
   "directories": {
     "res": "./res"
