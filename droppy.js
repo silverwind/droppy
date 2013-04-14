@@ -228,8 +228,8 @@ function sendMessage(IP, messageType) {
     var dir = clients[IP].directory;
     var data = JSON.stringify({
         "type"  : messageType,
-        "folder": dirs[dir],
-        "data"  : content
+        "folder": dir,
+        "data"  : dirs[dir]
     });
     clients[IP].ws.send(data);
 }
