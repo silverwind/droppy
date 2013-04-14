@@ -34,8 +34,8 @@
 // - Encrypt login data on client
 // - Multiple file operations like delete/move
 // - Full drag & drop support
-// - IE < 10 compatibilty, if possible
-// - gzip compression
+// - Keybindings
+// - Gzip compression
 // - Check for any XSS
 //-----------------------------------------------------------------------------
 // vim: ts=4:sw=4
@@ -611,24 +611,17 @@ function getTimestamp() {
 //-----------------------------------------------------------------------------
 // Helper function for size values
 function convertToSI(bytes) {
-    var kib = 1024;
-    var mib = kib * 1024;
-    var gib = mib * 1024;
-    var tib = gib * 1024;
+    var kib = 1024,
+        mib = kib * 1024,
+        gib = mib * 1024,
+        tib = gib * 1024;
 
-    if ((bytes >= 0) && (bytes < kib)) {
-        return bytes + ' B';
-    } else if ((bytes >= kib) && (bytes < mib)) {
-        return (bytes / kib).toFixed(2) + ' KiB';
-    } else if ((bytes >= mib) && (bytes < gib)) {
-        return (bytes / mib).toFixed(2) + ' MiB';
-    } else if ((bytes >= gib) && (bytes < tib)) {
-        return (bytes / gib).toFixed(2) + ' GiB';
-    } else if (bytes >= tib) {
-        return (bytes / tib).toFixed(2) + ' TiB';
-    } else {
-        return bytes + ' B';
-    }
+    if ((bytes >= 0) && (bytes < kib))         return bytes + ' B';
+    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + ' KiB';
+    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + ' MiB';
+    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + ' GiB';
+    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + ' TiB';
+    else return bytes + ' B';
 }
 //-----------------------------------------------------------------------------
 // underscore's debounce

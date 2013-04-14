@@ -18,7 +18,7 @@ ws.onopen = function() {
     sendMessage("REQUEST_UPDATE", currentFolder);
 };
 
-// Handle incoming data
+// Handle incoming socket message
 ws.onmessage = function (event) {
     var msg = JSON.parse(event.data);
     if (msg.type === "UPDATE_FILES") {
@@ -29,7 +29,7 @@ ws.onmessage = function (event) {
     }
 };
 
-// Send data to the server
+// Send a socket message
 function sendMessage(msgType, msgData) {
     ws.send(JSON.stringify({
         type: msgType,
@@ -93,11 +93,16 @@ $(document).ready(function() {
 
     // Show popup for folder creation
     $("#add-folder").click(function (){
-        $("#overlay").fadeToggle(250);
+        $("#overlay").fadeToggle(350);
         name.val("");
         name.focus();
         name.attr("class","valid");
     });
+
+    //TODO: Keybindings
+    //$('body').keyup(function(event) {
+    //    alert(event.which);
+    //});
 
     // Handler for the input of the folder name
     // TODO: Sanitize on server
@@ -139,7 +144,7 @@ $(document).ready(function() {
                 sendMessage("CREATE_FOLDER", "/" + input);
             else
                 sendMessage("CREATE_FOLDER", currentFolder + "/" + input);
-            $("#overlay").hide();
+            $("#overlay").fadeOut(350);
         }
     });
 });
@@ -176,16 +181,22 @@ function attachForm() {
 }
 
 //-----------------------------------------------------------------------------
-// Initialize upload by resetting a few things
+// Upload helper functions
 function uploadInit() {
-        progress.show();
-        bar.width("0%");
-        percent.html("");
-        isUploading = true;
-        start = new Date().getTime();
+    progress.fadeIn(600);
+    bar.width("0%");
+    percent.html("");
+    isUploading = true;
+    start = new Date().getTime();
 }
-//-----------------------------------------------------------------------------
-// Update the progress bar and the time left
+
+function uploadDone(){
+    bar.width("100%");
+    percent.html("finished");
+    progress.fadeOut(600);
+    isUploading = false;
+}
+
 function uploadProgress(bytesSent, bytesTotal, completed) {
     var perc = Math.round(completed) + "%";
 
@@ -203,14 +214,6 @@ function uploadProgress(bytesSent, bytesTotal, completed) {
     } else {
         percent.html(Math.round(secs) + " seconds left");
     }
-}
-//-----------------------------------------------------------------------------
-// Initialize a few things before starting the upload
-function uploadDone(){
-    bar.width("100%");
-    percent.html("finished");
-    progress.fadeOut(800);
-    isUploading = false;
 }
 //-----------------------------------------------------------------------------
 // Set the path indicator
@@ -250,13 +253,11 @@ function buildHTML(fileList,root) {
 
             if(type === "f") {
                 //Create a file row
-
                 htmlFiles += '<div class="filerow" data-id="' + id + '">';
                 htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
                 htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
                 htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>';
                 htmlFiles += '<div class="right"></div></div>';
-
                 folderList[name] = true;
             } else {
                 //Create a folder row
