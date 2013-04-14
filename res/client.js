@@ -10,14 +10,15 @@ var folderList    = [],
 var bar, content, info, name, percent, progress, loc, start;
 
 //-----------------------------------------------------------------------------
-// Simple Vanilla WebSocket handler
+// WebSocket functions
 var ws = new WebSocket('ws://' + window.document.location.host);
 
-//Request initial update of files
+// Request initial update
 ws.onopen = function() {
-    ws.send(JSON.stringify({type: "REQUEST_UPDATE", data: currentFolder}));
+    sendMessage("REQUEST_UPDATE", currentFolder);
 };
 
+// Handle incoming data
 ws.onmessage = function (event) {
     var msg = JSON.parse(event.data);
     if (msg.type === "UPDATE_FILES") {
@@ -27,8 +28,15 @@ ws.onmessage = function (event) {
         }
     }
 };
+
+// Send data to the server
+function sendMessage(msgType, msgData) {
+    ws.send(JSON.stringify({
+        type: msgType,
+        data: msgData
+    }));
+}
 //-----------------------------------------------------------------------------
-// DOM is ready
 $(document).ready(function() {
     // Cache elements
     bar = $("#progressBar"),
@@ -44,15 +52,12 @@ $(document).ready(function() {
     attachForm();
 
     // Set location
-    loc.html(styleLoc(currentFolder));
+    setLocation(currentFolder);
 
     // Delete a folder
     $("body").on("click", ".delete", function(e) {
         e.preventDefault();
-        ws.send(JSON.stringify({
-            type: "DELETE_FILE",
-            "data": $(this).parent().parent().data("id")
-        }));
+        sendMessage("DELETE_FILE", $(this).parent().parent().data("id"));
     });
 
     // Switch into a folder
@@ -63,8 +68,8 @@ $(document).ready(function() {
         if (currentFolder !== "/" ) destination = "/" + destination;
 
         currentFolder += destination;
-        loc.html(styleLoc(currentFolder));
-        ws.send(JSON.stringify({type: "SWITCH_FOLDER", "data": currentFolder}));
+        setLocation(currentFolder);
+        sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
     // Go back up
@@ -76,8 +81,8 @@ $(document).ready(function() {
         if (!match.match(/\//)) match = "/";
 
         currentFolder = match;
-        loc.html(styleLoc(currentFolder));
-        ws.send(JSON.stringify({type: "SWITCH_FOLDER", "data": currentFolder}));
+        setLocation(currentFolder);
+        sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
     // Automatically submit a form once it's data changed
@@ -131,9 +136,9 @@ $(document).ready(function() {
 
         if(e.keyCode === 13) { // Return Key
             if (currentFolder === "/")
-                ws.send(JSON.stringify({type: "CREATE_FOLDER", "data": "/" + input}));
+                sendMessage("CREATE_FOLDER", "/" + input);
             else
-                ws.send(JSON.stringify({type: "CREATE_FOLDER", "data": currentFolder + "/" + input}));
+                sendMessage("CREATE_FOLDER", currentFolder + "/" + input);
             $("#overlay").hide();
         }
     });
@@ -209,8 +214,8 @@ function uploadDone(){
 }
 //-----------------------------------------------------------------------------
 // Set the path indicator
-function styleLoc(path){
-    return path.replace(/\//g,"<span class='black'>/</span>");
+function setLocation(path){
+    loc.html(path.replace(/\//g,"<span class='black'>/</span>"));
 }
 //-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML

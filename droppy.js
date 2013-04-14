@@ -167,20 +167,20 @@ function setupSocket(server) {
     wss.on('connection', function(ws) {
         ws.on('message', function(message) {
             var msg = JSON.parse(message);
-            var dir = msg.data;
+            var path = msg.data;
             var remoteIP = ws._socket.remoteAddress;
             var remotePort = ws._socket.remotePort;
 
             switch(msg.type) {
             case "REQUEST_UPDATE":
-                dir = dir.replace(/&amp;/g,"&");
-                clients[remoteIP] = { "directory": dir, "ws": ws};
-                readDirectory(dir, function() {
+                path = path.replace(/&amp;/g,"&");
+                clients[remoteIP] = { "directory": path, "ws": ws};
+                readDirectory(path, function() {
                     sendMessage(remoteIP, "UPDATE_FILES");
                 });
                 break;
             case "CREATE_FOLDER":
-                fs.mkdir(prefixBase(dir), config.mode, function(err){
+                fs.mkdir(prefixBase(path), config.mode, function(err){
                     if(err) handleError(err);
                     readDirectory(clients[remoteIP].directory, function() {
                         sendMessage(remoteIP, "UPDATE_FILES");
@@ -188,12 +188,10 @@ function setupSocket(server) {
                 });
                 break;
             case "DELETE_FILE":
-                var path = prefixBase(dir);
+                path = prefixBase(path);
                 log("DEL:  " + remoteIP + ":" + remotePort + "\t\t" + path);
-
                 fs.stat(path, function(err, stats) {
                     if(err) handleError(err);
-
                     if (stats.isFile()) {
                         fs.unlink(path, function(err) {
                             if(err) handleError(err);
@@ -205,14 +203,13 @@ function setupSocket(server) {
                         });
                     }
                 });
-
                 break;
             case "SWITCH_FOLDER":
-                if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
-                dir = dir.replace(/&amp;/g,"&");
-                clients[remoteIP] = { "directory": dir, "ws": ws};
-                updateWatchers(dir);
-                readDirectory(dir, function() {
+                if ( !path.match(/^\//) || path.match(/\.\./) ) return;
+                path = path.replace(/&amp;/g,"&");
+                clients[remoteIP] = { "directory": path, "ws": ws};
+                updateWatchers(path);
+                readDirectory(path, function() {
                     sendMessage(remoteIP, "UPDATE_FILES");
                 });
                 break;
