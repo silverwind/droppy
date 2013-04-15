@@ -1,8 +1,21 @@
 /* vim: ts=4:sw=4 */
-html,body {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Open Sans"), local("OpenSans"), url(/res/OpenSans400.woff) format("woff");
+}
 
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 800;
+  src: local("Open Sans Extrabold"), local("OpenSans-Extrabold"), url(/res/OpenSans800.woff) format("woff");
+}
+
+html,body {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400;
     background-image: url("/res/bg.png");
     background-color: #f2f2f2;
     font-size: 100%;
@@ -238,7 +251,7 @@ img {
     margin-bottom: 10px;
     background-position: 15px 0, center;
     margin-top:10px;
-    background-image: url('/res/drop.png');
+    background-image: url("/res/drop.png");
     background-repeat: no-repeat;
     -webkit-transition: all .1s linear;
        -moz-transition: all .1s linear;

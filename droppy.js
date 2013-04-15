@@ -243,13 +243,17 @@ function updateWatchers(newDir) {
 //-----------------------------------------------------------------------------
 // Send file list JSON over websocket
 function sendMessage(IP, messageType) {
+    // Dont't send if the socket isn't open
+    if (clients[IP].ws._socket === null) return;
     var dir = clients[IP].directory;
     var data = JSON.stringify({
         "type"  : messageType,
         "folder": dir,
         "data"  : dirs[dir]
     });
-    clients[IP].ws.send(data);
+    clients[IP].ws.send(data, function(err) {
+        if(err) handleError(err);
+    });
 }
 //-----------------------------------------------------------------------------
 // Check if remote is authenticated before handing down the request
@@ -323,7 +327,7 @@ function processRequest(req, res) {
 // Serve resources. Everything from /res/ will be cached by both the server and client
 function handleResourceRequest(req,res,socket) {
     var resourceName = unescape(req.url.substring(config.resDir.length -1));
-    if (cache[resourceName] === undefined){
+    if (cache[resourceName] === undefined) {
         var path = config.resDir + resourceName;
         fs.readFile(path, function (err, data) {
             if(!err) {
@@ -349,7 +353,7 @@ function handleResourceRequest(req,res,socket) {
         res.writeHead(200, {
             "Content-Type"      : cache[resourceName].mime,
             "Content-Length"    : cache[resourceName].size,
-            "Cache-Control"     : "max-age=3600, public"
+            "Cache-Control"     : "public, max-age=31536000"
         });
         res.end(cache[resourceName].data);
     }
@@ -587,7 +591,8 @@ function isClientAuthenticated(IP) {
 // Serve a HTML page
 function serveHTML(res,resource) {
     res.writeHead(200, {
-        "content-type"  : "text/html"
+        "content-type"      : "text/html",
+        "Cache-Control"     : "public, max-age=31536000"
     });
     res.end(resource);
 }
