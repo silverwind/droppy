@@ -247,16 +247,16 @@ img {
 /* ===================== Popup box ===================== */
 #overlay {
     display: none;
+    position: absolute;
+    box-shadow: 1px 1px 25px 5px rgba(122,122,122,0.8);
     background-image: url("/res/bg-dark.png");
     height: 180px;
     width: 360px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
     margin-top: -90px;
     margin-left: -180px;
-    background-color: #222;
-    opacity: .9;
+    left: 50%;
+    top: 50%;
+    opacity: .95;
     text-align: center;
     -webkit-border-radius: 10px;
        -moz-border-radius: 10px;
@@ -397,19 +397,18 @@ img {
 /* ===================== Login Form ===================== */
 
 #login-form {
-    box-shadow: 1px 1px 25px 5px rgba(122,122,122,0.8);
-    height: 180px;
-    width: 360px;
     position: absolute;
+    text-align: center;
+    box-shadow: 1px 1px 25px 5px rgba(122,122,122,0.8);
+    height: 250px;
+    width: 400px;
+    margin-top: -125px;
+    margin-left: -200px;
     left: 50%;
     top: 50%;
     background-image: url("/res/bg-dark.png");
-    margin-top: -90px;
-    margin-left: -180px;
     background-color: #222;
     opacity: .9;
-    text-align: center;
-    display: table;
     -webkit-border-radius: 10px;
        -moz-border-radius: 10px;
         -ms-border-radius: 10px;
@@ -421,20 +420,31 @@ img {
 }
 
 #login-form-inner {
-    display: table-cell;
     vertical-align: middle;
+    position: absolute;
+    height: 150px;
+    width: 300px;
+    margin-top: -110px;
+    margin-left: -150px;
+    left: 50%;
+    top: 50%;
 }
 
 #login-text {
     color: #ddd;
+    display:block;
+    width: 100%;
+    text-align: left;
+    font-size: 1.5em;
 }
 
 .login-input {
     box-shadow: inset 1px 1px 5px 1px rgba(143,143,143,0.8);
-    margin:5px;
     color: #222;
+    margin-top: 5px;
+    margin-bottom: 5px;
     font-size: 1.5em;
-    width: 260px;
+    width: 100%;
     border: 2px transparent;
     -webkit-border-radius: 8px;
        -moz-border-radius: 8px;
@@ -444,8 +454,75 @@ img {
     -webkit-box-sizing: border-box;
        -moz-box-sizing: border-box;
             box-sizing: border-box;
+
 }
 
 #login-container{
     text-align: center;
+}
+
+#submit-bg {
+    width: 100%;
+    margin-top: 200px;
+    height: 50px;
+}
+
+#submit {
+    width: 100%;
+    height: 100%;
+    display:inline-block;
+    color:#fff;
+    -webkit-border-radius: 8px;
+       -moz-border-radius: 8px;
+        -ms-border-radius: 8px;
+         -o-border-radius: 8px;
+            border-radius: 8px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    font-weight: 800;
+    font-size: 1.75em;
+    text-shadow:1px 1px 0 #528009;
+    cursor:pointer;
+}
+
+#submit.valid {
+    background-color:#89c403;
+    border: 1px solid #74b807;
+}
+
+#submit.invalid {
+    background-color:#ff4030;
+    border: 1px solid #ee4030;
+}
+
+#submit:hover {
+    opacity: .9;
+}
+
+#below {
+    width: 100%;
+    margin-top: 8px;
+    color: #ddd;
+    text-align: left;
+}
+
+#check { display:none; }
+
+#check + #checklabel {
+    display:inline-block;
+    padding-left:20px;
+    height:20px;
+    line-height:20px;
+    background-repeat:no-repeat;
+    background-position: 0 0;
+    vertical-align:middle;
+    cursor:pointer;
+}
+
+#check:checked + #checklabel {
+    background-position: 0 -20px;
+}
+
+#checklabel{
+    background-image: url(/res/chk.png);
 }

@@ -6,44 +6,53 @@ $(document).ready(function() {
     var user = $("#user"),
         pass = $("#pass"),
         form = $("form"),
-        info = $("#info");
+        submit = $("#submit");
 
     user.focus();
 
     pass.keyup(function(e){
         if(e.keyCode === 13) {
-            form.submit();
+            submitForm(form, submit);
         }
     });
 
-    pass.focus(function(){
-        info.html("&nbsp;");
+    submit.click(function() {
+        submitForm(form, submit);
     });
 
-    user.focus(function(){
-        info.html("&nbsp;");
+    user.focus(function() {
+        resetError(submit);
     });
 
-    form.submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            type: "POST",
-            url: "/",
-            data: form.serialize(),
-            statusCode: {
-                200: function() {
-                    location.reload();
-                },
-                401: function() {
-                    info.html("Wrong user name or password!");
-                    user.val("");
-                    pass.val("");
-                }
-            }
-        });
-
-        return false;
+    pass.focus(function() {
+        resetError(submit);
     });
 });
+
+function submitForm(form, errForm) {
+    $.ajax({
+        type: "POST",
+        url: "/login",
+        data: form.serialize(),
+        statusCode: {
+            200: function() {
+                location.reload();
+            },
+            401: function() {
+                showError(errForm);
+            }
+        }
+    });
+}
+
+function showError(el) {
+    el.attr("class","invalid");
+    el.val("Wrong username/password!");
+}
+
+function resetError(el) {
+    el.attr("class","valid");
+    el.val("Sign in");
+}
 
 }).call(this);

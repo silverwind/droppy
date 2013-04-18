@@ -267,19 +267,19 @@ function onRequest(req, res) {
     } else {
         processRequest(req, res);
     }
-
 }
 //-----------------------------------------------------------------------------
 // Show login form for unauthenticated users
 function displayLoginForm(req, res) {
     var method = req.method.toUpperCase();
+    var remote = req.socket.remoteAddress + ":" + req.socket.remotePort;
     if (method === "GET") {
         if (req.url.match(/^\/res\//)) {
-            handleResourceRequest(req, res, req.socket.remoteAddress + ":" + req.socket.remotePort);
+            handleResourceRequest(req, res);
         } else {
             serveHTML(res, cache.authHTML);
         }
-    } else if (method === "POST") {
+    } else if (method === "POST" && req.url === "/login") {
         var body = "";
         req.on("data", function(data) {
             body += data;
@@ -288,12 +288,12 @@ function displayLoginForm(req, res) {
             var postData = querystring.parse(body);
             var clientIP = req.socket.remoteAddress;
             if (isValidUser(postData.username, postData.password)) {
-                log("AUTH: User " + postData.username + " successfully authenticated.");
+                log("AUTH: " + remote + "\t\tUser " + postData.username + " successfully authenticated.");
                 authClients[clientIP] = true;
-                res.statusCode = 303;
-                res.setHeader("Location", "/");
+                res.writeHead(200);
                 res.end();
             } else {
+                log("AUTH: " + remote + "\t\tUser " + postData.username + " failed authentication.");
                 res.writeHead(401);
                 res.end();
             }
@@ -309,9 +309,9 @@ function processRequest(req, res) {
     log("REQ:  " + socket + "\t" + method + "\t" + req.url);
     if (method === "GET") {
         if (req.url.match(/^\/res\//))
-            handleResourceRequest(req,res,socket);
+            handleResourceRequest(req,res);
         else if (req.url.match(/^\/get\//))
-            handleFileRequest(req,res,socket);
+            handleFileRequest(req,res);
         else if (req.url === "/") {
             serveHTML(res, cache.mainHTML);
         } else {
@@ -319,12 +319,13 @@ function processRequest(req, res) {
             res.end();
         }
     } else if (method === "POST" && req.url === "/upload") {
-        handleUploadRequest(req,res,socket);
+        handleUploadRequest(req,res);
     }
 }
 //-----------------------------------------------------------------------------
 // Serve resources. Everything from /res/ will be cached by both the server and client
-function handleResourceRequest(req,res,socket) {
+function handleResourceRequest(req, res) {
+    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     var resourceName = unescape(req.url.substring(config.resDir.length -1));
     if (cache[resourceName] === undefined) {
         var path = config.resDir + resourceName;
@@ -358,7 +359,8 @@ function handleResourceRequest(req,res,socket) {
     }
 }
 //-----------------------------------------------------------------------------
-function handleFileRequest(req,res,socket) {
+function handleFileRequest(req, res) {
+    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     var path = prefixBase(req.url.replace("get/",""));
     if (path) {
         var mimeType = mime.lookup(path);
@@ -379,7 +381,8 @@ function handleFileRequest(req,res,socket) {
     }
 }
 //-----------------------------------------------------------------------------
-function handleUploadRequest(req,res,socket) {
+function handleUploadRequest(req, res) {
+    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     if (req.url === "/upload" ) {
         var form = new formidable.IncomingForm();
         var address = req.socket.remoteAddress;

@@ -19,13 +19,19 @@
         <div id="login-container">
             <div id="login-form">
                 <div id="login-form-inner">
-                    <form>
-                        <p id="login-text">User Name:</p>
-                        <input class="login-input" id="user" type="text" name="username" />
-                        <p id="login-text">Password:</p>
-                        <input class="login-input" id="pass" type="password" name="password" />
-                        <p id="info">&nbsp;</p>
+                    <form accept-charset="UTF-8">
+                        <label for="user" id="login-text">Username:</label>
+                        <input id="user" class="login-input" type="text" name="username" autocapitalize="off" tabindex="1" />
+                        <label for="pass" id="login-text">Password:</label>
+                        <input id="pass" class="login-input" type="password" name="password" autocomplete="disabled" tabindex="2"/>
+                        <div id="below">
+                            <input id="check" type="checkbox" />
+                            <label for="check" id="checklabel">Remember me</label>
+                        </div>
                     </form>
+                </div>
+                <div id="submit-bg">
+                    <input id="submit" class="valid" type="submit" value="Sign in" tabindex="3" />
                 </div>
             </div>
         </div>

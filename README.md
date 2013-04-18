@@ -9,7 +9,7 @@ git clone https://github.com/silverwind/Droppy.git
 cd Droppy
 npm install
 ````
-This will fetch the dependancies, which are [ws](https://github.com/einaros/ws/),[formidable](https://github.com/felixge/node-formidable) and [mime](https://github.com/broofa/node-mime). Alternatively, there are the startup scripts `droppy.sh` or `droppy.bat` which install the modules and start the server.
+This will fetch the dependancies, which are [ws](https://github.com/einaros/ws/), [formidable](https://github.com/felixge/node-formidable) and [mime](https://github.com/broofa/node-mime). Alternatively, there are the startup scripts `droppy.sh` or `droppy.bat` which install the modules and start the server.
 
 ###Usage
 
