@@ -24,13 +24,13 @@
 //SOFTWARE.
 //-----------------------------------------------------------------------------
 // Current limitiations:
-// - When a client has multiple browser windows pointing to differrent folder,
+// - When a client has multiple browser windows pointing to different folder,
 //   only one of them will get updated. Need to figure out a way to map
 //   WebSocket source ports to source ports of the HTTP connection.
 //-----------------------------------------------------------------------------
 // TODOs:
-// - Recursive folder uploading & deleting
-// - Login form styling
+// - Recursive deleting
+// - Cookie authentication
 // - Encrypt login data on client
 // - Multiple file operations like delete/move
 // - Full drag & drop support
@@ -288,14 +288,13 @@ function displayLoginForm(req, res) {
             var postData = querystring.parse(body);
             var clientIP = req.socket.remoteAddress;
             if (isValidUser(postData.username, postData.password)) {
+                log("AUTH: User " + postData.username + " successfully authenticated.");
                 authClients[clientIP] = true;
                 res.statusCode = 303;
                 res.setHeader("Location", "/");
                 res.end();
-
             } else {
                 res.writeHead(401);
-                res.write("Unauthorized");
                 res.end();
             }
         });

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Droppy</title>
+		<title>droppy</title>
 		<meta charset="utf-8" />
 		<link rel="shortcut icon" href="res/icon.ico" type="image/x-icon" />
 		<link rel="apple-touch-icon" href="res/apple-touch-icon.png" type="image/png" />
@@ -14,42 +14,36 @@
 	</head>
 	<body>
 		<noscript>
-			<div id="noscript"><p id="error">Please enable Javascript in your browser to use Droppy!</p></div>
+			<div id="noscript"><p id="error">Please enable JavaScript to use Droppy!</p></div>
 		</noscript>
-		<div id="container">
-			<div id="content"></div>
-		</div>
-		<aside id="left">
+		<nav id="navigation">
 			<a href="/">
-				<div id="logo">
-					<p id="logotext">Droppy</p>
-				</div>
+				<header id="title">droppy</header>
 			</a>
-			<form action="/upload" enctype="multipart/form-data" method="post">
-				<div id="file-upload" class="button">
-					<p>Add file(s)</p>
-					<input type="file" name="file" id="file" multiple />
-				</div>
-			</form>
-			<div id="add-folder" class="button" title="Add a new folder">
-				<p>Create Folder</p>
-			</div>
-			<div id="loc">
-				<p id="info-current">Current location:</p>
-				<p id="current"></p>
-			</div>
+			<ul>
+				<li id="file-upload" class="button">
+					<form action="/upload" enctype="multipart/form-data" method="post">
+						<p>Add file(s)</p>
+						<input type="file" name="file" id="file" multiple />
+					</form>
+				</li>
+				<li id="add-folder" class="button" title="Add a new folder">
+					<p>Create Folder</p>
+				</li>
+			</ul>
 			<div id="progress">
 				<div id="progressBar"></div>
 				<div id="percent"></div>
 			</div>
-			<footer id="footer">
-				Created on <a class="foot" href="http://nodejs.org/">node</a> by <a class="foot" href="https://github.com/silverwind/">silverwind</a>
-			</footer>
-		</aside>
+		</nav>
+		<section id="content"></section>
+		<footer id="footer">
+			<p>Created on <a class="foot" href="http://nodejs.org/">node</a> by <a class="foot" href="https://github.com/silverwind/">silverwind</a></p>
+		</footer>
 		<div id="overlay">
 			<p id="question">Folder name?</p>
 			<input type="text" id="nameinput"/>
-			<p id="info-filename"></p>
+			<p id="info">&nbsp;</p>
 		</div>
 	</body>
 </html>

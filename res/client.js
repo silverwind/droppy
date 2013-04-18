@@ -41,7 +41,7 @@ $(document).ready(function() {
     // Cache elements
     bar = $("#progressBar"),
     content = $("#content"),
-    info = $("#info-filename"),
+    info = $("#info"),
     name = $("#nameinput"),
     percent = $("#percent"),
     progress = $("#progress"),
@@ -50,9 +50,6 @@ $(document).ready(function() {
     // Initialize and attach plugins
     attachDropzone();
     attachForm();
-
-    // Set location
-    setLocation(currentFolder);
 
     // Delete a folder
     $("body").on("click", ".delete", function(e) {
@@ -68,7 +65,6 @@ $(document).ready(function() {
         if (currentFolder !== "/" ) destination = "/" + destination;
 
         currentFolder += destination;
-        setLocation(currentFolder);
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
@@ -81,7 +77,6 @@ $(document).ready(function() {
         if (!match.match(/\//)) match = "/";
 
         currentFolder = match;
-        setLocation(currentFolder);
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
@@ -112,32 +107,27 @@ $(document).ready(function() {
 
         var input = name.val();
         var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
-        var folderExists = folderList[input] === true;
-
+        var folderExists = folderList[input.toLowerCase()] === true;
         if (input === "" ) {
             name.attr("class","valid");
-            info.html("");
-            info.hide();
+            info.html("&nbsp;");
             return;
         }
 
         if (!valid){
             name.attr("class","invalid");
             info.html("Invalid character(s) in filename!");
-            info.show();
             return;
         }
 
         if (folderExists) {
             name.attr("class","invalid");
             info.html("File/Directory already exists!");
-            info.show();
             return;
         }
 
         name.attr("class","valid");
-        info.html("");
-        info.hide();
+        info.html("&nbsp;");
 
         if(e.keyCode === 13) { // Return Key
             if (currentFolder === "/")
@@ -216,16 +206,11 @@ function uploadProgress(bytesSent, bytesTotal, completed) {
     }
 }
 //-----------------------------------------------------------------------------
-// Set the path indicator
-function setLocation(path){
-    loc.html(path.replace(/\//g,"<span class='black'>/</span>"));
-}
-//-----------------------------------------------------------------------------
 // Convert the received fileList object into HTML
 // TODO: Clean up this mess
 function buildHTML(fileList,root) {
     var htmlFiles = "", htmlDirs = "", htmlBack = "";
-    var htmlheader = '<div class="fileheader"><div class="filename">Name</div><div class="fileinfo">Size<span class="headerspacer">Del</span></div><div class=right></div></div>';
+    var htmlheader = '<div id="current">' + root.replace(/\//g,"<span class='black'>/</span>") + '</div>';
     folderList = [];
 
     if(root !== "/") {
@@ -258,7 +243,7 @@ function buildHTML(fileList,root) {
                 htmlFiles += '<div class="filename"><a class="filelink" href="' + escape(href) + '">' + name + '</a></div>';
                 htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>';
                 htmlFiles += '<div class="right"></div></div>';
-                folderList[name] = true;
+
             } else {
                 //Create a folder row
                 htmlDirs += '<div class="folderrow" data-id="' + id + '">';
@@ -266,6 +251,8 @@ function buildHTML(fileList,root) {
                 htmlDirs += '<div class="foldername"><a class="folderlink" href="">' + name + '</a></div>';
                 htmlDirs += '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>';
                 htmlDirs += '<div class="right"></div></div>';
+                //Add to list of active folders
+                folderList[name.toLowerCase()] = true;
             }
 
         }

@@ -9,12 +9,25 @@
         <link rel="apple-touch-icon" href="res/apple-touch-icon-114.png" sizes="114x114" type="image/png" />
         <link rel="apple-touch-icon" href="res/apple-touch-icon-144.png" sizes="144x144" type="image/png" />
         <link rel="stylesheet" href="res/css.css" />
+        <script src="res/libraries.js" type="text/javascript"></script>
+        <script src="res/auth.js" type="text/javascript"></script>
     </head>
     <body>
-        <form method="POST" action="/">
-            <input type="text" name="username" class="loginText" />
-            <input type="password" name="password" class="loginText" />
-            <input type="submit" value="Login" />
-        </form>
+        <noscript>
+            <div id="noscript"><p id="error">Please enable JavaScript to use Droppy!</p></div>
+        </noscript>
+        <div id="login-container">
+            <div id="login-form">
+                <div id="login-form-inner">
+                    <form>
+                        <p id="login-text">User Name:</p>
+                        <input class="login-input" id="user" type="text" name="username" />
+                        <p id="login-text">Password:</p>
+                        <input class="login-input" id="pass" type="password" name="password" />
+                        <p id="info">&nbsp;</p>
+                    </form>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
