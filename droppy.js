@@ -594,6 +594,7 @@ function isClientAuthenticated(IP) {
 function serveHTML(res,resource) {
     res.writeHead(200, {
         "content-type"      : "text/html",
+        "X-Frame-Options"   : "DENY",
         "Cache-Control"     : "public, max-age=31536000"
     });
     res.end(resource);
