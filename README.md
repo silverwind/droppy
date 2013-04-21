@@ -2,17 +2,13 @@
 A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing [WebSockets](https://en.wikipedia.org/wiki/WebSocket) for realtime updates. A fairly recent browser is required (For IE, that's 10).
 
 ###Installation
-
 With [node](http://nodejs.org/) installed, run:
 ````
-git clone https://github.com/silverwind/Droppy.git
-cd Droppy
-npm install
+git clone https://github.com/silverwind/Droppy.git && cd Droppy && npm install
 ````
-This will fetch the dependancies, which are [ws](https://github.com/einaros/ws/), [formidable](https://github.com/felixge/node-formidable) and [mime](https://github.com/broofa/node-mime). Alternatively, there are the startup scripts `droppy.sh` or `droppy.bat` which install the modules and start the server.
+This will set up directory and fetch the dependancies, which are [ws](https://github.com/einaros/ws/), [formidable](https://github.com/felixge/node-formidable) and [mime](https://github.com/broofa/node-mime).
 
 ###Usage
-
 To start the server, run either
 ````
 node droppy
@@ -22,7 +18,7 @@ or just
 ./droppy.js
 ````
 
-Command line arguments are available through appending `-help`. Per default, files will be placed in `files/` and the server will listen on [localhost:80](http://localhost/). Note: If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
+Command line arguments are available through appending `-help`. Per default, shared files will be placed in `files/` and the server will listen on [localhost:80](http://localhost/). Note: If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
 
 ###Configuration
 Configuration is done through  the `config.json` file, located in the same directory as `droppy.js`.
