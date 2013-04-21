@@ -168,15 +168,14 @@ function prefixBasePath(relativePath) {
 // WebSocket listener
 function setupSocket(server) {
     var wss = new WebSocketServer({server : server});
-    wss.on('connection', function(ws) {
-        ws.on('close', function() {
-            console.log('disconnected');
-        });
-        ws.on('message', function(message) {
+    wss.on("connection", function(ws) {
+        var remoteIP = ws._socket.remoteAddress;
+        var remotePort = ws._socket.remotePort;
+        log("WS:   " + remoteIP +  ":" + remotePort + " connected");
+
+        ws.on("message", function(message) {
             var msg = JSON.parse(message);
             var path = msg.data;
-            var remoteIP = ws._socket.remoteAddress;
-            var remotePort = ws._socket.remotePort;
 
             switch(msg.type) {
             case "REQUEST_UPDATE":
@@ -221,6 +220,12 @@ function setupSocket(server) {
                 });
                 break;
             }
+        });
+        ws.on("close", function() {
+            log("WS:   " + remoteIP +  ":" + remotePort + " disconnected");
+        });
+        ws.on("error", function(err) {
+            log(err);
         });
     });
 }

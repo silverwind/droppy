@@ -11,7 +11,11 @@ var bar, content, info, name, percent, progress, loc, start;
 
 //-----------------------------------------------------------------------------
 // WebSocket functions
-var ws = new WebSocket('ws://' + window.document.location.host);
+var ws;
+if (document.location.protocol === "https:")
+    ws = new WebSocket('wss://' + window.document.location.host);
+else
+    ws = new WebSocket('ws://' + window.document.location.host);
 
 // Request initial update
 ws.onopen = function() {
