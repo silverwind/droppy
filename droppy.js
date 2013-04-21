@@ -280,10 +280,8 @@ function onRequest(req, res) {
 function displayLoginForm(req, res) {
     var method = req.method.toUpperCase();
     var remote = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    if (method === "GET") {
-        if (req.url.match(/^\/res\//) || req.url === "/")
-            handleResourceRequest(req, res);
-
+    if (method === "GET" && (req.url.match(/^\/res\//) || req.url === "/")) {
+        handleResourceRequest(req, res);
     } else if (method === "POST" && req.url === "/login") {
         var body = "";
         req.on("data", function(data) {
