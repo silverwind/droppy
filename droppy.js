@@ -27,15 +27,16 @@
 // - When a client has multiple browser windows pointing to different folder,
 //   only one of them will get updated. Need to figure out a way to map
 //   WebSocket source ports to source ports of the HTTP connection.
+// - The WS connection isn't stable in Firefox, while it is on Chrome
 //-----------------------------------------------------------------------------
 // TODOs:
+// - Investigate WS disconnects in Firefox
 // - Recursive deleting
 // - Cookie authentication
 // - Encrypt login data on client
 // - Multiple file operations like delete/move
 // - Full drag & drop support
 // - Keybindings
-// - Gzip compression
 // - Check for any XSS
 //-----------------------------------------------------------------------------
 // vim: ts=4:sw=4
@@ -60,7 +61,9 @@ var fs                 = require("fs"),
     mime               = require("mime"),
     util               = require("util"),
     crypto             = require("crypto"),
-    querystring        = require("querystring");
+    querystring        = require("querystring"),
+    zlib               = require("zlib"),
+    pathLib            = require("path");
 
 // Argument handler
 if (process.argv.length > 2)
@@ -75,14 +78,15 @@ if(config.useAuth) {
         console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'.");
         process.exit(1);
     }
-    cache.authHTML = fs.readFileSync(config.resDir + "auth.html", {"encoding": "utf8"});
 }
 
-cache.mainHTML = fs.readFileSync(config.resDir + "main.html", {"encoding": "utf8"});
+// Read and cache all resources
+cacheResources(function() {
+    // Proceed with setting up the files folder and bind to the listening port
+    setupFilesDir();
+    createListener();
+});
 
-// Process with setting up the files folder and bind to the listening port
-setupFilesDir();
-createListener();
 
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
@@ -119,7 +123,7 @@ function createListener() {
         //We're up - initialize everything
         var address = server.address();
         log("Listening on " + address.address + ":" + address.port);
-        createWatcher(prefixBase("/"));
+        createWatcher(prefixBasePath("/"));
         setupSocket(server);
     });
     server.on("error", function (err) {
@@ -157,7 +161,7 @@ function createWatcher(folder) {
 }
 //-----------------------------------------------------------------------------
 // Create absolute directory link
-function prefixBase(relativePath) {
+function prefixBasePath(relativePath) {
     return config.filesDir.substring(0, config.filesDir.length - 1) + relativePath;
 }
 //-----------------------------------------------------------------------------
@@ -165,6 +169,9 @@ function prefixBase(relativePath) {
 function setupSocket(server) {
     var wss = new WebSocketServer({server : server});
     wss.on('connection', function(ws) {
+        ws.on('close', function() {
+            console.log('disconnected');
+        });
         ws.on('message', function(message) {
             var msg = JSON.parse(message);
             var path = msg.data;
@@ -180,7 +187,7 @@ function setupSocket(server) {
                 });
                 break;
             case "CREATE_FOLDER":
-                fs.mkdir(prefixBase(path), config.mode, function(err){
+                fs.mkdir(prefixBasePath(path), config.mode, function(err){
                     if(err) handleError(err);
                     readDirectory(clients[remoteIP].directory, function() {
                         sendMessage(remoteIP, "UPDATE_FILES");
@@ -188,7 +195,7 @@ function setupSocket(server) {
                 });
                 break;
             case "DELETE_FILE":
-                path = prefixBase(path);
+                path = prefixBasePath(path);
                 log("DEL:  " + remoteIP + ":" + remotePort + "\t\t" + path);
                 fs.stat(path, function(err, stats) {
                     if(err) handleError(err);
@@ -221,7 +228,7 @@ function setupSocket(server) {
 // Watch given directory and check if we need the other active watchers
 function updateWatchers(newDir) {
     if (!watchedDirs[newDir]) {
-        createWatcher(prefixBase(newDir));
+        createWatcher(prefixBasePath(newDir));
 
         var neededDirs = {};
         for (var client in clients) {
@@ -274,11 +281,9 @@ function displayLoginForm(req, res) {
     var method = req.method.toUpperCase();
     var remote = req.socket.remoteAddress + ":" + req.socket.remotePort;
     if (method === "GET") {
-        if (req.url.match(/^\/res\//)) {
+        if (req.url.match(/^\/res\//) || req.url === "/")
             handleResourceRequest(req, res);
-        } else {
-            serveHTML(res, cache.authHTML);
-        }
+
     } else if (method === "POST" && req.url === "/login") {
         var body = "";
         req.on("data", function(data) {
@@ -298,6 +303,9 @@ function displayLoginForm(req, res) {
                 res.end();
             }
         });
+    } else {
+        res.writeHead(404);
+        res.end();
     }
 }
 
@@ -308,13 +316,11 @@ function processRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     log("REQ:  " + socket + "\t" + method + "\t" + req.url);
     if (method === "GET") {
-        if (req.url.match(/^\/res\//))
+        if (req.url.match(/^\/res\//) || req.url === "/")
             handleResourceRequest(req,res);
         else if (req.url.match(/^\/get\//))
             handleFileRequest(req,res);
-        else if (req.url === "/") {
-            serveHTML(res, cache.mainHTML);
-        } else {
+        else {
             res.writeHead(404);
             res.end();
         }
@@ -322,46 +328,96 @@ function processRequest(req, res) {
         handleUploadRequest(req,res);
     }
 }
+
 //-----------------------------------------------------------------------------
-// Serve resources. Everything from /res/ will be cached by both the server and client
-function handleResourceRequest(req, res) {
-    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    var resourceName = unescape(req.url.substring(config.resDir.length -1));
-    if (cache[resourceName] === undefined) {
-        var path = config.resDir + resourceName;
-        fs.readFile(path, function (err, data) {
-            if(!err) {
-                cache[resourceName] = {};
-                cache[resourceName].data = data;
-                cache[resourceName].size = fs.statSync(unescape(path)).size;
-                cache[resourceName].mime = mime.lookup(unescape(path));
-                serveResource();
-            } else {
-                handleError(err);
-                res.writeHead(404);
-                res.end();
-                return;
-            }
-        });
-    } else {
-        serveResource();
+// Read resources and store them in the cache object
+function cacheResources(callback) {
+    var files = fs.readdirSync(config.resDir);
+    var filesToGzip = [];
+    for(var i = 0, len = files.length; i < len; i++){
+        var fileName = files[i];
+        var path = config.resDir + fileName;
+        var fileData = fs.readFileSync(path);
+
+        cache[fileName] = {};
+        cache[fileName].data = fileData;
+        cache[fileName].size = fs.statSync(path).size;
+        cache[fileName].mime = mime.lookup(path);
+
+        if(fileName.match(/.*(js|css|html)$/))
+            filesToGzip.push(fileName);
     }
 
-    function serveResource() {
-        log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(cache[resourceName].size) + ")");
+    if (filesToGzip.length > 0)
+        runGzip();
+    else
+        callback();
 
-        res.writeHead(200, {
-            "Content-Type"      : cache[resourceName].mime,
-            "Content-Length"    : cache[resourceName].size,
-            "Cache-Control"     : "public, max-age=31536000"
+    function runGzip() {
+        var currentFile = filesToGzip[0];
+        zlib.gzip(cache[currentFile].data, function(err,compressed) {
+            cache[currentFile].gzipData = compressed;
+            cache[currentFile].gzipSize = compressed.length;
+            filesToGzip = filesToGzip.slice(1);
+            if (filesToGzip.length > 0)
+                runGzip();
+            else
+                callback();
         });
-        res.end(cache[resourceName].data);
     }
 }
 //-----------------------------------------------------------------------------
+// Serve resources. Everything from /res/ will be cached by both the server and client
+function handleResourceRequest(req, res) {
+    var resourceName;
+    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
+
+    if (req.url === "/") {
+        if (config.useAuth && !isClientAuthenticated(req.socket.remoteAddress))
+            resourceName = "auth.html";
+        else
+            resourceName = "main.html";
+    } else {
+        resourceName = pathLib.basename(req.url);
+    }
+
+    if (cache[resourceName] === undefined) {
+        res.writeHead(404);
+        res.end();
+    } else {
+        var size = cache[resourceName].size;
+
+        res.statusCode = 200;
+
+        if (req.url === "/")
+            res.setHeader("X-Frame-Options","DENY");
+
+        res.setHeader("Content-Type", cache[resourceName].mime);
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+
+        var acceptEncoding = req.headers["accept-encoding"];
+
+        if (!acceptEncoding)
+            acceptEncoding = "";
+
+        if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipSize !== undefined) {
+            log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(cache[resourceName].gzipSize) + " gzipped)");
+            res.setHeader("Content-Encoding", "gzip");
+            res.setHeader("Content-Length", cache[resourceName].gzipSize);
+            res.setHeader("Vary", "Accept-Encoding");
+            res.end(cache[resourceName].gzipData);
+        } else {
+            log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(size) + ")");
+            res.setHeader("Content-Length", size);
+            res.end(cache[resourceName].data);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    var path = prefixBase(req.url.replace("get/",""));
+    var path = prefixBasePath(req.url.replace("get/",""));
     if (path) {
         var mimeType = mime.lookup(path);
 
@@ -395,7 +451,7 @@ function handleUploadRequest(req, res) {
             if (clients[address].directory === "/")
                 file.path = form.uploadDir + file.name;
             else
-                file.path = prefixBase(clients[address].directory) + "/" + file.name;
+                file.path = prefixBasePath(clients[address].directory) + "/" + file.name;
             uploadedFiles.push(file.path);
 
             log("RECV: " + socket + "\t\t" + file.path );
@@ -424,7 +480,7 @@ function handleUploadRequest(req, res) {
 // Read the directory's content and store it in "dirs"
 var readDirectory = debounce(function (root, callback){
     lastRead = new Date();
-    fs.readdir(prefixBase(root), function(err,files) {
+    fs.readdir(prefixBasePath(root), function(err,files) {
         if(err) handleError(err);
         if(!files) return;
 
@@ -444,7 +500,7 @@ var readDirectory = debounce(function (root, callback){
         }
 
         function inspectFile(filename) {
-            fs.stat(prefixBase(root) + "/" + filename, function(err, stats) {
+            fs.stat(prefixBasePath(root) + "/" + filename, function(err, stats) {
                 counter++;
                 if(err) handleError(err);
                 if (stats.isFile())
@@ -590,16 +646,6 @@ function isClientAuthenticated(IP) {
         return false;
 }
 //-----------------------------------------------------------------------------
-// Serve a HTML page
-function serveHTML(res,resource) {
-    res.writeHead(200, {
-        "content-type"      : "text/html",
-        "X-Frame-Options"   : "DENY",
-        "Cache-Control"     : "public, max-age=31536000"
-    });
-    res.end(resource);
-}
-//-----------------------------------------------------------------------------
 // Helper function for log timestamps
 function getTimestamp() {
     var currentDate = new Date();
@@ -624,12 +670,12 @@ function convertToSI(bytes) {
         gib = mib * 1024,
         tib = gib * 1024;
 
-    if ((bytes >= 0) && (bytes < kib))         return bytes + ' B';
-    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + ' KiB';
-    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + ' MiB';
-    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + ' GiB';
-    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + ' TiB';
-    else return bytes + ' B';
+    if ((bytes >= 0) && (bytes < kib))         return bytes + ' bytes';
+    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + 'KiB';
+    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + 'MiB';
+    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + 'GiB';
+    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + 'TiB';
+    else return bytes + ' bytes';
 }
 //-----------------------------------------------------------------------------
 // underscore's debounce
