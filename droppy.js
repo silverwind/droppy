@@ -420,7 +420,7 @@ function handleResourceRequest(req, res) {
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    var path = prefixBasePath(req.url.replace("get/",""));
+    var path = unescape(prefixBasePath(req.url.replace("get/","")));
     if (path) {
         var mimeType = mime.lookup(path);
 

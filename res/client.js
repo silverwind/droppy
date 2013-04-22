@@ -12,26 +12,34 @@ var bar, content, info, name, percent, progress, loc, start;
 //-----------------------------------------------------------------------------
 // WebSocket functions
 var ws;
-if (document.location.protocol === "https:")
-    ws = new WebSocket('wss://' + window.document.location.host);
-else
-    ws = new WebSocket('ws://' + window.document.location.host);
+// Open a new socket connection
+function openSocket() {
+    if (document.location.protocol === "https:")
+        ws = new WebSocket('wss://' + window.document.location.host);
+    else
+        ws = new WebSocket('ws://' + window.document.location.host);
 
-// Request initial update
-ws.onopen = function() {
-    sendMessage("REQUEST_UPDATE", currentFolder);
-};
+    ws.onopen = function() {
+        // Request initial update
+        sendMessage("REQUEST_UPDATE", currentFolder);
+    };
 
-// Handle incoming socket message
-ws.onmessage = function (event) {
-    var msg = JSON.parse(event.data);
-    if (msg.type === "UPDATE_FILES") {
-        if (isUploading) return;
-        if(msg.folder === currentFolder.replace(/&amp;/,"&")) {
-            content.html(buildHTML(msg.data, msg.folder));
+    // Handle incoming socket message
+    ws.onmessage = function (event) {
+        var msg = JSON.parse(event.data);
+        if (msg.type === "UPDATE_FILES") {
+            if (isUploading) return;
+            if(msg.folder === currentFolder.replace(/&amp;/,"&")) {
+                content.html(buildHTML(msg.data, msg.folder));
+            }
         }
-    }
-};
+    };
+    ws.onclose = function() {
+        // Restart a closed socket. Firefox closes it on every download..
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
+        openSocket();
+    };
+}
 
 // Send a socket message
 function sendMessage(msgType, msgData) {
@@ -51,6 +59,9 @@ $(document).ready(function() {
     progress = $("#progress"),
     loc = $("#current");
 
+    //Open a WS
+    openSocket();
+
     // Initialize and attach plugins
     attachDropzone();
     attachForm();
@@ -68,8 +79,10 @@ $(document).ready(function() {
         var destination = $(this).html();
         if (currentFolder !== "/" ) destination = "/" + destination;
 
+
         currentFolder += destination;
         sendMessage("SWITCH_FOLDER", currentFolder);
+
     });
 
     // Go back up
@@ -80,8 +93,10 @@ $(document).ready(function() {
         match = match.substring(0,match.length - 1);
         if (!match.match(/\//)) match = "/";
 
+
         currentFolder = match;
         sendMessage("SWITCH_FOLDER", currentFolder);
+
     });
 
     // Automatically submit a form once it's data changed
@@ -240,7 +255,7 @@ function buildHTML(fileList,root) {
 
             var href = "/get" + id;
 
-            if(type === "f") {
+            if (type === "f") {
                 //Create a file row
                 htmlFiles += '<div class="filerow" data-id="' + id + '">';
                 htmlFiles += '<div class="fileicon" title="File"><img src="res/file.png" width="16px" height="16px" alt="File"></div>';
@@ -248,7 +263,7 @@ function buildHTML(fileList,root) {
                 htmlFiles += '<div class="fileinfo">' + size + '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>';
                 htmlFiles += '<div class="right"></div></div>';
 
-            } else {
+            } else if (type === "d") {
                 //Create a folder row
                 htmlDirs += '<div class="folderrow" data-id="' + id + '">';
                 htmlDirs += '<div class="foldericon" title="Directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
