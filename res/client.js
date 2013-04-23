@@ -5,6 +5,7 @@
 
 var folderList    = [],
     isUploading   = false,
+    isUnloading   = false,
     currentFolder = "/";
 
 var bar, content, info, name, percent, progress, loc, start;
@@ -20,12 +21,14 @@ function openSocket() {
         ws = new WebSocket('ws://' + window.document.location.host);
 
     ws.onopen = function() {
+        console.log("onopen");
         // Request initial update
         sendMessage("REQUEST_UPDATE", currentFolder);
     };
 
     // Handle incoming socket message
     ws.onmessage = function (event) {
+        console.log("onmessage");
         var msg = JSON.parse(event.data);
         if (msg.type === "UPDATE_FILES") {
             if (isUploading) return;
@@ -35,9 +38,10 @@ function openSocket() {
         }
     };
     ws.onclose = function() {
+        console.log("onclose");
         // Restart a closed socket. Firefox closes it on every download..
         // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-        openSocket();
+        if(!isUnloading) setTimeout(openSocket,300);
     };
 }
 
@@ -48,6 +52,13 @@ function sendMessage(msgType, msgData) {
         data: msgData
     }));
 }
+
+// Try to close the socket when the user navigates away to avoid errors
+// (This doesn't seem to always trigger in time)
+$(window).unload(function() {
+    isUnloading = true;
+    ws.close();
+});
 //-----------------------------------------------------------------------------
 $(document).ready(function() {
     // Cache elements
@@ -59,7 +70,7 @@ $(document).ready(function() {
     progress = $("#progress"),
     loc = $("#current");
 
-    //Open a WS
+    // Open a WS
     openSocket();
 
     // Initialize and attach plugins
