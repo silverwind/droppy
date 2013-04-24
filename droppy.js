@@ -63,7 +63,8 @@ var fs                 = require("fs"),
     crypto             = require("crypto"),
     querystring        = require("querystring"),
     zlib               = require("zlib"),
-    pathLib            = require("path");
+    pathLib            = require("path"),
+    cleanCSS           = require('clean-css');
 
 // Argument handler
 if (process.argv.length > 2)
@@ -381,6 +382,9 @@ function cacheResources(callback) {
         cache[fileName].size = stats.size;
         cache[fileName].revision = Number(stats.mtime).toString(36); //base36 the modified timestamp
         cache[fileName].mime = mime.lookup(path);
+
+        if (fileName.match(/.*\.css/))
+            cache[fileName].data = cleanCSS.process(String(cache[fileName].data));
 
         if (fileName.match(/.*(js|css|html)$/))
             filesToGzip.push(fileName);
