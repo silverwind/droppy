@@ -331,25 +331,63 @@ function processRequest(req, res) {
         handleUploadRequest(req,res);
     }
 }
+//-----------------------------------------------------------------------------
+// Append revision number to cached files, to force clients to download a changed file
+// Format: file.ext -> file.hfw6c03k.css
+function addRevisions() {
+    for (var file in cache) {
+        if (cache.hasOwnProperty(file)) {
+            if (file.match(/.*\.html/)) {
+                var html = String(cache[file].data);
+                for (var resource in cache) {
+                    if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
+                        html = html.replace(resource, function(match) {
+                            return match.replace(".","." + cache[resource].revision + ".");
+                        });
+                    }
+                }
+                cache[file].data = html;
+            }
+        }
+    }
 
+}
+// .. And strip a request off its revision
+function stripRevision(filename) {
+    var parts = filename.split(".");
+    if (parts.length === 3) {
+        return parts[0] + "." + parts[2];
+    } else {
+        log("Error Unable to strip revision off " + filename);
+        return filename;
+    }
+}
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
 function cacheResources(callback) {
     var files = fs.readdirSync(config.resDir);
     var filesToGzip = [];
-    for(var i = 0, len = files.length; i < len; i++){
+    for (var i = 0, len = files.length; i < len; i++){
         var fileName = files[i];
         var path = config.resDir + fileName;
         var fileData = fs.readFileSync(path);
-
+        var stats;
+        try {
+            stats = fs.statSync(path);
+        } catch (err) {
+            log(err);
+            continue;
+        }
         cache[fileName] = {};
         cache[fileName].data = fileData;
-        cache[fileName].size = fs.statSync(path).size;
+        cache[fileName].size = stats.size;
+        cache[fileName].revision = Number(stats.mtime).toString(36); //base36 the modified timestamp
         cache[fileName].mime = mime.lookup(path);
 
         if(fileName.match(/.*(js|css|html)$/))
             filesToGzip.push(fileName);
     }
+    addRevisions();
 
     if (filesToGzip.length > 0)
         runGzip();
@@ -382,6 +420,10 @@ function handleResourceRequest(req, res) {
             resourceName = "main.html";
     } else {
         resourceName = pathLib.basename(req.url);
+
+        if(resourceName.match(/\./g).length >= 2) {
+            resourceName = stripRevision(resourceName);
+        }
     }
 
     if (cache[resourceName] === undefined) {
@@ -663,7 +705,7 @@ function getTimestamp() {
     if (minutes < 10) minutes = "0" + minutes;
     if (seconds < 10) seconds = "0" + seconds;
 
-    return month + "/" + day + "/" + year + " "+ hours + ":" + minutes + ":" + seconds + " ";
+    return year + "-"  + month + "-" + day + " "+ hours + ":" + minutes + ":" + seconds + " ";
 }
 //-----------------------------------------------------------------------------
 // Helper function for size values
