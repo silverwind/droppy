@@ -72,7 +72,7 @@ if (process.argv.length > 2)
 // Read config.json into config
 readConfig();
 
-if(config.useAuth) {
+if (config.useAuth) {
     readDB();
     if (Object.keys(userDB).length < 1) {
         console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'.");
@@ -104,7 +104,7 @@ function setupFilesDir() {
 //-----------------------------------------------------------------------------
 // Bind to listening port
 function createListener() {
-    if(!config.useSSL) {
+    if (!config.useSSL) {
         server = require("http").createServer(onRequest);
     } else {
         var key, cert;
@@ -141,7 +141,7 @@ function createListener() {
 function createWatcher(folder) {
     var relativePath = folder.replace(config.filesDir.substring(0, config.filesDir.length - 1),"");
     var watcher = fs.watch(folder,{ persistent: true }, function(event){
-        if(event === "change" || event === "rename") {
+        if (event === "change" || event === "rename") {
             // Files in a watched directory changed. Figure out which client(s) need updates
             // This part might be quite costly cpu-wise while files are being written, need
             // to figure out something better, like an object lookup.
@@ -187,7 +187,7 @@ function setupSocket(server) {
                 break;
             case "CREATE_FOLDER":
                 fs.mkdir(prefixBasePath(path), config.mode, function(err){
-                    if(err) handleError(err);
+                    if (err) handleError(err);
                     readDirectory(clients[remoteIP].directory, function() {
                         sendMessage(remoteIP, "UPDATE_FILES");
                     });
@@ -197,14 +197,14 @@ function setupSocket(server) {
                 path = prefixBasePath(path);
                 log("DEL:  " + remoteIP + ":" + remotePort + "\t\t" + path);
                 fs.stat(path, function(err, stats) {
-                    if(err) handleError(err);
+                    if (err) handleError(err);
                     if (stats.isFile()) {
                         fs.unlink(path, function(err) {
-                            if(err) handleError(err);
+                            if (err) handleError(err);
                         });
                     } else if (stats.isDirectory()) {
                         fs.rmdir(path, function(err) {
-                            if(err) handleError(err);
+                            if (err) handleError(err);
                             // TODO: handle ENOTEMPTY
                         });
                     }
@@ -264,7 +264,7 @@ function sendMessage(IP, messageType) {
         "data"  : dirs[dir]
     });
     clients[IP].ws.send(data, function(err) {
-        if(err) handleError(err);
+        if (err) handleError(err);
     });
 }
 //-----------------------------------------------------------------------------
@@ -336,22 +336,20 @@ function processRequest(req, res) {
 // Format: file.ext -> file.hfw6c03k.css
 function addRevisions() {
     for (var file in cache) {
-        if (cache.hasOwnProperty(file)) {
-            if (file.match(/.*\.html/)) {
-                var html = String(cache[file].data);
-                for (var resource in cache) {
-                    if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
-                        html = html.replace(resource, function(match) {
-                            return match.replace(".","." + cache[resource].revision + ".");
-                        });
-                    }
+        if (file.match(/.*\.html/) && cache.hasOwnProperty(file)) {
+            var html = String(cache[file].data);
+            for (var resource in cache) {
+                if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
+                    html = html.replace(resource, function(match) {
+                        return match.replace(".","." + cache[resource].revision + ".");
+                    });
                 }
-                cache[file].data = html;
             }
+            cache[file].data = html;
         }
     }
-
 }
+
 // .. And strip a request off its revision
 function stripRevision(filename) {
     var parts = filename.split(".");
@@ -384,7 +382,7 @@ function cacheResources(callback) {
         cache[fileName].revision = Number(stats.mtime).toString(36); //base36 the modified timestamp
         cache[fileName].mime = mime.lookup(path);
 
-        if(fileName.match(/.*(js|css|html)$/))
+        if (fileName.match(/.*(js|css|html)$/))
             filesToGzip.push(fileName);
     }
     addRevisions();
@@ -421,7 +419,7 @@ function handleResourceRequest(req, res) {
     } else {
         resourceName = pathLib.basename(req.url);
 
-        if(resourceName.match(/\./g).length >= 2) {
+        if (resourceName.match(/\./g).length >= 2) {
             resourceName = stripRevision(resourceName);
         }
     }
@@ -467,7 +465,7 @@ function handleFileRequest(req, res) {
         var mimeType = mime.lookup(path);
 
         fs.stat(path, function(err,stats){
-            if(err) {
+            if (err) {
                 res.writeHead(500);
                 res.end();
                 handleError(err);
@@ -505,7 +503,7 @@ function handleUploadRequest(req, res) {
         form.on('end', function() {
             uploadedFiles.forEach(function(file) {
                 fs.chmod(file, config.mode, function(err) {
-                    if(err) handleError(err);
+                    if (err) handleError(err);
                 });
             });
         });
@@ -526,8 +524,8 @@ function handleUploadRequest(req, res) {
 var readDirectory = debounce(function (root, callback){
     lastRead = new Date();
     fs.readdir(prefixBasePath(root), function(err,files) {
-        if(err) handleError(err);
-        if(!files) return;
+        if (err) handleError(err);
+        if (!files) return;
 
         var dirContents = {};
 
@@ -539,7 +537,7 @@ var readDirectory = debounce(function (root, callback){
         var lastFile = files.length;
         var counter = 0;
 
-        for(var i = 0 ; i < lastFile; i++){
+        for (var i = 0 ; i < lastFile; i++){
             var filename = files[i], type;
             inspectFile(filename);
         }
@@ -547,7 +545,7 @@ var readDirectory = debounce(function (root, callback){
         function inspectFile(filename) {
             fs.stat(prefixBasePath(root) + "/" + filename, function(err, stats) {
                 counter++;
-                if(err) handleError(err);
+                if (err) handleError(err);
                 if (stats.isFile())
                     type = "f";
                 if (stats.isDirectory())

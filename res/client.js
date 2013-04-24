@@ -30,7 +30,7 @@ function openSocket() {
         var msg = JSON.parse(event.data);
         if (msg.type === "UPDATE_FILES") {
             if (isUploading) return;
-            if(msg.folder === currentFolder.replace(/&amp;/,"&")) {
+            if (msg.folder === currentFolder.replace(/&amp;/,"&")) {
                 content.html(buildHTML(msg.data, msg.folder));
             }
         }
@@ -38,7 +38,7 @@ function openSocket() {
     ws.onclose = function() {
         // Restart a closed socket. Firefox closes it on every download..
         // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-        if(!isUnloading) setTimeout(openSocket,300);
+        if (!isUnloading) setTimeout(openSocket,300);
     };
 }
 
@@ -133,7 +133,7 @@ $(document).ready(function() {
     // Handler for the input of the folder name
     // TODO: Sanitize on server
     name.keyup(function(e){
-        if(e.keyCode === 27) // Escape Key
+        if (e.keyCode === 27) // Escape Key
             $("#overlay").toggle();
 
         var input = name.val();
@@ -160,7 +160,7 @@ $(document).ready(function() {
         name.attr("class","valid");
         info.html("&nbsp;");
 
-        if(e.keyCode === 13) { // Return Key
+        if (e.keyCode === 13) { // Return Key
             if (currentFolder === "/")
                 sendMessage("CREATE_FOLDER", "/" + input);
             else
@@ -244,7 +244,7 @@ function buildHTML(fileList,root) {
     var htmlheader = '<div id="current">' + root.replace(/\//g,"<span class='black'>/</span>") + '</div>';
     folderList = [];
 
-    if(root !== "/") {
+    if (root !== "/") {
         htmlBack += '<div class="folderrow">';
         htmlBack += '<div class="foldericon" title="Go up one directory"><img src="res/dir.png" width="16px" height="16px" alt="Directory"></div>';
         htmlBack += '<div class="filename"><a class="backlink" href="">..</a></div>';
@@ -252,7 +252,7 @@ function buildHTML(fileList,root) {
         htmlBack += '<div class="right"></div></div>';
     }
 
-    for(var file in fileList) {
+    for (var file in fileList) {
         if (fileList.hasOwnProperty(file)) {
 
             var name = file;
