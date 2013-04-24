@@ -6,7 +6,7 @@ With [node](http://nodejs.org/) installed, run:
 ````
 git clone https://github.com/silverwind/Droppy.git && cd Droppy && npm install
 ````
-This will set up directory and fetch the dependancies, which are [ws](https://github.com/einaros/ws/), [formidable](https://github.com/felixge/node-formidable), [cleancss](https://github.com/GoalSmashers/clean-css) and [mime](https://github.com/broofa/node-mime).
+This will set up directory and fetch the dependancies, which are [ws](https://github.com/einaros/ws/), [formidable](https://github.com/felixge/node-formidable), [cleancss](https://github.com/GoalSmashers/clean-css), [uglifyjs](https://github.com/mishoo/UglifyJS2) and [mime](https://github.com/broofa/node-mime).
 
 ###Usage
 To start the server, run either

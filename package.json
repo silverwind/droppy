@@ -9,12 +9,13 @@
   "dependencies": {
     "ws": "*",
     "formidable": "*",
-    "mime": "*"
+    "mime": "*",
+    "uglify-js" : "*",
+    "clean-css" : "*"
   },
   "devDependencies": {
     "grunt": "*",
-    "grunt-exec" : "*",
-    "uglify-js" : "*"
+    "grunt-exec" : "*"
   },
   "directories": {
     "res": "./res"

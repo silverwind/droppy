@@ -64,7 +64,8 @@ var fs                 = require("fs"),
     querystring        = require("querystring"),
     zlib               = require("zlib"),
     pathLib            = require("path"),
-    cleanCSS           = require('clean-css');
+    cleancss           = require('clean-css'),
+    uglify             = require("uglify-js");
 
 // Argument handler
 if (process.argv.length > 2)
@@ -383,12 +384,21 @@ function cacheResources(callback) {
         cache[fileName].revision = Number(stats.mtime).toString(36); //base36 the modified timestamp
         cache[fileName].mime = mime.lookup(path);
 
-        if (fileName.match(/.*\.css/))
-            cache[fileName].data = cleanCSS.process(String(cache[fileName].data));
+        if (fileName.match(/.*\.css/)) {
+            log("Preparing CSS...");
+            cache[fileName].data = cleancss.process(String(cache[fileName].data));
+        }
+        if (fileName === "libraries.js") {
+            log("Preparing JS...");
+            cache["client.js"].data = uglify.minify([config.resDir + "libraries.js", config.resDir + "client.js"]).code;
+        }
 
         if (fileName.match(/.*(js|css|html)$/))
             filesToGzip.push(fileName);
     }
+
+
+
     addRevisions();
 
     if (filesToGzip.length > 0)
