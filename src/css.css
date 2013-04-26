@@ -27,6 +27,13 @@ html,body {
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+#page, #new {
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
 
 input:focus,select:focus,textarea:focus,button:focus {
@@ -89,10 +96,7 @@ footer {
     border-style: solid;
     border-color: #aaa #bbb #ccc #bbb;
     box-shadow:inset 0 2px 3px #bbb;
-    -webkit-border-radius: 8px;
-       -moz-border-radius: 8px;
-         -o-border-radius: 8px;
-            border-radius: 8px;
+    border-radius: 8px;
 }
 
 #progressBar {
@@ -101,10 +105,7 @@ footer {
     background-color: #f72;
     background-size: 18px 18px;
     box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
-    -webkit-border-radius: 8px;
-       -moz-border-radius: 8px;
-         -o-border-radius: 8px;
-            border-radius: 8px;
+    border-radius: 8px;
 }
 
 .button {
@@ -114,18 +115,10 @@ footer {
     margin: 0 auto;
     font-weight: 400;
     font-size: 1.2em;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
 }
 
 .button:hover {
     color: #fff;
-    background-color: #e73;
-    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-       -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-         -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
-            transition: all .5s cubic-bezier(0,.48,.27,.99);
 }
 
 
@@ -143,38 +136,16 @@ footer {
     position: relative;
     overflow: hidden;
 }
-
-/* ===================== Row header ===================== */
-#current {
-    max-width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-bottom: 5px;
-    word-wrap: break-word;
-    white-space: -moz-pre-wrap;
-    white-space:   -o-pre-wrap;
-    white-space:      pre-wrap;
-}
-
-.black {
-    color: #000;
-}
 /* ===================== File/Folder display ===================== */
 .filerow:hover, .folderrow:hover {
-    color: #fff !important;
-    background-color: #e73 !important;
-    -webkit-border-radius: 6px;
-       -moz-border-radius: 6px;
-         -o-border-radius: 6px;
-            border-radius: 6px;
-    -webkit-transition: all .5s cubic-bezier(0,.48,.27,.99);
-       -moz-transition: all .5s cubic-bezier(0,.48,.27,.99);
-         -o-transition: all .5s cubic-bezier(0,.48,.27,.99);
-            transition: all .5s cubic-bezier(0,.48,.27,.99);
+    color: #eee;
+    background-image: url("/res/bg-dark.png");
+    opacity: .9;
+    border-radius: 6px;
 }
 
 .filerow:hover *, .folderrow:hover * {
-    color: #fff;
+    color: #eee;
 }
 
 .filelink, .folderlink, .backlink{
@@ -182,40 +153,32 @@ footer {
     width: 100%;
     overflow: hidden;
     white-space: nowrap;
-    -o-text-overflow: ellipsis;
-       text-overflow: ellipsis;
-}
-
-.fileicon, .filename, .fileinfo, .foldericon, .foldername, .folderinfo {
-    line-height: 1.5em;
-}
-
-.fileicon, .foldericon {
-    text-align: right;
-    width: 16px;
-    margin-left: 10px;
-    float: left;
-}
-
-.filename, .foldername {
-    margin-left: 5px;
-    float: left;
-    overflow: hidden;
-    white-space: nowrap;
-    -webkit-text-overflow: ellipsis;
-         -o-text-overflow: ellipsis;
-            text-overflow: ellipsis;
-    -webkit-flex: 1;
-            flex: 1;
+    text-overflow: ellipsis;
 }
 
 .filerow, .folderrow {
-    margin-left:5px;
-    margin-right:5px;
-    display: -webkit-flex;
-    display:         flex;
-    -webkit-flex-direction: row;
-            flex-direction: row;
+    line-height: 1.5em;
+    height: 1.5em;
+    margin-left:12px;
+    margin-right:12px;
+}
+
+.icon {
+    position: relative;
+    float: left;
+    top:6px;
+    left: 10px;
+}
+
+.filename, .foldername, .backlink {
+    margin-left: 25px;
+    float: left;
+    overflow:auto;
+    width:65%;
+}
+
+.backlink {
+    width: 90%;
 }
 
 .fileinfo, .folderinfo {
@@ -223,13 +186,6 @@ footer {
     float: right;
     text-align: right;
     margin-right: 10px;
-}
-
-img {
-    vertical-align: middle;
-    margin:-100px 0;
-    position: relative;
-    top:-2px;
 }
 
 #back {
@@ -241,8 +197,7 @@ img {
 }
 
 .right {
-    clear: left;
-
+    clear: both;
 }
 /* ===================== Popup box ===================== */
 #overlay {
@@ -258,14 +213,7 @@ img {
     top: 50%;
     opacity: .95;
     text-align: center;
-    -webkit-border-radius: 10px;
-       -moz-border-radius: 10px;
-        -ms-border-radius: 10px;
-         -o-border-radius: 10px;
-            border-radius: 10px;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    border-radius: 10px;
 }
 
 #question {
@@ -286,14 +234,7 @@ img {
     font-size: 1.5em;
     width: 260px;
     border: 2px transparent;
-    -webkit-border-radius: 8px;
-       -moz-border-radius: 8px;
-        -ms-border-radius: 8px;
-         -o-border-radius: 8px;
-            border-radius: 8px;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    border-radius: 8px;
 }
 
 #nameinput.valid {
@@ -309,7 +250,6 @@ img {
 /* ===================== Media Queries ===================== */
 
 @media only screen and (max-width: 799px) {
-
     #navigation {
         width: 100%;
         height: auto;
@@ -318,7 +258,6 @@ img {
     #content {
         float: left;
         width: 100%;
-        overflow: auto;
     }
 
     #title {
@@ -335,11 +274,11 @@ img {
         width: 200px;
         height: 100%;
         position: fixed;
+        top:0;
     }
 
     #content {
         padding-left: 200px;
-        overflow: auto;
     }
 
     #title {
@@ -351,47 +290,51 @@ img {
 /* ===================== Related Elements ===================== */
 #title {
     font-weight: 800;
-    color: #ccc;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
-    -webkit-transition: all .1s linear;
-       -moz-transition: all .1s linear;
-         -o-transition: all .1s linear;
-            transition: all .1s linear;
+    color: #eee;
+    opacity: .6;
+    transition: all .2s linear;
+
 }
 
 #title:hover {
-    -webkit-transform: scale(1.1);
-       -moz-transform: scale(1.1);
-        -ms-transform: scale(1.1);
-         -o-transform: scale(1.1);
-            transform: scale(1.1);
+    color:  #eee;
+    opacity: 1;
+    transform: scale(1.2) rotateX(20deg) ;
 }
 
 #navigation {
-    z-index: 1;
+    z-index: 101;
     text-align: center;
     display: block;
     float: left;
     background-image: url("/res/bg-dark.png");
     -webkit-touch-callout: none;
-      -webkit-user-select: none;
-       -khtml-user-select: none;
-         -moz-user-select: none;
-          -ms-user-select: none;
-              user-select: none;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    user-select: none;
 }
 
+#current {
+    font-size: 1.5em;
+    z-index: 100;
+    position: fixed;
+    top:0;
+    overflow: auto;
+    padding-left:220px;
+    height:30px;
+    width:100%;
+}
+
+.black {
+    color: #000;
+}
 #content {
+    position: absolute;
+    top : 35px;
+    bottom: 0;
+    max-height: 100%;
+    width: 100%;
     font-size: 1.3em;
     text-shadow: 0 0 1px rgba(128,128,128, .3);
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    overflow: auto;
 }
 
 /* ===================== Login Form ===================== */
@@ -409,14 +352,7 @@ img {
     background-image: url("/res/bg-dark.png");
     background-color: #222;
     opacity: .9;
-    -webkit-border-radius: 10px;
-       -moz-border-radius: 10px;
-        -ms-border-radius: 10px;
-         -o-border-radius: 10px;
-            border-radius: 10px;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    border-radius: 10px;
 }
 
 #login-form-inner {
@@ -446,19 +382,13 @@ img {
     font-size: 1.5em;
     width: 100%;
     border: 2px transparent;
-    -webkit-border-radius: 8px;
-       -moz-border-radius: 8px;
-        -ms-border-radius: 8px;
-         -o-border-radius: 8px;
-            border-radius: 8px;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
-
+    border-radius: 8px;
 }
 
 #login-container{
     text-align: center;
+    width: 100%;
+    height: 100%;
 }
 
 #submit-bg {
@@ -472,11 +402,7 @@ img {
     height: 100%;
     display:inline-block;
     color:#fff;
-    -webkit-border-radius: 8px;
-       -moz-border-radius: 8px;
-        -ms-border-radius: 8px;
-         -o-border-radius: 8px;
-            border-radius: 8px;
+    border-radius: 8px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     font-weight: 800;
@@ -525,4 +451,5 @@ img {
 
 #checklabel{
     background-image: url(/res/chk.png);
+    user-select: none;
 }

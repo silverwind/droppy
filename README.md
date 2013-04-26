@@ -24,26 +24,25 @@ Command line arguments are available through appending `-help`. Per default, sha
 Configuration is done through  the `config.json` file, located in the same directory as `droppy.js`.
 ````javascript
 {
-    "filesDir"     : "./files/",
-    "resDir"       : "./res/",
     "useSSL"       : false,
-    "useAuth"      : false,
     "port"         : 80,
     "readInterval" : 100,
     "mode"         : 644,
-    "httpsKey"     : "./key.pem",
-    "httpsCert"    : "./cert.pem",
-    "userDB"       : "./userDB.json"
+    "httpsKey"     : "./keys/key.pem",
+    "httpsCert"    : "./keys/cert.pem",
+    "db"           : "./db.json",
+    "filesDir"     : "./files/",
+    "resDir"       : "./res/",
+    "srcDir"       : "./src/"
 }
-
 ````
 
-- `filesDir` The directory which serves as the server's root. Can be relative or absolute.
-- `resDir` The directory which contains the server's resources.
 - `useSSL` Whether the server should use HTTPS (SSL). Requires both the key file, `httpsKey` and the certificate, `httpsCert` to be set.
-- `useAuth` Whether to enable user authentication. If enabled, at least one user needs to exist in the database. New users are created through `node droppy -adduser username password`. The assiciated user database will be stored in a file, defined by `userDB`.
 - `port` The listening port. For HTTPS, you may want to set it to 443.
 - `readInterval` The time in milliseconds between full directory scans. Reducing it results in a little more responsiveness at the cost of more file I/O.
 - `mode` The access mode with which files are created.
 - `httpsKey` and `httpsCert` The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Self-signed certificates are supported, in case you just want end-to-end encryption.
-- `userDB` Location of the user database file.
+- `db` Location of the user database file.
+- `filesDir` The directory which serves as the server's root. Can be relative or absolute.
+- `resDir` The directory which contains the public resources.
+- `srcDir` The directory which contains the server html/js/css sources.

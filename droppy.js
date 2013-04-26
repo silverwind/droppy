@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 //-----------------------------------------------------------------------------
-// Droppy - file server on node.js
-// https://github.com/silverwind/Droppy
+// droppy - file server on node.js
+// https://github.com/silverwind/droppy
 //-----------------------------------------------------------------------------
 //Copyright (c) 2012 - 2013 silverwind
 //
@@ -30,26 +30,25 @@
 // - The WS connection isn't stable in Firefox, while it is on Chrome
 //-----------------------------------------------------------------------------
 // TODOs:
-// - Investigate WS disconnects in Firefox
+// - Logout functionality
 // - Recursive deleting
-// - Cookie authentication
-// - Encrypt login data on client
+// - OAuth?
 // - Multiple file operations like delete/move
 // - Full drag & drop support
 // - Keybindings
-// - Check for any XSS
 //-----------------------------------------------------------------------------
 // vim: ts=4:sw=4
 // jshint indent:4
 
 "use strict";
 
+var DEBUG = false;
+
 var cache          = {},
     clients        = {},
     watchedDirs    = {},
     dirs           = {},
-    userDB         = {},
-    authClients    = {},
+    db             = {},
     server,
     lastRead,
     config;
@@ -63,24 +62,23 @@ var fs                 = require("fs"),
     crypto             = require("crypto"),
     querystring        = require("querystring"),
     zlib               = require("zlib"),
-    pathLib            = require("path"),
-    cleancss           = require('clean-css'),
+    path               = require("path"),
+    cleancss           = require("clean-css"),
     uglify             = require("uglify-js");
 
+readConfig();
 // Argument handler
 if (process.argv.length > 2)
     handleArguments();
 
-// Read config.json into config
-readConfig();
+console.log(prettyStartup());
 
-if (config.useAuth) {
-    readDB();
-    if (Object.keys(userDB).length < 1) {
-        console.log("Error: Authentication is enabled, but no user exists. Please create user(s) first using 'node droppy -adduser'.");
-        process.exit(1);
-    }
+readDB();
+if (Object.keys(db.users).length < 1) {
+    addUser("droppy", "droppy");
 }
+
+prepareContent();
 
 // Read and cache all resources
 cacheResources(function() {
@@ -89,7 +87,46 @@ cacheResources(function() {
     createListener();
 });
 
+//-----------------------------------------------------------------------------
+// Read CSS and JS, minify them, and write them to /res
+function prepareContent() {
+    try {
+        console.log(" ->> minifying CSS...");
+        fs.writeFileSync(getResPath("css.css"),
+                cleancss.process(String(fs.readFileSync(getSrcPath("css.css"))))
+        );
 
+        if (DEBUG) {
+            console.log(" ->> preparing JS...");
+            fs.writeFileSync(getResPath("client.js"), [
+                String(fs.readFileSync(getSrcPath("jquery.js"))),
+                String(fs.readFileSync(getSrcPath("jquery.form.js"))),
+                String(fs.readFileSync(getSrcPath("dropzone.js"))),
+                String(fs.readFileSync(getSrcPath("prefixfree.js"))),
+                String(fs.readFileSync(getSrcPath("client.js")))
+            ].join("\n"));
+        } else {
+            console.log(" ->> minifying JS...");
+            fs.writeFileSync(getResPath("client.js"),
+                uglify.minify([
+                    getSrcPath("jquery.js"),
+                    getSrcPath("jquery.form.js"),
+                    getSrcPath("dropzone.js"),
+                    getSrcPath("prefixfree.js"),
+                    getSrcPath("client.js")
+                ]).code
+            );
+        }
+        console.log(" ->> preparing HTML...\n");
+        // Copy html from src to res - may do some preprocessing here later
+        fs.writeFileSync(getResPath("base.html"),fs.readFileSync(getSrcPath("base.html")));
+        fs.writeFileSync(getResPath("body-auth.html"),fs.readFileSync(getSrcPath("body-auth.html")));
+        fs.writeFileSync(getResPath("body-main.html"),fs.readFileSync(getSrcPath("body-main.html")));
+    } catch(err) {
+        console.log("Error reading client sources.\n" + util.inspect(err));
+        process.exit(1);
+    }
+}
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
 function setupFilesDir() {
@@ -97,7 +134,7 @@ function setupFilesDir() {
         if ( !err || err.code === "EEXIST") {
             return true;
         } else {
-            console.log("Error accessing " + config.filesDir + ".");
+            console.log("Error accessing",config.filesDir,".");
             console.log(util.inspect(err));
             process.exit(1);
         }
@@ -114,8 +151,7 @@ function createListener() {
             key = fs.readFileSync(config.httpsKey);
             cert = fs.readFileSync(config.httpsCert);
         } catch(error) {
-            console.log("Error reading required SSL certificate or key.");
-            console.log(util.inspect(error));
+            console.log("Error reading SSL certificate or key.\n",util.inspect(error));
             process.exit(1);
         }
         server = require("https").createServer({key: key, cert: cert}, onRequest);
@@ -124,17 +160,17 @@ function createListener() {
     server.on("listening", function() {
         //We're up - initialize everything
         var address = server.address();
-        log("Listening on " + address.address + ":" + address.port);
+        log("Listening on ", address.address, ":", address.port);
         createWatcher(prefixBasePath("/"));
         setupSocket(server);
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-            console.log("Failed to bind to port " + config.port + ". Adress already in use.");
+            console.log("Failed to bind to port", config.port, ". Adress already in use.");
         else if (err.code === "EACCES")
-            console.log("Failed to bind to port " + config.port + ". Need root to bind to ports < 1024.");
+            console.log("Failed to bind to port", config.port, ". Need root to bind to ports < 1024.");
         else
-            console.log("Error:" + util.inspect(err));
+            console.log("Error:",util.inspect(err));
         process.exit(1);
     });
 }
@@ -173,22 +209,22 @@ function setupSocket(server) {
     wss.on("connection", function(ws) {
         var remoteIP = ws._socket.remoteAddress;
         var remotePort = ws._socket.remotePort;
-        log("WS:   " + remoteIP +  ":" + remotePort + " connected");
+        log("WS:   ", remoteIP, ":", remotePort, " connected");
 
         ws.on("message", function(message) {
             var msg = JSON.parse(message);
-            var path = msg.data;
+            var dir = msg.data;
 
             switch(msg.type) {
             case "REQUEST_UPDATE":
-                path = path.replace(/&amp;/g,"&");
-                clients[remoteIP] = { "directory": path, "ws": ws};
-                readDirectory(path, function() {
+                dir = dir.replace(/&amp;/g,"&");
+                clients[remoteIP] = { "directory": dir, "ws": ws};
+                readDirectory(dir, function() {
                     sendMessage(remoteIP, "UPDATE_FILES");
                 });
                 break;
             case "CREATE_FOLDER":
-                fs.mkdir(prefixBasePath(path), config.mode, function(err){
+                fs.mkdir(prefixBasePath(dir), config.mode, function(err){
                     if (err) handleError(err);
                     readDirectory(clients[remoteIP].directory, function() {
                         sendMessage(remoteIP, "UPDATE_FILES");
@@ -196,16 +232,19 @@ function setupSocket(server) {
                 });
                 break;
             case "DELETE_FILE":
-                path = prefixBasePath(path);
-                log("DEL:  " + remoteIP + ":" + remotePort + "\t\t" + path);
-                fs.stat(path, function(err, stats) {
-                    if (err) handleError(err);
+                dir = prefixBasePath(dir);
+                log("DEL:  ", remoteIP, ":", remotePort, "\t\t", dir);
+                fs.stat(dir, function(err, stats) {
+                    if (err) {
+                        handleError(err);
+                        return;
+                    }
                     if (stats.isFile()) {
-                        fs.unlink(path, function(err) {
+                        fs.unlink(dir, function(err) {
                             if (err) handleError(err);
                         });
                     } else if (stats.isDirectory()) {
-                        fs.rmdir(path, function(err) {
+                        fs.rmdir(dir, function(err) {
                             if (err) handleError(err);
                             // TODO: handle ENOTEMPTY
                         });
@@ -213,18 +252,18 @@ function setupSocket(server) {
                 });
                 break;
             case "SWITCH_FOLDER":
-                if ( !path.match(/^\//) || path.match(/\.\./) ) return;
-                path = path.replace(/&amp;/g,"&");
-                clients[remoteIP] = { "directory": path, "ws": ws};
-                updateWatchers(path);
-                readDirectory(path, function() {
+                if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
+                dir = dir.replace(/&amp;/g,"&");
+                clients[remoteIP] = { "directory": dir, "ws": ws};
+                updateWatchers(dir);
+                readDirectory(dir, function() {
                     sendMessage(remoteIP, "UPDATE_FILES");
                 });
                 break;
             }
         });
         ws.on("close", function() {
-            log("WS:   " + remoteIP +  ":" + remotePort + " disconnected");
+            log("WS:   ", remoteIP, ":", remotePort, " disconnected");
         });
         ws.on("error", function(err) {
             log(err);
@@ -270,67 +309,41 @@ function sendMessage(IP, messageType) {
     });
 }
 //-----------------------------------------------------------------------------
-// Check if remote is authenticated before handing down the request
-function onRequest(req, res) {
-    if (config.useAuth) {
-        if (isClientAuthenticated(req.socket.remoteAddress)) {
-            processRequest(req, res);
-        } else {
-            displayLoginForm(req,res);
-        }
-    } else {
-        processRequest(req, res);
-    }
-}
-//-----------------------------------------------------------------------------
-// Show login form for unauthenticated users
-function displayLoginForm(req, res) {
-    var method = req.method.toUpperCase();
-    var remote = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    if (method === "GET" && (req.url.match(/^\/res\//) || req.url === "/")) {
-        handleResourceRequest(req, res);
-    } else if (method === "POST" && req.url === "/login") {
-        var body = "";
-        req.on("data", function(data) {
-            body += data;
-        });
-        req.on("end", function() {
-            var postData = querystring.parse(body);
-            var clientIP = req.socket.remoteAddress;
-            if (isValidUser(postData.username, postData.password)) {
-                log("AUTH: " + remote + "\t\tUser " + postData.username + " successfully authenticated.");
-                authClients[clientIP] = true;
-                res.writeHead(200);
-                res.end();
-            } else {
-                log("AUTH: " + remote + "\t\tUser " + postData.username + " failed authentication.");
-                res.writeHead(401);
-                res.end();
-            }
-        });
-    } else {
-        res.writeHead(404);
-        res.end();
-    }
-}
-
-//-----------------------------------------------------------------------------
 // GET/POST handler
-function processRequest(req, res) {
+function onRequest(req, res) {
     var method = req.method.toUpperCase();
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    log("REQ:  " + socket + "\t" + method + "\t" + req.url);
+    log("REQ:  ", socket, "\t", method, "\t", req.url);
+
     if (method === "GET") {
-        if (req.url.match(/^\/res\//) || req.url === "/")
-            handleResourceRequest(req,res);
-        else if (req.url.match(/^\/get\//))
-            handleFileRequest(req,res);
-        else {
-            res.writeHead(404);
-            res.end();
+        if (req.url.match(/^\/get\//) && checkCookie(req)) {
+            handleFileRequest(req, res);
+        } else {
+            handleGET(req,res);
         }
-    } else if (method === "POST" && req.url === "/upload") {
-        handleUploadRequest(req,res);
+    } else if (method === "POST") {
+        if (req.url === "/upload") {
+            if (!checkCookie(req)) res.end(401);
+            handleUploadRequest(req,res);
+        } else if (req.url === "/login") {
+            var body = "";
+            req.on("data", function(data) {
+                body += data;
+            });
+            req.on("end", function() {
+                var postData = querystring.parse(body);
+                if (isValidUser(postData.username, postData.password)) {
+                    log("AUTH: ", socket, "\t\tUser ", postData.username, " successfully authenticated.");
+                    res.statusCode = 200;
+                    createCookie(req, res, postData);
+                    res.end();
+                } else {
+                    log("AUTH: ", socket, "\t\tUser ", postData.username, " failed authentication.");
+                    res.writeHead(401);
+                    res.end();
+                }
+            });
+        }
     }
 }
 //-----------------------------------------------------------------------------
@@ -338,16 +351,28 @@ function processRequest(req, res) {
 // Format: file.ext -> file.hfw6c03k.css
 function addRevisions() {
     for (var file in cache) {
-        if (file.match(/.*\.html/) && cache.hasOwnProperty(file)) {
-            var html = String(cache[file].data);
-            for (var resource in cache) {
-                if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
-                    html = html.replace(resource, function(match) {
-                        return match.replace(".","." + cache[resource].revision + ".");
-                    });
+        if (cache.hasOwnProperty(file)) {
+            if (file.match(/.*\.html/)) {
+                var html = String(cache[file].data);
+                for (var resource in cache) {
+                    if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
+                        html = html.replace(resource, function(match) {
+                            return match.replace(".","." + cache[resource].revision + ".");
+                        });
+                    }
                 }
+                cache[file].data = html;
+            } else if (file.match(/.*\.css/)) {
+                var css = String(cache[file].data);
+                for (var res in cache) {
+                    if (!res.match(/.*\.css/) && cache.hasOwnProperty(res)) {
+                        css = css.replace(res, function(match) {
+                            return match.replace(".","." + cache[res].revision + ".");
+                        });
+                    }
+                }
+                cache[file].data = css;
             }
-            cache[file].data = html;
         }
     }
 }
@@ -358,7 +383,7 @@ function stripRevision(filename) {
     if (parts.length === 3) {
         return parts[0] + "." + parts[2];
     } else {
-        log("Error Unable to strip revision off " + filename);
+        log("Error Unable to strip revision off ", filename);
         return filename;
     }
 }
@@ -369,11 +394,11 @@ function cacheResources(callback) {
     var filesToGzip = [];
     for (var i = 0, len = files.length; i < len; i++){
         var fileName = files[i];
-        var path = config.resDir + fileName;
-        var fileData = fs.readFileSync(path);
+        var dir = getResPath(fileName);
+        var fileData = fs.readFileSync(dir);
         var stats;
         try {
-            stats = fs.statSync(path);
+            stats = fs.statSync(dir);
         } catch (err) {
             log(err);
             continue;
@@ -382,23 +407,11 @@ function cacheResources(callback) {
         cache[fileName].data = fileData;
         cache[fileName].size = stats.size;
         cache[fileName].revision = Number(stats.mtime).toString(36); //base36 the modified timestamp
-        cache[fileName].mime = mime.lookup(path);
-
-        if (fileName.match(/.*\.css/)) {
-            log("Preparing CSS...");
-            cache[fileName].data = cleancss.process(String(cache[fileName].data));
-        }
-        if (fileName === "libraries.js") {
-            log("Preparing JS...");
-            cache["client.js"].data = uglify.minify([config.resDir + "libraries.js", config.resDir + "client.js"]).code;
-        }
+        cache[fileName].mime = mime.lookup(dir);
 
         if (fileName.match(/.*(js|css|html)$/))
             filesToGzip.push(fileName);
     }
-
-
-
     addRevisions();
 
     if (filesToGzip.length > 0)
@@ -420,19 +433,30 @@ function cacheResources(callback) {
     }
 }
 //-----------------------------------------------------------------------------
-// Serve resources. Everything from /res/ will be cached by both the server and client
-function handleResourceRequest(req, res) {
+// Handle all GETs, except downloads
+function handleGET(req, res) {
     var resourceName;
-    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
+    var hasCookie = checkCookie(req);
 
     if (req.url === "/") {
-        if (config.useAuth && !isClientAuthenticated(req.socket.remoteAddress))
-            resourceName = "auth.html";
-        else
-            resourceName = "main.html";
-    } else {
-        resourceName = pathLib.basename(req.url);
-
+        resourceName = "base.html";
+    } else if (req.url === "/content") {
+        var obj = {};
+        if (hasCookie) {
+            obj.type = "main";
+            obj.data = cache["body-main.html"].data;
+        } else {
+            obj.type = "auth";
+            obj.data = cache["body-auth.html"].data;
+        }
+        var json = JSON.stringify(obj);
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Content-Length", json.length);
+        res.end(json);
+        return;
+    }  else {
+        resourceName = path.basename(req.url);
         if (resourceName.match(/\./g).length >= 2) {
             resourceName = stripRevision(resourceName);
         }
@@ -442,30 +466,20 @@ function handleResourceRequest(req, res) {
         res.writeHead(404);
         res.end();
     } else {
-        var size = cache[resourceName].size;
-
         res.statusCode = 200;
 
-        if (req.url === "/")
-            res.setHeader("X-Frame-Options","DENY");
-
+        if (req.url === "/") res.setHeader("X-Frame-Options","DENY");
         res.setHeader("Content-Type", cache[resourceName].mime);
         res.setHeader("Cache-Control", "public, max-age=31536000");
 
-        var acceptEncoding = req.headers["accept-encoding"];
-
-        if (!acceptEncoding)
-            acceptEncoding = "";
-
+        var acceptEncoding = req.headers["accept-encoding"] || "";
         if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipSize !== undefined) {
-            log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(cache[resourceName].gzipSize) + " gzipped)");
             res.setHeader("Content-Encoding", "gzip");
             res.setHeader("Content-Length", cache[resourceName].gzipSize);
             res.setHeader("Vary", "Accept-Encoding");
             res.end(cache[resourceName].gzipData);
         } else {
-            log("SEND: " + socket + "\t\t" + resourceName + " (" + convertToSI(size) + ")");
-            res.setHeader("Content-Length", size);
+            res.setHeader("Content-Length", cache[resourceName].size);
             res.end(cache[resourceName].data);
         }
     }
@@ -474,22 +488,22 @@ function handleResourceRequest(req, res) {
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    var path = unescape(prefixBasePath(req.url.replace("get/","")));
-    if (path) {
-        var mimeType = mime.lookup(path);
+    var filepath = unescape(prefixBasePath(req.url.replace("get/","")));
+    if (filepath) {
+        var mimeType = mime.lookup(filepath);
 
-        fs.stat(path, function(err,stats){
+        fs.stat(filepath, function(err,stats){
             if (err) {
                 res.writeHead(500);
                 res.end();
                 handleError(err);
             }
-            log("SEND: " + socket + "\t\t" + path + " (" + convertToSI(stats.size) + ")");
+            log("SEND: ", socket, "\t\t", filepath, " (", convertToSI(stats.size), ")");
             res.writeHead(200, {
                 "Content-Type"      : mimeType,
                 "Content-Length"    : stats.size
             });
-            fs.createReadStream(path, {"bufferSize": 4096}).pipe(res);
+            fs.createReadStream(filepath, {"bufferSize": 4096}).pipe(res);
         });
     }
 }
@@ -511,10 +525,10 @@ function handleUploadRequest(req, res) {
                 file.path = prefixBasePath(clients[address].directory) + "/" + file.name;
             uploadedFiles.push(file.path);
 
-            log("RECV: " + socket + "\t\t" + file.path );
+            log("RECV: ", socket, "\t\t", file.path );
         });
 
-        form.on('end', function() {
+        form.on("end", function() {
             uploadedFiles.forEach(function(file) {
                 fs.chmod(file, config.mode, function(err) {
                     if (err) handleError(err);
@@ -580,8 +594,9 @@ var readDirectory = debounce(function (root, callback){
 },config.readInterval);
 //-----------------------------------------------------------------------------
 // Logging and error handling helpers
-function log(msg) {
-    console.log(getTimestamp() + msg);
+function log() { //getTimestamp(),
+    var arr = Array.prototype.slice.call(arguments, 0);
+    console.log(getTimestamp(), arr.join(""));
 }
 
 function handleError(err) {
@@ -623,7 +638,7 @@ function handleArguments() {
     }
 
     function printUsage() {
-        process.stdout.write("Droppy - file server on node.js (https://github.com/silverwind/Droppy)\n");
+        process.stdout.write("droppy - file server on node.js (https://github.com/silverwind/droppy)\n");
         process.stdout.write("Usage: node droppy [option] [option arguments]\n\n");
         process.stdout.write("-help \t\t\t\tPrint this help\n");
         process.stdout.write("-adduser username password\tCreate a new user for authentication\n");
@@ -635,14 +650,13 @@ function readConfig() {
     try {
         config = JSON.parse(fs.readFileSync("./config.json"));
     } catch (e) {
-        console.log("Error reading ./config.json\n\n");
-        console.log(util.inspect(e));
+        console.log("Error reading config.json\n",util.inspect(e));
         process.exit(1);
     }
-    var opts = ["filesDir","resDir","useSSL","useAuth","port","readInterval","httpsKey","httpsCert","userDB"];
+    var opts = ["useSSL","port","readInterval","mode","httpsKey","httpsCert","db","filesDir","resDir","srcDir"];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
-            console.log("Error: Missing property in config.json: " + opts[i]);
+            console.log("Error: Missing property in config.json:", opts[i]);
             process.exit(1);
         }
     }
@@ -650,37 +664,54 @@ function readConfig() {
 //-----------------------------------------------------------------------------
 // Read and validate user database
 function readDB() {
-    if (config.useAuth === true) {
-        try {
-            userDB = JSON.parse(fs.readFileSync(config.userDB));
-        } catch (e) {
-            console.log("Error reading "+ config.userDB + "\n\n");
-            console.log(util.inspect(e));
-            process.exit(1);
+    try {
+        db = JSON.parse(fs.readFileSync(config.db));
+        if (!db) db = {};
+        if (!db.users) db.users = {};
+        if (!db.sessions) db.sessions = {};
+    } catch (e) {
+        if (e.code === "ENOENT") {
+            db = {users: {}, sessions: {}};
+            try {
+                fs.writeFileSync(config.db, JSON.stringify(db));
+            } catch (e) {
+                onError(e);
+            }
+        } else {
+            onError(e);
         }
+    }
+
+    function onError(error) {
+        console.log("Error reading", config.db);
+        console.log(util.inspect(error));
+        process.exit(1);
     }
 }
 //-----------------------------------------------------------------------------
 // Get a SHA256 hash of a string
 function getHash(string) {
-    return crypto.createHmac("sha256", new Buffer(string, 'utf8')).digest("hex");
+    return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
 }
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
 function addUser (user, password) {
-    readConfig();
     readDB();
-    if (userDB[user] !== undefined) {
-        console.log("User " + user + " already exists!");
+    if (db.users[user] !== undefined) {
+        console.log("User", user, "already exists!");
         process.exit(1);
     } else {
-        userDB[user] = getHash(password + "!salty!" + user);
+        db.users[user] = getHash(password + "!salty!" + user);
         try {
-            fs.writeFileSync(config.userDB, JSON.stringify(userDB));
-            console.log("User " + user + " sucessfully added.");
-            process.exit();
+            fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+            if (user === "droppy") {
+                console.log (" ->> default user added: Username: droppy, Password: droppy");
+            } else {
+                console.log("User", user, "sucessfully added.");
+                process.exit();
+            }
         } catch (e) {
-            console.log("Error writing "+ config.userDB + "\n\n");
+            console.log("Error writing", config.db);
             console.log(util.inspect(e));
             process.exit(1);
         }
@@ -689,21 +720,53 @@ function addUser (user, password) {
 //-----------------------------------------------------------------------------
 // Check if user/password is valid
 function isValidUser(user, password) {
-    if (userDB[user] === getHash(password + "!salty!" + user))
+    log(user,password);
+    if (db.users[user] === getHash(password + "!salty!" + user))
         return true;
     else
         return false;
 }
 //-----------------------------------------------------------------------------
-// Checks if a client is authenticated
-function isClientAuthenticated(IP) {
-    if (authClients[IP] !== undefined)
-        return true;
-    else
-        return false;
+// Cookie helpers
+function checkCookie(req) {
+    var cookie = req.headers.cookie, sid = "";
+    if (cookie !== undefined && cookie.match(/^_SESSION.*/)) {
+        sid = cookie.substring(9);
+    }
+
+    for (var savedsid in db.sessions) {
+        if (savedsid === sid) {
+            return true;
+        }
+    }
+    return false;
 }
-//-----------------------------------------------------------------------------
-// Helper function for log timestamps
+
+function createCookie(req, res, postData) {
+    var sessionID = crypto.randomBytes(64).toString("base64");
+    if (postData.check === "on") {
+        var dateString = new Date(new Date().getTime()+31536000000).toUTCString();
+        db.sessions[sessionID] = true;
+        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+        res.setHeader("Set-Cookie", "_SESSION=" + sessionID + "; Expires=" + dateString);
+    } else {
+        db.sessions[sessionID] = true;
+        res.setHeader("Set-Cookie", "_SESSION=" + sessionID + ";");
+    }
+
+}
+/* ============================================================================
+ *  Misc helper functions
+ * ============================================================================
+ */
+function getResPath(name) {
+    return path.join(config.resDir, name);
+}
+
+function getSrcPath(name) {
+    return path.join(config.srcDir, name);
+}
+
 function getTimestamp() {
     var currentDate = new Date();
     var day = currentDate.getDate();
@@ -717,26 +780,33 @@ function getTimestamp() {
     if (minutes < 10) minutes = "0" + minutes;
     if (seconds < 10) seconds = "0" + seconds;
 
-    return year + "-"  + month + "-" + day + " "+ hours + ":" + minutes + ":" + seconds + " ";
+    return year + "-"  + month + "-" + day + " "+ hours + ":" + minutes + ":" + seconds;
 }
-//-----------------------------------------------------------------------------
-// Helper function for size values
+
 function convertToSI(bytes) {
     var kib = 1024,
         mib = kib * 1024,
         gib = mib * 1024,
         tib = gib * 1024;
 
-    if ((bytes >= 0) && (bytes < kib))         return bytes + ' bytes';
-    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + 'KiB';
-    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + 'MiB';
-    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + 'GiB';
-    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + 'TiB';
-    else return bytes + ' bytes';
+    if ((bytes >= 0) && (bytes < kib))         return bytes + " bytes";
+    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + "KiB";
+    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + "MiB";
+    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + "GiB";
+    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + "TiB";
+    else return bytes + " bytes";
 }
-//-----------------------------------------------------------------------------
-// underscore's debounce
-// https://github.com/documentcloud/underscore
+
+function prettyStartup() {
+    return([
+        "    __\n",
+        ".--|  .----.-----.-----.-----.--.--.\n",
+        "|  _  |   _|  _  |  _  |  _  |  |  |\n",
+        "|_____|__| |_____|   __|   __|___  |\n",
+        "                 |__|  |__|  |_____|\n\n"
+    ].join(""));
+}
+// underscore's debounce - https://github.com/documentcloud/underscore
 function debounce(func, wait, immediate) {
     var timeout, result;
     return function() {
