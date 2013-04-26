@@ -58,7 +58,7 @@ $(getPage);
  */
 function openSocket() {
     if (document.location.protocol === "https:")
-        socket = new WebSocket('ws://' + document.location.host);
+        socket = new WebSocket('wss://' + document.location.host);
     else
         socket = new WebSocket('ws://' + document.location.host);
 
@@ -153,10 +153,9 @@ function initAuth() {
 function initMainPage() {
     // Opening the socket on onpageshow has the benefit that it works after
     // a user returns to the page through the back button.
-   // $("body").attr("onpageshow", function() {
-
-   // });
-    openSocket();
+    $("body").attr("onpageshow", function() {
+        openSocket();
+    });
 
     // Cache elements
     bar = $("#progressBar"),

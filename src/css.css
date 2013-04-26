@@ -319,7 +319,7 @@ footer {
     top:0;
     overflow: auto;
     padding-left:220px;
-    height:30px;
+    height:35px;
     width:100%;
 }
 
@@ -328,7 +328,7 @@ footer {
 }
 #content {
     position: absolute;
-    top : 35px;
+    top : 40px;
     bottom: 0;
     max-height: 100%;
     width: 100%;

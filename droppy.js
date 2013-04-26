@@ -720,7 +720,6 @@ function addUser (user, password) {
 //-----------------------------------------------------------------------------
 // Check if user/password is valid
 function isValidUser(user, password) {
-    log(user,password);
     if (db.users[user] === getHash(password + "!salty!" + user))
         return true;
     else

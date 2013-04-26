@@ -37,12 +37,12 @@ Configuration is done through  the `config.json` file, located in the same direc
 }
 ````
 
-- `useSSL` Whether the server should use HTTPS (SSL). Requires both the key file, `httpsKey` and the certificate, `httpsCert` to be set.
-- `port` The listening port. For HTTPS, you may want to set it to 443.
-- `readInterval` The time in milliseconds between full directory scans. Reducing it results in a little more responsiveness at the cost of more file I/O.
-- `mode` The access mode with which files are created.
-- `httpsKey` and `httpsCert` The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Self-signed certificates are supported, in case you just want end-to-end encryption.
+- `useSSL`: Whether the server should use HTTPS (SSL).
+- `port`: The listening port. For HTTPS, you may want to set it to 443.
+- `readInterval`: The time in milliseconds between full directory scans. Reducing it results in a little more responsiveness at the cost of more file I/O.
+- `mode`: The access mode with which files are created.
+- `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Sample self-signed files are provided.
 - `db` Location of the user database file.
-- `filesDir` The directory which serves as the server's root. Can be relative or absolute.
-- `resDir` The directory which contains the public resources.
-- `srcDir` The directory which contains the server html/js/css sources.
+- `filesDir`: The directory which serves as the server's root.
+- `resDir`: The directory which contains the compiled resources and images.
+- `srcDir`: The directory which contains the html/js/css sources.
