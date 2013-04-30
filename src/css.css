@@ -258,10 +258,16 @@ footer {
     #content {
         float: left;
         width: 100%;
+        top: 52px;
     }
 
     #title {
         display: none;
+    }
+
+    #current {
+        top: 1em;
+        padding-left: 5px;
     }
 
     .button {
@@ -274,26 +280,40 @@ footer {
         width: 200px;
         height: 100%;
         position: fixed;
-        top:0;
+        top: 0;
     }
 
     #content {
         padding-left: 200px;
+        top: 30px;
     }
 
     #title {
         padding: 5%;
         font-size: 2.5em;
     }
+
+    #current {
+        top: 0;
+        padding-left: 210px;
+    }
 }
 
 /* ===================== Related Elements ===================== */
+#current {
+    font-size: 1.5em;
+    z-index: 100;
+    position: fixed;
+    height:35px;
+    width:100%;
+    overflow: auto;
+}
+
 #title {
     font-weight: 800;
     color: #eee;
     opacity: .6;
     transition: all .2s linear;
-
 }
 
 #title:hover {
@@ -312,17 +332,6 @@ footer {
     user-select: none;
 }
 
-#current {
-    font-size: 1.5em;
-    z-index: 100;
-    position: fixed;
-    top:0;
-    overflow: auto;
-    padding-left:220px;
-    height:35px;
-    width:100%;
-}
-
 .black {
     color: #000;
 }
@@ -333,7 +342,6 @@ footer {
 
 #content {
     position: absolute;
-    top : 40px;
     bottom: 0;
     max-height: 100%;
     width: 100%;
