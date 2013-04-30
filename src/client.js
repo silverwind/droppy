@@ -264,10 +264,8 @@ function initMainPage() {
             uploadInit();
         });
 
-        dropZone.on("uploadprogress", function(file, progress) {
-            var bytesTotal = file.size;
-            var bytesSent = file.size * progress/100;
-            uploadProgress(bytesSent, bytesTotal, progress);
+        dropZone.on("uploadprogress", function(file, progress, bytesSent) {
+            uploadProgress(bytesSent, file.size, progress);
         });
 
         dropZone.on("complete", function() {

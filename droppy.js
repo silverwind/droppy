@@ -668,27 +668,40 @@ function readConfig() {
 //-----------------------------------------------------------------------------
 // Read and validate user database
 function readDB() {
+    var dbString = "";
+    var doWrite = false;
+
     try {
-        db = JSON.parse(fs.readFileSync(config.db));
-        if (!db) db = {};
-        if (!db.users) db.users = {};
-        if (!db.sessions) db.sessions = {};
+        dbString = String(fs.readFileSync(config.db));
+        db = JSON.parse(dbString);
+
+        // Create sub-objects in case they aren't here
+        if (!db.users) {
+            db.users = {};
+            doWrite = true;
+        }
+        if (!db.sessions) {
+            db.sessions = {};
+            doWrite = true;
+        }
     } catch (e) {
-        if (e.code === "ENOENT") {
+        if (e.code === "ENOENT" || dbString.match(/^\s*$/)) {
+            // Recreate DB file in case it doesn't exist / is empty
             db = {users: {}, sessions: {}};
-            try {
-                fs.writeFileSync(config.db, JSON.stringify(db));
-            } catch (e) {
-                onError(e);
-            }
+            doWrite = true;
         } else {
-            onError(e);
+            console.log("Error reading", config.db);
+            console.log(util.inspect(e));
+            process.exit(1);
         }
     }
 
-    function onError(error) {
-        console.log("Error reading", config.db);
-        console.log(util.inspect(error));
+    // Write a new DB if necessary
+    try {
+        fs.writeFileSync(config.db, JSON.stringify(db));
+    } catch (e) {
+        console.log("Error writing", config.db);
+        console.log(util.inspect(e));
         process.exit(1);
     }
 }
