@@ -701,7 +701,8 @@ function addUser (user, password) {
         console.log("User", user, "already exists!");
         process.exit(1);
     } else {
-        db.users[user] = getHash(password + "!salty!" + user);
+        var salt = crypto.randomBytes(4).toString("hex");
+        db.users[user] = getHash(password + salt + user) + "$" + salt;
         try {
             fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
             if (user === "droppy") {
@@ -720,10 +721,12 @@ function addUser (user, password) {
 //-----------------------------------------------------------------------------
 // Check if user/password is valid
 function isValidUser(user, password) {
-    if (db.users[user] === getHash(password + "!salty!" + user))
-        return true;
-    else
-        return false;
+    if (db.users[user]) {
+        var parts = db.users[user].split("$");
+        if (parts.length === 2 && parts[0] === getHash(password + parts[1] + user))
+            return true;
+    }
+    return false;
 }
 //-----------------------------------------------------------------------------
 // Cookie helpers
