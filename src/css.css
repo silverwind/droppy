@@ -326,6 +326,11 @@ footer {
 .black {
     color: #000;
 }
+
+#preview {
+    display : none;
+}
+
 #content {
     position: absolute;
     top : 40px;

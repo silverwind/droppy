@@ -65,6 +65,11 @@ function openSocket() {
     socket.onopen = function() {
         // Request initial update
         sendMessage("REQUEST_UPDATE", currentFolder);
+
+        // Close the socket to prevent Firefox errors
+        $(window).on('beforeunload', function(){
+          socket.close();
+        });
     };
 
     socket.onmessage = function (event) {
@@ -251,15 +256,22 @@ function initMainPage() {
      * ============================================================================
      */
     function attachDropzone(){
-        var dropZone = new Dropzone(document.body, {clickable: false, url: "/upload"});
+        var dropZone = new Dropzone(document.body, {
+            clickable: false,
+            url: "/upload",
+            previewsContainer: "#preview"
+        });
+
         dropZone.on("sending", function() {
             uploadInit();
         });
+
         dropZone.on("uploadprogress", function(file, progress) {
             var bytesTotal = file.size;
             var bytesSent = file.size * progress/100;
             uploadProgress(bytesSent, bytesTotal, progress);
         });
+
         dropZone.on("complete", function() {
             uploadDone();
         });
