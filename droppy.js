@@ -698,7 +698,7 @@ function readDB() {
 
     // Write a new DB if necessary
     try {
-        fs.writeFileSync(config.db, JSON.stringify(db));
+        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
     } catch (e) {
         console.log("Error writing", config.db);
         console.log(util.inspect(e));
