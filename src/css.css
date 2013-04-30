@@ -170,22 +170,30 @@ footer {
     left: 10px;
 }
 
-.filename, .foldername, .backlink {
-    margin-left: 25px;
-    float: left;
-    overflow:auto;
-    width:65%;
-}
-
 .backlink {
     width: 90%;
 }
 
+
+.filename, .foldername, .backlink {
+    margin-left: 25px;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 65%;
+}
+
 .fileinfo, .folderinfo {
-    width: auto;
+    width: 15%;
     float: right;
     text-align: right;
+    white-space: nowrap;
     margin-right: 10px;
+}
+
+.pin-right {
+    float: right;
 }
 
 #back {

@@ -353,7 +353,7 @@ function buildHTML(fileList,root) {
                 htmlFiles += [
                     '<div class="filerow" data-id="',id,'"><img class="icon" src="res/file.png" width="16px" height="16px" alt="File">',
                     '<div class="filename"><a class="filelink" href="',escape("/get" + id),'">',name,'</a></div>',
-                    '<div class="fileinfo">',size,'<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
+                    '<div class="fileinfo"><span class="pin-right">',size,'<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
                     '<div class="right"></div></div>'
                 ].join("");
 
