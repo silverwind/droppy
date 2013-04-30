@@ -332,16 +332,20 @@ function onRequest(req, res) {
             });
             req.on("end", function() {
                 var postData = querystring.parse(body);
+                var response;
                 if (isValidUser(postData.username, postData.password)) {
                     log("AUTH: ", socket, "\t\tUser ", postData.username, " successfully authenticated.");
-                    res.statusCode = 200;
+                    response = "OK";
                     createCookie(req, res, postData);
-                    res.end();
                 } else {
                     log("AUTH: ", socket, "\t\tUser ", postData.username, " failed authentication.");
-                    res.writeHead(401);
-                    res.end();
+                    response = "NOK";
                 }
+                var json = JSON.stringify(response);
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.setHeader("Content-Length", json.length);
+                res.end(json);
             });
         }
     }

@@ -129,13 +129,11 @@ function initAuth() {
             type: "POST",
             url: "/login",
             data: form.serialize(),
-            statusCode: {
-                200: function() {
+            success: function(data) {
+                if (data === "OK")
                     getPage();
-                },
-                401: function() {
+                else
                     showError(errForm);
-                }
             }
         });
     }
