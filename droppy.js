@@ -504,8 +504,9 @@ function handleFileRequest(req, res) {
             }
             log("SEND: ", socket, "\t\t", filepath, " (", convertToSI(stats.size), ")");
             res.writeHead(200, {
-                "Content-Type"      : mimeType,
-                "Content-Length"    : stats.size
+                "Content-Disposition" : ['attachment; filename="',path.basename(filepath),'"'].join(""),
+                "Content-Type"        : mimeType,
+                "Content-Length"      : stats.size
             });
             fs.createReadStream(filepath, {"bufferSize": 4096}).pipe(res);
         });
