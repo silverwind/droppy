@@ -478,8 +478,7 @@ footer {
     height:30px;
     width:100%;
     overflow: hidden;
-    opacity: .9;
-    font-size: 1.25em;
+    opacity: .95;
 }
 
 #crumbs {
@@ -502,10 +501,6 @@ footer {
     display: inline;
 }
 
-#crumbs ul li:last-child a:after, #crumbs ul li:last-child span:after {
-    border-radius: 3px;
-}
-
 #crumbs a, #crumbs span {
     color: #ccc;
     display: block;
@@ -525,7 +520,7 @@ footer {
     width: 30px;
     position: absolute;
    /* right: 2.1px; */
-    right: 5px;
+    right: 1px;
     top: 0;
     background: #eee;
     transform: translateX(1em) rotate(45deg) scale(0.707) ;
