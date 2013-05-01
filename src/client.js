@@ -80,11 +80,12 @@ function openSocket() {
         if (msg.type === "UPDATE_FILES") {
             if (isUploading) return;
             if (msg.folder === currentFolder.replace(/&amp;/,"&")) {
-                updateCurrentFolder(msg.folder);
+                updateCrumbs(msg.folder);
                 $("#content").html(buildHTML(msg.data, msg.folder));
             }
         }
     };
+
     socket.onclose = function() {
         socketOpen = false;
         // Restart a closed socket. Firefox closes it on every download..
@@ -192,6 +193,14 @@ function initMainPage() {
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
+    // Jump to a folder using the breadcrumbs
+    $("body").on("click", ".navlink", function(e) {
+        e.preventDefault();
+        var destination = $(this).data("path");
+        currentFolder = destination;
+        sendMessage("SWITCH_FOLDER", currentFolder);
+    });
+
     // Go back up
     $("body").on("click", ".backlink", function(e) {
         e.preventDefault();
@@ -208,12 +217,6 @@ function initMainPage() {
         e.preventDefault();
         sendMessage("DELETE_FILE", $(this).parents().eq(2).data("id") || $(this).parents().eq(1).data("id"));
     });
-
-    $("body").on("click", ".navlink", function(e) {
-        e.preventDefault();
-        //TODO
-    });
-
 
     // Automatically submit a form once it's data changed
     $("form").change(function() {
@@ -279,7 +282,6 @@ function initMainPage() {
             maxFilesize: 65535
         });
 
-
         dropZone.on("sending", function() {
             uploadInit();
         });
@@ -339,21 +341,28 @@ function initMainPage() {
  *  General helpers
  * ============================================================================
  */
-function updateCurrentFolder(path) {
+function updateCrumbs(path) {
     document.title = ["droppy",path].join(" - ");
     var parts = path.split("/");
     parts[0] = "droppy";
+
+    // Remove trailing empty string
     if (parts[parts.length - 1] === "") parts.pop();
 
+    // Build the list
     var html = '<ul id="crumbs">';
+    var elementPath = "";
     parts.forEach(function(part) {
-        html += '<li><a class="navlink" href="">' + part + '</a></li>';
+        if(part === "droppy") {
+            html += ['<li><a class="navlink" data-path="/" href="">',part,'</a></li>'].join("");
+        } else {
+            elementPath += "/" + part;
+            html += ['<li><a class="navlink" data-path="',elementPath,'" href="">',part,'</a></li>'].join("");
+        }
     });
     html += '</ul>';
     $("#current").html(html);
 }
-
-
 
 function buildHTML(fileList,root) {
     // TODO: Clean up this mess
@@ -406,6 +415,7 @@ function buildHTML(fileList,root) {
     }
     return htmlBack + htmlDirs + htmlFiles;
 }
+
 function convertToSI(bytes) {
     var kib = 1024,
         mib = kib * 1024,

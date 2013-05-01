@@ -17,8 +17,7 @@ or just
 ````
 ./droppy.js
 ````
-
-Command line arguments are available through appending `-help`. Per default, shared files will be placed in `files/` and the server will listen on [localhost:80](http://localhost/). Note: If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
+Once the server is listening, navigate to [http://localhost:80/](http://localhost/). Upon first startup, a user "droppy" with password "droppy" will be created. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
 
 ###Configuration
 Configuration is done through  the `config.json` file, located in the same directory as `droppy.js`.
@@ -46,3 +45,6 @@ Configuration is done through  the `config.json` file, located in the same direc
 - `filesDir`: The directory which serves as the server's root.
 - `resDir`: The directory which contains the compiled resources and images.
 - `srcDir`: The directory which contains the html/js/css sources.
+
+###Notes
+- If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
