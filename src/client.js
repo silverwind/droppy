@@ -361,7 +361,21 @@ function updateCrumbs(path) {
         }
     });
     html += '</ul>';
+
+    var oldLen = $("#current ul li").length;
     $("#current").html(html);
+    if ($("#current ul li").length > oldLen) {
+        var last = $("#current ul li:last-child");
+        last.css("margin-top",-100);
+        last.css("opacity",0);
+        $("#current ul li:last-child").animate({
+           "margin-top" : 0,
+           "opacity" : 1
+        },{
+            duration: 250
+        });
+    }
+
 }
 
 function buildHTML(fileList,root) {

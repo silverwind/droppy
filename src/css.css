@@ -81,13 +81,13 @@ li {
 
 #title {
     font-weight: 800;
-    color: #eee;
+    color: #fff;
     opacity: .6;
     transition: all .2s linear;
 }
 
 #title:hover {
-    color:  #eee;
+    color:  #fff;
     opacity: 1;
 }
 
@@ -169,6 +169,10 @@ footer a {
     color: #ccc;
 }
 
+footer a:hover {
+    color: #fff;
+}
+
 #noscript {
     position: absolute;
     display: table;
@@ -195,14 +199,14 @@ footer a {
 }
 /* ===================== File/Folder display ===================== */
 .filerow:hover, .folderrow:hover {
-    color: #eee;
+    color: #fff;
     background-image: url("/res/bg-dark.png");
     opacity: .9;
     border-radius: 6px;
 }
 
 .filerow:hover *, .folderrow:hover * {
-    color: #eee;
+    color: #fff;
 }
 
 .filelink, .folderlink, .backlink{
@@ -495,14 +499,13 @@ footer a {
     background-image: url(/res/chk.png);
     user-select: none;
 }
-/* ===================== Current Folder ===================== */
+/* ===================== Breadcrumbs ===================== */
 #current {
     z-index: 100;
     position: fixed;
     height:30px;
     width:100%;
     overflow: hidden;
-    opacity: .95;
 }
 
 #crumbs ul, #crumbs ul li {
@@ -510,7 +513,7 @@ footer a {
     list-style: none;
 }
 
-#crumbs a, #crumbs span {
+#crumbs a {
     color: #ddd;
     display: block;
     float: left;
@@ -521,7 +524,7 @@ footer a {
     background: #aaa;
 }
 
-#crumbs a:after, #crumbs span:after {
+#crumbs a:after {
     content: '';
     display: block;
     z-index: 1;
@@ -543,6 +546,11 @@ footer a {
 #crumbs li:nth-child(4) a       { background: #888; }
 #crumbs li:nth-child(4) a:after { background: #888; }
 
-#crumbs a:hover, #crumbs span:hover {
-    color: #fff;
+#crumbs li a, #crumbs li a:after {
+  transition: .3s all;
+}
+
+#crumbs li a:hover, #crumbs li a:hover:after {
+  background: #c73;
+  color: #fff;
 }
