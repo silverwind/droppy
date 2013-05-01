@@ -67,8 +67,6 @@ li {
     display: block;
     float: left;
     background-image: url("/res/bg-dark.png");
-    -webkit-touch-callout: none;
-    user-select: none;
 }
 
 #content {
@@ -100,6 +98,8 @@ li {
     margin: 0 auto;
     font-weight: 400;
     font-size: 1.2em;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 
 .button:hover {
@@ -119,15 +119,6 @@ li {
 #file-upload {
     position: relative;
     overflow: hidden;
-}
-
-footer {
-    display: none;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    font-size: 0.65em;
-    text-align: center;
 }
 
 #progress {
@@ -153,6 +144,29 @@ footer {
     background-size: 18px 18px;
     box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
     border-radius: 2px;
+}
+
+#tip {
+    position: absolute;
+    bottom: 1.4em;
+    font-size: 1em;
+    width: 100%;
+    text-align: center;
+    padding: 25px;
+    color: #999;
+}
+
+footer {
+    position: absolute;
+    bottom: .7em;
+    width: 100%;
+    height: .7em;
+    font-size: .7em;
+    text-align: center;
+}
+
+footer a {
+    color: #ccc;
 }
 
 #noscript {
@@ -329,6 +343,14 @@ footer {
 
     .button {
         width: 50%;
+    }
+
+    #tip {
+        display: none;
+    }
+
+    footer {
+        display: none;
     }
 }
 
