@@ -303,16 +303,16 @@ function initMainPage() {
         });
     }
     function uploadInit() {
-        progress.fadeIn(600);
         bar.width("0%");
         percent.html("");
+        progress.fadeIn(300);
         isUploading = true;
         start = new Date().getTime();
     }
     function uploadDone(){
         bar.width("100%");
         percent.html("finished");
-        progress.fadeOut(600);
+        progress.fadeOut(300);
         isUploading = false;
     }
     function uploadProgress(bytesSent, bytesTotal, completed) {
