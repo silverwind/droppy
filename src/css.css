@@ -519,11 +519,10 @@ footer {
     height: 30px;
     width: 30px;
     position: absolute;
-   /* right: 2.1px; */
-    right: 1px;
+    right: -15px;
     top: 0;
     background: #eee;
-    transform: translateX(1em) rotate(45deg) scale(0.707) ;
+    transform: rotate(45deg) scale(0.707) ;
 }
 
 
