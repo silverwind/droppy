@@ -217,8 +217,8 @@ footer a {
 .filerow, .folderrow {
     line-height: 1.5em;
     height: 1.5em;
-    margin-left:12px;
-    margin-right:12px;
+    margin-left:8px;
+    margin-right:8px;
 }
 
 .icon {
@@ -330,7 +330,7 @@ footer a {
     #content {
         float: left;
         width: 100%;
-        top: 60px;
+        top: 65px;
     }
 
     #title {
@@ -364,7 +364,7 @@ footer a {
 
     #content {
         padding-left: 200px;
-        top: 33px;
+        top: 38px;
     }
 
     #title {
@@ -533,7 +533,6 @@ footer a {
     background: #aaa;
     transform: rotate(45deg) scale(0.707) ;
 }
-
 
 #crumbs li:nth-child(1) a       { background: #222; }
 #crumbs li:nth-child(1) a:after { background: #222; }
