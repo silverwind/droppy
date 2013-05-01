@@ -316,7 +316,7 @@ function onRequest(req, res) {
     log("REQ:  ", socket, "\t", method, "\t", req.url);
 
     if (method === "GET") {
-        if (req.url.match(/^\/get\//) && checkCookie(req)) {
+        if (req.url.match(/^\/get\//)) {
             handleFileRequest(req, res);
         } else {
             handleGET(req,res);
@@ -489,9 +489,13 @@ function handleGET(req, res) {
         }
     }
 }
-
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
+    if(!checkCookie(req)) {
+        res.statusCode = 301;
+        res.setHeader("Location", "/");
+        res.end();
+    }
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     var filepath = unescape(prefixBasePath(req.url.replace("get/","")));
     if (filepath) {
@@ -593,8 +597,6 @@ var readDirectory = debounce(function (root, callback){
                     callback();
                 }
             });
-
-
         }
     });
 },config.readInterval);
