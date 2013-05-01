@@ -176,7 +176,7 @@ function createListener() {
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
     var relativePath = folder.replace(config.filesDir.substring(0, config.filesDir.length - 1),"");
-    var watcher = fs.watch(folder,{ persistent: true }, function(event){
+    var watcher = fs.watch(folder,{ persistent: true }, function(event) {
         if (event === "change" || event === "rename") {
             // Files in a watched directory changed. Figure out which client(s) need updates
             // This part might be quite costly cpu-wise while files are being written, need
@@ -222,7 +222,7 @@ function setupSocket(server) {
                 });
                 break;
             case "CREATE_FOLDER":
-                fs.mkdir(prefixBasePath(dir), config.mode, function(err){
+                fs.mkdir(prefixBasePath(dir), config.mode, function(err) {
                     if (err) handleError(err);
                     readDirectory(clients[remoteIP].directory, function() {
                         sendMessage(remoteIP, "UPDATE_FILES");
@@ -394,7 +394,7 @@ function stripRevision(filename) {
 function cacheResources(callback) {
     var files = fs.readdirSync(config.resDir);
     var filesToGzip = [];
-    for (var i = 0, len = files.length; i < len; i++){
+    for (var i = 0, len = files.length; i < len; i++) {
         var fileName = files[i];
         var dir = getResPath(fileName);
         var fileData = fs.readFileSync(dir);
@@ -489,7 +489,7 @@ function handleGET(req, res) {
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
-    if(!checkCookie(req)) {
+    if (!checkCookie(req)) {
         res.statusCode = 301;
         res.setHeader("Location", "/");
         res.end();
@@ -499,7 +499,7 @@ function handleFileRequest(req, res) {
     if (filepath) {
         var mimeType = mime.lookup(filepath);
 
-        fs.stat(filepath, function(err,stats){
+        fs.stat(filepath, function(err,stats) {
             if (err) {
                 res.writeHead(500);
                 res.end();
@@ -557,7 +557,7 @@ function handleUploadRequest(req, res) {
 }
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in "dirs"
-var readDirectory = debounce(function (root, callback){
+var readDirectory = debounce(function (root, callback) {
     lastRead = new Date();
     fs.readdir(prefixBasePath(root), function(err,files) {
         if (err) handleError(err);
@@ -573,7 +573,7 @@ var readDirectory = debounce(function (root, callback){
         var lastFile = files.length;
         var counter = 0;
 
-        for (var i = 0 ; i < lastFile; i++){
+        for (var i = 0 ; i < lastFile; i++) {
             var filename = files[i], type;
             inspectFile(filename);
         }

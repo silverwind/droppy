@@ -11,7 +11,7 @@ var bar, info, nameinput, percent, progress, start, socket;
  */
 function getPage() {
     $.getJSON('/content', function(response) {
-        animatedLoad("page", "body", response.data, function(){
+        animatedLoad("page", "body", response.data, function() {
             // Load the appropriate Javascript for the received page
             switch(response.type) {
                 case "main":
@@ -56,7 +56,7 @@ $(getPage);
  * ============================================================================
  */
 function openSocket() {
-    if(socketOpen === "true") return;
+    if (socketOpen === "true") return;
 
     if (document.location.protocol === "https:")
         socket = new WebSocket('wss://' + document.location.host);
@@ -69,7 +69,7 @@ function openSocket() {
         sendMessage("REQUEST_UPDATE", currentFolder);
 
         // Close the socket to prevent Firefox errors
-        $(window).on('beforeunload', function(){
+        $(window).on('beforeunload', function() {
           socket.close();
           socketOpen = false;
         });
@@ -115,15 +115,15 @@ function initAuthPage() {
     user.focus();
 
     // Return submits the form
-    pass.keyup(function(e){
-        if(e.keyCode === 13) {
+    pass.keyup(function(e) {
+        if (e.keyCode === 13) {
             submitForm(form, submit);
         }
     });
 
     // Spacebar toggles the checkbox
-    remember.keyup(function(e){
-        if(e.keyCode === 32) {
+    remember.keyup(function(e) {
+        if (e.keyCode === 32) {
             $("#check").trigger("click");
         }
     });
@@ -225,7 +225,7 @@ function initMainPage() {
     });
 
     // Show popup for folder creation
-    $("#add-folder").click(function (){
+    $("#add-folder").click(function () {
         $("#overlay").fadeToggle(350);
         nameinput.val("");
         nameinput.focus();
@@ -233,7 +233,7 @@ function initMainPage() {
     });
 
     // Handler for the input of the folder name
-    nameinput.keyup(function(e){
+    nameinput.keyup(function(e) {
         if (e.keyCode === 27) // Escape Key
             $("#overlay").toggle();
 
@@ -246,7 +246,7 @@ function initMainPage() {
             return;
         }
 
-        if (!valid){
+        if (!valid) {
             nameinput.attr("class","invalid");
             info.html("Invalid character(s) in filename!");
             return;
@@ -273,7 +273,7 @@ function initMainPage() {
      *  Helper functions for the main page
      * ============================================================================
      */
-    function attachDropzone(){
+    function attachDropzone() {
         var dropZone = new Dropzone(document.body, {
             clickable: false,
             url: "/upload",
@@ -314,7 +314,7 @@ function initMainPage() {
         isUploading = true;
         start = new Date().getTime();
     }
-    function uploadDone(){
+    function uploadDone() {
         bar.width("100%");
         percent.html("finished");
         progress.fadeOut(300);
@@ -353,7 +353,7 @@ function updateCrumbs(path) {
     var html = '<ul id="crumbs">';
     var elementPath = "";
     parts.forEach(function(part) {
-        if(part === "droppy") {
+        if (part === "droppy") {
             html += ['<li><a class="navlink" data-path="/" href="">',part,'</a></li>'].join("");
         } else {
             elementPath += "/" + part;
