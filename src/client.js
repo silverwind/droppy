@@ -15,10 +15,10 @@ function getPage() {
             // Load the appropriate Javascript for the received page
             switch(response.type) {
                 case "main":
-                    $(initMainPage);
+                    initMainPage();
                     break;
                 case "auth":
-                    $(initAuth);
+                    initAuthPage();
                     break;
             }
         });
@@ -104,7 +104,7 @@ function sendMessage(msgType, msgData) {
  *  Authentication page JS
  * ============================================================================
  */
-function initAuth() {
+function initAuthPage() {
     var user   = $("#user"),
         pass   = $("#pass"),
         form   = $("form"),
