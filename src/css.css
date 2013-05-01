@@ -15,7 +15,7 @@
 }
 
 /* ===================== General styles ===================== */
-html,body {
+html, body {
     font-family: "Open Sans", sans-serif;
     font-weight: 400;
     background-image: url("/res/bg.png");
@@ -27,7 +27,8 @@ html,body {
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+         box-sizing: border-box;
+    -moz-box-sizing: border-box;
 }
 
 #page, #new {
@@ -48,30 +49,82 @@ a {
 ul {
     list-style: none;
 }
-
-#noscript {
-    z-index: 2;
-    position: absolute;
-    display: table;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    background-color: black;
-    vertical-align: middle;
-    opacity: .9;
-}
-
-#noscript p {
-    display: table-cell;
-    vertical-align: middle;
-    font-size: 2.5em;
-    color: #f33;
-    line-height: 100%;
-    text-align: center;
-}
-
 /* ===================== Page elements ===================== */
+#loading {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background:url("/res/loading.gif") no-repeat center center;
+}
+
+#navigation {
+    z-index: 101;
+    text-align: center;
+    display: block;
+    float: left;
+    background-image: url("/res/bg-dark.png");
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+#content {
+    position: absolute;
+    bottom: 0;
+    max-height: 100%;
+    width: 100%;
+    font-size: 1.3em;
+    text-shadow: 0 0 1px rgba(128,128,128, .3);
+    overflow: auto;
+}
+
+#current {
+    font-size: 1.5em;
+    z-index: 100;
+    position: fixed;
+    height:35px;
+    width:100%;
+    overflow: auto;
+}
+
+#title {
+    font-weight: 800;
+    color: #eee;
+    opacity: .6;
+    transition: all .2s linear;
+}
+
+#title:hover {
+    color:  #eee;
+    opacity: 1;
+}
+
+.button {
+    float: left;
+    cursor: pointer;
+    width: 200px;
+    margin: 0 auto;
+    font-weight: 400;
+    font-size: 1.2em;
+}
+
+.button:hover {
+    color: #fff;
+}
+
+#file-upload input {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    height: 100%;
+    top: 0;
+    opacity: 0;
+    font-size: 100px;
+}
+
+#file-upload {
+    position: relative;
+    overflow: hidden;
+}
 
 footer {
     display: none;
@@ -108,33 +161,29 @@ footer {
     border-radius: 8px;
 }
 
-.button {
-    float: left;
-    cursor: pointer;
-    width: 200px;
-    margin: 0 auto;
-    font-weight: 400;
-    font-size: 1.2em;
-}
-
-.button:hover {
-    color: #fff;
-}
-
-
-#file-upload input {
-    cursor: pointer;
+#noscript {
     position: absolute;
-    right: 0;
-    height: 100%;
-    top: 0;
-    opacity: 0;
-    font-size: 100px;
+    display: table;
+    box-shadow: 1px 1px 25px 5px rgba(122,122,122,0.8);
+    height: 150px;
+    width: 300px;
+    margin-top: -75px;
+    margin-left: -150px;
+    left: 50%;
+    top: 50%;
+    background-image: url("/res/bg-dark.png");
+    opacity: .9;
+    border-radius: 10px;
 }
 
-#file-upload {
-    position: relative;
-    overflow: hidden;
+#noscript p {
+    display: table-cell;
+    vertical-align: middle;
+    font-size: 2em;
+    font-weight: 800;
+    color: #ddd;
+    line-height: 100%;
+    text-align: center;
 }
 /* ===================== File/Folder display ===================== */
 .filerow:hover, .folderrow:hover {
@@ -174,7 +223,6 @@ footer {
     width: 90%;
 }
 
-
 .filename, .foldername, .backlink {
     margin-left: 25px;
     float: left;
@@ -206,6 +254,14 @@ footer {
 
 .right {
     clear: both;
+}
+
+.black {
+    color: #000;
+}
+
+#preview {
+    display : none;
 }
 /* ===================== Popup box ===================== */
 #overlay {
@@ -306,58 +362,6 @@ footer {
         padding-left: 210px;
     }
 }
-
-/* ===================== Related Elements ===================== */
-#current {
-    font-size: 1.5em;
-    z-index: 100;
-    position: fixed;
-    height:35px;
-    width:100%;
-    overflow: auto;
-}
-
-#title {
-    font-weight: 800;
-    color: #eee;
-    opacity: .6;
-    transition: all .2s linear;
-}
-
-#title:hover {
-    color:  #eee;
-    opacity: 1;
-    transform: scale(1.2) rotateX(20deg) ;
-}
-
-#navigation {
-    z-index: 101;
-    text-align: center;
-    display: block;
-    float: left;
-    background-image: url("/res/bg-dark.png");
-    -webkit-touch-callout: none;
-    user-select: none;
-}
-
-.black {
-    color: #000;
-}
-
-#preview {
-    display : none;
-}
-
-#content {
-    position: absolute;
-    bottom: 0;
-    max-height: 100%;
-    width: 100%;
-    font-size: 1.3em;
-    text-shadow: 0 0 1px rgba(128,128,128, .3);
-    overflow: auto;
-}
-
 /* ===================== Login Form ===================== */
 
 #login-form {

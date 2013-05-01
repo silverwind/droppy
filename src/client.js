@@ -11,42 +11,41 @@ var bar, info, nameinput, percent, progress, start, socket;
  */
 function getPage() {
     $.getJSON('/content', function(response) {
-        animatedLoad("page", "body", response.data);
-        // Load the appropriate Javascript for that page
-        switch(response.type) {
-            case "main":
-                $(initMainPage);
-                break;
-            case "auth":
-                $(initAuth);
-                break;
-        }
+        animatedLoad("page", "body", response.data, function(){
+            // Load the appropriate Javascript for the received page
+            switch(response.type) {
+                case "main":
+                    $(initMainPage);
+                    break;
+                case "auth":
+                    $(initAuth);
+                    break;
+            }
+        });
     });
 }
 
 // Switch an element's content with an animation
-function animatedLoad(oldElement, container, data) {
+function animatedLoad(oldElement, container, data, callback) {
     $(container).css("overflow","hidden");
     $(container).append('<div id="new">' + data + '</div>');
     var newElement = $("#new");
-    newElement.css("margin-left", "100%");
     newElement.css("opacity", 0);
     newElement.animate({
-        "margin-left" : 0,
         "opacity" : 1
     },{
-        duration: 500,
+        duration: 400,
         queue: false,
     complete: function() {
         $(container).css("overflow","visible");
         $("#" + oldElement).remove();
         newElement.attr("id", oldElement);
+        callback();
     }});
     $("#" + oldElement).animate({
-       "margin-left" : "-100%",
        "opacity" : 0
     },{
-        duration: 500,
+        duration: 400,
         queue: false
     });
 }
@@ -103,13 +102,22 @@ function initAuth() {
     var user   = $("#user"),
         pass   = $("#pass"),
         form   = $("form"),
-        submit = $("#submit");
+        submit = $("#submit"),
+        remember = $("#below");
 
     user.focus();
 
+    // Return submits the form
     pass.keyup(function(e){
         if(e.keyCode === 13) {
             submitForm(form, submit);
+        }
+    });
+
+    // Spacebar toggles the checkbox
+    remember.keyup(function(e){
+        if(e.keyCode === 32) {
+            $("#check").trigger("click");
         }
     });
 
@@ -196,7 +204,7 @@ function initMainPage() {
     // Delete a folder
     $("body").on("click", ".delete", function(e) {
         e.preventDefault();
-        sendMessage("DELETE_FILE", $(this).parent().parent().data("id"));
+        sendMessage("DELETE_FILE", $(this).parents().eq(2).data("id"));
     });
 
     // Automatically submit a form once it's data changed
@@ -332,7 +340,7 @@ function buildHTML(fileList,root) {
     if (root !== "/") {
         htmlBack = [
             '<div class="folderrow">',
-            '<img class="icon" src="res/dir.png" width="16px" height="16px" alt="Directory">',
+            '<img class="icon" src="res/dir.png" width="16px" height="16px" alt="Go back up">',
             '<a class="backlink" href="">..</a></div><div class="right"></div>'
         ].join("");
     }
