@@ -481,35 +481,20 @@ footer {
     opacity: .95;
 }
 
-#crumbs {
-    display : inline-block;
-}
-
-#crumbs:after {
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
-}
-
-#crumbs ul {
+#crumbs ul, #crumbs ul li {
+    display: inline;
     list-style: none;
 }
 
-#crumbs ul, #crumbs ul li {
-    padding: 0;
-    display: inline;
-}
-
 #crumbs a, #crumbs span {
-    color: #ccc;
+    color: #ddd;
     display: block;
     float: left;
     position: relative;
     line-height: 30px;
     padding: 0 1.5em 0 2em;
     text-decoration: none;
-    background: #eee;
+    background: #aaa;
 }
 
 #crumbs a:after, #crumbs span:after {
@@ -521,7 +506,7 @@ footer {
     position: absolute;
     right: -15px;
     top: 0;
-    background: #eee;
+    background: #aaa;
     transform: rotate(45deg) scale(0.707) ;
 }
 
