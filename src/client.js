@@ -380,7 +380,7 @@ function buildHTML(fileList,root) {
             if (type === "f") {
                 //Create a file row
                 htmlFiles += [
-                    '<div class="filerow" data-id="',id,'"><img class="icon" src="res/file.png" width="16px" height="16px" alt="File">',
+                    '<div class="filerow" data-id="',id,'"><img class="icon" src="res/file.png" width="16" height="16" alt="File" />',
                     '<div class="filename"><a class="filelink" href="',escape("/get" + id),'">',name,'</a></div>',
                     '<div class="fileinfo"><span class="pin-right">',size,'<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
                     '<div class="right"></div></div>'
@@ -389,7 +389,7 @@ function buildHTML(fileList,root) {
             } else if (type === "d") {
                 //Create a folder row
                 htmlDirs += [
-                    '<div class="folderrow" data-id="',id,'"><img class="icon" src="res/dir.png" width="16px" height="16px" alt="Directory">',
+                    '<div class="folderrow" data-id="',id,'"><img class="icon" src="res/dir.png" width="16" height="16" alt="Directory" />',
                     '<div class="foldername"><a class="folderlink" href="">',name,'</a></div>',
                     '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
                     '<div class="right"></div></div>'
