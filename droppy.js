@@ -31,11 +31,11 @@
 //-----------------------------------------------------------------------------
 // TODOs:
 // - Logout functionality
+// - Admin panel to add/remove users
 // - Recursive deleting
 // - OAuth?
-// - Multiple file operations like delete/move
-// - Full drag & drop support
-// - Keybindings
+// - Drag and drop moving of files
+// - Keybindings (navigation and copy, cut, paste of files)
 //-----------------------------------------------------------------------------
 // vim: ts=4:sw=4
 // jshint indent:4
