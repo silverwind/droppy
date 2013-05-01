@@ -32,10 +32,11 @@
 // TODOs:
 // - Logout functionality
 // - Admin panel to add/remove users
-// - Recursive deleting
-// - OAuth?
-// - Drag and drop moving of files
+// - Add cookie authentification to the websocket connection
+// - Recursive deleting of folders (with confirmation)
+// - Drag and drop moving of files/folders
 // - Keybindings (navigation and copy, cut, paste of files)
+// - Find a solution to not send login data in cleartext over HTTP. OAuth?
 //-----------------------------------------------------------------------------
 // vim: ts=4:sw=4
 // jshint indent:4
