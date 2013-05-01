@@ -289,6 +289,9 @@ footer {
     font-size: 1.5em;
     width: 260px;
     border: 2px transparent;
+    padding: 0 5px;
+    font-size: 1.25em;
+    height: 1.5em;
     border-radius: 8px;
 }
 
@@ -394,7 +397,9 @@ footer {
     color: #222;
     margin-top: 5px;
     margin-bottom: 5px;
-    font-size: 1.5em;
+    padding: 0 5px;
+    font-size: 1.25em;
+    height: 1.5em;
     width: 100%;
     border: 2px transparent;
     border-radius: 8px;

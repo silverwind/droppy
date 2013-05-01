@@ -203,10 +203,10 @@ function initMainPage() {
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
-    // Delete a folder
+    // Delete a file/folder
     $("body").on("click", ".delete", function(e) {
         e.preventDefault();
-        sendMessage("DELETE_FILE", $(this).parents().eq(2).data("id"));
+        sendMessage("DELETE_FILE", $(this).parents().eq(2).data("id") || $(this).parents().eq(1).data("id"));
     });
 
     $("body").on("click", ".navlink", function(e) {
