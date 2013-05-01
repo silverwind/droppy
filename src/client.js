@@ -274,8 +274,11 @@ function initMainPage() {
         var dropZone = new Dropzone(document.body, {
             clickable: false,
             url: "/upload",
-            previewsContainer: "#preview"
+            previewsContainer: "#preview",
+            parallelUploads: 1000,
+            maxFilesize: 65535
         });
+
 
         dropZone.on("sending", function() {
             uploadInit();
