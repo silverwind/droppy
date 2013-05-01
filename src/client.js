@@ -77,6 +77,7 @@ function openSocket() {
         if (msg.type === "UPDATE_FILES") {
             if (isUploading) return;
             if (msg.folder === currentFolder.replace(/&amp;/,"&")) {
+                updateCurrentFolder(msg.folder);
                 $("#content").html(buildHTML(msg.data, msg.folder));
             }
         }
@@ -319,13 +320,14 @@ function initMainPage() {
  *  General helpers
  * ============================================================================
  */
+function updateCurrentFolder(path) {
+    document.title = ["droppy",path].join(" - ");
+    $("#current").html(path.replace(/\//g,"<span class='black'>/</span>"));
+}
+
 function buildHTML(fileList,root) {
     // TODO: Clean up this mess
-    var htmlFiles = "", htmlDirs = "", htmlBack = "";
-    //root.replace(/\//g,"<span class='black'>/</span>");
-
-    $("#current").html(root);
-    folderList = [];
+    var htmlFiles = "", htmlDirs = "", htmlBack = "", folderList = [];
 
     if (root !== "/") {
         htmlBack = [
