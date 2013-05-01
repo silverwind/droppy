@@ -416,12 +416,12 @@ function convertToSI(bytes) {
         gib = mib * 1024,
         tib = gib * 1024;
 
-    if ((bytes >= 0) && (bytes < kib))         return bytes + ' B';
+    if ((bytes >= 0) && (bytes < kib))         return bytes + ' Bytes';
     else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + ' KiB';
     else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + ' MiB';
     else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + ' GiB';
     else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + ' TiB';
-    else return bytes + ' B';
+    else return bytes + ' Bytes';
 }
 
 }).call(this);
