@@ -2,7 +2,7 @@
 (function() {
 "use strict";
 
-var folderList = [], isUploading = false, currentFolder = "/";
+var folderList = [], isUploading = false, currentFolder = "/", socketOpen = false;
 var bar, info, nameinput, percent, progress, start, socket;
 
 /* ============================================================================
@@ -56,10 +56,15 @@ $(getPage);
  * ============================================================================
  */
 function openSocket() {
+    if(socketOpen === "true") return;
+
     if (document.location.protocol === "https:")
         socket = new WebSocket('wss://' + document.location.host);
     else
         socket = new WebSocket('ws://' + document.location.host);
+
+    // socket.onopen seems to fire too late
+    socketOpen = true;
 
     socket.onopen = function() {
         // Request initial update
@@ -68,6 +73,7 @@ function openSocket() {
         // Close the socket to prevent Firefox errors
         $(window).on('beforeunload', function(){
           socket.close();
+          socketOpen = false;
         });
     };
 
@@ -82,6 +88,7 @@ function openSocket() {
         }
     };
     socket.onclose = function() {
+        socketOpen = false;
         // Restart a closed socket. Firefox closes it on every download..
         // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
         setTimeout(openSocket,300);
@@ -89,6 +96,7 @@ function openSocket() {
 }
 
 function sendMessage(msgType, msgData) {
+    if (!socketOpen) return;
     socket.send(JSON.stringify({
         type: msgType,
         data: msgData
@@ -168,6 +176,7 @@ function initMainPage() {
     $("body").attr("onpageshow", function() {
         openSocket();
     });
+    openSocket();
 
     // Cache elements
     bar = $("#progressBar"),
@@ -206,6 +215,12 @@ function initMainPage() {
         e.preventDefault();
         sendMessage("DELETE_FILE", $(this).parents().eq(2).data("id"));
     });
+
+    $("body").on("click", ".navlink", function(e) {
+        e.preventDefault();
+        //TODO
+    });
+
 
     // Automatically submit a form once it's data changed
     $("form").change(function() {
@@ -330,8 +345,19 @@ function initMainPage() {
  */
 function updateCurrentFolder(path) {
     document.title = ["droppy",path].join(" - ");
-    $("#current").html(path.replace(/\//g,"<span class='black'>/</span>"));
+    var parts = path.split("/");
+    parts[0] = "droppy";
+    if (parts[parts.length - 1] === "") parts.pop();
+
+    var html = '<ul id="crumbs">';
+    parts.forEach(function(part) {
+        html += '<li><a class="navlink" href="">' + part + '</a></li>';
+    });
+    html += '</ul>';
+    $("#current").html(html);
 }
+
+
 
 function buildHTML(fileList,root) {
     // TODO: Clean up this mess

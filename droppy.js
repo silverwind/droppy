@@ -457,6 +457,7 @@ function handleGET(req, res) {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.setHeader("Content-Length", json.length);
+        res.setHeader("Cache-Control", "no-cache");
         res.end(json);
         return;
     }  else {

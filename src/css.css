@@ -27,8 +27,9 @@ html, body {
 * {
     margin: 0;
     padding: 0;
-         box-sizing: border-box;
-    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 #page, #new {
@@ -49,6 +50,12 @@ a {
 ul {
     list-style: none;
 }
+
+li {
+    float:left;
+}
+
+
 /* ===================== Page elements ===================== */
 #loading {
     position: absolute;
@@ -74,15 +81,6 @@ ul {
     width: 100%;
     font-size: 1.3em;
     text-shadow: 0 0 1px rgba(128,128,128, .3);
-    overflow: auto;
-}
-
-#current {
-    font-size: 1.5em;
-    z-index: 100;
-    position: fixed;
-    height:35px;
-    width:100%;
     overflow: auto;
 }
 
@@ -256,10 +254,6 @@ footer {
     clear: both;
 }
 
-.black {
-    color: #000;
-}
-
 #preview {
     display : none;
 }
@@ -316,13 +310,13 @@ footer {
 @media only screen and (max-width: 799px) {
     #navigation {
         width: 100%;
-        height: auto;
+        height: 25px;
     }
 
     #content {
         float: left;
         width: 100%;
-        top: 52px;
+        top: 60px;
     }
 
     #title {
@@ -330,8 +324,7 @@ footer {
     }
 
     #current {
-        top: 1em;
-        padding-left: 5px;
+        top: 25px;
     }
 
     .button {
@@ -349,7 +342,7 @@ footer {
 
     #content {
         padding-left: 200px;
-        top: 30px;
+        top: 33px;
     }
 
     #title {
@@ -359,7 +352,7 @@ footer {
 
     #current {
         top: 0;
-        padding-left: 210px;
+        padding-left: 200px;
     }
 }
 /* ===================== Login Form ===================== */
@@ -477,4 +470,77 @@ footer {
 #checklabel{
     background-image: url(/res/chk.png);
     user-select: none;
+}
+/* ===================== Current Folder ===================== */
+#current {
+    z-index: 100;
+    position: fixed;
+    height:30px;
+    width:100%;
+    overflow: hidden;
+    opacity: .9;
+    font-size: 1.25em;
+}
+
+#crumbs {
+    display : inline-block;
+}
+
+#crumbs:after {
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+#crumbs ul {
+    list-style: none;
+}
+
+#crumbs ul, #crumbs ul li {
+    padding: 0;
+    display: inline;
+}
+
+#crumbs ul li:last-child a:after, #crumbs ul li:last-child span:after {
+    border-radius: 3px;
+}
+
+#crumbs a, #crumbs span {
+    color: #ccc;
+    display: block;
+    float: left;
+    position: relative;
+    line-height: 30px;
+    padding: 0 1.5em 0 2em;
+    text-decoration: none;
+    background: #eee;
+}
+
+#crumbs a:after, #crumbs span:after {
+    content: '';
+    display: block;
+    z-index: 1;
+    height: 30px;
+    width: 30px;
+    position: absolute;
+   /* right: 2.1px; */
+    right: 5px;
+    top: 0;
+    background: #eee;
+    transform: translateX(1em) rotate(45deg) scale(0.707) ;
+}
+
+
+#crumbs li:nth-child(1) a       { background: #222; }
+#crumbs li:nth-child(1) a:after { background: #222; }
+#crumbs li:nth-child(2) a       { background: #444; }
+#crumbs li:nth-child(2) a:after { background: #444; }
+#crumbs li:nth-child(3) a       { background: #666; }
+#crumbs li:nth-child(3) a:after { background: #666; }
+#crumbs li:nth-child(4) a       { background: #888; }
+#crumbs li:nth-child(4) a:after { background: #888; }
+
+#crumbs a:hover, #crumbs span:hover {
+    color: #fff;
 }
