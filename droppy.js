@@ -24,10 +24,7 @@
 //SOFTWARE.
 //-----------------------------------------------------------------------------
 // Current limitiations:
-// - When a client has multiple browser windows pointing to different folder,
-//   only one of them will get updated. Need to figure out a way to map
-//   WebSocket source ports to source ports of the HTTP connection.
-// - The WS connection isn't stable in Firefox, while it is on Chrome
+// - None known
 //-----------------------------------------------------------------------------
 // TODOs:
 // - Logout functionality
