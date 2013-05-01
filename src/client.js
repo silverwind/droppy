@@ -63,10 +63,8 @@ function openSocket() {
     else
         socket = new WebSocket('ws://' + document.location.host);
 
-    // socket.onopen seems to fire too late
-    socketOpen = true;
-
     socket.onopen = function() {
+        socketOpen = true;
         // Request initial update
         sendMessage("REQUEST_UPDATE", currentFolder);
 
@@ -171,11 +169,6 @@ function initAuth() {
  */
 
 function initMainPage() {
-    // Opening the socket on onpageshow has the benefit that it works after
-    // a user returns to the page through the back button.
-    $("body").attr("onpageshow", function() {
-        openSocket();
-    });
     openSocket();
 
     // Cache elements
