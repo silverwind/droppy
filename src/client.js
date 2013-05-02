@@ -1,4 +1,4 @@
-/* global $, Dropzone */
+/* global $, Dropzone, io */
 (function() {
 "use strict";
 
@@ -9,6 +9,10 @@ var bar, info, nameinput, percent, progress, start, socket;
  *  Page loading functions
  * ============================================================================
  */
+
+// Initialize webshims lib
+//$.webshims.polyfill();
+
 function getPage() {
     $.getJSON('/content', function(response) {
         animatedLoad("page", "body", response.data, function() {
@@ -57,13 +61,9 @@ $(getPage);
  */
 function openSocket() {
     if (socketOpen === "true") return;
+    socket = io.connect(document.location.protocol + "//" + document.location.host);
 
-    if (document.location.protocol === "https:")
-        socket = new WebSocket('wss://' + document.location.host);
-    else
-        socket = new WebSocket('ws://' + document.location.host);
-
-    socket.onopen = function() {
+    socket.on("connect", function() {
         socketOpen = true;
         // Request initial update
         sendMessage("REQUEST_UPDATE", currentFolder);
@@ -73,33 +73,28 @@ function openSocket() {
           socket.close();
           socketOpen = false;
         });
-    };
+    });
 
-    socket.onmessage = function (event) {
-        var msg = JSON.parse(event.data);
-        if (msg.type === "UPDATE_FILES") {
-            if (isUploading) return;
-            if (msg.folder === currentFolder.replace(/&amp;/,"&")) {
-                updateCrumbs(msg.folder);
-                $("#content").html(buildHTML(msg.data, msg.folder));
-            }
+    socket.on("UPDATE_FILES", function (data) {
+        var msgData = JSON.parse(data);
+        if (isUploading) return;
+        if (msgData.folder === currentFolder.replace(/&amp;/,"&")) {
+            updateCrumbs(msgData.folder);
+            $("#content").html(buildHTML(msgData.data, msgData.folder));
         }
-    };
+    });
 
-    socket.onclose = function() {
+    socket.on("disconnect", function() {
         socketOpen = false;
         // Restart a closed socket. Firefox closes it on every download..
         // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-        setTimeout(openSocket,300);
-    };
+        //setTimeout(openSocket,300);
+    });
 }
 
 function sendMessage(msgType, msgData) {
     if (!socketOpen) return;
-    socket.send(JSON.stringify({
-        type: msgType,
-        data: msgData
-    }));
+    socket.emit(msgType, JSON.stringify(msgData));
 }
 /* ============================================================================
  *  Authentication page JS
@@ -180,7 +175,7 @@ function initMainPage() {
     progress = $("#progress"),
 
     // Initialize and attach plugins
-    attachDropzone();
+    // attachDropzone();
     attachForm();
 
     // Switch into a folder
@@ -352,14 +347,16 @@ function updateCrumbs(path) {
     // Build the list
     var html = '<ul id="crumbs">';
     var elementPath = "";
-    parts.forEach(function(part) {
-        if (part === "droppy") {
-            html += ['<li><a class="navlink" data-path="/" href="">',part,'</a></li>'].join("");
+
+    for (var i = 0, len = parts.length; i < len; i++) {
+        if (parts[i] === "droppy") {
+            html += ['<li><a class="navlink" data-path="/" href="">',parts[i],'</a></li>'].join("");
         } else {
-            elementPath += "/" + part;
-            html += ['<li><a class="navlink" data-path="',elementPath,'" href="">',part,'</a></li>'].join("");
+            elementPath += "/" + parts[i];
+            html += ['<li><a class="navlink" data-path="',elementPath,'" href="">',parts[i],'</a></li>'].join("");
         }
-    });
+    }
+
     html += '</ul>';
 
     var oldLen = $("#current ul li").length;

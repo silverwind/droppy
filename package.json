@@ -7,7 +7,7 @@
   "bugs": "https://github.com/silverwind/Droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
-    "ws": "*",
+    "socket.io": "*",
     "formidable": "*",
     "mime": "*",
     "uglify-js" : "*",

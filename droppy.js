@@ -49,12 +49,12 @@ var cache          = {},
     db             = {},
     server,
     lastRead,
-    config;
+    config,
+    io;
 
 
 var fs                 = require("fs"),
     formidable         = require("formidable"),
-    WebSocketServer    = require("ws").Server,
     mime               = require("mime"),
     util               = require("util"),
     crypto             = require("crypto"),
@@ -65,25 +65,28 @@ var fs                 = require("fs"),
     uglify             = require("uglify-js");
 
 readConfig();
+
 // Argument handler
 if (process.argv.length > 2)
     handleArguments();
 
 console.log(prettyStartup());
 
+// Read user/sessions from DB and add a default user if no users exist
 readDB();
 if (Object.keys(db.users).length < 1) {
     addUser("droppy", "droppy");
 }
 
+// Copy/Minify JS,CSS and HTML content
 prepareContent();
 
 // Read and cache all resources
-cacheResources(function() {
-    // Proceed with setting up the files folder and bind to the listening port
-    setupFilesDir();
-    createListener();
-});
+cacheResources(config.resDir);
+
+// Proceed with setting up the files folder and bind to the listening port
+setupFilesDir();
+createListener();
 
 //-----------------------------------------------------------------------------
 // Read CSS and JS, minify them, and write them to /res
@@ -101,6 +104,8 @@ function prepareContent() {
                 String(fs.readFileSync(getSrcPath("jquery.form.js"))),
                 String(fs.readFileSync(getSrcPath("dropzone.js"))),
                 String(fs.readFileSync(getSrcPath("prefixfree.js"))),
+                String(fs.readFileSync(getSrcPath("webshim/extras/modernizr-custom.js"))),
+                String(fs.readFileSync(getSrcPath("webshim/polyfiller.js"))),
                 String(fs.readFileSync(getSrcPath("client.js")))
             ].join("\n"));
         } else {
@@ -111,18 +116,25 @@ function prepareContent() {
                     getSrcPath("jquery.form.js"),
                     getSrcPath("dropzone.js"),
                     getSrcPath("prefixfree.js"),
+                    getSrcPath("webshim/extras/modernizr-custom.js"),
+                    getSrcPath("webshim/polyfiller.js"),
                     getSrcPath("client.js")
                 ]).code
             );
         }
+
         console.log(" ->> preparing HTML...\n");
         // Copy html from src to res - may do some preprocessing here later
-        fs.writeFileSync(getResPath("base.html"),fs.readFileSync(getSrcPath("base.html")));
-        fs.writeFileSync(getResPath("body-auth.html"),fs.readFileSync(getSrcPath("body-auth.html")));
-        fs.writeFileSync(getResPath("body-main.html"),fs.readFileSync(getSrcPath("body-main.html")));
+        copyResource("base.html");
+        copyResource("body-auth.html");
+        copyResource("body-main.html");
     } catch(err) {
         console.log("Error reading client sources.\n" + util.inspect(err));
         process.exit(1);
+    }
+
+    function copyResource(filename) {
+        fs.writeFileSync(getResPath(filename),fs.readFileSync(getSrcPath(filename)));
     }
 }
 //-----------------------------------------------------------------------------
@@ -156,7 +168,7 @@ function createListener() {
     }
     server.listen(config.port);
     server.on("listening", function() {
-        //We're up - initialize everything
+        // We're up - initialize everything
         var address = server.address();
         log("Listening on ", address.address, ":", address.port);
         createWatcher(prefixBasePath("/"));
@@ -164,9 +176,9 @@ function createListener() {
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-            console.log("Failed to bind to port", config.port, ". Adress already in use.");
+            console.log("Failed to bind to port", config.port, ". Adress already in use.\n", err.stack);
         else if (err.code === "EACCES")
-            console.log("Failed to bind to port", config.port, ". Need root to bind to ports < 1024.");
+            console.log("Failed to bind to port", config.port, ". Need root to bind to ports < 1024.\n", err.stack);
         else
             console.log("Error:",util.inspect(err));
         process.exit(1);
@@ -203,68 +215,67 @@ function prefixBasePath(relativePath) {
 //-----------------------------------------------------------------------------
 // WebSocket listener
 function setupSocket(server) {
-    var wss = new WebSocketServer({server : server});
-    wss.on("connection", function(ws) {
-        var remoteIP = ws._socket.remoteAddress;
-        var remotePort = ws._socket.remotePort;
+    io = require("socket.io").listen(server, {"log level": 1});
+
+    io.sockets.on("connection", function(ws) {
+        var remoteIP = ws.handshake.address.address;
+        var remotePort = ws.handshake.address.port;
         log("WS:   ", remoteIP, ":", remotePort, " connected");
 
-        ws.on("message", function(message) {
-            var msg = JSON.parse(message);
-            var dir = msg.data;
+        ws.on("REQUEST_UPDATE", function(data) {
+            var dir = JSON.parse(data);
+            dir = dir.replace(/&amp;/g,"&");
+            clients[remoteIP] = { "directory": dir, "ws": ws};
+            readDirectory(dir, function() {
+                sendMessage(remoteIP, "UPDATE_FILES");
+            });
+        });
 
-            switch(msg.type) {
-            case "REQUEST_UPDATE":
-                dir = dir.replace(/&amp;/g,"&");
-                clients[remoteIP] = { "directory": dir, "ws": ws};
-                readDirectory(dir, function() {
+        ws.on("CREATE_FOLDER", function(data) {
+            var dir = JSON.parse(data);
+            fs.mkdir(prefixBasePath(dir), config.mode, function(err) {
+                if (err) handleError(err);
+                readDirectory(clients[remoteIP].directory, function() {
                     sendMessage(remoteIP, "UPDATE_FILES");
                 });
-                break;
-            case "CREATE_FOLDER":
-                fs.mkdir(prefixBasePath(dir), config.mode, function(err) {
-                    if (err) handleError(err);
-                    readDirectory(clients[remoteIP].directory, function() {
-                        sendMessage(remoteIP, "UPDATE_FILES");
+            });
+        });
+
+        ws.on("DELETE_FILE", function(data) {
+            var dir = JSON.parse(data);
+            dir = prefixBasePath(dir);
+            log("DEL:  ", remoteIP, ":", remotePort, "\t\t", dir);
+            fs.stat(dir, function(err, stats) {
+                if (err) {
+                    handleError(err);
+                    return;
+                }
+                if (stats.isFile()) {
+                    fs.unlink(dir, function(err) {
+                        if (err) handleError(err);
                     });
-                });
-                break;
-            case "DELETE_FILE":
-                dir = prefixBasePath(dir);
-                log("DEL:  ", remoteIP, ":", remotePort, "\t\t", dir);
-                fs.stat(dir, function(err, stats) {
-                    if (err) {
-                        handleError(err);
-                        return;
-                    }
-                    if (stats.isFile()) {
-                        fs.unlink(dir, function(err) {
-                            if (err) handleError(err);
-                        });
-                    } else if (stats.isDirectory()) {
-                        fs.rmdir(dir, function(err) {
-                            if (err) handleError(err);
-                            // TODO: handle ENOTEMPTY
-                        });
-                    }
-                });
-                break;
-            case "SWITCH_FOLDER":
-                if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
-                dir = dir.replace(/&amp;/g,"&");
-                clients[remoteIP] = { "directory": dir, "ws": ws};
-                updateWatchers(dir);
-                readDirectory(dir, function() {
-                    sendMessage(remoteIP, "UPDATE_FILES");
-                });
-                break;
-            }
+                } else if (stats.isDirectory()) {
+                    fs.rmdir(dir, function(err) {
+                        if (err) handleError(err);
+                        // TODO: handle ENOTEMPTY
+                    });
+                }
+            });
         });
-        ws.on("close", function() {
+
+        ws.on("SWITCH_FOLDER", function(data) {
+            var dir = JSON.parse(data);
+            if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
+            dir = dir.replace(/&amp;/g,"&");
+            clients[remoteIP] = { "directory": dir, "ws": ws};
+            updateWatchers(dir);
+            readDirectory(dir, function() {
+                sendMessage(remoteIP, "UPDATE_FILES");
+            });
+        });
+
+        ws.on("disconnect", function() {
             log("WS:   ", remoteIP, ":", remotePort, " disconnected");
-        });
-        ws.on("error", function(err) {
-            log(err);
         });
     });
 }
@@ -298,11 +309,10 @@ function sendMessage(IP, messageType) {
     if (clients[IP].ws._socket === null) return;
     var dir = clients[IP].directory;
     var data = JSON.stringify({
-        "type"  : messageType,
         "folder": dir,
         "data"  : dirs[dir]
     });
-    clients[IP].ws.send(data, function(err) {
+    clients[IP].ws.emit(messageType, data, function(err) {
         if (err) handleError(err);
     });
 }
@@ -391,48 +401,43 @@ function stripRevision(filename) {
 }
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
-function cacheResources(callback) {
-    var files = fs.readdirSync(config.resDir);
-    var filesToGzip = [];
-    for (var i = 0, len = files.length; i < len; i++) {
-        var fileName = files[i];
-        var dir = getResPath(fileName);
-        var fileData = fs.readFileSync(dir);
-        var stats;
-        try {
-            stats = fs.statSync(dir);
-        } catch (err) {
-            log(err);
-            continue;
-        }
-        cache[fileName] = {};
-        cache[fileName].data = fileData;
-        cache[fileName].size = stats.size;
-        cache[fileName].revision = Number(stats.mtime).toString(36); //base36 the modified timestamp
-        cache[fileName].mime = mime.lookup(dir);
+function cacheResources(dir) {
+    dir = dir.substring(0,dir.length -1); //Strip trailing slash
 
-        if (fileName.match(/.*(js|css|html)$/))
-            filesToGzip.push(fileName);
-    }
-    addRevisions();
+    walkDirectory(dir, function(err, results) {
+        var filesToGzip = [];
+        results.forEach(function(fullPath) {                    // fullPath = ./res/webshim/shims/styles/shim.css
+            var relPath = fullPath.substring(dir.length + 1);   // relPath  = webshim/shims/styles/shim.css
+            var fileName = path.basename(config.resPath);       // fileName = shim.css
+            var fileData = fs.readFileSync(fullPath);
+            var fileStats = fs.statSync(fullPath);
 
-    if (filesToGzip.length > 0)
-        runGzip();
-    else
-        callback();
+            cache[relPath] = {};
+            cache[relPath].data = fileData;
+            cache[relPath].size = fileStats.size;
+            cache[relPath].revision = Number(fileStats.mtime).toString(36); //base36 the modified timestamp
+            cache[relPath].mime = mime.lookup(fullPath);
 
-    function runGzip() {
-        var currentFile = filesToGzip[0];
-        zlib.gzip(cache[currentFile].data, function(err,compressed) {
-            cache[currentFile].gzipData = compressed;
-            cache[currentFile].gzipSize = compressed.length;
-            filesToGzip = filesToGzip.slice(1);
+            if (fileName.match(/.*(js|css|html)$/))
+                filesToGzip.push(relPath);
+
+            addRevisions();
+
             if (filesToGzip.length > 0)
                 runGzip();
-            else
-                callback();
+
+            function runGzip() {
+                var currentFile = filesToGzip[0];
+                zlib.gzip(cache[currentFile].data, function(err, compressedData) {
+                    cache[currentFile].gzipData = compressedData;
+                    cache[currentFile].gzipSize = compressedData.length;
+                    filesToGzip = filesToGzip.slice(1);
+                    if (filesToGzip.length > 0)
+                        runGzip();
+                });
+            }
         });
-    }
+    });
 }
 //-----------------------------------------------------------------------------
 // Handle all GETs, except downloads
@@ -440,9 +445,11 @@ function handleGET(req, res) {
     var resourceName;
     var hasCookie = checkCookie(req);
 
-    if (req.url === "/") {
+    switch(req.url) {
+    case "/":
         resourceName = "base.html";
-    } else if (req.url === "/content") {
+        break;
+    case "/content":
         var obj = {};
         if (hasCookie) {
             obj.type = "main";
@@ -451,6 +458,7 @@ function handleGET(req, res) {
             obj.type = "auth";
             obj.data = cache["body-auth.html"].data;
         }
+
         var json = JSON.stringify(obj);
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
@@ -458,12 +466,24 @@ function handleGET(req, res) {
         res.setHeader("Cache-Control", "no-cache");
         res.end(json);
         return;
-    }  else {
-        resourceName = path.basename(req.url);
-        if (resourceName.match(/\./g).length >= 2) {
-            resourceName = stripRevision(resourceName);
-        }
+    default:
+        var fileName = path.basename(req.url);
+        var dirName = path.dirname(req.url);
+
+        if (fileName.match(/\./g).length >= 2)
+            fileName = stripRevision(fileName);
+
+        if (dirName.indexOf("/res") === 0)
+            dirName = dirName.substring(4);
+
+        if (dirName === "")
+            resourceName = fileName;
+        else
+            resourceName = dirName + "/" + fileName;
+
+        break;
     }
+
 
     if (cache[resourceName] === undefined) {
         res.writeHead(404);
@@ -830,6 +850,32 @@ function prettyStartup() {
         "                 |__|  |__|  |_____|\n\n"
     ].join(""));
 }
+
+// Recursively walk a directory and return file paths in an array
+function walkDirectory(dir, cb) {
+    var results = [];
+    fs.readdir(dir, function(err, list) {
+        if (err) return cb(err);
+        var i = 0;
+        (function next() {
+            var file = list[i++];
+            if (!file) return cb(null, results);
+            file = dir + '/' + file;
+            fs.stat(file, function(err, stat) {
+                if (stat && stat.isDirectory()) {
+                    walkDirectory(file, function(err, res) {
+                        results = results.concat(res);
+                        next();
+                    });
+                } else {
+                    results.push(file);
+                    next();
+                }
+            });
+        })();
+    });
+}
+
 // underscore's debounce - https://github.com/documentcloud/underscore
 function debounce(func, wait, immediate) {
     var timeout, result;

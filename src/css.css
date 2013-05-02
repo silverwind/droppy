@@ -33,6 +33,10 @@ html, body {
             box-sizing: border-box;
 }
 
+section, nav {
+    display: block;
+}
+
 #page, #new {
     width: 100%;
     height: 100%;
@@ -397,6 +401,7 @@ footer a:hover {
     background-color: #222;
     opacity: .9;
     border-radius: 10px;
+    behavior: url("/res/PIE.htc");
 }
 
 #login-form-inner {
@@ -460,11 +465,13 @@ footer a:hover {
 #submit.valid {
     background-color:#89c403;
     border: 1px solid #74b807;
+
 }
 
 #submit.invalid {
     background-color:#ff4030;
     border: 1px solid #ee4030;
+
 }
 
 #submit:hover {
@@ -487,12 +494,17 @@ footer a:hover {
     line-height:20px;
     background-repeat:no-repeat;
     background-position: 0 0;
+    -ms-background-position-x : 0px;
+    -ms-background-position-y : 0px;
+
     vertical-align:middle;
     cursor:pointer;
 }
 
 #check:checked + #checklabel {
     background-position: 0 -20px;
+    -ms-background-position-x: 1px;
+    -ms-background-position-y: -20px;
 }
 
 #checklabel{
