@@ -184,7 +184,15 @@ function createListener() {
     }
     createWatcher(prefixBasePath("/"));
     setupSocket(server);
-    server.listen(config.port);
+
+    // Bind to 8080 on jitsu
+    if (process.env.NODE_ENV === "production") {
+        server.listen(8080);
+    }
+    else {
+        server.listen(config.port);
+    }
+
     server.on("listening", function () {
         // We're up - initialize everything
         var address = server.address();
