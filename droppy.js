@@ -40,7 +40,7 @@
 
 "use strict";
 
-var DEBUG = false;
+var DEBUG = true;
 
 var cache          = {},
     clients        = {},
@@ -97,10 +97,15 @@ cacheResources(config.resDir, function () {
 // Read CSS and JS, minify them, and write them to /res
 function prepareContent() {
     try {
-        logsimple(" ->> minifying CSS...");
-        fs.writeFileSync(getResPath("css.css"),
-                cleancss.process(String(fs.readFileSync(getSrcPath("css.css"))))
-        );
+        logsimple(" ->> preparing CSS...");
+
+        if (DEBUG) {
+            copyResource("css.css");
+        } else {
+            fs.writeFileSync(getResPath("css.css"),
+                    cleancss.process(String(fs.readFileSync(getSrcPath("css.css"))))
+            );
+        }
 
         if (DEBUG) {
             logsimple(" ->> preparing JS...");
