@@ -291,9 +291,10 @@
                 maxFilesize: 65535
             });
 
-            //dropZone.on("sending", function () {
-           //     uploadInit();
-         //   });
+            // IE8 fails on the next line - TODO: investigate
+            dropZone.on("sending", function () {
+                uploadInit();
+            });
 
             dropZone.on("uploadprogress", function (file, progress, bytesSent) {
                 uploadProgress(bytesSent, file.size, progress);
