@@ -52,7 +52,6 @@ var cache          = {},
     config,
     io;
 
-
 var fs                 = require("fs"),
     formidable         = require("formidable"),
     mime               = require("mime"),
@@ -92,13 +91,13 @@ createListener();
 // Read CSS and JS, minify them, and write them to /res
 function prepareContent() {
     try {
-        console.log(" ->> minifying CSS...");
+        logsimple(" ->> minifying CSS...");
         fs.writeFileSync(getResPath("css.css"),
                 cleancss.process(String(fs.readFileSync(getSrcPath("css.css"))))
         );
 
         if (DEBUG) {
-            console.log(" ->> preparing JS...");
+            logsimple(" ->> preparing JS...");
             fs.writeFileSync(getResPath("client.js"), [
                 String(fs.readFileSync(getSrcPath("jquery.js"))),
                 String(fs.readFileSync(getSrcPath("jquery.form.js"))),
@@ -109,7 +108,7 @@ function prepareContent() {
                 String(fs.readFileSync(getSrcPath("client.js")))
             ].join("\n"));
         } else {
-            console.log(" ->> minifying JS...");
+            logsimple(" ->> minifying JS...");
             fs.writeFileSync(getResPath("client.js"),
                 uglify.minify([
                     getSrcPath("jquery.js"),
@@ -125,17 +124,17 @@ function prepareContent() {
 
         require('ncp').ncp(config.srcDir + "/webshim", config.resDir + "/webshim", function (err) {
             if (err) {
-                log(err);
+                logerror(err);
             }
         });
 
-        console.log(" ->> preparing HTML...\n");
+        logsimple(" ->> preparing HTML...\n");
         // Copy html from src to res - may do some preprocessing here later
         copyResource("base.html");
         copyResource("body-auth.html");
         copyResource("body-main.html");
-    } catch(err) {
-        console.log("Error reading client sources.\n" + util.inspect(err));
+    } catch (err) {
+        logerror("Error reading client sources.\n", util.inspect(err));
         process.exit(1);
     }
 }
@@ -147,11 +146,11 @@ function copyResource(filepath) {
 // Set up the directory for files and start the server
 function setupFilesDir() {
     fs.mkdir(config.filesDir, function (err) {
-        if ( !err || err.code === "EEXIST") {
+        if (!err || err.code === "EEXIST") {
             return true;
         } else {
-            console.log("Error accessing",config.filesDir,".");
-            console.log(util.inspect(err));
+            logerror("Error accessing", config.filesDir, ".");
+            logerror(util.inspect(err));
             process.exit(1);
         }
     });
@@ -166,14 +165,14 @@ function createListener() {
         try {
             key = fs.readFileSync(config.httpsKey);
             cert = fs.readFileSync(config.httpsCert);
-        } catch(error) {
-            console.log("Error reading SSL certificate or key.\n",util.inspect(error));
+        } catch (error) {
+            logerror("Error reading SSL certificate or key.\n", util.inspect(error));
             process.exit(1);
         }
         server = require("https").createServer({key: key, cert: cert}, onRequest);
     }
     server.listen(config.port);
-    server.on("listening", function() {
+    server.on("listening", function () {
         // We're up - initialize everything
         var address = server.address();
         log("Listening on ", address.address, ":", address.port);
@@ -182,19 +181,19 @@ function createListener() {
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-            console.log("Failed to bind to port", config.port, ". Adress already in use.\n", err.stack);
+            logerror("Failed to bind to port", config.port, ". Adress already in use.\n", err.stack);
         else if (err.code === "EACCES")
-            console.log("Failed to bind to port", config.port, ". Need root to bind to ports < 1024.\n", err.stack);
+            logerror("Failed to bind to port", config.port, ". Need root to bind to ports < 1024.\n", err.stack);
         else
-            console.log("Error:",util.inspect(err));
+            logerror("Error:", util.inspect(err));
         process.exit(1);
     });
 }
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    var relativePath = folder.replace(config.filesDir.substring(0, config.filesDir.length - 1),"");
-    var watcher = fs.watch(folder,{ persistent: true }, function(event) {
+    var relativePath = folder.replace(config.filesDir.substring(0, config.filesDir.length - 1), "");
+    var watcher = fs.watch(folder, { persistent: true }, function (event) {
         if (event === "change" || event === "rename") {
             // Files in a watched directory changed. Figure out which client(s) need updates
             // This part might be quite costly cpu-wise while files are being written, need
@@ -203,8 +202,8 @@ function createWatcher(folder) {
                 if (clients.hasOwnProperty(client)) {
                     var clientDir = clients[client].directory;
                     if (clientDir === relativePath) {
-                        readDirectory(clientDir, function() {
-                            sendMessage(client,"UPDATE_FILES");
+                        readDirectory(clientDir, function () {
+                            sendMessage(client, "UPDATE_FILES");
                         });
                     }
                 }
@@ -223,65 +222,64 @@ function prefixBasePath(relativePath) {
 function setupSocket(server) {
     io = require("socket.io").listen(server, {"log level": 1});
 
-    io.sockets.on("connection", function(ws) {
+    io.sockets.on("connection", function (ws) {
         var remoteIP = ws.handshake.address.address;
         var remotePort = ws.handshake.address.port;
-        log("WS:   ", remoteIP, ":", remotePort, " connected");
+        log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
 
-        ws.on("REQUEST_UPDATE", function(data) {
+        ws.on("REQUEST_UPDATE", function (data) {
             var dir = JSON.parse(data);
-            dir = dir.replace(/&amp;/g,"&");
+            dir = dir.replace(/&amp;/g, "&");
             clients[remoteIP] = { "directory": dir, "ws": ws};
-            readDirectory(dir, function() {
+            readDirectory(dir, function () {
                 sendMessage(remoteIP, "UPDATE_FILES");
             });
         });
 
-        ws.on("CREATE_FOLDER", function(data) {
+        ws.on("CREATE_FOLDER", function (data) {
             var dir = JSON.parse(data);
-            fs.mkdir(prefixBasePath(dir), config.mode, function(err) {
-                if (err) handleError(err);
-                readDirectory(clients[remoteIP].directory, function() {
+            fs.mkdir(prefixBasePath(dir), config.mode, function (err) {
+                if (err) logerror(err);
+                readDirectory(clients[remoteIP].directory, function () {
                     sendMessage(remoteIP, "UPDATE_FILES");
                 });
             });
         });
 
-        ws.on("DELETE_FILE", function(data) {
+        ws.on("DELETE_FILE", function (data) {
             var dir = JSON.parse(data);
             dir = prefixBasePath(dir);
-            log("DEL:  ", remoteIP, ":", remotePort, "\t\t", dir);
-            fs.stat(dir, function(err, stats) {
+            fs.stat(dir, function (err, stats) {
                 if (err) {
-                    handleError(err);
+                    logerror(err);
                     return;
                 }
                 if (stats.isFile()) {
-                    fs.unlink(dir, function(err) {
-                        if (err) handleError(err);
+                    fs.unlink(dir, function (err) {
+                        if (err) logerror(err);
                     });
                 } else if (stats.isDirectory()) {
-                    fs.rmdir(dir, function(err) {
-                        if (err) handleError(err);
+                    fs.rmdir(dir, function (err) {
+                        if (err) logerror(err);
                         // TODO: handle ENOTEMPTY
                     });
                 }
             });
         });
 
-        ws.on("SWITCH_FOLDER", function(data) {
+        ws.on("SWITCH_FOLDER", function (data) {
             var dir = JSON.parse(data);
-            if ( !dir.match(/^\//) || dir.match(/\.\./) ) return;
-            dir = dir.replace(/&amp;/g,"&");
+            if (!dir.match(/^\//) || dir.match(/\.\./)) return;
+            dir = dir.replace(/&amp;/g, "&");
             clients[remoteIP] = { "directory": dir, "ws": ws};
             updateWatchers(dir);
-            readDirectory(dir, function() {
+            readDirectory(dir, function () {
                 sendMessage(remoteIP, "UPDATE_FILES");
             });
         });
 
-        ws.on("disconnect", function() {
-            log("WS:   ", remoteIP, ":", remotePort, " disconnected");
+        ws.on("disconnect", function () {
+            log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "]");
         });
     });
 }
@@ -318,41 +316,45 @@ function sendMessage(IP, messageType) {
         "folder": dir,
         "data"  : dirs[dir]
     });
-    clients[IP].ws.emit(messageType, data, function(err) {
-        if (err) handleError(err);
+    clients[IP].ws.emit(messageType, data, function (err) {
+        if (err) logerror(err);
     });
 }
 //-----------------------------------------------------------------------------
 // GET/POST handler
 function onRequest(req, res) {
     var method = req.method.toUpperCase();
-    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    log("REQ:  ", socket, "\t", method, "\t", req.url);
 
     if (method === "GET") {
         if (req.url.match(/^\/get\//)) {
             handleFileRequest(req, res);
         } else {
-            handleGET(req,res);
+            handleGET(req, res);
         }
     } else if (method === "POST") {
         if (req.url === "/upload") {
-            if (!checkCookie(req)) res.end(401);
-            handleUploadRequest(req,res);
+            if (!checkCookie(req)) {
+                res.statusCode = 400;
+                res.end();
+                logresponse(req, res);
+            }
+            handleUploadRequest(req, res);
         } else if (req.url === "/login") {
             var body = "";
-            req.on("data", function(data) {
+            req.on("data", function (data) {
                 body += data;
             });
-            req.on("end", function() {
+            req.on("end", function () {
                 var postData = querystring.parse(body);
                 var response;
                 if (isValidUser(postData.username, postData.password)) {
-                    log("AUTH: ", socket, "\t\tUser ", postData.username, " successfully authenticated.");
+                    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
+                        "User ", postData.username, " [", color.green, "authenticated", color.reset, "]");
                     response = "OK";
                     createCookie(req, res, postData);
                 } else {
-                    log("AUTH: ", socket, "\t\tUser ", postData.username, " failed authentication.");
+                    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
+                        "User ", postData.username, " [", color.red, "unathorized", color.reset, "]");
                     response = "NOK";
                 }
                 var json = JSON.stringify(response);
@@ -360,6 +362,7 @@ function onRequest(req, res) {
                 res.setHeader("Content-Type", "application/json");
                 res.setHeader("Content-Length", json.length);
                 res.end(json);
+                logresponse(req, res);
             });
         }
     }
@@ -374,8 +377,8 @@ function addRevisions() {
                 var html = String(cache[file].data);
                 for (var resource in cache) {
                     if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
-                        html = html.replace(resource, function(match) {
-                            return match.replace(".","." + cache[resource].revision + ".");
+                        html = html.replace(resource, function (match) {
+                            return match.replace(".", "." + cache[resource].revision + ".");
                         });
                     }
                 }
@@ -384,8 +387,8 @@ function addRevisions() {
                 var css = String(cache[file].data);
                 for (var res in cache) {
                     if (!res.match(/.*\.css/) && cache.hasOwnProperty(res)) {
-                        css = css.replace(res, function(match) {
-                            return match.replace(".","." + cache[res].revision + ".");
+                        css = css.replace(res, function (match) {
+                            return match.replace(".", "." + cache[res].revision + ".");
                         });
                     }
                 }
@@ -401,18 +404,18 @@ function stripRevision(filename) {
     if (parts.length === 3) {
         return parts[0] + "." + parts[2];
     } else {
-        log("Error Unable to strip revision off ", filename);
+        logerror("Error Unable to strip revision off ", filename);
         return filename;
     }
 }
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
 function cacheResources(dir) {
-    dir = dir.substring(0,dir.length -1); //Strip trailing slash
+    dir = dir.substring(0, dir.length - 1); //Strip trailing slash
 
-    walkDirectory(dir, function(err, results) {
+    walkDirectory(dir, function (err, results) {
         var filesToGzip = [];
-        results.forEach(function(fullPath) {                    // fullPath = ./res/webshim/shims/styles/shim.css
+        results.forEach(function (fullPath) {                    // fullPath = ./res/webshim/shims/styles/shim.css
             var relPath = fullPath.substring(dir.length + 1);   // relPath  = webshim/shims/styles/shim.css
             var fileName = path.basename(config.resPath);       // fileName = shim.css
             var fileData = fs.readFileSync(fullPath);
@@ -434,7 +437,7 @@ function cacheResources(dir) {
 
             function runGzip() {
                 var currentFile = filesToGzip[0];
-                zlib.gzip(cache[currentFile].data, function(err, compressedData) {
+                zlib.gzip(cache[currentFile].data, function (err, compressedData) {
                     cache[currentFile].gzipData = compressedData;
                     cache[currentFile].gzipSize = compressedData.length;
                     filesToGzip = filesToGzip.slice(1);
@@ -451,7 +454,7 @@ function handleGET(req, res) {
     var resourceName;
     var hasCookie = checkCookie(req);
 
-    switch(req.url) {
+    switch (req.url) {
     case "/":
         resourceName = "base.html";
         break;
@@ -471,6 +474,7 @@ function handleGET(req, res) {
         res.setHeader("Content-Length", json.length);
         res.setHeader("Cache-Control", "no-cache");
         res.end(json);
+        logresponse(req, res);
         return;
     default:
         var fileName = path.basename(req.url);
@@ -495,13 +499,13 @@ function handleGET(req, res) {
 
 
     if (cache[resourceName] === undefined) {
-        log("404: " + resourceName);
-        res.writeHead(404);
+        res.statusCode = 404;
         res.end();
+        logresponse(req, res);
     } else {
         res.statusCode = 200;
 
-        if (req.url === "/") res.setHeader("X-Frame-Options","DENY");
+        if (req.url === "/") res.setHeader("X-Frame-Options", "DENY");
         res.setHeader("Content-Type", cache[resourceName].mime);
         res.setHeader("Cache-Control", "public, max-age=31536000");
 
@@ -515,6 +519,7 @@ function handleGET(req, res) {
             res.setHeader("Content-Length", cache[resourceName].size);
             res.end(cache[resourceName].data);
         }
+        logresponse(req, res);
     }
 }
 //-----------------------------------------------------------------------------
@@ -523,32 +528,33 @@ function handleFileRequest(req, res) {
         res.statusCode = 301;
         res.setHeader("Location", "/");
         res.end();
+        logresponse(req, res);
     }
-    var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    var filepath = unescape(prefixBasePath(req.url.replace("get/","")));
+    var filepath = unescape(prefixBasePath(req.url.replace("get/", "")));
     if (filepath) {
         var mimeType = mime.lookup(filepath);
 
-        fs.stat(filepath, function(err,stats) {
+        fs.stat(filepath, function (err, stats) {
             if (err) {
-                res.writeHead(500);
+                res.statusCode = 500;
                 res.end();
-                handleError(err);
+                logresponse(req, res);
+                logerror(err);
+            } else {
+                res.statusCode = 200;
+                res.setHeader("Content-Disposition", ['attachment; filename="', path.basename(filepath), '"'].join(""));
+                res.setHeader("Content-Type", mimeType);
+                res.setHeader("Content-Length", stats.size);
+                logresponse(req, res);
+                fs.createReadStream(filepath, {"bufferSize": 4096}).pipe(res);
             }
-            log("SEND: ", socket, "\t\t", filepath, " (", convertToSI(stats.size), ")");
-            res.writeHead(200, {
-                "Content-Disposition" : ['attachment; filename="',path.basename(filepath),'"'].join(""),
-                "Content-Type"        : mimeType,
-                "Content-Length"      : stats.size
-            });
-            fs.createReadStream(filepath, {"bufferSize": 4096}).pipe(res);
         });
     }
 }
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    if (req.url === "/upload" ) {
+    if (req.url === "/upload") {
         var form = new formidable.IncomingForm();
         var address = req.socket.remoteAddress;
         var uploadedFiles = [];
@@ -556,41 +562,39 @@ function handleUploadRequest(req, res) {
         form.parse(req);
 
         //Change the path from a temporary to the actual files directory
-        form.on("fileBegin", function(name, file) {
+        form.on("fileBegin", function (name, file) {
             if (clients[address].directory === "/")
                 file.path = form.uploadDir + file.name;
             else
                 file.path = prefixBasePath(clients[address].directory) + "/" + file.name;
             uploadedFiles.push(file.path);
 
-            log("RECV: ", socket, "\t\t", file.path );
+            log(socket, " Receiving ", file.path.substring(1));
         });
 
-        form.on("end", function() {
-            uploadedFiles.forEach(function(file) {
-                fs.chmod(file, config.mode, function(err) {
-                    if (err) handleError(err);
+        form.on("end", function () {
+            uploadedFiles.forEach(function (file) {
+                fs.chmod(file, config.mode, function (err) {
+                    if (err) logerror(err);
                 });
             });
         });
 
-        form.on("error", function(err) {
-            handleError(err);
-
+        form.on("error", function (err) {
+            logerror(err);
         });
 
-        res.writeHead(200, {
-            "Content-Type" : "text/html"
-        });
+        res.statusCode = 200;
         res.end();
+        logresponse(req, res);
     }
 }
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in "dirs"
 var readDirectory = debounce(function (root, callback) {
     lastRead = new Date();
-    fs.readdir(prefixBasePath(root), function(err,files) {
-        if (err) handleError(err);
+    fs.readdir(prefixBasePath(root), function (err, files) {
+        if (err) logerror(err);
         if (!files) return;
 
         var dirContents = {};
@@ -609,9 +613,9 @@ var readDirectory = debounce(function (root, callback) {
         }
 
         function inspectFile(filename) {
-            fs.stat(prefixBasePath(root) + "/" + filename, function(err, stats) {
+            fs.stat(prefixBasePath(root) + "/" + filename, function (err, stats) {
                 counter++;
-                if (err) handleError(err);
+                if (err) logerror(err);
                 if (stats.isFile())
                     type = "f";
                 if (stats.isDirectory())
@@ -627,37 +631,17 @@ var readDirectory = debounce(function (root, callback) {
             });
         }
     });
-},config.readInterval);
-//-----------------------------------------------------------------------------
-// Logging and error handling helpers
-function log() { //getTimestamp(),
-    var arr = Array.prototype.slice.call(arguments, 0);
-    console.log(getTimestamp(), arr.join(""));
-}
-
-function handleError(err) {
-    if (typeof err === "object") {
-        if (err.message)
-            log(err.message);
-        if (err.stack)
-            log(err.stack);
-    }
-}
-
-process.on("uncaughtException", function (err) {
-    log("=============== Uncaught exception! ===============");
-    handleError(err);
-});
+}, config.readInterval);
 //-----------------------------------------------------------------------------
 // Argument handler
 function handleArguments() {
     var args = process.argv.slice(2);
     var option = args[0];
 
-    switch(option) {
+    switch (option) {
     case "-adduser":
-        if (args.length === 3 ) {
-            addUser(args[1],args[2]);
+        if (args.length === 3) {
+            addUser(args[1], args[2]);
         } else {
             printUsage();
             process.exit(1);
@@ -686,13 +670,13 @@ function readConfig() {
     try {
         config = JSON.parse(fs.readFileSync("./config.json"));
     } catch (e) {
-        console.log("Error reading config.json\n",util.inspect(e));
+        logerror("Error reading config.json\n", util.inspect(e));
         process.exit(1);
     }
-    var opts = ["useSSL","port","readInterval","mode","httpsKey","httpsCert","db","filesDir","resDir","srcDir"];
+    var opts = ["useSSL", "port", "readInterval", "mode", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
-            console.log("Error: Missing property in config.json:", opts[i]);
+            logerror("Error: Missing property in config.json:", opts[i]);
             process.exit(1);
         }
     }
@@ -722,8 +706,7 @@ function readDB() {
             db = {users: {}, sessions: {}};
             doWrite = true;
         } else {
-            console.log("Error reading", config.db);
-            console.log(util.inspect(e));
+            logerror("Error reading ", config.db, "\n", util.inspect(e));
             process.exit(1);
         }
     }
@@ -732,8 +715,7 @@ function readDB() {
     try {
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
     } catch (e) {
-        console.log("Error writing", config.db);
-        console.log(util.inspect(e));
+        logerror("Error writing ", config.db, "\n", util.inspect(e));
         process.exit(1);
     }
 }
@@ -744,25 +726,20 @@ function getHash(string) {
 }
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
-function addUser (user, password) {
+function addUser(user, password) {
     readDB();
     if (db.users[user] !== undefined) {
-        console.log("User", user, "already exists!");
+        process.stdout.write("User", user, "already exists!\n");
         process.exit(1);
     } else {
         var salt = crypto.randomBytes(4).toString("hex");
         db.users[user] = getHash(password + salt + user) + "$" + salt;
         try {
             fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-            if (user === "droppy") {
-                console.log (" ->> default user added: Username: droppy, Password: droppy");
-            } else {
-                console.log("User", user, "sucessfully added.");
-                process.exit();
-            }
+            process.stdout.write("User", user, "sucessfully added.\n");
+            process.exit();
         } catch (e) {
-            console.log("Error writing", config.db);
-            console.log(util.inspect(e));
+            logerror("Error writing ", config.db, "\n", util.inspect(e));
             process.exit(1);
         }
     }
@@ -797,7 +774,7 @@ function createCookie(req, res, postData) {
     var sessionID = crypto.randomBytes(64).toString("base64");
     if (postData.check === "on") {
         // Create a semi-permanent cookie
-        var dateString = new Date(new Date().getTime()+31536000000).toUTCString();
+        var dateString = new Date(new Date().getTime() + 31536000000).toUTCString();
         db.sessions[sessionID] = true;
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
         res.setHeader("Set-Cookie", "_SESSION=" + sessionID + "; Expires=" + dateString);
@@ -834,25 +811,11 @@ function getTimestamp() {
     if (minutes < 10) minutes = "0" + minutes;
     if (seconds < 10) seconds = "0" + seconds;
 
-    return year + "-"  + month + "-" + day + " "+ hours + ":" + minutes + ":" + seconds;
-}
-
-function convertToSI(bytes) {
-    var kib = 1024,
-        mib = kib * 1024,
-        gib = mib * 1024,
-        tib = gib * 1024;
-
-    if ((bytes >= 0) && (bytes < kib))         return bytes + " bytes";
-    else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + "KiB";
-    else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + "MiB";
-    else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + "GiB";
-    else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + "TiB";
-    else return bytes + " bytes";
+    return year + "-"  + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds + " ";
 }
 
 function prettyStartup() {
-    return([
+    return ([
         "    __\n",
         ".--|  .----.-----.-----.-----.--.--.\n",
         "|  _  |   _|  _  |  _  |  _  |  |  |\n",
@@ -864,16 +827,16 @@ function prettyStartup() {
 // Recursively walk a directory and return file paths in an array
 function walkDirectory(dir, cb) {
     var results = [];
-    fs.readdir(dir, function(err, list) {
+    fs.readdir(dir, function (err, list) {
         if (err) return cb(err);
         var i = 0;
         (function next() {
             var file = list[i++];
             if (!file) return cb(null, results);
             file = dir + '/' + file;
-            fs.stat(file, function(err, stat) {
+            fs.stat(file, function (err, stat) {
                 if (stat && stat.isDirectory()) {
-                    walkDirectory(file, function(err, res) {
+                    walkDirectory(file, function (err, res) {
                         results = results.concat(res);
                         next();
                     });
@@ -889,9 +852,9 @@ function walkDirectory(dir, cb) {
 // underscore's debounce - https://github.com/documentcloud/underscore
 function debounce(func, wait, immediate) {
     var timeout, result;
-    return function() {
+    return function () {
         var context = this, args = arguments;
-        var later = function() {
+        var later = function () {
             timeout = null;
             if (!immediate) result = func.apply(context, args);
         };
@@ -902,3 +865,70 @@ function debounce(func, wait, immediate) {
         return result;
     };
 }
+
+//-----------------------------------------------------------------------------
+// Logging and error handling helpers
+
+var color = {
+    red     : "\u001b[31m",
+    green   : "\u001b[32m",
+    yellow  : "\u001b[33m",
+    blue    : "\u001b[34m",
+    reset   : "\u001b[0m"
+};
+
+function log() {
+    var args = Array.prototype.slice.call(arguments, 0);
+    args.unshift(getTimestamp());
+    for (var i = 1, len = args.length; i < len; i++) {
+        var argStr = String(args[i]);
+        if (typeof args[i] === "number" && args[i] >= 100 && args[i] < 600) {
+            switch (argStr.charAt(0)) {
+            case "1":
+            case "2":
+                argStr = "[" + color.green + argStr + color.reset + "]";
+                break;
+            case "3":
+                argStr = "[" + color.yellow + argStr + color.reset + "]";
+                break;
+            case "4":
+            case "5":
+                argStr = "[" + color.red + argStr + color.reset + "]";
+                break;
+            }
+            args[i] = argStr;
+        } else if (argStr === "GET" || argStr === "POST") {
+            argStr = color.yellow + argStr + color.reset;
+        }
+    }
+    args.push(color.reset);
+    console.log(args.join(""));
+}
+
+function logresponse(req, res) {
+    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ", req.method.toUpperCase(), " ", req.url, " ", res.statusCode);
+}
+
+function logerror(error) {
+    if (typeof error === "object") {
+        if (error.message)
+            logerror("Error", error.message);
+        if (error.stack)
+            logerror("Error", error.stack);
+    } else {
+        var args = Array.prototype.slice.call(arguments, 0);
+        args.unshift(getTimestamp() + color.red);
+        args.push(color.reset);
+        console.log(args.join(""));
+    }
+}
+
+function logsimple() {
+    var args = Array.prototype.slice.call(arguments, 0);
+    console.log(args.join(""));
+}
+
+process.on("uncaughtException", function (err) {
+    logerror("=============== Uncaught exception! ===============");
+    logerror(err);
+});
