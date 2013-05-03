@@ -77,13 +77,17 @@ var isJitsu = (process.env.NODE_ENV === "production");
 readConfig();
 
 // Argument handler
-if (process.argv.length > 2)
+var isCLI = (process.argv.length > 2);
+if (isCLI)
     handleArguments();
 
-console.log(prettyStartup());
+logsimple(prettyStartup());
 
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
+if (Object.keys(db.users).length < 1) {
+    addUser("droppy", "droppy");
+}
 
 // Copy/Minify JS,CSS and HTML content
 prepareContent();
@@ -355,7 +359,7 @@ function onRequest(req, res) {
     } else if (method === "POST") {
         if (req.url === "/upload") {
             if (!checkCookie(req)) {
-                res.statusCode = 400;
+                res.statusCode = 401;
                 res.end();
                 logresponse(req, res);
             }
@@ -474,7 +478,6 @@ function cacheResources(dir, callback) {
 // Handle all GETs, except downloads
 function handleGET(req, res) {
     var resourceName;
-    var hasCookie = checkCookie(req);
 
     switch (req.url) {
     case "/":
@@ -482,7 +485,7 @@ function handleGET(req, res) {
         break;
     case "/content":
         var obj = {};
-        if (hasCookie) {
+        if (checkCookie(req)) {
             obj.type = "main";
             obj.data = cache["body-main.html"].data;
         } else {
@@ -663,27 +666,28 @@ function handleArguments() {
     switch (option) {
     case "-adduser":
         if (args.length === 3) {
+            readDB();
             addUser(args[1], args[2]);
         } else {
             printUsage();
             process.exit(1);
         }
         break;
-    case "-help":
+    case "--help":
         printUsage();
-        process.exit();
+        process.exit(0);
         break;
     default:
-        process.stdout.write("Unknown argument. See 'node droppy -? for help.'");
+        logsimple("Unknown argument. See 'node droppy --help for help.'\n");
         process.exit(1);
         break;
     }
 
     function printUsage() {
-        process.stdout.write("droppy - file server on node.js (https://github.com/silverwind/droppy)\n");
-        process.stdout.write("Usage: node droppy [option] [option arguments]\n\n");
-        process.stdout.write("-help \t\t\t\tPrint this help\n");
-        process.stdout.write("-adduser username password\tCreate a new user for authentication\n");
+        logsimple("droppy - file server on node.js (https://github.com/silverwind/droppy)");
+        logsimple("Usage: node droppy [option] [option arguments]\n");
+        logsimple("-help \t\t\t\tPrint this help");
+        logsimple("-adduser username password\tCreate a new user for authentication\n");
     }
 }
 //-----------------------------------------------------------------------------
@@ -725,6 +729,7 @@ function readDB() {
     } catch (e) {
         if (e.code === "ENOENT" || dbString.match(/^\s*$/)) {
             // Recreate DB file in case it doesn't exist / is empty
+            logsimple("->> creating" + path.basename(config.db) + "...");
             db = {users: {}, sessions: {}};
             doWrite = true;
         } else {
@@ -734,11 +739,13 @@ function readDB() {
     }
 
     // Write a new DB if necessary
-    try {
-        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-    } catch (e) {
-        logerror("Error writing ", config.db, "\n", util.inspect(e));
-        process.exit(1);
+    if (doWrite) {
+        try {
+            fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+        } catch (e) {
+            logerror("Error writing ", config.db, "\n", util.inspect(e));
+            if (isCLI) process.exit(1);
+        }
     }
 }
 //-----------------------------------------------------------------------------
@@ -749,20 +756,19 @@ function getHash(string) {
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
 function addUser(user, password) {
-    readDB();
     if (db.users[user] !== undefined) {
-        process.stdout.write("User", user, "already exists!\n");
-        process.exit(1);
+        logsimple("User ", user, " already exists!");
+        if (isCLI) process.exit(1);
     } else {
         var salt = crypto.randomBytes(4).toString("hex");
         db.users[user] = getHash(password + salt + user) + "$" + salt;
         try {
             fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-            process.stdout.write("User", user, "sucessfully added.\n");
-            process.exit();
+            if (isCLI) logsimple("User ", user, " successfully added.");
+            if (isCLI) process.exit();
         } catch (e) {
             logerror("Error writing ", config.db, "\n", util.inspect(e));
-            process.exit(1);
+            if (isCLI) process.exit(1);
         }
     }
 }
@@ -783,7 +789,7 @@ function checkCookie(req) {
     if (cookie !== undefined && cookie.match(/^_SESSION.*/)) {
         sid = cookie.substring(9);
     }
-
+    log("got sid " + sid);
     for (var savedsid in db.sessions) {
         if (savedsid === sid) {
             return true;
@@ -800,11 +806,13 @@ function createCookie(req, res, postData) {
         db.sessions[sessionID] = true;
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
         res.setHeader("Set-Cookie", "_SESSION=" + sessionID + "; Expires=" + dateString);
+        log("setcookie sid= " + sessionID);
     } else {
         // Create a single-session cookie
         // TODO: Delete these session ids after a certain period of inactivity from the client
         db.sessions[sessionID] = true;
         res.setHeader("Set-Cookie", "_SESSION=" + sessionID + ";");
+        log("settempcookie sid= " + sessionID);
     }
 
 }
