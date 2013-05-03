@@ -426,37 +426,38 @@ function cacheResources(dir, callback) {
 
     walkDirectory(dir, function (err, results) {
         var filesToGzip = [];
-        results.forEach(function (fullPath) {                    // fullPath = ./res/webshim/shims/styles/shim.css
+        results.forEach(function (fullPath) {                   // fullPath = ./res/webshim/shims/styles/shim.css
             var relPath = fullPath.substring(dir.length + 1);   // relPath  = webshim/shims/styles/shim.css
-            var fileName = path.basename(config.resPath);       // fileName = shim.css
+            var fileName = path.basename(fullPath);       // fileName = shim.css
             var fileData = fs.readFileSync(fullPath);
             var fileStats = fs.statSync(fullPath);
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
-            cache[relPath].size = fileStats.size;
             cache[relPath].revision = Number(fileStats.mtime).toString(36); //base36 the modified timestamp
             cache[relPath].mime = mime.lookup(fullPath);
-            if (fileName.match(/.*(js|css|html)$/))
+            if (fileName.match(/.*(js|css|html)$/)) {
                 filesToGzip.push(relPath);
-
-            addRevisions();
-
-            if (filesToGzip.length > 0)
-                runGzip();
-
-            function runGzip() {
-                var currentFile = filesToGzip[0];
-                zlib.gzip(cache[currentFile].data, function (err, compressedData) {
-                    cache[currentFile].gzipData = compressedData;
-                    cache[currentFile].gzipSize = compressedData.length;
-                    filesToGzip = filesToGzip.slice(1);
-                    if (filesToGzip.length > 0)
-                        runGzip();
-                });
             }
+            addRevisions();
         });
-        callback();
+
+        if (filesToGzip.length > 0)
+            runGzip();
+        else
+            callback();
+
+        function runGzip() {
+            var currentFile = filesToGzip[0];
+            zlib.gzip(cache[currentFile].data, function (err, compressedData) {
+                cache[currentFile].gzipData = compressedData;
+                filesToGzip = filesToGzip.slice(1);
+                if (filesToGzip.length > 0)
+                    runGzip();
+                else
+                    callback();
+            });
+        }
     });
 }
 //-----------------------------------------------------------------------------
@@ -521,13 +522,13 @@ function handleGET(req, res) {
         res.setHeader("Cache-Control", "public, max-age=31536000");
 
         var acceptEncoding = req.headers["accept-encoding"] || "";
-        if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipSize !== undefined) {
+        if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
             res.setHeader("Content-Encoding", "gzip");
-            res.setHeader("Content-Length", cache[resourceName].gzipSize);
+            res.setHeader("Content-Length", cache[resourceName].gzipData.length);
             res.setHeader("Vary", "Accept-Encoding");
             res.end(cache[resourceName].gzipData);
         } else {
-            res.setHeader("Content-Length", cache[resourceName].size);
+            res.setHeader("Content-Length", cache[resourceName].data.length);
             res.end(cache[resourceName].data);
         }
         logresponse(req, res);
