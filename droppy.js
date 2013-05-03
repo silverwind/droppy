@@ -72,6 +72,8 @@ var color = {
     reset   : "\u001b[0m"
 };
 
+var isJitsu = (process.env.NODE_ENV === "production");
+
 readConfig();
 
 // Argument handler
@@ -186,7 +188,7 @@ function createListener() {
     setupSocket(server);
 
     // Bind to 8080 on jitsu
-    if (process.env.NODE_ENV === "production") {
+    if (isJitsu) {
         server.listen(8080);
     }
     else {
@@ -819,6 +821,7 @@ function getSrcPath(name) {
 }
 
 function getTimestamp() {
+    if (isJitsu) return "";
     var currentDate = new Date();
     var day = currentDate.getDate();
     var month = currentDate.getMonth() + 1;
