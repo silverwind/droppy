@@ -63,6 +63,15 @@ var fs                 = require("fs"),
     cleancss           = require("clean-css"),
     uglify             = require("uglify-js");
 
+
+var color = {
+    red     : "\u001b[31m",
+    green   : "\u001b[32m",
+    yellow  : "\u001b[33m",
+    blue    : "\u001b[34m",
+    reset   : "\u001b[0m"
+};
+
 readConfig();
 
 // Argument handler
@@ -73,20 +82,17 @@ console.log(prettyStartup());
 
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
-if (Object.keys(db.users).length < 1) {
-    addUser("droppy", "droppy");
-}
 
 // Copy/Minify JS,CSS and HTML content
 prepareContent();
 
 // Read and cache all resources
-cacheResources(config.resDir);
-
-// Proceed with setting up the files folder and bind to the listening port
-setupFilesDir();
-createListener();
-
+logsimple(" ->> caching resources...\n");
+cacheResources(config.resDir, function () {
+    // Proceed with setting up the files folder and bind to the listening port
+    setupFilesDir();
+    createListener();
+});
 //-----------------------------------------------------------------------------
 // Read CSS and JS, minify them, and write them to /res
 function prepareContent() {
@@ -128,7 +134,7 @@ function prepareContent() {
             }
         });
 
-        logsimple(" ->> preparing HTML...\n");
+        logsimple(" ->> preparing HTML...");
         // Copy html from src to res - may do some preprocessing here later
         copyResource("base.html");
         copyResource("body-auth.html");
@@ -171,13 +177,13 @@ function createListener() {
         }
         server = require("https").createServer({key: key, cert: cert}, onRequest);
     }
+    createWatcher(prefixBasePath("/"));
+    setupSocket(server);
     server.listen(config.port);
     server.on("listening", function () {
         // We're up - initialize everything
         var address = server.address();
         log("Listening on ", address.address, ":", address.port);
-        createWatcher(prefixBasePath("/"));
-        setupSocket(server);
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
@@ -410,7 +416,7 @@ function stripRevision(filename) {
 }
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
-function cacheResources(dir) {
+function cacheResources(dir, callback) {
     dir = dir.substring(0, dir.length - 1); //Strip trailing slash
 
     walkDirectory(dir, function (err, results) {
@@ -426,7 +432,6 @@ function cacheResources(dir) {
             cache[relPath].size = fileStats.size;
             cache[relPath].revision = Number(fileStats.mtime).toString(36); //base36 the modified timestamp
             cache[relPath].mime = mime.lookup(fullPath);
-
             if (fileName.match(/.*(js|css|html)$/))
                 filesToGzip.push(relPath);
 
@@ -446,6 +451,7 @@ function cacheResources(dir) {
                 });
             }
         });
+        callback();
     });
 }
 //-----------------------------------------------------------------------------
@@ -825,21 +831,24 @@ function prettyStartup() {
 }
 
 // Recursively walk a directory and return file paths in an array
-function walkDirectory(dir, cb) {
+function walkDirectory(dir, callback) {
     var results = [];
     fs.readdir(dir, function (err, list) {
-        if (err) return cb(err);
+        if (err) return callback(err);
         var i = 0;
         (function next() {
             var file = list[i++];
-            if (!file) return cb(null, results);
+            if (!file) return callback(null, results);
             file = dir + '/' + file;
             fs.stat(file, function (err, stat) {
                 if (stat && stat.isDirectory()) {
-                    walkDirectory(file, function (err, res) {
-                        results = results.concat(res);
-                        next();
-                    });
+                    // This seems to rarely omit a file or two, setting a slight delay trying to counter it
+                    setTimeout(function () {
+                        walkDirectory(file, function (err, res) {
+                            results = results.concat(res);
+                            next();
+                        });
+                    }, 20);
                 } else {
                     results.push(file);
                     next();
@@ -868,14 +877,6 @@ function debounce(func, wait, immediate) {
 
 //-----------------------------------------------------------------------------
 // Logging and error handling helpers
-
-var color = {
-    red     : "\u001b[31m",
-    green   : "\u001b[32m",
-    yellow  : "\u001b[33m",
-    blue    : "\u001b[34m",
-    reset   : "\u001b[0m"
-};
 
 function log() {
     var args = Array.prototype.slice.call(arguments, 0);

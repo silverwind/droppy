@@ -291,9 +291,9 @@
                 maxFilesize: 65535
             });
 
-            dropZone.on("sending", function () {
-                uploadInit();
-            });
+            //dropZone.on("sending", function () {
+           //     uploadInit();
+         //   });
 
             dropZone.on("uploadprogress", function (file, progress, bytesSent) {
                 uploadProgress(bytesSent, file.size, progress);
