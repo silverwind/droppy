@@ -436,19 +436,38 @@ function stripRevision(filename) {
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
 function cacheResources(dir, callback) {
-    dir = dir.substring(0, dir.length - 1); //Strip trailing slash
+    dir = dir.substring(0, dir.length - 1); // Strip trailing slash
 
-    walkDirectory(dir, function (err, results) {
+    var rr = require("recursive-readdir");
+
+    rr(dir, function (err, results) {
         var filesToGzip = [];
         results.forEach(function (fullPath) {                   // fullPath = ./res/webshim/shims/styles/shim.css
             var relPath = fullPath.substring(dir.length + 1);   // relPath  = webshim/shims/styles/shim.css
-            var fileName = path.basename(fullPath);       // fileName = shim.css
-            var fileData = fs.readFileSync(fullPath);
-            var fileStats = fs.statSync(fullPath);
+            var fileName = path.basename(fullPath);             // fileName = shim.css
+            var fileData, fileTime;
+
+            // This is rather hacky. node seems to throw ENOENT on files that
+            // clearly exist when reading them in quick succession. This code
+            // tries to read a file 20 times before quitting.
+            var readCount = 0;
+            try {
+                var read = function () {
+                    fileData = fs.readFileSync(fullPath);
+                    fileTime = fs.statSync(fullPath).mtime;
+                    readCount++;
+                };
+            } catch (err) {
+                if (readCount > 20) {
+                    logerror(err);
+                    process.exit(1);
+                }
+                read();
+            }
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
-            cache[relPath].revision = Number(fileStats.mtime).toString(36); //base36 the modified timestamp
+            cache[relPath].revision = Number(fileTime).toString(36); //base36 the modified timestamp
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html)$/)) {
                 filesToGzip.push(relPath);
