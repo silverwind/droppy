@@ -34,7 +34,7 @@ function getPage() {
 // Switch an element's content with an animation
 function animatedLoad(oldElement, container, data, callback) {
     $(container).css("overflow","hidden");
-    $(container).append('<div id="new">' + data + '</div>');
+    $(container).appendPolyfill('<div id="new">' + data + '</div>');
     var newElement = $("#new");
     newElement.css("opacity", 0);
     newElement.animate({
@@ -72,7 +72,7 @@ function openSocket() {
 
         // Close the socket to prevent Firefox errors
         $(window).on('beforeunload', function() {
-          socket.close();
+          socket.disconnect();
           socketOpen = false;
         });
     });
@@ -82,15 +82,25 @@ function openSocket() {
         if (isUploading) return;
         if (msgData.folder === currentFolder.replace(/&amp;/,"&")) {
             updateCrumbs(msgData.folder);
-            $("#content").html(buildHTML(msgData.data, msgData.folder));
+            $("#content").htmlPolyfill(buildHTML(msgData.data, msgData.folder));
         }
     });
 
     socket.on("disconnect", function() {
         socketOpen = false;
+
         // Restart a closed socket. Firefox closes it on every download..
         // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-        //setTimeout(openSocket,300);
+        setTimeout(function() {
+            socket.socket.connect();
+        }, 50);
+    });
+
+    socket.on("error", function(error) {
+        if(typeof error === "object")
+            console.log(JSON.stringify(error, null, 4));
+        else if (typeof error === "string")
+            console.log(error);
     });
 }
 
@@ -239,24 +249,24 @@ function initMainPage() {
         var folderExists = folderList[input.toLowerCase()] === true;
         if (input === "" ) {
             nameinput.attr("class","valid");
-            info.html("&nbsp;");
+            info.htmlPolyfill("&nbsp;");
             return;
         }
 
         if (!valid) {
             nameinput.attr("class","invalid");
-            info.html("Invalid character(s) in filename!");
+            info.htmlPolyfill("Invalid character(s) in filename!");
             return;
         }
 
         if (folderExists) {
             nameinput.attr("class","invalid");
-            info.html("File/Directory already exists!");
+            info.htmlPolyfill("File/Directory already exists!");
             return;
         }
 
         nameinput.attr("class","valid");
-        info.html("&nbsp;");
+        info.htmlPolyfill("&nbsp;");
 
         if (e.keyCode === 13) { // Return Key
             if (currentFolder === "/")
@@ -306,14 +316,14 @@ function initMainPage() {
     }
     function uploadInit() {
         bar.width("0%");
-        percent.html("");
+        percent.htmlPolyfill("");
         progress.fadeIn(300);
         isUploading = true;
         start = new Date().getTime();
     }
     function uploadDone() {
         bar.width("100%");
-        percent.html("finished");
+        percent.htmlPolyfill("finished");
         progress.fadeOut(300);
         isUploading = false;
     }
@@ -326,11 +336,11 @@ function initMainPage() {
         var estimate = bytesTotal / (bytesSent / elapsed);
         var secs = (estimate - elapsed) / 1000;
         if ( secs > 120) {
-            percent.html("less than " + Math.floor((secs/60)+1) + " minutes left");
+            percent.htmlPolyfill("less than " + Math.floor((secs/60)+1) + " minutes left");
         } else if (secs > 60) {
-            percent.html("less than 2 minute left");
+            percent.htmlPolyfill("less than 2 minute left");
         } else {
-            percent.html(Math.round(secs) + " seconds left");
+            percent.htmlPolyfill(Math.round(secs) + " seconds left");
         }
     }
 }
@@ -362,7 +372,7 @@ function updateCrumbs(path) {
     html += '</ul>';
 
     var oldLen = $("#current ul li").length;
-    $("#current").html(html);
+    $("#current").htmlPolyfill(html);
     if ($("#current ul li").length > oldLen) {
         var last = $("#current ul li:last-child");
         last.css("margin-top",-100);
