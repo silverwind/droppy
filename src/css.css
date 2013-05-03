@@ -401,7 +401,6 @@ footer a:hover {
     background-color: #222;
     opacity: .9;
     border-radius: 10px;
-    behavior: url("/res/PIE.htc");
 }
 
 #login-form-inner {

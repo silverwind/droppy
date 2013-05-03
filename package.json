@@ -11,7 +11,8 @@
     "formidable": "*",
     "mime": "*",
     "uglify-js" : "*",
-    "clean-css" : "*"
+    "clean-css" : "*",
+    "ncp" : "*"
   },
   "devDependencies": {
     "grunt": "*",

@@ -123,6 +123,12 @@ function prepareContent() {
             );
         }
 
+        require('ncp').ncp(config.srcDir + "/webshim", config.resDir + "/webshim", function (err) {
+            if (err) {
+                log(err);
+            }
+        });
+
         console.log(" ->> preparing HTML...\n");
         // Copy html from src to res - may do some preprocessing here later
         copyResource("base.html");
@@ -132,10 +138,10 @@ function prepareContent() {
         console.log("Error reading client sources.\n" + util.inspect(err));
         process.exit(1);
     }
+}
 
-    function copyResource(filename) {
-        fs.writeFileSync(getResPath(filename),fs.readFileSync(getSrcPath(filename)));
-    }
+function copyResource(filepath) {
+    fs.writeFileSync(getResPath(filepath), fs.readFileSync(getSrcPath(filepath)));
 }
 //-----------------------------------------------------------------------------
 // Set up the directory for files and start the server
@@ -474,18 +480,22 @@ function handleGET(req, res) {
             fileName = stripRevision(fileName);
 
         if (dirName.indexOf("/res") === 0)
-            dirName = dirName.substring(4);
+            dirName = dirName.substring(5);
 
         if (dirName === "")
             resourceName = fileName;
         else
             resourceName = dirName + "/" + fileName;
 
+        if (resourceName.match(/favicon.ico/))
+            resourceName = "icon.ico";
+
         break;
     }
 
 
     if (cache[resourceName] === undefined) {
+        log("404: " + resourceName);
         res.writeHead(404);
         res.end();
     } else {

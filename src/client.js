@@ -11,7 +11,9 @@ var bar, info, nameinput, percent, progress, start, socket;
  */
 
 // Initialize webshims lib
-//$.webshims.polyfill();
+$.webshims.setOptions("basePath","res/webshim/shims/");
+
+$.webshims.polyfill();
 
 function getPage() {
     $.getJSON('/content', function(response) {
