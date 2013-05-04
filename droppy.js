@@ -438,9 +438,7 @@ function stripRevision(filename) {
 function cacheResources(dir, callback) {
     dir = dir.substring(0, dir.length - 1); // Strip trailing slash
 
-    var rr = require("recursive-readdir");
-
-    rr(dir, function (err, results) {
+    walkDirectory(dir, function (err, results) {
         var filesToGzip = [];
         results.forEach(function (fullPath) {                   // fullPath = ./res/webshim/shims/styles/shim.css
             var relPath = fullPath.substring(dir.length + 1);   // relPath  = webshim/shims/styles/shim.css
@@ -457,12 +455,14 @@ function cacheResources(dir, callback) {
                     fileTime = fs.statSync(fullPath).mtime;
                     readCount++;
                 };
+                read();
             } catch (err) {
                 if (readCount > 20) {
                     logerror(err);
                     process.exit(1);
+                } else {
+                    read();
                 }
-                read();
             }
 
             cache[relPath] = {};
@@ -805,10 +805,14 @@ function isValidUser(user, password) {
 // Cookie helpers
 function checkCookie(req) {
     var cookie = req.headers.cookie, sid = "";
-    if (cookie !== undefined && cookie.match(/^_SESSION.*/)) {
-        sid = cookie.substring(9);
+    if (cookie !== undefined) {
+        var cookies = cookie.split("; ");
+        cookies.forEach(function (c) {
+            if (c.match(/^_SESSION.*/)) {
+                sid = c.substring(9);
+            }
+        });
     }
-    log("got sid " + sid);
     for (var savedsid in db.sessions) {
         if (savedsid === sid) {
             return true;
@@ -825,13 +829,11 @@ function createCookie(req, res, postData) {
         db.sessions[sessionID] = true;
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
         res.setHeader("Set-Cookie", "_SESSION=" + sessionID + "; Expires=" + dateString);
-        log("setcookie sid= " + sessionID);
     } else {
         // Create a single-session cookie
         // TODO: Delete these session ids after a certain period of inactivity from the client
         db.sessions[sessionID] = true;
         res.setHeader("Set-Cookie", "_SESSION=" + sessionID + ";");
-        log("settempcookie sid= " + sessionID);
     }
 
 }
@@ -886,13 +888,10 @@ function walkDirectory(dir, callback) {
             file = dir + '/' + file;
             fs.stat(file, function (err, stat) {
                 if (stat && stat.isDirectory()) {
-                    // This seems to rarely omit a file or two, setting a slight delay trying to counter it
-                    setTimeout(function () {
-                        walkDirectory(file, function (err, res) {
-                            results = results.concat(res);
-                            next();
-                        });
-                    }, 20);
+                    walkDirectory(file, function (err, res) {
+                        results = results.concat(res);
+                        next();
+                    });
                 } else {
                     results.push(file);
                     next();
