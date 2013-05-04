@@ -23,9 +23,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 //-----------------------------------------------------------------------------
-// Current limitiations:
-// - None known
-//-----------------------------------------------------------------------------
 // TODOs:
 // - Logout functionality
 // - Admin panel to add/remove users
@@ -40,7 +37,7 @@
 
 "use strict";
 
-var DEBUG = true;
+var DEBUG = false;
 
 var cache          = {},
     clients        = {},
@@ -72,16 +69,14 @@ var color = {
     reset   : "\u001b[0m"
 };
 
-var isJitsu = (process.env.NODE_ENV === "production");
-
-readConfig();
-
 // Argument handler
 var isCLI = (process.argv.length > 2);
-if (isCLI)
-    handleArguments();
+if (isCLI) handleArguments();
 
+readConfig();
 logsimple(prettyStartup());
+
+var isJitsu = (process.env.NODE_ENV === "production");
 
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
@@ -188,7 +183,7 @@ function createListener() {
         }
         server = require("https").createServer({key: key, cert: cert}, onRequest);
     }
-    createWatcher(prefixBasePath("/"));
+    createWatcher(prefixFilePath("/"));
     setupSocket(server);
 
     // Bind to 8080 on jitsu
@@ -239,7 +234,7 @@ function createWatcher(folder) {
 }
 //-----------------------------------------------------------------------------
 // Create absolute directory link
-function prefixBasePath(relativePath) {
+function prefixFilePath(relativePath) {
     return config.filesDir.substring(0, config.filesDir.length - 1) + relativePath;
 }
 //-----------------------------------------------------------------------------
@@ -263,7 +258,7 @@ function setupSocket(server) {
 
         ws.on("CREATE_FOLDER", function (data) {
             var dir = JSON.parse(data);
-            fs.mkdir(prefixBasePath(dir), config.mode, function (err) {
+            fs.mkdir(prefixFilePath(dir), config.mode, function (err) {
                 if (err) logerror(err);
                 readDirectory(clients[remoteIP].directory, function () {
                     sendMessage(remoteIP, "UPDATE_FILES");
@@ -273,7 +268,7 @@ function setupSocket(server) {
 
         ws.on("DELETE_FILE", function (data) {
             var dir = JSON.parse(data);
-            dir = prefixBasePath(dir);
+            dir = prefixFilePath(dir);
             fs.stat(dir, function (err, stats) {
                 if (err) {
                     logerror(err);
@@ -312,7 +307,7 @@ function setupSocket(server) {
 // Watch given directory and check if we need the other active watchers
 function updateWatchers(newDir) {
     if (!watchedDirs[newDir]) {
-        createWatcher(prefixBasePath(newDir));
+        createWatcher(prefixFilePath(newDir));
 
         var neededDirs = {};
         for (var client in clients) {
@@ -574,7 +569,7 @@ function handleFileRequest(req, res) {
         res.end();
         logresponse(req, res);
     }
-    var filepath = unescape(prefixBasePath(req.url.replace("get/", "")));
+    var filepath = unescape(prefixFilePath(req.url.replace("get/", "")));
     if (filepath) {
         var mimeType = mime.lookup(filepath);
 
@@ -601,43 +596,63 @@ function handleUploadRequest(req, res) {
     if (req.url === "/upload") {
         var form = new formidable.IncomingForm();
         var address = req.socket.remoteAddress;
-        var uploadedFiles = [];
-        form.uploadDir = config.filesDir;
+        var uploadedFiles = {};
         form.parse(req);
 
-        //Change the path from a temporary to the actual files directory
         form.on("fileBegin", function (name, file) {
-            if (clients[address].directory === "/")
-                file.path = form.uploadDir + file.name;
+            var pathToSave;
+            if (clients[address].directory === undefined || clients[address].directory === "/")
+                pathToSave = config.filesDir + file.name;
             else
-                file.path = prefixBasePath(clients[address].directory) + "/" + file.name;
-            uploadedFiles.push(file.path);
+                pathToSave = prefixFilePath(clients[address].directory) + "/" + file.name;
 
-            log(socket, " Receiving ", file.path.substring(1));
+            uploadedFiles[file.name] = {
+                "temppath" : file.path,
+                "savepath" : pathToSave
+            };
+
+            log(socket, " Receiving ", pathToSave.substring(config.filesDir.length + 1));
         });
 
         form.on("end", function () {
-            uploadedFiles.forEach(function (file) {
-                fs.chmod(file, config.mode, function (err) {
-                    if (err) logerror(err);
-                });
-            });
+            for (var file in uploadedFiles) {
+                if (uploadedFiles.hasOwnProperty(file)) {
+                    try {
+                        var is = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 64 * 1024});
+                        var os = fs.createWriteStream(uploadedFiles[file].savepath);
+
+                        is.pipe(os);
+
+                        is.on("close", function () {
+                            fs.unlinkSync(uploadedFiles[file].temppath);
+                            fs.chmod(uploadedFiles[file].savepath, config.mode, function (err) {
+                                if (err) logerror(err);
+                            });
+                        });
+
+                        is.on("error", function (err) {
+                            logerror(err);
+                        });
+                    } catch (err) {
+                        logerror(err);
+                    }
+                    res.statusCode = 200;
+                    res.end();
+                    logresponse(req, res);
+                }
+            }
         });
 
         form.on("error", function (err) {
             logerror(err);
         });
-
-        res.statusCode = 200;
-        res.end();
-        logresponse(req, res);
     }
 }
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in "dirs"
 var readDirectory = debounce(function (root, callback) {
     lastRead = new Date();
-    fs.readdir(prefixBasePath(root), function (err, files) {
+    fs.readdir(prefixFilePath(root), function (err, files) {
         if (err) logerror(err);
         if (!files) return;
 
@@ -657,7 +672,7 @@ var readDirectory = debounce(function (root, callback) {
         }
 
         function inspectFile(filename) {
-            fs.stat(prefixBasePath(root) + "/" + filename, function (err, stats) {
+            fs.stat(prefixFilePath(root) + "/" + filename, function (err, stats) {
                 counter++;
                 if (err) logerror(err);
                 if (stats.isFile())
@@ -955,10 +970,12 @@ function logresponse(req, res) {
 
 function logerror(error) {
     if (typeof error === "object") {
-        if (error.message)
-            logerror("Error", error.message);
-        if (error.stack)
-            logerror("Error", error.stack);
+        if (error.stack) {
+            logerror(String(error.stack));
+        }
+        if (error.message) {
+            logerror(String(error.message));
+        }
     } else {
         var args = Array.prototype.slice.call(arguments, 0);
         args.unshift(getTimestamp() + color.red);

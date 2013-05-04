@@ -10,10 +10,13 @@
  *  Page loading functions
  * ============================================================================
  */
+    // Pre-load icons
+    $(["res/dir.png", "/res/file.png"]).each(function () {
+        $("<img />").attr("src", this).appendTo("body").css("display", "none");
+    });
 
-// Initialize webshims lib
+    // Initialize webshims
     $.webshims.setOptions("basePath", "res/webshim/shims/");
-
     $.webshims.polyfill();
 
     function getPage() {
@@ -32,7 +35,7 @@
         });
     }
 
-// Switch an element's content with an animation
+    // Switch an element's content with an animation
     function animatedLoad(oldElement, container, data, callback) {
         $(container).css("overflow", "hidden");
         $(container).appendPolyfill('<div id="new">' + data + '</div>');
