@@ -16,8 +16,10 @@
     };
 
     // Initialize webshims
-    $.webshims.setOptions("basePath", "res/webshim/shims/");
-    $.webshims.polyfill();
+    if ($.webshims) {
+        $.webshims.setOptions("basePath", "res/webshim/shims/");
+        $.webshims.polyfill();
+    }
 
     function getPage() {
         $.getJSON('/content', function (response) {
@@ -38,7 +40,7 @@
     // Switch an element's content with an animation
     function animatedLoad(oldElement, container, data, callback) {
         $(container).css("overflow", "hidden");
-        $(container).appendPolyfill('<div id="new">' + data + '</div>');
+        $(container).append('<div id="new">' + data + '</div>');
         var newElement = $("#new");
         newElement.css("opacity", 0);
         newElement.animate({
@@ -254,24 +256,24 @@
             var folderExists = folderList[input.toLowerCase()] === true;
             if (input === "") {
                 nameinput.attr("class", "valid");
-                info.htmlPolyfill("&nbsp;");
+                info.html("&nbsp;");
                 return;
             }
 
             if (!valid) {
                 nameinput.attr("class", "invalid");
-                info.htmlPolyfill("Invalid character(s) in filename!");
+                info.html("Invalid character(s) in filename!");
                 return;
             }
 
             if (folderExists) {
                 nameinput.attr("class", "invalid");
-                info.htmlPolyfill("File/Directory already exists!");
+                info.html("File/Directory already exists!");
                 return;
             }
 
             nameinput.attr("class", "valid");
-            info.htmlPolyfill("&nbsp;");
+            info.html("&nbsp;");
 
             if (e.keyCode === 13) { // Return Key
                 if (currentFolder === "/")
@@ -322,14 +324,14 @@
         }
         function uploadInit() {
             bar.width("0%");
-            percent.htmlPolyfill("");
+            percent.html("");
             progress.fadeIn(300);
             isUploading = true;
             start = new Date().getTime();
         }
         function uploadDone() {
             bar.width("100%");
-            percent.htmlPolyfill("finished");
+            percent.html("finished");
             progress.fadeOut(300);
             isUploading = false;
         }
@@ -342,11 +344,11 @@
             var estimate = bytesTotal / (bytesSent / elapsed);
             var secs = (estimate - elapsed) / 1000;
             if (secs > 120) {
-                percent.htmlPolyfill("less than " + Math.floor((secs / 60) + 1) + " minutes left");
+                percent.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
             } else if (secs > 60) {
-                percent.htmlPolyfill("less than 2 minute left");
+                percent.html("less than 2 minute left");
             } else {
-                percent.htmlPolyfill(Math.round(secs) + " seconds left");
+                percent.html(Math.round(secs) + " seconds left");
             }
         }
     }
@@ -378,7 +380,7 @@
         html += '</ul>';
 
         var oldLen = $("#current ul li").length;
-        $("#current").htmlPolyfill(html);
+        $("#current").html(html);
         if ($("#current ul li").length > oldLen) {
             var last = $("#current ul li:last-child");
             last.css("margin-top", -100);
@@ -395,9 +397,10 @@
 
     function buildHTML(fileList, root) {
         // TODO: Clean up this mess
-        var htmlFiles = "", htmlDirs = "", folderList = [];
+        var folderList = [];
         var content = $("#content");
-        content.htmlPolyfill("");
+
+        var list = $("<ul>");
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
@@ -414,30 +417,46 @@
 
                 if (type === "f") {
                     //Create a file row
-                    htmlFiles += [
-                        '<div class="filerow" data-id="', id, '"><img class="icon" src="', images.file, '" width="16" height="16" alt="File" />',
-                        '<div class="filename"><a class="filelink" href="', escape("/get" + id), '">', name, '</a></div>',
+                    list.append([
+                        '<li class="filerow" data-id="', id, '"><img class="icon" src="', images.file, '" width="16" height="16" alt="File" />',
+                        '<div class="filename"><a class="filelink" href="', escape("/get" + id), '" download="', name, '">', name, '</a></div>',
                         '<div class="fileinfo"><span class="pin-right">', size, '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
-                        '<div class="right"></div></div>'
-                    ].join("");
+                        '<div class="right"></div></li>'
+                    ].join(""));
 
                 } else if (type === "d") {
                     //Create a folder row
-                    htmlDirs += [
-                        '<div class="folderrow" data-id="', id, '"><img class="icon" src="', images.dir, '" width="16" height="16" alt="Directory" />',
+                    list.append([
+                        '<li class="folderrow" data-id="', id, '"><img class="icon" src="', images.dir, '" width="16" height="16" alt="Directory" />',
                         '<div class="foldername"><a class="folderlink" href="">', name, '</a></div>',
                         '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
-                        '<div class="right"></div></div>'
-                    ].join("");
+                        '<div class="right"></div></li>'
+                    ].join(""));
 
-                    //Add to list of active folders
+                    //Add to list of currently displayed folders
                     folderList[name.toLowerCase()] = true;
                 }
 
             }
         }
-        content.appendPolyfill(htmlDirs);
-        content.appendPolyfill(htmlFiles);
+
+        // Sorting
+        var items = list.children("li");
+        items.sort(function (a, b) {
+            var result = $(b).attr("class").toUpperCase().localeCompare($(a).attr("class").toUpperCase());
+            if (result !== 0)
+                return result;
+            else
+                return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
+
+        });
+
+      //  list.html("");
+        $.each(items, function (idx, itm) {
+            list.append(itm);
+        });
+
+        content.html(list);
     }
 
     function convertToSI(bytes) {

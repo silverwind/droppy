@@ -117,8 +117,8 @@ function prepareContent() {
                 String(fs.readFileSync(getSrcPath("jquery.form.js"))),
                 String(fs.readFileSync(getSrcPath("dropzone.js"))),
                 String(fs.readFileSync(getSrcPath("prefixfree.js"))),
-                String(fs.readFileSync(getSrcPath("webshim/extras/modernizr-custom.js"))),
-                String(fs.readFileSync(getSrcPath("webshim/polyfiller.js"))),
+//                String(fs.readFileSync(getSrcPath("webshim/extras/modernizr-custom.js"))),
+//                String(fs.readFileSync(getSrcPath("webshim/polyfiller.js"))),
                 String(fs.readFileSync(getSrcPath("client.js")))
             ].join("\n"));
         } else {
@@ -129,8 +129,8 @@ function prepareContent() {
                     getSrcPath("jquery.form.js"),
                     getSrcPath("dropzone.js"),
                     getSrcPath("prefixfree.js"),
-                    getSrcPath("webshim/extras/modernizr-custom.js"),
-                    getSrcPath("webshim/polyfiller.js"),
+//                    getSrcPath("webshim/extras/modernizr-custom.js"),
+//                    getSrcPath("webshim/polyfiller.js"),
                     getSrcPath("client.js")
                 ]).code
             );
@@ -294,7 +294,6 @@ function setupSocket(server) {
             if (!dir.match(/^\//) || dir.match(/\.\./)) return;
             dir = dir.replace(/&amp;/g, "&");
 
-
             updateWatchers(dir, function (ok) {
                 // Send client back to root in case the requested directory can't be read
                 if (!ok) dir = "/";
@@ -332,6 +331,8 @@ function updateWatchers(newDir, callback) {
                 callback(true);
             }
         });
+    } else {
+        callback(true);
     }
 }
 //-----------------------------------------------------------------------------
@@ -489,7 +490,7 @@ function cacheResources(dir, callback) {
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
-            cache[relPath].revision = Number(fileTime).toString("base64");
+            cache[relPath].revision = Number(fileTime).toString(36);
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html)$/)) {
                 filesToGzip.push(relPath);

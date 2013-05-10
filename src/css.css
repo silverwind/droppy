@@ -48,14 +48,9 @@ a {
     text-decoration: none;
 }
 
-ul {
+li {
     list-style: none;
 }
-
-li {
-    float:left;
-}
-
 
 /* ===================== Page elements ===================== */
 #loading {
@@ -519,9 +514,8 @@ input[type=checkbox]:checked + label:before {
     overflow: hidden;
 }
 
-#crumbs ul, #crumbs ul li {
-    display: inline;
-    list-style: none;
+#crumbs , #crumbs li {
+    float:left;
 }
 
 #crumbs a {
