@@ -10,10 +10,10 @@
  *  Page loading functions
  * ============================================================================
  */
-    // Pre-load icons
-    $(["res/dir.png", "/res/file.png"]).each(function () {
-        $("<img />").attr("src", this).appendTo("body").css("display", "none");
-    });
+    var images = {
+        dir  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAAAJ0lEQVR42mNgoBMIRQWEVfeiAgJ6QokGCA3FRIBRDYNQA2kxTRIAADC+zpuy1J+nAAAAAElFTkSuQmCC",
+        file : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAAAMUlEQVR42mNgIA+E4gD4NBRjAzj14NKAUw9EA5ogPj14bMCnAatrR22grw34AQPZAADrYIvezfHPuAAAAABJRU5ErkJggg=="
+    };
 
     // Initialize webshims
     $.webshims.setOptions("basePath", "res/webshim/shims/");
@@ -87,7 +87,7 @@
             if (isUploading) return;
             if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
                 updateCrumbs(msgData.folder);
-                $("#content").htmlPolyfill(buildHTML(msgData.data, msgData.folder));
+                buildHTML(msgData.data, msgData.folder);
             }
         });
 
@@ -395,15 +395,9 @@
 
     function buildHTML(fileList, root) {
         // TODO: Clean up this mess
-        var htmlFiles = "", htmlDirs = "", htmlBack = "", folderList = [];
-
-        if (root !== "/") {
-            htmlBack = [
-                '<div class="folderrow">',
-                '<img class="icon" src="res/dir.png" width="16px" height="16px" alt="Go back up">',
-                '<a class="backlink" href="">..</a></div><div class="right"></div>'
-            ].join("");
-        }
+        var htmlFiles = "", htmlDirs = "", folderList = [];
+        var content = $("#content");
+        content.htmlPolyfill("");
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
@@ -421,7 +415,7 @@
                 if (type === "f") {
                     //Create a file row
                     htmlFiles += [
-                        '<div class="filerow" data-id="', id, '"><img class="icon" src="res/file.png" width="16" height="16" alt="File" />',
+                        '<div class="filerow" data-id="', id, '"><img class="icon" src="', images.file, '" width="16" height="16" alt="File" />',
                         '<div class="filename"><a class="filelink" href="', escape("/get" + id), '">', name, '</a></div>',
                         '<div class="fileinfo"><span class="pin-right">', size, '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
                         '<div class="right"></div></div>'
@@ -430,7 +424,7 @@
                 } else if (type === "d") {
                     //Create a folder row
                     htmlDirs += [
-                        '<div class="folderrow" data-id="', id, '"><img class="icon" src="res/dir.png" width="16" height="16" alt="Directory" />',
+                        '<div class="folderrow" data-id="', id, '"><img class="icon" src="', images.dir, '" width="16" height="16" alt="Directory" />',
                         '<div class="foldername"><a class="folderlink" href="">', name, '</a></div>',
                         '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
                         '<div class="right"></div></div>'
@@ -442,7 +436,8 @@
 
             }
         }
-        return htmlBack + htmlDirs + htmlFiles;
+        content.appendPolyfill(htmlDirs);
+        content.appendPolyfill(htmlFiles);
     }
 
     function convertToSI(bytes) {

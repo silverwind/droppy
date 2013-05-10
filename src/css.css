@@ -216,7 +216,7 @@ footer a:hover {
     color: #fff;
 }
 
-.filelink, .folderlink, .backlink{
+.filelink, .folderlink {
     display: block;
     width: 100%;
     overflow: hidden;
@@ -239,11 +239,7 @@ footer a:hover {
     left: 10px;
 }
 
-.backlink {
-    width: 90%;
-}
-
-.filename, .foldername, .backlink {
+.filename, .foldername {
     margin-left: 25px;
     float: left;
     overflow: hidden;

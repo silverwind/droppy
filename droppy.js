@@ -26,6 +26,7 @@
 // TODOs:
 // - Logout functionality
 // - Admin panel to add/remove users
+// - ETags instead of manual revisions in filenames
 // - Add cookie authentification to the websocket connection
 // - Recursive deleting of folders (with confirmation)
 // - Drag and drop moving of files/folders
@@ -37,6 +38,7 @@
 
 "use strict";
 
+// Debug mode skips client JS minification
 var DEBUG = false;
 
 var cache          = {},
@@ -177,23 +179,18 @@ function createListener() {
         try {
             key = fs.readFileSync(config.httpsKey);
             cert = fs.readFileSync(config.httpsCert);
+            server = require("https").createServer({key: key, cert: cert}, onRequest);
         } catch (error) {
             logerror("Error reading SSL certificate or key.\n", util.inspect(error));
             process.exit(1);
         }
-        server = require("https").createServer({key: key, cert: cert}, onRequest);
     }
     createWatcher(prefixFilePath("/"));
     setupSocket(server);
 
     // Bind to 8080 on jitsu
-    if (isJitsu) {
-        server.listen(8080);
-    }
-    else {
-        server.listen(config.port);
-    }
-
+    var port =  isJitsu ? 8080 : config.port;
+    server.listen(port);
     server.on("listening", function () {
         // We're up - initialize everything
         var address = server.address();
@@ -201,13 +198,14 @@ function createListener() {
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-            logerror("Failed to bind to port", config.port, ". Adress already in use.\n", err.stack);
+            logerror("Failed to bind to port ", port, ". Adress already in use.\n\n", err.stack);
         else if (err.code === "EACCES")
-            logerror("Failed to bind to port", config.port, ". Need root to bind to ports < 1024.\n", err.stack);
+            logerror("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n\n", err.stack);
         else
             logerror("Error:", util.inspect(err));
         process.exit(1);
     });
+
 }
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
@@ -240,7 +238,11 @@ function prefixFilePath(relativePath) {
 //-----------------------------------------------------------------------------
 // WebSocket listener
 function setupSocket(server) {
-    io = require("socket.io").listen(server, {"log level": 1});
+    io = require("socket.io").listen(server, {
+        "log level": 1,
+        "browser client minification": DEBUG ? false : true,
+        "browser client gzip": true
+    });
 
     io.sockets.on("connection", function (ws) {
         var remoteIP = ws.handshake.address.address;
@@ -291,10 +293,20 @@ function setupSocket(server) {
             var dir = JSON.parse(data);
             if (!dir.match(/^\//) || dir.match(/\.\./)) return;
             dir = dir.replace(/&amp;/g, "&");
-            clients[remoteIP] = { "directory": dir, "ws": ws};
-            updateWatchers(dir);
-            readDirectory(dir, function () {
-                sendMessage(remoteIP, "UPDATE_FILES");
+
+
+            updateWatchers(dir, function (ok) {
+                // Send client back to root in case the requested directory can't be read
+                if (!ok) dir = "/";
+
+                clients[remoteIP] = {
+                    "directory": dir,
+                    "ws": ws
+                };
+
+                readDirectory(dir, function () {
+                    sendMessage(remoteIP, "UPDATE_FILES");
+                });
             });
         });
 
@@ -304,24 +316,39 @@ function setupSocket(server) {
     });
 }
 //-----------------------------------------------------------------------------
-// Watch given directory and check if we need the other active watchers
-function updateWatchers(newDir) {
+// Watch given directory
+function updateWatchers(newDir, callback) {
     if (!watchedDirs[newDir]) {
-        createWatcher(prefixFilePath(newDir));
-
-        var neededDirs = {};
-        for (var client in clients) {
-            if (clients.hasOwnProperty(client)) {
-                neededDirs[clients[client].directory] = true;
+        newDir = prefixFilePath(newDir);
+        fs.stat(newDir, function (err) {
+            if (err) {
+                // Requested Directory can't be read
+                checkWatchedDirs();
+                callback(false);
+            } else {
+                // Directory is okay to be read
+                createWatcher(newDir);
+                checkWatchedDirs();
+                callback(true);
             }
+        });
+    }
+}
+//-----------------------------------------------------------------------------
+// Check if we need the other active watchers
+function checkWatchedDirs() {
+    var neededDirs = {};
+    for (var client in clients) {
+        if (clients.hasOwnProperty(client)) {
+            neededDirs[clients[client].directory] = true;
         }
+    }
 
-        for (var directory in watchedDirs) {
-            if (watchedDirs.hasOwnProperty(directory)) {
-                if (!neededDirs[directory]) {
-                    watchedDirs[directory].close();
-                    delete watchedDirs[directory];
-                }
+    for (var directory in watchedDirs) {
+        if (watchedDirs.hasOwnProperty(directory)) {
+            if (!neededDirs[directory]) {
+                watchedDirs[directory].close();
+                delete watchedDirs[directory];
             }
         }
     }
@@ -462,7 +489,7 @@ function cacheResources(dir, callback) {
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
-            cache[relPath].revision = Number(fileTime).toString(36); //base36 the modified timestamp
+            cache[relPath].revision = Number(fileTime).toString("base64");
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html)$/)) {
                 filesToGzip.push(relPath);
@@ -611,7 +638,7 @@ function handleUploadRequest(req, res) {
                 "savepath" : pathToSave
             };
 
-            log(socket, " Receiving ", pathToSave.substring(config.filesDir.length + 1));
+            log(socket, " Receiving ", pathToSave.substring(config.filesDir.length));
         });
 
         form.on("end", function () {
@@ -787,6 +814,7 @@ function readDB() {
 function getHash(string) {
     return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
 }
+
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
 function addUser(user, password) {
@@ -978,7 +1006,7 @@ function logerror(error) {
         }
     } else {
         var args = Array.prototype.slice.call(arguments, 0);
-        args.unshift(getTimestamp() + color.red);
+        args.unshift(color.red);
         args.push(color.reset);
         console.log(args.join(""));
     }
