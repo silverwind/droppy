@@ -210,7 +210,7 @@ function createWatcher(folder) {
         if (!filename) {
             updateClients(folder);
         } else {
-            // a watcher gets a event for when a directory's content in a watched
+            // Watchers get events for when a directory's content in a watched
             // directory changes. We don't send these unneeded updates.
             fs.stat(path.join(folder, filename), function (err, stats) {
                 if (!stats.isDirectory() || err) {
@@ -220,18 +220,20 @@ function createWatcher(folder) {
         }
     });
 
-    function updateClients(dir) {
+    var updateClients = debounce(function (dir) {
+        var clientsToUpdate = [];
         for (var client in clients) {
             if (clients.hasOwnProperty(client)) {
                 var clientDir = clients[client].directory;
                 if (clientDir === removeFilePath(dir)) {
+                    clientsToUpdate.push(client);
                     readDirectory(clientDir, function () {
-                        sendMessage(client, "UPDATE_FILES");
+                        sendMessage(clientsToUpdate.pop(), "UPDATE_FILES");
                     });
                 }
             }
         }
-    }
+    }, config.readInterval);
 }
 //-----------------------------------------------------------------------------
 // Add ./files/ to a path
@@ -257,20 +259,22 @@ function setupSocket(server) {
         log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
 
         ws.on("REQUEST_UPDATE", function (data) {
+            var cookie = getCookie(ws.handshake.headers.cookie);
             var dir = JSON.parse(data);
             dir = dir.replace(/&amp;/g, "&");
-            clients[remoteIP] = { "directory": dir, "ws": ws};
+            clients[cookie] = { "directory": dir, "ws": ws};
             readDirectory(dir, function () {
-                sendMessage(remoteIP, "UPDATE_FILES");
+                sendMessage(cookie, "UPDATE_FILES");
             });
         });
 
         ws.on("CREATE_FOLDER", function (data) {
+            var cookie = getCookie(ws.handshake.headers.cookie);
             var dir = JSON.parse(data);
             fs.mkdir(addFilePath(dir), config.mode, function (err) {
                 if (err) logerror(err);
-                readDirectory(clients[remoteIP].directory, function () {
-                    sendMessage(remoteIP, "UPDATE_FILES");
+                readDirectory(clients[cookie].directory, function () {
+                    sendMessage(cookie, "UPDATE_FILES");
                 });
             });
         });
@@ -297,22 +301,23 @@ function setupSocket(server) {
         });
 
         ws.on("SWITCH_FOLDER", function (data) {
+            var cookie = getCookie(ws.handshake.headers.cookie);
             var dir = JSON.parse(data);
             if (!dir.match(/^\//) || dir.match(/\.\./)) return;
             dir = dir.replace(/&amp;/g, "&");
-            clients[remoteIP] = {"directory": dir, "ws": ws};
+            clients[cookie] = {"directory": dir, "ws": ws};
 
             updateWatchers(dir, function (ok) {
                 // Send client back to root in case the requested directory can't be read
                 if (!ok) {
                     dir = "/";
-                    clients[remoteIP] = {"directory": dir, "ws": ws};
+                    clients[cookie] = {"directory": dir, "ws": ws};
                     readDirectory(dir, function () {
-                        sendMessage(remoteIP, "NEW_FOLDER");
+                        sendMessage(cookie, "NEW_FOLDER");
                     });
                 } else {
                     readDirectory(dir, function () {
-                        sendMessage(remoteIP, "UPDATE_FILES");
+                        sendMessage(cookie, "UPDATE_FILES");
                     });
                 }
             });
@@ -365,15 +370,15 @@ function checkWatchedDirs() {
 }
 //-----------------------------------------------------------------------------
 // Send file list JSON over websocket
-function sendMessage(IP, messageType) {
+function sendMessage(cookie, messageType) {
     // Dont't send if the socket isn't open
-    if (clients[IP].ws._socket === null) return;
-    var dir = clients[IP].directory;
+    if (clients[cookie].ws._socket === null) return;
+    var dir = clients[cookie].directory;
     var data = JSON.stringify({
         "folder": dir,
         "data"  : dirs[dir]
     });
-    clients[IP].ws.emit(messageType, data, function (err) {
+    clients[cookie].ws.emit(messageType, data, function (err) {
         if (err) logerror(err);
     });
 }
@@ -386,7 +391,7 @@ function onRequest(req, res) {
         handleGET(req, res);
     } else if (method === "POST") {
         if (req.url === "/upload") {
-            if (!checkCookie(req)) {
+            if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 401;
                 res.end();
                 logresponse(req, res);
@@ -537,7 +542,7 @@ function handleGET(req, res) {
         break;
     case "/content":
         var obj = {};
-        if (checkCookie(req)) {
+        if (getCookie(req.headers.cookie)) {
             obj.type = "main";
             obj.data = cache["body-main.html"].data;
         } else {
@@ -601,7 +606,7 @@ function handleGET(req, res) {
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
-    if (!checkCookie(req)) {
+    if (!getCookie(req.headers.cookie)) {
         res.statusCode = 301;
         res.setHeader("Location", "/");
         res.end();
@@ -633,16 +638,16 @@ function handleUploadRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     if (req.url === "/upload") {
         var form = new formidable.IncomingForm();
-        var address = req.socket.remoteAddress;
+        var cookie = getCookie(req.headers.cookie);
         var uploadedFiles = {};
         form.parse(req);
 
         form.on("fileBegin", function (name, file) {
             var pathToSave;
-            if (clients[address].directory === undefined || clients[address].directory === "/")
+            if (clients[cookie].directory === undefined || clients[cookie].directory === "/")
                 pathToSave = config.filesDir + file.name;
             else
-                pathToSave = addFilePath(clients[address].directory) + "/" + file.name;
+                pathToSave = addFilePath(clients[cookie].directory) + "/" + file.name;
 
             uploadedFiles[file.name] = {
                 "temppath" : file.path,
@@ -691,7 +696,7 @@ function handleUploadRequest(req, res) {
 }
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in "dirs"
-var readDirectory = debounce(function (root, callback) {
+function readDirectory(root, callback) {
     lastRead = new Date();
     fs.readdir(addFilePath(root), function (err, files) {
         if (err) logerror(err);
@@ -731,7 +736,7 @@ var readDirectory = debounce(function (root, callback) {
             });
         }
     });
-}, config.readInterval);
+}
 //-----------------------------------------------------------------------------
 // Argument handler
 function handleArguments() {
@@ -860,8 +865,8 @@ function isValidUser(user, password) {
 }
 //-----------------------------------------------------------------------------
 // Cookie helpers
-function checkCookie(req) {
-    var cookie = req.headers.cookie, sid = "";
+function getCookie(cookie) {
+    var sid = "";
     if (cookie !== undefined) {
         var cookies = cookie.split("; ");
         cookies.forEach(function (c) {
@@ -872,7 +877,7 @@ function checkCookie(req) {
     }
     for (var savedsid in db.sessions) {
         if (savedsid === sid) {
-            return true;
+            return sid;
         }
     }
     return false;
