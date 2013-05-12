@@ -380,11 +380,7 @@ function onRequest(req, res) {
     var method = req.method.toUpperCase();
 
     if (method === "GET") {
-        if (req.url.match(/^\/get\//)) {
-            handleFileRequest(req, res);
-        } else {
-            handleGET(req, res);
-        }
+        handleGET(req, res);
     } else if (method === "POST") {
         if (req.url === "/upload") {
             if (!checkCookie(req)) {
@@ -525,6 +521,11 @@ function cacheResources(dir, callback) {
 //-----------------------------------------------------------------------------
 // Handle all GETs, except downloads
 function handleGET(req, res) {
+    if (req.url.match(/^\/get\//)) {
+        handleFileRequest(req, res);
+        return;
+    }
+
     var resourceName;
 
     switch (req.url) {
@@ -619,7 +620,7 @@ function handleFileRequest(req, res) {
                 res.setHeader("Content-Type", mimeType);
                 res.setHeader("Content-Length", stats.size);
                 logresponse(req, res);
-                fs.createReadStream(filepath, {"bufferSize": 4096}).pipe(res);
+                fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
             }
         });
     }
@@ -651,27 +652,28 @@ function handleUploadRequest(req, res) {
         form.on("end", function () {
             for (var file in uploadedFiles) {
                 if (uploadedFiles.hasOwnProperty(file)) {
-                    try {
-                        var is = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 64 * 1024});
-                        var os = fs.createWriteStream(uploadedFiles[file].savepath);
+                    var input, output;
 
-                        is.pipe(os);
+                    input = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 4096});
 
-                        is.on("close", function () {
-                    //       fs.unlink(uploadedFiles[file].temppath, function (err) {
-                    //           if (err) logerror(err);
-                    //       });
-                            fs.chmod(uploadedFiles[file].savepath, config.mode, function (err) {
-                                if (err) logerror(err);
-                            });
+                    input.on("close", function () {
+                        fs.unlink(this.path, function (err) {
+                            if (err) logerror(err);
                         });
+                    });
 
-                        is.on("error", function (err) {
-                            logerror(err);
-                        });
-                    } catch (err) {
+                    input.on("error", function (err) {
                         logerror(err);
-                    }
+                    });
+
+                    output = fs.createWriteStream(uploadedFiles[file].savepath, {mode: config.mode});
+
+                    output.on("error", function (err) {
+                        logerror(err);
+                    });
+
+                    input.pipe(output);
+
                     res.statusCode = 200;
                     res.end();
                     logresponse(req, res);
