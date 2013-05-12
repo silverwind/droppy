@@ -26,7 +26,6 @@
   TODOs:
   - Logout functionality
   - Admin panel to add/remove users
-  - ETags instead of manual revisions in filenames
   - Recursive deleting of folders (with confirmation)
   - Drag and drop moving of files/folders
   - Keybindings (navigation and copy, cut, paste of files)
@@ -248,7 +247,8 @@ function setupSocket(server) {
     io = require("socket.io").listen(server, {
         "log level": 1,
         "browser client minification": DEBUG ? false : true,
-        "browser client gzip": true
+        "browser client gzip": true,
+        "browser client etag": true
     });
 
     io.sockets.on("connection", function (ws) {
@@ -430,47 +430,6 @@ function onRequest(req, res) {
     }
 }
 //-----------------------------------------------------------------------------
-// Append revision number to cached files, to force clients to download a changed file
-// Format: file.ext -> file.hfw6c03k.css
-function addRevisions() {
-    for (var file in cache) {
-        if (cache.hasOwnProperty(file)) {
-            if (file.match(/.*\.html/)) {
-                var html = String(cache[file].data);
-                for (var resource in cache) {
-                    if (!resource.match(/.*\.html/) && cache.hasOwnProperty(resource)) {
-                        html = html.replace(resource, function (match) {
-                            return match.replace(".", "." + cache[resource].revision + ".");
-                        });
-                    }
-                }
-                cache[file].data = html;
-            } else if (file.match(/.*\.css/)) {
-                var css = String(cache[file].data);
-                for (var res in cache) {
-                    if (!res.match(/.*\.css/) && cache.hasOwnProperty(res)) {
-                        css = css.replace(res, function (match) {
-                            return match.replace(".", "." + cache[res].revision + ".");
-                        });
-                    }
-                }
-                cache[file].data = css;
-            }
-        }
-    }
-}
-
-// .. And strip a request off its revision
-function stripRevision(filename) {
-    var parts = filename.split(".");
-    if (parts.length === 3) {
-        return parts[0] + "." + parts[2];
-    } else {
-        logerror("Error Unable to strip revision off ", filename);
-        return filename;
-    }
-}
-//-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
 function cacheResources(dir, callback) {
     dir = dir.substring(0, dir.length - 1); // Strip trailing slash
@@ -504,12 +463,11 @@ function cacheResources(dir, callback) {
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
-            cache[relPath].revision = Number(fileTime).toString(36);
+            cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html)$/)) {
                 filesToGzip.push(relPath);
             }
-            addRevisions();
         });
 
         if (filesToGzip.length > 0)
@@ -548,10 +506,10 @@ function handleGET(req, res) {
         var obj = {};
         if (getCookie(req.headers.cookie)) {
             obj.type = "main";
-            obj.data = cache["body-main.html"].data;
+            obj.data = String(cache["body-main.html"].data);
         } else {
             obj.type = "auth";
-            obj.data = cache["body-auth.html"].data;
+            obj.data = String(cache["body-auth.html"].data);
         }
 
         var json = JSON.stringify(obj);
@@ -565,9 +523,6 @@ function handleGET(req, res) {
     default:
         var fileName = path.basename(req.url);
         var dirName = path.dirname(req.url);
-
-        if (fileName.match(/\./g).length >= 2)
-            fileName = stripRevision(fileName);
 
         if (dirName.indexOf("/res") === 0)
             dirName = dirName.substring(5);
@@ -592,14 +547,25 @@ function handleGET(req, res) {
         res.statusCode = 200;
 
         if (req.url === "/") res.setHeader("X-Frame-Options", "DENY");
+
         res.setHeader("Content-Type", cache[resourceName].mime);
         res.setHeader("Cache-Control", "public, max-age=31536000");
+        res.setHeader("ETag", cache[resourceName].etag);
+
+        var ifNoneMatch = req.headers["if-none-match"] || "";
+        if (ifNoneMatch === cache[resourceName].etag) {
+            res.statusCode = 304;
+            res.end();
+            logresponse(req, res);
+            return;
+        }
 
         var acceptEncoding = req.headers["accept-encoding"] || "";
         if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
             res.setHeader("Content-Encoding", "gzip");
             res.setHeader("Content-Length", cache[resourceName].gzipData.length);
             res.setHeader("Vary", "Accept-Encoding");
+
             res.end(cache[resourceName].gzipData);
         } else {
             res.setHeader("Content-Length", cache[resourceName].data.length);

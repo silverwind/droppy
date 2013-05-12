@@ -268,7 +268,7 @@ footer a:hover {
 }
 
 #preview {
-    display : none;
+    display : none !important;
 }
 /* ===================== Popup box ===================== */
 #overlay {
