@@ -257,7 +257,8 @@ function setupSocket(server) {
         var cookie = getCookie(ws.handshake.headers.cookie);
 
         if (!cookie) {
-            log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection refused.");
+            log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
+            ws.emit("UNAUTHORIZED");
             ws.disconnect();
             return;
         } else {

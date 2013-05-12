@@ -4,7 +4,7 @@
     "use strict";
 
     var folderList = [], currentFolder = "/", socketOpen = false;
-    var bar, info, nameinput, percent, progress, start, socket;
+    var bar, info, nameinput, percent, progress, start, socket, timeout;
 
 /* ============================================================================
  *  Page loading functions
@@ -97,9 +97,21 @@
 
             // Restart a closed socket. Firefox closes it on every download..
             // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-            setTimeout(function () {
-                socket.socket.connect();
-            }, 50);
+
+            if (!timeout) timeout = 50;
+            if (timeout < 50 * Math.pow(2, 10)) {
+                // This gives up connecting after 10 failed reconnects with increasing intervals
+                window.setTimeout(function () {
+                    socket.socket.connect();
+                    timeout *= 2;
+                }, timeout);
+            }
+
+        });
+
+        socket.on("UNAUTHORIZED", function () {
+            // Set the timeout to its maximum value to stop retries
+            timeout = 51200;
         });
 
         socket.on("error", function (error) {

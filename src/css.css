@@ -482,6 +482,7 @@ input[type=checkbox]:checked + label:before {
     font-size: 1.75em;
     text-shadow:1px 1px 0 #528009;
     cursor:pointer;
+    user-select: none;
 }
 
 #submit.valid {
