@@ -307,11 +307,14 @@ function setupSocket(server) {
                 if (!ok) {
                     dir = "/";
                     clients[remoteIP] = {"directory": dir, "ws": ws};
+                    readDirectory(dir, function () {
+                        sendMessage(remoteIP, "NEW_FOLDER");
+                    });
+                } else {
+                    readDirectory(dir, function () {
+                        sendMessage(remoteIP, "UPDATE_FILES");
+                    });
                 }
-
-                readDirectory(dir, function () {
-                    sendMessage(remoteIP, "UPDATE_FILES");
-                });
             });
         });
 

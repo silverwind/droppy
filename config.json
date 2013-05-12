@@ -1,7 +1,7 @@
 {
     "useSSL"       : false,
     "port"         : 80,
-    "readInterval" : 100,
+    "readInterval" : 10,
     "mode"         : 666,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",

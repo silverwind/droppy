@@ -3,7 +3,7 @@
 (function () {
     "use strict";
 
-    var folderList = [], isUploading = false, currentFolder = "/", socketOpen = false;
+    var folderList = [], currentFolder = "/", socketOpen = false;
     var bar, info, nameinput, percent, progress, start, socket;
 
 /* ============================================================================
@@ -80,11 +80,16 @@
 
         socket.on("UPDATE_FILES", function (data) {
             var msgData = JSON.parse(data);
-            if (isUploading) return;
             if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
                 updateCrumbs(msgData.folder);
                 buildHTML(msgData.data, msgData.folder);
             }
+        });
+
+        socket.on("NEW_FOLDER", function (data) {
+            var msgData = JSON.parse(data);
+            updateCrumbs(msgData.folder);
+            buildHTML(msgData.data, msgData.folder);
         });
 
         socket.on("disconnect", function () {
@@ -320,14 +325,12 @@
             bar.width("0%");
             percent.html("");
             progress.fadeIn(300);
-            isUploading = true;
             start = new Date().getTime();
         }
         function uploadDone() {
             bar.width("100%");
             percent.html("finished");
             progress.fadeOut(300);
-            isUploading = false;
         }
         function uploadProgress(bytesSent, bytesTotal, completed) {
             var perc = Math.round(completed) + "%";
