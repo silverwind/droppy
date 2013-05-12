@@ -23,7 +23,7 @@ Configuration is done through  the `config.json` file, located in the same direc
 {
     "useSSL"       : false,
     "port"         : 80,
-    "readInterval" : 100,
+    "readInterval" : 10,
     "mode"         : 644,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
@@ -36,7 +36,7 @@ Configuration is done through  the `config.json` file, located in the same direc
 
 - `useSSL`: Whether the server should use HTTPS (SSL).
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
-- `readInterval`: The time in milliseconds between full directory scans. Reducing it results in a little more responsiveness at the cost of more file I/O.
+- `readInterval`: The minimum interval in milliseconds in which updates to a directory are sent. In case a directory gets constantly written to, this helps to keep the amount of updates (and I/O) in check.
 - `mode`: The access mode with which files are created.
 - `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Sample self-signed files are provided.
 - `db` Location of the user database file.
