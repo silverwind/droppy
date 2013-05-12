@@ -1,6 +1,6 @@
-/* global $, Dropzone, io */
+/* global Dropzone, io */
 
-(function () {
+(function ($) {
     "use strict";
 
     var folderList = [], currentFolder = "/", socketOpen = false;
@@ -469,5 +469,4 @@
         else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + ' TiB';
         else return bytes + ' Bytes';
     }
-
-}).call(this);
+}(jQuery));

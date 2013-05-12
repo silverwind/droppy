@@ -1,40 +1,37 @@
 #!/usr/bin/env node
-//-----------------------------------------------------------------------------
-// droppy - file server on node.js
-// https://github.com/silverwind/droppy
-//-----------------------------------------------------------------------------
-//Copyright (c) 2012 - 2013 silverwind
-//
-//Permission is hereby granted, free of charge, to any person obtaining a copy
-//of this software and associated documentation files (the "Software"), to deal
-//in the Software without restriction, including without limitation the rights
-//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//copies of the Software, and to permit persons to whom the Software is
-//furnished to do so, subject to the following conditions:
-//
-//The above copyright notice and this permission notice shall be included in all
-//copies or substantial portions of the Software.
-//
-//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//SOFTWARE.
-//-----------------------------------------------------------------------------
-// TODOs:
-// - Logout functionality
-// - Admin panel to add/remove users
-// - ETags instead of manual revisions in filenames
-// - Add cookie authentification to the websocket connection
-// - Recursive deleting of folders (with confirmation)
-// - Drag and drop moving of files/folders
-// - Keybindings (navigation and copy, cut, paste of files)
-// - Find a solution to not send login data in cleartext over HTTP. OAuth?
-//-----------------------------------------------------------------------------
-// vim: ts=4:sw=4
-// jshint indent:4
+/* ----------------------------------------------------------------------------
+                          droppy - file server on node
+                      https://github.com/silverwind/droppy
+ ------------------------------------------------------------------------------
+ Copyright (c) 2012 - 2013 silverwind
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ ------------------------------------------------------------------------------
+  TODOs:
+  - Logout functionality
+  - Admin panel to add/remove users
+  - ETags instead of manual revisions in filenames
+  - Recursive deleting of folders (with confirmation)
+  - Drag and drop moving of files/folders
+  - Keybindings (navigation and copy, cut, paste of files)
+  - Find a solution to not send login data in cleartext over HTTP. OAuth?
+ --------------------------------------------------------------------------- */
 
 "use strict";
 
@@ -139,6 +136,7 @@ function prepareContent() {
         });
 
         logsimple(" ->> preparing HTML...");
+
         // Copy html from src to res - may do some preprocessing here later
         copyResource("base.html");
         copyResource("body-auth.html");
@@ -256,10 +254,17 @@ function setupSocket(server) {
     io.sockets.on("connection", function (ws) {
         var remoteIP = ws.handshake.address.address;
         var remotePort = ws.handshake.address.port;
-        log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
+        var cookie = getCookie(ws.handshake.headers.cookie);
+
+        if (!cookie) {
+            log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection refused.");
+            ws.disconnect();
+            return;
+        } else {
+            log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
+        }
 
         ws.on("REQUEST_UPDATE", function (data) {
-            var cookie = getCookie(ws.handshake.headers.cookie);
             var dir = JSON.parse(data);
             dir = dir.replace(/&amp;/g, "&");
             clients[cookie] = { "directory": dir, "ws": ws};
@@ -269,7 +274,6 @@ function setupSocket(server) {
         });
 
         ws.on("CREATE_FOLDER", function (data) {
-            var cookie = getCookie(ws.handshake.headers.cookie);
             var dir = JSON.parse(data);
             fs.mkdir(addFilePath(dir), config.mode, function (err) {
                 if (err) logerror(err);
@@ -281,6 +285,7 @@ function setupSocket(server) {
 
         ws.on("DELETE_FILE", function (data) {
             var dir = JSON.parse(data);
+            log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
             dir = addFilePath(dir);
             fs.stat(dir, function (err, stats) {
                 if (err) {
@@ -301,7 +306,6 @@ function setupSocket(server) {
         });
 
         ws.on("SWITCH_FOLDER", function (data) {
-            var cookie = getCookie(ws.handshake.headers.cookie);
             var dir = JSON.parse(data);
             if (!dir.match(/^\//) || dir.match(/\.\./)) return;
             dir = dir.replace(/&amp;/g, "&");
@@ -490,7 +494,7 @@ function cacheResources(dir, callback) {
                 };
                 read();
             } catch (err) {
-                if (readCount > 20) {
+                if (readCount >= 20) {
                     logerror(err);
                     process.exit(1);
                 } else {
