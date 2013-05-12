@@ -2,7 +2,7 @@
     "useSSL"       : false,
     "port"         : 80,
     "readInterval" : 10,
-    "mode"         : 666,
+    "mode"         : "644",
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",

@@ -183,7 +183,7 @@ function createListener() {
     setupSocket(server);
 
     // Bind to 8080 on jitsu
-    var port =  isJitsu ? 8080 : config.port;
+    var port =  isJitsu ? process.env.PORT : config.port;
     server.listen(port);
     server.on("listening", function () {
         // We're up - initialize everything
@@ -192,7 +192,7 @@ function createListener() {
     });
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-            logerror("Failed to bind to port ", port, ". Adress already in use.\n\n", err.stack);
+            logerror("Failed to bind to port ", port, ". Address already in use.\n\n", err.stack);
         else if (err.code === "EACCES")
             logerror("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n\n", err.stack);
         else
@@ -813,7 +813,7 @@ function readDB() {
     } catch (e) {
         if (e.code === "ENOENT" || dbString.match(/^\s*$/)) {
             // Recreate DB file in case it doesn't exist / is empty
-            logsimple("->> creating" + path.basename(config.db) + "...");
+            logsimple(" ->> creating " + path.basename(config.db) + "...");
             db = {users: {}, sessions: {}};
             doWrite = true;
         } else {
