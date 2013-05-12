@@ -18,7 +18,7 @@
 html, body {
     font-family: "Open Sans", sans-serif;
     font-weight: 400;
-    background-image: url("/res/bg.png");
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAQMAAACTPww9AAAABlBMVEX09PT///+farO/AAAAEElEQVR42mMwYEhgOMAwAQAGCAHhCrAGZQAAAABJRU5ErkJggg==);
     font-size: 100%;
     height: 100%;
     color: #888;
@@ -59,7 +59,7 @@ li {
     padding: 0;
     width: 100%;
     height: 100%;
-    background:url("/res/loading.gif") no-repeat center center;
+    background:url(/res/loading.gif) no-repeat center center;
 }
 
 #navigation {
@@ -67,7 +67,6 @@ li {
     text-align: center;
     display: block;
     float: left;
-    background-image: url("/res/bg-dark.png");
 }
 
 #content {
@@ -185,7 +184,6 @@ footer a:hover {
     margin-left: -150px;
     left: 50%;
     top: 50%;
-    background-image: url("/res/bg-dark.png");
     opacity: .9;
     border-radius: 10px;
 }
@@ -200,9 +198,13 @@ footer a:hover {
     text-align: center;
 }
 /* ===================== File/Folder display ===================== */
+
+.dark-bg, .filerow:hover, .folderrow:hover {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGUlEQVR42mOQAANtMGCAs4AMBjgLyoGrBACjhAZJiLyabAAAAABJRU5ErkJggg==);
+}
+
 .filerow:hover, .folderrow:hover {
     color: #fff;
-    background-image: url("/res/bg-dark.png");
     opacity: .9;
     border-radius: 6px;
 }
@@ -275,7 +277,6 @@ footer a:hover {
     display: none;
     position: absolute;
     box-shadow: 1px 1px 25px 5px rgba(122,122,122,0.8);
-    background-image: url("/res/bg-dark.png");
     height: 180px;
     width: 360px;
     margin-top: -90px;
@@ -405,7 +406,6 @@ footer a:hover {
     margin-left: -200px;
     left: 50%;
     top: 50%;
-    background-image: url("/res/bg-dark.png");
     background-color: #222;
     opacity: .9;
     border-radius: 10px;
