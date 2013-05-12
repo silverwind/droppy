@@ -15,12 +15,6 @@
         file : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAAAMUlEQVR42mNgIA+E4gD4NBRjAzj14NKAUw9EA5ogPj14bMCnAatrR22grw34AQPZAADrYIvezfHPuAAAAABJRU5ErkJggg=="
     };
 
-    // Initialize webshims
-    if ($.webshims) {
-        $.webshims.setOptions("basePath", "res/webshim/shims/");
-        $.webshims.polyfill();
-    }
-
     function getPage() {
         $.getJSON('/content', function (response) {
             animatedLoad("page", "body", response.data, function () {
@@ -69,7 +63,7 @@
  * ============================================================================
  */
     function openSocket() {
-        if (socketOpen === "true") return;
+        if (socketOpen) return;
         socket = io.connect(document.location.protocol + "//" + document.location.host);
 
         socket.on("connect", function () {
@@ -419,18 +413,18 @@
                     //Create a file row
                     list.append([
                         '<li class="filerow" data-id="', id, '"><img class="icon" src="', images.file, '" width="16" height="16" alt="File" />',
-                        '<div class="filename"><a class="filelink" href="', escape("/get" + id), '" download="', name, '">', name, '</a></div>',
-                        '<div class="fileinfo"><span class="pin-right">', size, '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
-                        '<div class="right"></div></li>'
+                        '<span class="filename"><a class="filelink" href="', escape("/get" + id), '" download="', name, '">', name, '</a></span>',
+                        '<span class="fileinfo"><span class="pin-right">', size, '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></span>',
+                        '<span class="right"></span></li>'
                     ].join(""));
 
                 } else if (type === "d") {
                     //Create a folder row
                     list.append([
                         '<li class="folderrow" data-id="', id, '"><img class="icon" src="', images.dir, '" width="16" height="16" alt="Directory" />',
-                        '<div class="foldername"><a class="folderlink" href="">', name, '</a></div>',
-                        '<div class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></div>',
-                        '<div class="right"></div></li>'
+                        '<span class="foldername"><a class="folderlink" href="">', name, '</a></span>',
+                        '<span class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></span>',
+                        '<span class="right"></span></li>'
                     ].join(""));
 
                     //Add to list of currently displayed folders

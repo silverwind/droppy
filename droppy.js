@@ -117,8 +117,6 @@ function prepareContent() {
                 String(fs.readFileSync(getSrcPath("jquery.form.js"))),
                 String(fs.readFileSync(getSrcPath("dropzone.js"))),
                 String(fs.readFileSync(getSrcPath("prefixfree.js"))),
-//                String(fs.readFileSync(getSrcPath("webshim/extras/modernizr-custom.js"))),
-//                String(fs.readFileSync(getSrcPath("webshim/polyfiller.js"))),
                 String(fs.readFileSync(getSrcPath("client.js")))
             ].join("\n"));
         } else {
@@ -129,8 +127,6 @@ function prepareContent() {
                     getSrcPath("jquery.form.js"),
                     getSrcPath("dropzone.js"),
                     getSrcPath("prefixfree.js"),
-//                    getSrcPath("webshim/extras/modernizr-custom.js"),
-//                    getSrcPath("webshim/polyfiller.js"),
                     getSrcPath("client.js")
                 ]).code
             );
@@ -185,7 +181,7 @@ function createListener() {
             process.exit(1);
         }
     }
-    createWatcher(prefixFilePath("/"));
+    createWatcher(addFilePath("/"));
     setupSocket(server);
 
     // Bind to 8080 on jitsu
@@ -210,30 +206,41 @@ function createListener() {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    var relativePath = folder.replace(config.filesDir.substring(0, config.filesDir.length - 1), "");
-    var watcher = fs.watch(folder, { persistent: true }, function (event) {
-        if (event === "change" || event === "rename") {
-            // Files in a watched directory changed. Figure out which client(s) need updates
-            // This part might be quite costly cpu-wise while files are being written, need
-            // to figure out something better, like an object lookup.
-            for (var client in clients) {
-                if (clients.hasOwnProperty(client)) {
-                    var clientDir = clients[client].directory;
-                    if (clientDir === relativePath) {
-                        readDirectory(clientDir, function () {
-                            sendMessage(client, "UPDATE_FILES");
-                        });
-                    }
+    watchedDirs[removeFilePath(folder)] = fs.watch(folder, function (event, filename) {
+        if (!filename) {
+            updateClients(folder);
+        } else {
+            // a watcher gets a event for when a directory's content in a watched
+            // directory changes. We don't send these unneeded updates.
+            fs.stat(path.join(folder, filename), function (err, stats) {
+                if (!stats.isDirectory() || err) {
+                    updateClients(folder);
+                }
+            });
+        }
+    });
+
+    function updateClients(dir) {
+        for (var client in clients) {
+            if (clients.hasOwnProperty(client)) {
+                var clientDir = clients[client].directory;
+                if (clientDir === removeFilePath(dir)) {
+                    readDirectory(clientDir, function () {
+                        sendMessage(client, "UPDATE_FILES");
+                    });
                 }
             }
         }
-    });
-    watchedDirs[relativePath] = watcher;
+    }
 }
 //-----------------------------------------------------------------------------
-// Create absolute directory link
-function prefixFilePath(relativePath) {
-    return config.filesDir.substring(0, config.filesDir.length - 1) + relativePath;
+// Add ./files/ to a path
+function addFilePath(p) {
+    return config.filesDir.substring(0, config.filesDir.length - 1) + p;
+}
+// Remove ./files/ from a path
+function removeFilePath(p) {
+    return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), "");
 }
 //-----------------------------------------------------------------------------
 // WebSocket listener
@@ -260,7 +267,7 @@ function setupSocket(server) {
 
         ws.on("CREATE_FOLDER", function (data) {
             var dir = JSON.parse(data);
-            fs.mkdir(prefixFilePath(dir), config.mode, function (err) {
+            fs.mkdir(addFilePath(dir), config.mode, function (err) {
                 if (err) logerror(err);
                 readDirectory(clients[remoteIP].directory, function () {
                     sendMessage(remoteIP, "UPDATE_FILES");
@@ -270,7 +277,7 @@ function setupSocket(server) {
 
         ws.on("DELETE_FILE", function (data) {
             var dir = JSON.parse(data);
-            dir = prefixFilePath(dir);
+            dir = addFilePath(dir);
             fs.stat(dir, function (err, stats) {
                 if (err) {
                     logerror(err);
@@ -293,15 +300,14 @@ function setupSocket(server) {
             var dir = JSON.parse(data);
             if (!dir.match(/^\//) || dir.match(/\.\./)) return;
             dir = dir.replace(/&amp;/g, "&");
+            clients[remoteIP] = {"directory": dir, "ws": ws};
 
             updateWatchers(dir, function (ok) {
                 // Send client back to root in case the requested directory can't be read
-                if (!ok) dir = "/";
-
-                clients[remoteIP] = {
-                    "directory": dir,
-                    "ws": ws
-                };
+                if (!ok) {
+                    dir = "/";
+                    clients[remoteIP] = {"directory": dir, "ws": ws};
+                }
 
                 readDirectory(dir, function () {
                     sendMessage(remoteIP, "UPDATE_FILES");
@@ -318,7 +324,7 @@ function setupSocket(server) {
 // Watch given directory
 function updateWatchers(newDir, callback) {
     if (!watchedDirs[newDir]) {
-        newDir = prefixFilePath(newDir);
+        newDir = addFilePath(newDir);
         fs.stat(newDir, function (err) {
             if (err) {
                 // Requested Directory can't be read
@@ -597,7 +603,7 @@ function handleFileRequest(req, res) {
         res.end();
         logresponse(req, res);
     }
-    var filepath = unescape(prefixFilePath(req.url.replace("get/", "")));
+    var filepath = unescape(addFilePath(req.url.replace("get/", "")));
     if (filepath) {
         var mimeType = mime.lookup(filepath);
 
@@ -632,7 +638,7 @@ function handleUploadRequest(req, res) {
             if (clients[address].directory === undefined || clients[address].directory === "/")
                 pathToSave = config.filesDir + file.name;
             else
-                pathToSave = prefixFilePath(clients[address].directory) + "/" + file.name;
+                pathToSave = addFilePath(clients[address].directory) + "/" + file.name;
 
             uploadedFiles[file.name] = {
                 "temppath" : file.path,
@@ -652,7 +658,9 @@ function handleUploadRequest(req, res) {
                         is.pipe(os);
 
                         is.on("close", function () {
-                            fs.unlinkSync(uploadedFiles[file].temppath);
+                    //       fs.unlink(uploadedFiles[file].temppath, function (err) {
+                    //           if (err) logerror(err);
+                    //       });
                             fs.chmod(uploadedFiles[file].savepath, config.mode, function (err) {
                                 if (err) logerror(err);
                             });
@@ -680,7 +688,7 @@ function handleUploadRequest(req, res) {
 // Read the directory's content and store it in "dirs"
 var readDirectory = debounce(function (root, callback) {
     lastRead = new Date();
-    fs.readdir(prefixFilePath(root), function (err, files) {
+    fs.readdir(addFilePath(root), function (err, files) {
         if (err) logerror(err);
         if (!files) return;
 
@@ -700,7 +708,7 @@ var readDirectory = debounce(function (root, callback) {
         }
 
         function inspectFile(filename) {
-            fs.stat(prefixFilePath(root) + "/" + filename, function (err, stats) {
+            fs.stat(addFilePath(root) + "/" + filename, function (err, stats) {
                 counter++;
                 if (err) logerror(err);
                 if (stats.isFile())
