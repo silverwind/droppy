@@ -26,16 +26,19 @@
   TODOs:
   - Logout functionality
   - Admin panel to add/remove users
-  - Recursive deleting of folders (with confirmation)
+  - Recursive deleting of folders
   - Drag and drop moving of files/folders
   - Keybindings (navigation and copy, cut, paste of files)
-  - Find a solution to not send login data in cleartext over HTTP. OAuth?
+  - Find a solution to not send login data in cleartext over HTTP.
+  - Handle breadcrumb overflow in layout
+  - Tweak performance (Investigate CSS loading twice sometimes)
+  - IE8 compatibilty
  --------------------------------------------------------------------------- */
 
 "use strict";
 
 // Debug mode skips client JS minification
-var DEBUG = false;
+var DEBUG = true;
 
 var cache          = {},
     clients        = {},
@@ -220,14 +223,12 @@ function createWatcher(folder) {
     var updateClients = debounce(function (dir) {
         var clientsToUpdate = [];
         for (var client in clients) {
-            if (clients.hasOwnProperty(client)) {
-                var clientDir = clients[client].directory;
-                if (clientDir === removeFilePath(dir)) {
-                    clientsToUpdate.push(client);
-                    readDirectory(clientDir, function () {
-                        sendMessage(clientsToUpdate.pop(), "UPDATE_FILES");
-                    });
-                }
+            var clientDir = clients[client].directory;
+            if (clientDir === removeFilePath(dir)) {
+                clientsToUpdate.push(client);
+                readDirectory(clientDir, function () {
+                    sendMessage(clientsToUpdate.pop(), "UPDATE_FILES");
+                });
             }
         }
     }, config.readInterval);
@@ -359,17 +360,13 @@ function updateWatchers(newDir, callback) {
 function checkWatchedDirs() {
     var neededDirs = {};
     for (var client in clients) {
-        if (clients.hasOwnProperty(client)) {
-            neededDirs[clients[client].directory] = true;
-        }
+        neededDirs[clients[client].directory] = true;
     }
 
     for (var directory in watchedDirs) {
-        if (watchedDirs.hasOwnProperty(directory)) {
-            if (!neededDirs[directory]) {
-                watchedDirs[directory].close();
-                delete watchedDirs[directory];
-            }
+        if (!neededDirs[directory]) {
+            watchedDirs[directory].close();
+            delete watchedDirs[directory];
         }
     }
 }
@@ -492,7 +489,7 @@ function cacheResources(dir, callback) {
 //-----------------------------------------------------------------------------
 // Handle all GETs, except downloads
 function handleGET(req, res) {
-    if (req.url.match(/^\/get\//)) {
+    if (decodeURIComponent(req.url).match(/^\/get\//)) {
         handleFileRequest(req, res);
         return;
     }
@@ -583,7 +580,7 @@ function handleFileRequest(req, res) {
         res.end();
         logresponse(req, res);
     }
-    var filepath = unescape(addFilePath(req.url.replace("get/", "")));
+    var filepath = addFilePath(decodeURIComponent(req.url).replace("get/", ""));
     if (filepath) {
         var mimeType = mime.lookup(filepath);
 
@@ -630,33 +627,31 @@ function handleUploadRequest(req, res) {
 
         form.on("end", function () {
             for (var file in uploadedFiles) {
-                if (uploadedFiles.hasOwnProperty(file)) {
-                    var input, output;
+                var input, output;
 
-                    input = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 4096});
+                input = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 4096});
 
-                    input.on("close", function () {
-                        fs.unlink(this.path, function (err) {
-                            if (err) logerror(err);
-                        });
+                input.on("close", function () {
+                    fs.unlink(this.path, function (err) {
+                        if (err) logerror(err);
                     });
+                });
 
-                    input.on("error", function (err) {
-                        logerror(err);
-                    });
+                input.on("error", function (err) {
+                    logerror(err);
+                });
 
-                    output = fs.createWriteStream(uploadedFiles[file].savepath, {mode: config.mode});
+                output = fs.createWriteStream(uploadedFiles[file].savepath, {mode: config.mode});
 
-                    output.on("error", function (err) {
-                        logerror(err);
-                    });
+                output.on("error", function (err) {
+                    logerror(err);
+                });
 
-                    input.pipe(output);
+                input.pipe(output);
 
-                    res.statusCode = 200;
-                    res.end();
-                    logresponse(req, res);
-                }
+                res.statusCode = 200;
+                res.end();
+                logresponse(req, res);
             }
         });
 
@@ -983,7 +978,7 @@ function log() {
 }
 
 function logresponse(req, res) {
-    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ", req.method.toUpperCase(), " ", req.url, " ", res.statusCode);
+    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ", req.method.toUpperCase(), " ", decodeURIComponent(req.url), " ", res.statusCode);
 }
 
 function logerror(error) {

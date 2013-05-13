@@ -10,11 +10,6 @@
  *  Page loading functions
  * ============================================================================
  */
-    var images = {
-        dir  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAAAJ0lEQVR42mNgoBMIRQWEVfeiAgJ6QokGCA3FRIBRDYNQA2kxTRIAADC+zpuy1J+nAAAAAElFTkSuQmCC",
-        file : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAAAMUlEQVR42mNgIA+E4gD4NBRjAzj14NKAUw9EA5ogPj14bMCnAatrR22grw34AQPZAADrYIvezfHPuAAAAABJRU5ErkJggg=="
-    };
-
     function getPage() {
         $.getJSON('/content', function (response) {
             animatedLoad("page", "body", response.data, function () {
@@ -209,7 +204,7 @@
         attachForm();
 
         // Switch into a folder
-        $("body").on("click", ".folderlink", function (e) {
+        $("#content").on("click", ".folderlink", function (e) {
             e.preventDefault();
 
             var destination = $(this).html();
@@ -226,21 +221,10 @@
             sendMessage("SWITCH_FOLDER", currentFolder);
         });
 
-        // Go back up
-        $("body").on("click", ".backlink", function (e) {
-            e.preventDefault();
-
-            var match = currentFolder.match(/.*(\/)/)[0];
-            match = match.substring(0, match.length - 1);
-            if (!match.match(/\//)) match = "/";
-            currentFolder = match;
-            sendMessage("SWITCH_FOLDER", currentFolder);
-        });
-
         // Delete a file/folder
-        $("body").on("click", ".delete", function (e) {
+        $("body").on("click", ".icon-delete", function (e) {
             e.preventDefault();
-            sendMessage("DELETE_FILE", $(this).parents().eq(2).data("id") || $(this).parents().eq(1).data("id"));
+            sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
         // Automatically submit a form once it's data changed
@@ -273,7 +257,7 @@
 
             if (!valid) {
                 nameinput.attr("class", "invalid");
-                info.html("Invalid character(s) in filename!");
+                info.html("Invalid character(s) in data-name!");
                 return;
             }
 
@@ -405,51 +389,39 @@
     }
 
     function buildHTML(fileList, root) {
-        // TODO: Clean up this mess
         var folderList = [];
-        var content = $("#content");
 
         var list = $("<ul>");
 
         for (var file in fileList) {
-            if (fileList.hasOwnProperty(file)) {
+            var size = convertToSI(fileList[file].size);
 
-                var name = file;
-                var type = fileList[file].type;
-                var size = convertToSI(fileList[file].size);
+            var id = (root === "/") ? "/" + file : root + "/" + file;
 
-                var id;
-                if (root === "/")
-                    id = "/" + name;
-                else
-                    id = root + "/" + name;
+            if (fileList[file].type === "f") { //Create a file row
+                list.append([
+                    '<li class="data-row" data-id="', id, '"><span class="icon-file file-normal"></span>',
+                    '<span class="data-name"><a class="filelink" href="', encodeURIComponent("get" + id), '" download="', file, '">', file, '</a></span>',
+                    '<span class="data-info">', size, '</span><span class="icon-delete delete-normal"></span>',
+                    '</span><span class="right-clear"></span>',
+                    '</li>'
+                ].join(""));
 
-                if (type === "f") {
-                    //Create a file row
-                    list.append([
-                        '<li class="filerow" data-id="', id, '"><img class="icon" src="', images.file, '" width="16" height="16" alt="File" />',
-                        '<span class="filename"><a class="filelink" href="', escape("/get" + id), '" download="', name, '">', name, '</a></span>',
-                        '<span class="fileinfo"><span class="pin-right">', size, '<span class="spacer"></span><a class="delete" href="">&#x2716;</a></span>',
-                        '<span class="right"></span></li>'
-                    ].join(""));
+            } else {  //Create a folder row
+                list.append([
+                    '<li class="sort-first data-row" data-id="', id, '"><span class="icon-folder folder-normal"></span>',
+                    '<span class="data-name"><a class="folderlink" href="">', file, '</a></span>',
+                    '<span class="icon-delete delete-normal"></span>',
+                    '</span><span class="right-clear"></span></li>'
+                ].join(""));
 
-                } else if (type === "d") {
-                    //Create a folder row
-                    list.append([
-                        '<li class="folderrow" data-id="', id, '"><img class="icon" src="', images.dir, '" width="16" height="16" alt="Directory" />',
-                        '<span class="foldername"><a class="folderlink" href="">', name, '</a></span>',
-                        '<span class="folderinfo"><span class="spacer"></span><a class="delete" href="">&#x2716;</a></span>',
-                        '<span class="right"></span></li>'
-                    ].join(""));
-
-                    //Add to list of currently displayed folders
-                    folderList[name.toLowerCase()] = true;
-                }
-
+                //Add to list of currently displayed folders
+                folderList[name.toLowerCase()] = true;
             }
+
         }
 
-        // Sorting
+        // Sort first by class, then alphabetically
         var items = list.children("li");
         items.sort(function (a, b) {
             var result = $(b).attr("class").toUpperCase().localeCompare($(a).attr("class").toUpperCase());
@@ -460,12 +432,26 @@
 
         });
 
-      //  list.html("");
-        $.each(items, function (idx, itm) {
-            list.append(itm);
+        $.each(items, function (index, item) {
+            list.append(item);
         });
 
-        content.html(list);
+        // Load generated list into view
+        $("#content").html(list);
+
+        // Add hover classes
+        $("#content ul").children("li").hover(
+            function () {
+                $(this).children(".icon-file").removeClass("file-normal").addClass("file-invert");
+                $(this).children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
+                $(this).children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
+            },
+            function () {
+                $(this).children(".icon-file").removeClass("file-invert").addClass("file-normal");
+                $(this).children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
+                $(this).children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
+            }
+        );
     }
 
     function convertToSI(bytes) {
