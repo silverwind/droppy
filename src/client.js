@@ -257,7 +257,7 @@
 
             if (!valid) {
                 nameinput.attr("class", "invalid");
-                info.html("Invalid character(s) in data-name!");
+                info.html("Invalid character(s) in filename!");
                 return;
             }
 
