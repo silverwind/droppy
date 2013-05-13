@@ -1,4 +1,5 @@
 {
+    "debug"        : false,
     "useSSL"       : false,
     "port"         : 80,
     "readInterval" : 10,

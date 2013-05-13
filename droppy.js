@@ -37,9 +37,6 @@
 
 "use strict";
 
-// Debug mode skips client JS minification
-var DEBUG = true;
-
 var cache          = {},
     clients        = {},
     watchedDirs    = {},
@@ -101,7 +98,7 @@ function prepareContent() {
     try {
         logsimple(" ->> preparing CSS...");
 
-        if (DEBUG) {
+        if (config.debug) {
             copyResource("css.css");
         } else {
             fs.writeFileSync(getResPath("css.css"),
@@ -109,7 +106,7 @@ function prepareContent() {
             );
         }
 
-        if (DEBUG) {
+        if (config.debug) {
             logsimple(" ->> preparing JS...");
             fs.writeFileSync(getResPath("client.js"), [
                 String(fs.readFileSync(getSrcPath("jquery.js"))),
@@ -247,7 +244,7 @@ function removeFilePath(p) {
 function setupSocket(server) {
     io = require("socket.io").listen(server, {
         "log level": 1,
-        "browser client minification": DEBUG ? false : true,
+        "browser client minification": config.debug ? false : true,
         "browser client gzip": true,
         "browser client etag": true
     });
@@ -745,7 +742,10 @@ function readConfig() {
         logerror("Error reading config.json\n", util.inspect(e));
         process.exit(1);
     }
-    var opts = ["useSSL", "port", "readInterval", "mode", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"];
+
+
+
+    var opts = ["debug", "useSSL", "port", "readInterval", "mode", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
             logerror("Error: Missing property in config.json:", opts[i]);
