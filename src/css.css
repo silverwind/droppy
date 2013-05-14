@@ -105,10 +105,12 @@ li {
 #file-upload input {
     cursor: pointer;
     position: absolute;
-    right: 0;
-    height: 100%;
+    left: 0;
     top: 0;
+    height: 100%;
+    width: 100%;
     opacity: 0;
+    font-size: 100px;
 }
 
 #file-upload {

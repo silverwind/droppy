@@ -4,14 +4,13 @@
 	</a>
 	<ul>
 		<li id="file-upload" class="button">
-			<form action="/upload" enctype="multipart/form-data" method="post">
-				<p>Add file(s)</p>
-				<input type="file" name="file" id="file" multiple />
-			</form>
+			<span>Add file(s)</span>
+				<form action="/upload" enctype="multipart/form-data" method="post">
+					<input type="file" name="file" id="file" multiple />
+				</form>
+
 		</li>
-		<li id="add-folder" class="button" title="Add a new folder">
-			<p>Create Folder</p>
-		</li>
+		<li id="add-folder" class="button" title="Add a new folder"><span>Create Folder</span></li>
 	</ul>
 	<div id="overlay">
 		<input type="text" id="name-input" placeholder="Folder Name"/>
