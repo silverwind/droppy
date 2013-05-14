@@ -56,7 +56,8 @@ var fs                 = require("fs"),
     zlib               = require("zlib"),
     path               = require("path"),
     cleancss           = require("clean-css"),
-    uglify             = require("uglify-js");
+    uglify             = require("uglify-js"),
+    autoprefixer       = require("autoprefixer");
 
 
 var color = {
@@ -98,13 +99,8 @@ function prepareContent() {
     try {
         logsimple(" ->> preparing CSS...");
 
-        if (config.debug) {
-            copyResource("css.css");
-        } else {
-            fs.writeFileSync(getResPath("css.css"),
-                    cleancss.process(String(fs.readFileSync(getSrcPath("css.css"))))
-            );
-        }
+        var css = autoprefixer.compile(String(fs.readFileSync(getSrcPath("css.css"))), ["last 10 version", "ie 8", "ie 7"]);
+        fs.writeFileSync(getResPath("css.css"), config.debug ? css : cleancss.process(css));
 
         if (config.debug) {
             logsimple(" ->> preparing JS...");
@@ -112,7 +108,6 @@ function prepareContent() {
                 String(fs.readFileSync(getSrcPath("jquery.js"))),
                 String(fs.readFileSync(getSrcPath("jquery.form.js"))),
                 String(fs.readFileSync(getSrcPath("dropzone.js"))),
-                String(fs.readFileSync(getSrcPath("prefixfree.js"))),
                 String(fs.readFileSync(getSrcPath("client.js")))
             ].join("\n"));
         } else {
@@ -122,17 +117,10 @@ function prepareContent() {
                     getSrcPath("jquery.js"),
                     getSrcPath("jquery.form.js"),
                     getSrcPath("dropzone.js"),
-                    getSrcPath("prefixfree.js"),
                     getSrcPath("client.js")
                 ]).code
             );
         }
-
-        require('ncp').ncp(config.srcDir + "/webshim", config.resDir + "/webshim", function (err) {
-            if (err) {
-                logerror(err);
-            }
-        });
 
         logsimple(" ->> preparing HTML...");
 

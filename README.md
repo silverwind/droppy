@@ -1,5 +1,5 @@
 #Droppy
-A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing [WebSockets](https://en.wikipedia.org/wiki/WebSocket) for realtime updates. A fairly recent browser is required (for IE, it's 10 currently, working on IE8).
+A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates. A fairly recent browser is required (for IE, it's 10 currently, working on IE8).
 
 ###Installation
 With [node](http://nodejs.org/) installed, run:
