@@ -35,7 +35,7 @@
         newElement.animate({
             "opacity" : 1
         }, {
-            duration: 400,
+            duration: 250,
             queue: false,
             complete: function () {
                 $(container).css("overflow", "visible");
@@ -47,7 +47,7 @@
         $("#" + oldElement).animate({
             "opacity" : 0
         }, {
-            duration: 400,
+            duration: 250,
             queue: false
         });
     }
@@ -188,7 +188,6 @@
  *  Main page JS
  * ============================================================================
  */
-
     function initMainPage() {
         openSocket();
 
@@ -203,33 +202,6 @@
         attachDropzone();
         attachForm();
 
-        // Switch into a folder
-        $("#content").on("mousedown", ".folderlink", function (e) {
-            if (e.button !== 0) return;
-            e.preventDefault();
-
-            var destination = $(this).html();
-            if (currentFolder !== "/") destination = "/" + destination;
-            currentFolder += destination;
-            sendMessage("SWITCH_FOLDER", currentFolder);
-        });
-
-        // Jump to a folder using the breadcrumbs
-        $("body").on("mousedown", ".navlink", function (e) {
-            if (e.button !== 0) return;
-            e.preventDefault();
-            var destination = $(this).data("path");
-            currentFolder = destination;
-            sendMessage("SWITCH_FOLDER", currentFolder);
-        });
-
-        // Delete a file/folder
-        $("body").on("mousedown", ".icon-delete", function (e) {
-            if (e.button !== 0) return;
-            e.preventDefault();
-            sendMessage("DELETE_FILE", $(this).parent().data("id"));
-        });
-
         // Automatically submit a form once it's data changed
         $("form").change(function () {
             $("form").submit();
@@ -237,7 +209,7 @@
         });
 
         // Show popup for folder creation
-        $("#add-folder").mousedown(function (e) {
+        $("#add-folder").click(function (e) {
             if (e.button !== 0) return;
             $("#overlay").fadeToggle(350);
             nameinput.val("");
@@ -367,17 +339,21 @@
 
         for (var i = 0, len = parts.length; i < len; i++) {
             if (parts[i] === "droppy") {
-                html += ['<li><a class="navlink" data-path="/" href="">', parts[i], '</a></li>'].join("");
+                html += ['<li data-path="/">', parts[i], '</li>'].join("");
             } else {
                 elementPath += "/" + parts[i];
-                html += ['<li><a class="navlink" data-path="', elementPath, '" href="">', parts[i], '</a></li>'].join("");
+                html += ['<li data-path="', elementPath, '">', parts[i], '</li>'].join("");
             }
         }
 
         html += '</ul>';
 
         var oldLen = $("#current ul li").length;
+
+        // Load crumbs into view
         $("#current").html(html);
+
+        // Animate last added element
         if ($("#current ul li").length > oldLen) {
             var last = $("#current ul li:last-child");
             last.css("margin-top", -100);
@@ -390,6 +366,14 @@
             });
         }
 
+        // Bind mouse events
+        $("#crumbs li").mousedown(function (e) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            var destination = $(this).data("path");
+            currentFolder = destination;
+            sendMessage("SWITCH_FOLDER", currentFolder);
+        });
     }
 
     function buildHTML(fileList, root) {
@@ -413,8 +397,8 @@
 
             } else {  //Create a folder row
                 list.append([
-                    '<li class="sort-first data-row" data-id="', id, '"><span class="icon-folder folder-normal"></span>',
-                    '<span class="data-name"><a class="folderlink" href="">', file, '</a></span>',
+                    '<li class="folder data-row" data-id="', id, '"><span class="icon-folder folder-normal"></span>',
+                    '<span class="data-name folder">', file, '</span>',
                     '<span class="icon-delete delete-normal"></span>',
                     '</span><span class="right-clear"></span></li>'
                 ].join(""));
@@ -447,19 +431,22 @@
         // mouseenter event when content is replaced behind a un-moving cursor, so we keep track
         // of the last hovered element and restore the hover class accordingly.
 
-        $("#content ul").mouseout(function () {
-            hoverIndex = -1;
-        });
+        // Reset hover state when mouse leaves the list or the new folder is empty
+        $("#content ul").mouseleave(function () { hoverIndex = -1; });
+        if (items.length === 0)  hoverIndex = -1;
 
-        if (hoverIndex >= 0)
+        //  Invert the row in which the mouse was before the reload
+        if (hoverIndex >= 0) {
             invertImages($("#content ul").children('li[data-index="' + hoverIndex + '"]'));
+        }
 
-        $("#content ul").children("li").mouseenter(function () {
+        // Bind mouse events for swapping images. Text and Background are switched in CSS
+        $("#content ul li").mouseover(function () {
             invertImages($(this));
-            hoverIndex = $(this).attr("data-index");
+            hoverIndex = $(this).data("index");
         });
 
-        $("#content ul").children("li").mouseleave(function () {
+        $("#content ul li").mouseout(function () {
             revertImages($(this));
         });
 
@@ -474,6 +461,25 @@
             li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
             li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
         }
+
+
+        // Bind mouse event to switch into a folder
+        $(".data-name.folder").mousedown(function (e) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+
+            var destination = $(this).html();
+            if (currentFolder !== "/") destination = "/" + destination;
+            currentFolder += destination;
+            sendMessage("SWITCH_FOLDER", currentFolder);
+        });
+
+        // Bind mouse event to delete a file/folder
+        $(".icon-delete").mousedown(function (e) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            sendMessage("DELETE_FILE", $(this).parent().data("id"));
+        });
 
     }
 

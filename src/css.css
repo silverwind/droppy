@@ -205,15 +205,12 @@ footer a:hover {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGUlEQVR42mOQAANtMGCAs4AMBjgLyoGrBACjhAZJiLyabAAAAABJRU5ErkJggg==);
 }
 
-.data-row:hover {
+.data-row:hover, .data-row:hover * {
     color: #fff;
     opacity: .9;
     border-radius: 6px;
 }
 
-.data-row:hover span a {
-    color: #fff;
-}
 
 .filelink, .folderlink {
     display: block;
@@ -232,6 +229,7 @@ footer a:hover {
 }
 
 .data-name {
+    color: #222;
     position: relative;
     left: 1em;
     float: left;
@@ -239,6 +237,7 @@ footer a:hover {
     white-space: nowrap;
     text-overflow: ellipsis;
     width: 65%;
+    cursor: pointer;
 }
 
 .data-info {
@@ -545,7 +544,7 @@ input[type=checkbox]:checked + label:before {
     float:left;
 }
 
-#crumbs a {
+#crumbs li {
     color: #ddd;
     display: block;
     float: left;
@@ -555,9 +554,10 @@ input[type=checkbox]:checked + label:before {
     padding: 0 1.6em 0 2em;
     text-decoration: none;
     background: #aaa;
+    cursor: pointer;
 }
 
-#crumbs a:after {
+#crumbs li:after {
     content: '';
     display: block;
     z-index: 1;
@@ -570,20 +570,20 @@ input[type=checkbox]:checked + label:before {
     transform: rotate(45deg) scale(0.707) ;
 }
 
-#crumbs li:nth-child(1) a       { background: #333; }
-#crumbs li:nth-child(1) a:after { background: #333; }
-#crumbs li:nth-child(2) a       { background: #555; }
-#crumbs li:nth-child(2) a:after { background: #555; }
-#crumbs li:nth-child(3) a       { background: #777; }
-#crumbs li:nth-child(3) a:after { background: #777; }
-#crumbs li:nth-child(4) a       { background: #999; }
-#crumbs li:nth-child(4) a:after { background: #999; }
+#crumbs li:nth-child(1)       { background: #333; }
+#crumbs li:nth-child(1):after { background: #333; }
+#crumbs li:nth-child(2)       { background: #555; }
+#crumbs li:nth-child(2):after { background: #555; }
+#crumbs li:nth-child(3)       { background: #777; }
+#crumbs li:nth-child(3):after { background: #777; }
+#crumbs li:nth-child(4)       { background: #999; }
+#crumbs li:nth-child(4):after { background: #999; }
 
-#crumbs li a, #crumbs li a:after {
+#crumbs li, #crumbs li:after {
   transition: .3s all;
 }
 
-#crumbs li a:hover, #crumbs li a:hover:after {
+#crumbs li:hover, #crumbs li:hover:after {
   background: #c73;
   color: #fff;
 }
