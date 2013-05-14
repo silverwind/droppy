@@ -24,7 +24,7 @@ Configuration is done through  the `config.json` file, located in the same direc
     "debug"        : false,
     "useSSL"       : false,
     "port"         : 80,
-    "readInterval" : 10,
+    "readInterval" : 50,
     "mode"         : "644",
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",

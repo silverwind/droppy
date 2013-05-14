@@ -59,7 +59,7 @@ li {
     padding: 0;
     width: 100%;
     height: 100%;
-    background:url(/res/loading.gif) no-repeat center center;
+    background: url(/res/loading.gif) no-repeat center center;
 }
 
 #navigation {
@@ -97,7 +97,6 @@ li {
     width: 10em;
     margin: 0 auto;
     font-weight: 400;
-
     -webkit-touch-callout: none;
     user-select: none;
 }
@@ -123,26 +122,34 @@ li {
 #progress {
     display: none;
     float: left;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    margin-top: 1em;
+    margin-bottom: 2em;
     width: 92%;
     margin-left: 4%;
-    height: 20px;
-    background: #aaa;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #aaa #bbb #ccc #bbb;
-    box-shadow:inset 0 2px 3px #bbb;
-    border-radius: 2px;
+    height: 1em;
+    background-color: #1a1a1a;
+    box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;
+    border-radius: 5px;
 }
 
+/* TODO: investigate why PrefixFree won't prefix linear-gradient */
 #progressBar {
-    width: 0;
-    height: 19px;
-    background-color: #fff;
-    background-size: 18px 18px;
-    box-shadow: inset 0 2px 8px rgba(255, 255, 255, .5), inset -1px -1px 0 rgba(0, 0, 0, .2);
-    border-radius: 2px;
+    width: 50%;
+    height: 100%;
+    background-color: #bbb;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#aaa));
+    background-image: -webkit-linear-gradient(top, #eee, #aaa);
+    background-image: -moz-linear-gradient(top, #eee, #aaa);
+    background-image: -ms-linear-gradient(top, #eee, #aaa);
+    background-image: -o-linear-gradient(top, #eee, #aaa);
+    background-image: linear-gradient(top, #eee, #aaa);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+    border-radius: 3px;
+    transition: width .25s ease-in-out;
+}
+
+#percent {
+    font-size: 0.7em;
 }
 
 #tip {
@@ -262,7 +269,7 @@ footer a:hover {
 .icon-file, .icon-folder {
     position: relative;
     float: left;
-    top: .25em;
+    top: .2em;
     left: .5em;
     height: 24px;
     width: 24px;
@@ -272,7 +279,7 @@ footer a:hover {
     position: relative;
     float: right;
     cursor: pointer;
-    top: .25em;
+    top: .2em;
     right: .5em;
     height: 24px;
     width: 24px;
@@ -365,6 +372,25 @@ footer a:hover {
         width: 33%;
     }
 
+    #progress {
+        position: absolute;
+        top: .25em;
+        right: .25em;
+        margin-top: 1.5em;
+        width: 33%;
+    }
+
+    #progressBar {
+        height: 104%;
+    }
+
+    #percent {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        text-align: center;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {
@@ -399,7 +425,7 @@ footer a:hover {
     text-align: center;
     width: 100%;
     margin-top: 10px;
-    text-shadow:1px 1px 0 #777;
+    text-shadow: 1px 1px 0 #777;
     color: #fff;
     transition: all .2s linear;
 }
@@ -485,28 +511,28 @@ input[type=checkbox]:checked + label:before {
 }
 
 #submit {
+    display: inline-block;
     width: 100%;
     height: 100%;
-    display:inline-block;
-    color:#fff;
+    color: #fff;
     border-radius: 8px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     font-weight: 800;
     font-size: 1.3em;
-    text-shadow:1px 1px 0 #528009;
+    text-shadow: 1px 1px 0 #528009;
     cursor:pointer;
     user-select: none;
 }
 
 #submit.valid {
-    background-color:#89c403;
+    background-color: #89c403;
     border: 1px solid #74b807;
 
 }
 
 #submit.invalid {
-    background-color:#ff4030;
+    background-color: #ff4030;
     border: 1px solid #ee4030;
 
 }

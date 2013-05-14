@@ -210,7 +210,7 @@ function createWatcher(folder) {
             // Watchers get events for when a directory's content in a watched
             // directory changes. We don't send these unneeded updates.
             fs.stat(path.join(folder, filename), function (err, stats) {
-                if (!stats.isDirectory() || err) {
+                if (err || !stats || !stats.isDirectory()) {
                     updateClients(folder);
                 }
             });
@@ -287,19 +287,19 @@ function setupSocket(server) {
             log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
             dir = addFilePath(dir);
             fs.stat(dir, function (err, stats) {
-                if (err) {
+                if (stats && !err) {
+                    if (stats.isFile()) {
+                        fs.unlink(dir, function (err) {
+                            if (err) logerror(err);
+                        });
+                    } else if (stats.isDirectory()) {
+                        fs.rmdir(dir, function (err) {
+                            if (err) logerror(err);
+                            // TODO: handle ENOTEMPTY
+                        });
+                    }
+                } else if (err) {
                     logerror(err);
-                    return;
-                }
-                if (stats.isFile()) {
-                    fs.unlink(dir, function (err) {
-                        if (err) logerror(err);
-                    });
-                } else if (stats.isDirectory()) {
-                    fs.rmdir(dir, function (err) {
-                        if (err) logerror(err);
-                        // TODO: handle ENOTEMPTY
-                    });
                 }
             });
         });
@@ -336,8 +336,8 @@ function setupSocket(server) {
 function updateWatchers(newDir, callback) {
     if (!watchedDirs[newDir]) {
         newDir = addFilePath(newDir);
-        fs.stat(newDir, function (err) {
-            if (err) {
+        fs.stat(newDir, function (err, stats) {
+            if (err || !stats) {
                 // Requested Directory can't be read
                 checkWatchedDirs();
                 callback(false);
@@ -582,18 +582,19 @@ function handleFileRequest(req, res) {
         var mimeType = mime.lookup(filepath);
 
         fs.stat(filepath, function (err, stats) {
-            if (err) {
-                res.statusCode = 500;
-                res.end();
-                logresponse(req, res);
-                logerror(err);
-            } else {
+            if (!err && stats) {
                 res.statusCode = 200;
                 res.setHeader("Content-Disposition", ['attachment; filename="', path.basename(filepath), '"'].join(""));
                 res.setHeader("Content-Type", mimeType);
                 res.setHeader("Content-Length", stats.size);
                 logresponse(req, res);
                 fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+            } else {
+                res.statusCode = 500;
+                res.end();
+                logresponse(req, res);
+                if (err)
+                    logerror(err);
             }
         });
     }
@@ -683,16 +684,18 @@ function readDirectory(root, callback) {
         function inspectFile(filename) {
             fs.stat(addFilePath(root) + "/" + filename, function (err, stats) {
                 counter++;
-                if (err) logerror(err);
-                if (stats.isFile())
-                    type = "f";
-                if (stats.isDirectory())
-                    type = "d";
-                if (type === "f" || type === "d")
-                    dirContents[filename] = {"type": type, "size" : stats.size};
-
-                // All callbacks have fired
+                if (!err && stats) {
+                    if (stats.isFile())
+                        type = "f";
+                    if (stats.isDirectory())
+                        type = "d";
+                    if (type === "f" || type === "d")
+                        dirContents[filename] = {"type": type, "size" : stats.size};
+                } else if (err) {
+                    logerror(err);
+                }
                 if (counter === lastFile) {
+                    // All stat callbacks have fired
                     dirs[root] = dirContents;
                     callback();
                 }
@@ -914,8 +917,8 @@ function walkDirectory(dir, callback) {
             var file = list[i++];
             if (!file) return callback(null, results);
             file = dir + '/' + file;
-            fs.stat(file, function (err, stat) {
-                if (stat && stat.isDirectory()) {
+            fs.stat(file, function (err, stats) {
+                if (stats && stats.isDirectory()) {
                     walkDirectory(file, function (err, res) {
                         results = results.concat(res);
                         next();
