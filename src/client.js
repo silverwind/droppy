@@ -202,10 +202,15 @@
         attachDropzone();
         attachForm();
 
-        // Automatically submit a form once it's data changed
-        $("form").change(function () {
-            $("form").submit();
+        var fileInput = $(":file").wrap($("<div/>").css({height: 0, width: 0, "overflow": "hidden"}));
+        fileInput.change(function () {
+            if ($("#file").val() !== "")
+                $("#uploadform").submit(); // Automatically submit the upload form once it has files attached
             $("#file").val(""); // Reset file form
+        });
+
+        $("#file-upload").click(function () {
+            fileInput.click();
         });
 
         // Show popup for folder creation

@@ -3,13 +3,7 @@
 		<header id="title">droppy</header>
 	</a>
 	<ul>
-		<li id="file-upload" class="button">
-			<span>Add file(s)</span>
-				<form action="/upload" enctype="multipart/form-data" method="post">
-					<input type="file" name="file" id="file" multiple />
-				</form>
-
-		</li>
+		<li id="file-upload" class="button"title="Upload a file into the current directory">Add file(s)</li>
 		<li id="add-folder" class="button" title="Add a new folder"><span>Create Folder</span></li>
 	</ul>
 	<div id="overlay">
@@ -28,3 +22,6 @@
 </nav>
 <nav id="current"></nav>
 <section id="content"></section>
+<form id="uploadform" action="/upload" enctype="multipart/form-data" method="post">
+	<input type="file" name="file" id="file" multiple />
+</form>
