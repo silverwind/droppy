@@ -150,13 +150,13 @@ function copyResource(filepath) {
     fs.writeFileSync(getResPath(filepath), fs.readFileSync(getSrcPath(filepath)));
 }
 //-----------------------------------------------------------------------------
-// Set up the directory for files and start the server
+// Set up the directory for files
 function setupFilesDir() {
     fs.mkdir(config.filesDir, function (err) {
         if (!err || err.code === "EEXIST") {
             return true;
         } else {
-            logerror("Error accessing", config.filesDir, ".");
+            logerror("Error accessing ", config.filesDir);
             logerror(util.inspect(err));
             process.exit(1);
         }
