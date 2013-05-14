@@ -292,12 +292,13 @@ footer a:hover {
     z-index: 3;
 }
 
-#nameinput {
+#name-input {
+    box-shadow: inset 1px 1px 5px 1px rgba(143,143,143,0.8);
     color: #222;
     width: 90%;
-    padding: 0 5px;
+    padding-left: 5px;
     font-size: 1em;
-    height: 1.25em;
+    height: 1.5em;
     border-radius: 8px;
     border: 2px solid #000;
     background-color: #eee;
@@ -309,12 +310,12 @@ footer a:hover {
     font-size: .6em;
 }
 
-#nameinput.valid {
+#name-input.valid {
     border: 2px solid #000;
     background-color: #eee;
 }
 
-#nameinput.invalid {
+#name-input.invalid {
     border: 2px solid #f00;
     background-color: #f55;
 }

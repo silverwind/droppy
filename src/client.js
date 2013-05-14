@@ -194,7 +194,7 @@
         // Cache elements
         bar = $("#progressBar"),
         info = $("#info"),
-        nameinput = $("#nameinput"),
+        nameinput = $("#name-input"),
         percent = $("#percent"),
         progress = $("#progress"),
 
