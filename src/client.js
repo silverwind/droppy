@@ -33,7 +33,7 @@
         var newElement = $("#new");
         newElement.css("opacity", 0);
         newElement.animate({
-            "opacity" : 1
+            "opacity": 1
         }, {
             duration: 250,
             queue: false,
@@ -45,7 +45,7 @@
             }
         });
         $("#" + oldElement).animate({
-            "opacity" : 0
+            "opacity": 0
         }, {
             duration: 250,
             queue: false
@@ -126,10 +126,10 @@
  * ============================================================================
  */
     function initAuthPage() {
-        var user   = $("#user"),
-            pass   = $("#pass"),
-            form   = $("form"),
-            submit = $("#submit"),
+        var user     = $("#user"),
+            pass     = $("#pass"),
+            form     = $("form"),
+            submit   = $("#submit"),
             remember = $("#below");
 
         user.focus();
@@ -202,7 +202,12 @@
         attachDropzone();
         attachForm();
 
-        var fileInput = $(":file").wrap($("<div/>").css({height: 0, width: 0, "overflow": "hidden"}));
+        var fileInput = $(":file").wrap($("<div/>").css({
+            "height"  : 0,
+            "width"   : 0,
+            "overflow": "hidden"
+        }));
+
         fileInput.change(function () {
             if ($("#file").val() !== "")
                 $("#uploadform").submit(); // Automatically submit the upload form once it has files attached
@@ -285,6 +290,7 @@
                 uploadDone();
             });
         }
+
         function attachForm() {
             $("form").ajaxForm({
                 beforeSend: function () {
@@ -298,17 +304,20 @@
                 }
             });
         }
+
         function uploadInit() {
             bar.width("0%");
             percent.html("");
             progress.fadeIn(300);
             start = new Date().getTime();
         }
+
         function uploadDone() {
             bar.width("100%");
             percent.html("finished");
             progress.fadeOut(300);
         }
+
         function uploadProgress(bytesSent, bytesTotal, completed) {
             var perc = Math.round(completed) + "%";
             bar.width(perc);
@@ -364,8 +373,8 @@
             last.css("margin-top", -100);
             last.css("opacity", 0);
             $("#current ul li:last-child").animate({
-                "margin-top" : 0,
-                "opacity" : 1
+                "margin-top": 0,
+                "opacity": 1
             }, {
                 duration: 250
             });
@@ -437,7 +446,9 @@
         // of the last hovered element and restore the hover class accordingly.
 
         // Reset hover state when mouse leaves the list or the new folder is empty
-        $("#content ul").mouseleave(function () { hoverIndex = -1; });
+        $("#content ul").mouseleave(function () {
+            hoverIndex = -1;
+        });
         if (items.length === 0)  hoverIndex = -1;
 
         //  Invert the row in which the mouse was before the reload

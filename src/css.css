@@ -405,7 +405,7 @@ footer a:hover {
     font-size: 2em;
     text-align: center;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     text-shadow: 1px 1px 0 #777;
     color: #fff;
     transition: all .2s linear;
@@ -444,8 +444,8 @@ footer a:hover {
     color: #222;
     margin-top: 30px;
     padding-left: 5px;
-    font-size: 1.25em;
-    height: 1.5em;
+    font-size: 1em;
+    height: 1.75em;
     width: 100%;
     border: 2px transparent;
     border-radius: 8px;
@@ -509,13 +509,11 @@ input[type=checkbox]:checked + label:before {
 #submit.valid {
     background-color: #89c403;
     border: 1px solid #74b807;
-
 }
 
 #submit.invalid {
     background-color: #ff4030;
     border: 1px solid #ee4030;
-
 }
 
 #submit:hover {

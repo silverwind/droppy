@@ -37,28 +37,26 @@
 
 "use strict";
 
-var cache          = {},
-    clients        = {},
-    watchedDirs    = {},
-    dirs           = {},
-    db             = {},
-    server,
-    lastRead,
-    config,
-    io;
+var cache        = {},
+    clients      = {},
+    watchedDirs  = {},
+    dirs         = {},
+    db           = {},
+    server       = null,
+    config       = null,
+    io           = null;
 
-var fs                 = require("fs"),
-    formidable         = require("formidable"),
-    mime               = require("mime"),
-    util               = require("util"),
-    crypto             = require("crypto"),
-    querystring        = require("querystring"),
-    zlib               = require("zlib"),
-    path               = require("path"),
-    cleancss           = require("clean-css"),
-    uglify             = require("uglify-js"),
-    autoprefixer       = require("autoprefixer");
-
+var fs           = require("fs"),
+    formidable   = require("formidable"),
+    mime         = require("mime"),
+    util         = require("util"),
+    crypto       = require("crypto"),
+    querystring  = require("querystring"),
+    zlib         = require("zlib"),
+    path         = require("path"),
+    cleancss     = require("clean-css"),
+    uglify       = require("uglify-js"),
+    autoprefixer = require("autoprefixer");
 
 var color = {
     red     : "\u001b[31m",
@@ -68,14 +66,14 @@ var color = {
     reset   : "\u001b[0m"
 };
 
+var isCLI   = (process.argv.length > 2),
+    isJitsu = (process.env.NODE_ENV === "production");
+
 // Argument handler
-var isCLI = (process.argv.length > 2);
 if (isCLI) handleArguments();
 
 readConfig();
 logsimple(prettyStartup());
-
-var isJitsu = (process.env.NODE_ENV === "production");
 
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
@@ -93,6 +91,7 @@ cacheResources(config.resDir, function () {
     setupFilesDir();
     createListener();
 });
+
 //-----------------------------------------------------------------------------
 // Read CSS and JS, minify them, and write them to /res
 function prepareContent() {
@@ -171,12 +170,15 @@ function createListener() {
 
     // Bind to 8080 on jitsu
     var port =  isJitsu ? process.env.PORT : config.port;
+
     server.listen(port);
+
     server.on("listening", function () {
         // We're up - initialize everything
         var address = server.address();
         log("Listening on ", address.address, ":", address.port);
     });
+
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
             logerror("Failed to bind to port ", port, ". Address already in use.\n\n", err.stack);
@@ -238,9 +240,9 @@ function setupSocket(server) {
     });
 
     io.sockets.on("connection", function (ws) {
-        var remoteIP = ws.handshake.address.address;
+        var remoteIP   = ws.handshake.address.address;
         var remotePort = ws.handshake.address.port;
-        var cookie = getCookie(ws.handshake.headers.cookie);
+        var cookie     = getCookie(ws.handshake.headers.cookie);
 
         if (!cookie) {
             log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
@@ -372,44 +374,18 @@ function sendMessage(cookie, messageType) {
 //-----------------------------------------------------------------------------
 // GET/POST handler
 function onRequest(req, res) {
-    var method = req.method.toUpperCase();
-
-    if (method === "GET") {
+    switch (req.method.toUpperCase()) {
+    case "GET":
         handleGET(req, res);
-    } else if (method === "POST") {
-        if (req.url === "/upload") {
-            if (!getCookie(req.headers.cookie)) {
-                res.statusCode = 401;
-                res.end();
-                logresponse(req, res);
-            }
-            handleUploadRequest(req, res);
-        } else if (req.url === "/login") {
-            var body = "";
-            req.on("data", function (data) {
-                body += data;
-            });
-            req.on("end", function () {
-                var postData = querystring.parse(body);
-                var response;
-                if (isValidUser(postData.username, postData.password)) {
-                    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                        "User ", postData.username, " [", color.green, "authenticated", color.reset, "]");
-                    response = "OK";
-                    createCookie(req, res, postData);
-                } else {
-                    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                        "User ", postData.username, " [", color.red, "unathorized", color.reset, "]");
-                    response = "NOK";
-                }
-                var json = JSON.stringify(response);
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.setHeader("Content-Length", json.length);
-                res.end(json);
-                logresponse(req, res);
-            });
-        }
+        break;
+    case "POST":
+        handlePOST(req, res);
+        break;
+    default:
+        res.statusCode = 405;
+        res.setHeader("Allow", "GET, POST");
+        res.end();
+        logresponse(req, res);
     }
 }
 //-----------------------------------------------------------------------------
@@ -472,7 +448,7 @@ function cacheResources(dir, callback) {
     });
 }
 //-----------------------------------------------------------------------------
-// Handle all GETs, except downloads
+// Handle all GET requests
 function handleGET(req, res) {
     if (decodeURIComponent(req.url).match(/^\/get\//)) {
         handleFileRequest(req, res);
@@ -558,6 +534,43 @@ function handleGET(req, res) {
     }
 }
 //-----------------------------------------------------------------------------
+// Handle all POST requests
+function handlePOST(req, res) {
+    if (req.url === "/upload") {
+        if (!getCookie(req.headers.cookie)) {
+            res.statusCode = 401;
+            res.end();
+            logresponse(req, res);
+        }
+        handleUploadRequest(req, res);
+    } else if (req.url === "/login") {
+        var body = "";
+        req.on("data", function (data) {
+            body += data;
+        });
+        req.on("end", function () {
+            var postData = querystring.parse(body);
+            var response;
+            if (isValidUser(postData.username, postData.password)) {
+                log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
+                    "User ", postData.username, " [", color.green, "authenticated", color.reset, "]");
+                response = "OK";
+                createCookie(req, res, postData);
+            } else {
+                log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
+                    "User ", postData.username, " [", color.red, "unathorized", color.reset, "]");
+                response = "NOK";
+            }
+            var json = JSON.stringify(response);
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.setHeader("Content-Length", json.length);
+            res.end(json);
+            logresponse(req, res);
+        });
+    }
+}
+//-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
     if (!getCookie(req.headers.cookie)) {
         res.statusCode = 301;
@@ -565,6 +578,7 @@ function handleFileRequest(req, res) {
         res.end();
         logresponse(req, res);
     }
+
     var filepath = addFilePath(decodeURIComponent(req.url).replace("get/", ""));
     if (filepath) {
         var mimeType = mime.lookup(filepath);
@@ -649,7 +663,6 @@ function handleUploadRequest(req, res) {
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in "dirs"
 function readDirectory(root, callback) {
-    lastRead = new Date();
     fs.readdir(addFilePath(root), function (err, files) {
         if (err) logerror(err);
         if (!files) return;
@@ -734,8 +747,6 @@ function readConfig() {
         process.exit(1);
     }
 
-
-
     var opts = ["debug", "useSSL", "port", "readInterval", "mode", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
@@ -790,7 +801,6 @@ function readDB() {
 function getHash(string) {
     return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
 }
-
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
 function addUser(user, password) {
@@ -936,10 +946,10 @@ function debounce(func, wait, immediate) {
         return result;
     };
 }
-
-//-----------------------------------------------------------------------------
-// Logging and error handling helpers
-
+/* ============================================================================
+ *  Logging and error handling helpers
+ * ============================================================================
+ */
 function log() {
     var args = Array.prototype.slice.call(arguments, 0);
     args.unshift(getTimestamp());
