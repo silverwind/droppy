@@ -132,17 +132,11 @@ li {
     border-radius: 5px;
 }
 
-/* TODO: investigate why PrefixFree won't prefix linear-gradient */
 #progressBar {
-    width: 50%;
+    width: 0;
     height: 100%;
     background-color: #bbb;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#aaa));
-    background-image: -webkit-linear-gradient(top, #eee, #aaa);
-    background-image: -moz-linear-gradient(top, #eee, #aaa);
-    background-image: -ms-linear-gradient(top, #eee, #aaa);
-    background-image: -o-linear-gradient(top, #eee, #aaa);
-    background-image: linear-gradient(top, #eee, #aaa);
+    background-image: linear-gradient(to bottom, #eee, #aaa);
     box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
     border-radius: 3px;
     transition: width .25s ease-in-out;
