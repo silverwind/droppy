@@ -4,7 +4,7 @@
     "use strict";
 
     var folderList = [], currentFolder = "/", socketOpen = false;
-    var bar, info, nameinput, percent, progress, start, socket, timeout;
+    var bar, info, nameinput, percent, progress, start, socket, timeout, hoverIndex;
 
 /* ============================================================================
  *  Page loading functions
@@ -204,7 +204,8 @@
         attachForm();
 
         // Switch into a folder
-        $("#content").on("click", ".folderlink", function (e) {
+        $("#content").on("mousedown", ".folderlink", function (e) {
+            if (e.button !== 0) return;
             e.preventDefault();
 
             var destination = $(this).html();
@@ -214,7 +215,8 @@
         });
 
         // Jump to a folder using the breadcrumbs
-        $("body").on("click", ".navlink", function (e) {
+        $("body").on("mousedown", ".navlink", function (e) {
+            if (e.button !== 0) return;
             e.preventDefault();
             var destination = $(this).data("path");
             currentFolder = destination;
@@ -222,7 +224,8 @@
         });
 
         // Delete a file/folder
-        $("body").on("click", ".icon-delete", function (e) {
+        $("body").on("mousedown", ".icon-delete", function (e) {
+            if (e.button !== 0) return;
             e.preventDefault();
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
@@ -234,7 +237,8 @@
         });
 
         // Show popup for folder creation
-        $("#add-folder").click(function () {
+        $("#add-folder").mousedown(function (e) {
+            if (e.button !== 0) return;
             $("#overlay").fadeToggle(350);
             nameinput.val("");
             nameinput.focus();
@@ -433,25 +437,44 @@
         });
 
         $.each(items, function (index, item) {
+            $(item).attr("data-index", index);
             list.append(item);
         });
 
-        // Load generated list into view
-        $("#content").html(list);
+        $("#content").html(list); // Load generated list into view
 
-        // Add hover classes
-        $("#content ul").children("li").hover(
-            function () {
-                $(this).children(".icon-file").removeClass("file-normal").addClass("file-invert");
-                $(this).children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
-                $(this).children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
-            },
-            function () {
-                $(this).children(".icon-file").removeClass("file-invert").addClass("file-normal");
-                $(this).children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
-                $(this).children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
-            }
-        );
+        // Functionality to invert images on hover below. Chrome doesn't seem to trigger the
+        // mouseenter event when content is replaced behind a un-moving cursor, so we keep track
+        // of the last hovered element and restore the hover class accordingly.
+
+        $("#content ul").mouseout(function () {
+            hoverIndex = -1;
+        });
+
+        if (hoverIndex >= 0)
+            invertImages($("#content ul").children('li[data-index="' + hoverIndex + '"]'));
+
+        $("#content ul").children("li").mouseenter(function () {
+            invertImages($(this));
+            hoverIndex = $(this).attr("data-index");
+        });
+
+        $("#content ul").children("li").mouseleave(function () {
+            revertImages($(this));
+        });
+
+        function invertImages(li) {
+            li.children(".icon-file").removeClass("file-normal").addClass("file-invert");
+            li.children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
+            li.children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
+        }
+
+        function revertImages(li) {
+            li.children(".icon-file").removeClass("file-invert").addClass("file-normal");
+            li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
+            li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
+        }
+
     }
 
     function convertToSI(bytes) {

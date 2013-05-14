@@ -263,7 +263,7 @@ footer a:hover {
 .icon-file, .icon-folder {
     position: relative;
     float: left;
-    top: .2em;
+    top: .25em;
     left: .5em;
     height: 24px;
     width: 24px;
@@ -273,7 +273,7 @@ footer a:hover {
     position: relative;
     float: right;
     cursor: pointer;
-    top: .2em;
+    top: .25em;
     right: .5em;
     height: 24px;
     width: 24px;
@@ -397,7 +397,7 @@ footer a:hover {
 
     #content {
         padding-left: 10em;
-        top: 2.1em;
+        top: 1.95em;
     }
 
     #title {
