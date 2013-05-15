@@ -3,7 +3,7 @@
 (function ($) {
     "use strict";
 
-    var folderList = [], currentFolder = "/", socketOpen = false;
+    var folderList = [], currentFolder, socketOpen = false;
     var bar, info, nameinput, percent, progress, start, socket, timeout, hoverIndex;
 
 /* ============================================================================
@@ -64,7 +64,7 @@
         socket.on("connect", function () {
             socketOpen = true;
             // Request initial update
-            sendMessage("REQUEST_UPDATE", currentFolder);
+            updateLocation(currentFolder || "/", false);
 
             // Close the socket to prevent Firefox errors
             $(window).on('beforeunload', function () {
@@ -339,6 +339,22 @@
  *  General helpers
  * ============================================================================
  */
+    window.addEventListener("popstate", function () {
+        currentFolder = decodeURIComponent(window.location.pathname);
+        sendMessage("SWITCH_FOLDER", currentFolder);
+    });
+
+    function updateLocation(path, doSwitch) {
+        if (doSwitch) {
+            currentFolder += path;
+            sendMessage("SWITCH_FOLDER", currentFolder);
+        } else {
+            currentFolder = path;
+            sendMessage("REQUEST_UPDATE", currentFolder);
+        }
+        window.history.pushState(null, null, currentFolder);
+    }
+
     function updateCrumbs(path) {
         document.title = ["droppy", path].join(" - ");
         var parts = path.split("/");
@@ -385,8 +401,7 @@
             if (e.button !== 0) return;
             e.preventDefault();
             var destination = $(this).data("path");
-            currentFolder = destination;
-            sendMessage("SWITCH_FOLDER", currentFolder);
+            updateLocation(destination);
         });
     }
 
@@ -401,12 +416,12 @@
             var id = (root === "/") ? "/" + file : root + "/" + file;
 
             if (fileList[file].type === "f") { //Create a file row
+                var downloadURL = [window.location.protocol, "//", window.location.host, "/get", encodeURIComponent(id)].join("");
                 list.append([
                     '<li class="data-row" data-id="', id, '"><span class="icon-file file-normal"></span>',
-                    '<span class="data-name"><a class="filelink" href="', encodeURIComponent("get" + id), '" download="', file, '">', file, '</a></span>',
+                    '<span class="data-name"><a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a></span>',
                     '<span class="data-info">', size, '</span><span class="icon-delete delete-normal"></span>',
-                    '</span><span class="right-clear"></span>',
-                    '</li>'
+                    '</span><span class="right-clear"></span></li>'
                 ].join(""));
 
             } else {  //Create a folder row
@@ -420,7 +435,6 @@
                 //Add to list of currently displayed folders
                 folderList[name.toLowerCase()] = true;
             }
-
         }
 
         // Sort first by class, then alphabetically
@@ -431,7 +445,6 @@
                 return result;
             else
                 return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
-
         });
 
         $.each(items, function (index, item) {
@@ -486,8 +499,7 @@
 
             var destination = $(this).html();
             if (currentFolder !== "/") destination = "/" + destination;
-            currentFolder += destination;
-            sendMessage("SWITCH_FOLDER", currentFolder);
+            updateLocation(destination, true);
         });
 
         // Bind mouse event to delete a file/folder
@@ -500,16 +512,13 @@
     }
 
     function convertToSI(bytes) {
-        var kib = 1024,
-            mib = kib * 1024,
-            gib = mib * 1024,
-            tib = gib * 1024;
+        var step = 0;
+        var units = ["bytes", "KiB", "MiB", "GiB", "TiB"];
 
-        if ((bytes >= 0) && (bytes < kib))         return bytes + ' Bytes';
-        else if ((bytes >= kib) && (bytes < mib))  return (bytes / kib).toFixed(2) + ' KiB';
-        else if ((bytes >= mib) && (bytes < gib))  return (bytes / mib).toFixed(2) + ' MiB';
-        else if ((bytes >= gib) && (bytes < tib))  return (bytes / gib).toFixed(2) + ' GiB';
-        else if (bytes >= tib)                     return (bytes / tib).toFixed(2) + ' TiB';
-        else return bytes + ' Bytes';
+        while (bytes >= 1024) {
+            bytes /= 1024;
+            step++;
+        }
+        return [bytes.toFixed(2), units[step]].join(" ");
     }
 }(jQuery));

@@ -31,7 +31,7 @@
   - Keybindings (navigation and copy, cut, paste of files)
   - Find a solution to not send login data in cleartext over HTTP.
   - Handle breadcrumb overflow in layout
-  - Tweak performance (Investigate CSS loading twice sometimes)
+  - Tweak performance
   - IE8 compatibilty
  --------------------------------------------------------------------------- */
 
@@ -450,18 +450,12 @@ function cacheResources(dir, callback) {
 //-----------------------------------------------------------------------------
 // Handle all GET requests
 function handleGET(req, res) {
-    if (decodeURIComponent(req.url).match(/^\/get\//)) {
-        handleFileRequest(req, res);
-        return;
-    }
-
+    var URI = decodeURIComponent(req.url);
     var resourceName;
 
-    switch (req.url) {
-    case "/":
-        resourceName = "base.html";
-        break;
-    case "/content":
+    if (URI === "/") {
+        handleResourceRequest(req, res, "base.html");
+    } else if (URI === "/content") {
         var obj = {};
         if (getCookie(req.headers.cookie)) {
             obj.type = "main";
@@ -478,58 +472,21 @@ function handleGET(req, res) {
         res.setHeader("Cache-Control", "no-cache");
         res.end(json);
         logresponse(req, res);
-        return;
-    default:
+    } else if (URI.match(/^\/get\//)) {
+        handleFileRequest(req, res);
+    } else if (URI.match(/^\/res\//)) {
         var fileName = path.basename(req.url);
         var dirName = path.dirname(req.url);
-
-        if (dirName.indexOf("/res") === 0)
-            dirName = dirName.substring(5);
-
-        if (dirName === "")
-            resourceName = fileName;
-        else
-            resourceName = dirName + "/" + fileName;
-
-        if (resourceName.match(/favicon.ico/))
-            resourceName = "icon.ico";
-
-        break;
-    }
-
-
-    if (cache[resourceName] === undefined) {
-        res.statusCode = 404;
-        res.end();
-        logresponse(req, res);
+        dirName = dirName.substring(5);
+        resourceName = (dirName === "") ? fileName : dirName + "/" + fileName;
+        handleResourceRequest(req, res, resourceName);
+    } else if (URI === "/favicon.ico") {
+        handleResourceRequest(req, res, "icon.ico");
     } else {
-        res.statusCode = 200;
-
-        if (req.url === "/") res.setHeader("X-Frame-Options", "DENY");
-
-        res.setHeader("Content-Type", cache[resourceName].mime);
-        res.setHeader("Cache-Control", "public, max-age=31536000");
-        res.setHeader("ETag", cache[resourceName].etag);
-
-        var ifNoneMatch = req.headers["if-none-match"] || "";
-        if (ifNoneMatch === cache[resourceName].etag) {
-            res.statusCode = 304;
-            res.end();
-            logresponse(req, res);
-            return;
-        }
-
-        var acceptEncoding = req.headers["accept-encoding"] || "";
-        if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
-            res.setHeader("Content-Encoding", "gzip");
-            res.setHeader("Content-Length", cache[resourceName].gzipData.length);
-            res.setHeader("Vary", "Accept-Encoding");
-
-            res.end(cache[resourceName].gzipData);
-        } else {
-            res.setHeader("Content-Length", cache[resourceName].data.length);
-            res.end(cache[resourceName].data);
-        }
+        // TODO: Add direct folder navigation here
+        res.statusCode = 301;
+        res.setHeader("Location", "/");
+        res.end();
         logresponse(req, res);
     }
 }
@@ -568,6 +525,43 @@ function handlePOST(req, res) {
             res.end(json);
             logresponse(req, res);
         });
+    }
+}
+//-----------------------------------------------------------------------------
+function handleResourceRequest(req, res, resourceName) {
+    if (cache[resourceName] === undefined) {
+        res.statusCode = 404;
+        res.end();
+        logresponse(req, res);
+    } else {
+        res.statusCode = 200;
+
+        if (req.url === "/") res.setHeader("X-Frame-Options", "DENY");
+
+        res.setHeader("Content-Type", cache[resourceName].mime);
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+        res.setHeader("ETag", cache[resourceName].etag);
+
+        var ifNoneMatch = req.headers["if-none-match"] || "";
+        if (ifNoneMatch === cache[resourceName].etag) {
+            res.statusCode = 304;
+            res.end();
+            logresponse(req, res);
+            return;
+        }
+
+        var acceptEncoding = req.headers["accept-encoding"] || "";
+        if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
+            res.setHeader("Content-Encoding", "gzip");
+            res.setHeader("Content-Length", cache[resourceName].gzipData.length);
+            res.setHeader("Vary", "Accept-Encoding");
+
+            res.end(cache[resourceName].gzipData);
+        } else {
+            res.setHeader("Content-Length", cache[resourceName].data.length);
+            res.end(cache[resourceName].data);
+        }
+        logresponse(req, res);
     }
 }
 //-----------------------------------------------------------------------------
