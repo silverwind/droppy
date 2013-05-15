@@ -3,7 +3,7 @@
 (function ($) {
     "use strict";
 
-    var folderList = [], currentFolder, socketOpen = false;
+    var folderList = [], currentFolder, socketOpen = false, socketWait = false;
     var bar, info, nameinput, percent, progress, start, socket, timeout, hoverIndex;
 
 /* ============================================================================
@@ -78,6 +78,7 @@
             if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
                 updateCrumbs(msgData.folder);
                 buildHTML(msgData.data, msgData.folder);
+                socketWait = false;
             }
         });
 
@@ -85,6 +86,7 @@
             var msgData = JSON.parse(data);
             updateCrumbs(msgData.folder);
             buildHTML(msgData.data, msgData.folder);
+            socketWait = false;
         });
 
         socket.on("disconnect", function () {
@@ -111,14 +113,15 @@
 
         socket.on("error", function (error) {
             if (typeof error === "object" && Object.keys(error).length > 0)
-                console.log(JSON.stringify(error, null, 4));
+                console.log("Socket Error:\n", JSON.stringify(error, null, 4));
             else if (typeof error === "string" && error !== "")
-                console.log(error);
+                console.log("Socket Error: ", error);
         });
     }
 
     function sendMessage(msgType, msgData) {
         if (!socketOpen) return;
+        socketWait = true;
         socket.emit(msgType, JSON.stringify(msgData));
     }
 /* ============================================================================
@@ -347,6 +350,7 @@
 
     // Update our current location and change the URL to it
     function updateLocation(path, doSwitch) {
+        if (socketWait) return; // Dont switch location in case we are still waiting for a response from the server
         if (doSwitch) {
             currentFolder += path;
             sendMessage("SWITCH_FOLDER", currentFolder);
@@ -358,7 +362,7 @@
     }
 
     function updateCrumbs(path) {
-        document.title = ["droppy", path].join(" - ");
+        document.title = [path, "droppy"].join(" - ");
         var parts = path.split("/");
         parts[0] = "droppy";
 
