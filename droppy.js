@@ -193,32 +193,22 @@ function createListener() {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    watchedDirs[removeFilePath(folder)] = fs.watch(folder, function (event, filename) {
-        if (!filename) {
-            updateClients(folder);
-        } else {
-            // Watchers get events for when a directory's content in a watched
-            // directory changes. We don't send these unneeded updates.
-            fs.stat(path.join(folder, filename), function (err, stats) {
-                if (err || !stats || !stats.isDirectory()) {
-                    updateClients(folder);
-                }
-            });
-        }
-    });
+    watchedDirs[removeFilePath(folder)] = fs.watch(folder, debounce(function () {
+        updateClients(folder);
+    }), config.readInterval);
 
-    var updateClients = debounce(function (dir) {
+    function updateClients(folder) {
         var clientsToUpdate = [];
         for (var client in clients) {
             var clientDir = clients[client].directory;
-            if (clientDir === removeFilePath(dir)) {
+            if (clientDir === removeFilePath(folder)) {
                 clientsToUpdate.push(client);
                 readDirectory(clientDir, function () {
                     sendMessage(clientsToUpdate.pop(), "UPDATE_FILES");
                 });
             }
         }
-    }, config.readInterval);
+    }
 }
 //-----------------------------------------------------------------------------
 // Add ./files/ to a path
@@ -620,14 +610,20 @@ function handleUploadRequest(req, res) {
         });
 
         form.on("end", function () {
+            var count = 0, deletecount = 0;
             for (var file in uploadedFiles) {
+                count++;
                 var input, output;
 
                 input = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 4096});
 
                 input.on("close", function () {
                     fs.unlink(this.path, function (err) {
+                        deletecount++;
                         if (err) logerror(err);
+                        if (deletecount === count) {
+                            sendMessage(cookie, "UPLOAD_DONE");
+                        }
                     });
                 });
 
@@ -642,11 +638,10 @@ function handleUploadRequest(req, res) {
                 });
 
                 input.pipe(output);
-
-                res.statusCode = 200;
-                res.end();
-                logresponse(req, res);
             }
+            res.statusCode = 200;
+            res.end();
+            logresponse(req, res);
         });
 
         form.on("error", function (err) {

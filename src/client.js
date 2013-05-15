@@ -3,8 +3,8 @@
 (function ($) {
     "use strict";
 
-    var folderList = [], currentFolder, socketOpen = false, socketWait = false;
-    var bar, info, nameinput, percent, progress, start, socket, timeout, hoverIndex;
+    var folderList = [], socketOpen = false, socketWait = false, isUploading = false;
+    var currentFolder, socket, timeout, hoverIndex, activeFiles;
 
 /* ============================================================================
  *  Page loading functions
@@ -74,17 +74,25 @@
         });
 
         socket.on("UPDATE_FILES", function (data) {
+            if (isUploading) return;
             var msgData = JSON.parse(data);
             if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
                 updateCrumbs(msgData.folder);
+                activeFiles = msgData;
                 buildHTML(msgData.data, msgData.folder);
                 socketWait = false;
             }
         });
 
+        socket.on("UPLOAD_DONE", function () {
+            isUploading = false;
+            sendMessage("REQUEST_UPDATE", currentFolder);
+        });
+
         socket.on("NEW_FOLDER", function (data) {
             var msgData = JSON.parse(data);
             updateCrumbs(msgData.folder);
+            activeFiles = msgData;
             buildHTML(msgData.data, msgData.folder);
             socketWait = false;
         });
@@ -109,13 +117,6 @@
         socket.on("UNAUTHORIZED", function () {
             // Set the timeout to its maximum value to stop retries
             timeout = 51200;
-        });
-
-        socket.on("error", function (error) {
-            if (typeof error === "object" && Object.keys(error).length > 0)
-                console.log("Socket Error:\n", JSON.stringify(error, null, 4));
-            else if (typeof error === "string" && error !== "")
-                console.log("Socket Error: ", error);
         });
     }
 
@@ -194,12 +195,9 @@
     function initMainPage() {
         openSocket();
 
-        // Cache elements
-        bar = $("#progressBar"),
-        info = $("#info"),
-        nameinput = $("#name-input"),
-        percent = $("#percent"),
-        progress = $("#progress"),
+        // Cache static elements
+        var info      = $("#info"),
+            nameinput = $("#name-input");
 
         // Initialize and attach plugins
         attachDropzone();
@@ -212,8 +210,22 @@
         }));
 
         fileInput.change(function () {
-            if ($("#file").val() !== "")
+            if ($("#file").val() !== "") {
+                var files = $("#file").get(0).files;
+                var num = files.length;
+                if (num > 0) {
+                    for (var i = 0; i < num; i++) {
+                        activeFiles.data[files[i].name] = {
+                            size: files[i].size,
+                            type: "nf"
+                        };
+                    }
+                    buildHTML(activeFiles.data, activeFiles.folder);
+                }
+                isUploading = true;
                 $("#uploadform").submit(); // Automatically submit the upload form once it has files attached
+            }
+
             $("#file").val(""); // Reset file form
         });
 
@@ -308,33 +320,51 @@
             });
         }
 
+        var start, progressBars;
+        var ui = $("#upload-info");
+        var utl = $("#upload-time-left");
+        var uperc = $("#upload-percentage");
+
         function uploadInit() {
-            bar.width("0%");
-            percent.html("");
-            progress.fadeIn(300);
             start = new Date().getTime();
+
+            progressBars = $(".progressBar");
+            progressBars.show();
+            progressBars.width("0%");
+
+            uperc.html("0%");
+            utl.html("");
+            ui.animate({top: "-2px"}, 500);
+
+            $("#content ul").children().each(function () {
+                revert($(this));
+            });
         }
 
         function uploadDone() {
-            bar.width("100%");
-            percent.html("finished");
-            progress.fadeOut(300);
+            progressBars.width("100%");
+            uperc.html("100%");
+            utl.html("finished");
+            ui.animate({top: "-46px"}, 500);
         }
 
         function uploadProgress(bytesSent, bytesTotal, completed) {
-            var perc = Math.round(completed) + "%";
-            bar.width(perc);
+            var progress = Math.round(completed) + "%";
+            progressBars.width(progress);
+            uperc.html(progress);
 
             // Calculate estimated time left
             var elapsed = (new Date().getTime()) - start;
             var estimate = bytesTotal / (bytesSent / elapsed);
             var secs = (estimate - elapsed) / 1000;
             if (secs > 120) {
-                percent.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
+                utl.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
             } else if (secs > 60) {
-                percent.html("less than 2 minute left");
+                utl.html("less than 2 minutes left");
+            } else if (secs < 1.5) {
+                utl.html("less than a second left");
             } else {
-                percent.html(Math.round(secs) + " seconds left");
+                utl.html(Math.round(secs) + " seconds left");
             }
         }
     }
@@ -351,13 +381,9 @@
     // Update our current location and change the URL to it
     function updateLocation(path, doSwitch) {
         if (socketWait) return; // Dont switch location in case we are still waiting for a response from the server
-        if (doSwitch) {
-            currentFolder += path;
-            sendMessage("SWITCH_FOLDER", currentFolder);
-        } else {
-            currentFolder = path;
-            sendMessage("REQUEST_UPDATE", currentFolder);
-        }
+
+        currentFolder = path;
+        sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
         window.history.pushState(null, null, currentFolder);
     }
 
@@ -407,46 +433,51 @@
             if (e.button !== 0) return;
             e.preventDefault();
             var destination = $(this).data("path");
-            updateLocation(destination);
+            updateLocation(destination, true);
         });
     }
 
     function buildHTML(fileList, root) {
         var folderList = [];
-
         var list = $("<ul>");
-
         for (var file in fileList) {
             var size = convertToSI(fileList[file].size);
 
             var id = (root === "/") ? "/" + file : root + "/" + file;
 
-            if (fileList[file].type === "f") { //Create a file row
+            if (fileList[file].type === "f" || fileList[file].type === "nf") { // Create a file row
                 var downloadURL = [window.location.protocol, "//", window.location.host, "/get", encodeURIComponent(id)].join("");
+                var addClass = "", addProgress = "";
+
+                if (fileList[file].type === "nf") {
+                    addClass = " new-file";
+                    addProgress = '<div class="progressBar"></div>';
+                }
+
                 list.append([
-                    '<li class="data-row" data-id="', id, '"><span class="icon-file file-normal"></span>',
+                    '<li class="data-row', addClass, '"data-type="file" data-id="', id, '"><span class="icon-file file-normal"></span>',
                     '<span class="data-name"><a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a></span>',
                     '<span class="data-info">', size, '</span><span class="icon-delete delete-normal"></span>',
-                    '</span><span class="right-clear"></span></li>'
+                    '</span><span class="right-clear"></span>', addProgress, '</li>'
                 ].join(""));
 
-            } else {  //Create a folder row
+            } else {  // Create a folder row
                 list.append([
-                    '<li class="folder data-row" data-id="', id, '"><span class="icon-folder folder-normal"></span>',
+                    '<li class="data-row" data-type="folder" data-id="', id, '"><span class="icon-folder folder-normal"></span>',
                     '<span class="data-name folder">', file, '</span>',
                     '<span class="icon-delete delete-normal"></span>',
                     '</span><span class="right-clear"></span></li>'
                 ].join(""));
 
-                //Add to list of currently displayed folders
+                // Add to list of currently displayed folders
                 folderList[name.toLowerCase()] = true;
             }
         }
 
         // Sort first by class, then alphabetically
-        var items = list.children("li");
+        var items = $(list).children("li");
         items.sort(function (a, b) {
-            var result = $(b).attr("class").toUpperCase().localeCompare($(a).attr("class").toUpperCase());
+            var result = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
             if (result !== 0)
                 return result;
             else
@@ -468,6 +499,7 @@
         $("#content ul").mouseleave(function () {
             hoverIndex = -1;
         });
+
         if (items.length === 0)  hoverIndex = -1;
 
         //  Invert the row in which the mouse was before the reload
@@ -484,38 +516,36 @@
         $("#content ul li").mouseout(function () {
             revert($(this));
         });
-
-        function invert(li) {
-            li.addClass("highlight");
-            li.children(".icon-file").removeClass("file-normal").addClass("file-invert");
-            li.children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
-            li.children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
-        }
-
-        function revert(li) {
-            li.removeClass("highlight");
-            li.children(".icon-file").removeClass("file-invert").addClass("file-normal");
-            li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
-            li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
-        }
-
         // Bind mouse event to switch into a folder
         $(".data-name.folder").mousedown(function (e) {
             if (e.button !== 0) return;
-            e.preventDefault();
 
-            var destination = $(this).html();
-            if (currentFolder !== "/") destination = "/" + destination;
+            var destination = $(this).parent().data("id").replace("&amp;", "&");
             updateLocation(destination, true);
         });
 
         // Bind mouse event to delete a file/folder
         $(".icon-delete").mousedown(function (e) {
-            if (e.button !== 0) return;
-            e.preventDefault();
+            if (e.button !== 0 || socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
+    }
+
+    // Invert and highlight a list entry
+    function invert(li) {
+        li.addClass("highlight");
+        li.children(".icon-file").removeClass("file-normal").addClass("file-invert");
+        li.children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
+        li.children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
+    }
+
+    // Revert highlight state of a list entry
+    function revert(li) {
+        li.removeClass("highlight");
+        li.children(".icon-file").removeClass("file-invert").addClass("file-normal");
+        li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
+        li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
     }
 
     function convertToSI(bytes) {

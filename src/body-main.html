@@ -10,10 +10,6 @@
 		<input type="text" id="name-input" placeholder="Folder Name"/>
 		<p id="info">&nbsp;</p>
 	</div>
-	<div id="progress">
-		<div id="progressBar"></div>
-		<div id="percent"></div>
-	</div>
 	<div id="preview" class="dropzone-previews"></div>
 	<div id="tip">Drop files anywhere on this page to start uploading!</div>
 	<footer>
@@ -25,3 +21,7 @@
 <form id="uploadform" action="/upload" enctype="multipart/form-data" method="post">
 	<input type="file" name="file" id="file" multiple />
 </form>
+<div id="upload-info">
+	<div id="upload-percentage"></div>
+	<div id="upload-time-left"></div>
+</div>
