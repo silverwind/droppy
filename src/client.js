@@ -339,11 +339,13 @@
  *  General helpers
  * ============================================================================
  */
+    // Listen for "popstate" events, which indicate the user navigated back
     window.addEventListener("popstate", function () {
         currentFolder = decodeURIComponent(window.location.pathname);
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
+    // Update our current location and change the URL to it
     function updateLocation(path, doSwitch) {
         if (doSwitch) {
             currentFolder += path;
@@ -466,31 +468,32 @@
 
         //  Invert the row in which the mouse was before the reload
         if (hoverIndex >= 0) {
-            invertImages($("#content ul").children('li[data-index="' + hoverIndex + '"]'));
+            invert($("#content ul").children('li[data-index="' + hoverIndex + '"]'));
         }
 
         // Bind mouse events for swapping images. Text and Background are switched in CSS
         $("#content ul li").mouseover(function () {
-            invertImages($(this));
+            invert($(this));
             hoverIndex = $(this).data("index");
         });
 
         $("#content ul li").mouseout(function () {
-            revertImages($(this));
+            revert($(this));
         });
 
-        function invertImages(li) {
+        function invert(li) {
+            li.addClass("highlight");
             li.children(".icon-file").removeClass("file-normal").addClass("file-invert");
             li.children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
             li.children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
         }
 
-        function revertImages(li) {
+        function revert(li) {
+            li.removeClass("highlight");
             li.children(".icon-file").removeClass("file-invert").addClass("file-normal");
             li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
             li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
         }
-
 
         // Bind mouse event to switch into a folder
         $(".data-name.folder").mousedown(function (e) {
@@ -519,6 +522,6 @@
             bytes /= 1024;
             step++;
         }
-        return [bytes.toFixed(2), units[step]].join(" ");
+        return [(step === 0) ? bytes : bytes.toFixed(2), units[step]].join(" ");
     }
 }(jQuery));

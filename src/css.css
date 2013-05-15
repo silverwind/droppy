@@ -191,14 +191,17 @@ footer a:hover {
 
 /* ===================== File/Folder display ===================== */
 
-.dark-bg, .data-row:hover {
+.dark-bg, .highlight{
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGUlEQVR42mOQAANtMGCAs4AMBjgLyoGrBACjhAZJiLyabAAAAABJRU5ErkJggg==);
 }
 
-.data-row:hover, .data-row:hover * {
-    color: #fff;
-    opacity: .9;
+.highlight {
     border-radius: 6px;
+    opacity: .9;
+}
+
+.highlight span, .highlight span a {
+    color: #fff;
 }
 
 
