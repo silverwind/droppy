@@ -826,8 +826,8 @@ function getCookie(cookie) {
     if (cookie !== undefined) {
         var cookies = cookie.split("; ");
         cookies.forEach(function (c) {
-            if (c.match(/^_SESSION.*/)) {
-                sid = c.substring(9);
+            if (c.match(/^sid.*/)) {
+                sid = c.substring(4);
             }
         });
     }
@@ -840,18 +840,18 @@ function getCookie(cookie) {
 }
 
 function createCookie(req, res, postData) {
-    var sessionID = crypto.randomBytes(64).toString("base64");
+    var sessionID = crypto.randomBytes(32).toString("base64");
     if (postData.check === "on") {
         // Create a semi-permanent cookie
         var dateString = new Date(new Date().getTime() + 31536000000).toUTCString();
         db.sessions[sessionID] = true;
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-        res.setHeader("Set-Cookie", "_SESSION=" + sessionID + "; Expires=" + dateString);
+        res.setHeader("Set-Cookie", "sid=" + sessionID + "; Expires=" + dateString);
     } else {
         // Create a single-session cookie
         // TODO: Delete these session ids after a certain period of inactivity from the client
         db.sessions[sessionID] = true;
-        res.setHeader("Set-Cookie", "_SESSION=" + sessionID + ";");
+        res.setHeader("Set-Cookie", "sid=" + sessionID + ";");
     }
 
 }
