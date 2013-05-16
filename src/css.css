@@ -85,7 +85,7 @@ li {
 }
 
 #title span {
-    color: #444;
+    color: #666;
     font-size: 2em;
     left: 75px;
     position: absolute;
@@ -106,7 +106,7 @@ li {
 }
 
 .button {
-    color: #999;
+    color: #bbb;
     cursor: pointer;
     font-size: 1em;
     line-height: 1em;
@@ -459,42 +459,41 @@ footer a:hover {
 
 #overlay {
     display: none;
-    margin-top: 1.5em;
-    margin-top: 3em;
-    position: absolute;
-    right: 0;
+    position: relative;
     text-align: center;
     top: 0;
-    width: 33%;
-    z-index: 3;
+    width: 220px;
+    z-index: 8;
+}
+
+#name-input::-moz-placeholder {
+   color: #666;
 }
 
 #name-input {
-    background: #eee;
-    border-radius: 8px;
-    border: 2px solid #000;
-    box-shadow: inset 1px 1px 5px 1px rgba(143, 143, 143, 0.8);
-    color: #222;
+    border: 2px transparent;
+    background: #111;
+    color: #bbb;
     font-size: 1em;
-    height: 1.5em;
-    padding-left: 5px;
-    width: 90%;
+    height: 1.44em;
+    padding-left: 10px;
+    width: 100%;
 }
 
-#info {
+#name-info {
+    display: none;
     color: #f55;
+    background: #111;
+    box-shadow: 0px 0px 15px 1px rgba(0,0,0,1);
     font-size: .6em;
-    text-shadow: 0 1px 5px rgba(255, 0, 0, 0.3);
-}
-
-#name-input.valid {
-    background: #eee;
-    border: 2px solid #000;
+    text-shadow: 0 1px 5px rgba(255, 0, 0, 0.5);
+    border: 2px solid #f00;
+    border-top: none;
 }
 
 #name-input.invalid {
-    background: #f55;
     border: 2px solid #f00;
+    border-bottom: none;
 }
 
 /* ============================== Login Form =============================== */
@@ -642,6 +641,9 @@ input[type=checkbox]:checked + label:before {
 
 @media all and (max-width: 1023px) {
     .button {
+        width: 160px;
+    }
+    #overlay {
         width: 160px;
     }
 }

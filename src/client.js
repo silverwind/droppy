@@ -194,11 +194,9 @@
  * ============================================================================
  */
     function initMainPage() {
-        openSocket();
 
-        // Cache static elements
-        var info      = $("#info"),
-            nameinput = $("#name-input");
+        // Open Websocket for initial update
+        openSocket();
 
         // Initialize and attach plugins
         attachDropzone();
@@ -243,6 +241,9 @@
             nameinput.attr("class", "valid");
         });
 
+        var info      = $("#name-info"),
+            nameinput = $("#name-input");
+
         // Handler for the input of the folder name
         nameinput.keyup(function (e) {
             if (e.keyCode === 27) // Escape Key
@@ -252,25 +253,20 @@
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
             var folderExists = folderList[input.toLowerCase()] === true;
             if (input === "") {
-                nameinput.attr("class", "valid");
-                info.html("&nbsp;");
+                nameinput.removeClass("invalid");
+                info.hide();
                 return;
             }
 
-            if (!valid) {
-                nameinput.attr("class", "invalid");
-                info.html("Invalid character(s) in filename!");
+            if (!valid || folderExists) {
+                nameinput.addClass("invalid");
+                info.html(folderExists ? "File/Directory already exists!" : "Invalid characters in filename!");
+                info.show();
                 return;
             }
 
-            if (folderExists) {
-                nameinput.attr("class", "invalid");
-                info.html("File/Directory already exists!");
-                return;
-            }
-
-            nameinput.attr("class", "valid");
-            info.html("&nbsp;");
+            nameinput.removeClass("invalid");
+            info.hide();
 
             if (e.keyCode === 13) { // Return Key
                 if (currentFolder === "/")
