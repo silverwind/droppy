@@ -12,44 +12,32 @@
  */
     function getPage() {
         $.getJSON('/content', function (response) {
-            animatedLoad("page", "body", response.data, function () {
-                // Load the appropriate Javascript for the received page
-                switch (response.type) {
-                case "main":
-                    initMainPage();
-                    break;
-                case "auth":
-                    initAuthPage();
-                    break;
-                }
-            });
+            load(response.type, response.data);
         });
     }
 
-    // Switch an element's content with an animation
-    function animatedLoad(oldElement, container, data, callback) {
-        $(container).css("overflow", "hidden");
-        $(container).append('<div id="new">' + data + '</div>');
-        var newElement = $("#new");
-        newElement.css("opacity", 0);
-        newElement.animate({
-            "opacity": 1
-        }, {
-            duration: 250,
-            queue: false,
-            complete: function () {
-                $(container).css("overflow", "visible");
-                $("#" + oldElement).remove();
-                newElement.attr("id", oldElement);
-                callback();
-            }
-        });
-        $("#" + oldElement).animate({
-            "opacity": 0
-        }, {
-            duration: 250,
-            queue: false
-        });
+    // Switch the body's content with an animation
+    function load(type, data) {
+        $("body").append('<div id="new">' + data + '</div>');
+        var newPage = $("#new");
+        if (type === "auth") {
+            initAuthPage();
+            $("#page").remove();
+            newPage.attr("id", "page");
+        } else {
+            initMainPage();
+            $("#navigation").css("top", "-3.5em");
+            $("#current").css("top", "-1.5em");
+            $("#title").css("top", "-250px");
+            $("#current").animate({"top": "2em"}, {duration: 600, queue: false});
+            $("#page").animate({"opacity": 0}, {duration: 300, queue: false});
+
+            $("#navigation").animate({"top": 0}, {duration: 600, queue: false, complete: function () {
+                $("#page").remove();
+                newPage.attr("id", "page");
+                $("#title").animate({"top": "-200px"}, {duration: 600, queue: false});
+            }});
+        }
     }
 
     $(getPage);
@@ -194,7 +182,6 @@
  * ============================================================================
  */
     function initMainPage() {
-
         // Open Websocket for initial update
         openSocket();
 

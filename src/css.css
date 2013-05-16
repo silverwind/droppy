@@ -54,10 +54,10 @@ li {
 
 #navigation {
     background-image: linear-gradient(#222, #111);
-    display: block;
-    float: left;
     height: 2em;
+    position: absolute;
     text-align: center;
+    top: 0;
     width: 100%;
     z-index: 2;
 }
@@ -241,7 +241,8 @@ li {
     pointer-events:none;
     position: absolute;
     top: -50%;
-    width: 100%;
+    left: -20%;
+    width: 140%;
     z-index: 55;
 }
 
@@ -649,7 +650,6 @@ input[type=checkbox]:checked + label:before {
 #submit:hover {
     opacity: .9;
 }
-
 
 @media all and (max-width: 1023px) {
     .button {
