@@ -164,7 +164,8 @@ li {
     float: left;
     font-size: .9em;
     line-height: 1.6em;
-    padding: 0 1.6em 0 2em;
+    padding-right: 1.6em;
+    padding-left: 2em;
     position: relative;
     text-decoration: none;
 }
@@ -677,6 +678,11 @@ input[type=checkbox]:checked + label:before {
     #overlay {
         width: 160px;
     }
+
+    #crumbs li {
+        padding-right: 0.9em;
+        padding-left: 1em;
+    }
 }
 
 @media all and (max-width: 767px) {
@@ -686,5 +692,23 @@ input[type=checkbox]:checked + label:before {
 
     .button {
         width: 80px;
+    }
+
+    #current {
+        height: 1.13em;
+    }
+
+    #crumbs li {
+        font-size: .7em;
+        padding-right: 0.9em;
+        padding-left: 1em;
+    }
+
+    #crumbs li:first-child {
+        padding-left: 0.2em;
+    }
+
+    #content {
+        top: 3.5em;
     }
 }
