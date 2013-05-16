@@ -55,7 +55,8 @@ li {
 #navigation {
     background-image: linear-gradient(#222, #111);
     display: block;
-    float: left;
+    position: absolute;
+    top: 0;
     height: 2em;
     text-align: center;
     width: 100%;

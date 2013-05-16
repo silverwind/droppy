@@ -29,9 +29,8 @@
             $("#navigation").css("top", "-3.5em");
             $("#current").css("top", "-1.5em");
             $("#title").css("top", "-250px");
-            $("#current").animate({"top": "2em"}, {duration: 600, queue: false});
             $("#page").animate({"opacity": 0}, {duration: 300, queue: false});
-
+            $("#current").animate({"top": "2em"}, {duration: 600, queue: false});
             $("#navigation").animate({"top": 0}, {duration: 600, queue: false, complete: function () {
                 $("#page").remove();
                 newPage.attr("id", "page");
