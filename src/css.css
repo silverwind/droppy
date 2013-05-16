@@ -1,4 +1,4 @@
-/* ================================= Fonts ================================= */
+ /* ================================= Fonts ================================= */
 
 @font-face {
     font-family: "Open Sans";
@@ -54,10 +54,10 @@ li {
 
 #navigation {
     background-image: linear-gradient(#222, #111);
+    display: block;
+    float: left;
     height: 2em;
-    position: absolute;
     text-align: center;
-    top: 0;
     width: 100%;
     z-index: 2;
 }
@@ -350,12 +350,24 @@ footer a:hover {
 }
 
 #loading {
-    background: url(/res/loading.gif) no-repeat center center;
+    display: table;
     height: 100%;
-    margin: 0;
-    padding: 0;
-    position: absolute;
+    overflow: hidden;
+    text-align: center;
+    user-select: none;
     width: 100%;
+}
+
+#loading span {
+    animation: 1.5s linear 0s normal none infinite spin;
+    display: table-cell;
+    font-size: 8em;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg);  }
+  100% { transform: rotate(360deg); }
 }
 
 #preview {
