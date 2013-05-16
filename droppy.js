@@ -944,9 +944,8 @@ function log() {
     args.unshift(getTimestamp());
     for (var i = 1, len = args.length; i < len; i++) {
         var argStr = String(args[i]);
-        if (typeof args[i] === "number" && args[i] >= 100 && args[i] < 600) {
+        if (typeof args[i] === "number" && [200, 301, 304, 307, 401, 404, 405, 500].indexOf(args[i]) > -1) {
             switch (argStr.charAt(0)) {
-            case "1":
             case "2":
                 argStr = "[" + color.green + argStr + color.reset + "]";
                 break;
