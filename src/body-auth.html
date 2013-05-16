@@ -1,19 +1,18 @@
 <div id="login-container">
-    <div id="login-form" class="dark-bg">
-        <header id="title-login">droppy</header>
+    <div id="login-form">
+        <span id="icon-login" class="icon"></span>
         <div id="login-form-inner">
-            <form accept-charset="UTF-8">
+            <form id="loginform" accept-charset="UTF-8">
                 <input id="user" class="login-input" type="text" name="username" autocapitalize="off" tabindex="1" placeholder="Username" />
                 <input id="pass" class="login-input" type="password" name="password" autocomplete="disabled" tabindex="2" placeholder="Password" />
                 <div id="below" tabindex="3" >
-                    <input id="check" name="check" type="checkbox" />
+                    <input id="check" name="check" type="checkbox" checked="checked" />
                     <label for="check"><span></span>Remember me</label>
+                </div>
+                <div id="submit-bg">
+                    <button id="submit" class="valid" type="submit" tabindex="4"><span class="icon"></span><span class="signin" >Sign in</span></button>
                 </div>
             </form>
         </div>
-        <div id="submit-bg">
-            <input id="submit" class="valid" type="submit" value="Sign in" tabindex="4" />
-        </div>
     </div>
 </div>
-<div id="newpage"></div>

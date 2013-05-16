@@ -132,7 +132,7 @@
     function initAuthPage() {
         var user     = $("#user"),
             pass     = $("#pass"),
-            form     = $("form"),
+            form     = $("#loginform"),
             submit   = $("#submit"),
             remember = $("#below");
 
@@ -152,7 +152,8 @@
             }
         });
 
-        submit.click(function () {
+        form.submit(function (e) {
+            e.preventDefault();
             submitForm(form, submit);
         });
 
@@ -229,7 +230,7 @@
             $("#file").val(""); // Reset file form
         });
 
-        $("#file-upload").click(function () {
+        $("#upload").click(function () {
             fileInput.click();
         });
 
@@ -328,24 +329,24 @@
         function uploadInit() {
             start = new Date().getTime();
 
+            $("#content ul").children().each(function () {
+                revert($(this));
+            });
+
             progressBars = $(".progressBar");
             progressBars.show();
             progressBars.width("0%");
 
             uperc.html("0%");
             utl.html("");
-            ui.animate({top: "-2px"}, 500);
-
-            $("#content ul").children().each(function () {
-                revert($(this));
-            });
+            ui.animate({top: "-2px"}, 250);
         }
 
         function uploadDone() {
             progressBars.width("100%");
             uperc.html("100%");
             utl.html("finished");
-            ui.animate({top: "-46px"}, 500);
+            ui.animate({top: "-50px"}, 250);
         }
 
         function uploadProgress(bytesSent, bytesTotal, completed) {
@@ -408,7 +409,7 @@
             }
         }
 
-        html += '</ul>';
+        html += '<div></div></ul>';
 
         var oldLen = $("#current ul li").length;
 
@@ -416,16 +417,10 @@
         $("#current").html(html);
 
         // Animate last added element
-        if ($("#current ul li").length > oldLen) {
-            var last = $("#current ul li:last-child");
-            last.css("margin-top", -100);
+        if ($("#crumbs li").length > oldLen) {
+            var last = $("#crumbs li:last");
             last.css("opacity", 0);
-            $("#current ul li:last-child").animate({
-                "margin-top": 0,
-                "opacity": 1
-            }, {
-                duration: 250
-            });
+            last.animate({"opacity" : 1}, 200);
         }
 
         // Bind mouse events
@@ -447,15 +442,14 @@
 
             if (fileList[file].type === "f" || fileList[file].type === "nf") { // Create a file row
                 var downloadURL = [window.location.protocol, "//", window.location.host, "/get", encodeURIComponent(id)].join("");
-                var addClass = "", addProgress = "";
+                var addProgress = "";
 
                 if (fileList[file].type === "nf") {
-                    addClass = " new-file";
                     addProgress = '<div class="progressBar"></div>';
                 }
 
                 list.append([
-                    '<li class="data-row', addClass, '"data-type="file" data-id="', id, '"><span class="icon-file file-normal"></span>',
+                    '<li class="data-row" data-type="file" data-id="', id, '"><span class="icon-file file-normal"></span>',
                     '<span class="data-name"><a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a></span>',
                     '<span class="data-info">', size, '</span><span class="icon-delete delete-normal"></span>',
                     '</span><span class="right-clear"></span>', addProgress, '</li>'

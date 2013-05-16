@@ -104,10 +104,10 @@ function prepareContent() {
         if (config.debug) {
             logsimple(" ->> preparing JS...");
             fs.writeFileSync(getResPath("client.js"), [
-                String(fs.readFileSync(getSrcPath("jquery.js"))),
-                String(fs.readFileSync(getSrcPath("jquery.form.js"))),
-                String(fs.readFileSync(getSrcPath("dropzone.js"))),
-                String(fs.readFileSync(getSrcPath("client.js")))
+                fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
+                fs.readFileSync(getSrcPath("jquery.form.js")).toString("utf8"),
+                fs.readFileSync(getSrcPath("dropzone.js")).toString("utf8"),
+                fs.readFileSync(getSrcPath("client.js")).toString("utf8")
             ].join("\n"));
         } else {
             logsimple(" ->> minifying JS...");
@@ -449,16 +449,16 @@ function handleGET(req, res) {
         var obj = {};
         if (getCookie(req.headers.cookie)) {
             obj.type = "main";
-            obj.data = String(cache["body-main.html"].data);
+            obj.data = cache["body-main.html"].data.toString("utf8");
         } else {
             obj.type = "auth";
-            obj.data = String(cache["body-auth.html"].data);
+            obj.data = cache["body-auth.html"].data.toString("utf8");
         }
 
         var json = JSON.stringify(obj);
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
-        res.setHeader("Content-Length", json.length);
+        res.setHeader("Content-Length", Buffer.byteLength(json));
         res.setHeader("Cache-Control", "no-cache");
         res.end(json);
         logresponse(req, res);

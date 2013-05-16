@@ -1,22 +1,18 @@
 <nav id="navigation" class="dark-bg">
-	<a href="/">
-		<header id="title">droppy</header>
-	</a>
-	<ul>
-		<li id="file-upload" class="button"title="Upload a file into the current directory">Add file(s)</li>
-		<li id="add-folder" class="button" title="Add a new folder"><span>Create Folder</span></li>
+	<header id="title" title="About droppy"><span class="icon"></span></header>
+	<ul id="left-buttons">
+		<li id="upload" class="button" title="Upload a file into the current directory"><span class="inline-icon"></span><span class="button-text">Add files</span></li>
+		<li id="add-folder" class="button" title="Add a new folder"><span class="inline-icon"></span><span class="button-text">Add Folder</span></li>
 	</ul>
-	<div id="overlay">
-		<input type="text" id="name-input" placeholder="Folder Name"/>
-		<p id="info">&nbsp;</p>
-	</div>
-	<div id="preview" class="dropzone-previews"></div>
+	<ul id="right-buttons">
+		<li id="logout" class="button" title="Log out"><span class="inline-icon"></span><span class="button-text">Sign out</span></li>
+		<li id="config" class="button" title="Configure droppy"><span class="inline-icon"></span><span class="button-text">Configure</span></li>
+	</ul>
 	<div id="tip">Drop files anywhere on this page to start uploading!</div>
-	<footer>
-		<p>Created on <a href="http://nodejs.org/" target="_blank">node</a> by <a href="https://github.com/silverwind/" target="_blank">silverwind</a></p>
-	</footer>
 </nav>
-<nav id="current"></nav>
+<nav id="current">
+<ul id="crumbs"><div></div><ul>
+</nav>
 <section id="content"></section>
 <form id="uploadform" action="/upload" enctype="multipart/form-data" method="post">
 	<input type="file" name="file" id="file" multiple />
@@ -25,3 +21,11 @@
 	<div id="upload-percentage"></div>
 	<div id="upload-time-left"></div>
 </div>
+<div id="overlay">
+	<input type="text" id="name-input" placeholder="Folder Name"/>
+	<p id="info"> </p>
+</div>
+<div id="preview" class="dropzone-previews"></div>
+<footer>
+	<p>Created on <a href="http://nodejs.org/" target="_blank">node</a> by <a href="https://github.com/silverwind/" target="_blank">silverwind</a></p>
+</footer>
