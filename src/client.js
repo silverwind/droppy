@@ -3,8 +3,11 @@
 (function ($) {
     "use strict";
 
+    // debug logging
+    var debug = false;
+
     // "globals"
-    var debug, folderList, socketOpen, socketWait, isUploading, hasLoggedOut, currentFolder, socket, socketTimeout, hoverIndex, activeFiles;
+    var folderList, socketOpen, socketWait, isUploading, hasLoggedOut, currentFolder, socket, socketTimeout, hoverIndex, activeFiles;
 
     // Separetely init the variables so we can init them on demand
     initVariables();
@@ -90,11 +93,10 @@
         }
 
         socket.on("error", function (error) {
-            console.log(error);
+            if (debug) console.log("socket.io error", error);
         });
 
         socket.on("connect", function () {
-            console.log("connected");
             socketOpen = true;
             // Request initial update
             updateLocation(currentFolder || "/", false);
@@ -143,7 +145,7 @@
                     try {
                         if (!hasLoggedOut) socket.socket.connect();
                     } catch (e) {
-                        console.log(e);
+                        if (debug) console.log(e);
                     } finally {
                         socketTimeout *= 2;
                     }
@@ -227,7 +229,7 @@
 // ============================================================================
     function initMainPage() {
         // Open Websocket for initial update
-        setTimeout(openSocket(), 100);
+        window.setTimeout(openSocket, 50);
 
         hasLoggedOut = false;
 
@@ -365,8 +367,7 @@
                     uploadDone();
                 });
             } catch (e) {
-                if (debug)
-                    console.log(e);
+                if (debug) console.log(e);
             }
         }
 
@@ -609,7 +610,6 @@
     }
 
     function initVariables() {
-        debug = false;
         folderList = [];
         socketOpen = false;
         socketWait = false;
