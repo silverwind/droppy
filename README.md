@@ -1,12 +1,11 @@
 #Droppy
-A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates. A fairly recent browser is required (for IE, it's 10 currently, working on IE8).
-
-###Installation
+A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates.
+##Installation
 With [node](http://nodejs.org/) installed, run:
 ````
 git clone https://github.com/silverwind/Droppy.git && cd Droppy && npm install
 ````
-###Usage
+##Usage
 To start the server, run either
 ````
 node droppy
@@ -17,7 +16,12 @@ or just
 ````
 Once the server is listening, navigate to [http://localhost:80/](http://localhost/). The default login is user `droppy` with password `droppy`. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
 
-###Configuration
+##Supported Browsers
+- Firefox 19+
+- Chrome 26+
+- IE 10+ (IE9 is untested, but might work resonably well)
+
+##Configuration
 Configuration is done through  the `config.json` file, located in the same directory as `droppy.js`.
 ````javascript
 {
@@ -46,5 +50,5 @@ Configuration is done through  the `config.json` file, located in the same direc
 - `resDir`: The directory which contains the compiled resources and images.
 - `srcDir`: The directory which contains the html/js/css sources.
 
-###Notes
+##Notes
 - If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.

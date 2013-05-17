@@ -24,15 +24,15 @@
  SOFTWARE.
  ------------------------------------------------------------------------------
   TODOs:
-  - Logout functionality
-  - Admin panel to add/remove users
+  - User privilege levels, and a admin panel to add/remove users
+  - Restyle the folder view
+  - Handle breadcrumb overflow in layout
+  - Public file links (using a URL shortening mechanism)
   - Recursive deleting of folders
   - Drag and drop moving of files/folders
-  - Keybindings (navigation and copy, cut, paste of files)
   - Find a solution to not send login data in cleartext over HTTP.
-  - Handle breadcrumb overflow in layout
-  - Tweak performance
-  - IE8 compatibilty
+  - IE9 compatibilty, if possible
+  - Keybindings
  --------------------------------------------------------------------------- */
 
 "use strict";
