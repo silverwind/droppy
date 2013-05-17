@@ -3,9 +3,11 @@
 (function ($) {
     "use strict";
 
-    var folderList = [], socketOpen = false, socketWait = false, isUploading = false;
-    var currentFolder, socket, timeout, hoverIndex, activeFiles;
+    // "globals"
+    var debug, folderList, socketOpen, socketWait, isUploading, hasLoggedOut, currentFolder, socket, socketTimeout, hoverIndex, activeFiles;
 
+    // Separetely init the variables so we can init them on demand
+    initVariables();
 // ============================================================================
 //  Page loading functions
 // ============================================================================
@@ -23,9 +25,26 @@
 
         if (type === "auth") {
             initAuthPage();
-            switchID();
+
+            var loginform = $("#login-form");
+
+            loginform.css("top", "60%");
+            loginform.css("opacity", 0); // top: 50%;
+
+            oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
+            loginform.animate({"opacity": 1}, {duration: 250, queue: false});
+            loginform.animate({"top": "50%"}, {duration: 250, queue: false, complete: function () {
+                switchID();
+                $(this).removeAttr("style");
+                if (hasLoggedOut) {
+                    window.setTimeout(function () {
+                        $("#login-info").fadeIn(300);
+                    }, 300);
+                }
+            }});
         } else {
             initMainPage();
+
 
             var navigation = $("#navigation"),
                 current    = $("#current"),
@@ -38,13 +57,12 @@
 
             oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
             current.animate({"top": "2em"}, {duration: 500, queue: false});
-
             navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
+                switchID();
+
                 // Remove inline style caused by animation
                 $(this).removeAttr("style");
                 current.removeAttr("style");
-
-                switchID();
                 about.animate({"top": "-200px"}, {duration: 500, queue: false, complete: function () {
                     $(this).removeAttr("style");
                 }});
@@ -55,7 +73,6 @@
         function switchID() {
             oldPage.remove();
             newPage.attr("id", "page");
-            oldPage.removeAttr("style");
         }
     }
 
@@ -65,9 +82,19 @@
 // ============================================================================
     function openSocket() {
         if (socketOpen) return;
-        socket = io.connect(document.location.protocol + "//" + document.location.host);
+
+        if (!socket) {
+            socket = io.connect(document.location.protocol + "//" + document.location.host);
+        } else {
+            socket.socket.connect();
+        }
+
+        socket.on("error", function (error) {
+            console.log(error);
+        });
 
         socket.on("connect", function () {
+            console.log("connected");
             socketOpen = true;
             // Request initial update
             updateLocation(currentFolder || "/", false);
@@ -109,20 +136,24 @@
             // Restart a closed socket. Firefox closes it on every download..
             // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
 
-            if (!timeout) timeout = 50;
-            if (timeout < 50 * Math.pow(2, 10)) {
+            if (!socketTimeout) socketTimeout = 50;
+            if (socketTimeout < 51200) {
                 // This gives up connecting after 10 failed reconnects with increasing intervals
                 window.setTimeout(function () {
-                    socket.socket.connect();
-                    timeout *= 2;
-                }, timeout);
+                    try {
+                        if (!hasLoggedOut) socket.socket.connect();
+                    } catch (e) {
+                        console.log(e);
+                    } finally {
+                        socketTimeout *= 2;
+                    }
+                }, socketTimeout);
             }
-
         });
 
         socket.on("UNAUTHORIZED", function () {
-            // Set the timeout to its maximum value to stop retries
-            timeout = 51200;
+            // Set the socketTimeout to its maximum value to stop retries
+            socketTimeout = 51200;
         });
     }
 
@@ -135,13 +166,18 @@
 //  Authentication page JS
 // ============================================================================
     function initAuthPage() {
-        var user     = $("#user"),
-            pass     = $("#pass"),
-            form     = $("#loginform"),
-            submit   = $("#submit"),
-            remember = $("#below");
+        var user      = $("#user"),
+            pass      = $("#pass"),
+            form      = $("#loginform"),
+            submit    = $("#submit"),
+            remember  = $("#remember"),
+            logininfo = $("#login-info");
 
         user.focus();
+
+        user.keydown(function () {
+            logininfo.fadeOut(300);
+        });
 
         // Return submits the form
         pass.keyup(function (e) {
@@ -163,14 +199,16 @@
         });
 
         user.focus(function () {
-            resetError(submit);
+            submit.removeClass("invalid");
+            logininfo.fadeOut(300);
         });
 
         pass.focus(function () {
-            resetError(submit);
+            submit.removeClass("invalid");
+            logininfo.fadeOut(300);
         });
 
-        function submitForm(form, errForm) {
+        function submitForm(form) {
             $.ajax({
                 type: "POST",
                 url: "/login",
@@ -179,19 +217,9 @@
                     if (data === "OK")
                         getPage();
                     else
-                        showError(errForm);
+                        submit.attr("class", "invalid");
                 }
             });
-        }
-
-        function showError(element) {
-            element.attr("class", "invalid");
-            element.val("Wrong username/password!");
-        }
-
-        function resetError(element) {
-            element.attr("class", "valid");
-            element.val("Sign in");
         }
     }
 // ============================================================================
@@ -199,7 +227,9 @@
 // ============================================================================
     function initMainPage() {
         // Open Websocket for initial update
-        openSocket();
+        setTimeout(openSocket(), 100);
+
+        hasLoggedOut = false;
 
         // Initialize and attach plugins
         attachDropzone();
@@ -298,30 +328,46 @@
                 }, 400);
             }
         });
+
+        var logout = $("#logout");
+
+        logout.click(function () {
+            sendMessage("LOGOUT");
+            socket.disconnect();
+            deleteCookie("sid");
+            hasLoggedOut = true;
+            initVariables(); // Reset some vars to their init state
+            getPage();
+        });
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
         function attachDropzone() {
-            var dropZone = new Dropzone(document.body, {
-                clickable: false,
-                url: "/upload",
-                previewsContainer: "#preview",
-                parallelUploads: 1000,
-                maxFilesize: 65535
-            });
+            try {
+                var dropZone = new Dropzone(document.body, {
+                    clickable: false,
+                    url: "/upload",
+                    previewsContainer: "#preview",
+                    parallelUploads: 1000,
+                    maxFilesize: 65535
+                });
 
-            // IE8 fails on the next line - TODO: investigate
-            dropZone.on("sending", function () {
-                uploadInit();
-            });
+                // IE8 fails on the next line - TODO: investigate
+                dropZone.on("sending", function () {
+                    uploadInit();
+                });
 
-            dropZone.on("uploadprogress", function (file, progress, bytesSent) {
-                uploadProgress(bytesSent, file.size, progress);
-            });
+                dropZone.on("uploadprogress", function (file, progress, bytesSent) {
+                    uploadProgress(bytesSent, file.size, progress);
+                });
 
-            dropZone.on("complete", function () {
-                uploadDone();
-            });
+                dropZone.on("complete", function () {
+                    uploadDone();
+                });
+            } catch (e) {
+                if (debug)
+                    console.log(e);
+            }
         }
 
         function attachForm() {
@@ -556,6 +602,22 @@
         li.children(".icon-file").removeClass("file-invert").addClass("file-normal");
         li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
         li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    }
+
+    function initVariables() {
+        debug = false;
+        folderList = [];
+        socketOpen = false;
+        socketWait = false;
+        isUploading = false;
+        currentFolder = false;
+        socketTimeout = false;
+        hoverIndex = -1;
+        activeFiles = false;
     }
 
     function convertToSI(bytes) {

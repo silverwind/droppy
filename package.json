@@ -25,8 +25,8 @@
     "files": "./files",
     "keys": "./keys"
   },
-  "engines": {
-    "node": "*"
+  "engines" : {
+    "node" : ">=0.8.0"
   },
   "keywords": [
     "http",

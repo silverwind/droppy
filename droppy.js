@@ -306,6 +306,10 @@ function setupSocket(server) {
             });
         });
 
+        ws.on("LOGOUT", function () {
+            delete db.sessions[cookie];
+        });
+
         ws.on("disconnect", function () {
             log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "]");
         });
@@ -777,12 +781,7 @@ function readDB() {
 
     // Write a new DB if necessary
     if (doWrite) {
-        try {
-            fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-        } catch (e) {
-            logerror("Error writing ", config.db, "\n", util.inspect(e));
-            if (isCLI) process.exit(1);
-        }
+        writeDB();
     }
 }
 //-----------------------------------------------------------------------------
@@ -799,14 +798,11 @@ function addUser(user, password) {
     } else {
         var salt = crypto.randomBytes(4).toString("hex");
         db.users[user] = getHash(password + salt + user) + "$" + salt;
-        try {
-            fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+        writeDB(function () {
             if (isCLI) logsimple("User ", user, " successfully added.");
             if (isCLI) process.exit();
-        } catch (e) {
-            logerror("Error writing ", config.db, "\n", util.inspect(e));
-            if (isCLI) process.exit(1);
-        }
+        });
     }
 }
 //-----------------------------------------------------------------------------
@@ -845,7 +841,7 @@ function createCookie(req, res, postData) {
         // Create a semi-permanent cookie
         var dateString = new Date(new Date().getTime() + 31536000000).toUTCString();
         db.sessions[sessionID] = true;
-        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+        writeDB();
         res.setHeader("Set-Cookie", "sid=" + sessionID + "; Expires=" + dateString);
     } else {
         // Create a single-session cookie
@@ -853,7 +849,16 @@ function createCookie(req, res, postData) {
         db.sessions[sessionID] = true;
         res.setHeader("Set-Cookie", "sid=" + sessionID + ";");
     }
+}
 
+function writeDB(callback) {
+    fs.writeFile(config.db, JSON.stringify(db, null, 4), function (err) {
+        if (err) {
+            logerror("Error writing ", config.db, "\n", util.inspect(err));
+            if (isCLI) process.exit(1);
+        }
+        if (callback) callback();
+    });
 }
 //============================================================================
 // Misc helper functions

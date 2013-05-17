@@ -1,3 +1,4 @@
+
 /* ================================= Fonts ================================= */
 
 @font-face {
@@ -244,7 +245,7 @@ li {
     text-align: center;
     top: -50px;
     width: 180px;
-    z-index: 5;
+    z-index: 11;
 }
 
 #upload-percentage {
@@ -300,7 +301,7 @@ li {
 #loading span {
     animation: 1.5s linear 0s normal none infinite spin;
     display: table-cell;
-    font-size: 8em;
+    font-size: 6em;
     vertical-align: middle;
 }
 
@@ -314,7 +315,7 @@ li {
 }
 
 #shader-top {
-   box-shadow: 0 0 200px 5px #000;
+   box-shadow: 0 0 200px 0 #000;
    height: 10%;
    left: -20%;
    position: absolute;
@@ -533,6 +534,7 @@ li {
     width: 100px;
     cursor: default;
     user-select: none;
+    transition: color .3s ease-in;
 }
 
 #about-content {
@@ -548,10 +550,10 @@ li {
 
 #about a {
     color: #fff;
-    transition: color .25s ease-in;
+    transition: color .2s ease-in;
 }
 
-#about a:hover {
+#about a:hover, #about-logo:hover {
     color: #29f;
 }
 
@@ -607,7 +609,6 @@ li {
     background: #222;
     border-radius: 10px;
     box-shadow: 0 0 30px 5px #7a7a7a;
-    text-shadow: 0 1px 1px #000;
     height: 300px;
     left: 50%;
     margin-left: -250px;
@@ -626,6 +627,20 @@ li {
     width: 400px;
 }
 
+#login-info {
+    display: none;
+    position: absolute;
+    width: 60%;
+    margin-left:20%;
+    text-align: center;
+    color: #eee;
+    top: .7em;
+    line-height: 1.75em;
+    z-index: 1;
+    background: rgba(150, 200, 50, .8);
+    border-radius: 20px;
+}
+
 .login-input {
     border-radius: 10px;
     border: 2px transparent;
@@ -638,7 +653,7 @@ li {
     width: 100%;
 }
 
-#below {
+#remember {
     color: #ddd;
     margin-top: 15px;
     text-align: left;
@@ -685,41 +700,45 @@ input[type=checkbox]:checked + label:before {
 }
 
 #submit {
+    background: #89c403;
+    background: linear-gradient(#9c0, #7a0);
     border-radius: 8px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+    border: 1px solid #9c0;
     color: #fff;
     cursor:pointer;
     font-size: 1.5em;
     font-weight: 800;
-    line-height: 100%;
     height: 100%;
-    text-shadow: 1px 1px 0 #528009;
+    line-height: 100%;
+    text-shadow: 1px 1px 0 #581;
     user-select: none;
     width: 100%;
+    transition: all, .2s, ease-in-out;
 }
 
-#submit span.icon {
+#submit .icon {
     margin-right: 10px;
     font-size: 1.25em;
     display: inline-block;
     vertical-align: middle;
 }
 
-#submit span.signin {
+#submit .signin {
     display: inline-block;
     vertical-align: middle;
 }
 
-#submit.valid {
-    background: #89c403;
-    background: linear-gradient(#89c403, #79b400);
-    border: 1px solid #74b807;
-}
-
 #submit.invalid {
     background: #ff4030;
-    border: 1px solid #ee4030;
+    background: linear-gradient(#f43, #d21);
+    border: 1px solid #f43;
+    text-shadow: 1px 1px 0 #811;
+}
+
+#submit:active {
+    transform: translateY(2px);
 }
 
 #submit:hover {
