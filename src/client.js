@@ -20,22 +20,41 @@
     function load(type, data) {
         $("body").append('<div id="new">' + data + '</div>');
         var newPage = $("#new");
+        var oldPage = $("#page");
+
         if (type === "auth") {
             initAuthPage();
-            $("#page").remove();
-            newPage.attr("id", "page");
+            switchID();
         } else {
             initMainPage();
-            $("#navigation").css("top", "-3.5em");
-            $("#current").css("top", "-1.5em");
-            $("#title").css("top", "-250px");
-            $("#page").animate({"opacity": 0}, {duration: 300, queue: false});
-            $("#current").animate({"top": "2em"}, {duration: 600, queue: false});
-            $("#navigation").animate({"top": 0}, {duration: 600, queue: false, complete: function () {
-                $("#page").remove();
-                newPage.attr("id", "page");
-                $("#title").animate({"top": "-200px"}, {duration: 600, queue: false});
+            var navigation = $("#navigation"),
+                   current = $("#current"),
+                     title = $("#title");
+
+            // Set pre-animation positions
+            navigation.css("top", "-3.5em");
+            current.css("top", "-1.5em");
+            title.css("top", "-250px");
+
+            oldPage.animate({"opacity": 0}, {duration: 300, queue: false});
+            current.animate({"top": "2em"}, {duration: 600, queue: false});
+            navigation.animate({"top": 0}, {duration: 600, queue: false, complete: function () {
+                // Remove inline style caused by animation
+                $(this).removeAttr("style");
+                current.removeAttr("style");
+
+                switchID();
+                title.animate({"top": "-200px"}, {duration: 600, queue: false, complete: function () {
+                    $(this).removeAttr("style");
+                }});
             }});
+        }
+
+        // Switch ID of #new for further animation
+        function switchID() {
+            oldPage.remove();
+            newPage.attr("id", "page");
+            oldPage.removeAttr("style");
         }
     }
 
