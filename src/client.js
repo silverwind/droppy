@@ -6,10 +6,9 @@
     var folderList = [], socketOpen = false, socketWait = false, isUploading = false;
     var currentFolder, socket, timeout, hoverIndex, activeFiles;
 
-/* ============================================================================
- *  Page loading functions
- * ============================================================================
- */
+// ============================================================================
+//  Page loading functions
+// ============================================================================
     function getPage() {
         $.getJSON('/content', function (response) {
             load(response.type, response.data);
@@ -27,24 +26,26 @@
             switchID();
         } else {
             initMainPage();
+
             var navigation = $("#navigation"),
-                   current = $("#current"),
-                     title = $("#title");
+                current    = $("#current"),
+                about      = $("#about");
 
             // Set pre-animation positions
             navigation.css("top", "-3.5em");
             current.css("top", "-1.5em");
-            title.css("top", "-250px");
+            about.css("top", "-250px");
 
-            oldPage.animate({"opacity": 0}, {duration: 300, queue: false});
-            current.animate({"top": "2em"}, {duration: 600, queue: false});
-            navigation.animate({"top": 0}, {duration: 600, queue: false, complete: function () {
+            oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
+            current.animate({"top": "2em"}, {duration: 500, queue: false});
+
+            navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
                 // Remove inline style caused by animation
                 $(this).removeAttr("style");
                 current.removeAttr("style");
 
                 switchID();
-                title.animate({"top": "-200px"}, {duration: 600, queue: false, complete: function () {
+                about.animate({"top": "-200px"}, {duration: 500, queue: false, complete: function () {
                     $(this).removeAttr("style");
                 }});
             }});
@@ -59,10 +60,9 @@
     }
 
     $(getPage);
-/* ============================================================================
- *  WebSocket functions
- * ============================================================================
- */
+// ============================================================================
+//  WebSocket functions
+// ============================================================================
     function openSocket() {
         if (socketOpen) return;
         socket = io.connect(document.location.protocol + "//" + document.location.host);
@@ -131,10 +131,9 @@
         socketWait = true;
         socket.emit(msgType, JSON.stringify(msgData));
     }
-/* ============================================================================
- *  Authentication page JS
- * ============================================================================
- */
+// ============================================================================
+//  Authentication page JS
+// ============================================================================
     function initAuthPage() {
         var user     = $("#user"),
             pass     = $("#pass"),
@@ -195,10 +194,9 @@
             element.val("Sign in");
         }
     }
-/* ============================================================================
- *  Main page JS
- * ============================================================================
- */
+// ============================================================================
+//  Main page JS
+// ============================================================================
     function initMainPage() {
         // Open Websocket for initial update
         openSocket();
@@ -237,54 +235,72 @@
             fileInput.click();
         });
 
+        var info        = $("#name-info"),
+            nameinput   = $("#name-input"),
+            nameoverlay = $("#name-overlay");
+
         // Show popup for folder creation
-        $("#add-folder").click(function (e) {
-            if (e.button !== 0) return;
-            $("#overlay").fadeToggle(350);
+        $("#add-folder").click(function () {
+            nameoverlay.fadeToggle(350);
             nameinput.val("");
             nameinput.focus();
             nameinput.attr("class", "valid");
         });
 
-        var info      = $("#name-info"),
-            nameinput = $("#name-input");
-
         // Handler for the input of the folder name
         nameinput.keyup(function (e) {
             if (e.keyCode === 27) // Escape Key
-                $("#overlay").toggle();
+                nameoverlay.toggle();
 
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
             var folderExists = folderList[input.toLowerCase()] === true;
             if (input === "") {
                 nameinput.removeClass("invalid");
-                info.hide();
+                info.fadeOut(350);
                 return;
             }
 
             if (!valid || folderExists) {
                 nameinput.addClass("invalid");
                 info.html(folderExists ? "File/Directory already exists!" : "Invalid characters in filename!");
-                info.show();
+                info.fadeIn(350);
                 return;
             }
 
             nameinput.removeClass("invalid");
-            info.hide();
+            info.fadeOut(350);
 
             if (e.keyCode === 13) { // Return Key
                 if (currentFolder === "/")
                     sendMessage("CREATE_FOLDER", "/" + input);
                 else
                     sendMessage("CREATE_FOLDER", currentFolder + "/" + input);
-                $("#overlay").fadeOut(350);
+                nameoverlay.fadeOut(350);
             }
         });
-        /* ============================================================================
-         *  Helper functions for the main page
-         * ============================================================================
-         */
+
+        var arrow = $("#arrow"),
+            about = $("#about");
+
+        arrow.click(function () {
+            if (arrow.attr("class") === "down") {
+                about.css("top", "50%");
+                about.css("margin-top", "-100px");
+                window.setTimeout(function () {
+                    arrow.attr("class", "up");
+                }, 400);
+            } else {
+                about.css("top", "-200px");
+                about.css("margin-top", "0");
+                window.setTimeout(function () {
+                    arrow.attr("class", "down");
+                }, 400);
+            }
+        });
+        // ============================================================================
+        //  Helper functions for the main page
+        // ============================================================================
         function attachDropzone() {
             var dropZone = new Dropzone(document.body, {
                 clickable: false,
@@ -370,10 +386,9 @@
             }
         }
     }
-/* ============================================================================
- *  General helpers
- * ============================================================================
- */
+// ============================================================================
+//  General helpers
+// ============================================================================
     // Listen for "popstate" events, which indicate the user navigated back
     window.addEventListener("popstate", function () {
         currentFolder = decodeURIComponent(window.location.pathname);

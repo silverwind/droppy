@@ -1,46 +1,48 @@
 <nav id="navigation" class="dark-bg">
-	<header id="title" title="About droppy"><span class="icon"></span></header>
 	<ul id="left-buttons">
 		<li id="upload" class="button" title="Upload a file into the current directory">
-			<span class="inline-icon"></span>
-			<span class="button-text">Add files</span>
+			<span class="inline-icon"></span> <span class="button-text">Add files</span>
 		</li>
 		<li id="add-folder" class="button" title="Add a new folder">
-			<span class="inline-icon"></span>
-			<span class="button-text">Add Folder</span>
-			<div id="overlay">
-				<input type="text" id="name-input" placeholder="Folder Name"/>
+			<span class="inline-icon"></span> <span class="button-text">Add Folder</span>
+			<div id="name-overlay">
+				<input type="text" id="name-input" placeholder="Folder Name">
 				<div id="name-info"></div>
 			</div>
 		</li>
 	</ul>
 	<ul id="right-buttons">
 		<li id="logout" class="button" title="Log out">
-			<span class="inline-icon"></span>
-			<span class="button-text">Sign out</span>
+			<span class="inline-icon"></span> <span class="button-text">Sign out</span>
 		</li>
 		<li id="config" class="button" title="Configure droppy">
-			<span class="inline-icon"></span>
-			<span class="button-text">Configure</span>
+			<span class="inline-icon"></span> <span class="button-text">Configure</span>
 		</li>
 	</ul>
 	<div id="tip">Drop files anywhere on this page to start uploading!</div>
 	<nav id="current">
-		<ul id="crumbs">
-			<div></div>
-		<ul>
+		<ul id="crumbs"></ul>
 	</nav>
 </nav>
-
 <section id="content"></section>
 <form id="uploadform" action="/upload" enctype="multipart/form-data" method="post">
-	<input type="file" name="file" id="file" multiple />
+	<input type="file" name="file" id="file" multiple>
 </form>
 <div id="upload-info">
 	<div id="upload-percentage"></div>
 	<div id="upload-time-left"></div>
 </div>
 <div id="preview" class="dropzone-previews"></div>
-<footer>
-	<p>Created on <a href="http://nodejs.org/" target="_blank">node</a> by <a href="https://github.com/silverwind/" target="_blank">silverwind</a></p>
-</footer>
+<div id="about">
+	<div id="arrow" class="down" title="About droppy">
+		<span class="icon"></span>
+	</div>
+	<div id="about-logo" class="icon"></div>
+	<div id="about-content">
+		<p id="about-title">droppy 0.2.0</p>
+		<p id="about-text">powered by <a target="_blank" href="http://nodejs.org/">node.js</a>, <a target="_blank" href="http://jquery.com/">jQuery</a>, <a target="_blank" href="http://socket.io/">socket.io</a>, <a target="_blank" href="https://github.com/felixge/node-formidable">node-formidable</a>, <a target="_blank" href="https://github.com/ai/autoprefixer">autoprefixer</a>, <a target="_blank" href="http://www.dropzonejs.com/">dropzone.js</a> and others.</p>
+		<p id="about-copy">© 2012 - 2013 silverwind</p>
+	<div id="github" class="icon" title="Visit droppy's github repository">
+		<a target="_blank" href="https://github.com/silverwind/Droppy"></a>
+	</div>
+</div>
