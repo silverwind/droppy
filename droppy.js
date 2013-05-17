@@ -74,6 +74,7 @@ if (isCLI) handleArguments();
 
 readConfig();
 logsimple(prettyStartup());
+logsimple(" ->> running on node " + process.version);
 
 // Read user/sessions from DB and add a default user if no users exist
 readDB();

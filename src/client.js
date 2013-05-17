@@ -88,75 +88,75 @@
 
         if (!socket) {
             socket = io.connect(document.location.protocol + "//" + document.location.host);
-        } else {
-            socket.socket.connect();
-        }
 
-        socket.on("error", function (error) {
-            if (debug) console.log("socket.io error", error);
-        });
-
-        socket.on("connect", function () {
-            socketOpen = true;
-            // Request initial update
-            updateLocation(currentFolder || "/", false);
-
-            // Close the socket to prevent Firefox errors
-            $(window).on('beforeunload', function () {
-                socket.disconnect();
-                socketOpen = false;
+            socket.on("error", function (error) {
+                if (debug) console.log("socket.io error", error);
             });
-        });
 
-        socket.on("UPDATE_FILES", function (data) {
-            if (isUploading) return;
-            var msgData = JSON.parse(data);
-            if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
+            socket.on("connect", function () {
+                socketOpen = true;
+                // Request initial update
+                updateLocation(currentFolder || "/", false);
+
+                // Close the socket to prevent Firefox errors
+                $(window).on('beforeunload', function () {
+                    socket.disconnect();
+                    socketOpen = false;
+                });
+            });
+
+            socket.on("UPDATE_FILES", function (data) {
+                if (isUploading) return;
+                var msgData = JSON.parse(data);
+                if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
+                    updateCrumbs(msgData.folder);
+                    activeFiles = msgData;
+                    buildHTML(msgData.data, msgData.folder);
+                    socketWait = false;
+                }
+            });
+
+            socket.on("UPLOAD_DONE", function () {
+                isUploading = false;
+                sendMessage("REQUEST_UPDATE", currentFolder);
+            });
+
+            socket.on("NEW_FOLDER", function (data) {
+                var msgData = JSON.parse(data);
                 updateCrumbs(msgData.folder);
                 activeFiles = msgData;
                 buildHTML(msgData.data, msgData.folder);
                 socketWait = false;
-            }
-        });
+            });
 
-        socket.on("UPLOAD_DONE", function () {
-            isUploading = false;
-            sendMessage("REQUEST_UPDATE", currentFolder);
-        });
+            socket.on("disconnect", function () {
+                socketOpen = false;
 
-        socket.on("NEW_FOLDER", function (data) {
-            var msgData = JSON.parse(data);
-            updateCrumbs(msgData.folder);
-            activeFiles = msgData;
-            buildHTML(msgData.data, msgData.folder);
-            socketWait = false;
-        });
+                // Restart a closed socket. Firefox closes it on every download..
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
 
-        socket.on("disconnect", function () {
-            socketOpen = false;
+                if (!socketTimeout) socketTimeout = 50;
+                if (socketTimeout < 51200) {
+                    // This gives up connecting after 10 failed reconnects with increasing intervals
+                    window.setTimeout(function () {
+                        try {
+                            if (!hasLoggedOut) socket.socket.connect();
+                        } catch (e) {
+                            if (debug) console.log(e);
+                        } finally {
+                            socketTimeout *= 2;
+                        }
+                    }, socketTimeout);
+                }
+            });
 
-            // Restart a closed socket. Firefox closes it on every download..
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-
-            if (!socketTimeout) socketTimeout = 50;
-            if (socketTimeout < 51200) {
-                // This gives up connecting after 10 failed reconnects with increasing intervals
-                window.setTimeout(function () {
-                    try {
-                        if (!hasLoggedOut) socket.socket.connect();
-                    } catch (e) {
-                        if (debug) console.log(e);
-                    } finally {
-                        socketTimeout *= 2;
-                    }
-                }, socketTimeout);
-            }
-        });
-
-        socket.on("UNAUTHORIZED", function () {
-            // Set the socketTimeout to its maximum value to stop retries
-            socketTimeout = 51200;
-        });
+            socket.on("UNAUTHORIZED", function () {
+                // Set the socketTimeout to its maximum value to stop retries
+                socketTimeout = 51200;
+            });
+        } else {
+            socket.socket.connect();
+        }
     }
 
     function sendMessage(msgType, msgData) {
@@ -177,35 +177,35 @@
 
         user.focus();
 
-        user.keydown(function () {
+        user.unbind("keydown").keydown(function () {
             logininfo.fadeOut(300);
         });
 
         // Return submits the form
-        pass.keyup(function (e) {
+        pass.unbind("keyup").keyup(function (e) {
             if (e.keyCode === 13) {
                 submitForm(form, submit);
             }
         });
 
         // Spacebar toggles the checkbox
-        remember.keyup(function (e) {
+        remember.unbind("keyup").keyup(function (e) {
             if (e.keyCode === 32) {
                 $("#check").trigger("click");
             }
         });
 
-        form.submit(function (e) {
+        form.unbind("submit").submit(function (e) {
             e.preventDefault();
             submitForm(form, submit);
         });
 
-        user.focus(function () {
+        user.unbind("focus").focus(function () {
             submit.removeClass("invalid");
             logininfo.fadeOut(300);
         });
 
-        pass.focus(function () {
+        pass.unbind("focus").focus(function () {
             submit.removeClass("invalid");
             logininfo.fadeOut(300);
         });
@@ -243,7 +243,7 @@
             "overflow": "hidden"
         }));
 
-        fileInput.change(function () {
+        fileInput.unbind("change").change(function () {
             if ($("#file").val() !== "") {
                 var files = $("#file").get(0).files;
                 var num = files.length;
@@ -263,7 +263,7 @@
             $("#file").val(""); // Reset file form
         });
 
-        $("#upload").click(function () {
+        $("#upload").unbind("click").click(function () {
             fileInput.click();
         });
 
@@ -272,7 +272,7 @@
             nameoverlay = $("#name-overlay");
 
         // Show popup for folder creation
-        $("#add-folder").click(function () {
+        $("#add-folder").unbind("click").click(function () {
             nameoverlay.fadeToggle(350);
             nameinput.val("");
             nameinput.focus();
@@ -280,7 +280,7 @@
         });
 
         // Handler for the input of the folder name
-        nameinput.keyup(function (e) {
+        nameinput.unbind("keyup").keyup(function (e) {
             if (e.keyCode === 27) // Escape Key
                 nameoverlay.toggle();
 
@@ -315,7 +315,7 @@
         var arrow = $("#arrow"),
             about = $("#about");
 
-        arrow.click(function () {
+        arrow.unbind("click").click(function () {
             if (arrow.attr("class") === "down") {
                 about.css("top", "50%");
                 about.css("margin-top", "-100px");
@@ -331,9 +331,7 @@
             }
         });
 
-        var logout = $("#logout");
-
-        logout.click(function () {
+        $("#logout").unbind("click").click(function () {
             sendMessage("LOGOUT");
             socket.disconnect();
             deleteCookie("sid");
@@ -437,7 +435,7 @@
 //  General helpers
 // ============================================================================
     // Listen for "popstate" events, which indicate the user navigated back
-    window.addEventListener("popstate", function () {
+    $(window).unbind("popstate").bind("popstate", function () {
         currentFolder = decodeURIComponent(window.location.pathname);
         sendMessage("SWITCH_FOLDER", currentFolder);
     });

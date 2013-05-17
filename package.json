@@ -1,19 +1,21 @@
 {
   "name": "droppy",
-  "version": "0.2.0",
+  "version": "0.2.0-2",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "a http/https file server",
   "homepage": "https://github.com/silverwind/Droppy",
   "bugs": "https://github.com/silverwind/Droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
-    "socket.io": "*",
-    "socket.io-client": "*",
-    "formidable": "*",
-    "mime": "*",
-    "uglify-js": "*",
-    "clean-css": "*",
-    "autoprefixer": "*"
+    "socket.io": "~0.9.14",
+    "socket.io-client": "~0.9.11",
+    "formidable": "~1.0.14",
+    "mime": "~1.2.9",
+    "uglify-js": "~2.3.4",
+    "clean-css": "~1.0.2",
+    "autoprefixer": "~0.4.20130515",
+    "grunt-exec": "~0.4.0",
+    "grunt": "~0.4.1"
   },
   "devDependencies": {
     "grunt": "*",
@@ -25,8 +27,8 @@
     "files": "./files",
     "keys": "./keys"
   },
-  "engines" : {
-    "node" : ">=0.8.0"
+  "engines": {
+    "node": ">=0.8.0"
   },
   "keywords": [
     "http",
