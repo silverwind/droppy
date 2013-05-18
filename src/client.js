@@ -1,4 +1,4 @@
-/* global Dropzone, io */
+/* global io */
 
 (function ($) {
     "use strict";
@@ -90,7 +90,7 @@
             socket = io.connect(document.location.protocol + "//" + document.location.host);
 
             socket.on("error", function (error) {
-                if (debug) console.log("socket.io error", error);
+                log("socket.io error: ", error);
             });
 
             socket.on("connect", function () {
@@ -142,7 +142,7 @@
                         try {
                             if (!hasLoggedOut) socket.socket.connect();
                         } catch (e) {
-                            if (debug) console.log(e);
+                            log("socket error: " + e);
                         } finally {
                             socketTimeout *= 2;
                         }
@@ -233,34 +233,41 @@
 
         hasLoggedOut = false;
 
-        // Initialize and attach plugins
-        attachDropzone();
-        attachForm();
-
         var fileInput = $(":file").wrap($("<div/>").css({
             "height"  : 0,
             "width"   : 0,
             "overflow": "hidden"
         }));
 
+        // Stop dragenter and dragover from killing our drop event
+        $(document.documentElement).on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
+        $(document.documentElement).on("dragover",  function (e) { e.stopPropagation(); e.preventDefault(); });
+
+        // jQuery's event handler for drop doesn't get event.dataTransfer
+        $(document.documentElement)[0].addEventListener("drop", function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            createFormdata(event.dataTransfer.files);
+        });
+
         fileInput.unbind("change").change(function () {
             if ($("#file").val() !== "") {
                 var files = $("#file").get(0).files;
                 var num = files.length;
+                var formData = new FormData();
                 if (num > 0) {
                     for (var i = 0; i < num; i++) {
                         activeFiles.data[files[i].name] = {
                             size: files[i].size,
                             type: "nf"
                         };
+                        formData.append(files[i].name, files[i]);
                     }
                     buildHTML(activeFiles.data, activeFiles.folder);
+                    createFormdata(files);
                 }
-                isUploading = true;
-                $("#uploadform").submit(); // Automatically submit the upload form once it has files attached
+                $("#file").val(""); // Reset file form
             }
-
-            $("#file").val(""); // Reset file form
         });
 
         $("#upload").unbind("click").click(function () {
@@ -349,45 +356,40 @@
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
-        function attachDropzone() {
-            try {
-                var dropZone = new Dropzone(document.body, {
-                    clickable: false,
-                    url: "/upload",
-                    previewsContainer: "#preview",
-                    parallelUploads: 1000,
-                    maxFilesize: 65535
-                });
-
-                // IE8 fails on the next line - TODO: investigate
-                dropZone.on("sending", function () {
-                    uploadInit();
-                });
-
-                dropZone.on("uploadprogress", function (file, progress, bytesSent) {
-                    uploadProgress(bytesSent, file.size, progress);
-                });
-
-                dropZone.on("complete", function () {
-                    uploadDone();
-                });
-            } catch (e) {
-                if (debug) console.log(e);
+        function createFormdata(files) {
+            if (!files) return;
+            var formData = new FormData();
+            for (var i = 0, len = files.length; i < len; i++) {
+                formData.append(files[i].name, files[i]);
             }
+            uploadFiles(formData);
         }
 
-        function attachForm() {
-            $("form").ajaxForm({
-                beforeSend: function () {
-                    uploadInit();
-                },
-                uploadProgress: function (e, bytesSent, bytesTotal, completed) {
-                    uploadProgress(bytesSent, bytesTotal, completed);
-                },
-                complete: function () {
+        function uploadFiles(formData) {
+            var xhr = new XMLHttpRequest();
+            uploadInit();
+
+            xhr.open("post", "/upload", true);
+            isUploading = true;
+
+            xhr.addEventListener('error', function (event) {
+                log("XHR error: " + event);
+                uploadDone();
+            }, false);
+
+            xhr.upload.onprogress = function (event) {
+                if (event.lengthComputable) {
+                    uploadProgress(event.loaded, event.total);
+                }
+            };
+
+            xhr.send(formData);
+
+            xhr.onload = function () {
+                if (this.status === 200) {
                     uploadDone();
                 }
-            });
+            };
         }
 
         var start, progressBars;
@@ -418,8 +420,8 @@
             ui.animate({top: "-50px"}, 250);
         }
 
-        function uploadProgress(bytesSent, bytesTotal, completed) {
-            var progress = Math.round(completed) + "%";
+        function uploadProgress(bytesSent, bytesTotal) {
+            var progress = Math.round((bytesSent / bytesTotal) * 100) + "%";
             progressBars.width(progress);
             uperc.html(progress);
 
@@ -634,5 +636,11 @@
             step++;
         }
         return [(step === 0) ? bytes : bytes.toFixed(2), units[step]].join(" ");
+    }
+
+    function log(msg) {
+        if (debug) {
+            console.log(msg);
+        }
     }
 }(jQuery));

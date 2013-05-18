@@ -24,9 +24,13 @@
  SOFTWARE.
  ------------------------------------------------------------------------------
   TODOs:
+  - Touch events
+  - Thumbnail icons for images
   - User privilege levels, and a admin panel to add/remove users
   - Restyle the folder view
   - Handle breadcrumb overflow in layout
+  - Rework client >-> server communication so that the server has more
+    control over the client's current location in the file system
   - Public file links (using a URL shortening mechanism)
   - Recursive deleting of folders
   - Drag and drop moving of files/folders
@@ -107,8 +111,6 @@ function prepareContent() {
 
         js = [
             fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
-            fs.readFileSync(getSrcPath("jquery.form.js")).toString("utf8"),
-            fs.readFileSync(getSrcPath("dropzone.js")).toString("utf8"),
             fs.readFileSync(getSrcPath("client.js")).toString("utf8")
         ].join("\n");
 
@@ -589,7 +591,12 @@ function handleUploadRequest(req, res) {
         var form = new formidable.IncomingForm();
         var cookie = getCookie(req.headers.cookie);
         var uploadedFiles = {};
-        form.parse(req);
+        form.parse(req, function (err) {
+            if (err) logerror();
+            res.writeHead(200, {"content-type": "text/plain"});
+            res.end();
+            logresponse(req, res);
+        });
 
         form.on("fileBegin", function (name, file) {
             var pathToSave;
@@ -636,9 +643,6 @@ function handleUploadRequest(req, res) {
 
                 input.pipe(output);
             }
-            res.statusCode = 200;
-            res.end();
-            logresponse(req, res);
         });
 
         form.on("error", function (err) {
