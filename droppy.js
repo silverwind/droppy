@@ -97,30 +97,22 @@ cacheResources(config.resDir, function () {
 // Read CSS and JS, minify them, and write them to /res
 function prepareContent() {
     try {
+        var css, js;
         logsimple(" ->> preparing CSS...");
 
-        var css = autoprefixer.compile(String(fs.readFileSync(getSrcPath("css.css"))), ["last 2 versions"]);
+        css = autoprefixer.compile(fs.readFileSync(getSrcPath("css.css")).toString("utf8"), ["last 2 versions"]);
         fs.writeFileSync(getResPath("css.css"), config.debug ? css : cleancss.process(css));
 
-        if (config.debug) {
-            logsimple(" ->> preparing JS...");
-            fs.writeFileSync(getResPath("client.js"), [
-                fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
-                fs.readFileSync(getSrcPath("jquery.form.js")).toString("utf8"),
-                fs.readFileSync(getSrcPath("dropzone.js")).toString("utf8"),
-                fs.readFileSync(getSrcPath("client.js")).toString("utf8")
-            ].join("\n"));
-        } else {
-            logsimple(" ->> minifying JS...");
-            fs.writeFileSync(getResPath("client.js"),
-                uglify.minify([
-                    getSrcPath("jquery.js"),
-                    getSrcPath("jquery.form.js"),
-                    getSrcPath("dropzone.js"),
-                    getSrcPath("client.js")
-                ]).code
-            );
-        }
+        logsimple(config.debug ? " ->> preparing JS..." : " ->> minifying JS...");
+
+        js = [
+            fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
+            fs.readFileSync(getSrcPath("jquery.form.js")).toString("utf8"),
+            fs.readFileSync(getSrcPath("dropzone.js")).toString("utf8"),
+            fs.readFileSync(getSrcPath("client.js")).toString("utf8")
+        ].join("\n");
+
+        fs.writeFileSync(getResPath("client.js"), config.debug ? js :uglify.minify(js, {fromString: true}).code);
 
         logsimple(" ->> preparing HTML...");
 
@@ -531,10 +523,10 @@ function handleResourceRequest(req, res, resourceName) {
     } else {
         res.statusCode = 200;
 
-        if (req.url === "/") res.setHeader("X-Frame-Options", "DENY");
+        if (req.url === "/" && !config.debug) res.setHeader("X-Frame-Options", "DENY");
 
         res.setHeader("Content-Type", cache[resourceName].mime);
-        res.setHeader("Cache-Control", "public, max-age=31536000");
+        res.setHeader("Cache-Control", "private, no-transform, no-store, max-age=31536000");
         res.setHeader("ETag", cache[resourceName].etag);
 
         var ifNoneMatch = req.headers["if-none-match"] || "";

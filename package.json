@@ -1,8 +1,8 @@
 {
   "name": "droppy",
-  "version": "0.2.0-4",
+  "version": "0.2.0-6",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "a http/https file server",
+  "description": "Modern HTTP file server/browser application with realtime updates",
   "homepage": "https://github.com/silverwind/Droppy",
   "bugs": "https://github.com/silverwind/Droppy/issues",
   "main": "./droppy.js",
@@ -13,13 +13,11 @@
     "mime": "~1.2.9",
     "uglify-js": "~2.3.4",
     "clean-css": "~1.0.2",
-    "autoprefixer": "~0.4.20130515",
-    "grunt-exec": "~0.4.0",
-    "grunt": "~0.4.1"
+    "autoprefixer": "~0.4.20130515"
   },
   "devDependencies": {
-    "grunt": "*",
-    "grunt-exec": "*"
+    "grunt": "~0.4.0",
+    "grunt-exec": "~0.4.1"
   },
   "directories": {
     "src": "./src",
@@ -33,8 +31,7 @@
   "keywords": [
     "http",
     "https",
-    "file",
-    "server",
+    "fileserver",
     "websocket"
   ],
   "licenses": [
