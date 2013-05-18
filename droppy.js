@@ -526,6 +526,10 @@ function handleResourceRequest(req, res, resourceName) {
         res.statusCode = 200;
 
         if (req.url === "/" && !config.debug) res.setHeader("X-Frame-Options", "DENY");
+        if (resourceName.match(/.*(js|css|html)$/))
+            res.setHeader("Content-Type", cache[resourceName].mime + "; charset=utf-8");
+        else
+            res.setHeader("Content-Type", cache[resourceName].mime);
 
         res.setHeader("Content-Type", cache[resourceName].mime);
         res.setHeader("Cache-Control", "private, no-transform, no-store, max-age=31536000");
