@@ -312,21 +312,28 @@
             }
         });
 
-        var arrow = $("#arrow"),
-            about = $("#about");
+        var arrow     = $("#arrow"),
+            arrowtext = $(".arrow-text"),
+            about     = $("#about"),
+            arrowdown = $(".arrow-text.down"),
+            arrowup   = $(".arrow-text.up");
 
-        arrow.unbind("click").click(function () {
+        arrowtext.unbind("click").click(function () {
             if (arrow.attr("class") === "down") {
                 about.css("top", "50%");
                 about.css("margin-top", "-100px");
                 window.setTimeout(function () {
                     arrow.attr("class", "up");
+                    arrowdown.hide();
+                    arrowup.show();
                 }, 400);
             } else {
                 about.css("top", "-200px");
                 about.css("margin-top", "0");
                 window.setTimeout(function () {
                     arrow.attr("class", "down");
+                    arrowup.hide();
+                    arrowdown.show();
                 }, 400);
             }
         });

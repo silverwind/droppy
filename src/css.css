@@ -1,4 +1,3 @@
-
 /* ================================= Fonts ================================= */
 
 @font-face {
@@ -470,36 +469,6 @@ li {
 
 /* =============================== About box =============================== */
 
-#arrow {
-    background: #222;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #ccc;
-    height: 100px;
-    left: 50%;
-    margin-left: -50px;
-    position: absolute;
-    text-align: center;
-    transform: rotate(45deg);
-    top: 110px;
-    width: 100px;
-    z-index: -5;
-    user-select: none;
-}
-
-#arrow:hover {
-    color: #f1a;
-}
-
-#arrow > .icon {
-    transform: rotate(-45deg);
-    font-size: 2em;
-    left: 37px;
-    position: absolute;
-    top: 59px;
-    width: 100%;
-}
-
 #about {
     left: 50%;
     top: -200px;
@@ -507,7 +476,7 @@ li {
     height: 200px;
     box-shadow: 0 0 20px -2px #000;
     border-radius: 12px;
-    transition: top .4s ease-in;
+    transition: top .4s ease-in-out;
     position: absolute;
     width: 400px;
     color: #bbb;
@@ -518,7 +487,7 @@ li {
 #about-logo {
     float: left;
     text-align: center;
-    text-shadow: 1px 1px 0 #777;
+    text-shadow: 1px 1px 9 #fff;
     font-size: 6em;
     line-height: 200px;
     width: 100px;
@@ -535,7 +504,6 @@ li {
     width: 300px;
     padding-top: .25em;
     padding-right: 1em;
-
 }
 
 #about a {
@@ -576,6 +544,43 @@ li {
     font-size: 1.5em;
     user-select: none;
     cursor: pointer;
+}
+
+#arrow {
+    background: #222;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ccc;
+    height: 100px;
+    left: 50%;
+    margin-left: -50px;
+    position: absolute;
+    text-align: center;
+    transform: rotate(45deg);
+    width: 100px;
+    z-index: -5;
+    user-select: none;
+}
+
+#arrow.down { top: 115px;}
+#arrow.up   { top: -15px;}
+
+.arrow-text {
+   cursor: pointer;
+    font-size: 2em;
+    left: 50%;
+    text-align: center;
+    margin-left: -0.5em;
+    position: absolute;
+    width: 1em;
+    line-height: 1em;
+}
+
+.arrow-text.down { bottom: -38px; }
+.arrow-text.up   { top: -38px; display: none;}
+
+.arrow-text:hover {
+    color: #f1a;
 }
 
 /* ============================== Login Form =============================== */
