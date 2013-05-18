@@ -492,21 +492,12 @@ li {
     color: #f1a;
 }
 
-#arrow > .icon.down {
-    transform: rotate(-45deg);
-    font-size: 2em;
-    left: 36px;
-    position: absolute;
-    top: 63px;
-    width: 100%;
-}
-
 #arrow > .icon {
     transform: rotate(-45deg);
     font-size: 2em;
     left: 36px;
     position: absolute;
-    top: 63px;
+    top: 61px;
     width: 100%;
 }
 
