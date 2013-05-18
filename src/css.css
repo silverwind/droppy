@@ -480,13 +480,12 @@ li {
     margin-left: -50px;
     position: absolute;
     text-align: center;
+    transform: rotate(45deg);
+    top: 110px;
     width: 100px;
     z-index: -5;
     user-select: none;
 }
-
-#arrow.down { transform: rotate(45deg);  top: 110px;}
-#arrow.up   { transform: rotate(225deg); top: -10px;}
 
 #arrow:hover {
     color: #f1a;
@@ -495,9 +494,9 @@ li {
 #arrow > .icon {
     transform: rotate(-45deg);
     font-size: 2em;
-    left: 36px;
+    left: 37px;
     position: absolute;
-    top: 61px;
+    top: 59px;
     width: 100%;
 }
 
@@ -519,7 +518,7 @@ li {
 #about-logo {
     float: left;
     text-align: center;
-    text-shadow: 1px 1px 9 #fff;
+    text-shadow: 1px 1px 0 #777;
     font-size: 6em;
     line-height: 200px;
     width: 100px;
