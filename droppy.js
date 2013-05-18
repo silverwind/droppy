@@ -99,7 +99,7 @@ function prepareContent() {
     try {
         logsimple(" ->> preparing CSS...");
 
-        var css = autoprefixer.compile(String(fs.readFileSync(getSrcPath("css.css"))), ["last 10 version", "ie 8", "ie 7"]);
+        var css = autoprefixer.compile(String(fs.readFileSync(getSrcPath("css.css"))), ["last 2 version"]);
         fs.writeFileSync(getResPath("css.css"), config.debug ? css : cleancss.process(css));
 
         if (config.debug) {
