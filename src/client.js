@@ -1,5 +1,3 @@
-/* global io */
-
 (function ($) {
     "use strict";
 
@@ -86,83 +84,83 @@
     function openSocket() {
         if (socketOpen) return;
 
-        if (!socket) {
-            socket = io.connect(document.location.protocol + "//" + document.location.host);
+        if (document.location.protocol === "https:")
+            socket = new WebSocket('wss://' + document.location.host);
+        else
+            socket = new WebSocket('ws://' + document.location.host);
 
-            socket.on("error", function (error) {
-                log("socket.io error: ", error);
+        socket.onopen = function () {
+            socketOpen = true;
+            // Request initial update
+            updateLocation(currentFolder || "/", false);
+
+            // Close the socket to prevent Firefox errors
+            $(window).on('beforeunload', function () {
+                socket.close();
+                socketOpen = false;
             });
+        };
 
-            socket.on("connect", function () {
-                socketOpen = true;
-                // Request initial update
-                updateLocation(currentFolder || "/", false);
+        socket.onmessage = function (event) {
+            var msg = JSON.parse(event.data);
+            switch (msg.type) {
 
-                // Close the socket to prevent Firefox errors
-                $(window).on('beforeunload', function () {
-                    socket.disconnect();
-                    socketOpen = false;
-                });
-            });
-
-            socket.on("UPDATE_FILES", function (data) {
+            case "UPDATE_FILES":
                 if (isUploading) return;
-                var msgData = JSON.parse(data);
-                if (msgData.folder === currentFolder.replace(/&amp;/, "&")) {
-                    updateCrumbs(msgData.folder);
-                    activeFiles = msgData;
-                    buildHTML(msgData.data, msgData.folder);
+
+                if (msg.folder === currentFolder.replace(/&amp;/, "&")) {
+                    updateCrumbs(msg.folder);
+                    activeFiles = msg.data;
+                    buildHTML(msg.data, msg.folder);
                     socketWait = false;
                 }
-            });
-
-            socket.on("UPLOAD_DONE", function () {
+                break;
+            case "UPLOAD_DONE":
                 isUploading = false;
                 sendMessage("REQUEST_UPDATE", currentFolder);
-            });
-
-            socket.on("NEW_FOLDER", function (data) {
-                var msgData = JSON.parse(data);
-                updateCrumbs(msgData.folder);
-                activeFiles = msgData;
-                buildHTML(msgData.data, msgData.folder);
+                break;
+            case "NEW_FOLDER":
+                updateCrumbs(msg.folder);
+                activeFiles = msg.data;
+                buildHTML(msg.data, msg.folder);
                 socketWait = false;
-            });
-
-            socket.on("disconnect", function () {
-                socketOpen = false;
-
-                // Restart a closed socket. Firefox closes it on every download..
-                // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-
-                if (!socketTimeout) socketTimeout = 50;
-                if (socketTimeout < 51200) {
-                    // This gives up connecting after 10 failed reconnects with increasing intervals
-                    window.setTimeout(function () {
-                        try {
-                            if (!hasLoggedOut) socket.socket.connect();
-                        } catch (e) {
-                            log("socket error: " + e);
-                        } finally {
-                            socketTimeout *= 2;
-                        }
-                    }, socketTimeout);
-                }
-            });
-
-            socket.on("UNAUTHORIZED", function () {
+                break;
+            case "UNAUTHORIZED":
                 // Set the socketTimeout to its maximum value to stop retries
                 socketTimeout = 51200;
-            });
-        } else {
-            socket.socket.connect();
-        }
+                break;
+            }
+        };
+
+        socket.onclose = function () {
+            socketOpen = false;
+
+            // Restart a closed socket. Firefox closes it on every download..
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
+
+            if (!socketTimeout) socketTimeout = 50;
+            if (socketTimeout < 51200) {
+                // This gives up connecting after 10 failed reconnects with increasing intervals
+                window.setTimeout(function () {
+                    try {
+                        if (!hasLoggedOut) socket.socket.connect();
+                    } catch (e) {
+                        log("socket error: " + e);
+                    } finally {
+                        socketTimeout *= 2;
+                    }
+                }, socketTimeout);
+            }
+        };
     }
 
     function sendMessage(msgType, msgData) {
         if (!socketOpen) return;
         socketWait = true;
-        socket.emit(msgType, JSON.stringify(msgData));
+        socket.send(JSON.stringify({
+            type: msgType,
+            data: msgData
+        }));
     }
 // ============================================================================
 //  Authentication page JS
@@ -257,13 +255,13 @@
                 var formData = new FormData();
                 if (num > 0) {
                     for (var i = 0; i < num; i++) {
-                        activeFiles.data[files[i].name] = {
+                        activeFiles[files[i].name] = {
                             size: files[i].size,
                             type: "nf"
                         };
                         formData.append(files[i].name, files[i]);
                     }
-                    buildHTML(activeFiles.data, activeFiles.folder);
+                    buildHTML(activeFiles, activeFiles.folder);
                     createFormdata(files);
                 }
                 $("#file").val(""); // Reset file form
@@ -281,9 +279,11 @@
         // Show popup for folder creation
         $("#add-folder").unbind("click").click(function () {
             nameoverlay.fadeToggle(350);
+            if (nameoverlay.is(":visible"))
+                nameinput.focus();
             nameinput.val("");
-            nameinput.focus();
             nameinput.attr("class", "valid");
+            info.hide();
         });
 
         // Handler for the input of the folder name
@@ -347,7 +347,7 @@
 
         $("#logout").unbind("click").click(function () {
             sendMessage("LOGOUT");
-            socket.disconnect();
+            socket.close();
             deleteCookie("sid");
             hasLoggedOut = true;
             initVariables(); // Reset some vars to their init state

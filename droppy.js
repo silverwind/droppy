@@ -47,20 +47,20 @@ var cache        = {},
     dirs         = {},
     db           = {},
     server       = null,
-    config       = null,
-    io           = null;
+    config       = null;
 
-var fs           = require("fs"),
-    formidable   = require("formidable"),
-    mime         = require("mime"),
-    util         = require("util"),
-    crypto       = require("crypto"),
-    querystring  = require("querystring"),
-    zlib         = require("zlib"),
-    path         = require("path"),
-    cleancss     = require("clean-css"),
-    uglify       = require("uglify-js"),
-    autoprefixer = require("autoprefixer");
+var autoprefixer    = require("autoprefixer"),
+    cleancss        = require("clean-css"),
+    crypto          = require("crypto"),
+    formidable      = require("formidable"),
+    fs              = require("fs"),
+    mime            = require("mime"),
+    path            = require("path"),
+    querystring     = require("querystring"),
+    uglify          = require("uglify-js"),
+    util            = require("util"),
+    WebSocketServer = require("ws").Server,
+    zlib            = require("zlib");
 
 var color = {
     red     : "\u001b[31m",
@@ -217,96 +217,91 @@ function removeFilePath(p) {
 //-----------------------------------------------------------------------------
 // WebSocket listener
 function setupSocket(server) {
-    io = require("socket.io").listen(server, {
-        "log level": 1,
-        "browser client minification": config.debug ? false : true,
-        "browser client gzip": true,
-        "browser client etag": true
-    });
-
-    io.sockets.on("connection", function (ws) {
-        var remoteIP   = ws.handshake.address.address;
-        var remotePort = ws.handshake.address.port;
-        var cookie     = getCookie(ws.handshake.headers.cookie);
+    var wss = new WebSocketServer({server : server});
+    wss.on("connection", function (ws) {
+        var remoteIP   = ws._socket.remoteAddress;
+        var remotePort = ws._socket.remotePort;
+        var cookie     = getCookie(ws.upgradeReq.headers.cookie);
 
         if (!cookie) {
             log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
-            ws.emit("UNAUTHORIZED");
-            ws.disconnect();
+            ws.send("UNAUTHORIZED");
+            ws.close();
             return;
         } else {
             log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
         }
 
-        ws.on("REQUEST_UPDATE", function (data) {
-            var dir = JSON.parse(data);
-            dir = dir.replace(/&amp;/g, "&");
-            clients[cookie] = { "directory": dir, "ws": ws};
-            readDirectory(dir, function () {
-                sendMessage(cookie, "UPDATE_FILES");
-            });
-        });
+        ws.on("message", function (message) {
+            var msg = JSON.parse(message);
+            var dir = msg.data;
 
-        ws.on("CREATE_FOLDER", function (data) {
-            var dir = JSON.parse(data);
-            fs.mkdir(addFilePath(dir), config.mode, function (err) {
-                if (err) logerror(err);
-                readDirectory(clients[cookie].directory, function () {
+            switch (msg.type) {
+            case "REQUEST_UPDATE":
+                dir = dir.replace(/&amp;/g, "&");
+                clients[cookie] = { "directory": dir, "ws": ws};
+                readDirectory(dir, function () {
                     sendMessage(cookie, "UPDATE_FILES");
                 });
-            });
-        });
-
-        ws.on("DELETE_FILE", function (data) {
-            var dir = JSON.parse(data);
-            log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
-            dir = addFilePath(dir);
-            fs.stat(dir, function (err, stats) {
-                if (stats && !err) {
-                    if (stats.isFile()) {
-                        fs.unlink(dir, function (err) {
-                            if (err) logerror(err);
-                        });
-                    } else if (stats.isDirectory()) {
-                        fs.rmdir(dir, function (err) {
-                            if (err) logerror(err);
-                            // TODO: handle ENOTEMPTY
-                        });
-                    }
-                } else if (err) {
-                    logerror(err);
-                }
-            });
-        });
-
-        ws.on("SWITCH_FOLDER", function (data) {
-            var dir = JSON.parse(data);
-            if (!dir.match(/^\//) || dir.match(/\.\./)) return;
-            dir = dir.replace(/&amp;/g, "&");
-            clients[cookie] = {"directory": dir, "ws": ws};
-
-            updateWatchers(dir, function (ok) {
-                // Send client back to root in case the requested directory can't be read
-                if (!ok) {
-                    dir = "/";
-                    clients[cookie] = {"directory": dir, "ws": ws};
-                    readDirectory(dir, function () {
-                        sendMessage(cookie, "NEW_FOLDER");
-                    });
-                } else {
-                    readDirectory(dir, function () {
+                break;
+            case "CREATE_FOLDER":
+                fs.mkdir(addFilePath(dir), config.mode, function (err) {
+                    if (err) logerror(err);
+                    readDirectory(clients[cookie].directory, function () {
                         sendMessage(cookie, "UPDATE_FILES");
                     });
-                }
-            });
+                });
+                break;
+            case "DELETE_FILE":
+                log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
+                dir = addFilePath(dir);
+                fs.stat(dir, function (err, stats) {
+                    if (stats && !err) {
+                        if (stats.isFile()) {
+                            fs.unlink(dir, function (err) {
+                                if (err) logerror(err);
+                            });
+                        } else if (stats.isDirectory()) {
+                            fs.rmdir(dir, function (err) {
+                                if (err) logerror(err);
+                                // TODO: handle ENOTEMPTY
+                            });
+                        }
+                    } else if (err) {
+                        logerror(err);
+                    }
+                });
+                break;
+            case "SWITCH_FOLDER":
+                if (!dir.match(/^\//) || dir.match(/\.\./)) return;
+                dir = dir.replace(/&amp;/g, "&");
+                clients[cookie] = {"directory": dir, "ws": ws};
+                updateWatchers(dir, function (ok) {
+                    // Send client back to root in case the requested directory can't be read
+                    if (!ok) {
+                        dir = "/";
+                        clients[cookie] = {"directory": dir, "ws": ws};
+                        readDirectory(dir, function () {
+                            sendMessage(cookie, "NEW_FOLDER");
+                        });
+                    } else {
+                        readDirectory(dir, function () {
+                            sendMessage(cookie, "UPDATE_FILES");
+                        });
+                    }
+                });
+                break;
+            case "LOGOUT":
+                delete db.sessions[cookie];
+                writeDB();
+                break;
+            }
         });
-
-        ws.on("LOGOUT", function () {
-            delete db.sessions[cookie];
-        });
-
-        ws.on("disconnect", function () {
+        ws.on("close", function () {
             log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "]");
+        });
+        ws.on("error", function (err) {
+            logerror(err);
         });
     });
 }
@@ -350,13 +345,14 @@ function checkWatchedDirs() {
 // Send file list JSON over websocket
 function sendMessage(cookie, messageType) {
     // Dont't send if the socket isn't open
-    if (clients[cookie].ws._socket === null) return;
+    if (!clients[cookie].ws._socket) return;
     var dir = clients[cookie].directory;
     var data = JSON.stringify({
+        "type"  : messageType,
         "folder": dir,
         "data"  : dirs[dir]
     });
-    clients[cookie].ws.emit(messageType, data, function (err) {
+    clients[cookie].ws.send(data, function (err) {
         if (err) logerror(err);
     });
 }
@@ -456,7 +452,7 @@ function handleGET(req, res) {
 
         var json = JSON.stringify(obj);
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
         res.setHeader("Content-Length", Buffer.byteLength(json));
         res.setHeader("Cache-Control", "no-cache");
         res.end(json);
@@ -531,7 +527,6 @@ function handleResourceRequest(req, res, resourceName) {
         else
             res.setHeader("Content-Type", cache[resourceName].mime);
 
-        res.setHeader("Content-Type", cache[resourceName].mime);
         res.setHeader("Cache-Control", "private, no-transform, no-store, max-age=31536000");
         res.setHeader("ETag", cache[resourceName].etag);
 
@@ -601,9 +596,9 @@ function handleUploadRequest(req, res) {
             res.end();
             logresponse(req, res);
         });
-
         form.on("fileBegin", function (name, file) {
             var pathToSave;
+
             if (clients[cookie].directory === undefined || clients[cookie].directory === "/")
                 pathToSave = config.filesDir + file.name;
             else
