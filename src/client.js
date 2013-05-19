@@ -419,6 +419,7 @@
             progressBars.show();
             progressBars.width("0%");
 
+            document.title = ["0%", "droppy"].join(" - ");
             uperc.html("0%");
             utl.html("");
             ui.animate({top: "-2px"}, 250);
@@ -426,6 +427,7 @@
 
         function uploadDone() {
             progressBars.width("100%");
+            document.title = [currentFolder, "droppy"].join(" - ");
             uperc.html("100%");
             utl.html("finished");
             ui.animate({top: "-50px"}, 250);
@@ -433,6 +435,7 @@
 
         function uploadProgress(bytesSent, bytesTotal) {
             var progress = Math.round((bytesSent / bytesTotal) * 100) + "%";
+            document.title = [progress, "droppy"].join(" - ");
             progressBars.width(progress);
             uperc.html(progress);
 

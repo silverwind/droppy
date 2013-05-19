@@ -26,10 +26,11 @@
   TODOs:
   - Touch events
   - Thumbnail icons for images
-  - User privilege levels, and a admin panel to add/remove users
+  - Async downloads through FileSystem API
+  - User privilege levels and a admin panel to add/remove users
   - Restyle the folder view
   - Handle breadcrumb overflow in layout
-  - Rework client >-> server communication so that the server has more
+  - Rework client <-> server communication so that the server has more
     control over the client's current location in the file system
   - Public file links (using a URL shortening mechanism)
   - Recursive deleting of folders
@@ -255,22 +256,45 @@ function setupSocket(server) {
             case "DELETE_FILE":
                 log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
                 dir = addFilePath(dir);
-                fs.stat(dir, function (err, stats) {
-                    if (stats && !err) {
-                        if (stats.isFile()) {
-                            fs.unlink(dir, function (err) {
-                                if (err) logerror(err);
-                            });
-                        } else if (stats.isDirectory()) {
-                            fs.rmdir(dir, function (err) {
-                                if (err) logerror(err);
-                                // TODO: handle ENOTEMPTY
-                            });
+
+                var deleteFile =  function (dir, second) {
+                    fs.stat(dir, function (err, stats) {
+                        if (stats && !err) {
+                            if (stats.isFile()) {
+                                fs.unlink(dir, function (err) {
+                                    if (err) logerror(err);
+                                });
+                            } else if (stats.isDirectory()) {
+                                fs.rmdir(dir, function (err) {
+                                    if (err) logerror(err);
+                                    // TODO: handle ENOTEMPTY
+                                });
+                            }
+                        } else if (err) {
+                            if (second) throw err;
+                            deleteFile(dir.replace(/&/, "&amp;"), true);
                         }
-                    } else if (err) {
+                    });
+                };
+
+                // Filenames with "&amp;" can actually exist, but the client will send us and
+                // unescaped "&" in both cases ("&" and "&amp;"). To remedy this, we try to delete
+                // both variations before erroring. This can still fail if a path contains both
+                // cases at the same time, but it's the best solution until we do async downloads
+                // using the FileSystem API.
+                if (dir.indexOf("&")) {
+                    try {
+                        deleteFile(dir);
+                    } catch (err) {
                         logerror(err);
+                        readDirectory(clients[cookie].directory, function () {
+                            sendMessage(cookie, "UPDATE_FILES");
+                        });
                     }
-                });
+                } else {
+                    deleteFile(dir);
+                }
+
                 break;
             case "SWITCH_FOLDER":
                 if (!dir.match(/^\//) || dir.match(/\.\./)) return;
