@@ -4,6 +4,8 @@
     // debug logging
     var debug = false;
 
+    var smallScreen = $(window).width() <= 500;
+
     // "globals"
     var folderList, socketOpen, socketWait, isUploading, hasLoggedOut, currentFolder, socket, socketTimeout, hoverIndex, activeFiles;
 
@@ -24,32 +26,36 @@
     // Switch the body's content with an animation
     function load(type, data) {
         $("body").append('<div id="new">' + data + '</div>');
-        var newPage = $("#new");
-        var oldPage = $("#page");
+        var newPage = $("#new"), oldPage = $("#page");
 
-        if (type === "auth") {
+        switch (type) {
+        case "auth":
             initAuthPage();
 
-            var loginform = $("#login-form");
+            var loginform = $("#login-form"),
+                body      = $("body"),
+                from      = smallScreen ? "20%" : "70%",
+                to        = smallScreen ? "0%" : "50%";
 
-            loginform.css("top", "60%");
-            loginform.css("opacity", 0); // top: 50%;
+            body.css("overflow", "hidden");
+            loginform.css("top", from);
+            loginform.css("opacity", 0);
 
             oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
             loginform.animate({"opacity": 1}, {duration: 250, queue: false});
-            loginform.animate({"top": "50%"}, {duration: 250, queue: false, complete: function () {
+            loginform.animate({"top": to}, {duration: 250, queue: false, complete : function () {
                 switchID();
-                $(this).removeAttr("style");
+                body.removeAttr("style");
+                loginform.removeAttr("style");
                 if (hasLoggedOut) {
                     window.setTimeout(function () {
                         $("#login-info").fadeIn(300);
                     }, 300);
                 }
             }});
-        } else {
+            break;
+        case "main":
             initMainPage();
-
-
             var navigation = $("#navigation"),
                 current    = $("#current"),
                 about      = $("#about");
@@ -71,7 +77,9 @@
                     $(this).removeAttr("style");
                 }});
             }});
+            break;
         }
+
 
         // Switch ID of #new for further animation
         function switchID() {

@@ -1,3 +1,4 @@
+
 /* ================================= Fonts ================================= */
 
 @font-face {
@@ -587,15 +588,15 @@ li {
 
 #icon-login {
     color: #555;
-    font-size: 9.5em;
+    font-size: 10em;
     position: absolute;
     text-align: center;
     text-shadow: 1px 1px 0 #777;
-    top: 5px;
+    top: 0;
     width: 100%;
 }
 
-#login-container{
+#login-container {
     width: 100%;
     height: 100%;
 }
@@ -655,6 +656,10 @@ li {
     width: 100%;
 }
 
+input[type=checkbox] {
+    display: none;
+}
+
 input[type=checkbox] + label {
     cursor: pointer;
     user-select: none;
@@ -670,7 +675,7 @@ input[type=checkbox] + label:before {
 
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAAAaVBMVEUAAAChoqIAAAC3uLikpKSUl5kAAACtra0AAAC6urpmaWuxsbGxsbGWmJqgoKExMTEAAAAAAAAAAACtra27u7u7u7uwsLAAAAAAAACoqKj29/f19vb7+/v+/v73+PjX2Nj8/f36+vr///+/lwrFAAAAGnRSTlMD4QFu2KoCywBtDXV3o+MSBwYMzAVqww4K5HCPibsAAABXSURBVHjavcg3EoAgEADAM+dAlAzy/0faHjO2uuUCF1IjUvARmmgTYuNUQxt8RnxgADrlQtLk5dQHdxf+uj04XC4wBVs0CTFxUTB3lUaG9VDQE3oV6PkAhSEppdIoDmIAAAAASUVORK5CYII=);
     margin-right: 6px;
-    margin-left: -19px;
+    margin-left: 0px;
     margin-top: -3px;
 }
 
@@ -684,14 +689,6 @@ input[type=checkbox]:checked + label:before {
     width: 19px;
     height: 19px;
     display: block;
-}
-
-#submit-bg {
-    position: absolute;
-    height: 50px;
-    left: -50px;
-    top: 210px;
-    width: 500px;
 }
 
 #submit {
@@ -740,7 +737,7 @@ input[type=checkbox]:checked + label:before {
     opacity: .9;
 }
 
-@media all and (max-width: 1023px) {
+@media all and (max-width: 1024px) {
     .button {
         width: 160px;
     }
@@ -754,7 +751,7 @@ input[type=checkbox]:checked + label:before {
     }
 }
 
-@media all and (max-width: 767px) {
+@media all and (max-width: 768px) {
     .button-text {
         display: none !important;
     }
@@ -779,5 +776,60 @@ input[type=checkbox]:checked + label:before {
 
     #content {
         top: 3.5em;
+    }
+
+    #submit-bg {
+        width: 100%;
+        left: -5%;
+
+    }
+}
+
+@media all and (min-width: 640px) {
+    #submit-bg {
+        position: absolute;
+        height: 50px;
+        left: -50px;
+        top: 210px;
+        width: 500px;
+    }
+}
+
+@media all and (max-width: 639px) {
+    #login-form, #noscript {
+        border-radius: 0;
+        height: 100%;
+        left: 0;
+        margin-left: 0;
+        margin-top: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    #login-form-inner {
+        position: absolute;
+        top: 50%;
+        margin-top: -125px;
+        width: 90%;
+        margin-left: 5%;
+    }
+
+    #icon-login {
+        height: 50%;
+        top: 40%;
+        margin-top: -.5em;
+    }
+
+    #submit-bg {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    #submit {
+         height: 50px;
+         border-radius: 0;
     }
 }
