@@ -299,21 +299,8 @@ function setupSocket(server) {
             case "SWITCH_FOLDER":
                 if (!dir.match(/^\//) || dir.match(/\.\./)) return;
                 dir = dir.replace(/&amp;/g, "&");
-                clients[cookie] = {"directory": dir, "ws": ws};
-                updateWatchers(dir, function (ok) {
-                    // Send client back to root in case the requested directory can't be read
-                    if (!ok) {
-                        dir = "/";
-                        clients[cookie] = {"directory": dir, "ws": ws};
-                        readDirectory(dir, function () {
-                            sendMessage(cookie, "NEW_FOLDER");
-                        });
-                    } else {
-                        readDirectory(dir, function () {
-                            sendMessage(cookie, "UPDATE_FILES");
-                        });
-                    }
-                });
+                switchClientFolder(cookie, dir, ws);
+
                 break;
             case "LOGOUT":
                 delete db.sessions[cookie];
@@ -327,6 +314,43 @@ function setupSocket(server) {
         ws.on("error", function (err) {
             logerror(err);
         });
+    });
+}
+//-----------------------------------------------------------------------------
+// Switch a client into a folder and update watchers
+function switchClientFolder(cookie, dir, ws) {
+    if (!clients[cookie]) clients[cookie] = {};
+    clients[cookie].directory = dir;
+    if (ws) clients[cookie].ws = ws;
+
+    updateWatchers(dir, function (ok) {
+        // Send client back to root in case the requested directory can't be read
+        if (!ok) {
+            dir = "/";
+            clients[cookie].directory = dir;
+        }
+
+        if (!ws)
+            waitOnWebsocket(cookie, dir);
+        else
+            readDirectory(dir, function () {
+                sendMessage(cookie, "NEW_FOLDER");
+            });
+
+        function waitOnWebsocket(cookie, dir) {
+            var runtime = 0;
+            // Wait 10 seconds for a client to open the websocket after a direct folder navigation
+            var retry = setInterval(function () {
+                if (runtime >= 10000) clearInterval(retry);
+                if (clients[cookie].ws) {
+                    clearInterval(retry);
+                    readDirectory(dir, function () {
+                        sendMessage(cookie, "NEW_FOLDER");
+                    });
+                }
+                runtime += 50;
+            }, 50);
+        }
     });
 }
 //-----------------------------------------------------------------------------
@@ -483,11 +507,22 @@ function handleGET(req, res) {
     } else if (URI === "/favicon.ico") {
         handleResourceRequest(req, res, "icon.ico");
     } else {
-        // TODO: Add direct folder navigation here
-        res.statusCode = 301;
-        res.setHeader("Location", "/");
-        res.end();
-        logresponse(req, res);
+        // Check if client is going to a folder directly
+        fs.stat(path.join(config.filesDir, URI), function (err, stats) {
+            if (!err && stats.isDirectory()) {
+                handleResourceRequest(req, res, "base.html");
+                // Strip trailing slash
+                if (URI.charAt(URI.length - 1) === "/")
+                    URI = URI.substring(0, URI.length - 1);
+
+                switchClientFolder(getCookie(req.headers.cookie), URI);
+            } else {
+                res.statusCode = 301;
+                res.setHeader("Location", "/");
+                res.end();
+                logresponse(req, res);
+            }
+        });
     }
 }
 //-----------------------------------------------------------------------------

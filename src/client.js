@@ -239,7 +239,7 @@
     function initMainPage() {
         // Open Websocket for initial update
         window.setTimeout(openSocket, 50);
-
+        currentFolder = decodeURIComponent(window.location.pathname);
         hasLoggedOut = false;
 
         var fileInput = $(":file").wrap($("<div/>").css({
