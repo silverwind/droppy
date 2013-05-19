@@ -442,22 +442,13 @@ function handleGET(req, res) {
     if (URI === "/") {
         handleResourceRequest(req, res, "base.html");
     } else if (URI === "/content") {
-        var obj = {};
         if (getCookie(req.headers.cookie)) {
-            obj.type = "main";
-            obj.data = cache["body-main.html"].data.toString("utf8");
+            res.setHeader("X-Page-Type", "main");
+            handleResourceRequest(req, res, "body-main.html");
         } else {
-            obj.type = "auth";
-            obj.data = cache["body-auth.html"].data.toString("utf8");
+            res.setHeader("X-Page-Type", "auth");
+            handleResourceRequest(req, res, "body-auth.html");
         }
-
-        var json = JSON.stringify(obj);
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json; charset=utf-8");
-        res.setHeader("Content-Length", Buffer.byteLength(json));
-        res.setHeader("Cache-Control", "no-cache");
-        res.end(json);
-        logresponse(req, res);
     } else if (URI.match(/^\/get\//)) {
         handleFileRequest(req, res);
     } else if (URI.match(/^\/res\//)) {
@@ -521,15 +512,19 @@ function handleResourceRequest(req, res, resourceName) {
         logresponse(req, res);
     } else {
         var ifNoneMatch = req.headers["if-none-match"] || "";
-        if (ifNoneMatch === cache[resourceName].etag) {
+        if (ifNoneMatch === cache[resourceName].etag && req.url !== "/content") {
             res.statusCode = 304;
             res.end();
             logresponse(req, res);
         } else {
             res.statusCode = 200;
 
-            res.setHeader("ETag", cache[resourceName].etag);
-            res.setHeader("Last-Modified", cache[resourceName].date);
+            if (req.url === "/content") {
+                res.setHeader("Cache-Control", "no-cache");
+            } else {
+                res.setHeader("ETag", cache[resourceName].etag);
+                res.setHeader("Last-Modified", cache[resourceName].date);
+            }
 
             if (req.url === "/" && !config.debug)
                 res.setHeader("X-Frame-Options", "DENY");

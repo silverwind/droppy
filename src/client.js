@@ -13,8 +13,11 @@
 //  Page loading functions
 // ============================================================================
     function getPage() {
-        $.getJSON('/content', function (response) {
-            load(response.type, response.data);
+        $.ajax({
+            url: "/content",
+            success: function (data, textStatus, request) {
+                load(request.getResponseHeader("X-Page-Type"), data);
+            }
         });
     }
 
