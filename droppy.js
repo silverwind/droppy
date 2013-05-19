@@ -407,6 +407,7 @@ function cacheResources(dir, callback) {
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
+            cache[relPath].date = fileTime.toUTCString();
             cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html)$/)) {
@@ -527,9 +528,8 @@ function handleResourceRequest(req, res, resourceName) {
         else
             res.setHeader("Content-Type", cache[resourceName].mime);
 
-        res.setHeader("Cache-Control", "private, no-transform, no-store, max-age=31536000");
         res.setHeader("ETag", cache[resourceName].etag);
-
+        res.setHeader("Last-Modified", cache[resourceName].date);
         var ifNoneMatch = req.headers["if-none-match"] || "";
         if (ifNoneMatch === cache[resourceName].etag) {
             res.statusCode = 304;
