@@ -39,7 +39,7 @@ Configuration is done through  the `config.json` file, located in the same direc
 }
 ````
 
-- `debug`: With debug enabled, client JS/CSS resources won't be minfied.
+- `debug`: With debug enabled, client JS/CSS resources won't be minfied and the site will be allowed to be embedded in an frame.
 - `useSSL`: Whether the server should use HTTPS (SSL).
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
 - `readInterval`: The minimum interval in milliseconds in which updates to a directory are sent. In case a directory gets constantly written to, this helps to keep the amount of updates (and I/O) in check.

@@ -520,36 +520,38 @@ function handleResourceRequest(req, res, resourceName) {
         res.end();
         logresponse(req, res);
     } else {
-        res.statusCode = 200;
-
-        if (req.url === "/" && !config.debug) res.setHeader("X-Frame-Options", "DENY");
-        if (resourceName.match(/.*(js|css|html)$/))
-            res.setHeader("Content-Type", cache[resourceName].mime + "; charset=utf-8");
-        else
-            res.setHeader("Content-Type", cache[resourceName].mime);
-
-        res.setHeader("ETag", cache[resourceName].etag);
-        res.setHeader("Last-Modified", cache[resourceName].date);
         var ifNoneMatch = req.headers["if-none-match"] || "";
         if (ifNoneMatch === cache[resourceName].etag) {
             res.statusCode = 304;
             res.end();
             logresponse(req, res);
-            return;
-        }
-
-        var acceptEncoding = req.headers["accept-encoding"] || "";
-        if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
-            res.setHeader("Content-Encoding", "gzip");
-            res.setHeader("Content-Length", cache[resourceName].gzipData.length);
-            res.setHeader("Vary", "Accept-Encoding");
-
-            res.end(cache[resourceName].gzipData);
         } else {
-            res.setHeader("Content-Length", cache[resourceName].data.length);
-            res.end(cache[resourceName].data);
+            res.statusCode = 200;
+
+            res.setHeader("ETag", cache[resourceName].etag);
+            res.setHeader("Last-Modified", cache[resourceName].date);
+
+            if (req.url === "/" && !config.debug)
+                res.setHeader("X-Frame-Options", "DENY");
+
+            if (resourceName.match(/.*(js|css|html)$/))
+                res.setHeader("Content-Type", cache[resourceName].mime + "; charset=utf-8");
+            else
+                res.setHeader("Content-Type", cache[resourceName].mime);
+
+            var acceptEncoding = req.headers["accept-encoding"] || "";
+            if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
+                res.setHeader("Content-Encoding", "gzip");
+                res.setHeader("Content-Length", cache[resourceName].gzipData.length);
+                res.setHeader("Vary", "Accept-Encoding");
+
+                res.end(cache[resourceName].gzipData);
+            } else {
+                res.setHeader("Content-Length", cache[resourceName].data.length);
+                res.end(cache[resourceName].data);
+            }
+            logresponse(req, res);
         }
-        logresponse(req, res);
     }
 }
 //-----------------------------------------------------------------------------
