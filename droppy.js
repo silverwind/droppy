@@ -407,7 +407,6 @@ function cacheResources(dir, callback) {
 
             cache[relPath] = {};
             cache[relPath].data = fileData;
-            cache[relPath].date = fileTime.toUTCString();
             cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html)$/)) {
@@ -520,10 +519,9 @@ function handleResourceRequest(req, res, resourceName) {
             res.statusCode = 200;
 
             if (req.url === "/content") {
-                res.setHeader("Cache-Control", "no-cache");
+                res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
             } else {
                 res.setHeader("ETag", cache[resourceName].etag);
-                res.setHeader("Last-Modified", cache[resourceName].date);
             }
 
             if (req.url === "/" && !config.debug)
