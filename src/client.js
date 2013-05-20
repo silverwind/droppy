@@ -166,11 +166,19 @@
 
     function sendMessage(msgType, msgData) {
         if (!socketOpen) return;
-        socketWait = true;
+        startSocketWait();
         socket.send(JSON.stringify({
             type: msgType,
             data: msgData
         }));
+    }
+
+    // Wait 1 second for a socket response before unlocking the UI again
+    function startSocketWait() {
+        socketWait = true;
+        setTimeout(function () {
+            socketWait = false;
+        }, 1000);
     }
 // ============================================================================
 //  Authentication page JS
