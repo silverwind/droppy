@@ -112,7 +112,7 @@ function prepareContent() {
 
         js = [
             fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
-            fs.readFileSync(getSrcPath("jquery-ui-.custom.js")).toString("utf8"),
+            fs.readFileSync(getSrcPath("jquery-ui-custom.js")).toString("utf8"),
             fs.readFileSync(getSrcPath("client.js")).toString("utf8")
         ].join("\n");
 
@@ -268,7 +268,9 @@ function setupSocket(server) {
                             } else if (stats.isDirectory()) {
                                 fs.rmdir(dir, function (err) {
                                     if (err) logerror(err);
-                                    // TODO: handle ENOTEMPTY
+                                    readDirectory(clients[cookie].directory, function () {
+                                        sendMessage(cookie, "UPDATE_FILES");
+                                    });
                                 });
                             }
                         } else if (err) {

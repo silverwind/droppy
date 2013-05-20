@@ -7,7 +7,7 @@
     var smallScreen = $(window).width() < 640;
 
     // "globals"
-    var folderList, socketOpen, socketWait, isUploading, hasLoggedOut,
+    var folderList, socketOpen, socketWait, isUploading, hasLoggedOut, fileInput,
         currentFolder, socket, socketTimeout, activeFiles, animatingData;
 
     // Separetely init the variables so we can init them on demand
@@ -131,6 +131,7 @@
             case "NEW_FOLDER":
                 updateCrumbs(msg.folder);
                 activeFiles = msg.data;
+                updateLocation(msg.folder);
                 buildHTML(msg.data, msg.folder);
                 socketWait = false;
                 break;
@@ -240,7 +241,7 @@
         currentFolder = decodeURIComponent(window.location.pathname);
         hasLoggedOut = false;
 
-        var fileInput = $(":file").wrap($("<div/>").css({
+        fileInput = $(":file").wrap($("<div/>").css({
             "height"  : 0,
             "width"   : 0,
             "overflow": "hidden"
@@ -472,8 +473,6 @@
         document.title = [prefix, suffix].join(" - ");
     }
 
-
-
     // Listen for "popstate" events, which indicate the user navigated back
     $(window).unbind("popstate").bind("popstate", function () {
         currentFolder = decodeURIComponent(window.location.pathname);
@@ -536,7 +535,7 @@
             last.animate({"opacity" : 1}, 200);
         }
 
-        // Bind mouse events
+        // Folder switching by breadcrumb
         $("#crumbs li").unbind("click").click(function (e) {
             if (e.button !== 0 || animatingData) return;
             e.preventDefault();
@@ -563,7 +562,7 @@
 
                 list.append([
                     '<li class="data-row" data-type="file" data-id="', id, '"><span class="icon icon-file"></span>',
-                    '<span class="data-name"><a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a></span>',
+                    '<a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a>',
                     '<span class="icon-delete icon"></span><span class="data-info">', size, '</span>',
                     '</span><span class="right-clear"></span>', addProgress, '</li>'
                 ].join(""));
@@ -591,18 +590,31 @@
                 return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
         });
 
+        var count = 0;
         $.each(items, function (index, item) {
             $(item).attr("data-index", index);
             list.append(item);
+            count++;
         });
 
+        if (count > 0)
+            loadContent(list);
+        else {
+            $("#content").html('<div id="sorry"><div id="sorry-icon" class="icon"></div><div id="sorry-text-outer"><div id="sorry-text">Sorry, there appears to be nothing here. Why not start by<span id="upload-inline"><span class="icon"></span> adding files</span>?</div></div></div>');
+            $("#upload-inline").unbind("click").click(function () {
+                fileInput.click();
+            });
+            nav = "same";
+        }
+    }
+
+    function loadContent(list) {
         // Load generated list into view with an animation
         if (nav === "same") {
             finalize(true);
             return;
         } else {
             var holder = $("#holder");
-
             animatingData = true;
             $(".data-row").addClass("animating");
 
@@ -610,7 +622,7 @@
             $("#newcontent").attr("class", nav === "forward" ? "new-right" : "new-left");
             $("#newcontent").html(list);
 
-            holder.addClass(nav === "forward" ? "to-left" : "to-right", 250, "swing", function () {
+            holder.addClass(nav === "forward" ? "to-left" : "to-right", 200, "swing", function () {
                 $("#content").remove();
                 $("#newcontent").attr("id", "content");
                 $("#newcontent").removeAttr("class");
@@ -629,11 +641,12 @@
     }
 
     function bindEvents() {
+
         // Bind mouse event to switch into a folder
-        $(".data-name.folder").unbind("click").click(function (e) {
+        $(".data-row").unbind("click").click(function (e) {
             if (e.button !== 0) return;
 
-            var destination = $(this).parent().data("id").replace("&amp;", "&");
+            var destination = $(this).data("id").replace("&amp;", "&");
             updateLocation(destination, true);
         });
 
