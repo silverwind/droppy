@@ -58,7 +58,7 @@ li {
     display: block;
     position: fixed;
     top: 0;
-    height: 2em;
+    height: auto;
     text-align: center;
     width: 100%;
     z-index: 2;
@@ -79,7 +79,7 @@ li {
     cursor: pointer;
     font-size: 1em;
     line-height: 1em;
-    max-height: 2em;
+    max-height: 42px;
     user-select: none;
     width: 220px;
     z-index: 6;
@@ -101,12 +101,18 @@ li {
 /* ============================== Breadcrumbs ============================== */
 
 #current {
-    height: 1.44em;
+    height: 34px; /* TODO: Handle overflow by scrolling */
     overflow: hidden;
-    position: fixed;
-    top: 2em;
+    position: relative;
+    top: 0;
     width: 100%;
     z-index: 1;
+}
+
+
+#crumbs {
+   width: 100%;
+   height: 100%;
 }
 
 #crumbs , #crumbs li {
@@ -217,16 +223,34 @@ li {
 
 /* ============================== Main Content ============================= */
 
-#content {
-    bottom: 0;
-    float: left;
-    max-height: 100%;
-    overflow: auto;
-    position: absolute;
-    text-shadow: 0 0 1px rgba(128, 128, 128, 0.3);
-    top: 4em;
-    width: 100%;
+#holder {
+    position: fixed;
+    width: 300%;
+    left: -100%;
+    height: 100%;
+    overflow-x: hidden;
 }
+#content, #newcontent {
+    bottom: 0;
+    max-height: 100%;
+    position: absolute;
+    top: 77px;
+    width: 33.3333333%;
+    padding: .25em;
+    text-shadow: 0 0 1px rgba(128, 128, 128, 0.4);
+}
+
+#content {
+    left: 33.333333%;
+}
+
+.new-left  { left: 0;           }
+.new-right { left: 66.6666666%; }
+.to-right  { left: 0     !important; }
+.to-left   { left: -200% !important; }
+
+/* ============================ Helper classes ============================= */
+
 
 #uploadform {
     display: none;
@@ -310,10 +334,6 @@ li {
   100% { transform: rotate(360deg); }
 }
 
-#preview {
-    display : none !important; /* !important in case Dropzone adds display styling */
-}
-
 #shader-top {
    box-shadow: 0 0 200px 0 #000;
    height: 10%;
@@ -325,20 +345,6 @@ li {
 }
 
 /* ========================= File/Folder Display =========================== */
-
-.highlight {
-    background: #222;
-    background: rgba(0, 0, 0, 0.8);
-}
-
-.highlight {
-    border-radius: 6px;
-    opacity: .9;
-}
-
-.highlight span, .highlight span a {
-    color: #fff;
-}
 
 .progressBar {
     background: #ccc;
@@ -360,30 +366,31 @@ li {
 .data-row {
     height: 1.5em;
     line-height: 1.5em;
-    margin-left: .5em;
-    margin-right: .5em;
     user-select: none;
+}
+
+.data-row:not(.animating):hover,
+.data-row:not(.animating):hover span,
+.data-row:not(.animating):hover span a {
+    background: #222;
+    border-radius: 6px;
+    color: #ddd;
 }
 
 .data-name {
     color: #222;
     cursor: pointer;
     float: left;
-    left: 1em;
+    left: 0;
     overflow: hidden;
     position: relative;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 65%;
 }
 
 .data-info {
     float: right;
-    position: absolute;
-    right: 2.8em;
-    text-align: right;
     white-space: nowrap;
-    width: 25%;
 }
 
 .right-clear {
@@ -392,6 +399,9 @@ li {
 
 /* ================================= Icons ================================= */
 
+.data-row .icon {
+    color: #333;
+}
 .icon, .inline-icon {
   font-family: "icons";
 }
@@ -404,31 +414,18 @@ li {
 }
 
 .icon-file, .icon-folder {
+    width: 1.5em;
+    text-align: center;
     float: left;
-    height: 24px;
-    left: .5em;
-    position: relative;
-    top: .25em;
-    width: 24px;
 }
 
 .icon-delete {
+    width: 1.5em;
+    text-align: center;
     cursor: pointer;
     float: right;
-    height: 24px;
     position: relative;
-    right: .5em;
-    top: .25em;
-    width: 24px;
 }
-
-.file-normal   { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAADFBMVEUAAAA2NjbU1NQ4ODip2l1/AAAAAXRSTlMAQObYZgAAADRJREFUeNrtzDEKACAMxVDbf/87OwgtRiy6962BjJKCMSSGhOALinbXYFydM8FT8NCrv1CZNV0DuCRGPMwAAAAASUVORK5CYII=);}
-.folder-normal { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAACVBMVEUAAAA6Ojo7Ozv3AnmEAAAAAXRSTlMAQObYZgAAAC5JREFUeNrtyzEKAAAIQlH1/oduaBACh5p7ox9xIarN3fbBQqAUHh8WgfkRCg4KddwDIotBpMAAAAAASUVORK5CYII=);}
-.delete-normal { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAPFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQLyYwAAAAE3RSTlMwiOnWCQoj5IPRhxZt4xnc4BMAM3v2IwAAAIRJREFUeNp1kkkWwCAIQ+1oB+uU+9+18qBllezMfwYEQydSkHZ39uTgwpw/P8+4PnAAKLf6dwFwKJggqk38ViGaBCSonjxyHjukAUK0Q9m2AlUctl0XLQvwxwYr6LJGBvBoL6bA0jzHQV9PmM61c8CjeHHeLn0gHQkdIh07XxRfLf8MRC+a/CYN66MNFgAAAABJRU5ErkJggg==);}
-
-.file-invert   { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAADFBMVEUAAADCwsIrKyvHx8d5y4cwAAAAAXRSTlMAQObYZgAAADRJREFUeNrtzDEKACAMxVDbf/87OwgtRiy6962BjJKCMSSGhOALinbXYFydM8FT8NCrv1CZNV0DuCRGPMwAAAAASUVORK5CYII=);}
-.folder-invert { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAADFBMVEUAAADCwsLDw8PExMQ40Uc2AAAAAXRSTlMAQObYZgAAAC9JREFUeNrtyzEKAAAIQlHL+9+5oUEIHGrujX7EBZNt7rIPYkKS5vFhEcI/TMFBATFaBLPICCGNAAAAAElFTkSuQmCC);}
-.delete-invert { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAPFBMVEXU1NTh4eHh4eHh4eHh4eHX19fW1tbh4eHh4eHh4eHU1NTh4eHh4eHV1dXh4eHW1tbV1dXh4eEAAADh4eGs51dKAAAAE3RSTlPpg4eIMNHWCQoj5BZt4xnc4BMA80stwAAAAIVJREFUeNp1kkkSwCAIBM1qFuM2//9rsCDhNH2TLgdFQyeoSKdXzuRiRshfPQfMn5gAlFvrdwEwqVgwqG3UW8VgGSJBebLkPLZIItbLFuU4CpRrFWHbhX0H/thgDR07iAiP9mYqLM1zXPS4wdhi54JH8eb8uPSCdCR0iHTs/KH40/LPQHgBmvwmDR1xeewAAAAASUVORK5CYII=);}
 
 /* ========================= Directory Name Input ========================== */
 
@@ -478,7 +475,7 @@ li {
     box-shadow: 0 0 20px -2px #000;
     border-radius: 12px;
     transition: top .4s ease-in-out;
-    position: absolute;
+    position: fixed;
     width: 400px;
     color: #bbb;
     background: #222;
@@ -737,6 +734,8 @@ input[type=checkbox]:checked + label:before {
     opacity: .9;
 }
 
+/* ============================= Media Queries ============================== */
+
 @media all and (max-width: 1024px) {
     .button {
         width: 160px;
@@ -760,8 +759,12 @@ input[type=checkbox]:checked + label:before {
         width: 80px;
     }
 
+    #content, #newcontent {
+        top: 69px;
+    }
+
     #current {
-        height: 1.13em;
+        height: 27px;
     }
 
     #crumbs li {
@@ -772,10 +775,6 @@ input[type=checkbox]:checked + label:before {
 
     #crumbs li:first-child {
         padding-left: 0.2em;
-    }
-
-    #content {
-        top: 3.5em;
     }
 
     #submit-bg {

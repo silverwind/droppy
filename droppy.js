@@ -112,6 +112,7 @@ function prepareContent() {
 
         js = [
             fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
+            fs.readFileSync(getSrcPath("jquery-ui-.custom.js")).toString("utf8"),
             fs.readFileSync(getSrcPath("client.js")).toString("utf8")
         ].join("\n");
 
@@ -579,6 +580,9 @@ function handleResourceRequest(req, res, resourceName) {
 
             if (req.url === "/content") {
                 res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
+            } else if (resourceName === "icon.ico") {
+                // Long cache on favicon, because some browsers seem to request them constantly
+                res.setHeader("Cache-Control", "max-age=7257600");
             } else {
                 res.setHeader("ETag", cache[resourceName].etag);
             }

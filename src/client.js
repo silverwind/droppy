@@ -4,10 +4,11 @@
     // debug logging
     var debug = false;
 
-    var smallScreen = $(window).width() <= 500;
+    var smallScreen = $(window).width() < 640;
 
     // "globals"
-    var folderList, socketOpen, socketWait, isUploading, hasLoggedOut, currentFolder, socket, socketTimeout, hoverIndex, activeFiles;
+    var folderList, socketOpen, socketWait, isUploading, hasLoggedOut,
+        currentFolder, socket, socketTimeout, activeFiles, animatingData;
 
     // Separetely init the variables so we can init them on demand
     initVariables();
@@ -57,22 +58,18 @@
         case "main":
             initMainPage();
             var navigation = $("#navigation"),
-                current    = $("#current"),
                 about      = $("#about");
 
             // Set pre-animation positions
-            navigation.css("top", "-3.5em");
-            current.css("top", "-1.5em");
+            navigation.css("top", "-42px");
             about.css("top", "-250px");
 
             oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
-            current.animate({"top": "2em"}, {duration: 500, queue: false});
             navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
                 switchID();
 
                 // Remove inline style caused by animation
-                $(this).removeAttr("style");
-                current.removeAttr("style");
+                navigation.removeAttr("style");
                 about.animate({"top": "-200px"}, {duration: 500, queue: false, complete: function () {
                     $(this).removeAttr("style");
                 }});
@@ -128,6 +125,7 @@
                 break;
             case "UPLOAD_DONE":
                 isUploading = false;
+                updateTitle(currentFolder, true);
                 sendMessage("REQUEST_UPDATE", currentFolder);
                 break;
             case "NEW_FOLDER":
@@ -411,38 +409,39 @@
         function uploadInit() {
             start = new Date().getTime();
 
-            $("#content ul").children().each(function () {
-                revert($(this));
-            });
-
             progressBars = $(".progressBar");
             progressBars.show();
             progressBars.width("0%");
 
-            document.title = ["0%", "droppy"].join(" - ");
+            updateTitle("0%");
             uperc.html("0%");
+
             utl.html("");
             ui.animate({top: "-2px"}, 250);
         }
 
         function uploadDone() {
             progressBars.width("100%");
-            document.title = [currentFolder, "droppy"].join(" - ");
+
+            updateTitle("100%");
             uperc.html("100%");
+
             utl.html("finished");
             ui.animate({top: "-50px"}, 250);
         }
 
         function uploadProgress(bytesSent, bytesTotal) {
             var progress = Math.round((bytesSent / bytesTotal) * 100) + "%";
-            document.title = [progress, "droppy"].join(" - ");
+
             progressBars.width(progress);
+            updateTitle(progress);
             uperc.html(progress);
 
             // Calculate estimated time left
             var elapsed = (new Date().getTime()) - start;
             var estimate = bytesTotal / (bytesSent / elapsed);
             var secs = (estimate - elapsed) / 1000;
+
             if (secs > 120) {
                 utl.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
             } else if (secs > 60) {
@@ -457,23 +456,53 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
+    // Update the page title and trim a path to its basename
+    function updateTitle(text, isPath) {
+        var prefix = "", suffix = "droppy";
+
+        if (isPath) {
+            var parts = text.match(/([^\/]+)/gm);
+            if (!parts)
+                prefix = "/";
+            else
+                prefix = parts[parts.length - 1];
+        } else {
+            prefix = text;
+        }
+        document.title = [prefix, suffix].join(" - ");
+    }
+
+
+
     // Listen for "popstate" events, which indicate the user navigated back
     $(window).unbind("popstate").bind("popstate", function () {
         currentFolder = decodeURIComponent(window.location.pathname);
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
 
+    var nav;
+
     // Update our current location and change the URL to it
     function updateLocation(path, doSwitch) {
         if (socketWait) return; // Dont switch location in case we are still waiting for a response from the server
 
+        if (path.length > currentFolder.length)
+            nav = "forward";
+        else if (path.length === currentFolder.length)
+            nav = "same";
+        else
+            nav = "back";
+
         currentFolder = path;
         sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
-        window.history.pushState(null, null, currentFolder);
+
+        // pushState causes Chrome's UI to flicker
+        // http://code.google.com/p/chromium/issues/detail?id=50298
+        window.history.pushState(true, true, currentFolder);
     }
 
     function updateCrumbs(path) {
-        document.title = [path, "droppy"].join(" - ");
+        updateTitle(path, true);
         var parts = path.split("/");
         parts[0] = "droppy";
 
@@ -508,8 +537,8 @@
         }
 
         // Bind mouse events
-        $("#crumbs li").mousedown(function (e) {
-            if (e.button !== 0) return;
+        $("#crumbs li").unbind("click").click(function (e) {
+            if (e.button !== 0 || animatingData) return;
             e.preventDefault();
             var destination = $(this).data("path");
             updateLocation(destination, true);
@@ -533,17 +562,17 @@
                 }
 
                 list.append([
-                    '<li class="data-row" data-type="file" data-id="', id, '"><span class="icon-file file-normal"></span>',
+                    '<li class="data-row" data-type="file" data-id="', id, '"><span class="icon icon-file"></span>',
                     '<span class="data-name"><a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a></span>',
-                    '<span class="data-info">', size, '</span><span class="icon-delete delete-normal"></span>',
+                    '<span class="icon-delete icon"></span><span class="data-info">', size, '</span>',
                     '</span><span class="right-clear"></span>', addProgress, '</li>'
                 ].join(""));
 
             } else {  // Create a folder row
                 list.append([
-                    '<li class="data-row" data-type="folder" data-id="', id, '"><span class="icon-folder folder-normal"></span>',
+                    '<li class="data-row" data-type="folder" data-id="', id, '"><span class="icon icon-folder"></span>',
                     '<span class="data-name folder">', file, '</span>',
-                    '<span class="icon-delete delete-normal"></span>',
+                    '<span class="icon-delete icon"></span>',
                     '</span><span class="right-clear"></span></li>'
                 ].join(""));
 
@@ -567,35 +596,41 @@
             list.append(item);
         });
 
-        $("#content").html(list); // Load generated list into view
+        // Load generated list into view with an animation
+        if (nav === "same") {
+            finalize(true);
+            return;
+        } else {
+            var holder = $("#holder");
 
-        // Functionality to invert images on hover below. Chrome doesn't seem to trigger the
-        // mouseenter event when content is replaced behind a un-moving cursor, so we keep track
-        // of the last hovered element and restore the hover class accordingly.
+            animatingData = true;
+            $(".data-row").addClass("animating");
 
-        // Reset hover state when mouse leaves the list or the new folder is empty
-        $("#content ul").mouseleave(function () {
-            hoverIndex = -1;
-        });
+            holder.append($("<section id='newcontent'></section>"));
+            $("#newcontent").attr("class", nav === "forward" ? "new-right" : "new-left");
+            $("#newcontent").html(list);
 
-        if (items.length === 0)  hoverIndex = -1;
-
-        //  Invert the row in which the mouse was before the reload
-        if (hoverIndex >= 0) {
-            invert($("#content ul").children('li[data-index="' + hoverIndex + '"]'));
+            holder.addClass(nav === "forward" ? "to-left" : "to-right", 250, "swing", function () {
+                $("#content").remove();
+                $("#newcontent").attr("id", "content");
+                $("#newcontent").removeAttr("class");
+                holder.removeAttr("class");
+                $(".data-row").removeClass("animating");
+                animatingData = false;
+                finalize();
+            });
         }
 
-        // Bind mouse events for swapping images. Text and Background are switched in CSS
-        $("#content ul li").mouseover(function () {
-            invert($(this));
-            hoverIndex = $(this).data("index");
-        });
+        function finalize(samePage) {
+            if (samePage) $("#content").html(list);
+            bindEvents();
+            nav = "same";
+        }
+    }
 
-        $("#content ul li").mouseout(function () {
-            revert($(this));
-        });
+    function bindEvents() {
         // Bind mouse event to switch into a folder
-        $(".data-name.folder").mousedown(function (e) {
+        $(".data-name.folder").unbind("click").click(function (e) {
             if (e.button !== 0) return;
 
             var destination = $(this).parent().data("id").replace("&amp;", "&");
@@ -603,27 +638,10 @@
         });
 
         // Bind mouse event to delete a file/folder
-        $(".icon-delete").mousedown(function (e) {
+        $(".icon-delete").unbind("click").click(function (e) {
             if (e.button !== 0 || socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
-
-    }
-
-    // Invert and highlight a list entry
-    function invert(li) {
-        li.addClass("highlight");
-        li.children(".icon-file").removeClass("file-normal").addClass("file-invert");
-        li.children(".icon-folder").removeClass("folder-normal").addClass("folder-invert");
-        li.children(".icon-delete").removeClass("delete-normal").addClass("delete-invert");
-    }
-
-    // Revert highlight state of a list entry
-    function revert(li) {
-        li.removeClass("highlight");
-        li.children(".icon-file").removeClass("file-invert").addClass("file-normal");
-        li.children(".icon-folder").removeClass("folder-invert").addClass("folder-normal");
-        li.children(".icon-delete").removeClass("delete-invert").addClass("delete-normal");
     }
 
     function deleteCookie(name) {
@@ -637,7 +655,6 @@
         isUploading = false;
         currentFolder = false;
         socketTimeout = false;
-        hoverIndex = -1;
         activeFiles = false;
     }
 

@@ -1,4 +1,4 @@
-<nav id="navigation" class="dark-bg">
+<nav id="navigation">
 	<ul id="left-buttons">
 		<li id="upload" class="button" title="Upload a file into the current directory">
 			<span class="inline-icon"></span> <span class="button-text">Add files</span>
@@ -24,7 +24,7 @@
 		<ul id="crumbs"></ul>
 	</nav>
 </nav>
-<section id="content"></section>
+<div id="holder"><section id="content"></section></div>
 <form id="uploadform" enctype="multipart/form-data">
 	<input type="file" name="file" id="file" multiple>
 </form>
@@ -32,7 +32,6 @@
 	<div id="upload-percentage"></div>
 	<div id="upload-time-left"></div>
 </div>
-<div id="preview" class="dropzone-previews"></div>
 <div id="about">
 	<div id="arrow" class="down"></div>
 	<span class="arrow-text icon down" title="About droppy"></span>
