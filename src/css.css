@@ -80,7 +80,7 @@ li {
     line-height: 1em;
     max-height: 42px;
     user-select: none;
-    width: 220px;
+    width: 250px;
     z-index: 6;
     transition: width, .5s, ease-out;
 }
@@ -227,7 +227,6 @@ li {
     width: 300%;
     left: -100%;
     height: 100%;
-    overflow-x: hidden;
 }
 #content, #newcontent {
     bottom: 0;
@@ -235,6 +234,8 @@ li {
     position: absolute;
     top: 77px;
     width: 33.3333333%;
+    overflow-x: hidden;
+    overflow-y: scroll;
     padding: .25em;
     text-shadow: 0 0 1px rgba(128, 128, 128, 0.4);
 }
@@ -821,7 +822,7 @@ input[type=checkbox]:checked + label:before {
     }
 }
 
-@media all and (max-width: 768px) {
+@media all and (max-width: 640px) {
     .button-text {
         display: none !important;
     }
@@ -901,5 +902,20 @@ input[type=checkbox]:checked + label:before {
     #submit {
          height: 50px;
          border-radius: 0;
+    }
+
+    .data-info {
+        display: none;
+    }
+
+    #content {
+        font-size: .8em !important;
+    }
+
+}
+
+@media all and (max-width: 319px) {
+    .button {
+        width: 40px;
     }
 }

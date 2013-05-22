@@ -625,7 +625,7 @@
             var holder = $("#holder");
             animatingData = true;
             $(".data-row").addClass("animating");
-
+            $("#content").css("overflow-y", "hidden");
             holder.append($("<section id='newcontent'></section>"));
             $("#newcontent").attr("class", nav === "forward" ? "new-right" : "new-left");
             $("#newcontent").html(list);
@@ -636,6 +636,7 @@
                 $("#newcontent").removeAttr("class");
                 holder.removeAttr("class");
                 $(".data-row").removeClass("animating");
+                $("#content").css("overflow-y", "scroll");
                 animatingData = false;
                 finalize();
             });
