@@ -645,8 +645,35 @@
         function finalize(samePage) {
             if (samePage) $("#content").html(list);
             bindEvents();
+            colorize();
             nav = "same";
         }
+    }
+
+    function colorize() {
+        $(".filelink").each(function () {
+            var filename = $(this).attr("download");
+            var colors = [], dot = filename.lastIndexOf(".");
+
+            if (dot > -1 && dot < filename.length)
+                colors = colorFromString(filename.substring(dot + 1, filename.length));
+            else
+                colors = colorFromString(filename);
+
+            var red   = colors[0];
+            var green = colors[1];
+            var blue  = colors[2];
+
+            if (red > 200)   red = 200;
+            if (green > 200) green = 200;
+            if (blue > 200)  blue = 200;
+
+            if (red < 60)    red = 60;
+            if (green < 60)  green = 60;
+            if (blue < 60)   blue = 60;
+
+            $(this).parent().children(".icon-file").css("color", "#" + red.toString(16) + green.toString(16) + blue.toString(16));
+        });
     }
 
     function bindEvents() {
@@ -696,4 +723,66 @@
             console.log(msg);
         }
     }
+
+    // get RGB color values for a given string
+    // based on : https://github.com/garycourt/murmurhash-js
+    function colorFromString(string) {
+        var remainder, bytes, h1, h1b, c1, c2, k1, i;
+        remainder = string.length & 3;
+        bytes = string.length - remainder;
+        h1 = 0; // Seed value
+        c1 = 0xcc9e2d51;
+        c2 = 0x1b873593;
+        i = 0;
+
+        while (i < bytes) {
+            k1 =
+              ((string.charCodeAt(i) & 0xff)) |
+              ((string.charCodeAt(++i) & 0xff) << 8) |
+              ((string.charCodeAt(++i) & 0xff) << 16) |
+              ((string.charCodeAt(++i) & 0xff) << 24);
+            ++i;
+
+            k1 = ((((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16))) & 0xffffffff;
+            k1 = (k1 << 15) | (k1 >>> 17);
+            k1 = ((((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16))) & 0xffffffff;
+
+            h1 ^= k1;
+            h1 = (h1 << 13) | (h1 >>> 19);
+            h1b = ((((h1 & 0xffff) * 5) + ((((h1 >>> 16) * 5) & 0xffff) << 16))) & 0xffffffff;
+            h1 = (((h1b & 0xffff) + 0x6b64) + ((((h1b >>> 16) + 0xe654) & 0xffff) << 16));
+        }
+
+        k1 = 0;
+
+        switch (remainder) {
+            case 3: k1 ^= (string.charCodeAt(i + 2) & 0xff) << 16;
+            case 2: k1 ^= (string.charCodeAt(i + 1) & 0xff) << 8;
+            case 1: k1 ^= (string.charCodeAt(i) & 0xff);
+
+            k1 = (((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
+            k1 = (k1 << 15) | (k1 >>> 17);
+            k1 = (((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
+            h1 ^= k1;
+        }
+
+        h1 ^= string.length;
+
+        h1 ^= h1 >>> 16;
+        h1 = (((h1 & 0xffff) * 0x85ebca6b) + ((((h1 >>> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
+        h1 ^= h1 >>> 13;
+        h1 = ((((h1 & 0xffff) * 0xc2b2ae35) + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16))) & 0xffffffff;
+        h1 ^= h1 >>> 16;
+
+        var integer = h1 >>> 0;
+        var colors = [];
+
+        var j = 3;
+        while (j) {
+            colors[--j] = integer & (255);
+            integer = integer >> 8;
+        }
+        return colors;
+    }
+
 }(jQuery));

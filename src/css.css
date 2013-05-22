@@ -371,7 +371,7 @@ li {
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 90%;
-    left: 1.75em;
+    left: 2em;
 }
 
 .data-row {
@@ -385,8 +385,9 @@ li {
     background: #222;
     border-radius: 6px;
 }
-.data-row:not(.animating):hover span {
 
+.data-row:not(.animating):hover span {
+    background: #222;
     color: #ddd;
 }
 
@@ -397,7 +398,7 @@ li {
 .data-name {
     color: #222;
     float: left;
-    left: 0;
+    left: .25em;
     overflow: hidden;
     position: relative;
     text-overflow: ellipsis;
