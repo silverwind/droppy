@@ -522,10 +522,10 @@
 
         for (var i = 0, len = parts.length; i < len; i++) {
             if (parts[i] === "droppy") {
-                html += ['<li data-path="/">', parts[i], '</li>'].join("");
+                html += '<li data-path="/">' + parts[i] + '</li>';
             } else {
                 elementPath += "/" + parts[i];
-                html += ['<li data-path="', elementPath, '">', parts[i], '</li>'].join("");
+                html += '<li data-path="' + elementPath + '">' + parts[i] + '</li>';
             }
         }
 
@@ -561,27 +561,27 @@
             var id = (root === "/") ? "/" + file : root + "/" + file;
 
             if (fileList[file].type === "f" || fileList[file].type === "nf") { // Create a file row
-                var downloadURL = [window.location.protocol, "//", window.location.host, "/get", encodeURIComponent(id)].join("");
+                var downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
                 var addProgress = "";
 
                 if (fileList[file].type === "nf") {
                     addProgress = '<div class="progressBar"></div>';
                 }
 
-                list.append([
-                    '<li class="data-row" data-type="file" data-id="', id, '"><span class="icon icon-file"></span>',
-                    '<a class="filelink" href="', downloadURL, '" download="', file, '">', file, '</a>',
-                    '<span class="icon-delete icon"></span><span class="data-info">', size, '</span>',
-                    '</span><span class="right-clear"></span>', addProgress, '</li>'
-                ].join(""));
+                list.append(
+                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
+                    '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                    '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' +
+                    '</span><span class="right-clear"></span>' +  addProgress + '</li>'
+                );
 
             } else {  // Create a folder row
-                list.append([
-                    '<li class="data-row" data-type="folder" data-id="', id, '"><span class="icon icon-folder"></span>',
-                    '<span class="data-name folder">', file, '</span>',
-                    '<span class="icon-delete icon"></span>',
+                list.append(
+                    '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="icon icon-folder"></span>' +
+                    '<span class="data-name folder">' + file + '</span>' +
+                    '<span class="icon-delete icon"></span>' +
                     '</span><span class="right-clear"></span></li>'
-                ].join(""));
+                );
 
                 // Add to list of currently displayed folders
                 folderList[name.toLowerCase()] = true;
@@ -652,7 +652,7 @@
     function bindEvents() {
 
         // Bind mouse event to switch into a folder
-        $(".data-row").unbind("click").click(function (e) {
+        $(".data-row[data-type='folder']").unbind("click").click(function (e) {
             if (e.button !== 0) return;
 
             var destination = $(this).data("id").replace("&amp;", "&");
