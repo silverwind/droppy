@@ -264,7 +264,6 @@
             createFormdata(event.dataTransfer.files);
         });
 
-
         var resizeTimeout;
         $(window).resize(function () {
             clearTimeout(resizeTimeout);
@@ -582,13 +581,15 @@
         if (!last.position()) return;
 
         var margin = smallScreen ? 45 : 80;
+        var space = $(window).width();
         var right = last.position().left + last.width();
 
-        if ((right + 80) > $(window).width()) {
-            var needed = right - $(window).width() + margin;
-            $("#crumbs").animate({"left": -(needed)}, {duration: 200});
+        if ((right + 80) > space) {
+            var needed = right - space + margin;
+            $("#crumbs").animate({"left": -needed}, {duration: 200});
         } else {
-            $("#crumbs").animate({"left": 0}, {duration: 200});
+            if ($("#crumbs").css("left") !== 0)
+                $("#crumbs").animate({"left": 0}, {duration: 200});
         }
     }
 
