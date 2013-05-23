@@ -36,9 +36,9 @@ section, nav {
 
 #page, #new {
     height: 100%;
+    overflow-x: hidden;
     position: absolute;
     width: 100%;
-    overflow-x: hidden;
 }
 
 a {
@@ -59,10 +59,10 @@ input:focus {
 #navigation {
     background-image: linear-gradient(#222, #111);
     display: block;
-    position: fixed;
-    top: 0;
     height: auto;
+    position: fixed;
     text-align: center;
+    top: 0;
     width: 100%;
     z-index: 2;
 }
@@ -81,10 +81,10 @@ input:focus {
     color: #ccc;
     cursor: pointer;
     height: 42px;
+    transition: width, .5s, ease-out;
     user-select: none;
     width: 240px;
     z-index: 6;
-    transition: width, .5s, ease-out;
 }
 
 .button span  {
@@ -101,14 +101,14 @@ input:focus {
 /* ============================== Breadcrumbs ============================== */
 
 #crumbs {
+   background: #222;
    height: 100%;
    height: 34px;
-   position: relative;
    overflow: hidden;
+   position: relative;
    top: 0;
    width: 1000%;
    z-index: 1;
-   background: #222;
 }
 
 #crumbs , #crumbs li {
@@ -116,17 +116,14 @@ input:focus {
 }
 
 #crumbs li {
-    background: #444;
     color: #ccc;
     cursor: pointer;
-    display: block;
     float: left;
     font-size: .9em;
     line-height: 1.6em;
-    padding-right: 1.6em;
     padding-left: 2em;
+    padding-right: 1.6em;
     position: relative;
-    text-decoration: none;
 }
 
 #crumbs li:after {
@@ -139,7 +136,6 @@ input:focus {
     top: 0;
     transform: rotate(45deg) scale(0.707) ;
     width:1.6em;
-
 }
 
 #crumbs li:nth-child(1)       { background: #444; z-index: 10;}
@@ -177,7 +173,7 @@ input:focus {
 #crumbs li:nth-child(8):hover:after { background: #f1a; }
 
 #crumbs li, #crumbs li:after {
-  transition: 0.2s all ease-out;
+  transition: background 0.2s ease-out;
 }
 
 #crumbs li:hover, #crumbs li:hover:after {
@@ -189,21 +185,21 @@ input:focus {
 /* ============================== Main Content ============================= */
 
 #holder {
+    height: 100%;
+    left: -100%;
     position: absolute;
     width: 300%;
-    left: -100%;
-    height: 100%;
 }
 
 #content, #newcontent {
     bottom: 0;
     max-height: 100%;
-    position: absolute;
-    top: 76px;
-    width: 33.3333333%;
     overflow-x: hidden;
     padding: .25em;
+    position: absolute;
     text-shadow: 0 0 1px rgba(128, 128, 128, 0.4);
+    top: 76px;
+    width: 33.3333333%;
 }
 
 #content {
@@ -245,8 +241,8 @@ input:focus {
 }
 
 #upload-time-left {
-    color: #aaa;
     bottom: 4px;
+    color: #aaa;
     font-size: .5em;
     position: absolute;
     width: 100%;
@@ -309,19 +305,19 @@ input:focus {
 }
 
 .filelink, .folderlink {
-    position: absolute;
+    left: 2em;
     overflow: hidden;
+    position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 85%;
-    left: 2em;
 }
 
 .data-row {
+    cursor: pointer;
     height: 1.5em;
     line-height: 1.5em;
     user-select: none;
-    cursor: pointer;
 }
 
 .data-row:not(.animating):hover {
@@ -341,33 +337,33 @@ input:focus {
 
 #empty {
     height: 150px;
-    width: 300px;
+    left: 50%;
+    line-height: 150px;
+    margin-left: -150px;
+    margin-top: -100px;
     position: absolute;
     top: 50%;
-    left: 50%;
-    margin-top: -100px;
-    margin-left: -150px;
-    line-height: 150px;
+    width: 300px;
 }
 
 #empty-text {
-    text-align: center;
-    width: 300px;
-    height: 150px;
     display: inline-block;
-    vertical-align: middle;
+    height: 150px;
     line-height: 1.75em;
+    text-align: center;
+    vertical-align: middle;
+    width: 300px;
 }
 
 #upload-inline {
-    padding: 2px 10px 2px 10px;
     background: #222;
     border-radius: 10px;
     color: #fff;
     cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
+    padding: 2px 10px 2px 10px;
     transition: all, .3s, ease;
+    user-select: none;
+    white-space: nowrap;
 }
 
 #upload-inline .icon {
@@ -383,8 +379,9 @@ input:focus {
 .data-row .icon {
     color: #333;
 }
+
 .icon, .inline-icon {
-  font-family: "icons";
+   font-family: "icons";
 }
 
 .inline-icon {
@@ -394,17 +391,17 @@ input:focus {
 }
 
 .icon-file, .icon-folder {
-    width: 2em;
-    text-align: center;
     float: left;
+    text-align: center;
+    width: 2em;
 }
 
 .icon-delete {
-    width: 2em;
-    text-align: center;
     cursor: pointer;
     float: right;
     position: relative;
+    text-align: center;
+    width: 2em;
 }
 
 .icon-delete:hover {
@@ -426,8 +423,8 @@ input:focus {
 #name-input:-ms-input-placeholder      { color: #555; }
 
 #name-input {
-    border: 2px transparent;
     background: #111;
+    border: 2px transparent;
     color: #bbb;
     font-size: 1em;
     height: 1.44em;
@@ -436,10 +433,10 @@ input:focus {
 }
 
 #name-info {
-    display: none;
-    color: #f55;
     background: #111;
     box-shadow: 0 0 15px 1px #000;
+    color: #f55;
+    display: none;
     font-size: .6em;
     text-shadow: 0 1px 5px rgba(255, 0, 0, 0.5);
 }
@@ -451,41 +448,40 @@ input:focus {
 /* =============================== About box =============================== */
 
 #about {
-    /*display: none;*/
-    left: 50%;
-    top: -203px;
-    margin-left: -200px;
-    height: 200px;
-    box-shadow: 0 0 20px -2px #000;
-    border-radius: 12px;
-    transition: top .4s ease-in-out;
-    position: absolute;
-    width: 400px;
-    color: #bbb;
     background: #222;
+    border-radius: 12px;
+    box-shadow: 0 0 20px -2px #000;
+    color: #bbb;
+    height: 200px;
+    left: 50%;
+    margin-left: -200px;
+    position: absolute;
+    top: -203px;
+    transition: top .4s ease-in-out;
+    width: 400px;
     z-index: 10;
 }
 
 #about-logo {
+    cursor: default;
     float: left;
-    text-align: center;
-    text-shadow: 1px 1px 9 #fff;
     font-size: 6em;
     line-height: 200px;
-    width: 100px;
-    cursor: default;
-    user-select: none;
+    text-align: center;
+    text-shadow: 1px 1px 9 #fff;
     transition: color .3s ease-in;
+    user-select: none;
+    width: 100px;
 }
 
 #about-content {
+    display: table;
     float: left;
     height: 100%;
-    display: table;
+    padding-right: 1em;
+    padding-top: .25em;
     text-align: left;
     width: 300px;
-    padding-top: .25em;
-    padding-right: 1em;
 }
 
 #about a {
@@ -498,9 +494,9 @@ input:focus {
 }
 
 #about-title {
+    display: table-row;
     font-size: 1.6em;
     height: 25%;
-    display: table-row;
     vertical-align: top;
 }
 
@@ -512,9 +508,9 @@ input:focus {
 }
 
 #about-copy {
+    display: table-row;
     font-size: .7em;
     height: 15%;
-    display: table-row;
     vertical-align: bottom;
 }
 
@@ -531,31 +527,31 @@ input:focus {
 #arrow {
     background: #222;
     border-radius: 6px;
-    cursor: pointer;
     color: #ccc;
+    cursor: pointer;
     height: 100px;
     left: 50%;
     margin-left: -50px;
     position: absolute;
     text-align: center;
     transform: rotateZ(45deg);
+    user-select: none;
     width: 100px;
     z-index: -5;
-    user-select: none;
 }
 
 #arrow.down { top: 115px;}
 #arrow.up   { top: -15px;}
 
 .arrow-text {
-   cursor: pointer;
+    cursor: pointer;
     font-size: 2em;
     left: 50%;
-    text-align: center;
+    line-height: 1em;
     margin-left: -0.5em;
     position: absolute;
+    text-align: center;
     width: 1em;
-    line-height: 1em;
 }
 
 .arrow-text.down { bottom: -38px; }
@@ -578,8 +574,8 @@ input:focus {
 }
 
 #login-container {
-    width: 100%;
     height: 100%;
+    width: 100%;
 }
 
 #login-form, #noscript {
@@ -605,17 +601,17 @@ input:focus {
 }
 
 #login-info {
-    display: none;
-    position: absolute;
-    width: 60%;
-    margin-left:20%;
-    text-align: center;
-    color: #eee;
-    top: .7em;
-    line-height: 1.75em;
-    z-index: 1;
     background: rgba(150, 200, 50, .8);
     border-radius: 20px;
+    color: #eee;
+    display: none;
+    line-height: 1.75em;
+    margin-left:20%;
+    position: absolute;
+    text-align: center;
+    top: .7em;
+    width: 60%;
+    z-index: 1;
 }
 
 .login-input {
@@ -643,21 +639,20 @@ input[type=checkbox] {
 
 input[type=checkbox] + label {
     cursor: pointer;
-    user-select: none;
     line-height: 19px;
+    user-select: none;
 }
 
 input[type=checkbox] + label:before {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAAAaVBMVEUAAAChoqIAAAC3uLikpKSUl5kAAACtra0AAAC6urpmaWuxsbGxsbGWmJqgoKExMTEAAAAAAAAAAACtra27u7u7u7uwsLAAAAAAAACoqKj29/f19vb7+/v+/v73+PjX2Nj8/f36+vr///+/lwrFAAAAGnRSTlMD4QFu2KoCywBtDXV3o+MSBwYMzAVqww4K5HCPibsAAABXSURBVHjavcg3EoAgEADAM+dAlAzy/0faHjO2uuUCF1IjUvARmmgTYuNUQxt8RnxgADrlQtLk5dQHdxf+uj04XC4wBVs0CTFxUTB3lUaG9VDQE3oV6PkAhSEppdIoDmIAAAAASUVORK5CYII=);
     content: "";
     display: inline-block;
     height: 19px;
+    margin-left: 0;
+    margin-right: 6px;
+    margin-top: -3px;
     vertical-align: middle;
     width: 19px;
-
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAAAaVBMVEUAAAChoqIAAAC3uLikpKSUl5kAAACtra0AAAC6urpmaWuxsbGxsbGWmJqgoKExMTEAAAAAAAAAAACtra27u7u7u7uwsLAAAAAAAACoqKj29/f19vb7+/v+/v73+PjX2Nj8/f36+vr///+/lwrFAAAAGnRSTlMD4QFu2KoCywBtDXV3o+MSBwYMzAVqww4K5HCPibsAAABXSURBVHjavcg3EoAgEADAM+dAlAzy/0faHjO2uuUCF1IjUvARmmgTYuNUQxt8RnxgADrlQtLk5dQHdxf+uj04XC4wBVs0CTFxUTB3lUaG9VDQE3oV6PkAhSEppdIoDmIAAAAASUVORK5CYII=);
-    margin-right: 6px;
-    margin-left: 0px;
-    margin-top: -3px;
 }
 
 input[type=checkbox]:checked + label:before {
@@ -666,10 +661,10 @@ input[type=checkbox]:checked + label:before {
 
 #check:after {
     content: "";
+    display: block;
+    height: 19px;
     position: absolute;
     width: 19px;
-    height: 19px;
-    display: block;
 }
 
 #submit {
@@ -686,15 +681,15 @@ input[type=checkbox]:checked + label:before {
     height: 100%;
     line-height: 100%;
     text-shadow: 1px 1px 0 #581;
+    transition: all, .2s, ease-in-out;
     user-select: none;
     width: 100%;
-    transition: all, .2s, ease-in-out;
 }
 
 #submit .icon {
-    margin-right: 10px;
-    font-size: 1.25em;
     display: inline-block;
+    font-size: 1.25em;
+    margin-right: 10px;
     vertical-align: middle;
 }
 
@@ -729,8 +724,8 @@ input[type=checkbox]:checked + label:before {
     }
 
     #crumbs li {
-        padding-right: 1em;
         padding-left: 1.5em;
+        padding-right: 1em;
     }
 }
 
@@ -757,8 +752,8 @@ input[type=checkbox]:checked + label:before {
 
     #crumbs li {
         font-size: .7em;
-        padding-right: 0.75em;
         padding-left: 1em;
+        padding-right: 0.75em;
     }
 
     #crumbs li:first-child {
@@ -774,9 +769,9 @@ input[type=checkbox]:checked + label:before {
 
 @media all and (min-width: 640px) {
     #submit-bg {
-        position: absolute;
         height: 50px;
         left: -50px;
+        position: absolute;
         top: 210px;
         width: 500px;
     }
@@ -794,30 +789,30 @@ input[type=checkbox]:checked + label:before {
     }
 
     #login-form-inner {
+        margin-left: 5%;
+        margin-top: -125px;
         position: absolute;
         top: 50%;
-        margin-top: -125px;
         width: 90%;
-        margin-left: 5%;
     }
 
     #icon-login {
         height: 50%;
-        top: 40%;
         margin-top: -.5em;
+        top: 40%;
     }
 
     #submit-bg {
-        position: fixed;
         bottom: 0;
         left: 0;
-        width: 100%;
         overflow: hidden;
+        position: fixed;
+        width: 100%;
     }
 
     #submit {
-         height: 50px;
          border-radius: 0;
+         height: 50px;
     }
 
     .data-info {
@@ -831,7 +826,6 @@ input[type=checkbox]:checked + label:before {
     .filelink, .folderlink {
         width: 70%;
     }
-
 }
 
 @media all and (max-width: 319px) {

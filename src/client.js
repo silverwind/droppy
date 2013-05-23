@@ -32,6 +32,7 @@
         switch (type) {
         case "main":
             initMainPage();
+
             var navigation = $("#navigation"),
                 about      = $("#about");
 
@@ -195,6 +196,10 @@
             logininfo.fadeOut(300);
         });
 
+        user.unbind("click").click(function () {
+            logininfo.fadeOut(300);
+        });
+
         // Return submits the form
         pass.unbind("keyup").keyup(function (e) {
             if (e.keyCode === 13) {
@@ -247,23 +252,19 @@
         currentFolder = decodeURIComponent(window.location.pathname);
         hasLoggedOut = false;
 
-        fileInput = $(":file").wrap($("<div/>").css({
-            "height"  : 0,
-            "width"   : 0,
-            "overflow": "hidden"
-        }));
-
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
         $(document.documentElement).on("dragover",  function (e) { e.stopPropagation(); e.preventDefault(); });
 
         // jQuery's event handler for drop doesn't get event.dataTransfer
+        // http://bugs.jquery.com/ticket/10756
         $(document.documentElement)[0].addEventListener("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
             createFormdata(event.dataTransfer.files);
         });
 
+        // Debounced window resize event
         var resizeTimeout;
         $(window).resize(function () {
             clearTimeout(resizeTimeout);
@@ -273,6 +274,14 @@
             }, 100);
         });
 
+        // Hide our file input form by wrapping it in a 0 x 0 div
+        fileInput = $(":file").wrap($("<div/>").css({
+            "height"  : 0,
+            "width"   : 0,
+            "overflow": "hidden"
+        }));
+
+        // All file uploads land here
         fileInput.unbind("change").change(function () {
             if ($("#file").val() !== "") {
                 var files = $("#file").get(0).files;
@@ -293,6 +302,7 @@
             }
         });
 
+        // Redirect the upload button click to the real, hidden form
         $("#upload").unbind("click").click(function () {
             fileInput.click();
         });
@@ -303,7 +313,7 @@
 
         // Show popup for folder creation
         $("#add-folder").unbind("click").click(function (e) {
-            if (e.target.id === "name-input") return;
+            if (e.target.id === "name-input") return; // Skip clicks on children
             nameoverlay.fadeToggle(350);
             if (nameoverlay.is(":visible"))
                 nameinput.focus();
@@ -526,15 +536,14 @@
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
 
         if (savedparts) {
-            i = 1;
+            i = 1; // Skip the first element as it's always the same
             while (true) {
                 if (!parts[i] && !savedparts[i]) break;
                 if (parts[i] !== savedparts[i]) {
-                    if (savedparts[i] && !parts[i]) {
+                    if (savedparts[i] && !parts[i])
                         $("#crumbs li:contains(" + savedparts[i] + ")").remove();
-                    } else if (parts[i] && !savedparts[i]) {
+                    else if (parts[i] && !savedparts[i])
                         create(parts[i]);
-                    }
                 }
                 i++;
             }
@@ -545,7 +554,7 @@
                 for (i = 0, len = parts.length; i < len; i++)
                     create(parts[i]);
                 finalize();
-            }, 800);
+            }, 300);
         }
 
         savedparts = parts;
@@ -580,11 +589,11 @@
         var last = $("#crumbs li:last-child");
         if (!last.position()) return;
 
-        var margin = smallScreen ? 45 : 80;
+        var margin = smallScreen ? 50 : 120;
         var space = $(window).width();
         var right = last.position().left + last.width();
 
-        if ((right + 80) > space) {
+        if ((right + margin) > space) {
             var needed = right - space + margin;
             $("#crumbs").animate({"left": -needed}, {duration: 200});
         } else {
@@ -595,7 +604,7 @@
 
     function buildHTML(fileList, root) {
         var folderList = [];
-        var list = $("<ul>");
+        var list = $("<ul></ul>");
         for (var file in fileList) {
             var size = convertToSI(fileList[file].size);
 
@@ -603,24 +612,17 @@
 
             if (fileList[file].type === "f" || fileList[file].type === "nf") { // Create a file row
                 var downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
-                var addProgress = "";
-
-                if (fileList[file].type === "nf") {
-                    addProgress = '<div class="progressBar"></div>';
-                }
-
+                var addProgress = fileList[file].type === "nf" ? '<div class="progressBar"></div>' : "";
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' + addProgress + '</li>'
                 );
-
             } else {  // Create a folder row
                 list.append(
                     '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="icon icon-folder"></span>' +
                     '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span></li>'
                 );
-
                 // Add to list of currently displayed folders
                 folderList[name.toLowerCase()] = true;
             }
@@ -630,10 +632,7 @@
         var items = $(list).children("li");
         items.sort(function (a, b) {
             var result = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
-            if (result !== 0)
-                return result;
-            else
-                return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
+            return result ? result : $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
         });
 
         var count = 0;
@@ -701,9 +700,9 @@
             var green = colors[1];
             var blue  = colors[2];
 
-            if (red > 200)   red = 200;
-            if (green > 200) green = 200;
-            if (blue > 200)  blue = 200;
+            if (red > 180)   red = 180;
+            if (green > 180) green = 180;
+            if (blue > 180)  blue = 180;
 
             if (red < 60)    red = 60;
             if (green < 60)  green = 60;
@@ -714,7 +713,6 @@
     }
 
     function bindEvents() {
-
         // Bind mouse event to switch into a folder
         $(".data-row[data-type='folder']").unbind("click").click(function (e) {
             if (e.button !== 0) return;
@@ -722,7 +720,6 @@
             var destination = $(this).data("id").replace("&amp;", "&");
             updateLocation(destination, true);
         });
-
         // Bind mouse event to delete a file/folder
         $(".icon-delete").unbind("click").click(function (e) {
             if (e.button !== 0 || socketWait) return;
@@ -745,9 +742,7 @@
     }
 
     function convertToSI(bytes) {
-        var step = 0;
-        var units = ["bytes", "KiB", "MiB", "GiB", "TiB"];
-
+        var step = 0, units = ["bytes", "KiB", "MiB", "GiB", "TiB"];
         while (bytes >= 1024) {
             bytes /= 1024;
             step++;
@@ -773,53 +768,43 @@
         i = 0;
 
         while (i < bytes) {
-            k1 =
-              ((string.charCodeAt(i) & 0xff)) |
-              ((string.charCodeAt(++i) & 0xff) << 8) |
-              ((string.charCodeAt(++i) & 0xff) << 16) |
-              ((string.charCodeAt(++i) & 0xff) << 24);
+            k1 = ((string.charCodeAt(i) & 0xff)) |
+                 ((string.charCodeAt(++i) & 0xff) << 8) |
+                 ((string.charCodeAt(++i) & 0xff) << 16) |
+                 ((string.charCodeAt(++i) & 0xff) << 24);
             ++i;
-
             k1 = ((((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16))) & 0xffffffff;
             k1 = (k1 << 15) | (k1 >>> 17);
             k1 = ((((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16))) & 0xffffffff;
-
             h1 ^= k1;
             h1 = (h1 << 13) | (h1 >>> 19);
             h1b = ((((h1 & 0xffff) * 5) + ((((h1 >>> 16) * 5) & 0xffff) << 16))) & 0xffffffff;
             h1 = (((h1b & 0xffff) + 0x6b64) + ((((h1b >>> 16) + 0xe654) & 0xffff) << 16));
         }
-
         k1 = 0;
-
         switch (remainder) {
             case 3: k1 ^= (string.charCodeAt(i + 2) & 0xff) << 16;
             case 2: k1 ^= (string.charCodeAt(i + 1) & 0xff) << 8;
             case 1: k1 ^= (string.charCodeAt(i) & 0xff);
-
             k1 = (((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
             k1 = (k1 << 15) | (k1 >>> 17);
             k1 = (((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
             h1 ^= k1;
         }
-
         h1 ^= string.length;
-
         h1 ^= h1 >>> 16;
         h1 = (((h1 & 0xffff) * 0x85ebca6b) + ((((h1 >>> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
         h1 ^= h1 >>> 13;
         h1 = ((((h1 & 0xffff) * 0xc2b2ae35) + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16))) & 0xffffffff;
         h1 ^= h1 >>> 16;
 
-        var integer = h1 >>> 0;
+        var result = h1 >>> 0;
         var colors = [];
-
         var j = 3;
         while (j) {
-            colors[--j] = integer & (255);
-            integer = integer >> 8;
+            colors[--j] = result & (255);
+            result = result >> 8;
         }
         return colors;
     }
-
 }(jQuery));
