@@ -30,6 +30,29 @@
         var newPage = $("#new"), oldPage = $("#page");
 
         switch (type) {
+        case "main":
+            initMainPage();
+            var navigation = $("#navigation"),
+                about      = $("#about"),
+                current    = $("#current");
+
+            // Set pre-animation positions
+            navigation.css("top", "-42px");
+            about.css("top", "-250px");
+            current.css("left", "-100%");
+            oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
+            current.animate({"left": 0}, {duration: 1000, queue: false});
+            navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
+                finalize();
+                // Remove inline style caused by animation
+                navigation.removeAttr("style");
+                about.removeAttr("style");
+                about.animate({"top": "-200px"}, {duration: 500, queue: false, complete: function () {
+                    $(this).removeAttr("style");
+                    current.removeAttr("style");
+                }});
+            }});
+            break;
         case "auth":
             initAuthPage();
 
@@ -45,7 +68,7 @@
             oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
             loginform.animate({"opacity": 1}, {duration: 250, queue: false});
             loginform.animate({"top": to}, {duration: 250, queue: false, complete : function () {
-                switchID();
+                finalize();
                 body.removeAttr("style");
                 loginform.removeAttr("style");
                 if (hasLoggedOut) {
@@ -55,31 +78,10 @@
                 }
             }});
             break;
-        case "main":
-            initMainPage();
-            var navigation = $("#navigation"),
-                about      = $("#about");
-
-            // Set pre-animation positions
-            navigation.css("top", "-42px");
-            about.css("top", "-250px");
-
-            oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
-            navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
-                switchID();
-
-                // Remove inline style caused by animation
-                navigation.removeAttr("style");
-                about.animate({"top": "-200px"}, {duration: 500, queue: false, complete: function () {
-                    $(this).removeAttr("style");
-                }});
-            }});
-            break;
         }
 
-
         // Switch ID of #new for further animation
-        function switchID() {
+        function finalize() {
             oldPage.remove();
             newPage.attr("id", "page");
         }
@@ -176,7 +178,7 @@
     // Wait 1 second for a socket response before unlocking the UI again
     function startSocketWait() {
         socketWait = true;
-        setTimeout(function () {
+        window.setTimeout(function () {
             socketWait = false;
         }, 1000);
     }
@@ -436,7 +438,7 @@
             uperc.html("100%");
 
             utl.html("finished");
-            ui.animate({top: "-50px"}, 250);
+            ui.animate({top: "-85px"}, 250);
         }
 
         function uploadProgress(bytesSent, bytesTotal) {
@@ -505,51 +507,57 @@
 
         // pushState causes Chrome's UI to flicker
         // http://code.google.com/p/chromium/issues/detail?id=50298
-        window.history.pushState(true, true, currentFolder);
+        window.history.pushState(null, null, currentFolder);
     }
 
+    var savedparts;
     function updateCrumbs(path) {
         updateTitle(path, true);
         var parts = path.split("/");
-        parts[0] = "droppy";
+        var i = 0, len, home = "";
 
-        // Remove trailing empty string
-        if (parts[parts.length - 1] === "") parts.pop();
+        parts[0] = '<span class="icon">' + home + '<span>';
+        if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
 
-        // Build the list
-        var html = '<ul id="crumbs">';
-        var elementPath = "";
-
-        for (var i = 0, len = parts.length; i < len; i++) {
-            if (parts[i] === "droppy") {
-                html += '<li data-path="/">' + parts[i] + '</li>';
-            } else {
-                elementPath += "/" + parts[i];
-                html += '<li data-path="' + elementPath + '">' + parts[i] + '</li>';
+        if (savedparts) {
+            i = 1;
+            while (true) {
+                if (!parts[i] && !savedparts[i]) break;
+                if (parts[i] !== savedparts[i]) {
+                    if (savedparts[i] && !parts[i]) {
+                        $("#crumbs li:contains(" + savedparts[i] + ")").remove();
+                    } else if (parts[i] && !savedparts[i]) {
+                        create(parts[i]);
+                    }
+                }
+                i++;
             }
+        } else {
+            for (i = 0, len = parts.length; i < len; i++)
+                create(parts[i]);
         }
 
-        html += '<div></div></ul>';
+        savedparts = parts;
 
-        var oldLen = $("#current ul li").length;
-
-        // Load crumbs into view
-        $("#current").html(html);
-
-        // Animate last added element
-        if ($("#crumbs li").length > oldLen) {
-            var last = $("#crumbs li:last");
-            last.css("opacity", 0);
-            last.animate({"opacity" : 1}, 200);
+        function create(name) {
+            var li = $("<li>" + name + "</li>");
+            li.click(function (e) {
+                if (e.button !== 0 || animatingData) return;
+                var data = $(this).html();
+                var destination;
+                if (data.indexOf(home) > -1)
+                    destination = "/";
+                else
+                    destination = currentFolder.match(new RegExp(".*" + data))[0];
+                updateLocation(destination, true);
+            });
+            li.attr("class", "out");
+            $("#crumbs").append(li);
+            $(".out").switchClass("out", "in", 300);
+            window.setTimeout(function () {
+                $(".in").removeClass();
+            }, 300);
         }
-
-        // Folder switching by breadcrumb
-        $("#crumbs li").unbind("click").click(function (e) {
-            if (e.button !== 0 || animatingData) return;
-            e.preventDefault();
-            var destination = $(this).data("path");
-            updateLocation(destination, true);
-        });
     }
 
     function buildHTML(fileList, root) {
@@ -608,7 +616,7 @@
         if (count > 0)
             loadContent(list);
         else {
-            $("#content").html('<div id="sorry"><div id="sorry-icon" class="icon"></div><div id="sorry-text-outer"><div id="sorry-text">Sorry, there appears to be nothing here. Why not start by<span id="upload-inline"><span class="icon"></span> adding files</span>?</div></div></div>');
+            $("#content").html('<div id="empty"><div id="empty-text">There appears to be nothing here. Drop files into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>');
             $("#upload-inline").unbind("click").click(function () {
                 fileInput.click();
             });
@@ -625,7 +633,7 @@
             var holder = $("#holder");
             animatingData = true;
             $(".data-row").addClass("animating");
-            $("#content").css("overflow-y", "hidden");
+
             holder.append($("<section id='newcontent'></section>"));
             $("#newcontent").attr("class", nav === "forward" ? "new-right" : "new-left");
             $("#newcontent").html(list);
@@ -633,10 +641,9 @@
             holder.addClass(nav === "forward" ? "to-left" : "to-right", 200, "swing", function () {
                 $("#content").remove();
                 $("#newcontent").attr("id", "content");
-                $("#newcontent").removeAttr("class");
+                $("#content").removeAttr("class");
                 holder.removeAttr("class");
                 $(".data-row").removeClass("animating");
-                $("#content").css("overflow-y", "scroll");
                 animatingData = false;
                 finalize();
             });
