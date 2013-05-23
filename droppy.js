@@ -33,7 +33,6 @@
   - Rework client <-> server communication so that the server has more
     control over the client's current location in the file system
   - Public file links (using a URL shortening mechanism)
-  - Recursive deleting of folders
   - Drag and drop moving of files/folders
   - Find a solution to not send login data in cleartext over HTTP.
   - IE9 compatibilty, if possible
@@ -44,9 +43,9 @@
 
 var cache        = {},
     clients      = {},
-    watchedDirs  = {},
-    dirs         = {},
     db           = {},
+    dirs         = {},
+    watchedDirs  = {},
     server       = null,
     config       = null;
 
@@ -58,6 +57,7 @@ var autoprefixer    = require("autoprefixer"),
     mime            = require("mime"),
     path            = require("path"),
     querystring     = require("querystring"),
+    rmdir           = require("rmdir"),
     uglify          = require("uglify-js"),
     util            = require("util"),
     WebSocketServer = require("ws").Server,
@@ -266,7 +266,7 @@ function setupSocket(server) {
                                     if (err) logerror(err);
                                 });
                             } else if (stats.isDirectory()) {
-                                fs.rmdir(dir, function (err) {
+                                rmdir(dir, function (err) {
                                     if (err) logerror(err);
                                     readDirectory(clients[cookie].directory, function () {
                                         sendMessage(cookie, "UPDATE_FILES");

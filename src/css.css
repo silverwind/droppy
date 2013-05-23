@@ -20,7 +20,6 @@ a, body, div, header, html, input, label, li, nav, p, section, span, ul {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    outline: none;
 }
 
 body {
@@ -39,6 +38,7 @@ section, nav {
     height: 100%;
     position: absolute;
     width: 100%;
+    overflow-x: hidden;
 }
 
 a {
@@ -48,6 +48,10 @@ a {
 
 li {
     list-style: none;
+}
+
+input:focus {
+    outline: none;
 }
 
 /* ========================== Main Page Navigation ========================= */
@@ -76,9 +80,7 @@ li {
 .button {
     color: #ccc;
     cursor: pointer;
-    font-size: 1em;
-    line-height: 1em;
-    max-height: 42px;
+    height: 42px;
     user-select: none;
     width: 240px;
     z-index: 6;
@@ -87,8 +89,7 @@ li {
 
 .button span  {
     display: inline-block;
-    line-height:2em;
-    margin-top: -2px;
+    line-height: 42px;
     vertical-align: middle;
 }
 
@@ -99,33 +100,19 @@ li {
 
 /* ============================== Breadcrumbs ============================== */
 
-#current {
-    height: 34px; /* TODO: Handle overflow by scrolling */
-    overflow: hidden;
-    position: relative;
-    top: 0;
-    width: 200%;
-    z-index: 1;
-}
-
-
 #crumbs {
-   width: 100%;
    height: 100%;
+   height: 34px;
+   position: relative;
+   overflow: hidden; /* TODO: Handle overflow by auto-scrolling */
+   top: 0;
+   width: 100%;
+   z-index: 1;
+   background: #222;
 }
 
 #crumbs , #crumbs li {
     float:left;
-}
-
-#crumbs:after {
-    background: #222;
-    content: "";
-    height: 100%;
-    position: absolute;
-    width: 200%;
-    left: -50%;
-    z-index: -5;
 }
 
 #crumbs li {
@@ -202,16 +189,17 @@ li {
 /* ============================== Main Content ============================= */
 
 #holder {
-    position: fixed;
+    position: absolute;
     width: 300%;
     left: -100%;
     height: 100%;
 }
+
 #content, #newcontent {
     bottom: 0;
     max-height: 100%;
     position: absolute;
-    top: 77px;
+    top: 76px;
     width: 33.3333333%;
     overflow-x: hidden;
     padding: .25em;
@@ -257,7 +245,7 @@ li {
 }
 
 #upload-time-left {
-  color: #aaa;
+    color: #aaa;
     bottom: 4px;
     font-size: .5em;
     position: absolute;
@@ -320,7 +308,7 @@ li {
     width: 0;
 }
 
-.filelink {
+.filelink, .folderlink {
     position: absolute;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -341,33 +329,14 @@ li {
     border-radius: 6px;
 }
 
-.data-row:not(.animating):hover span {
-    background: #222;
-    color: #ddd;
-}
-
+.data-row:not(.animating):hover span,
 .data-row:not(.animating):hover a {
     color: #ddd;
-}
-
-.data-name {
-    color: #222;
-    float: left;
-    left: .25em;
-    overflow: hidden;
-    position: relative;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 85%;
 }
 
 .data-info {
     float: right;
     white-space: nowrap;
-}
-
-.right-clear {
-    clear: both;
 }
 
 #empty {
@@ -422,17 +391,16 @@ li {
     line-height: 2em;
     padding-right: 4px;
     padding-top: 2px;
-    text-decoration: inherit;
 }
 
 .icon-file, .icon-folder {
-    width: 1.5em;
+    width: 2em;
     text-align: center;
     float: left;
 }
 
 .icon-delete {
-    width: 1.5em;
+    width: 2em;
     text-align: center;
     cursor: pointer;
     float: right;
@@ -448,15 +416,14 @@ li {
 #name-overlay {
     display: none;
     position: relative;
-    text-align: center;
-    top: 0;
-    width: 220px;
+    top: -4px;
+    width: 240px;
     z-index: 8;
 }
 
-#name-input::-moz-placeholder {
-   color: #666;
-}
+#name-input::-moz-placeholder          { color: #555; }
+#name-input::-webkit-input-placeholder { color: #555; }
+#name-input:-ms-input-placeholder      { color: #555; }
 
 #name-input {
     border: 2px transparent;
@@ -484,6 +451,7 @@ li {
 /* =============================== About box =============================== */
 
 #about {
+    /*display: none;*/
     left: 50%;
     top: -203px;
     margin-left: -200px;
@@ -491,7 +459,7 @@ li {
     box-shadow: 0 0 20px -2px #000;
     border-radius: 12px;
     transition: top .4s ease-in-out;
-    position: fixed;
+    position: absolute;
     width: 400px;
     color: #bbb;
     background: #222;
@@ -570,7 +538,7 @@ li {
     margin-left: -50px;
     position: absolute;
     text-align: center;
-    transform: rotate(45deg);
+    transform: rotateZ(45deg);
     width: 100px;
     z-index: -5;
     user-select: none;
@@ -761,8 +729,8 @@ input[type=checkbox]:checked + label:before {
     }
 
     #crumbs li {
-        padding-right: 0.9em;
-        padding-left: 1em;
+        padding-right: 1em;
+        padding-left: 1.5em;
     }
 }
 
@@ -779,8 +747,12 @@ input[type=checkbox]:checked + label:before {
         top: 69px;
     }
 
-    #current {
+    #crumbs, #name-input {
         height: 27px;
+    }
+
+    #name-overlay {
+        top: -6px;
     }
 
     #crumbs li {
@@ -852,11 +824,11 @@ input[type=checkbox]:checked + label:before {
         display: none;
     }
 
-    #content {
+    #content, #newcontent {
         font-size: .8em !important;
     }
 
-    .filelink, .data-name {
+    .filelink, .folderlink {
         width: 70%;
     }
 

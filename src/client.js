@@ -33,15 +33,12 @@
         case "main":
             initMainPage();
             var navigation = $("#navigation"),
-                about      = $("#about"),
-                current    = $("#current");
+                about      = $("#about");
 
             // Set pre-animation positions
             navigation.css("top", "-42px");
             about.css("top", "-250px");
-            current.css("left", "-100%");
             oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
-            current.animate({"left": 0}, {duration: 1000, queue: false});
             navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
                 finalize();
                 // Remove inline style caused by animation
@@ -49,7 +46,6 @@
                 about.removeAttr("style");
                 about.animate({"top": "-200px"}, {duration: 500, queue: false, complete: function () {
                     $(this).removeAttr("style");
-                    current.removeAttr("style");
                 }});
             }});
             break;
@@ -297,7 +293,8 @@
             nameoverlay = $("#name-overlay");
 
         // Show popup for folder creation
-        $("#add-folder").unbind("click").click(function () {
+        $("#add-folder").unbind("click").click(function (e) {
+            if (e.target.id === "name-input") return;
             nameoverlay.fadeToggle(350);
             if (nameoverlay.is(":visible"))
                 nameinput.focus();
@@ -533,8 +530,11 @@
                 i++;
             }
         } else {
-            for (i = 0, len = parts.length; i < len; i++)
-                create(parts[i]);
+            // Delay initial slide-in
+            window.setTimeout(function () {
+                for (i = 0, len = parts.length; i < len; i++)
+                    create(parts[i]);
+            }, 800);
         }
 
         savedparts = parts;
@@ -579,16 +579,13 @@
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                    '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' +
-                    '</span><span class="right-clear"></span>' +  addProgress + '</li>'
+                    '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' + addProgress + '</li>'
                 );
 
             } else {  // Create a folder row
                 list.append(
                     '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="icon icon-folder"></span>' +
-                    '<span class="data-name folder">' + file + '</span>' +
-                    '<span class="icon-delete icon"></span>' +
-                    '</span><span class="right-clear"></span></li>'
+                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span></li>'
                 );
 
                 // Add to list of currently displayed folders

@@ -13,6 +13,7 @@
     "uglify-js": "~2.3.5",
     "clean-css": "~1.0.2",
     "autoprefixer": "~0.4.20130515",
+    "rmdir": "~1.0.0",
     "grunt-exec": "~0.4.0",
     "grunt": "~0.4.1"
   },
