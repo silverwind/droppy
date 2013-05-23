@@ -28,8 +28,6 @@
   - Thumbnail icons for images
   - Async downloads through FileSystem API
   - User privilege levels and a admin panel to add/remove users
-  - Restyle the folder view
-  - Handle breadcrumb overflow in layout
   - Rework client <-> server communication so that the server has more
     control over the client's current location in the file system
   - Public file links (using a URL shortening mechanism)

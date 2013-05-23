@@ -264,6 +264,16 @@
             createFormdata(event.dataTransfer.files);
         });
 
+
+        var resizeTimeout;
+        $(window).resize(function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function () {
+                smallScreen = $(window).width() < 640;
+                checkBreadcrumbWidth();
+            }, 100);
+        });
+
         fileInput.unbind("change").change(function () {
             if ($("#file").val() !== "") {
                 var files = $("#file").get(0).files;
@@ -529,11 +539,13 @@
                 }
                 i++;
             }
+            finalize();
         } else {
             // Delay initial slide-in
             window.setTimeout(function () {
                 for (i = 0, len = parts.length; i < len; i++)
                     create(parts[i]);
+                finalize();
             }, 800);
         }
 
@@ -550,13 +562,33 @@
                 else
                     destination = currentFolder.match(new RegExp(".*" + data))[0];
                 updateLocation(destination, true);
+                checkBreadcrumbWidth();
             });
             li.attr("class", "out");
             $("#crumbs").append(li);
+        }
+
+        function finalize() {
             $(".out").switchClass("out", "in", 300);
             window.setTimeout(function () {
                 $(".in").removeClass();
+                checkBreadcrumbWidth();
             }, 300);
+        }
+    }
+
+    function checkBreadcrumbWidth() {
+        var last = $("#crumbs li:last-child");
+        if (!last.position()) return;
+
+        var margin = smallScreen ? 45 : 80;
+        var right = last.position().left + last.width();
+
+        if ((right + 80) > $(window).width()) {
+            var needed = right - $(window).width() + margin;
+            $("#crumbs").animate({"left": -(needed)}, {duration: 200});
+        } else {
+            $("#crumbs").animate({"left": 0}, {duration: 200});
         }
     }
 
