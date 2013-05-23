@@ -10,7 +10,7 @@
     "ws": "~0.4.25",
     "formidable": "~1.0.14",
     "mime": "~1.2.9",
-    "uglify-js": "~2.3.5",
+    "uglify-js": "~2.3.6",
     "clean-css": "~1.0.2",
     "autoprefixer": "~0.4.20130515",
     "rmdir": "~1.0.0",
