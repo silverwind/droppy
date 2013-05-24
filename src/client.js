@@ -26,8 +26,8 @@
 
     // Switch the body's content with an animation
     function load(type, data) {
-        $("body").append('<div id="new">' + data + '</div>');
-        var newPage = $("#new"), oldPage = $("#page");
+        $("body").append('<div id="newpage">' + data + '</div>');
+        var newPage = $("#newpage"), oldPage = $("#page");
 
         switch (type) {
         case "main":
@@ -183,12 +183,13 @@
 //  Authentication page JS
 // ============================================================================
     function initAuthPage() {
-        var user      = $("#user"),
+        var form      = $("#form"),
+            loginform = $("#login-form"),
+            logininfo = $("#login-info"),
             pass      = $("#pass"),
-            form      = $("#loginform"),
-            submit    = $("#submit"),
             remember  = $("#remember"),
-            logininfo = $("#login-info");
+            submit    = $("#submit"),
+            user      = $("#user");
 
         user.focus();
 
@@ -221,11 +222,13 @@
 
         user.unbind("focus").focus(function () {
             submit.removeClass("invalid");
+            loginform.removeClass("invalid");
             logininfo.fadeOut(300);
         });
 
         pass.unbind("focus").focus(function () {
             submit.removeClass("invalid");
+            loginform.removeClass("invalid");
             logininfo.fadeOut(300);
         });
 
@@ -235,10 +238,13 @@
                 url: "/login",
                 data: form.serialize(),
                 success: function (data) {
-                    if (data === "OK")
+                    if (data === "OK") {
                         getPage();
-                    else
+                    } else {
                         submit.attr("class", "invalid");
+                        loginform.attr("class", "invalid");
+                    }
+
                 }
             });
         }
