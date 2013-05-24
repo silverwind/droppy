@@ -188,9 +188,13 @@ function createListener() {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    watchedDirs[removeFilePath(folder)] = fs.watch(folder, debounce(function () {
-        updateClients(folder);
-    }), config.readInterval);
+    try {
+        watchedDirs[removeFilePath(folder)] = fs.watch(folder, debounce(function () {
+            updateClients(folder);
+        }), config.readInterval);
+    } catch (err) {
+        logerror("Error trying to watch ", folder, "\n\n", err);
+    }
 
     function updateClients(folder) {
         var clientsToUpdate = [];
@@ -199,7 +203,7 @@ function createWatcher(folder) {
             if (clientDir === removeFilePath(folder)) {
                 clientsToUpdate.push(client);
                 readDirectory(clientDir, function () {
-                    sendMessage(clientsToUpdate.pop(), "UPDATE_FILES");
+                    sendMessage(clientsToUpdate.pop(), "UPDATE_FILES", true);
                 });
             }
         }
@@ -241,14 +245,14 @@ function setupSocket(server) {
                 dir = dir.replace(/&amp;/g, "&");
                 clients[cookie] = { "directory": dir, "ws": ws};
                 readDirectory(dir, function () {
-                    sendMessage(cookie, "UPDATE_FILES");
+                    sendMessage(cookie, "UPDATE_FILES", true);
                 });
                 break;
             case "CREATE_FOLDER":
                 fs.mkdir(addFilePath(dir), config.mode, function (err) {
                     if (err) logerror(err);
                     readDirectory(clients[cookie].directory, function () {
-                        sendMessage(cookie, "UPDATE_FILES");
+                        sendMessage(cookie, "UPDATE_FILES", true);
                     });
                 });
                 break;
@@ -267,7 +271,7 @@ function setupSocket(server) {
                                 rmdir(dir, function (err) {
                                     if (err) logerror(err);
                                     readDirectory(clients[cookie].directory, function () {
-                                        sendMessage(cookie, "UPDATE_FILES");
+                                        sendMessage(cookie, "UPDATE_FILES", true);
                                     });
                                 });
                             }
@@ -289,7 +293,7 @@ function setupSocket(server) {
                     } catch (err) {
                         logerror(err);
                         readDirectory(clients[cookie].directory, function () {
-                            sendMessage(cookie, "UPDATE_FILES");
+                            sendMessage(cookie, "UPDATE_FILES", true);
                         });
                     }
                 } else {
@@ -326,19 +330,21 @@ function switchClientFolder(cookie, dir, ws) {
 
     updateWatchers(dir, function (ok) {
         // Send client back to root in case the requested directory can't be read
+        var msg = ok ? "UPDATE_FILES" : "NEW_FOLDER";
         if (!ok) {
             dir = "/";
             clients[cookie].directory = dir;
         }
 
-        if (!ws)
-            waitOnWebsocket(cookie, dir);
-        else
+        if (!ws) {
+            waitOnWebsocket(cookie, dir, msg);
+        } else {
             readDirectory(dir, function () {
-                sendMessage(cookie, "NEW_FOLDER");
+                sendMessage(cookie, msg, true);
             });
+        }
 
-        function waitOnWebsocket(cookie, dir) {
+        function waitOnWebsocket(cookie, dir, msg) {
             var runtime = 0;
             // Wait 10 seconds for a client to open the websocket after a direct folder navigation
             var retry = setInterval(function () {
@@ -346,7 +352,7 @@ function switchClientFolder(cookie, dir, ws) {
                 if (clients[cookie].ws) {
                     clearInterval(retry);
                     readDirectory(dir, function () {
-                        sendMessage(cookie, "NEW_FOLDER");
+                        sendMessage(cookie, msg, true);
                     });
                 }
                 runtime += 50;
@@ -392,15 +398,15 @@ function checkWatchedDirs() {
 }
 //-----------------------------------------------------------------------------
 // Send file list JSON over websocket
-function sendMessage(cookie, messageType) {
+function sendMessage(cookie, messageType, attachData) {
     // Dont't send if the socket isn't open
     if (!clients[cookie].ws._socket) return;
     var dir = clients[cookie].directory;
-    var data = JSON.stringify({
+    var data = attachData ? JSON.stringify({
         "type"  : messageType,
         "folder": dir,
         "data"  : dirs[dir]
-    });
+    }) : false;
     clients[cookie].ws.send(data, function (err) {
         if (err) logerror(err);
     });
@@ -683,7 +689,7 @@ function handleUploadRequest(req, res) {
                         deletecount++;
                         if (err) logerror(err);
                         if (deletecount === count) {
-                            sendMessage(cookie, "UPLOAD_DONE");
+                            sendMessage(cookie, "UPLOAD_DONE", false);
                         }
                     });
                 });

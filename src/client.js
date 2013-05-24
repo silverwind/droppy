@@ -1,17 +1,12 @@
 (function ($) {
     "use strict";
 
-    // debug logging
-    var debug = false;
-
+    var debug = false; // debug logging
     var smallScreen = $(window).width() < 640;
-
-    // "globals"
     var folderList, socketOpen, socketWait, isUploading, hasLoggedOut, fileInput,
-        currentFolder, socket, socketTimeout, activeFiles, animatingData;
+        currentFolder, socket, activeFiles, animatingData, savedParts;
 
-    // Separetely init the variables so we can init them on demand
-    initVariables();
+    initVariables(); // Separately init the variables so we can init them on demand
 // ============================================================================
 //  Page loading functions
 // ============================================================================
@@ -77,7 +72,7 @@
             break;
         }
 
-        // Switch ID of #new for further animation
+        // Switch ID of #newpage for further animation
         function finalize() {
             oldPage.remove();
             newPage.attr("id", "page");
@@ -92,9 +87,9 @@
         if (socketOpen) return;
 
         if (document.location.protocol === "https:")
-            socket = new WebSocket('wss://' + document.location.host);
+            socket = new WebSocket("wss://" + document.location.host);
         else
-            socket = new WebSocket('ws://' + document.location.host);
+            socket = new WebSocket("ws://" + document.location.host);
 
         socket.onopen = function () {
             socketOpen = true;
@@ -102,29 +97,28 @@
             updateLocation(currentFolder || "/", false);
 
             // Close the socket to prevent Firefox errors
-            $(window).on('beforeunload', function () {
+            $(window).on("beforeunload", function () {
                 socket.close();
                 socketOpen = false;
             });
         };
 
         socket.onmessage = function (event) {
+            socketWait = false;
             var msg = JSON.parse(event.data);
             switch (msg.type) {
 
             case "UPDATE_FILES":
                 if (isUploading) return;
-
                 if (msg.folder === currentFolder.replace(/&amp;/, "&")) {
                     updateCrumbs(msg.folder);
                     activeFiles = msg.data;
                     buildHTML(msg.data, msg.folder);
-                    socketWait = false;
                 }
                 break;
             case "UPLOAD_DONE":
                 isUploading = false;
-                updateTitle(currentFolder, true);
+                updateTitle(currentFolder, true); // Reset title
                 sendMessage("REQUEST_UPDATE", currentFolder);
                 break;
             case "NEW_FOLDER":
@@ -132,34 +126,31 @@
                 activeFiles = msg.data;
                 updateLocation(msg.folder);
                 buildHTML(msg.data, msg.folder);
-                socketWait = false;
                 break;
             case "UNAUTHORIZED":
-                // Set the socketTimeout to its maximum value to stop retries
-                socketTimeout = 51200;
+                // Set hasLoggedOut to stop reconnects, will get cleared on login
+                hasLoggedOut = true;
                 break;
             }
         };
 
         socket.onclose = function () {
             socketOpen = false;
-
-            // Restart a closed socket. Firefox closes it on every download..
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-
-            if (!socketTimeout) socketTimeout = 50;
-            if (socketTimeout < 51200) {
-                // This gives up connecting after 10 failed reconnects with increasing intervals
-                window.setTimeout(function () {
+            // Restart a closed socket in case it unexpectedly closes,
+            // and give up after 20 seconds increasingly higher intervals.
+            // Related: https://bugzilla.mozilla.org/show_bug.cgi?id=858538
+            (function retry(timout) {
+                if (timout === 20480 || hasLoggedOut) {
+                    return;
+                } else {
                     try {
-                        if (!hasLoggedOut) socket.socket.connect();
+                        socket.socket.connect();
                     } catch (e) {
                         log("socket error: " + e);
-                    } finally {
-                        socketTimeout *= 2;
                     }
-                }, socketTimeout);
-            }
+                    window.setTimeout(retry, timout * 2, timout * 2);
+                }
+            })(10);
         };
     }
 
@@ -172,12 +163,13 @@
         }));
     }
 
-    // Wait 1 second for a socket response before unlocking the UI again
+
     function startSocketWait() {
         socketWait = true;
+        // Unlock the UI in case we get no socket resonse after waiting for 2 seconds
         window.setTimeout(function () {
             socketWait = false;
-        }, 1000);
+        }, 2000);
     }
 // ============================================================================
 //  Authentication page JS
@@ -239,6 +231,7 @@
                 data: form.serialize(),
                 success: function (data) {
                     if (data === "OK") {
+                        hasLoggedOut = false;
                         getPage();
                     } else {
                         submit.attr("class", "invalid");
@@ -274,7 +267,7 @@
         var resizeTimeout;
         $(window).resize(function () {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function () {
+            resizeTimeout = window.setTimeout(function () {
                 smallScreen = $(window).width() < 640;
                 checkBreadcrumbWidth();
             }, 100);
@@ -330,9 +323,7 @@
 
         // Handler for the input of the folder name
         nameinput.unbind("keyup").keyup(function (e) {
-            if (e.keyCode === 27) // Escape Key
-                nameoverlay.toggle();
-
+            if (e.keyCode === 27) nameoverlay.toggle(); // Escape Key
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
             var folderExists = folderList[input.toLowerCase()] === true;
@@ -341,17 +332,14 @@
                 info.fadeOut(350);
                 return;
             }
-
             if (!valid || folderExists) {
                 nameinput.addClass("invalid");
                 info.html(folderExists ? "File/Directory already exists!" : "Invalid characters in filename!");
                 info.fadeIn(350);
                 return;
             }
-
             nameinput.removeClass("invalid");
             info.fadeOut(350);
-
             if (e.keyCode === 13) { // Return Key
                 if (currentFolder === "/")
                     sendMessage("CREATE_FOLDER", "/" + input);
@@ -392,7 +380,7 @@
             socket.close();
             deleteCookie("sid");
             hasLoggedOut = true;
-            initVariables(); // Reset some vars to their init state
+            initVariables(); // Reset vars to their init state
             getPage();
         });
         // ============================================================================
@@ -434,10 +422,10 @@
             };
         }
 
-        var start, progressBars;
-        var ui = $("#upload-info");
-        var utl = $("#upload-time-left");
-        var uperc = $("#upload-percentage");
+        var start, progressBars,
+            infobox  = $("#upload-info"),
+            timeleft = $("#upload-time-left"),
+            uperc    = $("#upload-percentage");
 
         function uploadInit() {
             start = new Date().getTime();
@@ -449,8 +437,8 @@
             updateTitle("0%");
             uperc.html("0%");
 
-            utl.html("");
-            ui.animate({top: "-2px"}, 250);
+            timeleft.html("");
+            infobox.animate({top: "-2px"}, 250);
         }
 
         function uploadDone() {
@@ -459,8 +447,8 @@
             updateTitle("100%");
             uperc.html("100%");
 
-            utl.html("finished");
-            ui.animate({top: "-85px"}, 250);
+            timeleft.html("finished");
+            infobox.animate({top: "-85px"}, 250);
         }
 
         function uploadProgress(bytesSent, bytesTotal) {
@@ -476,13 +464,13 @@
             var secs = (estimate - elapsed) / 1000;
 
             if (secs > 120) {
-                utl.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
+                timeleft.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
             } else if (secs > 60) {
-                utl.html("less than 2 minutes left");
+                timeleft.html("less than 2 minutes left");
             } else if (secs < 1.5) {
-                utl.html("less than a second left");
+                timeleft.html("less than a second left");
             } else {
-                utl.html(Math.round(secs) + " seconds left");
+                timeleft.html(Math.round(secs) + " seconds left");
             }
         }
     }
@@ -523,7 +511,6 @@
             nav = "same";
         else
             nav = "back";
-
         currentFolder = path;
         sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
 
@@ -532,7 +519,6 @@
         window.history.pushState(null, null, currentFolder);
     }
 
-    var savedparts;
     function updateCrumbs(path) {
         updateTitle(path, true);
         var parts = path.split("/");
@@ -541,14 +527,14 @@
         parts[0] = '<span class="icon">' + home + '<span>';
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
 
-        if (savedparts) {
+        if (savedParts) {
             i = 1; // Skip the first element as it's always the same
             while (true) {
-                if (!parts[i] && !savedparts[i]) break;
-                if (parts[i] !== savedparts[i]) {
-                    if (savedparts[i] && !parts[i])
-                        $("#crumbs li:contains(" + savedparts[i] + ")").remove();
-                    else if (parts[i] && !savedparts[i])
+                if (!parts[i] && !savedParts[i]) break;
+                if (parts[i] !== savedParts[i]) {
+                    if (savedParts[i] && !parts[i])
+                        $("#crumbs li:contains(" + savedParts[i] + ")").remove();
+                    else if (parts[i] && !savedParts[i])
                         create(parts[i]);
                 }
                 i++;
@@ -563,7 +549,7 @@
             }, 300);
         }
 
-        savedparts = parts;
+        savedParts = parts;
 
         function create(name) {
             var li = $("<li>" + name + "</li>");
@@ -668,7 +654,6 @@
             var holder = $("#holder");
             animatingData = true;
             $(".data-row").addClass("animating");
-
             holder.append($("<section id='newcontent'></section>"));
             $("#newcontent").attr("class", nav === "forward" ? "new-right" : "new-left");
             $("#newcontent").html(list);
@@ -743,8 +728,8 @@
         socketWait = false;
         isUploading = false;
         currentFolder = false;
-        socketTimeout = false;
         activeFiles = false;
+        savedParts = false;
     }
 
     function convertToSI(bytes) {
@@ -756,14 +741,8 @@
         return [(step === 0) ? bytes : bytes.toFixed(2), units[step]].join(" ");
     }
 
-    function log(msg) {
-        if (debug) {
-            console.log(msg);
-        }
-    }
-
     // get RGB color values for a given string
-    // based on : https://github.com/garycourt/murmurhash-js
+    // based on https://github.com/garycourt/murmurhash-js
     function colorFromString(string) {
         var remainder, bytes, h1, h1b, c1, c2, k1, i;
         remainder = string.length & 3;
@@ -813,4 +792,15 @@
         }
         return colors;
     }
+
+    function log(msg) {
+        if (debug) console.log(msg);
+    }
+
+    window.onerror = function (msg, url, line) {
+        console.log("JS Error: " + msg + " @" + line + " of " + url);
+        return true;
+    };
 }(jQuery));
+
+

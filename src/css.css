@@ -39,7 +39,6 @@ section, nav {
 }
 
 a {
-    color: #222;
     text-decoration: none;
 }
 
@@ -94,7 +93,6 @@ input:focus {
 
 .button span  {
     display: inline-block;
-    height: 42px;
     line-height: 42px;
     vertical-align: middle;
 }
@@ -289,15 +287,6 @@ input:focus {
   100% { transform: rotate(360deg); }
 }
 
-#shader-top {
-   box-shadow: 0 0 200px 0 #000;
-   height: 10%;
-   left: 0;
-   position: absolute;
-   top: -10%;
-   width: 100%;
-}
-
 /* ========================= File/Folder Display =========================== */
 
 .progressBar {
@@ -325,14 +314,18 @@ input:focus {
     user-select: none;
 }
 
-.data-row:not(.animating):hover {
-    background: #222;
-    border-radius: 6px;
+.data-row , .data-row a {
+    color: #333;
 }
 
 .data-row:not(.animating):hover span,
 .data-row:not(.animating):hover a {
     color: #ddd;
+}
+
+.data-row:not(.animating):hover {
+    background: #222;
+    border-radius: 6px;
 }
 
 .data-info {
@@ -355,7 +348,7 @@ input:focus {
     display: inline-block;
     height: 150px;
     line-height: 1.5em;
-    padding: 0 30px;
+    padding: 0 10px;
     text-align: center;
     vertical-align: middle;
     width: 300px;
@@ -387,14 +380,8 @@ input:focus {
     color: #333;
 }
 
-.icon, .inline-icon {
+.icon {
    font-family: "icons";
-}
-
-.inline-icon {
-    line-height: 2em;
-    padding-right: 4px;
-    padding-top: 2px;
 }
 
 .icon-file, .icon-folder {
@@ -475,7 +462,7 @@ input:focus {
     font-size: 6em;
     line-height: 200px;
     text-align: center;
-    text-shadow: 1px 1px 9 #fff;
+    text-shadow: 1px 1px 0 #fff;
     transition: color .3s ease-in;
     user-select: none;
     width: 100px;
@@ -486,7 +473,7 @@ input:focus {
     float: left;
     height: 100%;
     padding-right: 1em;
-    padding-top: .25em;
+    padding-top: .5em;
     text-align: left;
     width: 300px;
 }
@@ -501,6 +488,7 @@ input:focus {
 }
 
 #about-title {
+    color: #eee;
     display: table-row;
     font-size: 1.6em;
     height: 25%;
@@ -840,7 +828,11 @@ input[type=checkbox]:checked + label:before {
     }
 
     #content, #newcontent {
-        font-size: .8em !important;
+        font-size: .8em;
+    }
+
+    #empty-text {
+        padding: 0 30px;
     }
 
     .filelink, .folderlink {
