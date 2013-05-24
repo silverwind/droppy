@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "0.2.1-1",
+  "version": "0.2.1-3",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "Modern HTTP file server/browser application with realtime updates",
   "homepage": "https://github.com/silverwind/Droppy",
