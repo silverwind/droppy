@@ -1,15 +1,17 @@
-(function ($) {
+(function ($, window, document) {
     "use strict";
 
-    var debug = false; // debug logging
+    var debug; // debug logging - this is set by the server
     var smallScreen = $(window).width() < 640;
-    var folderList, socketOpen, socketWait, isUploading, hasLoggedOut, fileInput,
-        currentFolder, socket, activeFiles, animatingData, savedParts;
+    var activeFolders, currentData, currentFolder, fileInput, hasLoggedOut,
+        isAnimating, isUploading, savedParts, socket, socketOpen, socketWait;
 
     initVariables(); // Separately init the variables so we can init them on demand
 // ============================================================================
 //  Page loading functions
 // ============================================================================
+    $(getPage);
+
     function getPage() {
         $.ajax({
             url: "/content",
@@ -78,8 +80,6 @@
             newPage.attr("id", "page");
         }
     }
-
-    $(getPage);
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
@@ -110,27 +110,30 @@
 
             case "UPDATE_FILES":
                 if (isUploading) return;
-                if (msg.folder === currentFolder.replace(/&amp;/, "&")) {
-                    updateCrumbs(msg.folder);
-                    activeFiles = msg.data;
-                    buildHTML(msg.data, msg.folder);
-                }
+                updateData(msg.folder, msg.data);
                 break;
             case "UPLOAD_DONE":
                 isUploading = false;
                 updateTitle(currentFolder, true); // Reset title
-                sendMessage("REQUEST_UPDATE", currentFolder);
+                $(".progressBar").css("width", 0); // Reset progress bars
+                updateData(msg.folder, msg.data);
                 break;
             case "NEW_FOLDER":
-                updateCrumbs(msg.folder);
-                activeFiles = msg.data;
-                updateLocation(msg.folder);
-                buildHTML(msg.data, msg.folder);
+                updateData(msg.folder, msg.data);
                 break;
             case "UNAUTHORIZED":
                 // Set hasLoggedOut to stop reconnects, will get cleared on login
                 hasLoggedOut = true;
                 break;
+            }
+
+            function updateData(folder, data) {
+                if (folder !== currentFolder.replace(/&amp;/, "&")) {
+                    updateLocation(msg.folder);
+                }
+                updateCrumbs(msg.folder);
+                currentData = data;
+                buildHTML(data, folder);
             }
         };
 
@@ -143,14 +146,10 @@
                 if (timout === 20480 || hasLoggedOut) {
                     return;
                 } else {
-                    try {
-                        socket.socket.connect();
-                    } catch (e) {
-                        log("socket error: " + e);
-                    }
+                    socket.socket && socket.socket.connect();
                     window.setTimeout(retry, timout * 2, timout * 2);
                 }
-            })(10);
+            })(5);
         };
     }
 
@@ -274,7 +273,7 @@
         });
 
         // Hide our file input form by wrapping it in a 0 x 0 div
-        fileInput = $(":file").wrap($("<div/>").css({
+        fileInput = $("#file").wrap($("<div/>").css({
             "height"  : 0,
             "width"   : 0,
             "overflow": "hidden"
@@ -288,13 +287,13 @@
                 var formData = new FormData();
                 if (num > 0) {
                     for (var i = 0; i < num; i++) {
-                        activeFiles[files[i].name] = {
+                        currentData[files[i].name] = {
                             size: files[i].size,
                             type: "nf"
                         };
                         formData.append(files[i].name, files[i]);
                     }
-                    buildHTML(activeFiles, activeFiles.folder);
+                    buildHTML(currentData, currentData.folder);
                     createFormdata(files);
                 }
                 $("#file").val(""); // Reset file form
@@ -326,7 +325,7 @@
             if (e.keyCode === 27) nameoverlay.toggle(); // Escape Key
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
-            var folderExists = folderList[input.toLowerCase()] === true;
+            var folderExists = activeFolders[input.toLowerCase()] === true;
             if (input === "") {
                 nameinput.removeClass("invalid");
                 info.fadeOut(350);
@@ -377,9 +376,9 @@
 
         $("#logout").unbind("click").click(function () {
             sendMessage("LOGOUT");
+            hasLoggedOut = true;
             socket.close();
             deleteCookie("sid");
-            hasLoggedOut = true;
             initVariables(); // Reset vars to their init state
             getPage();
         });
@@ -399,27 +398,24 @@
             var xhr = new XMLHttpRequest();
             uploadInit();
 
-            xhr.open("post", "/upload", true);
-            isUploading = true;
+            xhr.upload.addEventListener("progress", function (event) {
+                if (event.lengthComputable) {
+                    uploadProgress(event.loaded, event.total);
+                }
+            }, false);
 
-            xhr.addEventListener('error', function (event) {
+            xhr.upload.addEventListener("load", function () {
+                uploadDone();
+            }, false);
+
+            xhr.upload.addEventListener("error", function (event) {
                 log("XHR error: " + event);
                 uploadDone();
             }, false);
 
-            xhr.upload.onprogress = function (event) {
-                if (event.lengthComputable) {
-                    uploadProgress(event.loaded, event.total);
-                }
-            };
-
+            isUploading = true;
+            xhr.open("post", "/upload", true);
             xhr.send(formData);
-
-            xhr.onload = function () {
-                if (this.status === 200) {
-                    uploadDone();
-                }
-            };
         }
 
         var start, progressBars,
@@ -554,7 +550,7 @@
         function create(name) {
             var li = $("<li>" + name + "</li>");
             li.click(function (e) {
-                if (e.button !== 0 || animatingData) return;
+                if (e.button !== 0 || isAnimating) return;
                 var data = $(this).html();
                 var destination;
                 if (data.indexOf(home) > -1)
@@ -595,7 +591,7 @@
     }
 
     function buildHTML(fileList, root) {
-        var folderList = [];
+        var activeFolders = [];
         var list = $("<ul></ul>");
         for (var file in fileList) {
             var size = convertToSI(fileList[file].size);
@@ -616,7 +612,7 @@
                     '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span></li>'
                 );
                 // Add to list of currently displayed folders
-                folderList[name.toLowerCase()] = true;
+                activeFolders[name.toLowerCase()] = true;
             }
         }
 
@@ -651,20 +647,20 @@
             finalize(true);
             return;
         } else {
-            var holder = $("#holder");
-            animatingData = true;
+            var slider = $("#slider");
             $(".data-row").addClass("animating");
-            holder.append($("<section id='newcontent'></section>"));
+            isAnimating = true;
+            slider.append($("<section id='newcontent'></section>"));
             $("#newcontent").attr("class", nav === "forward" ? "new-right" : "new-left");
             $("#newcontent").html(list);
 
-            holder.addClass(nav === "forward" ? "to-left" : "to-right", 200, "swing", function () {
+            slider.addClass(nav === "forward" ? "to-left" : "to-right", 200, "swing", function () {
                 $("#content").remove();
                 $("#newcontent").attr("id", "content");
                 $("#content").removeAttr("class");
-                holder.removeAttr("class");
+                slider.removeAttr("class");
                 $(".data-row").removeClass("animating");
-                animatingData = false;
+                isAnimating = false;
                 finalize();
             });
         }
@@ -675,6 +671,31 @@
             colorize();
             nav = "same";
         }
+    }
+
+    function bindEvents() {
+        // TODO: file moving
+        $(".data-row").draggable({
+            addClasses: false,
+            axis: "y",
+            cursor: "move",
+            delay: 200,
+            revert: true,
+            scroll: true
+        });
+
+        // Bind mouse event to switch into a folder
+        $(".data-row[data-type='folder']").unbind("click").click(function (e) {
+            if (e.button !== 0) return;
+
+            var destination = $(this).data("id").replace("&amp;", "&");
+            updateLocation(destination, true);
+        });
+        // Bind mouse event to delete a file/folder
+        $(".icon-delete").unbind("click").click(function (e) {
+            if (e.button !== 0 || socketWait) return;
+            sendMessage("DELETE_FILE", $(this).parent().data("id"));
+        });
     }
 
     function colorize() {
@@ -703,33 +724,20 @@
         });
     }
 
-    function bindEvents() {
-        // Bind mouse event to switch into a folder
-        $(".data-row[data-type='folder']").unbind("click").click(function (e) {
-            if (e.button !== 0) return;
-
-            var destination = $(this).data("id").replace("&amp;", "&");
-            updateLocation(destination, true);
-        });
-        // Bind mouse event to delete a file/folder
-        $(".icon-delete").unbind("click").click(function (e) {
-            if (e.button !== 0 || socketWait) return;
-            sendMessage("DELETE_FILE", $(this).parent().data("id"));
-        });
-    }
-
     function deleteCookie(name) {
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     }
 
     function initVariables() {
-        folderList = [];
+        activeFolders = [];
+        currentData = false;
+        currentFolder = false;
+        isAnimating = false;
+        isUploading = false;
+        savedParts = false;
+        socket = false;
         socketOpen = false;
         socketWait = false;
-        isUploading = false;
-        currentFolder = false;
-        activeFiles = false;
-        savedParts = false;
     }
 
     function convertToSI(bytes) {
@@ -801,6 +809,6 @@
         console.log("JS Error: " + msg + " @" + line + " of " + url);
         return true;
     };
-}(jQuery));
+}(jQuery, window, document));
 
 

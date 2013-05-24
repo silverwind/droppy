@@ -111,6 +111,7 @@ input:focus {
    overflow: hidden;
    position: relative;
    top: 0;
+   user-select: none;
    width: 1000%;
    z-index: 1;
 }
@@ -188,7 +189,7 @@ input:focus {
 .out { left: -10%; }
 /* ============================== Main Content ============================= */
 
-#holder {
+#slider {
     height: 100%;
     left: -100%;
     position: absolute;
@@ -202,6 +203,7 @@ input:focus {
     position: absolute;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .2);
     top: 76px;
+    user-select: none;
     width: 33.3333333%;
 }
 
@@ -311,7 +313,6 @@ input:focus {
     cursor: pointer;
     height: 1.5em;
     line-height: 1.5em;
-    user-select: none;
 }
 
 .data-row , .data-row a {
@@ -362,7 +363,6 @@ input:focus {
     line-height: 2em;
     padding: 3px 10px;
     transition: all, .3s, ease;
-    user-select: none;
     white-space: nowrap;
 }
 
@@ -464,7 +464,6 @@ input:focus {
     text-align: center;
     text-shadow: 1px 1px 0 #fff;
     transition: color .3s ease-in;
-    user-select: none;
     width: 100px;
 }
 
@@ -515,7 +514,6 @@ input:focus {
     right: 0;
     padding: 8px;
     font-size: 1.5em;
-    user-select: none;
     cursor: pointer;
 }
 
