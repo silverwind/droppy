@@ -257,7 +257,7 @@ input:focus {
 #upload-time-left {
     bottom: 4px;
     color: #aaa;
-    font-size: .5em;
+    font-size: .6em;
     position: absolute;
     width: 100%;
 }
@@ -416,7 +416,7 @@ input:focus {
     left: 50%;
     margin-top: -65px;
     margin-left: -150px;
-    width: 310px;
+    width: 300px;
     height: 130px;
     z-index: 8;
     background: #222;
@@ -582,7 +582,7 @@ input:focus {
 /* ============================== Login Form =============================== */
 
 #login-icon {
-    color: #555;
+    color: #444;
     font-size: 9.5em;
     height: 250px;
     line-height: 250px;
@@ -838,21 +838,47 @@ input[type=checkbox]:checked + label:before {
          height: 50px;
     }
 
-    .data-info {
-        display: none;
-    }
-
     #content, #newcontent {
         font-size: .8em;
+    }
+
+    .data-info {
+        display: none;
     }
 
     .filelink, .folderlink {
         width: 70%;
     }
+
+    #about {
+        font-size: .9em;
+        width: 300px;
+        margin-left: -150px;
+    }
+
+    #about-logo {
+        color: #444;
+        font-size: 8em;
+        line-height: 200px;
+        position: absolute;
+        text-shadow: .5px .5px 0 #777;
+        width: 100%;
+        z-index: -1;
+    }
+
+    #about-logo:hover {
+        color: #111;
+    }
+
+    #about-content {
+        float: left;
+        margin-left: 10%;
+        width: 80%;
+    }
 }
 
 @media all and (max-width: 319px) {
     .button {
-        width: 40px;
+        width: 60px;
     }
 }

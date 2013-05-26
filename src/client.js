@@ -220,14 +220,6 @@
 
         user.focus();
 
-        user.off("keydown").on("keydown", function () {
-            logininfo.fadeOut(300);
-        });
-
-        user.off("click").on("click", function () {
-            logininfo.fadeOut(300);
-        });
-
         // Return submits the form
         pass.off("keyup").on("keyup", function (e) {
             if (e.keyCode === 13) {
@@ -253,6 +245,10 @@
             logininfo.fadeOut(300);
         });
 
+        user.off("click keydown").on("click keydown", function () {
+            logininfo.fadeOut(300);
+        });
+
         pass.off("focus").on("focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
@@ -272,7 +268,6 @@
                         submit.attr("class", "invalid");
                         loginform.attr("class", "invalid");
                     }
-
                 }
             });
         }
@@ -396,7 +391,7 @@
                 info.html(folderExists ? "File or folder already exists!" : "Invalid character(s) in filename!");
                 info.fadeIn(300);
             } else {
-                nameinput.removeClass("invalid").addClass("valid");
+                nameoverlay.removeClass("invalid").addClass("valid");
                 info.fadeOut(300);
                 if (e.keyCode === 13) { // Return Key
                     if (currentFolder === "/")
@@ -458,20 +453,9 @@
             var xhr = new XMLHttpRequest();
             uploadInit();
 
-            xhr.upload.addEventListener("progress", function (event) {
-                if (event.lengthComputable) {
-                    uploadProgress(event.loaded, event.total);
-                }
-            }, false);
-
-            xhr.upload.addEventListener("load", function () {
-                uploadDone();
-            }, false);
-
-            xhr.upload.addEventListener("error", function (event) {
-                log("XHR error: " + event);
-                uploadDone();
-            }, false);
+            xhr.upload.addEventListener("progress", uploadProgress, false);
+            xhr.upload.addEventListener("load", uploadDone, false);
+            xhr.upload.addEventListener("error", uploadDone, false);
 
             isUploading = true;
             xhr.open("post", "/upload", true);
@@ -507,8 +491,12 @@
             infobox.animate({top: "-85px"}, 250);
         }
 
-        function uploadProgress(bytesSent, bytesTotal) {
-            var progress = Math.round((bytesSent / bytesTotal) * 100) + "%";
+        function uploadProgress(event) {
+            if (!event.lengthComputable) return;
+
+            var bytesSent  = event.loaded,
+                bytesTotal = event.total,
+                progress   = Math.round((bytesSent / bytesTotal) * 100) + "%";
 
             progressBars.width(progress);
             updateTitle(progress);
