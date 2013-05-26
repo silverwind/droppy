@@ -44,8 +44,9 @@ var cache        = {},
     db           = {},
     dirs         = {},
     watchedDirs  = {},
-    server       = null,
-    config       = null;
+    server       = false,
+    debugcss     = false,
+    config       = false;
 
 var autoprefixer    = require("autoprefixer"),
     cleancss        = require("clean-css"),
@@ -110,7 +111,6 @@ function prepareContent() {
 
         js = [
             fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
-            fs.readFileSync(getSrcPath("jquery-ui-custom.js")).toString("utf8"),
             fs.readFileSync(getSrcPath("client.js")).toString("utf8").replace("debug;", config.debug ? "debug = true;" : "debug = false;")
         ].join("\n");
 
@@ -161,6 +161,28 @@ function createListener() {
         }
     }
     createWatcher(addFilePath("/"));
+
+    // Live CSS reloading function for easy styling
+    if (config.debug) {
+        var cssfile = config.srcDir + "css.css";
+        fs.watch(cssfile, debounce(function () {
+            fs.readFile(cssfile, function (err, css) {
+                for (var cookie in clients) {
+                    debugcss = autoprefixer.compile(css.toString("utf8"), ["last 2 versions"]);
+                    var data = JSON.stringify({
+                        "type"  : "UPDATE_CSS",
+                        "css"   : debugcss
+                    });
+                    if (clients[cookie].ws) {
+                        clients[cookie].ws.send(data, function (err) {
+                            if (err) logerror(err);
+                        });
+                    }
+                }
+            });
+        }), 100);
+    }
+
     setupSocket(server);
 
     // Bind to 8080 on jitsu
@@ -209,6 +231,11 @@ function setupSocket(server) {
         var remoteIP   = ws._socket.remoteAddress;
         var remotePort = ws._socket.remotePort;
         var cookie     = getCookie(ws.upgradeReq.headers.cookie);
+        if (!clients[cookie]) {
+            clients[cookie] = {};
+            clients[cookie].ws = ws;
+        }
+
 
         if (!cookie) {
             log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
@@ -298,6 +325,7 @@ function setupSocket(server) {
         });
         ws.on("close", function () {
             log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "]");
+            delete clients[cookie].ws;
         });
         ws.on("error", function (err) {
             logerror(err);
@@ -416,7 +444,7 @@ function checkWatchedDirs() {
 // Send file list JSON over websocket
 function sendMessage(cookie, messageType) {
     // Dont't send if the socket isn't open
-    if (!clients[cookie].ws._socket) return;
+    if (!clients[cookie] || !clients[cookie].ws._socket) return;
     var dir = clients[cookie].directory;
     var data = JSON.stringify({
         "type"  : messageType,
@@ -573,6 +601,17 @@ function handleResourceRequest(req, res, resourceName) {
         res.end();
         logresponse(req, res);
     } else {
+
+        // Shortcut to send the current CSS for live styling in debug mode
+        if (config.debug && debugcss && resourceName === "css.css") {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/css; charset=utf-8");
+            res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
+            res.setHeader("Content-Length", Buffer.byteLength(debugcss, 'utf8'));
+            res.end(debugcss);
+            return;
+        }
+
         var ifNoneMatch = req.headers["if-none-match"] || "";
         if (ifNoneMatch === cache[resourceName].etag && req.url !== "/content") {
             res.statusCode = 304;

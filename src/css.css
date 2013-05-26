@@ -97,8 +97,8 @@ input:focus {
     vertical-align: middle;
 }
 
-#upload:hover      { color: #29f;}
-#add-folder:hover  { color: #f1a;}
+#upload:hover      { color: #f1a;}
+#add-folder:hover  { color: #29f;}
 #config:hover      { color: #ae5;}
 #logout:hover      { color: #ff5;}
 
@@ -107,7 +107,7 @@ input:focus {
 #crumbs {
    background: #222;
    height: 100%;
-   height: 34px;
+   height: auto;
    overflow: hidden;
    position: relative;
    top: 0;
@@ -143,6 +143,19 @@ input:focus {
     width:1.6em;
 }
 
+
+#crumbs li, #crumbs li:after {
+  transition: all 0.3s ease;
+}
+
+#crumbs li:hover, #crumbs li:hover:after {
+  color: #fff;
+}
+
+#crumbs li.in  { left: 0;    }
+#crumbs li.out { left: -10%; }
+#crumbs li.placeholder { opacity: 0; }
+
 #crumbs li:nth-child(1)       { background: #444; z-index: 10;}
 #crumbs li:nth-child(1):after { background: #444;}
 #crumbs li:nth-child(2)       { background: #666; z-index: 9;}
@@ -177,16 +190,6 @@ input:focus {
 #crumbs li:nth-child(8):hover       { background: #f1a; }
 #crumbs li:nth-child(8):hover:after { background: #f1a; }
 
-#crumbs li, #crumbs li:after {
-  transition: background 0.2s ease-out;
-}
-
-#crumbs li:hover, #crumbs li:hover:after {
-  color: #fff;
-}
-
-.in  { left: 0;    }
-.out { left: -10%; }
 /* ============================== Main Content ============================= */
 
 #slider {
@@ -199,22 +202,20 @@ input:focus {
 #content, #newcontent {
     bottom: 0;
     max-height: 100%;
-    padding: .25em;
     position: absolute;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .2);
     top: 76px;
+    transition: left .2s ease;
     user-select: none;
-    width: 33.3333333%;
+    width: 100%;
+    padding: .25em;
 }
 
 #content {
-    left: 33.333333%;
+    left: 0;
 }
 
-.new-left  { left: 0;           }
-.new-right { left: 66.6666666%; }
-.to-right  { left: 0     !important; }
-.to-left   { left: -200% !important; }
+.new-left  { left: -100%; }
+.new-right { left: 100%; }
 
 /* ============================ Helper classes ============================= */
 
@@ -285,7 +286,7 @@ input:focus {
 }
 
 @keyframes spin {
-  0%   { transform: rotate(0deg);  }
+  0%   { transform: rotate(0deg);   }
   100% { transform: rotate(360deg); }
 }
 
@@ -301,7 +302,6 @@ input:focus {
 }
 
 .filelink, .folderlink {
-    left: 2em;
     overflow: hidden;
     position: absolute;
     text-overflow: ellipsis;
@@ -313,6 +313,7 @@ input:focus {
     cursor: pointer;
     height: 1.5em;
     line-height: 1.5em;
+    width: 100%;
 }
 
 .data-row , .data-row a {
@@ -339,19 +340,16 @@ input:focus {
     left: 50%;
     line-height: 150px;
     margin-left: -150px;
-    margin-top: -100px;
+    margin-top: -75px;
     position: absolute;
     top: 50%;
     width: 300px;
 }
 
 #empty-text {
-    display: inline-block;
-    height: 150px;
+    height: 140px;
     line-height: 1.5em;
-    padding: 0 10px;
     text-align: center;
-    vertical-align: middle;
     width: 300px;
 }
 
@@ -362,7 +360,7 @@ input:focus {
     cursor: pointer;
     line-height: 2em;
     padding: 3px 10px;
-    transition: all, .3s, ease;
+    transition: color .3s ease;
     white-space: nowrap;
 }
 
@@ -371,7 +369,7 @@ input:focus {
 }
 
 #upload-inline:hover {
-    background: #29f;
+    background:  #f1a;
 }
 
 /* ================================= Icons ================================= */
@@ -405,55 +403,80 @@ input:focus {
 /* ========================= Directory Name Input ========================== */
 
 #name-overlay {
-    display: none;
-    position: relative;
-    top: -4px;
-    width: 240px;
+    visibility: hidden;
+    position: absolute;
+    left: 50%;
+    margin-top: -65px;
+    margin-left: -150px;
+    width: 310px;
+    height: 130px;
     z-index: 8;
+    background: #222;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 0 5px rgba(32, 144, 255, .6);
+    transition: all 0.3s ease;
 }
 
-#name-input::-moz-placeholder          { color: #555; }
-#name-input::-webkit-input-placeholder { color: #555; }
-#name-input:-ms-input-placeholder      { color: #555; }
+#name-overlay.out { top: -90px; }
+#name-overlay.in  { top:   50%; }
+
+#name-input::-moz-placeholder          { color: #666; }
+#name-input::-webkit-input-placeholder { color: #666; }
+#name-input:-ms-input-placeholder      { color: #666; }
+
+#name-overlay p {
+    color: #ccc;
+    margin: 10px;
+    line-height: 30px;
+}
+
+#name-overlay.valid { box-shadow: 0 0 0 5px rgba(80, 210, 0, .6); }
+#name-overlay.invalid { box-shadow: 0 0 0 5px rgba(255, 16, 16, .6); }
 
 #name-input {
-    background: #111;
-    border: 2px transparent;
-    color: #bbb;
+    background: #eee;
+    color: #222;
     font-size: 1em;
-    height: 1.44em;
-    padding-left: 10px;
-    width: 100%;
+    height: 1.75em;
+    padding-left: 2.5%;
+    box-shadow: inset 1px 1px 5px 1px rgba(143, 143, 143, 0.8);
+    border-radius: 7px;
+    border: none;
+    width: 87.5%;
+    transition: all 0.3s ease;
 }
+
+#name-input.invalid { color: rgb(255, 80, 80); }
 
 #name-info {
-    background: #111;
-    box-shadow: 0 0 15px 1px #000;
+    padding-top: 5px;
+    line-height: 30px;
     color: #f55;
     display: none;
-    font-size: .6em;
-    text-shadow: 0 1px 5px rgba(255, 0, 0, 0.5);
-}
-
-#name-input.invalid {
-   color: #f55;
+    font-size: .7em;
 }
 
 /* =============================== About box =============================== */
 
 #about {
+    opacity: 1;
     background: #222;
     border-radius: 12px;
-    box-shadow: 0 0 20px -2px #000;
+    box-shadow: 0 0 0 5px transparent;
     color: #bbb;
     height: 200px;
     left: 50%;
     margin-left: -200px;
     position: absolute;
-    top: -203px;
+    top: -200px;
     transition: top .4s ease-in-out;
     width: 400px;
     z-index: 10;
+}
+
+#about.active {
+    box-shadow: 0 0 0 5px rgba(255, 128, 0, .6);
 }
 
 #about-logo {
@@ -464,17 +487,14 @@ input:focus {
     text-align: center;
     text-shadow: 1px 1px 0 #fff;
     transition: color .3s ease-in;
-    width: 100px;
+    width: 130px;
 }
 
 #about-content {
-    display: table;
     float: left;
     height: 100%;
-    padding-right: 1em;
-    padding-top: .5em;
     text-align: left;
-    width: 300px;
+    width: 260px;
 }
 
 #about a {
@@ -488,24 +508,20 @@ input:focus {
 
 #about-title {
     color: #eee;
-    display: table-row;
-    font-size: 1.6em;
-    height: 25%;
-    vertical-align: top;
+    font-size: 1.5em;
+    line-height: 1.75em;
 }
 
 #about-text {
-    display: table-row;
-    font-size: 0.8em;
-    height: 60%;
-    vertical-align: middle;
+    font-size: .8em;
+    line-height: 1.2em;
 }
 
 #about-copy {
-    display: table-row;
+    position: absolute;
+    bottom: 0;
+    margin-bottom: .5em;
     font-size: .7em;
-    height: 15%;
-    vertical-align: bottom;
 }
 
 #about #github {
@@ -533,25 +549,26 @@ input:focus {
     z-index: -5;
 }
 
-#arrow.down { top: 115px;}
-#arrow.up   { top: -15px;}
+#arrow.down { top: 110px;}
+#arrow.up   { top: -10px;}
 
 .arrow-text {
     cursor: pointer;
-    font-size: 2em;
+    font-size: 1.75em;
     left: 50%;
     line-height: 1em;
     margin-left: -0.5em;
     position: absolute;
     text-align: center;
     width: 1em;
+    z-index: 30;
 }
 
-.arrow-text.down { bottom: -38px; }
-.arrow-text.up   { top: -38px; display: none; }
+.arrow-text.down { bottom: -33px; }
+.arrow-text.up   { top: -33px; display: none; }
 
 .arrow-text:hover {
-    color: #f1a;
+    color: #f80;
 }
 
 /* ============================== Login Form =============================== */
@@ -743,14 +760,6 @@ input[type=checkbox]:checked + label:before {
         top: 69px;
     }
 
-    #crumbs, #name-input {
-        height: 27px;
-    }
-
-    #name-overlay {
-        top: -6px;
-    }
-
     #crumbs li {
         font-size: 0.7em;
         padding-left: 1em;
@@ -827,10 +836,6 @@ input[type=checkbox]:checked + label:before {
 
     #content, #newcontent {
         font-size: .8em;
-    }
-
-    #empty-text {
-        padding: 0 30px;
     }
 
     .filelink, .folderlink {

@@ -7,10 +7,6 @@
 		<li id="add-folder" class="button" title="Add a new folder">
 			<span class="icon"></span>
 			<span class="button-text">Add Folder</span>
-			<div id="name-overlay">
-				<input type="text" id="name-input" placeholder="Folder Name">
-				<div id="name-info"></div>
-			</div>
 		</li>
 	</ul>
 	<ul id="right-buttons">
@@ -23,15 +19,20 @@
 			<span class="button-text">Configure</span>
 		</li>
 	</ul>
-	<ul id="crumbs"></ul>
+	<ul id="crumbs"><li class="placeholder">&nbsp;</li></ul>
 </nav>
-<div id="slider"><section id="content"></section></div>
+<section id="content"></section>
 <form id="upload-form" enctype="multipart/form-data">
 	<input type="file" name="file" id="file" multiple>
 </form>
 <div id="upload-info">
 	<div id="upload-percentage"></div>
 	<div id="upload-time-left"></div>
+</div>
+<div id="name-overlay" class="out">
+	<p>Which Name?</p>
+	<input type="text" id="name-input" placeholder="Folder Name">
+	<div id="name-info"></div>
 </div>
 <div id="about">
 	<div id="arrow" class="down"></div>
