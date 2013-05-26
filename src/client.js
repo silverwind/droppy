@@ -184,40 +184,40 @@
 
         user.focus();
 
-        user.unbind("keydown").keydown(function () {
+        user.off("keydown").on("keydown", function () {
             logininfo.fadeOut(300);
         });
 
-        user.unbind("click").click(function () {
+        user.off("click").on("click", function () {
             logininfo.fadeOut(300);
         });
 
         // Return submits the form
-        pass.unbind("keyup").keyup(function (e) {
+        pass.off("keyup").on("keyup", function (e) {
             if (e.keyCode === 13) {
                 submitForm(form, submit);
             }
         });
 
         // Spacebar toggles the checkbox
-        remember.unbind("keyup").keyup(function (e) {
+        remember.off("keyup").on("keyup", function (e) {
             if (e.keyCode === 32) {
                 $("#check").trigger("click");
             }
         });
 
-        form.unbind("submit").submit(function (e) {
+        form.off("submit").on("submit", function (e) {
             e.preventDefault();
             submitForm(form, submit);
         });
 
-        user.unbind("focus").focus(function () {
+        user.off("focus").on("focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
             logininfo.fadeOut(300);
         });
 
-        pass.unbind("focus").focus(function () {
+        pass.off("focus").on("focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
             logininfo.fadeOut(300);
@@ -228,8 +228,8 @@
                 type: "POST",
                 url: "/login",
                 data: form.serialize(),
-                success: function (data) {
-                    if (data === "OK") {
+                success: function (response) {
+                    if (response === "OK") {
                         hasLoggedOut = false;
                         getPage();
                     } else {
@@ -284,7 +284,7 @@
         }));
 
         // All file uploads land here
-        fileInput.unbind("change").change(function () {
+        fileInput.off("change").on("change", function () {
             if ($("#file").val() !== "") {
                 var files = $("#file").get(0).files;
                 var num = files.length;
@@ -305,7 +305,7 @@
         });
 
         // Redirect the upload button click to the real, hidden form
-        $("#upload").unbind("click").click(function () {
+        $("#upload").off("click").on("click", function () {
             fileInput.click();
         });
 
@@ -315,7 +315,7 @@
             activeFiles;
 
         // Show popup for folder creation
-        $("#add-folder").unbind("click").click(function () {
+        $("#add-folder").off("click").on("click", function () {
             activeFiles = [];
             $(".filelink, .folderlink").each(function () {
                 activeFiles.push($(this).html().toLowerCase());
@@ -343,7 +343,7 @@
         }
 
         // Handler for the input of the folder name
-        nameinput.unbind("keyup").keyup(function (e) {
+        nameinput.off("keyup").on("keyup", function (e) {
             if (e.keyCode === 27) toggleOverlay(); // Escape Key
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
@@ -375,7 +375,7 @@
         var arrow     = $("#arrow"),
             about     = $("#about");
 
-        $(".arrow-text").unbind("click").click(function () {
+        $(".arrow-text").off("click").on("click", function () {
             if (arrow.attr("class") === "down") {
                 about.attr("class", "active");
                 about.css("top", "50%");
@@ -398,7 +398,7 @@
             }
         });
 
-        $("#logout").unbind("click").click(function () {
+        $("#logout").off("click").on("click", function () {
             sendMessage("LOGOUT");
             hasLoggedOut = true;
             socket.close();
@@ -514,7 +514,7 @@
     }
 
     // Listen for "popstate" events, which indicate the user navigated back
-    $(window).unbind("popstate").bind("popstate", function () {
+    $(window).off("popstate").on("popstate", function () {
         currentFolder = decodeURIComponent(window.location.pathname);
         sendMessage("SWITCH_FOLDER", currentFolder);
     });
@@ -656,7 +656,7 @@
             loadContent(list);
         else {
             $("#content").html('<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>');
-            $("#upload-inline").unbind("click").click(function () {
+            $("#upload-inline").on("click", function () {
                 fileInput.click();
             });
             nav = "same";
@@ -704,14 +704,13 @@
         }); */
 
         // Bind mouse event to switch into a folder
-        $(".data-row[data-type='folder']").unbind("click").click(function (e) {
+        $(".data-row[data-type='folder']").off("click").on("click", function (e) {
             if (e.button !== 0) return;
-
             var destination = $(this).data("id").replace("&amp;", "&");
             updateLocation(destination, true);
         });
         // Bind mouse event to delete a file/folder
-        $(".icon-delete").unbind("click").click(function (e) {
+        $(".icon-delete").off("click").on("click", function (e) {
             if (e.button !== 0 || socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
