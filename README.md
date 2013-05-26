@@ -1,5 +1,6 @@
 #Droppy
 A modern file server web application built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates.
+![droppy](http://i.imgur.com/hxK8WjS.png)
 ##Installation
 With [node](http://nodejs.org/) installed, run:
 ````
