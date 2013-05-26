@@ -1,12 +1,48 @@
+/* globals Modernizr */
 (function ($, window, document) {
     "use strict";
-
     var debug; // live css reload and debug logging - this is set by the server
     var smallScreen = $(window).width() < 640;
-    var currentData, currentFolder, fileInput, hasLoggedOut,
+    var hasAnimations = Modernizr.cssanimations;
+
+    var currentData, currentFolder, fileInput, hasLoggedOut, isAnimating,
         isUploading, savedParts, socket, socketOpen, socketWait;
 
     initVariables(); // Separately init the variables so we can init them on demand
+
+// ============================================================================
+//  jQuery extensions
+// ============================================================================
+    // Set a class on freshly inserted elements, once the DOM has fully loaded it
+    $.fn.setClass = function (newclass) {
+        if (hasAnimations) {
+            // Set the new class as a data attribute on the matched tag(s)
+            this.css("animation", "nodeInserted 0.001s");
+            this.data("newclass", newclass);
+        } else {
+            // If we don't support animations, fallback to a simple timeout
+            window.setTimeout(function () {
+                this.attr("class", newclass);
+            }, 30);
+        }
+        return this;
+    };
+
+    if (hasAnimations) {
+        // Listen for the animation event for our pseudo-animation
+        var listener = function (event) {
+            if (event.animationName === "nodeInserted") {
+                var target = $(event.target);
+                // Set the class stored in the data attribute and clean up
+                target.attr("class", target.data("newclass"));
+                target.removeAttr("data-newclass").removeAttr("style");
+            }
+        };
+        document.addEventListener("animationstart", listener, false);
+        document.addEventListener("webkitAnimationStart", listener, false);
+        document.addEventListener("MSAnimationStart", listener, false);
+        document.addEventListener("oanimationstart", listener, false);
+    }
 // ============================================================================
 //  Page loading functions
 // ============================================================================
@@ -142,12 +178,12 @@
             // Restart a closed socket in case it unexpectedly closes,
             // and give up after 20 seconds increasingly higher intervals.
             // Related: https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-            (function retry(timout) {
-                if (timout === 20480 || hasLoggedOut) {
+            (function retry(timeout) {
+                if (timeout === 20480 || hasLoggedOut) {
                     return;
                 } else {
                     socket.socket && socket.socket.connect();
-                    setTimeout(retry, timout * 2, timout * 2);
+                    setTimeout(retry, timeout * 2, timeout * 2);
                 }
             })(5);
         };
@@ -520,16 +556,28 @@
     });
 
     // Update our current location and change the URL to it
-    var nav;
+    var nav, retryTimout;
     function updateLocation(path, doSwitch) {
         if (socketWait) return; // Dont switch location in case we are still waiting for a response from the server
 
+        // Queue the folder switching if we are in an animation
+        if (isAnimating) {
+            if (retryTimout > 1000) return;
+            retryTimout += 25;
+            console.log("retry");
+            setTimeout(updateLocation, retryTimout, path, doSwitch);
+        } else {
+            retryTimout = 0;
+        }
+
+        // Find the direction in which we should animate
         if (path.length > currentFolder.length)
             nav = "forward";
         else if (path.length === currentFolder.length)
             nav = "same";
         else
             nav = "back";
+
         currentFolder = path;
         sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
 
@@ -586,15 +634,12 @@
         }
 
         function finalize() {
-            // Give the DOM some time to recognize our new element for transition purposes
+            $("#crumbs li.out").setClass("in");
             setTimeout(function () {
-                $("#crumbs li.out").attr("class", "in");
-            }, 20);
-            // Remove the class after the transition and keep the list scrolled to the last element
-            setTimeout(function () {
+                // Remove the class after the transition and keep the list scrolled to the last element
                 $("#crumbs li.in").removeClass();
                 checkBreadcrumbWidth();
-            }, 310);
+            }, 300);
         }
     }
 
@@ -659,33 +704,34 @@
             $("#upload-inline").on("click", function () {
                 fileInput.click();
             });
-            nav = "same";
         }
     }
 
     function loadContent(list) {
         // Load generated list into view with an animation
         if (nav === "same") {
-            finalize(true);
-            return;
+            $("#content").attr("class", "center");
+            $("#content").html(list);
+            finalize();
         } else {
-            $("#page").append($("<section id='newcontent'></section>"));
-            $("#newcontent").addClass(nav === "forward" ? "new-right" : "new-left");
+            $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
             $("#newcontent").html(list);
+            isAnimating = true;
             $(".data-row").addClass("animating");
-            // Give the DOM some time to recognize our new element for transition purposes
-            setTimeout(function () {
+            $("#content").attr("class", (nav === "forward") ? "back" : "forward");
+            $("#newcontent").setClass("center");
+
+            // Switch classes once the transition has finished
+            window.setTimeout(function () {
+                isAnimating = false;
                 $("#content").remove();
                 $("#newcontent").attr("id", "content");
-                $("#content").removeAttr("class");
                 $(".data-row").removeClass("animating");
-                finalize();
-            }, 20);
-
+            }, 250);
+            finalize();
         }
 
-        function finalize(samePage) {
-            if (samePage) $("#content").html(list);
+        function finalize() {
             bindEvents();
             colorize();
             nav = "same";

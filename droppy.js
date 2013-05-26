@@ -110,6 +110,7 @@ function prepareContent() {
         logsimple(config.debug ? " ->> preparing JS..." : " ->> minifying JS...");
 
         js = [
+            fs.readFileSync(getSrcPath("modernizr.js")).toString("utf8"),
             fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
             fs.readFileSync(getSrcPath("client.js")).toString("utf8").replace("debug;", config.debug ? "debug = true;" : "debug = false;")
         ].join("\n");

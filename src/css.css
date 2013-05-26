@@ -61,6 +61,12 @@ input:focus {
 
 #page.out { opacity: 0; }
 
+/* pseudo-animation for use in setClass */
+@keyframes nodeInserted {
+    from { clip: rect(1px, auto, auto, auto); }
+    to   { clip: rect(0px, auto, auto, auto); }
+}
+
 /* ========================== Main Page Navigation ========================= */
 
 #navigation {
@@ -204,18 +210,20 @@ input:focus {
     max-height: 100%;
     position: absolute;
     top: 76px;
-    transition: left .2s ease;
+    transition: all .25s ease;
+    opacity: 1;
     user-select: none;
     width: 100%;
     padding: .25em;
 }
 
-#content {
-    left: 0;
-}
+#newcontent.center  { left: 0;     }
+#newcontent.back    { left: -100%; }
+#newcontent.forward { left: 100%;  }
 
-.new-left  { left: -100%; }
-.new-right { left: 100%; }
+#content.center  { left: 0;     }
+#content.back    { left: -100%; opacity: 0;}
+#content.forward { left: 100%;  opacity: 0;}
 
 /* ============================ Helper classes ============================= */
 
