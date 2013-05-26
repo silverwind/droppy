@@ -54,8 +54,12 @@ input:focus {
     height: 100%;
     position: absolute;
     width: 100%;
+    opacity: 1;
     overflow-x: hidden;
+    transition: opacity .25s ease;
 }
+
+#page.out { opacity: 0; }
 
 /* ========================== Main Page Navigation ========================= */
 
@@ -65,10 +69,13 @@ input:focus {
     height: auto;
     position: fixed;
     text-align: center;
-    top: 0;
+    transition: top .5s ease;
     width: 100%;
     z-index: 2;
 }
+
+#navigation.in  { top: 0;    }
+#navigation.out { top: -42px; }
 
 #left-buttons, #left-buttons li {
     box-shadow: 10px 0 20px -2px rgba(0, 0, 0, 0.5);
@@ -191,13 +198,6 @@ input:focus {
 #crumbs li:nth-child(8):hover:after { background: #f1a; }
 
 /* ============================== Main Content ============================= */
-
-#slider {
-    height: 100%;
-    left: -100%;
-    position: absolute;
-    width: 300%;
-}
 
 #content, #newcontent {
     bottom: 0;
@@ -374,7 +374,7 @@ input:focus {
 
 /* ================================= Icons ================================= */
 
-.data-row .icon {
+.data-row, .data-row > .icon, .data-row > a {
     color: #333;
 }
 

@@ -1,7 +1,7 @@
 (function ($, window, document) {
     "use strict";
 
-    var debug; // debug logging - this is set by the server
+    var debug; // live css reload and debug logging - this is set by the server
     var smallScreen = $(window).width() < 640;
     var currentData, currentFolder, fileInput, hasLoggedOut,
         isUploading, savedParts, socket, socketOpen, socketWait;
@@ -29,37 +29,28 @@
         switch (type) {
         case "main":
             initMainPage();
-
-            var navigation = $("#navigation");
-
-            // Set pre-animation positions
-            navigation.css("top", "-42px");
-
-            oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
-            navigation.animate({"top": 0}, {duration: 500, queue: false, complete: function () {
-                finalize();
-                // Remove inline style caused by animation
-                navigation.removeAttr("style");
-                $(this).removeAttr("style");
-            }});
+            oldPage.attr("class", "out");
+            setTimeout(function () {
+                $("#navigation").attr("class", "in");
+                setTimeout(function () {
+                    finalize();
+                }, 500);
+            }, 250);
             break;
         case "auth":
             initAuthPage();
 
-            var loginform = $("#login-form"),
-                body      = $("body"),
-                from      = smallScreen ? "20%" : "70%",
-                to        = smallScreen ? "0%" : "50%";
+            var loginform = $("#login-form");
 
-            body.css("overflow", "hidden");
-            loginform.css("top", from);
+            $("body").css("overflow", "hidden");
+            loginform.css("top", smallScreen ? "20%" : "70%");
             loginform.css("opacity", 0);
 
             oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
             loginform.animate({"opacity": 1}, {duration: 250, queue: false});
-            loginform.animate({"top": to}, {duration: 250, queue: false, complete : function () {
+            loginform.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
                 finalize();
-                body.removeAttr("style");
+                $("body").removeAttr("style");
                 loginform.removeAttr("style");
                 if (hasLoggedOut) {
                     setTimeout(function () {
@@ -598,7 +589,7 @@
             // Give the DOM some time to recognize our new element for transition purposes
             setTimeout(function () {
                 $("#crumbs li.out").attr("class", "in");
-            }, 10);
+            }, 20);
             // Remove the class after the transition and keep the list scrolled to the last element
             setTimeout(function () {
                 $("#crumbs li.in").removeClass();
@@ -628,11 +619,12 @@
         var list = $("<ul></ul>");
         for (var file in fileList) {
             var size = convertToSI(fileList[file].size);
+            var type = fileList[file].type;
             var id = (root === "/") ? "/" + file : root + "/" + file;
 
-            if (fileList[file].type === "f" || fileList[file].type === "nf") { // Create a file row
+            if (type === "f" || type === "nf") { // Create a file row
                 var downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
-                var addProgress = fileList[file].type === "nf" ? '<div class="progressBar"></div>' : "";
+                var addProgress = type === "nf" ? '<div class="progressBar"></div>' : "";
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
@@ -688,7 +680,7 @@
                 $("#content").removeAttr("class");
                 $(".data-row").removeClass("animating");
                 finalize();
-            }, 10);
+            }, 20);
 
         }
 

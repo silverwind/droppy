@@ -116,12 +116,11 @@ function prepareContent() {
 
         fs.writeFileSync(getResPath("client.js"), config.debug ? js : uglify.minify(js, {fromString: true}).code);
 
-        logsimple(" ->> preparing HTML...");
-
         // Copy html from src to res - may do some preprocessing here later
+        logsimple(" ->> preparing HTML...");
         copyResource("base.html");
-        copyResource("body-auth.html");
-        copyResource("body-main.html");
+        copyResource("auth.html");
+        copyResource("main.html");
     } catch (err) {
         logerror("Error reading client sources.\n", util.inspect(err));
         process.exit(1);
@@ -524,10 +523,10 @@ function handleGET(req, res) {
     } else if (URI === "/content") {
         if (getCookie(req.headers.cookie)) {
             res.setHeader("X-Page-Type", "main");
-            handleResourceRequest(req, res, "body-main.html");
+            handleResourceRequest(req, res, "main.html");
         } else {
             res.setHeader("X-Page-Type", "auth");
-            handleResourceRequest(req, res, "body-auth.html");
+            handleResourceRequest(req, res, "auth.html");
         }
     } else if (URI.match(/^\/get\//)) {
         handleFileRequest(req, res);
