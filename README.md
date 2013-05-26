@@ -1,5 +1,5 @@
 #Droppy
-A modern HTTP/HTTPS fileserver built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates.
+A modern file server web application built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates.
 ##Installation
 With [node](http://nodejs.org/) installed, run:
 ````
@@ -17,12 +17,12 @@ or just
 Once the server is listening, navigate to [http://localhost:80/](http://localhost/). The default login is user `droppy` with password `droppy`. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
 
 ##Supported Browsers
-- Firefox 19+
-- Chrome 26+
-- IE 10+ (IE9 is untested, but might work resonably well)
+- Firefox 19 or higher
+- Chrome 25 or higher
+- Internet Explorer 10 or higher
 
 ##Configuration
-Configuration is done through  the `config.json` file, located in the same directory as `droppy.js`.
+Configuration is done through the `config.json` file, located in the same directory as `droppy.js`.
 ````javascript
 {
     "debug"        : false,
@@ -39,7 +39,7 @@ Configuration is done through  the `config.json` file, located in the same direc
 }
 ````
 
-- `debug`: With debug enabled, client JS/CSS resources won't be minfied and the site will be allowed to be embedded in an frame.
+- `debug`: With debug enabled, client JS/CSS resources won't be minfied and the stylesheet will get refreshed automatically when changed on the server.
 - `useSSL`: Whether the server should use HTTPS (SSL).
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
 - `readInterval`: The minimum interval in milliseconds in which updates to a directory are sent. In case a directory gets constantly written to, this helps to keep the amount of updates (and I/O) in check.
@@ -49,6 +49,3 @@ Configuration is done through  the `config.json` file, located in the same direc
 - `filesDir`: The directory which serves as the server's root.
 - `resDir`: The directory which contains the compiled resources and images.
 - `srcDir`: The directory which contains the html/js/css sources.
-
-##Notes
-- If you're running inside Cygwin, it is advisable to run node with `cmd /c node` for compatibilty reasons.
