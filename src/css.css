@@ -51,9 +51,10 @@ input:focus {
 }
 
 #page, #newpage {
-    height: 100%;
+    height: calc(100% - 76px);
     position: absolute;
     width: 100%;
+    top: 76px;
     opacity: 1;
     overflow-x: hidden;
     transition: opacity .25s ease;
@@ -119,7 +120,6 @@ input:focus {
 
 #crumbs {
    background: #222;
-   height: 100%;
    height: auto;
    overflow: hidden;
    position: relative;
@@ -129,33 +129,29 @@ input:focus {
    z-index: 1;
 }
 
-#crumbs , #crumbs li {
-    float:left;
-}
-
 #crumbs li {
     color: #ccc;
     cursor: pointer;
     float: left;
     font-size: .9em;
     line-height: 1.6em;
+    height: 1.6em;
     padding-left: 2em;
     padding-right: 1.6em;
     position: relative;
 }
 
 #crumbs li:after {
-    background: #444;
-    content: "";
-    display: block;
-    height: 1.6em;
     position: absolute;
-    right: -.8em;
-    top: 0;
-    transform: rotate(45deg) scale(0.707) ;
-    width:1.6em;
+    top: -1px;
+    right: -1em;
+    content: "";
+    width: .6px;
+    height: 0px;
+    border-style: solid;
+    border-width: .85em 0 .85em 1em;
+    border-color: transparent;
 }
-
 
 #crumbs li, #crumbs li:after {
   transition: all 0.3s ease;
@@ -169,52 +165,37 @@ input:focus {
 #crumbs li.out { left: -10%; }
 #crumbs li.placeholder { opacity: 0; }
 
-#crumbs li:nth-child(1)       { background: #444; z-index: 10;}
-#crumbs li:nth-child(1):after { background: #444;}
-#crumbs li:nth-child(2)       { background: #666; z-index: 9;}
-#crumbs li:nth-child(2):after { background: #666;}
-#crumbs li:nth-child(3)       { background: #444; z-index: 8;}
-#crumbs li:nth-child(3):after { background: #444;}
-#crumbs li:nth-child(4)       { background: #666; z-index: 7;}
-#crumbs li:nth-child(4):after { background: #666;}
-#crumbs li:nth-child(5)       { background: #444; z-index: 6;}
-#crumbs li:nth-child(5):after { background: #444;}
-#crumbs li:nth-child(6)       { background: #666; z-index: 5;}
-#crumbs li:nth-child(6):after { background: #666;}
-#crumbs li:nth-child(7)       { background: #444; z-index: 4;}
-#crumbs li:nth-child(7):after { background: #444;}
-#crumbs li:nth-child(8)       { background: #666; z-index: 3;}
-#crumbs li:nth-child(8):after { background: #666;}
+#crumbs li:nth-child(odd)  { background: #444; }
+#crumbs li:nth-child(even) { background: #666; }
 
-#crumbs li:nth-child(1):hover       { background: #29f; }
-#crumbs li:nth-child(1):hover:after { background: #29f; }
-#crumbs li:nth-child(2):hover       { background: #f1a; }
-#crumbs li:nth-child(2):hover:after { background: #f1a; }
-#crumbs li:nth-child(3):hover       { background: #29f; }
-#crumbs li:nth-child(3):hover:after { background: #29f; }
-#crumbs li:nth-child(4):hover       { background: #f1a; }
-#crumbs li:nth-child(4):hover:after { background: #f1a; }
-#crumbs li:nth-child(5):hover       { background: #29f; }
-#crumbs li:nth-child(5):hover:after { background: #29f; }
-#crumbs li:nth-child(6):hover       { background: #f1a; }
-#crumbs li:nth-child(6):hover:after { background: #f1a; }
-#crumbs li:nth-child(7):hover       { background: #29f; }
-#crumbs li:nth-child(7):hover:after { background: #29f; }
-#crumbs li:nth-child(8):hover       { background: #f1a; }
-#crumbs li:nth-child(8):hover:after { background: #f1a; }
+#crumbs li:nth-child(odd):after  { border-left-color: #444; }
+#crumbs li:nth-child(even):after { border-left-color: #666; }
+
+#crumbs li:nth-child(odd):hover  { background: #29f; }
+#crumbs li:nth-child(even):hover { background: #f1a; }
+
+#crumbs li:nth-child(odd):hover:after  { border-left-color: #29f; }
+#crumbs li:nth-child(even):hover:after { border-left-color: #f1a; }
+
+#crumbs li:nth-child(1) { z-index: 8; }
+#crumbs li:nth-child(2) { z-index: 7; }
+#crumbs li:nth-child(3) { z-index: 6; }
+#crumbs li:nth-child(4) { z-index: 5; }
+#crumbs li:nth-child(5) { z-index: 4; }
+#crumbs li:nth-child(6) { z-index: 3; }
+#crumbs li:nth-child(7) { z-index: 2; }
+#crumbs li:nth-child(8) { z-index: 1; }
 
 /* ============================== Main Content ============================= */
 
 #content, #newcontent {
-    bottom: 0;
-    max-height: 100%;
-    position: absolute;
-    top: 76px;
-    transition: all .25s ease;
+    height: 100%;
     opacity: 1;
+    position: absolute;
+    top: 0;
+    transition: all .25s ease;
     user-select: none;
     width: 100%;
-    padding: .25em;
 }
 
 #newcontent.center  { left: 0;     }
@@ -314,7 +295,8 @@ input:focus {
     position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 85%;
+    width: 66%;
+
 }
 
 .data-row {
@@ -322,6 +304,7 @@ input:focus {
     height: 1.5em;
     line-height: 1.5em;
     width: 100%;
+
 }
 
 .data-row , .data-row a {
@@ -476,9 +459,9 @@ input:focus {
     height: 200px;
     left: 50%;
     margin-left: -200px;
-    position: absolute;
+    position: fixed;
     top: -200px;
-    transition: top .4s ease-in-out;
+    transition: top .4s ease;
     width: 400px;
     z-index: 10;
 }
@@ -743,10 +726,8 @@ input[type=checkbox]:checked + label:before {
 
 @media all and (max-width: 1024px) {
     .button {
-        width: 160px;
-    }
-    #overlay {
-        width: 160px;
+        width: 150px;
+        font-size: .9em;
     }
 
     #crumbs li {
@@ -764,18 +745,20 @@ input[type=checkbox]:checked + label:before {
         width: 80px;
     }
 
-    #content, #newcontent {
+    #page, #newpage {
         top: 69px;
+        height: calc(100% - 69px);
     }
 
     #crumbs li {
         font-size: 0.7em;
-        padding-left: 1em;
+        padding-left: 1.5em;
         padding-right: 0.8em;
     }
 
     #crumbs li:first-child {
         padding-left: 0.5em;
+
     }
 
     #submit-bg {
@@ -879,6 +862,6 @@ input[type=checkbox]:checked + label:before {
 
 @media all and (max-width: 319px) {
     .button {
-        width: 60px;
+        width: 40px;
     }
 }

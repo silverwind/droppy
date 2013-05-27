@@ -15,7 +15,8 @@
     "autoprefixer": "~0.4.20130515",
     "rmdir": "~1.0.0",
     "grunt-exec": "~0.4.1",
-    "grunt": "~0.4.1"
+    "grunt": "~0.4.1",
+    "mkdirp": "~0.3.5"
   },
   "devDependencies": {
     "grunt": "*",

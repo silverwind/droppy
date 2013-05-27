@@ -284,19 +284,74 @@
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
         $(document.documentElement).on("dragover",  function (e) { e.stopPropagation(); e.preventDefault(); });
-
-        // jQuery's event handler for drop doesn't get event.dataTransfer
-        // http://bugs.jquery.com/ticket/10756
         $(document.documentElement)[0].addEventListener("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
-            createFormdata(event.dataTransfer.files);
+
+            // Check if we support GetAsEntry();
+            if (!event.dataTransfer.items || !event.dataTransfer.items[0].webkitGetAsEntry()) {
+                // No support, fallback to normal File API
+                createFormdata(event.dataTransfer.files, true);
+                return;
+            }
+            // We support GetAsEntry, go ahead and read recursively
+            var obj = {};
+            var cbCount = 0, cbFired = 0, dirCount = 0;
+            var length = event.dataTransfer.items.length;
+            for (var i = 0; i < length; i++) {
+                var entry = event.dataTransfer.items[i].webkitGetAsEntry();
+                if (!entry) continue;
+                if (entry.isFile) {
+                    cbCount++;
+                    entry.file(function (file) {
+                        obj[file.name] = file;
+                        cbFired++;
+                    }, function () { cbFired++; });
+                } else if (entry.isDirectory) {
+                    dirCount++;
+                    (function readDirectory(entry, path) {
+                        if (!path) path = entry.name;
+                        obj[path] = {};
+                        entry.createReader().readEntries(function (entries) {
+                            for (var i = 0; i < entries.length; i++) {
+                                if (entries[i].isDirectory) {
+                                    dirCount++;
+                                    readDirectory(entries[i], path + "/" + entries[i].name);
+                                } else {
+                                    cbCount++;
+                                    entries[i].file(function (file) {
+                                        obj[path + "/" + file.name] = file;
+                                        cbFired++;
+                                    }, function () { cbFired++; });
+                                }
+                            }
+                        });
+                    })(entry);
+                }
+            }
+
+            // TODO: Uploading just empty folders without any files runs into the timeout
+            // Possible solution would be to send the folder creations over the websocket
+            // as we can't send empty FormData.
+            (function wait(timeout) {
+                if (timeout > 10000) {
+                    log("Timeout waiting for files to be read");
+                    return;
+                } else {
+                    if (cbCount > 0 && cbFired === cbCount) {
+                        log("Got " + cbFired + " files in " + dirCount + " directories.");
+                        createFormdata(obj);
+                    } else {
+                        setTimeout(wait, timeout + 50, timeout + 50);
+                    }
+                }
+            })(50);
         });
 
         // Debounced window resize event
         var resizeTimeout;
         $(window).resize(function () {
-            // Hide the out-of-screen about box to prevent chrome's automatic
+            // Hide the out-of-screen about box to prevent Chrome's automatic
             // resize transition sliding in the element momentarerly
             $("#about").hide();
             clearTimeout(resizeTimeout);
@@ -403,8 +458,8 @@
             }
         });
 
-        var arrow     = $("#arrow"),
-            about     = $("#about");
+        var arrow = $("#arrow"),
+            about = $("#about");
 
         $(".arrow-text").off("click").on("click", function () {
             if (arrow.attr("class") === "down") {
@@ -440,13 +495,21 @@
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
-        function createFormdata(files) {
-            if (!files) return;
+        function createFormdata(data, isArray) {
             var formData = new FormData();
-            for (var i = 0, len = files.length; i < len; i++) {
-                formData.append(files[i].name, files[i]);
+            if (!data) return;
+
+            if (isArray) {
+                for (var i = 0, len = data.length; i < len; i++) {
+                    formData.append(data[i].name, data[i]);
+                }
+                uploadFiles(formData);
+            } else {
+                for (var key in data) {
+                    formData.append(key, data[key], key);
+                }
+                uploadFiles(formData);
             }
-            uploadFiles(formData);
         }
 
         function uploadFiles(formData) {
@@ -552,7 +615,6 @@
         if (isAnimating) {
             if (retryTimout > 1000) return;
             retryTimout += 25;
-            console.log("retry");
             setTimeout(updateLocation, retryTimout, path, doSwitch);
         } else {
             retryTimout = 0;
@@ -581,16 +643,19 @@
 
         parts[0] = '<span class="icon">' + home + '<span>';
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
-
+        var pathStr = "";
         if (savedParts) {
             i = 1; // Skip the first element as it's always the same
             while (true) {
+                pathStr += "/" + parts[i];
                 if (!parts[i] && !savedParts[i]) break;
                 if (parts[i] !== savedParts[i]) {
-                    if (savedParts[i] && !parts[i])
-                        $("#crumbs li:contains(" + savedParts[i] + ")").remove();
+                    if (savedParts[i] && !parts[i]) {
+                        $("#crumbs li").slice(i).remove();
+                        break;
+                    }
                     else if (parts[i] && !savedParts[i])
-                        create(parts[i], path);
+                        create(parts[i], pathStr);
                 }
                 i++;
             }
@@ -599,8 +664,12 @@
             // Delay initial slide-in
             setTimeout(function () {
                 $(".placeholder").remove(); // Invisible placeholder so height:auto works during the initial animation
-                for (i = 0, len = parts.length; i < len; i++)
-                    create(parts[i], path);
+                create(parts[0]);
+                for (i = 1, len = parts.length; i < len; i++) {
+                    pathStr += "/" + parts[i];
+                    create(parts[i], pathStr);
+                }
+
                 finalize();
             }, 300);
         }
@@ -609,11 +678,11 @@
 
         function create(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
-            if (name.indexOf(home) > -1)
+            if (!path)
                 li.data("destination", "/");
-            else
-                li.data("destination", path.substring(0, path.lastIndexOf(name) + name.length));
-
+            else {
+                li.data("destination", path);
+            }
             li.click(function () {
                 updateLocation($(this).data("destination"), true);
             });

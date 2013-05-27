@@ -54,6 +54,7 @@ var autoprefixer    = require("autoprefixer"),
     formidable      = require("formidable"),
     fs              = require("fs"),
     mime            = require("mime"),
+    mkdirp          = require("mkdirp"),
     path            = require("path"),
     querystring     = require("querystring"),
     rmdir           = require("rmdir"),
@@ -690,26 +691,35 @@ function handleUploadRequest(req, res) {
         var form = new formidable.IncomingForm();
         var cookie = getCookie(req.headers.cookie);
         var uploadedFiles = {};
-        form.parse(req, function (err) {
+        var basePath = path.join(config.filesDir + clients[cookie].directory);
+        form.encoding = "utf-8";
+        form.parse(req, function (err, fields, files) {
             if (err) logerror();
+            var createdPaths = {};
+            for (var file in files) {
+                try {
+                    var fullPath = path.dirname(path.join(basePath, file));
+                    if (!createdPaths[fullPath]) {
+                        mkdirp.sync(fullPath);
+                        createdPaths[fullPath] = true;
+                    }
+                } catch (err) {
+                    if (err || err.code !== "EEXIST") logerror(err);
+                }
+                if (path.sep !== "/")
+                    log(socket, " Receiving ", path.join(clients[cookie].directory, file).split(path.sep).join("/"));
+                else
+                    log(socket, " Receiving ", path.join(clients[cookie].directory, file));
+            }
             res.writeHead(200, {"content-type": "text/plain"});
             res.end();
             logresponse(req, res);
         });
         form.on("fileBegin", function (name, file) {
-            var pathToSave;
-
-            if (clients[cookie].directory === undefined || clients[cookie].directory === "/")
-                pathToSave = config.filesDir + file.name;
-            else
-                pathToSave = addFilePath(clients[cookie].directory) + "/" + file.name;
-
             uploadedFiles[file.name] = {
                 "temppath" : file.path,
-                "savepath" : pathToSave
+                "savepath" : path.join(basePath, file.name)
             };
-
-            log(socket, " Receiving ", pathToSave.substring(config.filesDir.length));
         });
 
         form.on("end", function () {
