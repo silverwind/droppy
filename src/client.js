@@ -384,7 +384,7 @@
                         formData.append(files[i].name, files[i]);
                     }
                     buildHTML(currentData, currentData.folder);
-                    createFormdata(files);
+                    createFormdata(files, true);
                 }
                 $("#file").val(""); // Reset file form
             }
@@ -447,6 +447,7 @@
                 info.fadeIn(300);
             } else {
                 nameoverlay.removeClass("invalid").addClass("valid");
+                nameinput.removeClass("invalid").addClass("valid");
                 info.fadeOut(300);
                 if (e.keyCode === 13) { // Return Key
                     if (currentFolder === "/")
@@ -924,8 +925,4 @@
         if (debug) console.log(msg);
     }
 
-    window.onerror = function (msg, url, line) {
-        console.log("JS Error: " + msg + " @" + line + " of " + url);
-        return true;
-    };
 }(jQuery, window, document));

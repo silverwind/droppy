@@ -445,7 +445,7 @@ function checkWatchedDirs() {
 // Send file list JSON over websocket
 function sendMessage(cookie, messageType) {
     // Dont't send if the socket isn't open
-    if (!clients[cookie] || !clients[cookie].ws._socket) return;
+    if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
     var dir = clients[cookie].directory;
     var data = JSON.stringify({
         "type"  : messageType,
