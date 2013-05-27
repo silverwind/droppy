@@ -237,7 +237,6 @@ function setupSocket(server) {
             clients[cookie].ws = ws;
         }
 
-
         if (!cookie) {
             log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
             ws.send("UNAUTHORIZED");
