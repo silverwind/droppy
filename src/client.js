@@ -13,6 +13,9 @@
 // ============================================================================
 //  jQuery extensions
 // ============================================================================
+    // Add the dataTransfer property to the "drop" event.
+    $.event.props.push("dataTransfer");
+
     // Set a class on freshly inserted elements, once the DOM has fully loaded it
     $.fn.setClass = function (newclass) {
         if (hasAnimations) {
@@ -282,9 +285,9 @@
         hasLoggedOut = false;
 
         // Stop dragenter and dragover from killing our drop event
-        $(document.documentElement).on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
-        $(document.documentElement).on("dragover",  function (e) { e.stopPropagation(); e.preventDefault(); });
-        $(document.documentElement)[0].addEventListener("drop", function (event) {
+        $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
+        $(document.documentElement).off("dragover").on("dragover", function (e) { e.stopPropagation(); e.preventDefault(); });
+        $(document.documentElement).off("drop").on("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
 
