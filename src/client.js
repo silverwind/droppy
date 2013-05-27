@@ -291,7 +291,7 @@
             // Check if we support GetAsEntry();
             if (!event.dataTransfer.items || !event.dataTransfer.items[0].webkitGetAsEntry()) {
                 // No support, fallback to normal File API
-                prepareUpload(event.dataTransfer.files, true);
+                upload(event.dataTransfer.files, true);
                 return;
             }
             // We support GetAsEntry, go ahead and read recursively
@@ -340,7 +340,7 @@
                 } else {
                     if (cbCount > 0 && cbFired === cbCount) {
                         log("Got " + cbFired + " files in " + dirCount + " directories.");
-                        prepareUpload(obj);
+                        upload(obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
                     }
@@ -371,7 +371,7 @@
 
         fileInput.off("change").on("change", function () {
             if ($("#file").val() !== "") {
-                prepareUpload($("#file").get(0).files);
+                upload($("#file").get(0).files, true);
                 $("#file").val(""); // Reset file form
             }
         });
@@ -482,33 +482,47 @@
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
-        function prepareUpload(data, isArray) {
+        function upload(data, isArray) {
             var formData = new FormData();
             if (!data) return;
-            if (isArray) { // We got a File array, process and preview it
+            if (isArray) { // We got a normal File array
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
                     currentData[data[i].name] = { size: data[i].size, type: "nf" };
                     formData.append(data[i].name, data[i]);
                 }
-                buildHTML(currentData, currentData.folder);
-                uploadFiles(formData);
             } else { // We got an object for recursive folder uploads
-                for (var key in data) {
-                    formData.append(key, data[key], key);
+                var addedDirs = {};
+                for (var path in data) {
+                    formData.append(path, data[path], path);
+                    var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
+                    switch (Object.prototype.toString.call(data[path])) {
+                    case "[object Object]":
+                        if (!addedDirs[name]) {
+                            currentData[name] = { size: 0, type: "nd" };
+                            addedDirs[name] = true;
+                        }
+                        break;
+                    case "[object File]":
+                        if (!addedDirs[name]) {
+                            currentData[name] = { size: data[path].size, type: "nf" };
+                        }
+                        break;
+                    }
                 }
-                uploadFiles(formData);
             }
-        }
 
-        function uploadFiles(formData) {
-            var xhr = new XMLHttpRequest();
+            // Load the preview progress bars and init the UI
+            buildHTML(currentData, currentData.folder);
             uploadInit();
 
+            // Create the XHR2
+            var xhr = new XMLHttpRequest();
             xhr.upload.addEventListener("progress", uploadProgress, false);
             xhr.upload.addEventListener("load", uploadDone, false);
             xhr.upload.addEventListener("error", uploadDone, false);
 
+            // And send the files
             isUploading = true;
             xhr.open("post", "/upload", true);
             xhr.send(formData);
@@ -709,22 +723,23 @@
     function buildHTML(fileList, root) {
         var list = $("<ul></ul>");
         for (var file in fileList) {
-            var size = convertToSI(fileList[file].size);
-            var type = fileList[file].type;
-            var id = (root === "/") ? "/" + file : root + "/" + file;
+            var downloadURL,
+                type = fileList[file].type,
+                size = convertToSI(fileList[file].size),
+                id = (root === "/") ? "/" + file : root + "/" + file,
+                addProgress = (type === "nf" || type === "nd") ? '<div class="progressBar"></div>' : "";
 
             if (type === "f" || type === "nf") { // Create a file row
-                var downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
-                var addProgress = type === "nf" ? '<div class="progressBar"></div>' : "";
+                downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' + addProgress + '</li>'
                 );
-            } else {  // Create a folder row
+            } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
                     '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="icon icon-folder"></span>' +
-                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span></li>'
+                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span>' + addProgress + '</li>'
                 );
             }
         }

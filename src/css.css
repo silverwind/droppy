@@ -259,6 +259,8 @@ input:focus {
 }
 
 #loading {
+    position: fixed;
+    top: 0;
     display: table;
     height: 100%;
     overflow: hidden;
@@ -578,6 +580,8 @@ input:focus {
 #login-container {
     height: 100%;
     width: 100%;
+    position: fixed;
+    top: 0;
 }
 
 #login-form, #noscript {
