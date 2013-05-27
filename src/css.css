@@ -318,7 +318,6 @@ input:focus {
 
 .data-row:not(.animating):hover {
     background: #222;
-    border-radius: 6px;
 }
 
 .data-info {

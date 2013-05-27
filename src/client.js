@@ -291,7 +291,7 @@
             // Check if we support GetAsEntry();
             if (!event.dataTransfer.items || !event.dataTransfer.items[0].webkitGetAsEntry()) {
                 // No support, fallback to normal File API
-                createFormdata(event.dataTransfer.files, true);
+                prepareUpload(event.dataTransfer.files, true);
                 return;
             }
             // We support GetAsEntry, go ahead and read recursively
@@ -340,7 +340,7 @@
                 } else {
                     if (cbCount > 0 && cbFired === cbCount) {
                         log("Got " + cbFired + " files in " + dirCount + " directories.");
-                        createFormdata(obj);
+                        prepareUpload(obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
                     }
@@ -369,23 +369,9 @@
             "overflow": "hidden"
         }));
 
-        // All file uploads land here
         fileInput.off("change").on("change", function () {
             if ($("#file").val() !== "") {
-                var files = $("#file").get(0).files;
-                var num = files.length;
-                var formData = new FormData();
-                if (num > 0) {
-                    for (var i = 0; i < num; i++) {
-                        currentData[files[i].name] = {
-                            size: files[i].size,
-                            type: "nf"
-                        };
-                        formData.append(files[i].name, files[i]);
-                    }
-                    buildHTML(currentData, currentData.folder);
-                    createFormdata(files, true);
-                }
+                prepareUpload($("#file").get(0).files);
                 $("#file").val(""); // Reset file form
             }
         });
@@ -496,16 +482,18 @@
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
-        function createFormdata(data, isArray) {
+        function prepareUpload(data, isArray) {
             var formData = new FormData();
             if (!data) return;
-
-            if (isArray) {
+            if (isArray) { // We got a File array, process and preview it
+                if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
+                    currentData[data[i].name] = { size: data[i].size, type: "nf" };
                     formData.append(data[i].name, data[i]);
                 }
+                buildHTML(currentData, currentData.folder);
                 uploadFiles(formData);
-            } else {
+            } else { // We got an object for recursive folder uploads
                 for (var key in data) {
                     formData.append(key, data[key], key);
                 }
