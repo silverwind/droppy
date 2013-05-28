@@ -1,7 +1,7 @@
 #Droppy
 A modern file server web application built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates. It supports dropping one or more files into the window, and with Chrome, directories can be recursively uploaded.
 
-![droppy](http://i.imgur.com/8wbGWGl.png)
+![droppy](http://i.imgur.com/8xxWW9T.png)
 
 ##Installation
 With [node](http://nodejs.org/) installed, run:

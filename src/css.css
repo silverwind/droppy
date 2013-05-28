@@ -43,10 +43,10 @@ body {
 }
 
 #page, #newpage {
-    height: calc(100% - 79px);
+    height: calc(100% - 80px);
     position: absolute;
     width: 100%;
-    top: 79px;
+    top: 80px;
     opacity: 1;
     overflow-x: hidden;
     transition: opacity .25s ease;
@@ -119,8 +119,8 @@ body {
    height: auto;
    overflow: hidden;
    position: relative;
-   border-top: 1px solid #999;
-   border-bottom: 1px solid #999;
+   border-top: 1.5px solid #999;
+   border-bottom: 1.5px solid #999;
    top: 0;
    user-select: none;
    width: 1000%;
@@ -135,7 +135,7 @@ body {
     line-height: 1.6em;
     height: 1.6em;
     padding-left: 1.5em;
-    padding-right: 1.5em;
+    padding-right: .75em;
     position: relative;
 }
 
@@ -146,10 +146,11 @@ body {
   right: -.37em;
   height: 50.5%;
   width: .75em;
+
 }
 
-#path li:before { transform: skew(45deg); top: 0; }
-#path li:after  { transform: skew(-45deg); bottom: 0; }
+#path li:before { border-right: 2px solid #aaa; transform: skew(45deg); top: 0; }
+#path li:after  { border-right: 2px solid #aaa; transform: skew(-45deg); bottom: 0; }
 
 #path li,
 #path li:before,
@@ -177,15 +178,15 @@ body {
 #path li:nth-child(even)       { background: #246; }
 #path li:nth-child(even):hover { background: #36a; }
 
-#path li:nth-child(odd):before  { background: #aaa; }
-#path li:nth-child(odd):after   { background: #aaa; }
-#path li:nth-child(even):before { background: #aaa; }
-#path li:nth-child(even):after  { background: #aaa; }
+#path li:nth-child(odd):before  { background: #624; }
+#path li:nth-child(odd):after   { background: #624; }
+#path li:nth-child(even):before { background: #246; }
+#path li:nth-child(even):after  { background: #246; }
 
-#path li:nth-child(odd):hover:before  { background: #fff; }
-#path li:nth-child(odd):hover:after   { background: #fff; }
-#path li:nth-child(even):hover:before { background: #fff; }
-#path li:nth-child(even):hover:after  { background: #fff; }
+#path li:nth-child(odd):hover:before  { background: #a36; }
+#path li:nth-child(odd):hover:after   { background: #a36; }
+#path li:nth-child(even):hover:before { background: #36a; }
+#path li:nth-child(even):hover:after  { background: #36a; }
 
 #path li:nth-child(1) { z-index: 8; }
 #path li:nth-child(2) { z-index: 7; }
@@ -761,8 +762,8 @@ input[type=checkbox]:checked + label:before {
     }
 
     #page, #newpage {
-        top: 100px;
-        height: calc(100% - 100px);
+        top: 101px;
+        height: calc(100% - 101px);
     }
 
     #name-overlay {
@@ -777,8 +778,8 @@ input[type=checkbox]:checked + label:before {
     }
 
     #path li {
-        padding-left: 1em;
-        padding-right: 1em;
+        padding-left: 1.2em;
+        padding-right: .5em;
     }
 }
 
@@ -792,14 +793,14 @@ input[type=checkbox]:checked + label:before {
     }
 
     #page, #newpage {
-        top: 69px;
-        height: calc(100% - 69px);
+        top: 80px;
+        height: calc(100% - 80px);
     }
 
     #path li {
         font-size: 0.7em;
-        padding-left: 1em;
-        padding-right: 1em;
+        padding-left: 1.2em;
+        padding-right: .6em;
     }
 
     #submit-bg {
