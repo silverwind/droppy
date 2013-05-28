@@ -602,8 +602,9 @@ function handleResourceRequest(req, res, resourceName) {
         logresponse(req, res);
     } else {
 
-        // Shortcut to send the current CSS for live styling in debug mode
-        if (config.debug && debugcss && resourceName === "css.css") {
+        // Shortcut for CSS debugging when no Websocket is available
+        if (config.debug && resourceName === "css.css") {
+            debugcss = autoprefixer.compile(fs.readFileSync(config.srcDir + "css.css").toString("utf8"), ["last 2 versions"]);
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/css; charset=utf-8");
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
