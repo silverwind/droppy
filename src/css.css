@@ -127,9 +127,9 @@ body {
     display: none;
 }
 
-/* ============================== Breadcrumbs ============================== */
+/* ================================== Path ================================= */
 
-#crumbs {
+#path {
    background: #222;
    height: auto;
    overflow: hidden;
@@ -140,62 +140,74 @@ body {
    z-index: 1;
 }
 
-#crumbs li {
+#path li {
     color: #ccc;
     cursor: pointer;
     float: left;
     font-size: .9em;
     line-height: 1.6em;
     height: 1.6em;
-    padding-left: 2em;
-    padding-right: 1.6em;
+    padding-left: 1.5em;
+    padding-right: 1.5em;
     position: relative;
 }
 
-#crumbs li:after {
-    position: absolute;
-    top: -1px;
-    right: -1em;
-    content: "";
-    width: 1px;
-    height: 0;
-    border-style: solid;
-    border-width: .85em 0 .85em 1em;
-    border-color: transparent;
+#path li:before, #path li:after {
+  content: "";
+  display: block;
+  position: absolute;
+  right: -.37em;
+  height: 50.5%;
+  width: .75em;
 }
 
-#crumbs li, #crumbs li:after {
+#path li:before { transform: skew(45deg); top: 0; }
+#path li:after  { transform: skew(-45deg); bottom: 0; }
+
+#path li,
+#path li:before,
+#path li:after {
   transition: all 0.3s ease;
 }
 
-#crumbs li:hover, #crumbs li:hover:after {
+#path li:hover,
+#path li:hover:before,
+#path li:hover:after {
   color: #fff;
 }
 
-#crumbs li.in  { left: 0;    }
-#crumbs li.out { left: -10%; }
-#crumbs li.placeholder { opacity: 0; }
+#path li:first-child {
+    padding-left: 0.4em;
+}
 
-#crumbs li:nth-child(odd)  { background: #444; }
-#crumbs li:nth-child(even) { background: #666; }
+#path li.in  { left: 0;    }
+#path li.out { left: -10%; }
 
-#crumbs li:nth-child(odd):after  { border-left-color: #444; }
-#crumbs li:nth-child(even):after { border-left-color: #666; }
+#path li.placeholder { opacity: 0; }
 
-#crumbs li:nth-child(odd):hover  { background: #29f; }
-#crumbs li:nth-child(even):hover { background: #f1a; }
+#path li:nth-child(odd)        { background: #624; }
+#path li:nth-child(odd):hover  { background: #a36; }
+#path li:nth-child(even)       { background: #246; }
+#path li:nth-child(even):hover { background: #36a; }
 
-#crumbs li:nth-child(odd):hover:after  { border-left-color: #29f; }
-#crumbs li:nth-child(even):hover:after { border-left-color: #f1a; }
+#path li:nth-child(odd):before  { background: #aaa; }
+#path li:nth-child(odd):after   { background: #aaa; }
+#path li:nth-child(even):before { background: #aaa; }
+#path li:nth-child(even):after  { background: #aaa; }
 
-#crumbs li:nth-child(1) { z-index: 8; }
-#crumbs li:nth-child(2) { z-index: 7; }
-#crumbs li:nth-child(3) { z-index: 6; }
-#crumbs li:nth-child(4) { z-index: 5; }
-#crumbs li:nth-child(5) { z-index: 4; }
-#crumbs li:nth-child(6) { z-index: 3; }
-#crumbs li:nth-child(7) { z-index: 2; }
-#crumbs li:nth-child(8) { z-index: 1; }
+#path li:nth-child(odd):hover:before  { background: #fff; }
+#path li:nth-child(odd):hover:after   { background: #fff; }
+#path li:nth-child(even):hover:before { background: #fff; }
+#path li:nth-child(even):hover:after  { background: #fff; }
+
+#path li:nth-child(1) { z-index: 8; }
+#path li:nth-child(2) { z-index: 7; }
+#path li:nth-child(3) { z-index: 6; }
+#path li:nth-child(4) { z-index: 5; }
+#path li:nth-child(5) { z-index: 4; }
+#path li:nth-child(6) { z-index: 3; }
+#path li:nth-child(7) { z-index: 2; }
+#path li:nth-child(8) { z-index: 1; }
 
 /* ============================ Upload Progress ============================ */
 
@@ -735,8 +747,8 @@ input[type=checkbox]:checked + label:before {
         font-size: .9em;
     }
 
-    #crumbs li {
-        padding-left: 1.5em;
+    #path li {
+        padding-left: 1em;
         padding-right: 1em;
     }
 }
@@ -755,14 +767,10 @@ input[type=checkbox]:checked + label:before {
         height: calc(100% - 69px);
     }
 
-    #crumbs li {
+    #path li {
         font-size: 0.7em;
-        padding-left: 1.5em;
+        padding-left: 0.8em;
         padding-right: 0.8em;
-    }
-
-    #crumbs li:first-child {
-        padding-left: 0.5em;
     }
 
     #submit-bg {

@@ -173,7 +173,7 @@
                 if (folder !== currentFolder.replace(/&amp;/, "&")) {
                     updateLocation(msg.folder);
                 }
-                updateCrumbs(msg.folder);
+                updatePath(msg.folder);
                 currentData = data;
                 buildHTML(data, folder);
             }
@@ -373,7 +373,7 @@
             resizeTimeout = setTimeout(function () {
                 smallScreen = $(window).width() < 640;
                 $("#about").show();
-                checkBreadcrumbWidth();
+                checkPathWidth();
             }, 100);
         });
 
@@ -654,7 +654,7 @@
         window.history.pushState(null, null, currentFolder);
     }
 
-    function updateCrumbs(path) {
+    function updatePath(path) {
         updateTitle(path, true);
         var parts = path.split("/");
         var i = 0, len, home = "";
@@ -669,7 +669,7 @@
                 if (!parts[i] && !savedParts[i]) break;
                 if (parts[i] !== savedParts[i]) {
                     if (savedParts[i] && !parts[i]) {
-                        $("#crumbs li").slice(i).remove();
+                        $("#path li").slice(i).remove();
                         break;
                     }
                     else if (parts[i] && !savedParts[i])
@@ -705,21 +705,21 @@
                 updateLocation($(this).data("destination"), true);
             });
 
-            $("#crumbs").append(li);
+            $("#path").append(li);
         }
 
         function finalize() {
-            $("#crumbs li.out").setClass("in");
+            $("#path li.out").setClass("in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
-                $("#crumbs li.in").removeClass();
-                checkBreadcrumbWidth();
+                $("#path li.in").removeClass();
+                checkPathWidth();
             }, 300);
         }
     }
 
-    function checkBreadcrumbWidth() {
-        var last = $("#crumbs li:last-child");
+    function checkPathWidth() {
+        var last = $("#path li:last-child");
         if (!last.position()) return;
 
         var margin = smallScreen ? 50 : 120;
@@ -728,10 +728,10 @@
 
         if ((right + margin) > space) {
             var needed = right - space + margin;
-            $("#crumbs").animate({"left": -needed}, {duration: 200});
+            $("#path").animate({"left": -needed}, {duration: 200});
         } else {
-            if ($("#crumbs").css("left") !== 0)
-                $("#crumbs").animate({"left": 0}, {duration: 200});
+            if ($("#path").css("left") !== 0)
+                $("#path").animate({"left": 0}, {duration: 200});
         }
     }
 
