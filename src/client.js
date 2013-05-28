@@ -747,7 +747,7 @@
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
                 list.append(
-                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
+                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' + addProgress + '</li>'
                 );
