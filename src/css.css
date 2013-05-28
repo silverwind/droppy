@@ -199,32 +199,30 @@ body {
 /* ============================ Upload Progress ============================ */
 
 #upload-info {
-    background: #222;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
-    box-shadow: 0 0 20px -2px #000;
     color: #ccc;
-    height: 78px;
+    height: 42px;
     left: 50%;
-    margin-left: -90px;
+    margin-left: -100px;
     position: fixed;
     text-align: center;
     top: -85px;
-    width: 180px;
+    width: 200px;
     z-index: 11;
 }
 
 #upload-percentage {
-    font-size: 2em;
+    font-size: 1.2em;
+    top: 1px;
     position: absolute;
-    top: -2px;
     width: 100%;
 }
 
 #upload-time-left {
-    bottom: 4px;
+    bottom: 2px;
     color: #aaa;
-    font-size: .6em;
+    font-size: .5em;
     position: absolute;
     width: 100%;
 }
@@ -749,8 +747,12 @@ input[type=checkbox]:checked + label:before {
         font-size: 2em;
     }
     .button {
-        width: 250px;
+        width: 220px;
         font-size: .8em;
+        height: 54px;
+    }
+
+    #upload-info {
         height: 54px;
     }
 
@@ -762,11 +764,15 @@ input[type=checkbox]:checked + label:before {
         top: 100px;
         height: calc(100% - 100px);
     }
+
+    #name-overlay {
+        font-size: .8em;
+    }
 }
 
 @media all and (max-width: 1024px) {
     .button {
-        width: 150px;
+        width: 135px;
         font-size: .9em;
     }
 
@@ -782,7 +788,7 @@ input[type=checkbox]:checked + label:before {
     }
 
     .button {
-        width: 75px;
+        width: 60px;
     }
 
     #page, #newpage {
@@ -792,8 +798,8 @@ input[type=checkbox]:checked + label:before {
 
     #path li {
         font-size: 0.7em;
-        padding-left: 0.8em;
-        padding-right: 0.8em;
+        padding-left: 1em;
+        padding-right: 1em;
     }
 
     #submit-bg {
@@ -890,6 +896,14 @@ input[type=checkbox]:checked + label:before {
         float: left;
         margin-left: 10%;
         width: 80%;
+    }
+
+    #upload-info {
+        font-size: .8em;
+    }
+
+    #upload-percentage {
+        top: 5px;
     }
 }
 

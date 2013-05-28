@@ -147,6 +147,7 @@
                 isUploading = false;
                 updateTitle(currentFolder, true); // Reset title
                 $(".progressBar").css("width", 0); // Reset progress bars
+                $(".progressBar").hide();
                 updateData(msg.folder, msg.data);
                 break;
             case "NEW_FOLDER":
@@ -561,6 +562,7 @@
             uperc.html("0%");
 
             timeleft.html("");
+            $("#about").hide();
             infobox.animate({top: "-2px"}, 250);
         }
 
@@ -572,6 +574,9 @@
 
             timeleft.html("finished");
             infobox.animate({top: "-85px"}, 250);
+            setTimeout(function () {
+                $("#about").show();
+            }, 250);
         }
 
         function uploadProgress(event) {
@@ -591,11 +596,9 @@
             var secs = (estimate - elapsed) / 1000;
 
             if (secs > 120) {
-                timeleft.html("less than " + Math.floor((secs / 60) + 1) + " minutes left");
+                timeleft.html(Math.floor((secs / 60) + 1) + " minutes left");
             } else if (secs > 60) {
-                timeleft.html("less than 2 minutes left");
-            } else if (secs < 1.5) {
-                timeleft.html("less than a second left");
+                timeleft.html("2 minutes left");
             } else {
                 timeleft.html(Math.round(secs) + " seconds left");
             }
