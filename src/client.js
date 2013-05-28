@@ -70,9 +70,11 @@
         case "main":
             initMainPage();
             oldPage.attr("class", "out");
+            $("#content").addClass("out");
             setTimeout(function () {
                 $("#navigation").attr("class", "in");
                 setTimeout(function () {
+                    $("#content").removeClass("out");
                     finalize();
                 }, 500);
             }, 250);

@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "0.3.0-1",
+  "version": "0.3.0-2",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "Modern HTTP file server/browser application with realtime updates",
   "homepage": "https://github.com/silverwind/Droppy",
@@ -14,7 +14,8 @@
     "clean-css": "~1.0.2",
     "autoprefixer": "~0.4.20130528",
     "rmdir": "~1.0.0",
-    "mkdirp": "~0.3.5"
+    "mkdirp": "~0.3.5",
+    "grunt": "~0.4.1"
   },
   "devDependencies": {
     "grunt-exec": "~0.4.1",
