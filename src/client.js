@@ -2,8 +2,9 @@
 (function ($, window, document) {
     "use strict";
     var debug; // live css reload and debug logging - this is set by the server
-    var smallScreen = $(window).width() < 640;
+
     var hasAnimations = Modernizr.cssanimations;
+    var smallScreen = $(window).width() < 640;
 
     var currentData, currentFolder, fileInput, hasLoggedOut, isAnimating,
         isUploading, savedParts, socket, socketOpen, socketWait;
@@ -93,6 +94,8 @@
                 loginform.removeAttr("style");
                 if (hasLoggedOut) {
                     setTimeout(function () {
+                        $("#login-info").attr("class", "info");
+                        $("#login-info").html("Logged out successfully!");
                         $("#login-info").fadeIn(300);
                     }, 300);
                 }
@@ -270,6 +273,15 @@
                     } else {
                         submit.attr("class", "invalid");
                         loginform.attr("class", "invalid");
+                        if ($("#login-info").is(":visible")) {
+                            $("#login-info").addClass("shake");
+                            setTimeout(function () {
+                                $("#login-info").removeClass("shake");
+                            }, 500);
+                        }
+                        $("#login-info").addClass("error");
+                        $("#login-info").html("Wrong login!");
+                        $("#login-info").fadeIn(300);
                     }
                 }
             });

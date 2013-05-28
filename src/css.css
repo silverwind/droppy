@@ -146,7 +146,7 @@ input:focus {
     top: -1px;
     right: -1em;
     content: "";
-    width: .6px;
+    width: 1px;
     height: 0px;
     border-style: solid;
     border-width: .85em 0 .85em 1em;
@@ -474,7 +474,7 @@ input:focus {
 #about-logo {
     cursor: default;
     float: left;
-    font-size: 6em;
+    font-size: 10rem;
     line-height: 200px;
     text-align: center;
     text-shadow: 1px 1px 0 #fff;
@@ -500,20 +500,20 @@ input:focus {
 
 #about-title {
     color: #eee;
-    font-size: 1.5em;
-    line-height: 1.75em;
+    font-size: 2rem;
+    line-height: 4.5rem;
 }
 
 #about-text {
-    font-size: .8em;
-    line-height: 1.2em;
+    font-size: 1rem;
+    line-height: 1.5rem;
 }
 
 #about-copy {
     position: absolute;
     bottom: 0;
-    margin-bottom: .5em;
-    font-size: .7em;
+    margin-bottom: .5rem;
+    font-size: 1rem;
 }
 
 #about #github {
@@ -521,7 +521,7 @@ input:focus {
     bottom: 0;
     right: 0;
     padding: 8px;
-    font-size: 1.5em;
+    font-size: 2rem;
     cursor: pointer;
 }
 
@@ -546,7 +546,7 @@ input:focus {
 
 .arrow-text {
     cursor: pointer;
-    font-size: 1.75em;
+    font-size: 2.25rem;
     left: 50%;
     line-height: 1em;
     margin-left: -0.5em;
@@ -564,19 +564,6 @@ input:focus {
 }
 
 /* ============================== Login Form =============================== */
-
-#login-icon {
-    color: #444;
-    font-size: 9.5em;
-    height: 250px;
-    line-height: 250px;
-    position: absolute;
-    text-align: center;
-    text-shadow: 1px 1px 0 #777;
-    top: 0;
-    width: 100%;
-}
-
 #login-container {
     height: 100%;
     width: 100%;
@@ -594,6 +581,8 @@ input:focus {
     position: absolute;
     top: 50%;
     width: 500px;
+    z-index: 0;
+    user-select: none;
 }
 
 #login-form {
@@ -613,18 +602,44 @@ input:focus {
     width: 400px;
 }
 
-#login-info {
-    background: rgba(150, 200, 50, .8);
-    border-radius: 20px;
-    color: #eee;
-    display: none;
-    line-height: 1.75em;
-    margin-left:20%;
+#login-icon {
+    color: #444;
+    font-size: 9.5em;
+    height: 250px;
+    line-height: 250px;
     position: absolute;
     text-align: center;
-    top: .7em;
-    width: 60%;
-    z-index: 1;
+    text-shadow: 1px 1px 0 #777;
+    top: 0;
+    width: 100%;
+    z-index: -1;
+}
+
+#login-info {
+    border-radius: 20px;
+    box-shadow: inset 0 0 0 1.4px rgba(255, 255, 255, .7);
+    color: #eee;
+    display: none;
+    position: absolute;
+    line-height: 1.7em;
+    text-align: center;
+    top: .75em;
+    width: 300px;
+    margin-left: 100px;
+}
+
+#login-info.info  { background: rgba(150, 200, 50, .8); }
+#login-info.error { background: rgba(250, 40, 50, .8); }
+#login-info.shake {
+    animation-name: shake;
+    animation-duration: .4s;
+    animation-timing-function: ease;
+}
+
+@keyframes shake {
+    0%, 100% {transform: translateX(0);}
+    10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
+    20%, 40%, 60%, 80% {transform: translateX(5px);}
 }
 
 .login-input {
@@ -637,14 +652,26 @@ input:focus {
     margin-top: 30px;
     padding-left: 10px;
     width: 100%;
+
+}
+
+.login-input:focus {
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, .4);
 }
 
 #remember {
     color: #ddd;
     margin-top: 15px;
+    margin-left: -5px;
     text-align: left;
-    width: 100%;
 }
+
+#remember:focus {
+    outline: none;
+    border-radius: 5px;
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, .3);
+}
+
 
 input[type=checkbox] {
     display: none;
@@ -652,7 +679,7 @@ input[type=checkbox] {
 
 input[type=checkbox] + label {
     cursor: pointer;
-    line-height: 19px;
+    line-height: 18px;
     user-select: none;
 }
 
@@ -660,24 +687,16 @@ input[type=checkbox] + label:before {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAAAaVBMVEUAAAChoqIAAAC3uLikpKSUl5kAAACtra0AAAC6urpmaWuxsbGxsbGWmJqgoKExMTEAAAAAAAAAAACtra27u7u7u7uwsLAAAAAAAACoqKj29/f19vb7+/v+/v73+PjX2Nj8/f36+vr///+/lwrFAAAAGnRSTlMD4QFu2KoCywBtDXV3o+MSBwYMzAVqww4K5HCPibsAAABXSURBVHjavcg3EoAgEADAM+dAlAzy/0faHjO2uuUCF1IjUvARmmgTYuNUQxt8RnxgADrlQtLk5dQHdxf+uj04XC4wBVs0CTFxUTB3lUaG9VDQE3oV6PkAhSEppdIoDmIAAAAASUVORK5CYII=);
     content: "";
     display: inline-block;
-    height: 19px;
-    margin-left: 0;
+    height: 18px;
+    margin-left: 5px;
     margin-right: 6px;
     margin-top: -3px;
     vertical-align: middle;
-    width: 19px;
+    width: 18px;
 }
 
 input[type=checkbox]:checked + label:before {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAABC1BMVEUUFRYiJCUSExMAAACpqakAAAChoqIAAAC3uLikpKS6urqUl5kAAAAAAACtra2tra1maWuxsbGxsbGWmJoxMTGgoKEAAAAAAAC7u7u7u7uwsLAAAAAAAACoqKju7+/v7+9paWmYmZlLS0tzc3NGRkZ8fX2Cg4NRUVFZWVl2dnaPj497e3tFRUVKSkpQUFBYWFiDg4P09fWMjIyRkZGVlZVmZmaXmJiXl5fu7u6jo6NsbW1bW1v7/Pzw8fHz9PTy8vKUlJT29/dtbm7w8PBgYGB+fn5lZWVsbGzy8/N3eHj19vZWVlaZmprX2Njt7e35+vr3+Pjs7Ozx8fHp6enn5+fr6+vo6Ojk5OT8/f1T7JKqAAAAHnRSTlMWXwwD0QHhBm7YbaoCAMvMDXV3oxLjBwwFasMKDuSKNsVOAAAA1ElEQVR42lXI10LCMAAF0IiIiAIKyqpBUUFcuDfKHm1pm6Qm3P//EilFDOfxkEKxRDWlYiFJ4o4FjeUkNsgW6001PRZdJxTTFaAR/caAmN2aduL7ucvKoOT/hPUxOjYBasxPNcHF/Wj43m//ncJTDV63//pZgQrPRdu2Ly9uH+wJjtzwOMzzu/pw0HjBG+fhybFXPRmc3kzgSikXJ1ve1dl1UMvzfV945iOkHwhPzQiAq7ngDpj40XyxtEGyTgeajrNnkN3tGNWkMvsG2dnMH67I534BYfhYu61v4qgAAAAASUVORK5CYII=);
-}
-
-#check:after {
-    content: "";
-    display: block;
-    height: 19px;
-    position: absolute;
-    width: 19px;
 }
 
 #submit {
@@ -697,6 +716,15 @@ input[type=checkbox]:checked + label:before {
     user-select: none;
     width: 100%;
 }
+
+#submit:focus {
+    outline: none;
+    box-shadow: inset 0 0 10px 5px rgba(0, 0, 0, .2);
+}
+
+#submit::-moz-focus-inner { border: 0; }
+
+
 
 #submit .icon {
     display: inline-block;
@@ -789,6 +817,7 @@ input[type=checkbox]:checked + label:before {
         margin-top: 0;
         top: 0;
         width: 100%;
+
     }
 
     #login-form-inner {
@@ -800,9 +829,8 @@ input[type=checkbox]:checked + label:before {
     }
 
     #login-info {
-        width: 90%;
-        margin-left: 5%;
-        font-size: .7em;
+        width: 65%;
+        margin-left: 17.5%;
     }
 
     #login-icon {
@@ -837,14 +865,13 @@ input[type=checkbox]:checked + label:before {
     }
 
     #about {
-        font-size: .9em;
         width: 300px;
         margin-left: -150px;
     }
 
     #about-logo {
         color: #444;
-        font-size: 8em;
+        font-size: 12rem;
         line-height: 200px;
         position: absolute;
         text-shadow: .5px .5px 0 #777;
@@ -853,7 +880,7 @@ input[type=checkbox]:checked + label:before {
     }
 
     #about-logo:hover {
-        color: #111;
+        color: #444;
     }
 
     #about-content {
