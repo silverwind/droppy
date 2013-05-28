@@ -781,22 +781,31 @@
         if (count > 0)
             loadContent(list);
         else {
-            $("#content").html('<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>');
-            $("#upload-inline").on("click", function () {
-                fileInput.click();
-            });
+            loadContent(false);
         }
     }
 
+    // Load generated list into view with an animation
     function loadContent(list) {
-        // Load generated list into view with an animation
+        var emptyPage = '<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>';
         if (nav === "same") {
             $("#content").attr("class", "center");
-            $("#content").html(list);
+            if (list) {
+                $("#content").html(list);
+            } else {
+                $("#content").html(emptyPage);
+            }
             finalize();
         } else {
             $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
-            $("#newcontent").html(list);
+            if (list) {
+                $("#newcontent").html(list);
+            } else {
+                $("#newcontent").html(emptyPage);
+                $("#upload-inline").on("click", function () {
+                    fileInput.click();
+                });
+            }
             isAnimating = true;
             $(".data-row").addClass("animating");
             $("#content").attr("class", (nav === "forward") ? "back" : "forward");
