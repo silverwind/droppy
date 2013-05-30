@@ -12,7 +12,7 @@
     initVariables(); // Separately init the variables so we can init them on demand
 
 // ============================================================================
-//  jQuery extensions
+//  jQuery extensions / requestAnimationFrame
 // ============================================================================
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
@@ -47,6 +47,11 @@
         document.addEventListener("MSAnimationStart", listener, false);
         document.addEventListener("oanimationstart", listener, false);
     }
+
+    var requestAnimation = (function () {
+        return  window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                window.webkitRequestAnimationFrame || function (callback) { window.setTimeout(callback, 1000 / 60); };
+    })();
 // ============================================================================
 //  Page loading functions
 // ============================================================================
@@ -64,53 +69,54 @@
     // Switch the page content with an animation
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
-        var newPage = $("#newpage"), oldPage = $("#page");
-        var login = $("#login-form");
-        switch (type) {
-        case "main":
-            initMainPage();
-            oldPage.attr("class", "out");
-            $("#content").css("opacity", 0);
-            login.animate({"opacity": 0}, {duration: 250, queue: false});
-            login.animate({"top": smallScreen ? "20%" : "70%"}, {duration: 250, queue: false });
-            setTimeout(function () {
-                $("#navigation").attr("class", "in");
+        requestAnimation(function () {
+            var newPage = $("#newpage"), oldPage = $("#page");
+            var login = $("#login-form");
+            switch (type) {
+            case "main":
+                oldPage.attr("class", "out");
+                login.animate({"opacity": 0}, {duration: 250, queue: false});
+                login.animate({"top": smallScreen ? "20%" : "70%"}, {duration: 250, queue: false });
                 setTimeout(function () {
-                    $("#content").css("opacity", 1);
-                    $("#about-trigger").fadeIn(100);
-
-                    finalize();
+                    $("#navigation").attr("class", "in");
+                    setTimeout(function () {
+                        $("#about-trigger").fadeIn(100);
+                        $("content").removeAttr("class");
+                        finalize();
+                        initMainPage();
+                    }, 250);
                 }, 250);
-            }, 250);
-            break;
-        case "auth":
-            initAuthPage();
-            oldPage.attr("class", "out");
-            login.css("top", smallScreen ? "20%" : "70%");
-            login.css("opacity", 0);
-            $("#navigation").addClass("farout");
-            setTimeout(function () {
-                login.animate({"opacity": 1}, {duration: 250, queue: false});
-                login.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
-                    finalize();
-                    if (hasLoggedOut) {
-                        setTimeout(function () {
-                            $("#login-info").attr("class", "info");
-                            $("#login-info").html("Logged out!");
-                            $("#login-info").fadeIn(250);
-                        }, 250);
-                    }
-                }});
-            }, 250);
-            break;
-        }
+                break;
+            case "auth":
+                oldPage.attr("class", "out");
+                login.css("top", smallScreen ? "20%" : "70%");
+                login.css("opacity", 0);
+                $("#navigation").addClass("farout");
+                setTimeout(function () {
+                    login.animate({"opacity": 1}, {duration: 250, queue: false});
+                    login.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
+                        finalize();
+                        initAuthPage();
+                        if (hasLoggedOut) {
+                            setTimeout(function () {
+                                $("#login-info").attr("class", "info");
+                                $("#login-info").html("Logged out!");
+                                $("#login-info").fadeIn(250);
+                            }, 250);
+                        }
+                    }});
+                }, 250);
+                break;
+            }
 
-        // Switch ID of #newpage for further animation
-        function finalize() {
-            oldPage.remove();
-            newPage.attr("id", "page");
-        }
+            // Switch ID of #newpage for further animation
+            function finalize() {
+                oldPage.remove();
+                newPage.attr("id", "page");
+            }
+        });
     }
+
 // ============================================================================
 //  WebSocket functions
 // ============================================================================

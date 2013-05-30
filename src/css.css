@@ -84,6 +84,8 @@ body {
     z-index: -1;
 }
 
+#content.out {opacity: 0}
+
 @media all and (min-width: 1025px) { #content, #newcontent { top: 3.25em; margin: 1.5%;  width: 97% } }
 @media all and (max-width: 1024px) { #content, #newcontent { top: 3.25em } }
 @media all and (max-width: 640px)  { #content, #newcontent { top: 3.75em; max-height: calc(100% - 4.7em); } }
