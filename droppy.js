@@ -32,8 +32,6 @@
     control over the client's current location in the file system
   - Public file links (using a URL shortening mechanism)
   - Drag and drop moving of files/folders
-  - Find a solution to not send login data in cleartext over HTTP.
-  - IE9 compatibilty, if possible
   - Keybindings
  --------------------------------------------------------------------------- */
 

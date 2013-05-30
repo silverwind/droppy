@@ -127,12 +127,6 @@
             socketOpen = true;
             // Request initial update
             updateLocation(currentFolder || "/", false);
-
-            // Close the socket to prevent Firefox errors
-            $(window).on("beforeunload", function () {
-                socket.close();
-                socketOpen = false;
-            });
         };
 
         socket.onmessage = function (event) {
@@ -186,16 +180,16 @@
         socket.onclose = function () {
             socketOpen = false;
             // Restart a closed socket in case it unexpectedly closes,
-            // and give up after 20 seconds increasingly higher intervals.
+            // and give up after 10 seconds of increasingly higher intervals.
             // Related: https://bugzilla.mozilla.org/show_bug.cgi?id=858538
             (function retry(timeout) {
-                if (timeout === 20480 || hasLoggedOut) {
+                if (timeout > 10000 || hasLoggedOut) {
                     return;
                 } else {
-                    socket.socket && socket.socket.connect();
-                    setTimeout(retry, timeout * 2, timeout * 2);
+                    openSocket();
+                    setTimeout(retry, timeout * 1.5, timeout + 1.5);
                 }
-            })(5);
+            })(200);
         };
     }
 
@@ -299,6 +293,12 @@
         setTimeout(openSocket, 50);
         currentFolder = decodeURIComponent(window.location.pathname);
         hasLoggedOut = false;
+
+        // Close the socket gracefully
+        $(window).on("beforeunload", function () {
+            if (socketOpen)
+                socket.close();
+        });
 
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
@@ -708,9 +708,6 @@
     function checkPathWidth() {
         var last = $("#path li:last-child");
         if (!last.position()) return;
-
-        console.log("lastpos " + (last.position().left + last.width()));
-        console.log("win " + $(window).width());
         var margin = smallScreen ? 95 : 110;
         var space = $(window).width();
         var right = last.position().left + last.width();
