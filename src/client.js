@@ -1,8 +1,8 @@
 /* globals Modernizr */
 (function ($, window, document) {
     "use strict";
-    var debug; // live css reload and debug logging - this is set by the server
 
+    var debug; // live css reload and debug logging - this is set by the server
     var hasAnimations = Modernizr.cssanimations;
     var smallScreen = $(window).width() < 640;
 
@@ -25,7 +25,7 @@
             this.data("newclass", newclass);
         } else {
             // If we don't support animations, fallback to a simple timeout
-            window.setTimeout(function () {
+            setTimeout(function () {
                 this.attr("class", newclass);
             }, 30);
         }
@@ -49,8 +49,8 @@
     }
 
     var requestAnimation = (function () {
-        return  window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-                window.webkitRequestAnimationFrame || function (callback) { window.setTimeout(callback, 1000 / 60); };
+        return window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+               window.webkitRequestAnimationFrame || function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 // ============================================================================
 //  Page loading functions
@@ -67,6 +67,7 @@
     }
 
     // Switch the page content with an animation
+    // TODO: Clean up and avoid animate()
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
         requestAnimation(function () {
@@ -309,8 +310,10 @@
         });
 
         // Stop dragenter and dragover from killing our drop event
-        $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.stopPropagation(); e.preventDefault(); });
-        $(document.documentElement).off("dragover").on("dragover", function (e) { e.stopPropagation(); e.preventDefault(); });
+        $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.preventDefault(); });
+        $(document.documentElement).off("dragover").on("dragover", function (e) { e.preventDefault(); });
+
+        // File drop handler
         $(document.documentElement).off("drop").on("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
@@ -602,13 +605,9 @@
     // Update the page title and trim a path to its basename
     function updateTitle(text, isPath) {
         var prefix = "", suffix = "droppy";
-
         if (isPath) {
             var parts = text.match(/([^\/]+)/gm);
-            if (!parts)
-                prefix = "/";
-            else
-                prefix = parts[parts.length - 1];
+            prefix = parts ? parts[parts.length - 1] : "/";
         } else {
             prefix = text;
         }
@@ -803,7 +802,7 @@
             $("#newcontent").setClass("center");
 
             // Switch classes once the transition has finished
-            window.setTimeout(function () {
+            setTimeout(function () {
                 isAnimating = false;
                 $("#content").remove();
                 $("#newcontent").attr("id", "content");
