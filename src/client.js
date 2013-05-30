@@ -6,8 +6,8 @@
     var hasAnimations = Modernizr.cssanimations;
     var smallScreen = $(window).width() < 640;
 
-    var currentData, currentFolder, fileInput, hasLoggedOut, isAnimating,
-        isUploading, savedParts, socket, socketOpen, socketWait;
+    var currentData, currentFolder, giveUp, hasLoggedOut, isAnimating,
+        isUploading, savedParts, socket, socketWait;
 
     initVariables(); // Separately init the variables so we can init them on demand
 
@@ -61,48 +61,47 @@
         });
     }
 
-    // Switch the body's content with an animation
+    // Switch the page content with an animation
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"), oldPage = $("#page");
-
+        var login = $("#login-form");
         switch (type) {
         case "main":
             initMainPage();
             oldPage.attr("class", "out");
-            $("#content").addClass("out");
+            $("#content").css("opacity", 0);
+            login.animate({"opacity": 0}, {duration: 250, queue: false});
+            login.animate({"top": smallScreen ? "20%" : "70%"}, {duration: 250, queue: false });
             setTimeout(function () {
                 $("#navigation").attr("class", "in");
                 setTimeout(function () {
-                    $("#content").removeClass("out");
-                    $("#about-trigger").fadeIn();
+                    $("#content").css("opacity", 1);
+                    $("#about-trigger").fadeIn(100);
+
                     finalize();
-                }, 500);
+                }, 250);
             }, 250);
             break;
         case "auth":
             initAuthPage();
-
-            var loginform = $("#login-form");
-
-            $("body").css("overflow", "hidden");
-            loginform.css("top", smallScreen ? "20%" : "70%");
-            loginform.css("opacity", 0);
-
-            oldPage.animate({"opacity": 0}, {duration: 250, queue: false});
-            loginform.animate({"opacity": 1}, {duration: 250, queue: false});
-            loginform.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
-                finalize();
-                $("body").removeAttr("style");
-                loginform.removeAttr("style");
-                if (hasLoggedOut) {
-                    setTimeout(function () {
-                        $("#login-info").attr("class", "info");
-                        $("#login-info").html("Logged out successfully!");
-                        $("#login-info").fadeIn(300);
-                    }, 300);
-                }
-            }});
+            oldPage.attr("class", "out");
+            login.css("top", smallScreen ? "20%" : "70%");
+            login.css("opacity", 0);
+            $("#navigation").addClass("farout");
+            setTimeout(function () {
+                login.animate({"opacity": 1}, {duration: 250, queue: false});
+                login.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
+                    finalize();
+                    if (hasLoggedOut) {
+                        setTimeout(function () {
+                            $("#login-info").attr("class", "info");
+                            $("#login-info").html("Logged out!");
+                            $("#login-info").fadeIn(250);
+                        }, 250);
+                    }
+                }});
+            }, 250);
             break;
         }
 
@@ -116,7 +115,7 @@
 //  WebSocket functions
 // ============================================================================
     function openSocket() {
-        if (socketOpen) return;
+        if (socket.readyState < 2 || giveUp) return;
 
         if (document.location.protocol === "https:")
             socket = new WebSocket("wss://" + document.location.host);
@@ -124,7 +123,6 @@
             socket = new WebSocket("ws://" + document.location.host);
 
         socket.onopen = function () {
-            socketOpen = true;
             // Request initial update
             updateLocation(currentFolder || "/", false);
         };
@@ -132,8 +130,8 @@
         socket.onmessage = function (event) {
             socketWait = false;
             var msg = JSON.parse(event.data);
+            console.log(msg.type);
             switch (msg.type) {
-
             case "UPDATE_FILES":
                 if (isUploading) return;
                 updateData(msg.folder, msg.data);
@@ -178,12 +176,15 @@
         };
 
         socket.onclose = function () {
-            socketOpen = false;
+            if (hasLoggedOut) return;
             // Restart a closed socket in case it unexpectedly closes,
-            // and give up after 10 seconds of increasingly higher intervals.
+            // and give up after 20 seconds of increasingly higher intervals.
             // Related: https://bugzilla.mozilla.org/show_bug.cgi?id=858538
             (function retry(timeout) {
-                if (timeout > 10000 || hasLoggedOut) {
+                if (socket.readyState < 2) return;
+                if (timeout > 20000) {
+                    giveUp = true;
+                    log("Gave up reconnecting after 20 seconds");
                     return;
                 } else {
                     openSocket();
@@ -194,14 +195,19 @@
     }
 
     function sendMessage(msgType, msgData) {
-        if (!socketOpen) return;
-        startSocketWait();
-        socket.send(JSON.stringify({
-            type: msgType,
-            data: msgData
-        }));
+        (function queue() {
+            if (socket.readyState < 2) {
+                startSocketWait();
+                console.log("send");
+                socket.send(JSON.stringify({
+                    type: msgType,
+                    data: msgData
+                }));
+            } else {
+                if (!giveUp) setTimeout(queue, 50);
+            }
+        })();
     }
-
 
     function startSocketWait() {
         socketWait = true;
@@ -295,8 +301,8 @@
         hasLoggedOut = false;
 
         // Close the socket gracefully
-        $(window).on("beforeunload", function () {
-            if (socketOpen)
+        $(window).off("beforeunload").on("beforeunload", function () {
+            if (socket.close && socket.readyState < 2)
                 socket.close();
         });
 
@@ -377,8 +383,10 @@
             }, 100);
         });
 
+        var fileInput = $("#file");
+
         // Hide our file input form by wrapping it in a 0 x 0 div
-        fileInput = $("#file").wrap($("<div/>").css({
+        fileInput.wrap($("<div/>").css({
             "height"  : 0,
             "width"   : 0,
             "overflow": "hidden"
@@ -387,7 +395,7 @@
         fileInput.off("change").on("change", function () {
             if ($("#file").val() !== "") {
                 upload($("#file").get(0).files, true);
-                $("#file").val(""); // Reset file form
+                $("#file").val(""); // Reset the form
             }
         });
 
@@ -465,7 +473,6 @@
         $("#about-trigger").off("click").on("click", function () {
             if (about.attr("class") !== "in") {
                 setTimeout(function () {
-
                     about.setClass("in");
                 }, 50);
 
@@ -478,6 +485,7 @@
             sendMessage("LOGOUT");
             hasLoggedOut = true;
             socket.close();
+            $("#about-trigger").hide();
             deleteCookie("sid");
             initVariables(); // Reset vars to their init state
             getPage();
@@ -784,7 +792,7 @@
             } else {
                 $("#newcontent").html(emptyPage);
                 $("#upload-inline").on("click", function () {
-                    fileInput.click();
+                    $("#file").click();
                 });
             }
             isAnimating = true;
@@ -869,7 +877,6 @@
         isUploading = false;
         savedParts = false;
         socket = false;
-        socketOpen = false;
         socketWait = false;
     }
 
