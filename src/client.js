@@ -75,6 +75,7 @@
                 $("#navigation").attr("class", "in");
                 setTimeout(function () {
                     $("#content").removeClass("out");
+                    $("#about-trigger").fadeIn();
                     finalize();
                 }, 500);
             }, 250);
@@ -366,16 +367,12 @@
             })(50);
         });
 
-        // Debounced window resize event
+        // Re-fit path line after 100ms of no resizing
         var resizeTimeout;
         $(window).resize(function () {
-            // Hide the out-of-screen about box to prevent Chrome's automatic
-            // resize transition sliding in the element momentarerly
-            $("#about").hide();
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
                 smallScreen = $(window).width() < 640;
-                $("#about").show();
                 checkPathWidth();
             }, 100);
         });
@@ -463,29 +460,17 @@
             }
         });
 
-        var arrow = $("#arrow"),
-            about = $("#about");
+        var about = $("#about");
 
-        $(".arrow-text").off("click").on("click", function () {
-            if (arrow.attr("class") === "down") {
-                about.attr("class", "active");
-                about.css("top", "50%");
-                about.css("margin-top", "-100px");
+        $("#about-trigger").off("click").on("click", function () {
+            if (about.attr("class") !== "in") {
                 setTimeout(function () {
-                    arrow.attr("class", "up");
-                    $(".arrow-text.down").hide();
-                    $(".arrow-text.up").show();
-                }, 400);
+
+                    about.setClass("in");
+                }, 50);
+
             } else {
-                about.css("top", "-200px");
-                about.css("margin-top", "0");
-                setTimeout(function () {
-                    arrow.attr("class", "down");
-                    about.removeAttr("class");
-                    about.removeAttr("style");
-                    $(".arrow-text.up").hide();
-                    $(".arrow-text.down").show();
-                }, 400);
+                about.attr("class", "out");
             }
         });
 
@@ -563,7 +548,7 @@
 
             timeleft.html("");
             $("#about").hide();
-            infobox.animate({top: "-2px"}, 250);
+            infobox.attr("class", "in");
         }
 
         function uploadDone() {
@@ -573,10 +558,7 @@
             uperc.html("100%");
 
             timeleft.html("finished");
-            infobox.animate({top: "-85px"}, 250);
-            setTimeout(function () {
-                $("#about").show();
-            }, 250);
+            infobox.attr("class", "out");
         }
 
         function uploadProgress(event) {
@@ -727,7 +709,9 @@
         var last = $("#path li:last-child");
         if (!last.position()) return;
 
-        var margin = smallScreen ? 50 : 120;
+        console.log("lastpos " + (last.position().left + last.width()));
+        console.log("win " + $(window).width());
+        var margin = smallScreen ? 95 : 110;
         var space = $(window).width();
         var right = last.position().left + last.width();
 
@@ -752,7 +736,7 @@
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
                 list.append(
-                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
+                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' + addProgress + '</li>'
                 );
