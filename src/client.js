@@ -136,7 +136,6 @@
         socket.onmessage = function (event) {
             socketWait = false;
             var msg = JSON.parse(event.data);
-            console.log(msg.type);
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (isUploading) return;
@@ -202,9 +201,14 @@
 
     function sendMessage(msgType, msgData) {
         (function queue() {
-            if (socket.readyState < 2) {
-                startSocketWait();
-                console.log("send");
+            if (socket.readyState === 1) {
+                socketWait = true;
+
+                // Unlock the UI in case we get no socket resonse after waiting for 2 seconds
+                setTimeout(function () {
+                    socketWait = false;
+                }, 2000);
+
                 socket.send(JSON.stringify({
                     type: msgType,
                     data: msgData
@@ -213,14 +217,6 @@
                 if (!giveUp) setTimeout(queue, 50);
             }
         })();
-    }
-
-    function startSocketWait() {
-        socketWait = true;
-        // Unlock the UI in case we get no socket resonse after waiting for 2 seconds
-        setTimeout(function () {
-            socketWait = false;
-        }, 2000);
     }
 // ============================================================================
 //  Authentication page JS
