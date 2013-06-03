@@ -295,8 +295,8 @@
                         hasLoggedOut = false;
                         getPage();
                     } else {
-                        submit.attr("class", "invalid");
-                        loginform.attr("class", "invalid");
+                        submit.addClass("invalid");
+                        loginform.addClass("invalid");
                         if ($("#login-info").is(":visible")) {
                             $("#login-info").addClass("shake");
                             setTimeout(function () {
