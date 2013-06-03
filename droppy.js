@@ -104,10 +104,15 @@ cacheResources(config.resDir, function () {
 function prepareContent() {
     try {
         var css, js;
-        logsimple(" ->> preparing CSS...");
+        logsimple(config.debug ? " ->> preparing CSS..." : " ->> minifying CSS...");
 
-        css = autoprefixer.compile(fs.readFileSync(getSrcPath("css.css")).toString("utf8"), ["last 2 versions"]);
-        fs.writeFileSync(getResPath("css.css"), config.debug ? css : cleancss.process(css));
+        css = [
+            fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+            fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
+        ].join("\n");
+
+        css = autoprefixer.compile(css, ["last 2 versions"]);
+        fs.writeFileSync(getResPath("client.css"), config.debug ? css : cleancss.process(css));
 
         logsimple(config.debug ? " ->> preparing JS..." : " ->> minifying JS...");
 
@@ -185,7 +190,7 @@ function createListener() {
 
     // Live CSS reloading function for easy styling
     if (config.debug) {
-        var cssfile = config.srcDir + "css.css";
+        var cssfile = config.srcDir + "client.css";
         fs.watch(cssfile, debounce(function () {
             fs.readFile(cssfile, function (err, css) {
                 for (var cookie in clients) {
@@ -625,8 +630,14 @@ function handleResourceRequest(req, res, resourceName) {
     } else {
 
         // Shortcut for CSS debugging when no Websocket is available
-        if (config.debug && resourceName === "css.css") {
-            debugcss = autoprefixer.compile(fs.readFileSync(config.srcDir + "css.css").toString("utf8"), ["last 2 versions"]);
+        if (config.debug && resourceName === "client.css") {
+
+            debugcss = [
+                fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+                fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
+            ].join("\n");
+
+            debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/css; charset=utf-8");
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");

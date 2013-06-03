@@ -350,10 +350,13 @@ body {
    font-family: "icons";
 }
 
-.icon-file, .icon-folder {
+.sprite {
+    background-repeat: no-repeat;
+    display: block;
     float: left;
-    text-align: center;
-    width: 1.5em;
+    margin-top: calc( ( 1.5em - 24px ) / 2);
+    margin-right: .5em;
+    margin-left: .25em;
 }
 
 .icon-delete, .icon-link {

@@ -755,8 +755,9 @@
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
+                var spriteClass = getSpriteClass(getFileExtension(file));
                 list.append(
-                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
+                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon" title="Delete this file"></span>' +
                     '<span class="icon-link icon" title="Get a shortened link for this file"></span>' +
@@ -764,7 +765,7 @@
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
-                    '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="icon icon-folder"></span>' +
+                    '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="sprite sprite-folder"></span>' +
                     '<span class="folderlink">' + file + '</span><span class="icon-delete icon" title="Delete this folder"></span>' + progressBar + '</li>'
                 );
             }
@@ -826,7 +827,6 @@
                 }, 250);
             }
             bindEvents();
-            colorize();
             nav = "same";
         });
     }
@@ -867,27 +867,6 @@
         });
     }
 
-    function colorize() {
-        $(".filelink").each(function () {
-            var colors = colorFromString(getFileExtension($(this).attr("download")));
-
-            var red   = colors[0];
-            var green = colors[1];
-            var blue  = colors[2];
-
-            if (red > 180)   red = 180;
-            if (green > 180) green = 180;
-            if (blue > 180)  blue = 180;
-
-            if (red < 60)    red = 60;
-            if (green < 60)  green = 60;
-            if (blue < 60)   blue = 60;
-
-            $(this).parent().children(".icon-file").css("color", "#" + red.toString(16) + green.toString(16) + blue.toString(16));
-        });
-    }
-
-
     function getFileExtension(filename) {
         var dot = filename.lastIndexOf(".");
         if (dot > -1 && dot < filename.length)
@@ -918,58 +897,6 @@
         return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
     }
 
-    // get RGB color values for a given string
-    // based on https://github.com/garycourt/murmurhash-js
-    function colorFromString(string) {
-        var remainder, bytes, h1, h1b, c1, c2, k1, i;
-        remainder = string.length & 3;
-        bytes = string.length - remainder;
-        h1 = 0; // Seed value
-        c1 = 0xcc9e2d51;
-        c2 = 0x1b873593;
-        i = 0;
-
-        while (i < bytes) {
-            k1 = ((string.charCodeAt(i) & 0xff)) |
-                 ((string.charCodeAt(++i) & 0xff) << 8) |
-                 ((string.charCodeAt(++i) & 0xff) << 16) |
-                 ((string.charCodeAt(++i) & 0xff) << 24);
-            ++i;
-            k1 = ((((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16))) & 0xffffffff;
-            k1 = (k1 << 15) | (k1 >>> 17);
-            k1 = ((((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16))) & 0xffffffff;
-            h1 ^= k1;
-            h1 = (h1 << 13) | (h1 >>> 19);
-            h1b = ((((h1 & 0xffff) * 5) + ((((h1 >>> 16) * 5) & 0xffff) << 16))) & 0xffffffff;
-            h1 = (((h1b & 0xffff) + 0x6b64) + ((((h1b >>> 16) + 0xe654) & 0xffff) << 16));
-        }
-        k1 = 0;
-        switch (remainder) {
-            case 3: k1 ^= (string.charCodeAt(i + 2) & 0xff) << 16;
-            case 2: k1 ^= (string.charCodeAt(i + 1) & 0xff) << 8;
-            case 1: k1 ^= (string.charCodeAt(i) & 0xff);
-            k1 = (((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
-            k1 = (k1 << 15) | (k1 >>> 17);
-            k1 = (((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
-            h1 ^= k1;
-        }
-        h1 ^= string.length;
-        h1 ^= h1 >>> 16;
-        h1 = (((h1 & 0xffff) * 0x85ebca6b) + ((((h1 >>> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
-        h1 ^= h1 >>> 13;
-        h1 = ((((h1 & 0xffff) * 0xc2b2ae35) + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16))) & 0xffffffff;
-        h1 ^= h1 >>> 16;
-
-        var result = h1 >>> 0;
-        var colors = [];
-        var j = 3;
-        while (j) {
-            colors[--j] = result & (255);
-            result = result >> 8;
-        }
-        return colors;
-    }
-
     if (Function.prototype.bind && console && typeof console.log === "object") {
         console.log = Function.prototype.bind.call(console.log, console);
     }
@@ -979,4 +906,70 @@
             console.log.apply(console, arguments);
     }
 
+    var iconmap = {
+        "archive":  ["bz2", "gz", "tgz"],
+        "audio":    ["aif", "flac", "m4a", "mid", "mp3", "mpa", "ra", "ogg", "wav", "wma"],
+        "authors":  ["authors"],
+        "bin":      ["class", "o", "so"],
+        "bmp":      ["bmp"],
+        "c":        ["c"],
+        "calc":     ["ods", "ots", "xlr", "xls", "xlsx"],
+        "cd":       ["cue", "iso"],
+        "copying":  ["copying", "license"],
+        "cpp":      ["cpp"],
+        "css":      ["css", "less"],
+        "deb":      ["deb"],
+        "diff":     ["diff", "patch"],
+        "doc":      ["doc", "docx", "odm", "odt", "ott"],
+        "draw":     ["drw"],
+        "eps":      ["eps"],
+        "exe":      ["bat", "cmd", "exe"],
+        "gif":      ["gif"],
+        "gzip":     ["gz"],
+        "h":        ["h"],
+        "hpp":      ["hpp"],
+        "html":     ["htm", "html", "shtml"],
+        "ico":      ["ico"],
+        "image":    ["svg", "xpm"],
+        "install":  ["install"],
+        "java":     ["java"],
+        "jpg":      ["jpg", "jpeg"],
+        "js":       ["js"],
+        "json":     ["json"],
+        "log":      ["log", "changelog"],
+        "makefile": ["makefile", "pom"],
+        "markdown": ["markdown", "md"],
+        "pdf":      ["pdf"],
+        "php":      ["php"],
+        "playlist": ["m3u", "m3u8", "pls"],
+        "png":      ["png"],
+        "pres":     ["odp", "otp", "pps", "ppt", "pptx"],
+        "ps":       ["ps"],
+        "psd":      ["psd"],
+        "py":       ["py"],
+        "rar":      ["rar"],
+        "rb":       ["rb"],
+        "readme":   ["readme"],
+        "rpm":      ["rpm"],
+        "rss":      ["rss"],
+        "rtf":      ["rtf"],
+        "script":   ["conf", "csh", "ini", "ksh", "sh", "shar", "tcl"],
+        "tar":      ["tar"],
+        "tex":      ["tex"],
+        "text":     ["text", "txt"],
+        "tiff":     ["tiff"],
+        "vcal":     ["vcal"],
+        "video":    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "rm", "swf", "vob", "wmv"],
+        "xml":      ["xml"],
+        "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
+    };
+
+    function getSpriteClass(extension) {
+        for (var type in iconmap) {
+            if (iconmap[type].indexOf(extension) > -1) {
+                return "sprite sprite-" + type;
+            }
+        }
+        return "sprite sprite-bin";
+    }
 }(jQuery, window, document));
