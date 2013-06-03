@@ -1,7 +1,7 @@
 #Droppy
 A modern file server web application built on [node](http://nodejs.org/) utilizing WebSockets for realtime updates. It supports dropping one or more files into the window, and with Chrome, directories can be recursively uploaded.
 
-![droppy](http://i.imgur.com/8xxWW9T.png)
+![droppy](http://i.imgur.com/FeJYd4L.png)
 
 ##Installation
 With [node](http://nodejs.org/) installed, run:
@@ -33,7 +33,8 @@ Configuration is done through the `config.json` file, located in the same direct
     "useSSL"       : false,
     "port"         : 80,
     "readInterval" : 50,
-    "mode"         : "755",
+    "filesMode"    : "644",
+    "dirMode"      : "755",
     "linkLength"   : 3,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
@@ -48,7 +49,8 @@ Configuration is done through the `config.json` file, located in the same direct
 - `useSSL`: Whether the server should use HTTPS (SSL).
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
 - `readInterval`: The minimum interval in milliseconds in which updates to a directory are sent. In case a directory gets constantly written to, this helps to keep the amount of updates (and I/O) in check.
-- `mode`: The access mode with which files are created.
+- `filesMode`: The access mask with which files are created.
+- `dirMode`: The access mask with which directories are created.
 - `linkLength` : The amount of characters in a shortened link to a file
 - `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Sample self-signed files are provided.
 - `db` Location of the user database file.

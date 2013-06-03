@@ -141,7 +141,6 @@
             log("Error opening socket: ", error);
             setTimeout(open, 500);
         }
-
         socket.onopen = function () {
             // Request initial update
             updateLocation(currentFolder || "/", false);
@@ -458,11 +457,9 @@
             info.hide();
             requestAnimation(function () {
                 createbox.setClass(createbox.attr("class") !== "in" ? "in" : "out");
-                if (createbox.attr("class") === "in") {
-                    setTimeout(function () {
-                        nameinput.focus();
-                    }, 300);
-                }
+                setTimeout(function () {
+                    nameinput.focus();
+                }, 300);
             });
         });
 
@@ -759,14 +756,14 @@
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                    '<span class="icon-delete icon" title="Delete this file"></span>' +
-                    '<span class="icon-link icon" title="Get a shortened link for this file"></span>' +
+                    '<span class="icon-delete icon"></span>' +
+                    '<span class="icon-link icon"></span>' +
                     '<span class="data-info">' + size + '</span>' + progressBar + '</li>'
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
                     '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="sprite sprite-folder"></span>' +
-                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon" title="Delete this folder"></span>' + progressBar + '</li>'
+                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span>' + progressBar + '</li>'
                 );
             }
         }

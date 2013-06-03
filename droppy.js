@@ -143,7 +143,7 @@ function copyResource(filepath) {
 //-----------------------------------------------------------------------------
 // Set up the directory for files
 function setupFilesDir() {
-    fs.mkdir(config.filesDir, config.mode, function (err) {
+    fs.mkdir(config.filesDir, config.dirMode, function (err) {
         if (!err || err.code === "EEXIST") {
             return true;
         } else {
@@ -285,7 +285,7 @@ function setupSocket(server) {
                 });
                 break;
             case "CREATE_FOLDER":
-                fs.mkdir(addFilePath(dir), config.mode, function (err) {
+                fs.mkdir(addFilePath(dir), config.dirMode, function (err) {
                     if (err) logerror(err);
                     readDirectory(clients[cookie].directory, function () {
                         sendFiles(cookie, "UPDATE_FILES");
@@ -739,7 +739,7 @@ function handleUploadRequest(req, res) {
                 try {
                     var fullPath = path.dirname(path.join(basePath, file));
                     if (!createdPaths[fullPath]) {
-                        mkdirp.sync(fullPath);
+                        mkdirp.sync(fullPath, config.dirMode);
                         createdPaths[fullPath] = true;
                     }
                 } catch (err) {
@@ -785,7 +785,7 @@ function handleUploadRequest(req, res) {
                     logerror(err);
                 });
 
-                output = fs.createWriteStream(uploadedFiles[file].savepath, {mode: config.mode});
+                output = fs.createWriteStream(uploadedFiles[file].savepath, {mode: config.filesMode});
 
                 output.on("error", function (err) {
                     logerror(err);
@@ -887,7 +887,10 @@ function readConfig() {
         process.exit(1);
     }
 
-    var opts = ["debug", "useSSL", "port", "readInterval", "mode", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"];
+    var opts = [
+        "debug", "useSSL", "port", "readInterval", "filesMode", "dirMode",
+        "linkLength", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"
+    ];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
             logerror("Error: Missing property in config.json:", opts[i]);
