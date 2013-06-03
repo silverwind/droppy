@@ -67,37 +67,31 @@
     }
 
     // Switch the page content with an animation
-    // TODO: Clean up and avoid animate()
+    // TODO: Clean up
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"), oldPage = $("#page");
         var login = $("#login-form");
         if (type === "main") {
-            initMainPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
-                login.animate({"opacity": 0}, {duration: 250, queue: false});
-                login.animate({"top": smallScreen ? "20%" : "70%"}, {duration: 250, queue: false });
+                login.removeClass("in").addClass("out");
                 setTimeout(function () {
                     $("#navigation").attr("class", "in");
                     setTimeout(function () {
-                        $("#about-trigger").fadeIn(100);
-                        $("content").removeAttr("class");
+                        initMainPage();
                         finalize();
                     }, 250);
                 }, 250);
             });
         } else if (type === "auth") {
-            initAuthPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
-                login.css("top", smallScreen ? "20%" : "70%");
-                login.css("opacity", 0);
                 $("#navigation").addClass("farout");
                 setTimeout(function () {
-                    login.animate({"opacity": 1}, {duration: 250, queue: false});
-                    login.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
-                        login.removeAttr("style");
+                    login.removeClass("out").addClass("in");
+                    setTimeout(function () {
+                        initAuthPage();
                         finalize();
                         if (hasLoggedOut) {
                             setTimeout(function () {
@@ -106,7 +100,7 @@
                                 $("#login-info").fadeIn(250);
                             }, 250);
                         }
-                    }});
+                    }, 250);
                 }, 250);
             });
         }
@@ -215,6 +209,10 @@
                     setTimeout(retry, timeout * 1.5, timeout * 1.5);
                 }
             })(200);
+        };
+
+        socket.onerror = function (error) {
+            log(error);
         };
     }
 

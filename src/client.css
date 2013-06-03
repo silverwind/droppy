@@ -99,7 +99,7 @@ body {
     #content, #newcontent { top: 3em; margin: 1.5%; width: 97%; max-height: calc(100% - 4em) }
 }
 @media all and (max-width: 639px) {
-    #content, #newcontent { top: 3.25em; margin: 2.5%; width: 95%; max-height: calc(100% - 4.5em) }
+    #content, #newcontent { top: 3.25em; margin: 2.5%; width: 95%; max-height: calc(100% - 4.5em); font-size: .8em }
 }
 
 #content.center,  #newcontent.center  { left: 0     }
@@ -518,22 +518,25 @@ body {
 #login-form {
     background: rgba(0,0,0,0.6);
     border-radius: 10px;
+    box-shadow: 0 0 0 5px rgba(153, 204, 0, .5);
     height: 350px;
     left: 50%;
     margin-left: -300px;
     margin-top: -175px;
     padding: 60px;
     position: fixed;
+    transition: all .25s ease;
     width: 600px;
     z-index: 0;
     user-select: none;
 }
 
-#login-form { box-shadow: 0 0 0 5px rgba(153, 204, 0, .5) }
-#login-form.invalid { box-shadow: 0 0 0 5px rgba(255,32,24,.5) }
+@media all and (min-width: 640px) { #login-form.out { top: 70% ; opacity: 0 } }
+@media all and (max-width: 639px) { #login-form.out { top: 20% ; opacity: 0 } }
+@media all and (min-width: 640px) { #login-form.in  { top: 50% ; opacity: 1 } }
+@media all and (max-width: 639px) { #login-form.in  { top: 0   ; opacity: 1 } }
 
-@media all and (min-width: 640px) { #login-form { top: 50% } }
-@media all and (max-width: 639px) { #login-form { top: 0 } }
+#login-form.invalid { box-shadow: 0 0 0 5px rgba(255,32,24,.5) }
 
 #login-icon {
     color: #444;
@@ -741,10 +744,6 @@ body {
         top: 50%;
         margin-top: -180px;
         width: 100%;
-    }
-
-    #content, #newcontent {
-        font-size: .8em;
     }
 
     .data-info {
