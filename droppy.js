@@ -91,11 +91,13 @@ prepareContent();
 // Read and cache all resources
 logsimple(" ->> caching resources...\n");
 cacheResources(config.resDir, function () {
+    // Set up the exposed files folder
+    setupFilesDir();
+
     // Clean up our shortened links
     cleanUpLinks();
 
-    // Proceed with setting up the files folder and bind to the listening port
-    setupFilesDir();
+    // Bind to the listening port
     createListener();
 });
 
@@ -141,7 +143,7 @@ function copyResource(filepath) {
 //-----------------------------------------------------------------------------
 // Set up the directory for files
 function setupFilesDir() {
-    fs.mkdir(config.filesDir, function (err) {
+    fs.mkdir(config.filesDir, config.mode, function (err) {
         if (!err || err.code === "EEXIST") {
             return true;
         } else {
