@@ -2,8 +2,7 @@
 (function ($, window, document) {
     "use strict";
 
-    var debug; // live css reload and debug logging - this is set by the server
-    var hasAnimations = Modernizr.cssanimations;
+    var debug; // live css reload and debug logging - this variable is set by the server
     var smallScreen = $(window).width() < 640;
 
     var currentData, currentFolder, giveUp, hasLoggedOut, isAnimating,
@@ -12,14 +11,14 @@
     initVariables(); // Separately init the variables so we can init them on demand
 
 // ============================================================================
-//  jQuery extensions / requestAnimationFrame
+//  jQuery / modernizr extensions, requestAnimationFrame
 // ============================================================================
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
 
     // Set a class on freshly inserted elements, once the DOM has fully loaded it
     $.fn.setClass = function (newclass) {
-        if (hasAnimations) {
+        if (Modernizr.cssanimations) {
             // Set the new class as a data attribute on the matched tag(s)
             this.css("animation", "nodeInserted 0.001s");
             this.data("newclass", newclass);
@@ -32,7 +31,7 @@
         return this;
     };
 
-    if (hasAnimations) {
+    if (Modernizr.cssanimations) {
         // Listen for the animation event for our pseudo-animation
         var listener = function (event) {
             if (event.animationName === "nodeInserted") {
@@ -48,6 +47,15 @@
         document.addEventListener("oanimationstart", listener, false);
     }
 
+    // Add a modernizr test for directory input
+    Modernizr.addTest("inputdirectory", function () {
+        var input = document.createElement("input");
+        input.type = "file";
+        return "webkitdirectory" in input || "mozdirectory" in input ||
+               "msdirectory" in input || "odirectory" in input || "directory" in input;
+    });
+
+    // Alias requestAnimationFrame
     var requestAnimation = (function () {
         return window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                window.webkitRequestAnimationFrame || function (callback) { setTimeout(callback, 1000 / 60); };
@@ -119,23 +127,20 @@
     function openSocket() {
         if (socket.readyState < 2 || giveUp) return;
 
-        var timeout = 0;
-        try {
-            (function open(time) {
-                timeout += time;
-                if (timeout >= 20000) {
-                    log("Unable to connect via WebSocket - aborting");
-                } else {
-                    if (document.location.protocol === "https:")
-                        socket = new WebSocket("wss://" + document.location.host);
-                    else
-                        socket = new WebSocket("ws://" + document.location.host);
-                }
-            })(0);
-        } catch (error) {
-            log("Error opening socket: ", error);
-            setTimeout(open, 500);
-        }
+        (function open(time) {
+            if (time >= 20000) {
+                log("Unable to connect via WebSocket - aborting");
+            } else if (socket.readyState === 1) {
+                return;
+            } else {
+                if (document.location.protocol === "https:")
+                    socket = new WebSocket("wss://" + document.location.host);
+                else
+                    socket = new WebSocket("ws://" + document.location.host);
+                setTimeout(open, 250, time + 250);
+            }
+        })(0);
+
         socket.onopen = function () {
             // Request initial update
             updateLocation(currentFolder || "/", false);
@@ -422,22 +427,28 @@
             }
         });
 
-        // Redirect the upload button click to the real, hidden form
+        // Set the correct attributes on our file input and redirect the click
         $("#upload-file").off("click").on("click", function () {
             fileInput.removeAttr("directory");
+            fileInput.removeAttr("msdirectory");
             fileInput.removeAttr("mozdirectory");
             fileInput.removeAttr("webkitdirectory");
             fileInput.click();
         });
 
-        // ..same for folder, but set the directory attribute so we get a
-        // folder OS dialog.
-        $("#upload-folder").off("click").on("click", function () {
-            fileInput.attr("directory", "directory");
-            fileInput.attr("mozdirectory", "mozdirectory");
-            fileInput.attr("webkitdirectory", "webkitdirectory");
-            fileInput.click();
-        });
+
+        if (Modernizr.inputdirectory) {
+            // ..same for folder, but set the directory attribute so we get a folder picker dialog.
+            $("#upload-folder").off("click").on("click", function () {
+                fileInput.attr("directory",       "directory");
+                fileInput.attr("msdirectory",     "msdirectory");
+                fileInput.attr("mozdirectory",    "mozdirectory");
+                fileInput.attr("webkitdirectory", "webkitdirectory");
+                fileInput.click();
+            });
+        } else {
+            $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
+        }
 
         var info        = $("#name-info"),
             nameinput   = $("#name-input"),
