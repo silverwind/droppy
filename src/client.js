@@ -70,8 +70,9 @@
     // TODO: Clean up
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
-        var newPage = $("#newpage"), oldPage = $("#page");
-        var login = $("#login-form");
+        var newPage = $("#newpage"),
+            oldPage = $("#page"),
+            login = $("#login-form");
         if (type === "main") {
             requestAnimation(function () {
                 oldPage.attr("class", "out");
@@ -912,13 +913,13 @@
         "cd":       ["cue", "iso"],
         "copying":  ["copying", "license"],
         "cpp":      ["cpp"],
-        "css":      ["css", "less"],
+        "css":      ["css", "less", "scss", "sass"],
         "deb":      ["deb"],
         "diff":     ["diff", "patch"],
         "doc":      ["doc", "docx", "odm", "odt", "ott"],
         "draw":     ["drw"],
         "eps":      ["eps"],
-        "exe":      ["bat", "cmd", "exe", "msi"],
+        "exe":      ["bat", "cmd", "exe"],
         "gif":      ["gif"],
         "gzip":     ["gz"],
         "h":        ["h"],
@@ -926,7 +927,7 @@
         "html":     ["htm", "html", "shtml"],
         "ico":      ["ico"],
         "image":    ["svg", "xpm"],
-        "install":  ["install"],
+        "install":  ["install", "msi"],
         "java":     ["java"],
         "jpg":      ["jpg", "jpeg"],
         "js":       ["js"],
@@ -961,7 +962,7 @@
 
     function getSpriteClass(extension) {
         for (var type in iconmap) {
-            if (iconmap[type].indexOf(extension) > -1) {
+            if (iconmap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
                 return "sprite sprite-" + type;
             }
         }
