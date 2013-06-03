@@ -302,7 +302,7 @@ body {
     position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 6em) !important;
+    width: calc(100% - 10em);
 }
 
 .data-info {
@@ -752,7 +752,7 @@ body {
     }
 
     .filelink, .folderlink {
-        width: 70%;
+        width: calc(100% - 6em);
     }
 
     #about-box {
