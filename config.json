@@ -4,6 +4,7 @@
     "port"         : 80,
     "readInterval" : 50,
     "mode"         : "755",
+    "linkLength"   : 3,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",

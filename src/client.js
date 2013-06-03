@@ -70,11 +70,11 @@
     // TODO: Clean up and avoid animate()
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
-        requestAnimation(function () {
-            var newPage = $("#newpage"), oldPage = $("#page");
-            var login = $("#login-form");
-            switch (type) {
-            case "main":
+        var newPage = $("#newpage"), oldPage = $("#page");
+        var login = $("#login-form");
+        if (type === "main") {
+            initMainPage();
+            requestAnimation(function () {
                 oldPage.attr("class", "out");
                 login.animate({"opacity": 0}, {duration: 250, queue: false});
                 login.animate({"top": smallScreen ? "20%" : "70%"}, {duration: 250, queue: false });
@@ -84,11 +84,12 @@
                         $("#about-trigger").fadeIn(100);
                         $("content").removeAttr("class");
                         finalize();
-                        initMainPage();
                     }, 250);
                 }, 250);
-                break;
-            case "auth":
+            });
+        } else if (type === "auth") {
+            initAuthPage();
+            requestAnimation(function () {
                 oldPage.attr("class", "out");
                 login.css("top", smallScreen ? "20%" : "70%");
                 login.css("opacity", 0);
@@ -96,8 +97,8 @@
                 setTimeout(function () {
                     login.animate({"opacity": 1}, {duration: 250, queue: false});
                     login.animate({"top": smallScreen ? "0%" : "50%"}, {duration: 250, queue: false, complete : function () {
+                        login.removeAttr("style");
                         finalize();
-                        initAuthPage();
                         if (hasLoggedOut) {
                             setTimeout(function () {
                                 $("#login-info").attr("class", "info");
@@ -107,15 +108,14 @@
                         }
                     }});
                 }, 250);
-                break;
-            }
+            });
+        }
 
-            // Switch ID of #newpage for further animation
-            function finalize() {
-                oldPage.remove();
-                newPage.attr("id", "page");
-            }
-        });
+        // Switch ID of #newpage for further animation
+        function finalize() {
+            oldPage.remove();
+            newPage.attr("id", "page");
+        }
     }
 
 // ============================================================================
@@ -124,10 +124,23 @@
     function openSocket() {
         if (socket.readyState < 2 || giveUp) return;
 
-        if (document.location.protocol === "https:")
-            socket = new WebSocket("wss://" + document.location.host);
-        else
-            socket = new WebSocket("ws://" + document.location.host);
+        var timeout = 0;
+        try {
+            (function open(time) {
+                timeout += time;
+                if (timeout >= 20000) {
+                    log("Unable to connect via WebSocket - aborting");
+                } else {
+                    if (document.location.protocol === "https:")
+                        socket = new WebSocket("wss://" + document.location.host);
+                    else
+                        socket = new WebSocket("ws://" + document.location.host);
+                }
+            })(0);
+        } catch (error) {
+            log("Error opening socket: ", error);
+            setTimeout(open, 500);
+        }
 
         socket.onopen = function () {
             // Request initial update
@@ -137,6 +150,7 @@
         socket.onmessage = function (event) {
             socketWait = false;
             var msg = JSON.parse(event.data);
+
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (isUploading) return;
@@ -150,6 +164,7 @@
                 updateData(msg.folder, msg.data);
                 break;
             case "NEW_FOLDER":
+                if (isUploading) return;
                 updateData(msg.folder, msg.data);
                 break;
             case "UPDATE_CSS":
@@ -164,6 +179,10 @@
                     var style = $('<style type="text/css"></style>');
                     style.text(msg.css).appendTo($("head"));
                 }
+                break;
+            case "FILE_LINK":
+                // TODO: UI for this
+                window.prompt("Download Link:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
                 break;
             case "UNAUTHORIZED":
                 // Set hasLoggedOut to stop reconnects, will get cleared on login
@@ -194,7 +213,7 @@
                     return;
                 } else {
                     openSocket();
-                    setTimeout(retry, timeout * 1.5, timeout + 1.5);
+                    setTimeout(retry, timeout * 1.5, timeout * 1.5);
                 }
             })(200);
         };
@@ -299,7 +318,8 @@
 // ============================================================================
     function initMainPage() {
         // Open Websocket for initial update
-        setTimeout(openSocket, 50);
+        setTimeout(openSocket, 750);
+
         currentFolder = decodeURIComponent(window.location.pathname);
         hasLoggedOut = false;
 
@@ -380,7 +400,7 @@
 
         // Re-fit path line after 100ms of no resizing
         var resizeTimeout;
-        $(window).resize(function () {
+        $(window).off("resize").on("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
                 smallScreen = $(window).width() < 640;
@@ -405,46 +425,50 @@
         });
 
         // Redirect the upload button click to the real, hidden form
-        $("#upload").off("click").on("click", function () {
+        $("#upload-file").off("click").on("click", function () {
+            fileInput.removeAttr("directory");
+            fileInput.removeAttr("mozdirectory");
+            fileInput.removeAttr("webkitdirectory");
+            fileInput.click();
+        });
+
+        // ..same for folder, but set the directory attribute so we get a
+        // folder OS dialog.
+        $("#upload-folder").off("click").on("click", function () {
+            fileInput.attr("directory", "directory");
+            fileInput.attr("mozdirectory", "mozdirectory");
+            fileInput.attr("webkitdirectory", "webkitdirectory");
             fileInput.click();
         });
 
         var info        = $("#name-info"),
             nameinput   = $("#name-input"),
-            nameoverlay = $("#name-overlay"),
+            createbox   = $("#create-folder-box"),
             activeFiles;
 
         // Show popup for folder creation
-        $("#add-folder").off("click").on("click", function () {
+        $("#create-folder").off("click").on("click", function () {
             activeFiles = [];
             $(".filelink, .folderlink").each(function () {
                 activeFiles.push($(this).html().toLowerCase());
             });
             nameinput.val("");
             nameinput.removeClass("invalid");
-            nameoverlay.removeClass("invalid");
+            createbox.removeClass("invalid");
             info.hide();
-            toggleOverlay();
+            requestAnimation(function () {
+                createbox.setClass(createbox.attr("class") !== "in" ? "in" : "out");
+                if (createbox.attr("class") === "in") {
+                    setTimeout(function () {
+                        nameinput.focus();
+                    }, 300);
+                }
+            });
         });
-
-        function toggleOverlay() {
-            if (nameoverlay.attr("class") === "out") {
-                nameoverlay.css("visibility", "visible");
-                nameoverlay.attr("class", "in");
-                setTimeout(function () {
-                    nameinput.focus();
-                }, 300);
-            } else {
-                nameoverlay.attr("class", "out");
-                setTimeout(function () {
-                    nameoverlay.css("visibility", "hidden");
-                }, 300);
-            }
-        }
 
         // Handler for the input of the folder name
         nameinput.off("keyup").on("keyup", function (e) {
-            if (e.keyCode === 27) toggleOverlay(); // Escape Key
+            if (e.keyCode === 27) createbox.setClass("out"); // Escape Key
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
             var folderExists;
@@ -452,15 +476,15 @@
                 if (activeFiles[i] === input.toLowerCase()) folderExists = true;
             if (input === "") {
                 nameinput.removeClass();
-                nameoverlay.removeClass("valid invalid");
+                createbox.removeClass("valid invalid");
                 info.fadeOut(300);
             } else if (!valid || folderExists) {
                 nameinput.removeClass("valid").addClass("invalid");
-                nameoverlay.addClass("invalid");
+                createbox.addClass("invalid");
                 info.html(folderExists ? "File or folder already exists!" : "Invalid character(s) in filename!");
                 info.fadeIn(300);
             } else {
-                nameoverlay.removeClass("invalid").addClass("valid");
+                createbox.removeClass("invalid").addClass("valid");
                 nameinput.removeClass("invalid").addClass("valid");
                 info.fadeOut(300);
                 if (e.keyCode === 13) { // Return Key
@@ -468,29 +492,21 @@
                         sendMessage("CREATE_FOLDER", "/" + input);
                     else
                         sendMessage("CREATE_FOLDER", currentFolder + "/" + input);
-                    nameoverlay.removeClass("in").addClass("out");
+                    createbox.removeClass("in").addClass("out");
                 }
             }
         });
 
-        var about = $("#about");
-
-        $("#about-trigger").off("click").on("click", function () {
-            if (about.attr("class") !== "in") {
-                setTimeout(function () {
-                    about.setClass("in");
-                }, 50);
-
-            } else {
-                about.attr("class", "out");
-            }
+        $("#about").off("click").on("click", function () {
+            requestAnimation(function () {
+                $("#about-box").setClass($("#about-box").attr("class") !== "in" ? "in" : "out");
+            });
         });
 
         $("#logout").off("click").on("click", function () {
             sendMessage("LOGOUT");
             hasLoggedOut = true;
             socket.close();
-            $("#about-trigger").hide();
             deleteCookie("sid");
             initVariables(); // Reset vars to their init state
             getPage();
@@ -544,7 +560,7 @@
             xhr.send(formData);
         }
 
-        var start, progressBars,
+        var start, progressBars, lastUpdate,
             infobox  = $("#upload-info"),
             timeleft = $("#upload-time-left"),
             uperc    = $("#upload-percentage");
@@ -553,14 +569,13 @@
             start = new Date().getTime();
 
             progressBars = $(".progressBar");
-            progressBars.show();
             progressBars.width("0%");
+            progressBars.show();
 
             updateTitle("0%");
             uperc.html("0%");
 
             timeleft.html("");
-            $("#about").hide();
             infobox.attr("class", "in");
         }
 
@@ -577,25 +592,28 @@
         function uploadProgress(event) {
             if (!event.lengthComputable) return;
 
-            var bytesSent  = event.loaded,
-                bytesTotal = event.total,
-                progress   = Math.round((bytesSent / bytesTotal) * 100) + "%";
+            // Update progress every 250ms at most
+            if (!lastUpdate || (Number(new Date()) - lastUpdate) >= 250) {
+                lastUpdate = Number(new Date());
 
-            progressBars.width(progress);
-            updateTitle(progress);
-            uperc.html(progress);
+                var bytesSent  = event.loaded,
+                    bytesTotal = event.total,
+                    progress   = Math.round((bytesSent / bytesTotal) * 100) + "%";
 
-            // Calculate estimated time left
-            var elapsed = (new Date().getTime()) - start;
-            var estimate = bytesTotal / (bytesSent / elapsed);
-            var secs = (estimate - elapsed) / 1000;
+                progressBars.width(progress);
+                updateTitle(progress);
+                uperc.html(progress);
 
-            if (secs > 120) {
-                timeleft.html(Math.floor((secs / 60) + 1) + " minutes left");
-            } else if (secs > 60) {
-                timeleft.html("2 minutes left");
-            } else {
-                timeleft.html(Math.round(secs) + " seconds left");
+                // Calculate estimated time left
+                var elapsed = (new Date().getTime()) - start;
+                var estimate = bytesTotal / (bytesSent / elapsed);
+                var secs = (estimate - elapsed) / 1000;
+
+                if (secs > 60) {
+                    timeleft.html(Math.ceil(secs / 60) + " minutes left");
+                } else {
+                    timeleft.html(Math.ceil(secs) + " seconds left");
+                }
             }
         }
     }
@@ -616,38 +634,36 @@
 
     // Listen for "popstate" events, which indicate the user navigated back
     $(window).off("popstate").on("popstate", function () {
-        currentFolder = decodeURIComponent(window.location.pathname);
-        sendMessage("SWITCH_FOLDER", currentFolder);
+        (function queue(time) {
+            if ((!socketWait && !isAnimating) || time > 2000)
+                updateLocation(decodeURIComponent(window.location.pathname), true, true);
+            else
+                setTimeout(queue, 50, time + 50);
+        })(0);
     });
 
     // Update our current location and change the URL to it
-    var nav, retryTimout;
-    function updateLocation(path, doSwitch) {
-        if (socketWait) return; // Dont switch location in case we are still waiting for a response from the server
+    var nav;
+    function updateLocation(path, doSwitch, skipPush) {
+        // Queue the folder switching if we are mid-animation or waiting for the server
+        (function queue(time) {
+            if ((!socketWait && !isAnimating) || time > 2000) {
+                // Find the direction in which we should animate
+                if (path.length > currentFolder.length)
+                    nav = "forward";
+                else if (path.length === currentFolder.length)
+                    nav = "same";
+                else
+                    nav = "back";
 
-        // Queue the folder switching if we are in an animation
-        if (isAnimating) {
-            if (retryTimout > 1000) return;
-            retryTimout += 25;
-            setTimeout(updateLocation, retryTimout, path, doSwitch);
-        } else {
-            retryTimout = 0;
-        }
+                currentFolder = path;
+                sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
 
-        // Find the direction in which we should animate
-        if (path.length > currentFolder.length)
-            nav = "forward";
-        else if (path.length === currentFolder.length)
-            nav = "same";
-        else
-            nav = "back";
-
-        currentFolder = path;
-        sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
-
-        // pushState causes Chrome's UI to flicker
-        // http://code.google.com/p/chromium/issues/detail?id=50298
-        window.history.pushState(null, null, currentFolder);
+                // Skip the push if we're already navigation through history
+                if (!skipPush) window.history.pushState(null, null, currentFolder);
+            } else
+                setTimeout(queue, 50, time + 50);
+        })(0);
     }
 
     function updatePath(path) {
@@ -673,7 +689,7 @@
                 }
                 i++;
             }
-            finalize();
+            requestAnimation(finalize);
         } else {
             // Delay initial slide-in
             setTimeout(function () {
@@ -683,8 +699,7 @@
                     pathStr += "/" + parts[i];
                     create(parts[i], pathStr);
                 }
-
-                finalize();
+                requestAnimation(finalize);
             }, 300);
         }
 
@@ -692,11 +707,7 @@
 
         function create(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
-            if (!path)
-                li.data("destination", "/");
-            else {
-                li.data("destination", path);
-            }
+            li.data("destination", path || "/");
             li.click(function () {
                 updateLocation($(this).data("destination"), true);
             });
@@ -723,52 +734,67 @@
 
         if ((right + margin) > space) {
             var needed = right - space + margin;
-            $("#path").animate({"left": -needed}, {duration: 200});
+            requestAnimation(function () {
+                $("#path").animate({"left": -needed}, {duration: 200});
+            });
         } else {
-            if ($("#path").css("left") !== 0)
-                $("#path").animate({"left": 0}, {duration: 200});
+            requestAnimation(function () {
+                if ($("#path").css("left") !== 0)
+                    $("#path").animate({"left": 0}, {duration: 200});
+            });
         }
     }
 
     function buildHTML(fileList, root) {
-        var list = $("<ul></ul>");
+        var list = $("<ul></ul>"), downloadURL, type, size, id, progressBar;
         for (var file in fileList) {
-            var downloadURL,
-                type = fileList[file].type,
-                size = convertToSI(fileList[file].size),
-                id = (root === "/") ? "/" + file : root + "/" + file,
-                addProgress = (type === "nf" || type === "nd") ? '<div class="progressBar"></div>' : "";
+            type = fileList[file].type;
+            size = convertToSI(fileList[file].size);
+            id = (root === "/") ? "/" + file : root + "/" + file;
+            progressBar = (type === "nf" || type === "nd") ? '<div class="progressBar"></div>' : "";
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="icon icon-file"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                    '<span class="icon-delete icon"></span><span class="data-info">' + size + '</span>' + addProgress + '</li>'
+                    '<span class="icon-delete icon" title="Delete this file"></span>' +
+                    '<span class="icon-link icon" title="Get a shortened link for this file"></span>' +
+                    '<span class="data-info">' + size + '</span>' + progressBar + '</li>'
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
                     '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="icon icon-folder"></span>' +
-                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span>' + addProgress + '</li>'
+                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon" title="Delete this folder"></span>' + progressBar + '</li>'
                 );
             }
         }
+        $(list).children("li").sort(function (a, b) {
+            var type = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
+            var extension = getFileExtension($(a).children(".filelink").text().toUpperCase())
+                                 .localeCompare(getFileExtension($(b).children(".filelink").text().toUpperCase()));
+            var text = $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
+            if (type < 0)
+                return -1;
+            else if (type > 0)
+                return 1;
+            else {
+                if (extension < 0)
+                    return -1;
+                else if (extension > 0)
+                    return 1;
+                else {
+                    if (text < 0)
+                        return -1;
+                    else if (text > 0)
+                        return 1;
+                    else
+                        return 0;
+                }
+            }
+        }).appendTo(list);
 
-        // Sort first by class, then alphabetically
-        var items = $(list).children("li");
-        items.sort(function (a, b) {
-            var result = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
-            return result ? result : $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
-        });
-
-        var count = 0;
-        $.each(items, function (index, item) {
-            $(item).attr("data-index", index);
-            list.append(item);
-            count++;
-        });
-
-        if (count > 0)
+        if ($(list).children("li").length > 0)
             loadContent(list);
         else {
             loadContent(false);
@@ -778,44 +804,31 @@
     // Load generated list into view with an animation
     function loadContent(list) {
         var emptyPage = '<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>';
-        if (nav === "same") {
-            $("#content").attr("class", "center");
-            if (list) {
-                $("#content").html(list);
-            } else {
-                $("#content").html(emptyPage);
-            }
-            finalize();
-        } else {
-            $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
-            if (list) {
-                $("#newcontent").html(list);
-            } else {
-                $("#newcontent").html(emptyPage);
-                $("#upload-inline").on("click", function () {
-                    $("#file").click();
-                });
-            }
-            isAnimating = true;
-            $(".data-row").addClass("animating");
-            $("#content").attr("class", (nav === "forward") ? "back" : "forward");
-            $("#newcontent").setClass("center");
 
-            // Switch classes once the transition has finished
-            setTimeout(function () {
-                isAnimating = false;
-                $("#content").remove();
-                $("#newcontent").attr("id", "content");
-                $(".data-row").removeClass("animating");
-            }, 250);
-            finalize();
-        }
+        requestAnimation(function () {
+            if (nav === "same") {
+                $("#content").attr("class", "center");
+                $("#content").html(list || emptyPage);
+            } else {
+                $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
+                $("#newcontent").html(list || emptyPage);
+                isAnimating = true;
+                $(".data-row").addClass("animating");
+                $("#content").attr("class", (nav === "forward") ? "back" : "forward");
+                $("#newcontent").setClass("center");
 
-        function finalize() {
+                // Switch classes once the transition has finished
+                setTimeout(function () {
+                    isAnimating = false;
+                    $("#content").remove();
+                    $("#newcontent").attr("id", "content");
+                    $(".data-row").removeClass("animating");
+                }, 250);
+            }
             bindEvents();
             colorize();
             nav = "same";
-        }
+        });
     }
 
     function bindEvents() {
@@ -829,28 +842,34 @@
             scroll: true
         }); */
 
-        // Bind mouse event to switch into a folder
-        $(".data-row[data-type='folder']").off("click").on("click", function (e) {
-            if (e.button !== 0) return;
+        // Upload icon on empty page
+        $("#upload-inline").off("click").on("click", function () {
+            $("#file").click();
+        });
+
+        // Switch into a folder
+        $(".data-row[data-type='folder']").off("click").on("click", function () {
+            if (socketWait) return;
             var destination = $(this).data("id").replace("&amp;", "&");
             updateLocation(destination, true);
         });
-        // Bind mouse event to delete a file/folder
-        $(".icon-delete").off("click").on("click", function (e) {
-            if (e.button !== 0 || socketWait) return;
+
+        // Request a public link
+        $(".icon-link").off("click").on("click", function () {
+            if (socketWait) return;
+            sendMessage("REQUEST_LINK", $(this).parent().data("id"));
+        });
+
+        // Delete a file/folder
+        $(".icon-delete").off("click").on("click", function () {
+            if (socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
     }
 
     function colorize() {
         $(".filelink").each(function () {
-            var filename = $(this).attr("download");
-            var colors = [], dot = filename.lastIndexOf(".");
-
-            if (dot > -1 && dot < filename.length)
-                colors = colorFromString(filename.substring(dot + 1, filename.length));
-            else
-                colors = colorFromString(filename);
+            var colors = colorFromString(getFileExtension($(this).attr("download")));
 
             var red   = colors[0];
             var green = colors[1];
@@ -866,6 +885,15 @@
 
             $(this).parent().children(".icon-file").css("color", "#" + red.toString(16) + green.toString(16) + blue.toString(16));
         });
+    }
+
+
+    function getFileExtension(filename) {
+        var dot = filename.lastIndexOf(".");
+        if (dot > -1 && dot < filename.length)
+            return filename.substring(dot + 1, filename.length);
+        else
+            return filename;
     }
 
     function deleteCookie(name) {
@@ -887,7 +915,7 @@
             bytes /= 1024;
             step++;
         }
-        return [(step === 0) ? bytes : bytes.toFixed(2), units[step]].join(" ");
+        return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
     }
 
     // get RGB color values for a given string
@@ -942,8 +970,13 @@
         return colors;
     }
 
-    function log(msg) {
-        if (debug) console.log(msg);
+    if (Function.prototype.bind && console && typeof console.log === "object") {
+        console.log = Function.prototype.bind.call(console.log, console);
+    }
+
+    function log() {
+        if (debug && console)
+            console.log.apply(console, arguments);
     }
 
 }(jQuery, window, document));

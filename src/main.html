@@ -1,12 +1,16 @@
 <nav id="navigation" class="out">
 	<ul id="left-buttons">
-		<li id="upload" class="button" title="Upload files into the current directory">
+		<li id="upload-file" class="button" title="Upload files into the current directory">
 			<span class="icon"></span>
 			<span class="button-text">Add files</span>
 		</li>
-		<li id="add-folder" class="button" title="Create a new folder">
+		<li id="upload-folder" class="button" title="Upload a folder into the current directory">
+			<span class="icon"></span>
+			<span class="button-text">Add folder</span>
+		</li>
+		<li id="create-folder" class="button" title="Create a new folder">
 			<span class="icon"></span>
-			<span class="button-text">Add Folder</span>
+			<span class="button-text">New Folder</span>
 		</li>
 	</ul>
 	<div id="upload-info" class="out">
@@ -22,8 +26,11 @@
 			<span class="icon"></span>
 			<span class="button-text">Configure</span>
 		</li>
+		<li id="about" class="button" title="About droppy">
+			<span class="icon"></span>
+			<span class="button-text">About</span>
+		</li>
 	</ul>
-	<div id="about-trigger" class="icon" title="about droppy"></div>
 	<ul id="path">
 		<li class="placeholder">&nbsp;</li>
 	</ul>
@@ -32,15 +39,15 @@
 <form id="upload-form" enctype="multipart/form-data">
 	<input type="file" name="file" id="file" multiple>
 </form>
-<div id="name-overlay" class="out">
+<div id="create-folder-box" class="out">
 	<p>Which Name?</p>
 	<input type="text" id="name-input" placeholder="Folder Name">
 	<div id="name-info"></div>
 </div>
-<div id="about" class="out">
+<div id="about-box" class="out">
 	<div id="about-logo" class="icon"></div>
 	<div id="about-content">
-		<p id="about-title">droppy 0.3.0</p>
+		<p id="about-title">droppy 0.3.5</p>
 		<p id="about-text">powered by <a target="_blank" href="http://nodejs.org/">node.js</a>, <a target="_blank" href="http://jquery.com/">jQuery</a>, <a target="_blank" href="https://github.com/einaros/ws">ws</a>, <a target="_blank" href="https://github.com/felixge/node-formidable">formidable</a>, <a target="_blank" href="https://github.com/ai/autoprefixer">autoprefixer</a>, <a target="_blank" href="https://github.com/mishoo/UglifyJS2">uglifyjs2</a>, <a target="_blank" href="https://github.com/GoalSmashers/clean-css">clean-css</a> and others.</p>
 		<p id="about-copy">© 2012 - 2013 silverwind</p>
 	</div>

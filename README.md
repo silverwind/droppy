@@ -29,11 +29,12 @@ In case of Chrome and Firefox, slightly older versions may work resonably well.
 Configuration is done through the `config.json` file, located in the same directory as `droppy.js`.
 ````javascript
 {
-    "debug"        : false,
+    "debug"        : true,
     "useSSL"       : false,
     "port"         : 80,
     "readInterval" : 50,
     "mode"         : "755",
+    "linkLength"   : 3,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
@@ -48,6 +49,7 @@ Configuration is done through the `config.json` file, located in the same direct
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
 - `readInterval`: The minimum interval in milliseconds in which updates to a directory are sent. In case a directory gets constantly written to, this helps to keep the amount of updates (and I/O) in check.
 - `mode`: The access mode with which files are created.
+- `linkLength` : The amount of characters in a shortened link to a file
 - `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Sample self-signed files are provided.
 - `db` Location of the user database file.
 - `filesDir`: The directory which serves as the server's root.
