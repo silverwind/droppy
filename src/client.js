@@ -381,33 +381,26 @@
         });
 
         var fileInput = $("#file");
-
-        // Hide our file input form by wrapping it in a 0 x 0 div
-        fileInput.wrap($("<div/>").css({
-            "height"  : 0,
-            "width"   : 0,
-            "overflow": "hidden"
-        }));
-
         fileInput.off("change").on("change", function () {
-            if ($("#file").val() !== "") {
+            if (fileInput.val()) {
                 upload($("#file").get(0).files, true);
-                $("#file").val(""); // Reset the form
+                fileInput.val(""); // Reset the input element
             }
         });
 
-        // Set the correct attributes on our file input and redirect the click
+        // Set the correct attributes on our file input before redirecting the click
         $("#upload-file").off("click").on("click", function () {
-            fileInput.removeAttr("directory");
-            fileInput.removeAttr("msdirectory");
-            fileInput.removeAttr("mozdirectory");
-            fileInput.removeAttr("webkitdirectory");
+            if (Modernizr.inputdirectory) {
+                fileInput.removeAttr("directory");
+                fileInput.removeAttr("msdirectory");
+                fileInput.removeAttr("mozdirectory");
+                fileInput.removeAttr("webkitdirectory");
+            }
             fileInput.click();
         });
 
-
         if (Modernizr.inputdirectory) {
-            // ..same for folder, but set the directory attribute so we get a folder picker dialog.
+            // Set the attributes for directory uploads, so we get a directory picker dialog.
             $("#upload-folder").off("click").on("click", function () {
                 fileInput.attr("directory",       "directory");
                 fileInput.attr("msdirectory",     "msdirectory");
