@@ -5,7 +5,7 @@
     var debug; // live css reload and debug logging - this variable is set by the server
     var smallScreen = $(window).width() < 640;
 
-    var currentData, currentFolder, giveUp, hasLoggedOut, isAnimating,
+    var currentData, currentFolder, hasLoggedOut, isAnimating,
         isUploading, savedParts, socket, socketWait;
 
     initVariables(); // Separately init the variables so we can init them on demand
@@ -124,32 +124,31 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
+    var queuedData, reopen;
     function openSocket() {
-        if (socket.readyState < 2 || giveUp) return;
+        var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
+        socket = new WebSocket(protocol + document.location.host + "/");
+        socket.onopen    = function (event) { onOpen(event);    };
+        socket.onclose   = function (event) { onClose(event);   };
+        socket.onmessage = function (event) { onMessage(event); };
 
-        (function open(time) {
-            if (time >= 20000) {
-                log("Unable to connect via WebSocket - aborting");
-            } else if (socket.readyState === 1) {
-                return;
-            } else {
-                if (document.location.protocol === "https:")
-                    socket = new WebSocket("wss://" + document.location.host);
-                else
-                    socket = new WebSocket("ws://" + document.location.host);
-                setTimeout(open, 250, time + 250);
-            }
-        })(0);
-
-        socket.onopen = function () {
+        function onOpen() {
+            if (queuedData) sendQueued(queuedData);
             // Request initial update
             updateLocation(currentFolder || "/", false);
-        };
+        }
 
-        socket.onmessage = function (event) {
+        function onClose() {
+            if (hasLoggedOut) return;
+            if (reopen) {
+                openSocket();
+                reopen = false;
+            }
+        }
+
+        function onMessage(event) {
             socketWait = false;
             var msg = JSON.parse(event.data);
-
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (isUploading) return;
@@ -197,49 +196,37 @@
                 currentData = data;
                 buildHTML(data, folder);
             }
-        };
-
-        socket.onclose = function () {
-            if (hasLoggedOut) return;
-            // Restart a closed socket in case it unexpectedly closes,
-            // and give up after 20 seconds of increasingly higher intervals.
-            // Related: https://bugzilla.mozilla.org/show_bug.cgi?id=858538
-            (function retry(timeout) {
-                if (socket.readyState < 2) return;
-                if (timeout > 20000) {
-                    giveUp = true;
-                    log("Gave up reconnecting after 20 seconds");
-                    return;
-                } else {
-                    openSocket();
-                    setTimeout(retry, timeout * 1.5, timeout * 1.5);
-                }
-            })(200);
-        };
-
-        socket.onerror = function (error) {
-            log(error);
-        };
+        }
     }
 
     function sendMessage(msgType, msgData) {
-        (function queue() {
-            if (socket.readyState === 1) {
-                socketWait = true;
+        if (socket.readyState === 1) { // open
+            socketWait = true;
 
-                // Unlock the UI in case we get no socket resonse after waiting for 2 seconds
-                setTimeout(function () {
-                    socketWait = false;
-                }, 2000);
+            setTimeout(function () {
+                socketWait = false; // Unlock the UI in case we get no socket resonse after waiting for 1 second
+            }, 1000);
 
-                socket.send(JSON.stringify({
-                    type: msgType,
-                    data: msgData
-                }));
+            if (queuedData) {
+                socket.send(queuedData);
+                queuedData = false;
             } else {
-                if (!giveUp) setTimeout(queue, 50);
+                socket.send(JSON.stringify({type: msgType, data: msgData}));
             }
-        })();
+        } else if (socket.readyState === 0) { // connecting
+            queuedData = JSON.stringify({type: msgType, data: msgData});
+        } else if (socket.readyState === 2) { // closing
+            queuedData = JSON.stringify({type: msgType, data: msgData});
+            reopen = true;
+        } else if (socket.readyState === 3) { // closed
+            openSocket();
+        }
+    }
+
+    function sendQueued(data) {
+        if (socket.readyState === 1) {
+            socket.send(data);
+        }
     }
 // ============================================================================
 //  Authentication page JS
@@ -320,15 +307,15 @@
 //  Main page JS
 // ============================================================================
     function initMainPage() {
-        // Open Websocket for initial update
-        setTimeout(openSocket, 750);
-
         currentFolder = decodeURIComponent(window.location.pathname);
         hasLoggedOut = false;
 
+        // Open the WebSocket
+        openSocket();
+
         // Close the socket gracefully
         $(window).off("beforeunload").on("beforeunload", function () {
-            if (socket.close && socket.readyState < 2)
+            if (socket && socket.close && socket.readyState < 2)
                 socket.close();
         });
 
@@ -518,6 +505,7 @@
             initVariables(); // Reset vars to their init state
             getPage();
         });
+
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
@@ -848,6 +836,11 @@
             revert: true,
             scroll: true
         }); */
+
+        // Reconnect socket on Firefox < 23
+        $(".filelink").off("click").on("click", function () {
+            reopen = true;
+        });
 
         // Upload icon on empty page
         $("#upload-inline").off("click").on("click", function () {
