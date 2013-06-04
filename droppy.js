@@ -30,7 +30,6 @@
   - User privilege levels and a admin panel to add/remove users
   - Rework client <-> server communication so that the server has more
     control over the client's current location in the file system
-  - Public file links (using a URL shortening mechanism)
   - Drag and drop moving of files/folders
   - Keybindings
  --------------------------------------------------------------------------- */
@@ -259,18 +258,17 @@ function setupSocket(server) {
         var remoteIP   = ws._socket.remoteAddress;
         var remotePort = ws._socket.remotePort;
         var cookie     = getCookie(ws.upgradeReq.headers.cookie);
-        if (!clients[cookie]) {
-            clients[cookie] = {};
-            clients[cookie].ws = ws;
-        }
 
         if (!cookie) {
+            ws.close(4000);
             log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
-            ws.send("UNAUTHORIZED");
-            ws.close();
             return;
         } else {
             log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
+            if (!clients[cookie]) {
+                clients[cookie] = {};
+                clients[cookie].ws = ws;
+            }
         }
 
         ws.on("message", function (message) {
@@ -297,7 +295,6 @@ function setupSocket(server) {
                 for (var link in db.links) {
                     if (db.links[link] === dir) {
                         sendLink(clients[cookie].ws, link);
-                        writeDB();
                         return;
                     }
                 }
@@ -355,16 +352,22 @@ function setupSocket(server) {
                     });
                 });
                 break;
-            case "LOGOUT":
-                delete db.sessions[cookie];
-                writeDB();
-                break;
             }
         });
-        ws.on("close", function () {
-            log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "]");
-            delete clients[cookie].ws;
+
+        ws.on("close", function (code) {
+            var reason;
+            if (code === 4001) {
+                reason = "(Client logged out)";
+                delete db.sessions[cookie];
+                writeDB();
+            } else if (code === 1001) {
+                reason = "(Client going away)";
+                delete clients[cookie];
+            }
+            log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "] ", reason || "(Code: " + (code || "none")  + ")");
         });
+
         ws.on("error", function (err) {
             logerror(err);
         });
@@ -985,15 +988,14 @@ function createCookie(req, res, postData) {
     if (postData.check === "on") {
         // Create a semi-permanent cookie
         var dateString = new Date(new Date().getTime() + 31536000000).toUTCString();
-        db.sessions[sessionID] = true;
-        writeDB();
         res.setHeader("Set-Cookie", "sid=" + sessionID + "; Expires=" + dateString);
     } else {
         // Create a single-session cookie
         // TODO: Delete these session ids after a certain period of inactivity from the client
-        db.sessions[sessionID] = true;
         res.setHeader("Set-Cookie", "sid=" + sessionID + ";");
     }
+    db.sessions[sessionID] = true;
+    writeDB();
 }
 
 function writeDB(callback) {
@@ -1148,6 +1150,7 @@ process.on("uncaughtException", function (err) {
 function shutdown() {
     var count = 0;
     for (var client in clients) {
+        if (!clients[client] || !clients[client].ws) continue;
         if (clients[client].ws.readyState < 2) {
             count++;
             clients[client].ws.close(1001);
@@ -1155,7 +1158,6 @@ function shutdown() {
     }
 
     if (count > 0) log("Closed " + count + " active WebSockets");
-    writeDB();
     process.exit();
 }
 

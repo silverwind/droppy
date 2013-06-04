@@ -139,9 +139,12 @@
                 updateLocation(currentFolder || "/", false); // Request initial update
         }
 
-        function onClose() {
-            if (hasLoggedOut) return;
-            if (reopen) {
+        function onClose(event) {
+            if (hasLoggedOut || event.code === 4000) return;
+            if (event.code >= 1002 && event.code < 3999) {
+                log("Websocket closed unexpectedly with code " + event.code + ". Reconnecting...");
+                openSocket();
+            } else if (reopen) {
                 openSocket();
                 reopen = false;
             }
@@ -182,10 +185,6 @@
             case "FILE_LINK":
                 // TODO: UI for this
                 window.prompt("Download Link:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
-                break;
-            case "UNAUTHORIZED":
-                // Set hasLoggedOut to stop reconnects, will get cleared on login
-                hasLoggedOut = true;
                 break;
             }
 
@@ -310,7 +309,7 @@
         // Close the socket gracefully
         $(window).off("beforeunload").on("beforeunload", function () {
             if (socket && socket.close && socket.readyState < 2)
-                socket.close();
+                socket.close(1001);
         });
 
         // Stop dragenter and dragover from killing our drop event
@@ -492,9 +491,8 @@
         });
 
         $("#logout").off("click").on("click", function () {
-            sendMessage("LOGOUT");
             hasLoggedOut = true;
-            socket.close();
+            socket.close(4001);
             deleteCookie("sid");
             initVariables(); // Reset vars to their init state
             getPage();
