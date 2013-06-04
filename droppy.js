@@ -1145,9 +1145,7 @@ process.on("uncaughtException", function (err) {
     logerror(err);
 });
 
-process.on("SIGINT", function () {
-    log("Received SIGINT - Shutting down...");
-
+function shutdown() {
     var count = 0;
     for (var client in clients) {
         if (clients[client].ws.readyState < 2) {
@@ -1157,5 +1155,19 @@ process.on("SIGINT", function () {
     }
 
     if (count > 0) log("Closed " + count + " active WebSockets");
+    writeDB();
     process.exit();
+}
+
+process.on("SIGINT", function () {
+    log("Received SIGINT - Shutting down...");
+    shutdown();
+});
+process.on("SIGQUIT", function () {
+    log("Received SIGQUIT - Shutting down...");
+    shutdown();
+});
+process.on("SIGTERM", function () {
+    log("Received SIGTERM - Shutting down...");
+    shutdown();
 });
