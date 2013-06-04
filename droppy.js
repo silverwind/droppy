@@ -1144,3 +1144,18 @@ process.on("uncaughtException", function (err) {
     logerror("=============== Uncaught exception! ===============");
     logerror(err);
 });
+
+process.on("SIGINT", function () {
+    log("Received SIGINT - Shutting down...");
+
+    var count = 0;
+    for (var client in clients) {
+        if (clients[client].ws.readyState < 2) {
+            count++;
+            clients[client].ws.close(1001);
+        }
+    }
+
+    if (count > 0) log("Closed " + count + " active WebSockets");
+    process.exit();
+});
