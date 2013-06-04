@@ -133,9 +133,10 @@
         socket.onmessage = function (event) { onMessage(event); };
 
         function onOpen() {
-            if (queuedData) sendQueued(queuedData);
-            // Request initial update
-            updateLocation(currentFolder || "/", false);
+            if (queuedData) {
+                sendMessage();
+            } else
+                updateLocation(currentFolder || "/", false); // Request initial update
         }
 
         function onClose() {
@@ -210,9 +211,8 @@
             if (queuedData) {
                 socket.send(queuedData);
                 queuedData = false;
-            } else {
+            } else
                 socket.send(JSON.stringify({type: msgType, data: msgData}));
-            }
         } else if (socket.readyState === 0) { // connecting
             queuedData = JSON.stringify({type: msgType, data: msgData});
         } else if (socket.readyState === 2) { // closing
@@ -220,12 +220,6 @@
             reopen = true;
         } else if (socket.readyState === 3) { // closed
             openSocket();
-        }
-    }
-
-    function sendQueued(data) {
-        if (socket.readyState === 1) {
-            socket.send(data);
         }
     }
 // ============================================================================
