@@ -228,49 +228,38 @@
         var form      = $("#form"),
             loginform = $("#login-form"),
             logininfo = $("#login-info"),
-            pass      = $("#pass"),
-            remember  = $("#remember"),
-            submit    = $("#submit"),
-            user      = $("#user");
+            submit    = $("#submit");
 
-        user.focus();
+        $("#user").focus();
+
+        // Remove invalid class on user action
+        $("#user, #pass").off("click keydown focus").on("click keydown focus", function () {
+            submit.removeClass("invalid");
+            loginform.removeClass("invalid");
+            logininfo.fadeOut(300);
+        });
 
         // Return submits the form
-        pass.off("keyup").on("keyup", function (e) {
+        $("#user, #pass").off("keyup").on("keyup", function (e) {
             if (e.keyCode === 13) {
-                submitForm(form, submit);
+                submitForm();
             }
         });
 
         // Spacebar toggles the checkbox
-        remember.off("keyup").on("keyup", function (e) {
+        $("#remember").off("keyup").on("keyup", function (e) {
             if (e.keyCode === 32) {
                 $("#check").trigger("click");
             }
         });
 
+        // Submit the form over xhr
         form.off("submit").on("submit", function (e) {
             e.preventDefault();
-            submitForm(form, submit);
+            submitForm();
         });
 
-        user.off("focus").on("focus", function () {
-            submit.removeClass("invalid");
-            loginform.removeClass("invalid");
-            logininfo.fadeOut(300);
-        });
-
-        user.off("click keydown").on("click keydown", function () {
-            logininfo.fadeOut(300);
-        });
-
-        pass.off("focus").on("focus", function () {
-            submit.removeClass("invalid");
-            loginform.removeClass("invalid");
-            logininfo.fadeOut(300);
-        });
-
-        function submitForm(form) {
+        function submitForm() {
             $.ajax({
                 type: "POST",
                 url: "/login",
