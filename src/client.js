@@ -82,25 +82,28 @@
             oldPage = $("#page"),
             login = $("#login-form");
         if (type === "main") {
+            initMainPage();
+            $("#content, #newcontent").css("-webkit-backface-visibility", "hidden"); // Webkit animation fix
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 login.removeClass("in").addClass("out");
                 setTimeout(function () {
                     $("#navigation").attr("class", "in");
                     setTimeout(function () {
-                        initMainPage();
                         finalize();
                     }, 250);
                 }, 250);
             });
         } else if (type === "auth") {
+            $("#content, #newcontent").css("-webkit-backface-visibility", "visible"); // Webkit animation fix
+            initAuthPage();
+            redraw();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("farout");
                 setTimeout(function () {
                     login.removeClass("out").addClass("in");
                     setTimeout(function () {
-                        initAuthPage();
                         finalize();
                         if (hasLoggedOut) {
                             setTimeout(function () {
@@ -224,23 +227,44 @@
 // ============================================================================
 //  Authentication page JS
 // ============================================================================
+    var du, dp;
     function initAuthPage() {
         var form      = $("#form"),
             loginform = $("#login-form"),
             logininfo = $("#login-info"),
             submit    = $("#submit");
 
+        // Switch in username and password fields from a dummy form in the
+        // base page. This allows password saving in all browsers. Chrome
+        // additionally needs the form to submit to an actual URL, so we add
+        // and iframe where Chrome can post to.
+        // Relevant bugs:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=355063
+        // http://code.google.com/p/chromium/issues/detail?id=43219
+        if ($("#dummy-user").length) {
+            // Store a copy of the old inputs
+            du = $("#dummy-user").clone();
+            dp = $("#dummy-pass").clone();
+            // Move the dummys in place
+            $("#dummy-pass").prependTo(form);
+            $("#dummy-user").prependTo(form);
+        } else {
+            // On furter logins, restore our copys
+            dp.prependTo(form);
+            du.prependTo(form);
+        }
+
         $("#user").focus();
 
         // Remove invalid class on user action
-        $("#user, #pass").off("click keydown focus").on("click keydown focus", function () {
+        $(".login-input").off("click keydown focus").on("click keydown focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
             logininfo.fadeOut(300);
         });
 
         // Return submits the form
-        $("#user, #pass").off("keyup").on("keyup", function (e) {
+        $(".login-input").off("keyup").on("keyup", function (e) {
             if (e.keyCode === 13) {
                 submitForm();
             }
@@ -254,8 +278,7 @@
         });
 
         // Submit the form over xhr
-        form.off("submit").on("submit", function (e) {
-            e.preventDefault();
+        form.off("submit").on("submit", function () {
             submitForm();
         });
 
@@ -267,6 +290,8 @@
                 success: function (response) {
                     if (response === "OK") {
                         hasLoggedOut = false;
+                        form.off("submit");
+                        setTimeout(form.submit, 500);
                         getPage();
                     } else {
                         submit.addClass("invalid");
@@ -780,21 +805,23 @@
                 $("#content").attr("class", "center");
                 $("#content").html(list || emptyPage);
             } else {
+                $("#content, #newcontent").css("-webkit-backface-visibility", "visible"); // Webkit animation fix
                 $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
                 $("#newcontent").html(list || emptyPage);
                 isAnimating = true;
                 $(".data-row").addClass("animating");
                 $("#content").attr("class", (nav === "forward") ? "back" : "forward");
                 $("#newcontent").setClass("center");
-
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     isAnimating = false;
+                    $("#content, #newcontent").css("-webkit-backface-visibility", "hidden"); // Webkit animation fix
                     $("#content").remove();
                     $("#newcontent").attr("id", "content");
                     $(".data-row").removeClass("animating");
                 }, 250);
             }
+            redraw();
             bindEvents();
             nav = "same";
         });
@@ -871,6 +898,10 @@
         return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
     }
 
+    // This seems to fix weird Webkit rendering after animations
+    function redraw() {
+        $("<style>").appendTo($(document.body)).remove();
+    }
     if (Function.prototype.bind && console && typeof console.log === "object") {
         console.log = Function.prototype.bind.call(console.log, console);
     }

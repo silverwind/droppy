@@ -200,7 +200,7 @@ function createListener() {
                         "type"  : "UPDATE_CSS",
                         "css"   : debugcss
                     });
-                    if (clients[cookie].ws) {
+                    if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
                         clients[cookie].ws.send(data, function (err) {
                             if (err) logerror(err);
                         });
@@ -614,7 +614,7 @@ function handlePOST(req, res) {
                 createCookie(req, res, postData);
             } else {
                 log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                    "User ", postData.username, " [", color.red, "unathorized", color.reset, "]");
+                    "User ", postData.username, " [", color.red, "unauthorized", color.reset, "]");
                 response = "NOK";
             }
             var json = JSON.stringify(response);
@@ -628,29 +628,26 @@ function handlePOST(req, res) {
 }
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
+    // Shortcut for CSS debugging when no Websocket is available
+    if (config.debug && resourceName === "client.css") {
+        debugcss = [
+            fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+            fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
+        ].join("\n");
+        debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/css; charset=utf-8");
+        res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
+        res.setHeader("Content-Length", Buffer.byteLength(debugcss, 'utf8'));
+        res.end(debugcss);
+        return;
+    } else if (resourceName === "null") res.end(); // Serve an empty page for the dummy iframe
+
     if (cache[resourceName] === undefined) {
         res.statusCode = 404;
         res.end();
         logresponse(req, res);
     } else {
-
-        // Shortcut for CSS debugging when no Websocket is available
-        if (config.debug && resourceName === "client.css") {
-
-            debugcss = [
-                fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
-                fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
-            ].join("\n");
-
-            debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/css; charset=utf-8");
-            res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
-            res.setHeader("Content-Length", Buffer.byteLength(debugcss, 'utf8'));
-            res.end(debugcss);
-            return;
-        }
-
         var ifNoneMatch = req.headers["if-none-match"] || "";
         if (ifNoneMatch === cache[resourceName].etag && req.url !== "/content") {
             res.statusCode = 304;

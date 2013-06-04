@@ -89,7 +89,7 @@ body {
     height: 0.5em;
 }
 
-#content.out {opacity: 0}
+#content.out { opacity: 0 }
 
 @media all and (min-width: 1024px) {
     #content, #newcontent { top: 3.5em; margin: 1%; width: 98%; max-height: calc(100% - 4.5em) }
@@ -645,11 +645,13 @@ body {
     display: table;
     height: 1.5em;
     margin-top: .75em;
+    padding: 0 .25em;
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) { #remember { font-size: .75em } }
 
 #remember:focus {
+    outline: none;
     border-radius: 5px;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .3);
 }
@@ -763,7 +765,7 @@ body {
     animation: 2.5s linear 0s normal none infinite spin;
     color: #666;
     display: table-cell;
-    font-size: 8em;
+    font-size: 7em;
     vertical-align: middle;
 }
 

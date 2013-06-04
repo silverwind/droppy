@@ -1,9 +1,8 @@
 <div id="login-form" class="out">
     <p id="login-info"></p>
     <div id="login-icon" class="icon"></div>
-    <form id="form" accept-charset="UTF-8" autocomplete="on">
-        <input id="user" class="login-input" type="text" name="username" autofocus="true" tabindex="1" placeholder="Username" />
-        <input id="pass" class="login-input" type="password" name="password" autocomplete="on" tabindex="2" placeholder="Password" />
+    <iframe src="/res/null" name="dummy-iframe" style="display: none"></iframe>
+    <form id="form" action="/login" method="POST" target="dummy-iframe" accept-charset="UTF-8" autocomplete="on">
         <div id="remember" tabindex="3">
             <input id="check" name="check" type="checkbox" checked="checked" />
             <label for="check"><span></span>Remember me</label>
