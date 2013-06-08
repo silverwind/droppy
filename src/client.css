@@ -28,7 +28,7 @@ body, div, header, input, label, li, nav, p, section, span, ul {
 
 li { list-style: none }
 a  { text-decoration: none }
-input:focus, button:focus { outline: none }
+input:focus, button:focus, div:focus { outline: none }
 input, button { border: none }
 button::-moz-focus-inner { border: none }
 
@@ -640,40 +640,60 @@ body {
 
 .login-input:focus { box-shadow: 0 0 0 5px rgba(255, 255, 255, .4), inset 1px 1px 5px 1px rgba(143, 143, 143, 0.8) }
 
+
+input[type=checkbox] {
+    display: none;
+}
+
 #remember {
-    color: #ddd;
-    display: table;
-    height: 1.5em;
-    margin-top: .75em;
-    padding: 0 .25em;
-}
-
-@media all and (max-width: 639px), all and (max-height: 399px) { #remember { font-size: .75em } }
-
-#remember:focus {
-    outline: none;
-    border-radius: 5px;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, .3);
-}
-
-#check { display: none }
-#check + label {
+    margin-top: .5em;
+    padding: .25em 0;
     cursor: pointer;
-    display: table-cell;
-    vertical-align: middle;
+    position: relative;
+    width: auto;
+    height: 1.5em;
+    user-select: none;
 }
 
-#check + label:before {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAAAaVBMVEUAAAChoqIAAAC3uLikpKSUl5kAAACtra0AAAC6urpmaWuxsbGxsbGWmJqgoKExMTEAAAAAAAAAAACtra27u7u7u7uwsLAAAAAAAACoqKj29/f19vb7+/v+/v73+PjX2Nj8/f36+vr///+/lwrFAAAAGnRSTlMD4QFu2KoCywBtDXV3o+MSBwYMzAVqww4K5HCPibsAAABXSURBVHjavcg3EoAgEADAM+dAlAzy/0faHjO2uuUCF1IjUvARmmgTYuNUQxt8RnxgADrlQtLk5dQHdxf+uj04XC4wBVs0CTFxUTB3lUaG9VDQE3oV6PkAhSEppdIoDmIAAAAASUVORK5CYII=);
-    content: "";
-    display: inline-block;
-    height: 18px;
-    margin: 0 6px -2.5px -2px;
-    width: 18px;
+#remember:focus label {
+    user-select: none;
+    box-shadow: 0 0 0 3.5px rgba(255, 255, 255, .4)
 }
 
-#check:checked + label:before {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAABC1BMVEUUFRYiJCUSExMAAACpqakAAAChoqIAAAC3uLikpKS6urqUl5kAAAAAAACtra2tra1maWuxsbGxsbGWmJoxMTGgoKEAAAAAAAC7u7u7u7uwsLAAAAAAAACoqKju7+/v7+9paWmYmZlLS0tzc3NGRkZ8fX2Cg4NRUVFZWVl2dnaPj497e3tFRUVKSkpQUFBYWFiDg4P09fWMjIyRkZGVlZVmZmaXmJiXl5fu7u6jo6NsbW1bW1v7/Pzw8fHz9PTy8vKUlJT29/dtbm7w8PBgYGB+fn5lZWVsbGzy8/N3eHj19vZWVlaZmprX2Njt7e35+vr3+Pjs7Ozx8fHp6enn5+fr6+vo6Ojk5OT8/f1T7JKqAAAAHnRSTlMWXwwD0QHhBm7YbaoCAMvMDXV3oxLjBwwFasMKDuSKNsVOAAAA1ElEQVR42lXI10LCMAAF0IiIiAIKyqpBUUFcuDfKHm1pm6Qm3P//EilFDOfxkEKxRDWlYiFJ4o4FjeUkNsgW6001PRZdJxTTFaAR/caAmN2aduL7ucvKoOT/hPUxOjYBasxPNcHF/Wj43m//ncJTDV63//pZgQrPRdu2Ly9uH+wJjtzwOMzzu/pw0HjBG+fhybFXPRmc3kzgSikXJ1ve1dl1UMvzfV945iOkHwhPzQiAq7ngDpj40XyxtEGyTgeajrNnkN3tGNWkMvsG2dnMH67I534BYfhYu61v4qgAAAAASUVORK5CYII=);
+#remember span {
+    padding-left: 30px;
+    white-space: nowrap;
+    color: #ccc;
+    width: auto;
+    cursor: pointer;
+}
+
+#remember label {
+    cursor: pointer;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    box-shadow: inset 0px 1px 1px rgba(128,128,128,0.5);
+    background: linear-gradient(#111, #333);
+}
+
+#remember label:after {
+    opacity: 0;
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 5px;
+    top: 4px;
+    left: 4px;
+    border: 3px solid #fff;
+    border-top: none;
+    border-right: none;
+    transform: rotate(-45deg);
+}
+
+#remember input[type=checkbox]:checked + label:after {
+    opacity: 1;
 }
 
 #submit {
@@ -692,7 +712,7 @@ body {
     width: 100%;
 }
 
-#submit:focus  { box-shadow: inset 0 0 10px 5px rgba(0, 0, 0, .2) }
+#submit:focus  { box-shadow: inset 0 0 15px 5px rgba(0, 0, 0, .5) }
 #submit:active { transform: translateY(3px) }
 #submit:hover  { opacity: .9 }
 @media all and (max-width: 639px), all and (max-height: 399px) {

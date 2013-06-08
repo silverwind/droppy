@@ -237,7 +237,7 @@
         // Switch in username and password fields from a dummy form in the
         // base page. This allows password saving in all browsers. Chrome
         // additionally needs the form to submit to an actual URL, so we add
-        // and iframe where Chrome can post to.
+        // an iframe where Chrome can post to.
         // Relevant bugs:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=355063
         // http://code.google.com/p/chromium/issues/detail?id=43219
