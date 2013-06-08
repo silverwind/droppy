@@ -3,8 +3,8 @@
   "version": "0.3.5-2",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "Modern HTTP file server/browser application with realtime updates",
-  "homepage": "https://github.com/silverwind/Droppy",
-  "bugs": "https://github.com/silverwind/Droppy/issues",
+  "homepage": "https://github.com/silverwind/droppy",
+  "bugs": "https://github.com/silverwind/droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
     "ws": "~0.4.25",
@@ -38,12 +38,12 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/silverwind/Droppy/raw/master/LICENSE"
+      "url": "https://github.com/silverwind/droppy/raw/master/LICENSE"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/silverwind/Droppy.git"
+    "url": "https://github.com/silverwind/droppy.git"
   },
   "scripts": {
     "start": "node droppy.js"
