@@ -1,8 +1,8 @@
 {
   "name": "droppy",
-  "version": "0.3.5-2",
+  "version": "0.4.0",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "Modern HTTP file server/browser application with realtime updates",
+  "description": "Modern HTTP file server/browser with realtime updates",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": "https://github.com/silverwind/droppy/issues",
   "main": "./droppy.js",
@@ -11,7 +11,7 @@
     "formidable": "~1.0.14",
     "mime": "~1.2.9",
     "uglify-js": "~2.3.6",
-    "clean-css": "~1.0.5",
+    "clean-css": "~1.0.8",
     "autoprefixer": "~0.4.20130603",
     "rmdir": "~1.0.0",
     "mkdirp": "~0.3.5"

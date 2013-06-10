@@ -82,6 +82,7 @@
             oldPage = $("#page"),
             login = $("#login-form");
         if (type === "main") {
+            hasLoggedOut = false;
             initMainPage();
             $("#content, #newcontent").css("-webkit-backface-visibility", "hidden"); // Webkit animation fix
             requestAnimation(function () {
@@ -131,18 +132,15 @@
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         socket = new WebSocket(protocol + document.location.host + "/");
-        socket.onopen    = function (event) { onOpen(event);    };
-        socket.onclose   = function (event) { onClose(event);   };
-        socket.onmessage = function (event) { onMessage(event); };
 
-        function onOpen() {
+        socket.onopen = function () {
             if (queuedData) {
                 sendMessage();
             } else
                 updateLocation(currentFolder || "/", false); // Request initial update
-        }
+        };
 
-        function onClose(event) {
+        socket.onclose = function (event) {
             if (hasLoggedOut || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 log("Websocket closed unexpectedly with code " + event.code + ". Reconnecting...");
@@ -151,9 +149,9 @@
                 openSocket();
                 reopen = false;
             }
-        }
+        };
 
-        function onMessage(event) {
+        socket.onmessage = function (event) {
             socketWait = false;
             var msg = JSON.parse(event.data);
             switch (msg.type) {
@@ -190,16 +188,7 @@
                 window.prompt("Download Link:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
                 break;
             }
-
-            function updateData(folder, data) {
-                if (folder !== currentFolder.replace(/&amp;/, "&")) {
-                    updateLocation(msg.folder);
-                }
-                updatePath(msg.folder);
-                currentData = data;
-                buildHTML(data, folder);
-            }
-        }
+        };
     }
 
     function sendMessage(msgType, msgData) {
@@ -224,6 +213,13 @@
             openSocket();
         }
     }
+
+    // Close the socket gracefully before navigating away
+    $(window).off("beforeunload").on("beforeunload", function () {
+        if (socket && socket.close && socket.readyState < 2)
+            socket.close(1001);
+    });
+
 // ============================================================================
 //  Authentication page JS
 // ============================================================================
@@ -314,17 +310,27 @@
 //  Main page JS
 // ============================================================================
     function initMainPage() {
+        // Initialize the current folder, in case the user navigated to it through the URL.
         currentFolder = decodeURIComponent(window.location.pathname);
-        hasLoggedOut = false;
 
         // Open the WebSocket
         openSocket();
 
-        // Close the socket gracefully
-        $(window).off("beforeunload").on("beforeunload", function () {
-            if (socket && socket.close && socket.readyState < 2)
-                socket.close(1001);
-        });
+        // Check if we support directory uploads
+        if (Modernizr.inputdirectory) {
+            // We support directory uploads, register the click handler on our directory upload button
+            $("#upload-folder").off("click").on("click", function () {
+                // Set the directory attribute on click, so we get a directory picker from the browser
+                fileInput.attr("directory",       "directory");
+                fileInput.attr("msdirectory",     "msdirectory");
+                fileInput.attr("mozdirectory",    "mozdirectory");
+                fileInput.attr("webkitdirectory", "webkitdirectory");
+                fileInput.click();
+            });
+        } else {
+            // No directory upload support - disable the button (might be better to remove it completely)
+            $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
+        }
 
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.preventDefault(); });
@@ -413,9 +419,10 @@
             }
         });
 
-        // Set the correct attributes on our file input before redirecting the click
+        // Handler for the file upload button
         $("#upload-file").off("click").on("click", function () {
             if (Modernizr.inputdirectory) {
+                // Set the correct attributes on our file input before redirecting the click
                 fileInput.removeAttr("directory");
                 fileInput.removeAttr("msdirectory");
                 fileInput.removeAttr("mozdirectory");
@@ -423,19 +430,6 @@
             }
             fileInput.click();
         });
-
-        if (Modernizr.inputdirectory) {
-            // Set the attributes for directory uploads, so we get a directory picker dialog.
-            $("#upload-folder").off("click").on("click", function () {
-                fileInput.attr("directory",       "directory");
-                fileInput.attr("msdirectory",     "msdirectory");
-                fileInput.attr("mozdirectory",    "mozdirectory");
-                fileInput.attr("webkitdirectory", "webkitdirectory");
-                fileInput.click();
-            });
-        } else {
-            $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
-        }
 
         var info        = $("#name-info"),
             nameinput   = $("#name-input"),
@@ -614,6 +608,16 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
+    // Update data as received from the server
+    function updateData(folder, data) {
+        if (folder !== currentFolder.replace(/&amp;/, "&")) {
+            updateLocation(folder);
+        }
+        updatePath(folder);
+        currentData = data;
+        buildHTML(data, folder);
+    }
+
     // Update the page title and trim a path to its basename
     function updateTitle(text, isPath) {
         var prefix = "", suffix = "droppy";

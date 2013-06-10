@@ -445,7 +445,6 @@ body {
 #about-box {
     background: #222;
     border-radius: 16px;
-    box-shadow: 0 0 0 5px rgba(255,255,255,.3);
     color: #bbb;
     height: 200px;
     left: 50%;
