@@ -193,20 +193,23 @@ function createListener() {
     if (config.debug) {
         var cssfile = config.srcDir + "client.css";
         fs.watch(cssfile, debounce(function () {
-            fs.readFile(cssfile, function (err, css) {
-                for (var cookie in clients) {
-                    debugcss = autoprefixer.compile(css.toString("utf8"), ["last 2 versions"]);
-                    var data = JSON.stringify({
-                        "type"  : "UPDATE_CSS",
-                        "css"   : debugcss
+            var debugcss = [
+                fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+                fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
+            ].join("\n");
+            debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
+
+            for (var cookie in clients) {
+                var data = JSON.stringify({
+                    "type"  : "UPDATE_CSS",
+                    "css"   : debugcss
+                });
+                if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
+                    clients[cookie].ws.send(data, function (err) {
+                        if (err) logerror(err);
                     });
-                    if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
-                        clients[cookie].ws.send(data, function (err) {
-                            if (err) logerror(err);
-                        });
-                    }
                 }
-            });
+            }
         }), 100);
     }
 
@@ -285,6 +288,7 @@ function setupSocket(server) {
             case "CREATE_FOLDER":
                 fs.mkdir(addFilePath(dir), config.dirMode, function (err) {
                     if (err) logerror(err);
+                    log(remoteIP, ":", remotePort, " Created: ", dir);
                     readDirectory(clients[cookie].directory, function () {
                         sendFiles(cookie, "UPDATE_FILES");
                     });
@@ -483,9 +487,9 @@ function cacheResources(dir, callback) {
 
     walkDirectory(dir, function (err, results) {
         var filesToGzip = [];
-        results.forEach(function (fullPath) {                   // fullPath = ./res/webshim/shims/styles/shim.css
-            var relPath = fullPath.substring(dir.length + 1);   // relPath  = webshim/shims/styles/shim.css
-            var fileName = path.basename(fullPath);             // fileName = shim.css
+        results.forEach(function (fullPath) {
+            var relPath = fullPath.substring(dir.length + 1);
+            var fileName = path.basename(fullPath);
             var fileData, fileTime;
 
             // This is rather hacky. node seems to throw ENOENT on files that
@@ -628,8 +632,9 @@ function handlePOST(req, res) {
 }
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
-    // Shortcut for CSS debugging when no Websocket is available
+
     if (config.debug && resourceName === "client.css") {
+        // Shortcut for CSS debugging when no Websocket is available
         debugcss = [
             fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
@@ -641,18 +646,21 @@ function handleResourceRequest(req, res, resourceName) {
         res.setHeader("Content-Length", Buffer.byteLength(debugcss, 'utf8'));
         res.end(debugcss);
         return;
-    } else if (resourceName === "null") res.end(); // Serve an empty page for the dummy iframe
+    }
 
+    // Regular resource handling
     if (cache[resourceName] === undefined) {
+        if (resourceName === "null") { // Serve an empty document for the dummy iframe
+            res.end();
+            return;
+        }
         res.statusCode = 404;
         res.end();
-        logresponse(req, res);
     } else {
         var ifNoneMatch = req.headers["if-none-match"] || "";
         if (ifNoneMatch === cache[resourceName].etag && req.url !== "/content") {
             res.statusCode = 304;
             res.end();
-            logresponse(req, res);
         } else {
             res.statusCode = 200;
 
@@ -684,9 +692,9 @@ function handleResourceRequest(req, res, resourceName) {
                 res.setHeader("Content-Length", cache[resourceName].data.length);
                 res.end(cache[resourceName].data);
             }
-            logresponse(req, res);
         }
     }
+    logresponse(req, res);
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
