@@ -96,10 +96,10 @@ body {
     #content, #newcontent { top: 3.5em; margin: 1%; width: 98%; max-height: calc(100% - 4.5em) }
 }
 @media all and (max-width: 1023px) {
-    #content, #newcontent { top: 3em; margin: 1.5%; width: 97%; max-height: calc(100% - 4em) }
+    #content, #newcontent { top: 2.5em; margin: 1.5%; width: 97%; max-height: calc(100% - 3.5em) }
 }
 @media all and (max-width: 639px) {
-    #content, #newcontent { top: 3.25em; margin: 2.5%; width: 95%; max-height: calc(100% - 4.5em); font-size: .8em }
+    #content, #newcontent { top: 3em; margin: 2.5%; width: 95%; max-height: calc(100% - 4.5em); font-size: .8em }
 }
 
 #content.center,  #newcontent.center  { left: 0     }
@@ -320,6 +320,7 @@ body {
 }
 
 #empty-text {
+    color: #222;
     display: table-cell;
     line-height: 1.5em;
     text-align: center;
@@ -627,6 +628,7 @@ body {
 }
 
 .login-input {
+    background: #eee;
     border-radius: 10px;
     border: 2px transparent;
     box-shadow: inset 1px 1px 5px 1px rgba(143, 143, 143, 0.8);
@@ -639,7 +641,6 @@ body {
 }
 
 .login-input:focus { box-shadow: 0 0 0 5px rgba(255, 255, 255, .4), inset 1px 1px 5px 1px rgba(143, 143, 143, 0.8) }
-
 
 input[type=checkbox] {
     display: none;

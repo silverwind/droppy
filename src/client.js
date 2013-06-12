@@ -316,22 +316,6 @@
         // Open the WebSocket
         openSocket();
 
-        // Check if we support directory uploads
-        if (Modernizr.inputdirectory) {
-            // We support directory uploads, register the click handler on our directory upload button
-            $("#upload-folder").off("click").on("click", function () {
-                // Set the directory attribute on click, so we get a directory picker from the browser
-                fileInput.attr("directory",       "directory");
-                fileInput.attr("msdirectory",     "msdirectory");
-                fileInput.attr("mozdirectory",    "mozdirectory");
-                fileInput.attr("webkitdirectory", "webkitdirectory");
-                fileInput.click();
-            });
-        } else {
-            // No directory upload support - disable the button (might be better to remove it completely)
-            $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
-        }
-
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.preventDefault(); });
         $(document.documentElement).off("dragover").on("dragover", function (e) { e.preventDefault(); });
@@ -412,24 +396,48 @@
         });
 
         var fileInput = $("#file");
-        fileInput.off("change").on("change", function () {
-            if (fileInput.val()) {
+        fileInput.off("change").on("change", function (event) {
+            if (Modernizr.inputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
+                var files = event.target.files;
+                var obj = {};
+                for (var i = 0; i < files.length; i++) {
+                    var path = files[i].webkitRelativePath;
+                    if (!path) continue;
+                    obj[path.substring(0, path.indexOf(files[i].name) - 1)] = {};
+                    obj[path] = files[i];
+                }
+                upload(obj);
+            } else if ($("#file").val()) {
                 upload($("#file").get(0).files, true);
-                fileInput.val(""); // Reset the input element
             }
+            $("#file").val(""); // Reset the input
         });
 
-        // Handler for the file upload button
+        // File upload button
         $("#upload-file").off("click").on("click", function () {
-            if (Modernizr.inputdirectory) {
-                // Set the correct attributes on our file input before redirecting the click
-                fileInput.removeAttr("directory");
-                fileInput.removeAttr("msdirectory");
-                fileInput.removeAttr("mozdirectory");
-                fileInput.removeAttr("webkitdirectory");
-            }
+            // Remove the directory attributes so we get a file picker dialog
+            if (Modernizr.inputdirectory)
+                fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
             fileInput.click();
         });
+
+        // Folder upload button - check if we support directory uploads
+        if (Modernizr.inputdirectory) {
+            // Directory uploads supported - enable the button
+            $("#upload-folder").off("click").on("click", function () {
+                // Set the directory attribute so we get a directory picker dialog
+                fileInput.attr({
+                    directory: "directory",
+                    msdirectory: "msdirectory",
+                    mozdirectory: "mozdirectory",
+                    webkitdirectory: "webkitdirectory"
+                });
+                fileInput.click();
+            });
+        } else {
+            // No directory upload support - disable the button (might be better to remove it completely)
+            $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
+        }
 
         var info        = $("#name-info"),
             nameinput   = $("#name-input"),
@@ -518,7 +526,7 @@
                     var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
                     switch (Object.prototype.toString.call(data[path])) {
                     case "[object Object]":
-                        if (!addedDirs[name]) {
+                        if (!addedDirs[name] && data.hasOwnProperty(path)) {
                             currentData[name] = { size: 0, type: "nd" };
                             addedDirs[name] = true;
                         }

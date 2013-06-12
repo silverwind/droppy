@@ -108,12 +108,12 @@ function prepareContent() {
         logsimple(config.debug ? " ->> preparing CSS..." : " ->> minifying CSS...");
 
         css = [
-            fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+            fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
 
         css = autoprefixer.compile(css, ["last 2 versions"]);
-        fs.writeFileSync(getResPath("client.css"), config.debug ? css : cleancss.process(css));
+        fs.writeFileSync(getResPath("style.css"), config.debug ? css : cleancss.process(css));
 
         logsimple(config.debug ? " ->> preparing JS..." : " ->> minifying JS...");
 
@@ -191,10 +191,10 @@ function createListener() {
 
     // Live CSS reloading function for easy styling
     if (config.debug) {
-        var cssfile = config.srcDir + "client.css";
+        var cssfile = config.srcDir + "style.css";
         fs.watch(cssfile, debounce(function () {
             var debugcss = [
-                fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+                fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
             debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
@@ -633,10 +633,10 @@ function handlePOST(req, res) {
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
 
-    if (config.debug && resourceName === "client.css") {
+    if (config.debug && resourceName === "style.css") {
         // Shortcut for CSS debugging when no Websocket is available
         debugcss = [
-            fs.readFileSync(getSrcPath("client.css")).toString("utf8"),
+            fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
         debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
