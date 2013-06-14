@@ -16,11 +16,14 @@
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
 
-    // Set a class on freshly inserted elements, once the DOM has fully loaded it
-    $.fn.setClass = function (newclass) {
+    // Set a new class on an element, and make sure it is ready to be transitioned.
+    $.fn.setTransitionClass = function (newclass) {
         if (Modernizr.cssanimations) {
-            // Set the new class as a data attribute on the matched tag(s)
+            // Add a pseudo-animation to the element. When the "animationstart" event
+            // is fired on the element, we know it is ready to be transitioned.
             this.css("animation", "nodeInserted 0.001s");
+
+            // Set the new class as a data attribute. T
             this.data("newclass", newclass);
         } else {
             // If we don't support animations, fallback to a simple timeout
@@ -36,9 +39,12 @@
         var listener = function (event) {
             if (event.animationName === "nodeInserted") {
                 var target = $(event.target);
-                // Set the class stored in the data attribute and clean up
-                target.attr("class", target.data("newclass"));
-                target.removeAttr("data-newclass").removeAttr("style");
+                var newClass = target.data("newclass");
+                // Clean up our data attribute and remove the animation
+                target.removeData("newclass").css("animation", "");
+                // Set the transition class
+                target.attr("class", newClass);
+
             }
         };
         document.addEventListener("animationstart", listener, false);
@@ -225,10 +231,10 @@
 // ============================================================================
     var du, dp;
     function initAuthPage() {
-        var form      = $("#form"),
-            loginform = $("#login-form"),
+        var loginform = $("#login-form"),
             logininfo = $("#login-info"),
-            submit    = $("#submit");
+            submit    = $("#submit"),
+            form      = $("#form");
 
         // Switch in username and password fields from a dummy form in the
         // base page. This allows password saving in all browsers. Chrome
@@ -241,15 +247,16 @@
             // Store a copy of the old inputs
             du = $("#dummy-user").clone();
             dp = $("#dummy-pass").clone();
-            // Move the dummys in place
+            // Move the dummies in place
             $("#dummy-pass").prependTo(form);
             $("#dummy-user").prependTo(form);
         } else {
-            // On furter logins, restore our copys
+            // On further logins, restore our copies
             dp.prependTo(form);
             du.prependTo(form);
         }
 
+        // Auto-focus the user input on load
         $("#user").focus();
 
         // Remove invalid class on user action
@@ -273,7 +280,8 @@
             }
         });
 
-        // Submit the form over xhr
+        // Submit the form over Ajax, but also let it submit over
+        // a normal POST, which just goes into the iframe.
         form.off("submit").on("submit", function () {
             submitForm();
         });
@@ -286,8 +294,6 @@
                 success: function (response) {
                     if (response === "OK") {
                         hasLoggedOut = false;
-                        form.off("submit");
-                        setTimeout(form.submit, 500);
                         getPage();
                     } else {
                         submit.addClass("invalid");
@@ -391,7 +397,7 @@
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
                 smallScreen = $(window).width() < 640;
-                checkPathWidth();
+                checkPathOverflow();
             }, 100);
         });
 
@@ -455,7 +461,7 @@
             createbox.removeClass("invalid");
             info.hide();
             requestAnimation(function () {
-                createbox.setClass(createbox.attr("class") !== "in" ? "in" : "out");
+                createbox.setTransitionClass(createbox.attr("class") !== "in" ? "in" : "out");
                 setTimeout(function () {
                     nameinput.focus();
                 }, 300);
@@ -464,7 +470,7 @@
 
         // Handler for the input of the folder name
         nameinput.off("keyup").on("keyup", function (e) {
-            if (e.keyCode === 27) createbox.setClass("out"); // Escape Key
+            if (e.keyCode === 27) createbox.setTransitionClass("out"); // Escape Key
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
             var folderExists;
@@ -495,7 +501,7 @@
 
         $("#about").off("click").on("click", function () {
             requestAnimation(function () {
-                $("#about-box").setClass($("#about-box").attr("class") !== "in" ? "in" : "out");
+                $("#about-box").setTransitionClass($("#about-box").attr("class") !== "in" ? "in" : "out");
             });
         });
 
@@ -621,6 +627,7 @@
         if (folder !== currentFolder.replace(/&amp;/, "&")) {
             updateLocation(folder);
         }
+        updateTitle(folder, true);
         updatePath(folder);
         currentData = data;
         buildHTML(data, folder);
@@ -672,8 +679,8 @@
         })(0);
     }
 
+    // Update the path indicator
     function updatePath(path) {
-        updateTitle(path, true);
         var parts = path.split("/");
         var i = 0, len, home = "";
 
@@ -722,16 +729,17 @@
         }
 
         function finalize() {
-            $("#path li.out").setClass("in");
+            $("#path li.out").setTransitionClass("in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
                 $("#path li.in").removeClass();
-                checkPathWidth();
+                checkPathOverflow();
             }, 300);
         }
     }
 
-    function checkPathWidth() {
+    // Check if the path indicator overflows and scroll it if neccessary
+    function checkPathOverflow() {
         var last = $("#path li:last-child");
         if (!last.position()) return;
         var margin = smallScreen ? 95 : 110;
@@ -751,8 +759,10 @@
         }
     }
 
+    // Convert the received data into HTML
     function buildHTML(fileList, root) {
         var list = $("<ul></ul>"), downloadURL, type, size, id, progressBar;
+
         for (var file in fileList) {
             type = fileList[file].type;
             size = convertToSI(fileList[file].size);
@@ -761,7 +771,7 @@
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
-                var spriteClass = getSpriteClass(getFileExtension(file));
+                var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +
                     '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
@@ -776,10 +786,11 @@
                 );
             }
         }
+
         $(list).children("li").sort(function (a, b) {
             var type = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
-            var extension = getFileExtension($(a).children(".filelink").text().toUpperCase())
-                                 .localeCompare(getFileExtension($(b).children(".filelink").text().toUpperCase()));
+            var extension = extractExtension($(a).children(".filelink").text().toUpperCase())
+                                 .localeCompare(extractExtension($(b).children(".filelink").text().toUpperCase()));
             var text = $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
             if (type < 0)
                 return -1;
@@ -801,11 +812,7 @@
             }
         }).appendTo(list);
 
-        if ($(list).children("li").length > 0)
-            loadContent(list);
-        else {
-            loadContent(false);
-        }
+        loadContent($(list).children("li").length > 0 ? list : false);
     }
 
     // Load generated list into view with an animation
@@ -823,7 +830,7 @@
                 isAnimating = true;
                 $(".data-row").addClass("animating");
                 $("#content").attr("class", (nav === "forward") ? "back" : "forward");
-                $("#newcontent").setClass("center");
+                $("#newcontent").setTransitionClass("center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     isAnimating = false;
@@ -839,22 +846,8 @@
         });
     }
 
+    // Bind click events to the list elements
     function bindEvents() {
-        /* TODO: file moving
-        $(".data-row").draggable({
-            addClasses: false,
-            axis: "y",
-            cursor: "move",
-            delay: 200,
-            revert: true,
-            scroll: true
-        }); */
-
-        // Reconnect socket on Firefox < 23
-        $(".filelink").off("click").on("click", function () {
-            reopen = true;
-        });
-
         // Upload icon on empty page
         $("#upload-inline").off("click").on("click", function () {
             $("#file").click();
@@ -867,7 +860,7 @@
             updateLocation(destination, true);
         });
 
-        // Request a public link
+        // Request a short link
         $(".icon-link").off("click").on("click", function () {
             if (socketWait) return;
             sendMessage("REQUEST_LINK", $(this).parent().data("id"));
@@ -878,9 +871,15 @@
             if (socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
+
+        // Mark websocket for reopening in case the browser unexpectedly closes it (Firefox < 23)
+        $(".filelink").off("click").on("click", function () {
+            reopen = true;
+        });
     }
 
-    function getFileExtension(filename) {
+    // Extract the extension from a file name
+    function extractExtension(filename) {
         var dot = filename.lastIndexOf(".");
         if (dot > -1 && dot < filename.length)
             return filename.substring(dot + 1, filename.length);
@@ -901,8 +900,9 @@
         socketWait = false;
     }
 
+    // Convert raw byte numbers to SI values
     function convertToSI(bytes) {
-        var step = 0, units = ["bytes", "KiB", "MiB", "GiB", "TiB"];
+        var step = 0, units = ["B", "KiB", "MiB", "GiB", "TiB"];
         while (bytes >= 1024) {
             bytes /= 1024;
             step++;
@@ -914,15 +914,29 @@
     function redraw() {
         $("<style>").appendTo($(document.body)).remove();
     }
+
+    // Fix console.log on IE9
     if (Function.prototype.bind && console && typeof console.log === "object") {
         console.log = Function.prototype.bind.call(console.log, console);
     }
 
+    // Debug logging
     function log() {
         if (debug && console)
             console.log.apply(console, arguments);
     }
 
+    // Find the corrects class for an icon sprite
+    function getSpriteClass(extension) {
+        for (var type in iconmap) {
+            if (iconmap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
+                return "sprite sprite-" + type;
+            }
+        }
+        return "sprite sprite-bin";
+    }
+
+    // Extension to Icon mappings
     var iconmap = {
         "archive":  ["bz2", "gz", "tgz"],
         "audio":    ["aif", "flac", "m4a", "mid", "mp3", "mpa", "ra", "ogg", "wav", "wma"],
@@ -980,13 +994,4 @@
         "xml":      ["xml"],
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
-
-    function getSpriteClass(extension) {
-        for (var type in iconmap) {
-            if (iconmap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
-                return "sprite sprite-" + type;
-            }
-        }
-        return "sprite sprite-bin";
-    }
 }(jQuery, window, document));
