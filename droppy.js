@@ -489,7 +489,7 @@ function cacheResources(dir, callback) {
             cache[relPath].data = fileData;
             cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
             cache[relPath].mime = mime.lookup(fullPath);
-            if (fileName.match(/.*(js|css|html)$/)) {
+            if (fileName.match(/.*(js|css|html|svg)$/)) {
                 filesToGzip.push(relPath);
             }
         });
