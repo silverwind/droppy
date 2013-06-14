@@ -187,55 +187,28 @@ function createListener() {
             process.exit(1);
         }
     }
-    createWatcher(addFilePath("/"));
-
-    // Live CSS reloading function for easy styling
-    if (config.debug) {
-        var cssfile = config.srcDir + "style.css";
-        fs.watch(cssfile, debounce(function () {
-            var debugcss = [
-                fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
-                fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
-            ].join("\n");
-            debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
-
-            for (var cookie in clients) {
-                var data = JSON.stringify({
-                    "type"  : "UPDATE_CSS",
-                    "css"   : debugcss
-                });
-                if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
-                    clients[cookie].ws.send(data, function (err) {
-                        if (err) logerror(err);
-                    });
-                }
-            }
-        }), 100);
-    }
-
-    setupSocket(server);
-
-    // Bind to 8080 on jitsu
-    var port =  isJitsu ? process.env.PORT : config.port;
-
-    server.listen(port);
 
     server.on("listening", function () {
-        // We're up - initialize everything
-        var address = server.address();
-        log("Listening on ", address.address, ":", address.port);
+        setupSocket(server);
+        if (config.debug) setupDebugWatcher();
+        log("Listening on port ", server.address().port);
     });
 
     server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-            logerror("Failed to bind to port ", port, ". Address already in use.\n\n", err.stack);
+            logerror("Failed to bind to port ", port, ". Address already in use.\n");
         else if (err.code === "EACCES")
-            logerror("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n\n", err.stack);
+            logerror("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n");
         else
             logerror("Error:", util.inspect(err));
         process.exit(1);
     });
+
+    // Bind to 8080 on jitsu
+    var port =  isJitsu ? process.env.PORT : config.port;
+    server.listen(port);
 }
+
 //-----------------------------------------------------------------------------
 // GET/POST handler
 function onRequest(req, res) {
@@ -1073,6 +1046,30 @@ function walkDirectory(dir, callback) {
             });
         })();
     });
+}
+
+// Watch the CSS files and send updates to the client for live styling
+function setupDebugWatcher() {
+    var cssfile = config.srcDir + "style.css";
+    fs.watch(cssfile, debounce(function () {
+        var debugcss = [
+            fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
+            fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
+        ].join("\n");
+        debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
+
+        for (var cookie in clients) {
+            var data = JSON.stringify({
+                "type"  : "UPDATE_CSS",
+                "css"   : debugcss
+            });
+            if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
+                clients[cookie].ws.send(data, function (err) {
+                    if (err) logerror(err);
+                });
+            }
+        }
+    }), 100);
 }
 
 // underscore's debounce - https://github.com/documentcloud/underscore
