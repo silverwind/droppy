@@ -152,8 +152,8 @@
                 log("Websocket closed unexpectedly with code " + event.code + ". Reconnecting...");
                 openSocket();
             } else if (reopen) {
-                openSocket();
                 reopen = false;
+                openSocket();
             }
         };
 
@@ -199,10 +199,12 @@
 
     function sendMessage(msgType, msgData) {
         if (socket.readyState === 1) { // open
+            // Lock the UI while we wait for a socket response
             socketWait = true;
 
+            // Unlock the UI in case we get no socket resonse after waiting for 1 second
             setTimeout(function () {
-                socketWait = false; // Unlock the UI in case we get no socket resonse after waiting for 1 second
+                socketWait = false;
             }, 1000);
 
             if (queuedData) {
@@ -210,13 +212,17 @@
                 queuedData = false;
             } else
                 socket.send(JSON.stringify({type: msgType, data: msgData}));
-        } else if (socket.readyState === 0) { // connecting
+        } else {
+            // We can't send right now, so queue up the last added message to be sent later
             queuedData = JSON.stringify({type: msgType, data: msgData});
-        } else if (socket.readyState === 2) { // closing
-            queuedData = JSON.stringify({type: msgType, data: msgData});
-            reopen = true;
-        } else if (socket.readyState === 3) { // closed
-            openSocket();
+
+            if (socket.readyState === 2) { // closing
+                // Socket is closing, queue a reopening
+                reopen = true;
+            } else if (socket.readyState === 3) { // closed
+                // Socket is closed, we can reopen it right now
+                openSocket();
+            }
         }
     }
 
