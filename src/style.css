@@ -559,8 +559,9 @@ body {
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-form.in  { top: 0   ; opacity: 1 } }
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-form.out { top: 20% ; opacity: 0 } }
 
+
 @media all and (max-width: 639px), all and (max-height: 399px) {
-    #login-form, #noscript {
+    #login-form {
         border-radius: 0;
         box-shadow: none;
         height: 100%;
@@ -749,7 +750,7 @@ input[type=checkbox] {
 #noscript {
     background: #111;
     border-radius: 10px;
-    box-shadow: 0 0 0 5px rgba(255,32,24,.5)
+    box-shadow: 0 0 0 5px rgba(255,32,24,.5);
     display: table;
     height: 150px;
     left: 50%;
@@ -759,6 +760,19 @@ input[type=checkbox] {
     position: fixed;
     top: 50%;
     width: 400px;
+}
+
+@media all and (max-width: 639px), all and (max-height: 399px) {
+    #noscript {
+        border-radius: 0;
+        box-shadow: none;
+        height: 100%;
+        left: 0;
+        margin: 0;
+        padding: 0;
+        top: 0;
+        width: 100%;
+    }
 }
 
 #noscript p {
