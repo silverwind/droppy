@@ -22,17 +22,19 @@
 				<p>Please enable<br>JavaScript to<br>use droppy!</p>
 			</div>
 		</noscript>
-		<script type="text/javascript">
-			window.addEventListener("load", function () {
-			    var e = document.createElement("script");
-			    e.src = "/res/client.js";
-			    document.body.appendChild(e);
-			}, false);
-		</script>
 		<form id="dummy-form" action="/login" method="POST" style="display: none">
 			<input type="text" name="username" id="dummy-user" class="login-input" tabindex="1" placeholder="Username"/>
 			<input type="password" name="password" id="dummy-pass" class="login-input" tabindex="2" placeholder="Password"/>
 			<input type="submit" value="Login" id="dummy-submit"/>
 		</form>
+		<script type="text/javascript">
+			window.addEventListener("load", function () {
+				var e = document.createElement("script");
+				e.src = "/res/client.js";
+				window.removeEventListener("load", this, false);
+				document.body.removeChild(document.getElementsByTagName("script")[0]);
+				document.body.appendChild(e);
+			}, false);
+		</script>
 	</body>
 </html>

@@ -11,8 +11,8 @@
     "formidable": "~1.0.14",
     "mime": "~1.2.9",
     "uglify-js": "~2.3.6",
-    "clean-css": "~1.0.8",
-    "autoprefixer": "~0.4.20130603",
+    "clean-css": "~1.0.10",
+    "autoprefixer": "~0.5.20130617",
     "rmdir": "~1.0.0",
     "mkdirp": "~0.3.5"
   },
