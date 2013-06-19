@@ -156,19 +156,19 @@ function setupFilesDir() {
 // Clean up our shortened links by removing links to nonexistant files
 function cleanUpLinks() {
     var linkcount = 0, cbcount = 0;
-    for (var link in db.links) {
+    for (var link in db.shortlinks) {
         linkcount++;
         (function (shortlink, location) {
             fs.stat(path.join(config.filesDir, location), function (err, stats) {
                 cbcount++;
                 if (!stats || err) {
-                    delete db.links[shortlink];
+                    delete db.shortlinks[shortlink];
                 }
                 if (cbcount === linkcount) {
                     writeDB();
                 }
             });
-        })(link, db.links[link]);
+        })(link, db.shortlinks[link]);
     }
 }
 //-----------------------------------------------------------------------------
@@ -278,9 +278,9 @@ function setupSocket(server) {
                 break;
             case "REQUEST_SHORTLINK":
                 // Check if we already have a link for that file
-                for (var link in db.links) {
-                    if (db.links[link] === dir) {
-                        sendLink(clients[cookie].ws, link);
+                for (var link in db.shortlinks) {
+                    if (db.shortlinks[link] === dir) {
+                        sendLink(cookie, link);
                         return;
                     }
                 }
@@ -292,13 +292,14 @@ function setupSocket(server) {
                     link = "";
                     while (link.length < config.linkLength)
                         link += chars.charAt(Math.floor(Math.random() * chars.length));
-                } while (db.links[link]); // In case the RNG generates an existing link, go again
+                } while (db.shortlinks[link]); // In case the RNG generates an existing link, go again
 
+                log(remoteIP, ":", remotePort, " Shortlink created: " + link + " -> " + dir);
                 // Store the created link
-                db.links[link] = dir;
+                db.shortlinks[link] = dir;
 
                 // Send the shortlink to the client
-                sendLink(clients[cookie].ws, link);
+                sendLink(cookie, link);
                 writeDB();
                 break;
             case "DELETE_FILE":
@@ -375,8 +376,9 @@ function sendFiles(cookie, eventType) {
 }
 
 // Send a file link to a client
-function sendLink(ws, link) {
-    send(ws, JSON.stringify({
+function sendLink(cookie, link) {
+    if (!clients[cookie] || !clients[cookie].ws) return;
+    send(clients[cookie].ws, JSON.stringify({
         "type" : "SHORTLINK",
         "link" : link
     }));
@@ -686,13 +688,14 @@ function handleFileRequest(req, res) {
     var URI = decodeURIComponent(req.url).substring(5, req.url.length); // Strip /get/ off the URI
     var directLink;
     if (URI.length  === config.linkLength) // We got a 3-character suffix after /get/
-        if (db.links[URI]) directLink = db.links[URI];
+        if (db.shortlinks[URI]) directLink = db.shortlinks[URI];
 
-    if (!getCookie(req.headers.cookie)) {
+    if (!getCookie(req.headers.cookie) && ! directLink) {
         res.statusCode = 301;
         res.setHeader("Location", "/");
         res.end();
         logresponse(req, res);
+        return;
     }
     var filepath = directLink ? addFilePath(directLink) : addFilePath("/" + URI);
     if (filepath) {
@@ -905,12 +908,12 @@ function readDB() {
         if (Object.keys(db).length !== 3) doWrite = true;
         if (!db.users) db.users = {};
         if (!db.sessions) db.sessions = {};
-        if (!db.links) db.links = {};
+        if (!db.shortlinks) db.shortlinks = {};
     } catch (e) {
         if (e.code === "ENOENT" || dbString.match(/^\s*$/)) {
             // Recreate DB file in case it doesn't exist / is empty
             logsimple(" ->> creating " + path.basename(config.db) + "...");
-            db = {users: {}, sessions: {}};
+            db = {users: {}, sessions: {}, shortlinks: {}};
             doWrite = true;
         } else {
             logerror("Error reading ", config.db, "\n", util.inspect(e));

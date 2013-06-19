@@ -572,7 +572,7 @@
             }
 
             // Load the preview progress bars and init the UI
-            buildHTML(currentData, currentData.folder);
+            buildHTML(currentData, currentFolder);
             uploadInit();
 
             // Create the XHR2
@@ -609,11 +609,13 @@
         function uploadDone() {
             progressBars.width("100%");
 
-            updateTitle("100%");
+            updateTitle(currentFolder, true);
             uperc.html("100%");
 
             timeleft.html("finished");
             infobox.attr("class", "out");
+
+            updateLocation(currentFolder || "/", false);
         }
 
         function uploadProgress(event) {
@@ -904,8 +906,8 @@
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
-        // Mark websocket for reopening in case the browser unexpectedly closes it (Firefox < 23)
-        $(".filelink").register("click", function () {
+        // Mark websocket for reopening in case the browser unexpectedly closes when clicking on <a> tags(Firefox < 23)
+        $("a").register("click", function () {
             reopen = true;
         });
     }
