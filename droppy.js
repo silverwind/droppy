@@ -276,7 +276,7 @@ function setupSocket(server) {
                     });
                 });
                 break;
-            case "REQUEST_LINK":
+            case "REQUEST_SHORTLINK":
                 // Check if we already have a link for that file
                 for (var link in db.links) {
                     if (db.links[link] === dir) {
@@ -290,14 +290,14 @@ function setupSocket(server) {
                 var chars = "abcdefghjkmnpqrstuvwxyz23456789";
                 do {
                     link = "";
-                    while (link.length < config.linkLength) // n is adjustable here
+                    while (link.length < config.linkLength)
                         link += chars.charAt(Math.floor(Math.random() * chars.length));
                 } while (db.links[link]); // In case the RNG generates an existing link, go again
 
                 // Store the created link
                 db.links[link] = dir;
 
-                // Send the link to the client
+                // Send the shortlink to the client
                 sendLink(clients[cookie].ws, link);
                 writeDB();
                 break;
@@ -377,7 +377,7 @@ function sendFiles(cookie, eventType) {
 // Send a file link to a client
 function sendLink(ws, link) {
     send(ws, JSON.stringify({
-        "type" : "FILE_LINK",
+        "type" : "SHORTLINK",
         "link" : link
     }));
 }
@@ -1031,7 +1031,7 @@ function prettyStartup() {
         ".--|  .----.-----.-----.-----.--.--.\n",
         "|  _  |   _|  _  |  _  |  _  |  |  |\n",
         "|_____|__| |_____|   __|   __|___  |\n",
-        "                 |__|  |__|  |_____|\n\n"
+        "                 |__|  |__|  |_____|\n"
     ].join(""));
 }
 

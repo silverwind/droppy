@@ -16,6 +16,11 @@
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
 
+    // Shorthand for save event listeners
+    $.fn.register = function (events, callback) {
+        return this.off(events).on(events, callback);
+    };
+
     // Set a new class on an element, and make sure it is ready to be transitioned.
     $.fn.setTransitionClass = function (newclass) {
         if (Modernizr.cssanimations) {
@@ -189,9 +194,9 @@
                     style.text(msg.css).appendTo($("head"));
                 }
                 break;
-            case "FILE_LINK":
+            case "SHORTLINK":
                 // TODO: UI for this
-                window.prompt("Download Link:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
+                window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
                 break;
             }
         };
@@ -227,7 +232,7 @@
     }
 
     // Close the socket gracefully before navigating away
-    $(window).off("beforeunload").on("beforeunload", function () {
+    $(window).register("beforeunload", function () {
         if (socket && socket.close && socket.readyState < 2)
             socket.close(1001);
     });
@@ -266,21 +271,21 @@
         $("#user").focus();
 
         // Remove invalid class on user action
-        $(".login-input").off("click keydown focus").on("click keydown focus", function () {
+        $(".login-input").register("click keydown focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
             logininfo.fadeOut(300);
         });
 
         // Return submits the form
-        $(".login-input").off("keyup").on("keyup", function (e) {
+        $(".login-input").register("keyup", function (e) {
             if (e.keyCode === 13) {
                 submitForm();
             }
         });
 
         // Spacebar toggles the checkbox
-        $("#remember").off("keyup").on("keyup", function (e) {
+        $("#remember").register("keyup", function (e) {
             if (e.keyCode === 32) {
                 $("#check").trigger("click");
             }
@@ -288,7 +293,7 @@
 
         // Submit the form over Ajax, but also let it submit over
         // a normal POST, which just goes into the iframe.
-        form.off("submit").on("submit", function () {
+        form.register("submit", function () {
             submitForm();
         });
 
@@ -329,11 +334,11 @@
         openSocket();
 
         // Stop dragenter and dragover from killing our drop event
-        $(document.documentElement).off("dragenter").on("dragenter", function (e) { e.preventDefault(); });
-        $(document.documentElement).off("dragover").on("dragover", function (e) { e.preventDefault(); });
+        $(document.documentElement).register("dragenter", function (e) { e.preventDefault(); });
+        $(document.documentElement).register("dragover", function (e) { e.preventDefault(); });
 
         // File drop handler
-        $(document.documentElement).off("drop").on("drop", function (event) {
+        $(document.documentElement).register("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
 
@@ -399,7 +404,7 @@
 
         // Re-fit path line after 100ms of no resizing
         var resizeTimeout;
-        $(window).off("resize").on("resize", function () {
+        $(window).register("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
                 smallScreen = $(window).width() < 640;
@@ -408,7 +413,7 @@
         });
 
         var fileInput = $("#file");
-        fileInput.off("change").on("change", function (event) {
+        fileInput.register("change", function (event) {
             if (Modernizr.inputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
                 var files = event.target.files;
                 var obj = {};
@@ -426,7 +431,7 @@
         });
 
         // File upload button
-        $("#upload-file").off("click").on("click", function () {
+        $("#upload-file").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog
             if (Modernizr.inputdirectory)
                 fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
@@ -436,7 +441,7 @@
         // Folder upload button - check if we support directory uploads
         if (Modernizr.inputdirectory) {
             // Directory uploads supported - enable the button
-            $("#upload-folder").off("click").on("click", function () {
+            $("#upload-folder").register("click", function () {
                 // Set the directory attribute so we get a directory picker dialog
                 fileInput.attr({
                     directory: "directory",
@@ -458,7 +463,7 @@
             activeFiles;
 
         // Show popup for folder creation
-        $("#create-folder").off("click").on("click", function () {
+        $("#create-folder").register("click", function () {
             nameinput.removeClass("invalid").val("");
             createbox.removeClass("invalid");
             info.hide();
@@ -478,8 +483,11 @@
         });
 
         // Handler for the input of the folder name
-        nameinput.off("keyup").on("keyup", function (e) {
-            if (e.keyCode === 27) createbox.attr("class", "out"); // Escape Key
+        nameinput.register("keyup", function (e) {
+            if (e.keyCode === 27) { // Escape Key
+                createbox.attr("class", "out");
+                toggleCatcher();
+            }
             var input = nameinput.val();
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/^(\.+)$/);
             var folderExists;
@@ -504,24 +512,25 @@
                     else
                         sendMessage("CREATE_FOLDER", currentFolder + "/" + input);
                     createbox.removeClass("in").addClass("out");
+                    toggleCatcher();
                 }
             }
         });
 
-        $("#about").off("click").on("click", function () {
+        $("#about").register("click", function () {
             requestAnimation(function () {
                 aboutbox.attr("class", aboutbox.attr("class") !== "in" ? "in" : "out");
                 toggleCatcher();
             });
         });
 
-        $("#click-catcher").off("click").on("click", function () {
+        $("#click-catcher").register("click", function () {
             $("#click-catcher").attr("class", "out");
             createbox.attr("class", "out");
             aboutbox.attr("class", "out");
         });
 
-        $("#logout").off("click").on("click", function () {
+        $("#logout").register("click", function () {
             hasLoggedOut = true;
             socket.close(4001);
             deleteCookie("sid");
@@ -669,7 +678,7 @@
     }
 
     // Listen for "popstate" events, which indicate the user navigated back
-    $(window).off("popstate").on("popstate", function () {
+    $(window).register("popstate", function () {
         (function queue(time) {
             if ((!socketWait && !isAnimating) || time > 2000)
                 updateLocation(decodeURIComponent(window.location.pathname), true, true);
@@ -872,31 +881,31 @@
     // Bind click events to the list elements
     function bindEvents() {
         // Upload icon on empty page
-        $("#upload-inline").off("click").on("click", function () {
+        $("#upload-inline").register("click", function () {
             $("#file").click();
         });
 
         // Switch into a folder
-        $(".data-row[data-type='folder']").off("click").on("click", function () {
+        $(".data-row[data-type='folder']").register("click", function () {
             if (socketWait) return;
             var destination = $(this).data("id");
             updateLocation(destination, true);
         });
 
-        // Request a short link
-        $(".icon-link").off("click").on("click", function () {
+        // Request a shortlink
+        $(".icon-link").register("click", function () {
             if (socketWait) return;
-            sendMessage("REQUEST_LINK", $(this).parent().data("id"));
+            sendMessage("REQUEST_SHORTLINK", $(this).parent().data("id"));
         });
 
         // Delete a file/folder
-        $(".icon-delete").off("click").on("click", function () {
+        $(".icon-delete").register("click", function () {
             if (socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
         // Mark websocket for reopening in case the browser unexpectedly closes it (Firefox < 23)
-        $(".filelink").off("click").on("click", function () {
+        $(".filelink").register("click", function () {
             reopen = true;
         });
     }
