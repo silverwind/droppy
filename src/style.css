@@ -166,23 +166,91 @@ body {
 /* ============================ Upload Progress ============================ */
 
 #upload-info {
-    height: 42px;
+    background: #222;
+    border-radius: 10px 10px 0 0;
+    box-shadow: inset 0 0 25px #111;
+    color: #ccc;
+    height: 120px;
     left: 50%;
-    margin-left: -75px;
+    margin-left: -150px;
     position: absolute;
-    transition: top .3s ease;
-    width: 150px;
+    text-shadow: 0 0 5px #000;
+    transition: all .4s ease;
+    user-select: none;
+    width: 300px;
 }
 
-#upload-info.out {top: -85px }
-#upload-info.in  {top: 0     }
+#upload-info.out {opacity: 0; bottom: -125px;}
+#upload-info.in  {opacity: 1; bottom: 0;}
 
-#upload-time-left {
-    bottom: .3em;
-    color: #aaa;
-    font-size: .6em;
-    position: relative;
+#upload-title {
+    position: absolute;
+    line-height: 50px;
     width: 100%;
+    color: #ddd;
+    margin-left: 15px;
+}
+
+#upload-percentage {
+    position: absolute;
+    width: 100%;
+    line-height: 26px;
+    font-size: .8em;
+    top: 47px;
+    color: #eee;
+    z-index: 1;
+    text-align: center;
+}
+
+#upload-bar {
+    position: absolute;
+    width: 270px;
+    height: 26px;
+    top: 45px;
+    margin-left: 15px;
+    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .5);
+}
+
+#upload-bar-inner {
+    position: absolute;
+    transition: all .3s ease;
+    width: 50%;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(#24a,#35a);
+}
+
+#upload-time {
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    line-height: 25px;
+    font-size: .66em;
+    text-align: center;
+}
+
+#upload-cancel {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    line-height: 25px;
+    font-size: .66em;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #333;
+    padding: 0 8px;
+    text-shadow: none;
+    transition: all .25s ease-in-out;
+}
+
+#upload-cancel span.icon, #upload-time span.icon {
+    margin-right: 5px;
+}
+
+#upload-cancel:hover {
+    background: #35a;
+    color: #fff;
 }
 
 #file { display: none }
@@ -286,13 +354,19 @@ body {
     border-radius: 10px;
 }
 
-.progressBar {
-    background: #ccc;
-    background: rgba(120, 120, 120, .4);
-    display: none;
-    height: 100%;
-    transition: width .25s ease-in-out;
-    width: 0;
+.tag-uploading:after {
+    content: "uploading";
+    font-size: .5em;
+    font-family: sans-serif;
+    position: relative;
+    height: 1.5em;
+    top: -2px;
+    padding: 2px 3px;
+    border-radius: 3px;
+    color: #fff;
+    box-shadow: 0 0 5px 1px #24a;
+    background: #24a;
+    margin-left: 1.5em;
 }
 
 .filelink, .folderlink {
@@ -355,11 +429,10 @@ body {
 
 .sprite {
     background-repeat: no-repeat;
-    display: block;
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
     margin-left: .25em;
     margin-right: .5em;
-    margin-top: calc( ( 1.5em - 24px ) / 2);
 }
 
 .icon-delete, .icon-link {
@@ -399,6 +472,7 @@ body {
     transition: all 0.3s ease;
     width: 300px;
     z-index: 32;
+    box-shadow: inset 0 0 25px #111;
 }
 
 #create-folder-box.valid   { box-shadow: 0 0 0 5px rgba(80, 210, 0, .6)  }
@@ -457,6 +531,7 @@ body {
     transition: all .3s ease;
     width: 500px;
     z-index: 32;
+    box-shadow: inset 0 0 25px #111;
 }
 
 #about-box.in  { transform: scale(1); opacity: 1; }
@@ -557,7 +632,6 @@ body {
 @media all and (min-width: 640px) { #login-form.out { top: 70% ; opacity: 0 } }
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-form.in  { top: 0   ; opacity: 1 } }
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-form.out { top: 20% ; opacity: 0 } }
-
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
     #login-form {

@@ -173,8 +173,6 @@
             case "UPLOAD_DONE":
                 isUploading = false;
                 updateTitle(currentFolder, true); // Reset title
-                $(".progressBar").css("width", 0); // Reset progress bars
-                $(".progressBar").hide();
                 updateData(msg.folder, msg.data);
                 break;
             case "NEW_FOLDER":
@@ -419,9 +417,12 @@
                 var obj = {};
                 for (var i = 0; i < files.length; i++) {
                     var path = files[i].webkitRelativePath;
-                    if (!path) continue;
-                    obj[path.substring(0, path.indexOf(files[i].name) - 1)] = {};
-                    obj[path] = files[i];
+                    if (path) {
+                        obj[path.substring(0, path.indexOf(files[i].name) - 1)] = {};
+                        obj[path] = files[i];
+                    } else {
+                        obj[files[i].name] = files[i];
+                    }
                 }
                 upload(obj);
             } else if ($("#file").val()) {
@@ -541,12 +542,16 @@
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
+        var numFiles = 0;
         function upload(data, isArray) {
+            console.log(data);
             var formData = new FormData();
+            numFiles = 0;
             if (!data) return;
             if (isArray) { // We got a normal File array
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
+                    numFiles++;
                     currentData[data[i].name] = { size: data[i].size, type: "nf" };
                     formData.append(data[i].name, data[i]);
                 }
@@ -563,6 +568,7 @@
                         }
                         break;
                     case "[object File]":
+                        numFiles++;
                         if (!addedDirs[name]) {
                             currentData[name] = { size: data[path].size, type: "nf" };
                         }
@@ -571,9 +577,8 @@
                 }
             }
 
-            // Load the preview progress bars and init the UI
+            // Load the new files into view, tagged
             buildHTML(currentData, currentFolder);
-            uploadInit();
 
             // Create the XHR2
             var xhr = new XMLHttpRequest();
@@ -581,41 +586,52 @@
             xhr.upload.addEventListener("load", uploadDone, false);
             xhr.upload.addEventListener("error", uploadDone, false);
 
+            // Init the UI
+            uploadInit(xhr);
+
             // And send the files
             isUploading = true;
             xhr.open("post", "/upload", true);
             xhr.send(formData);
         }
 
-        var start, progressBars, lastUpdate,
+        var start, lastUpdate,
             infobox  = $("#upload-info"),
             timeleft = $("#upload-time-left"),
+            prog     = $("#upload-bar-inner"),
+            title    = $("#upload-title"),
             uperc    = $("#upload-percentage");
 
-        function uploadInit() {
+        function uploadInit(xhr) {
+
+            $("#upload-cancel").register("click", function () {
+                xhr.abort();
+                uploadDone();
+            });
+
             start = new Date().getTime();
 
-            progressBars = $(".progressBar");
-            progressBars.width("0%");
-            progressBars.show();
-
+            if (numFiles < 2)
+                title.html("Uploading...");
+            else
+                title.html("Uploading " + numFiles + " files...");
             updateTitle("0%");
             uperc.html("0%");
 
+            prog.css("width", "0%");
             timeleft.html("");
             infobox.attr("class", "in");
         }
 
         function uploadDone() {
-            progressBars.width("100%");
-
             updateTitle(currentFolder, true);
             uperc.html("100%");
 
+            prog.css("width", "100%");
             timeleft.html("finished");
             infobox.attr("class", "out");
 
-            updateLocation(currentFolder || "/", false);
+            updateLocation(currentFolder, false);
         }
 
         function uploadProgress(event) {
@@ -629,7 +645,7 @@
                     bytesTotal = event.total,
                     progress   = Math.round((bytesSent / bytesTotal) * 100) + "%";
 
-                progressBars.width(progress);
+                prog.css("width", progress);
                 updateTitle(progress);
                 uperc.html(progress);
 
@@ -639,9 +655,9 @@
                 var secs = (estimate - elapsed) / 1000;
 
                 if (secs > 60) {
-                    timeleft.html(Math.ceil(secs / 60) + " minutes left");
+                    timeleft.html(Math.ceil(secs / 60) + " mins left");
                 } else {
-                    timeleft.html(Math.ceil(secs) + " seconds left");
+                    timeleft.html(Math.ceil(secs) + " secs left");
                 }
             }
         }
@@ -658,9 +674,9 @@
 // ============================================================================
     // Update data as received from the server
     function updateData(folder, data) {
-        if (folder !== currentFolder) {
+        if (folder !== currentFolder)
             updateLocation(folder);
-        }
+
         updateTitle(folder, true);
         updatePath(folder);
         currentData = data;
@@ -795,28 +811,28 @@
 
     // Convert the received data into HTML
     function buildHTML(fileList, root) {
-        var list = $("<ul></ul>"), downloadURL, type, size, id, progressBar;
+        var list = $("<ul></ul>"), downloadURL, type, size, id, tags;
 
         for (var file in fileList) {
             type = fileList[file].type;
             size = convertToSI(fileList[file].size);
             id = (root === "/") ? "/" + file : root + "/" + file;
-            progressBar = (type === "nf" || type === "nd") ? '<div class="progressBar"></div>' : "";
+            tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
                 var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +
-                    '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                    '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon"></span>' +
                     '<span class="icon-link icon"></span>' +
-                    '<span class="data-info">' + size + '</span>' + progressBar + '</li>'
+                    '<span class="data-info">' + size + '</span></li>'
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
                     '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="sprite sprite-folder"></span>' +
-                    '<span class="folderlink">' + file + '</span><span class="icon-delete icon"></span>' + progressBar + '</li>'
+                    '<span class="folderlink ' + tags + '">' + file + '</span><span class="icon-delete icon"></span></li>'
                 );
             }
         }
@@ -906,7 +922,7 @@
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
-        // Mark websocket for reopening in case the browser unexpectedly closes when clicking on <a> tags(Firefox < 23)
+        // Mark websocket for reopening in case the browser unexpectedly closes when clicking on <a> tags (Firefox < 23)
         $("a").register("click", function () {
             reopen = true;
         });

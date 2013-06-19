@@ -685,9 +685,9 @@ function handleResourceRequest(req, res, resourceName) {
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
-    var URI = decodeURIComponent(req.url).substring(5, req.url.length); // Strip /get/ off the URI
+    var URI = decodeURIComponent(req.url).substring(5, req.url.length); // Strip "/get/" off the URI
     var directLink;
-    if (URI.length  === config.linkLength) // We got a 3-character suffix after /get/
+    if (URI.length  === config.linkLength) // We got a n-character suffix after /get/
         if (db.shortlinks[URI]) directLink = db.shortlinks[URI];
 
     if (!getCookie(req.headers.cookie) && ! directLink) {
@@ -727,9 +727,14 @@ function handleUploadRequest(req, res) {
         var cookie = getCookie(req.headers.cookie);
         var uploadedFiles = {};
         var basePath = path.join(config.filesDir + clients[cookie].directory);
-        form.encoding = "utf-8";
+        form.type = "multipart";
         form.parse(req, function (err, fields, files) {
-            if (err) logerror();
+            if (err.message !== "Request aborted") {
+                logerror(err);
+                readDirectory(clients[cookie].directory, function () {
+                    sendFiles(cookie, "UPLOAD_DONE");
+                });
+            }
             var createdPaths = {};
             for (var file in files) {
                 try {
@@ -742,9 +747,9 @@ function handleUploadRequest(req, res) {
                     if (err || err.code !== "EEXIST") logerror(err);
                 }
                 if (path.sep !== "/")
-                    log(socket, " Receiving ", path.join(clients[cookie].directory, file).split(path.sep).join("/"));
+                    log(socket, " Received ", path.join(clients[cookie].directory, file).split(path.sep).join("/"));
                 else
-                    log(socket, " Receiving ", path.join(clients[cookie].directory, file));
+                    log(socket, " Received ", path.join(clients[cookie].directory, file));
             }
             res.writeHead(200, {"content-type": "text/plain"});
             res.end();
@@ -792,7 +797,14 @@ function handleUploadRequest(req, res) {
         });
 
         form.on("error", function (err) {
-            logerror(err);
+            if (err.message === "Request aborted") {
+                log(socket, " Upload cancelled.");
+            } else {
+                logerror();
+            }
+            readDirectory(clients[cookie].directory, function () {
+                sendFiles(cookie, "UPLOAD_DONE");
+            });
         });
     }
 }
