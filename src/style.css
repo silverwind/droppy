@@ -398,7 +398,7 @@ body {
     top: 50%;
     transition: all 0.3s ease;
     width: 300px;
-    z-index: 10;
+    z-index: 32;
 }
 
 #create-folder-box.valid   { box-shadow: 0 0 0 5px rgba(80, 210, 0, .6)  }
@@ -456,7 +456,7 @@ body {
     top: 50%;
     transition: all .3s ease;
     width: 500px;
-    z-index: 10;
+    z-index: 32;
 }
 
 #about-box.in  { transform: scale(1); opacity: 1; }
@@ -745,6 +745,16 @@ input[type=checkbox] {
 }
 
 /* ============================= Misc Elements ============================= */
+
+#click-catcher {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 31;
+}
+
+#click-catcher.out { opacity: 0; display: none; }
+#click-catcher.in  { opacity: 1; display: block; }
 
 #noscript {
     background: #111;

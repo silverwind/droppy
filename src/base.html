@@ -32,7 +32,7 @@
 				var js = document.createElement("script");
 				js.src = "/res/client.js";
 				window.removeEventListener("load", this, false);
-				document.body.removeChild(document.getElementsByTagName("script")[0]);
+				document.body.removeChild(document.body.getElementsByTagName("script")[0]);
 				document.body.appendChild(js);
 			}, false);
 		</script>

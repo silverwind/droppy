@@ -252,13 +252,22 @@ function setupSocket(server) {
             var dir = msg.data;
             switch (msg.type) {
             case "REQUEST_UPDATE":
-                dir = dir.replace(/&amp;/g, "&");
-                clients[cookie] = { "directory": dir, "ws": ws};
-                readDirectory(dir, function () {
+                clients[cookie] = {
+                    directory: dir,
+                    ws: ws
+                };
+                readDirectory(clients[cookie].directory, function () {
                     sendFiles(cookie, "UPDATE_FILES");
                 });
+                updateWatchers(clients[cookie].directory);
                 break;
             case "CREATE_FOLDER":
+                var foldername = path.basename(dir);
+                if (foldername.match(/[\\*{}\/<>?|]/) || foldername.match(/^(\.+)$/)) {
+                    log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
+                    return;
+                }
+
                 fs.mkdir(addFilePath(dir), config.dirMode, function (err) {
                     if (err) logerror(err);
                     log(remoteIP, ":", remotePort, " Created: ", dir);
@@ -318,16 +327,18 @@ function setupSocket(server) {
                 break;
             case "SWITCH_FOLDER":
                 if (!dir.match(/^\//) || dir.match(/\.\./)) return;
-                dir = dir.replace(/&amp;/g, "&");
+                clients[cookie].directory = dir;
                 updateWatchers(dir, function (ok) {
                     // Send client back to root in case the requested directory can't be read
                     var msg = ok ? "UPDATE_FILES" : "NEW_FOLDER";
-                    if (!ok) dir = "/";
-                    clients[cookie].directory = dir;
-                    readDirectory(dir, function () {
+                    if (!ok) {
+                        clients[cookie].directory = "/";
+                    }
+                    readDirectory(clients[cookie].directory, function () {
                         sendFiles(cookie, msg);
                     });
                 });
+
                 break;
             }
         });
@@ -392,7 +403,7 @@ function createWatcher(folder) {
             updateClients(folder);
         }), config.readInterval);
     } catch (err) {
-        logerror("Error trying to watch ", folder, "\n\n", err);
+        logerror("Error trying to watch ", removeFilePath(folder), "\n\n", err);
     }
 
     function updateClients(folder) {
@@ -426,16 +437,16 @@ function updateWatchers(newDir, callback) {
             if (err || !stats) {
                 // Requested Directory can't be read
                 checkWatchedDirs();
-                callback(false);
+                callback && callback(false);
             } else {
                 // Directory is okay to be read
                 createWatcher(newDir);
                 checkWatchedDirs();
-                callback(true);
+                callback && callback(true);
             }
         });
     } else {
-        callback(true);
+        callback && callback(true);
     }
 }
 //-----------------------------------------------------------------------------
@@ -557,6 +568,7 @@ function handleGET(req, res) {
 
                 if (!clients[cookie]) clients[cookie] = {};
                 clients[cookie].directory = URI;
+                updateWatchers(URI);
             } else {
                 res.statusCode = 301;
                 res.setHeader("Location", "/");

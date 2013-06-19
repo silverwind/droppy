@@ -217,10 +217,10 @@
             queuedData = JSON.stringify({type: msgType, data: msgData});
 
             if (socket.readyState === 2) { // closing
-                // Socket is closing, queue a reopening
+                // Socket is closing, queue a re-opening
                 reopen = true;
             } else if (socket.readyState === 3) { // closed
-                // Socket is closed, we can reopen it right now
+                // Socket is closed, we can re-open it right now
                 openSocket();
             }
         }
@@ -453,32 +453,35 @@
 
         var info        = $("#name-info"),
             nameinput   = $("#name-input"),
+            aboutbox    = $("#about-box"),
             createbox   = $("#create-folder-box"),
             activeFiles;
 
         // Show popup for folder creation
         $("#create-folder").off("click").on("click", function () {
-            activeFiles = [];
-            $(".filelink, .folderlink").each(function () {
-                activeFiles.push($(this).html().toLowerCase());
-            });
-            nameinput.val("");
-            nameinput.removeClass("invalid");
+            nameinput.removeClass("invalid").val("");
             createbox.removeClass("invalid");
             info.hide();
             requestAnimation(function () {
-                createbox.setTransitionClass(createbox.attr("class") !== "in" ? "in" : "out");
+                createbox.attr("class", createbox.attr("class") !== "in" ? "in" : "out");
+                toggleCatcher();
                 setTimeout(function () {
-                    nameinput.focus();
+                    if (createbox.attr("class") === "in") {
+                        activeFiles = [];
+                        $(".filelink, .folderlink").each(function () {
+                            activeFiles.push($(this).html().toLowerCase());
+                        });
+                        nameinput.focus();
+                    }
                 }, 300);
             });
         });
 
         // Handler for the input of the folder name
         nameinput.off("keyup").on("keyup", function (e) {
-            if (e.keyCode === 27) createbox.setTransitionClass("out"); // Escape Key
+            if (e.keyCode === 27) createbox.attr("class", "out"); // Escape Key
             var input = nameinput.val();
-            var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/\.\./);
+            var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/^(\.+)$/);
             var folderExists;
             for (var i = 0, len = activeFiles.length; i < len; i++)
                 if (activeFiles[i] === input.toLowerCase()) folderExists = true;
@@ -507,8 +510,15 @@
 
         $("#about").off("click").on("click", function () {
             requestAnimation(function () {
-                $("#about-box").setTransitionClass($("#about-box").attr("class") !== "in" ? "in" : "out");
+                aboutbox.attr("class", aboutbox.attr("class") !== "in" ? "in" : "out");
+                toggleCatcher();
             });
+        });
+
+        $("#click-catcher").off("click").on("click", function () {
+            $("#click-catcher").attr("class", "out");
+            createbox.attr("class", "out");
+            aboutbox.attr("class", "out");
         });
 
         $("#logout").off("click").on("click", function () {
@@ -624,13 +634,20 @@
                 }
             }
         }
+
+        function toggleCatcher() {
+            if (aboutbox.attr("class") === "in" || createbox.attr("class") === "in") {
+                $("#click-catcher").attr("class", "in");
+            } else
+                $("#click-catcher").attr("class", "out");
+        }
     }
 // ============================================================================
 //  General helpers
 // ============================================================================
     // Update data as received from the server
     function updateData(folder, data) {
-        if (folder !== currentFolder.replace(/&amp;/, "&")) {
+        if (folder !== currentFolder) {
             updateLocation(folder);
         }
         updateTitle(folder, true);
@@ -862,7 +879,7 @@
         // Switch into a folder
         $(".data-row[data-type='folder']").off("click").on("click", function () {
             if (socketWait) return;
-            var destination = $(this).data("id").replace("&amp;", "&");
+            var destination = $(this).data("id");
             updateLocation(destination, true);
         });
 
