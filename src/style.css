@@ -25,7 +25,8 @@
 
 /* ============================ General Styles ============================= */
 
-body, div, header, input, label, li, nav, p, section, span, ul {
+button, body, div, header, input, label, li, nav, p, section, span, ul {
+    -webkit-touch-callout: none;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -63,7 +64,7 @@ body {
 #navigation {
     background-image: linear-gradient(#222, #111);
     clear: both;
-    color: #ccc;
+    color: #ddd;
     position: fixed;
     text-align: center;
     transition: top .5s ease;
@@ -77,15 +78,14 @@ body {
 #content, #newcontent {
     background-image: url(data:image/png;base64,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);
     border-radius: 12px;
-
-    text-shadow: 0 1px 0 rgba(0,0,0,0.1);
-    width: calc(100% - 1em);
     margin: .5em;
     overflow-y: auto;
     padding: .5em .25em 0 .5em;
     position: fixed;
+    text-shadow: 0 1px 0 rgba(255,255,255,.4);
     transition: all .25s ease;
     user-select: none;
+    width: calc(100% - 1em);
     z-index: -1;
 }
 
@@ -99,9 +99,9 @@ body {
 
 #content.out { opacity: 0 }
 
-@media all and (min-width: 1024px) { #content, #newcontent { top: 63px; max-height: calc(100% - 63px - 1em); font-size: .9em; } }
-@media all and (max-width: 1023px) { #content, #newcontent { top: 53px; max-height: calc(100% - 53px - 1em); font-size: .8em; } }
-@media all and (max-width: 639px)  { #content, #newcontent { top: 43px; max-height: calc(100% - 43px - 1em); font-size: .7em; } }
+@media all and (min-width: 1024px) { #content, #newcontent { top: 68px; max-height: calc(100% - 63px - 1em); } }
+@media all and (max-width: 1023px) { #content, #newcontent { top: 58px; max-height: calc(100% - 53px - 1em); font-size: .9em; } }
+@media all and (max-width: 639px)  { #content, #newcontent { top: 48px; max-height: calc(100% - 43px - 1em); font-size: .8em; } }
 
 #content.center,  #newcontent.center  { left: 0     }
 #content.back,    #newcontent.back    { left: -100% }
@@ -142,18 +142,18 @@ body {
 }
 
 .button {
+    border: 0;
     cursor: pointer;
+    padding: 0;
     transition: all .2s ease;
     user-select: none;
-    border: 0;
-    padding: 0;
-
+    color: #ddd;
 }
 
-@media all and (min-width: 1024px) { .button { width: 170px; font-size: .9em; line-height: 30px; height: 30px; } }
-@media all and (max-width: 1023px) { .button { width: 130px; font-size: .8em; line-height: 25px; height: 25px; } }
+@media all and (min-width: 1024px) { .button { width: 170px; font-size: .9em; line-height: 35px; height: 35px; } }
+@media all and (max-width: 1023px) { .button { width: 130px; font-size: .8em; line-height: 30px; height: 30px; } }
 @media all and (max-width: 800px)  { .button { width: 80px; } .button-text { display: none } }
-@media all and (max-width: 639px)  { .button { width: 50px; font-size: .7em; line-height: 20px; height: 20px; } }
+@media all and (max-width: 639px)  { .button { width: 50px; font-size: .7em; line-height: 25px; height: 25px; } }
 @media all and (max-width: 319px)  { .button { width: 30px } }
 
 .button:hover { transform: translateY(-2px) }
@@ -186,62 +186,62 @@ body {
 #upload-info.in  {opacity: 1; bottom: 0;}
 
 #upload-title {
-    position: absolute;
-    line-height: 50px;
-    width: 100%;
     color: #ddd;
+    line-height: 50px;
     margin-left: 15px;
+    position: absolute;
+    width: 100%;
 }
 
 #upload-percentage {
-    position: absolute;
-    width: 100%;
-    line-height: 26px;
-    font-size: .8em;
-    top: 47px;
     color: #eee;
-    z-index: 1;
+    font-size: .8em;
+    line-height: 26px;
+    position: absolute;
     text-align: center;
+    top: 47px;
+    width: 100%;
+    z-index: 1;
 }
 
 #upload-bar {
-    position: absolute;
-    width: 270px;
-    height: 26px;
-    top: 45px;
-    margin-left: 15px;
     box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .5);
+    height: 26px;
+    margin-left: 15px;
+    position: absolute;
+    top: 45px;
+    width: 270px;
 }
 
 #upload-bar-inner {
+    background: linear-gradient(#24a,#35a);
+    height: 100%;
+    left: 0;
     position: absolute;
+    top: 0;
     transition: all .3s ease;
     width: 50%;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: linear-gradient(#24a,#35a);
 }
 
 #upload-time {
-    position: absolute;
     bottom: 10px;
+    font-size: .66em;
     left: 15px;
     line-height: 25px;
-    font-size: .66em;
+    position: absolute;
     text-align: center;
 }
 
 #upload-cancel {
-    position: absolute;
-    bottom: 10px;
-    right: 15px;
-    line-height: 25px;
-    font-size: .66em;
-    border-radius: 6px;
-    cursor: pointer;
     background: #333;
+    border-radius: 6px;
+    bottom: 10px;
+    cursor: pointer;
+    font-size: .66em;
+    line-height: 25px;
     padding: 0 8px;
+    position: absolute;
+    right: 15px;
     text-shadow: none;
     transition: all .25s ease-in-out;
 }
@@ -260,9 +260,9 @@ body {
 /* ================================== Path ================================= */
 
 #path {
-   background: #222;
-   border-bottom: 1.5px solid #999;
-   border-top: 1.5px solid #999;
+   background: #111;
+   border-bottom: 1.5px solid #222;
+   border-top: 1.5px solid #111;
    height: auto;
    overflow: hidden;
    position: relative;
@@ -271,25 +271,42 @@ body {
    width: 1000%;
 }
 
-@media all and (min-width: 1024px) { #path { font-size: .9em; } }
-@media all and (max-width: 1023px) { #path { font-size: .8em; } }
-@media all and (max-width: 639px)  { #path { font-size: .7em; } }
+#path:before {
+    content: "";
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background: linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.08));
+    display: block;
+    z-index: 500;
+    pointer-events: none;
+}
+
+@media all and (min-width: 1024px) { #path { font-size: 1em } }
+@media all and (max-width: 1023px) { #path { font-size: .9em } }
+@media all and (max-width: 639px)  { #path { font-size: .8em } }
 
 #path li {
     cursor: pointer;
     float: left;
+    padding-left: 1.25em;
+    padding-right: .25em;
     position: relative;
+    text-shadow: 0 1px 0 rgba(0,0,0,.5);
 }
 
-@media all and (min-width: 1024px) { #path li { padding-left: 1.25em; padding-right: .25em; line-height: 30px; height: 30px; } }
-@media all and (max-width: 1023px) { #path li { padding-left: 1.25em; padding-right: .25em; line-height: 25px; height: 25px; } }
-@media all and (max-width: 639px)  { #path li { padding-left: 1.1em;  padding-right: 0    ; line-height: 20px; height: 20px; } }
+@media all and (min-width: 1024px) { #path li { line-height: 32px; height: 30px } }
+@media all and (max-width: 1023px) { #path li { line-height: 27px; height: 25px } }
+@media all and (max-width: 639px)  { #path li { line-height: 22px; height: 20px } }
 
+@media all and (min-width: 1024px) { #path li:first-child { line-height: 30px } }
+@media all and (max-width: 1023px) { #path li:first-child { line-height: 25px } }
+@media all and (max-width: 639px)  { #path li:first-child { line-height: 20px } }
 
 #path li:before, #path li:after {
   content: "";
   display: block;
-  height: 50.5%;
+  height: 50.6%;
   position: absolute;
   right: -.5em;
   width: .9em;
@@ -300,8 +317,8 @@ body {
 #path li.out { left: -10% }
 #path li.placeholder { opacity: 0 }
 
-#path li:before { border-right: 2px solid #aaa; transform: skew(45deg); top: 0 }
-#path li:after  { border-right: 2px solid #aaa; transform: skew(-45deg); bottom: 0 }
+#path li:before { border-right: 2px solid #111; transform: skew( 45deg); top:    0 }
+#path li:after  { border-right: 2px solid #111; transform: skew(-45deg); bottom: 0 }
 
 #path li, #path li:before, #path li:after { transition: all 0.3s ease }
 #path li:hover, #path li:hover:before, #path li:hover:after { color: #fff }
@@ -344,7 +361,6 @@ body {
     cursor: pointer;
     height: 1.5em;
     line-height: 1.5em;
-    padding: 0 .25em;
 }
 
 .data-row, .data-row > .icon, .data-row > a {
@@ -352,21 +368,20 @@ body {
 }
 
 .data-row:not(.animating):hover {
-    background: rgba(0,0,0,.1);
-    border-radius: 10px;
+    background: linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.666));
+    border-radius: 6px;
 }
 
 .tag-uploading:after {
-    background: #24a;
-    border-radius: 3px;
-    box-shadow: 0 0 5px 1px #24a;
+    background: linear-gradient(#36a,#58d);
+    border-radius: 4px;
     color: #fff;
     content: "uploading";
     font-family: sans-serif;
-    font-size: .5em;
+    font-size: .6em;
     height: 1.5em;
-    margin-left: 1.5em;
-    padding: 2px 3px;
+    margin-left: 1em;
+    padding: 3px 5px;
     position: relative;
     top: -2px;
 }
@@ -417,33 +432,25 @@ body {
     white-space: nowrap;
 }
 
-#upload-inline .icon {
-    margin-right: 5px;
-}
-
-#upload-inline:hover {
-    background:  #f1a;
-}
-
+#upload-inline .icon { margin-right: 5px }
+#upload-inline:hover { background:  #f1a }
 /* ================================= Icons ================================= */
 
-.icon {
-   font-family: "icons";
-}
+.icon { font-family: "icons" }
 
 .sprite {
     background-repeat: no-repeat;
     display: inline-block;
-    vertical-align: middle;
     margin-left: .25em;
     margin-right: .25em;
     position: relative;
     top: -1px;
+    vertical-align: middle;
 }
 
-@media all and (min-width: 1024px) { .sprite { transform: scale(1);  } }
-@media all and (max-width: 1023px) { .sprite { transform: scale(.9); } }
-@media all and (max-width: 639px)  { .sprite { transform: scale(.8); } }
+@media all and (min-width: 1024px) { .sprite { transform: scale(1)  } }
+@media all and (max-width: 1023px) { .sprite { transform: scale(.9) } }
+@media all and (max-width: 639px)  { .sprite { transform: scale(.8) } }
 
 .icon-delete, .icon-link {
     cursor: pointer;
@@ -453,25 +460,16 @@ body {
     width: 1.5em;
 }
 
-.icon-link {
-    padding-left: .25em;
-}
-
-.icon-delete:hover {
-    color: #f33;
-    transform: scale(1.3);
-}
-
-.icon-link:hover {
-    color: #29f;
-    transform: scale(1.3);
-}
+.icon-link         { padding-left: .25em }
+.icon-delete:hover { color: #f33; transform: scale(1.3) }
+.icon-link:hover   { color: #29f; transform: scale(1.3) }
 
 /* ========================= Directory Name Input ========================== */
 
 #create-folder-box {
     background: #222;
     border-radius: 10px;
+    box-shadow: inset 0 0 25px #111;
     height: 130px;
     left: 50%;
     margin-left: -150px;
@@ -482,7 +480,6 @@ body {
     transition: all 0.3s ease;
     width: 300px;
     z-index: 32;
-    box-shadow: inset 0 0 25px #111;
 }
 
 #create-folder-box.valid   { box-shadow: 0 0 0 5px rgba(80, 210, 0, .6)  }
@@ -531,6 +528,7 @@ body {
 #about-box {
     background: #222;
     border-radius: 16px;
+    box-shadow: inset 0 0 25px #111;
     color: #bbb;
     height: 200px;
     left: 50%;
@@ -541,7 +539,6 @@ body {
     transition: all .3s ease;
     width: 500px;
     z-index: 32;
-    box-shadow: inset 0 0 25px #111;
 }
 
 #about-box.in  { transform: scale(1); opacity: 1; }
@@ -586,7 +583,7 @@ body {
 }
 
 #about-box a {
-    color: #fff;
+    color: #eee;
     transition: color .2s ease;
 }
 
@@ -595,7 +592,7 @@ body {
 }
 
 #about-title {
-    color: #eee;
+    color: #fff;
     font-size: 1.5em;
     line-height: 2em;
 }
@@ -732,50 +729,50 @@ input[type=checkbox] {
 }
 
 #remember {
+    cursor: pointer;
+    height: 1.5em;
     margin-top: .5em;
     padding: .25em 0;
-    cursor: pointer;
     position: relative;
-    width: auto;
-    height: 1.5em;
     user-select: none;
+    width: auto;
 }
 
 #remember:focus label {
+    box-shadow: 0 0 0 3.5px rgba(255, 255, 255, .4);
     user-select: none;
-    box-shadow: 0 0 0 3.5px rgba(255, 255, 255, .4)
 }
 
 #remember span {
+    color: #ccc;
+    cursor: pointer;
     padding-left: 30px;
     white-space: nowrap;
-    color: #ccc;
     width: auto;
-    cursor: pointer;
 }
 
 #remember label {
+    background: linear-gradient(#111, #333);
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(128,128,128,0.5);
     cursor: pointer;
+    height: 20px;
     position: absolute;
     width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    box-shadow: inset 0px 1px 1px rgba(128,128,128,0.5);
-    background: linear-gradient(#111, #333);
 }
 
 #remember label:after {
-    opacity: 0;
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 5px;
-    top: 4px;
-    left: 4px;
     border: 3px solid #fff;
-    border-top: none;
     border-right: none;
+    border-top: none;
+    content: '';
+    height: 5px;
+    left: 4px;
+    opacity: 0;
+    position: absolute;
+    top: 4px;
     transform: rotate(-45deg);
+    width: 10px;
 }
 
 #remember input[type=checkbox]:checked + label:after {
@@ -822,7 +819,6 @@ input[type=checkbox] {
 }
 
 #submit.invalid {
-    background: #ff4030;
     background: linear-gradient(#f43, #d21);
     border: 1px solid #f43;
     text-shadow: 2px 2px 0 #811;
@@ -831,9 +827,9 @@ input[type=checkbox] {
 /* ============================= Misc Elements ============================= */
 
 #click-catcher {
+    height: 100%;
     position: absolute;
     width: 100%;
-    height: 100%;
     z-index: 31;
 }
 
