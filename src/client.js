@@ -599,7 +599,6 @@
             uperc    = $("#upload-percentage");
 
         function uploadInit(xhr) {
-
             $("#upload-cancel").register("click", function () {
                 xhr.abort();
                 uploadDone();
@@ -607,10 +606,7 @@
 
             start = new Date().getTime();
 
-            if (numFiles < 2)
-                title.html("Uploading...");
-            else
-                title.html("Uploading " + numFiles + " files...");
+            title.html(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
             updateTitle("0%");
             uperc.html("0%");
 
@@ -620,10 +616,12 @@
         }
 
         function uploadDone() {
+            // After this point, the server is moving the temp files into place
+            // and we finalized the upload once UPLOAD_DONE fires.
+            title.html("Processing Files...");
+            updateTitle("100%");
             prog.css("width", "100%");
-            uperc.html("processing files");
             timeleft.html("finished");
-            // The upload will get finalized once UPLOAD_DONE fires
         }
 
         function uploadProgress(event) {

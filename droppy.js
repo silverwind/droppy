@@ -732,17 +732,20 @@ function handleFileRequest(req, res) {
 function handleUploadRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     if (req.url === "/upload") {
+        var cookie = getCookie(req.headers.cookie);
+
         // TODO: Figure out a client's directory if don't have it at this point
         // (happens on server shutdown with the client staying on the page)
         if (!clients[cookie]) {
             res.statusCode = 500;
             res.end();
             logresponse(req, res);
+            return;
         }
 
         var form = new formidable.IncomingForm();
-        var cookie = getCookie(req.headers.cookie);
         var basePath = path.join(config.filesDir + clients[cookie].directory);
+
         form.type = "multipart";
         form.parse(req, function (error, fields, files) {
             res.writeHead(200, {"content-type": "text/plain"});
