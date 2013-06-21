@@ -729,7 +729,7 @@ function handleUploadRequest(req, res) {
         var basePath = path.join(config.filesDir + clients[cookie].directory);
         form.type = "multipart";
         form.parse(req, function (err, fields, files) {
-            if (err.message !== "Request aborted") {
+            if (err && err.message !== "Request aborted") {
                 logerror(err);
                 readDirectory(clients[cookie].directory, function () {
                     sendFiles(cookie, "UPLOAD_DONE");
@@ -797,7 +797,7 @@ function handleUploadRequest(req, res) {
         });
 
         form.on("error", function (err) {
-            if (err.message === "Request aborted") {
+            if (err && err.message === "Request aborted") {
                 log(socket, " Upload cancelled.");
             } else {
                 logerror();
