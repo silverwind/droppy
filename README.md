@@ -36,6 +36,7 @@ Configuration is done through the `config.json` file, located in the same direct
     "filesMode"    : "644",
     "dirMode"      : "755",
     "linkLength"   : 3,
+    "maxOpen"      : 256,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
@@ -52,6 +53,7 @@ Configuration is done through the `config.json` file, located in the same direct
 - `filesMode`: The access mask with which files are created.
 - `dirMode`: The access mask with which directories are created.
 - `linkLength` : The amount of characters in a shortened link to a file
+- `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Linux, you can probably go higher.
 - `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Sample self-signed files are provided.
 - `db` Location of the user database file.
 - `filesDir`: The directory which serves as the server's root.

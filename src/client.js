@@ -11,7 +11,7 @@
     initVariables(); // Separately init the variables so we can init them on demand
 
 // ============================================================================
-//  jQuery / modernizr extensions, requestAnimationFrame
+//  Set up a few things before we start
 // ============================================================================
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
@@ -41,21 +41,18 @@
 
     if (Modernizr.cssanimations) {
         // Listen for the animation event for our pseudo-animation
-        var listener = function (event) {
-            if (event.animationName === "nodeInserted") {
-                var target = $(event.target);
-                var newClass = target.data("newclass");
-                // Clean up our data attribute and remove the animation
-                target.removeData("newclass").css("animation", "");
-                // Set the transition class
-                target.attr("class", newClass);
-
-            }
-        };
-        document.addEventListener("animationstart", listener, false);
-        document.addEventListener("webkitAnimationStart", listener, false);
-        document.addEventListener("MSAnimationStart", listener, false);
-        document.addEventListener("oanimationstart", listener, false);
+        ["animationstart", "webkitAnimationStart", "mozAnimationStart", "MSAnimationStart"].forEach(function (eventName) {
+            document.addEventListener(eventName, function (event) {
+                if (event.animationName === "nodeInserted") {
+                    var target = $(event.target);
+                    var newClass = target.data("newclass");
+                    // Clean up our data attribute and remove the animation
+                    target.removeData("newclass").css("animation", "");
+                    // Set the transition class
+                    target.attr("class", newClass);
+                }
+            }, false);
+        });
     }
 
     // Add a modernizr test for directory input
@@ -95,7 +92,6 @@
         if (type === "main") {
             hasLoggedOut = false;
             initMainPage();
-            $("#content, #newcontent").css("-webkit-backface-visibility", "hidden"); // Webkit animation fix
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 login.removeClass("in").addClass("out");
@@ -107,7 +103,6 @@
                 }, 250);
             });
         } else if (type === "auth") {
-            $("#content, #newcontent").css("-webkit-backface-visibility", "visible"); // Webkit animation fix
             initAuthPage();
             redraw();
             requestAnimation(function () {
@@ -172,8 +167,10 @@
                 break;
             case "UPLOAD_DONE":
                 isUploading = false;
-                updateTitle(currentFolder, true); // Reset title
+                updateLocation(currentFolder, false);
+                updateTitle(currentFolder, true);
                 updateData(msg.folder, msg.data);
+                $("#upload-info").attr("class", "out");
                 break;
             case "NEW_FOLDER":
                 if (isUploading) return;
@@ -545,7 +542,6 @@
         // ============================================================================
         var numFiles = 0;
         function upload(data, isArray) {
-            console.log(data);
             var formData = new FormData();
             numFiles = 0;
             if (!data) return;
@@ -597,7 +593,6 @@
         }
 
         var start, lastUpdate,
-            infobox  = $("#upload-info"),
             timeleft = $("#upload-time-left"),
             prog     = $("#upload-bar-inner"),
             title    = $("#upload-title"),
@@ -621,18 +616,14 @@
 
             prog.css("width", "0%");
             timeleft.html("");
-            infobox.attr("class", "in");
+            $("#upload-info").attr("class", "in");
         }
 
         function uploadDone() {
-            updateTitle(currentFolder, true);
-            uperc.html("100%");
-
             prog.css("width", "100%");
+            uperc.html("processing files");
             timeleft.html("finished");
-            infobox.attr("class", "out");
-
-            updateLocation(currentFolder, false);
+            // The upload will get finalized once UPLOAD_DONE fires
         }
 
         function uploadProgress(event) {
@@ -875,17 +866,16 @@
                 $("#content").attr("class", "center");
                 $("#content").html(list || emptyPage);
             } else {
-                $("#content, #newcontent").css("-webkit-backface-visibility", "visible"); // Webkit animation fix
                 $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
                 $("#newcontent").html(list || emptyPage);
                 isAnimating = true;
                 $(".data-row").addClass("animating");
                 $("#content").attr("class", (nav === "forward") ? "back" : "forward");
                 $("#newcontent").setTransitionClass("center");
+
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     isAnimating = false;
-                    $("#content, #newcontent").css("-webkit-backface-visibility", "hidden"); // Webkit animation fix
                     $("#content").remove();
                     $("#newcontent").attr("id", "content");
                     $(".data-row").removeClass("animating");
@@ -959,6 +949,20 @@
             step++;
         }
         return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
+    }
+
+    // debounce based on underscore.js
+    function debounce(func, wait) {
+        var timeout, result;
+        return function () {
+            var context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function () {
+                timeout = null;
+                result = func.apply(context, args);
+            }, wait);
+            return result;
+        };
     }
 
     // This seems to fix weird Webkit rendering after animations

@@ -49,15 +49,14 @@ var autoprefixer    = require("autoprefixer"),
     cleancss        = require("clean-css"),
     crypto          = require("crypto"),
     formidable      = require("formidable"),
-    fs              = require("fs"),
+    fs              = require("graceful-fs"),
     mime            = require("mime"),
-    mkdirp          = require("mkdirp"),
     path            = require("path"),
     querystring     = require("querystring"),
-    rmdir           = require("rmdir"),
     uglify          = require("uglify-js"),
     util            = require("util"),
     WebSocketServer = require("ws").Server,
+    wrench          = require("wrench"),
     zlib            = require("zlib");
 
 var color = {
@@ -75,6 +74,9 @@ var isCLI   = (process.argv.length > 2),
 if (isCLI) handleArguments();
 
 readConfig();
+
+fs.MAX_OPEN = config.maxOpen;
+
 logsimple(prettyStartup());
 logsimple(" ->> running on node " + process.version);
 
@@ -130,8 +132,8 @@ function prepareContent() {
         copyResource("base.html");
         copyResource("auth.html");
         copyResource("main.html");
-    } catch (err) {
-        logerror("Error reading client sources.\n", util.inspect(err));
+    } catch (error) {
+        logerror("Error reading client sources.\n", util.inspect(error));
         process.exit(1);
     }
 }
@@ -142,12 +144,12 @@ function copyResource(filepath) {
 //-----------------------------------------------------------------------------
 // Set up the directory for files
 function setupFilesDir() {
-    fs.mkdir(config.filesDir, config.dirMode, function (err) {
-        if (!err || err.code === "EEXIST") {
+    fs.mkdir(config.filesDir, config.dirMode, function (error) {
+        if (!error || error.code === "EEXIST") {
             return true;
         } else {
             logerror("Error accessing ", config.filesDir);
-            logerror(util.inspect(err));
+            logerror(util.inspect(error));
             process.exit(1);
         }
     });
@@ -159,9 +161,9 @@ function cleanUpLinks() {
     for (var link in db.shortlinks) {
         linkcount++;
         (function (shortlink, location) {
-            fs.stat(path.join(config.filesDir, location), function (err, stats) {
+            fs.stat(path.join(config.filesDir, location), function (error, stats) {
                 cbcount++;
-                if (!stats || err) {
+                if (!stats || error) {
                     delete db.shortlinks[shortlink];
                 }
                 if (cbcount === linkcount) {
@@ -194,13 +196,13 @@ function createListener() {
         log("Listening on port ", server.address().port);
     });
 
-    server.on("error", function (err) {
-        if (err.code === "EADDRINUSE")
+    server.on("error", function (error) {
+        if (error.code === "EADDRINUSE")
             logerror("Failed to bind to port ", port, ". Address already in use.\n");
-        else if (err.code === "EACCES")
+        else if (error.code === "EACCES")
             logerror("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n");
         else
-            logerror("Error:", util.inspect(err));
+            logerror("Error:", util.inspect(error));
         process.exit(1);
     });
 
@@ -268,8 +270,8 @@ function setupSocket(server) {
                     return;
                 }
 
-                fs.mkdir(addFilePath(dir), config.dirMode, function (err) {
-                    if (err) logerror(err);
+                fs.mkdir(addFilePath(dir), config.dirMode, function (error) {
+                    if (error) logerror(error);
                     log(remoteIP, ":", remotePort, " Created: ", dir);
                     readDirectory(clients[cookie].directory, function () {
                         sendFiles(cookie, "UPDATE_FILES");
@@ -306,21 +308,24 @@ function setupSocket(server) {
                 log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
                 dir = addFilePath(dir);
 
-                fs.stat(dir, function (err, stats) {
-                    if (stats && !err) {
+                fs.stat(dir, function (error, stats) {
+                    if (stats && !error) {
                         if (stats.isFile()) {
-                            fs.unlink(dir, function (err) {
-                                if (err) logerror(err);
+                            fs.unlink(dir, function (error) {
+                                if (error) logerror(error);
                                 readDirectory(clients[cookie].directory, function () {
                                     sendFiles(cookie, "UPDATE_FILES");
                                 });
                             });
                         } else if (stats.isDirectory()) {
-                            rmdir(dir, function (err) {
-                                if (err) logerror(err);
-                                readDirectory(clients[cookie].directory, function () {
-                                    sendFiles(cookie, "UPDATE_FILES");
-                                });
+                            try {
+                                wrench.rmdirSyncRecursive(dir);
+                            } catch (error) {
+                                logerror(error);
+                            }
+
+                            readDirectory(clients[cookie].directory, function () {
+                                sendFiles(cookie, "UPDATE_FILES");
                             });
                         }
                     }
@@ -357,8 +362,8 @@ function setupSocket(server) {
             log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "] ", reason || "(Code: " + (code || "none")  + ")");
         });
 
-        ws.on("error", function (err) {
-            logerror(err);
+        ws.on("error", function (error) {
+            logerror(error);
         });
     });
 }
@@ -389,8 +394,8 @@ function send(ws, data) {
     (function queue(ws, data, time) {
         if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
         if (ws && ws.readyState === 1) {
-            ws.send(data, function (err) {
-                if (err) logerror(err);
+            ws.send(data, function (error) {
+                if (error) logerror(error);
             });
         } else {
             setTimeout(queue, 50, ws, data, time + 50);
@@ -400,13 +405,15 @@ function send(ws, data) {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    try {
-        watchedDirs[removeFilePath(folder)] = fs.watch(folder, debounce(function () {
-            updateClients(folder);
-        }), config.readInterval);
-    } catch (err) {
-        logerror("Error trying to watch ", removeFilePath(folder), "\n\n", err);
-    }
+    var watcher = fs.watch(folder, debounce(function () {
+        updateClients(folder);
+    }), config.readInterval);
+
+    watcher.on("error", function (error) {
+        logerror("Error trying to watch ", removeFilePath(folder), "\n", error);
+    });
+
+    watchedDirs[removeFilePath(folder)] = watcher;
 
     function updateClients(folder) {
         var clientsToUpdate = [];
@@ -435,8 +442,8 @@ function removeFilePath(p) {
 function updateWatchers(newDir, callback) {
     if (!watchedDirs[newDir]) {
         newDir = addFilePath(newDir);
-        fs.stat(newDir, function (err, stats) {
-            if (err || !stats) {
+        fs.stat(newDir, function (error, stats) {
+            if (error || !stats) {
                 // Requested Directory can't be read
                 checkWatchedDirs();
                 callback && callback(false);
@@ -471,7 +478,8 @@ function checkWatchedDirs() {
 function cacheResources(dir, callback) {
     dir = dir.substring(0, dir.length - 1); // Strip trailing slash
 
-    walkDirectory(dir, function (err, results) {
+    walkDirectory(dir, function (error, results) {
+        if (error) logerror(error);
         var filesToGzip = [];
         results.forEach(function (fullPath) {
             var relPath = fullPath.substring(dir.length + 1);
@@ -489,9 +497,9 @@ function cacheResources(dir, callback) {
                     readCount++;
                 };
                 read();
-            } catch (err) {
+            } catch (error) {
                 if (readCount >= 20) {
-                    logerror(err);
+                    logerror(error);
                     process.exit(1);
                 } else {
                     read();
@@ -514,7 +522,8 @@ function cacheResources(dir, callback) {
 
         function runGzip() {
             var currentFile = filesToGzip[0];
-            zlib.gzip(cache[currentFile].data, function (err, compressedData) {
+            zlib.gzip(cache[currentFile].data, function (error, compressedData) {
+                if (error) logerror(error);
                 cache[currentFile].gzipData = compressedData;
                 filesToGzip = filesToGzip.slice(1);
                 if (filesToGzip.length > 0)
@@ -561,8 +570,8 @@ function handleGET(req, res) {
         }
 
         // Check if client is going to a folder directly
-        fs.stat(path.join(config.filesDir, URI), function (err, stats) {
-            if (!err && stats.isDirectory()) {
+        fs.stat(path.join(config.filesDir, URI), function (error, stats) {
+            if (!error && stats.isDirectory()) {
                 handleResourceRequest(req, res, "base.html");
                 // Strip trailing slash
                 if (URI.charAt(URI.length - 1) === "/")
@@ -701,8 +710,8 @@ function handleFileRequest(req, res) {
     if (filepath) {
         var mimeType = mime.lookup(filepath);
 
-        fs.stat(filepath, function (err, stats) {
-            if (!err && stats) {
+        fs.stat(filepath, function (error, stats) {
+            if (!error && stats) {
                 res.statusCode = 200;
                 res.setHeader("Content-Disposition", ['attachment; filename="', path.basename(filepath), '"'].join(""));
                 res.setHeader("Content-Type", mimeType);
@@ -713,8 +722,8 @@ function handleFileRequest(req, res) {
                 res.statusCode = 500;
                 res.end();
                 logresponse(req, res);
-                if (err)
-                    logerror(err);
+                if (error)
+                    logerror(error);
             }
         });
     }
@@ -723,14 +732,24 @@ function handleFileRequest(req, res) {
 function handleUploadRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
     if (req.url === "/upload") {
+        // TODO: Figure out a client's directory if don't have it at this point
+        // (happens on server shutdown with the client staying on the page)
+        if (!clients[cookie]) {
+            res.statusCode = 500;
+            res.end();
+            logresponse(req, res);
+        }
+
         var form = new formidable.IncomingForm();
         var cookie = getCookie(req.headers.cookie);
-        var uploadedFiles = {};
         var basePath = path.join(config.filesDir + clients[cookie].directory);
         form.type = "multipart";
-        form.parse(req, function (err, fields, files) {
-            if (err && err.message !== "Request aborted") {
-                logerror(err);
+        form.parse(req, function (error, fields, files) {
+            res.writeHead(200, {"content-type": "text/plain"});
+            res.end();
+            logresponse(req, res);
+            if (error && error.message !== "Request aborted") {
+                logerror(error);
                 readDirectory(clients[cookie].directory, function () {
                     sendFiles(cookie, "UPLOAD_DONE");
                 });
@@ -740,67 +759,81 @@ function handleUploadRequest(req, res) {
                 try {
                     var fullPath = path.dirname(path.join(basePath, file));
                     if (!createdPaths[fullPath]) {
-                        mkdirp.sync(fullPath, config.dirMode);
-                        createdPaths[fullPath] = true;
+                        try {
+                            wrench.mkdirSyncRecursive(fullPath, config.dirMode);
+                            createdPaths[fullPath] = true;
+                        } catch (error) {
+                            logerror(error);
+                        }
                     }
-                } catch (err) {
-                    if (err || err.code !== "EEXIST") logerror(err);
+                } catch (error) {
+                    if (error || error.code !== "EEXIST") logerror(error);
                 }
-                if (path.sep !== "/")
-                    log(socket, " Received ", path.join(clients[cookie].directory, file).split(path.sep).join("/"));
-                else
-                    log(socket, " Received ", path.join(clients[cookie].directory, file));
             }
-            res.writeHead(200, {"content-type": "text/plain"});
-            res.end();
-            logresponse(req, res);
+
         });
+
+        // Process 100 files in batches of 100s
+        var files = [], total = 0;
         form.on("fileBegin", function (name, file) {
-            uploadedFiles[file.name] = {
+            var set = Math.floor(total / 100);
+            if (!files[set]) files[set] = [];
+            files[Math.floor(total / 100)].push({
                 "temppath" : file.path,
                 "savepath" : path.join(basePath, file.name)
-            };
+            });
+            total++;
         });
 
         form.on("end", function () {
-            var filescount = 0, deletecount = 0;
-            for (var file in uploadedFiles) {
-                filescount++;
-                var input, output;
-
-                input = fs.createReadStream(uploadedFiles[file].temppath, {bufferSize: 4096});
-
-                input.on("close", function () {
-                    fs.unlink(this.path, function (err) {
-                        deletecount++;
-                        if (err) logerror(err);
-                        if (deletecount === filescount) {
-                            readDirectory(clients[cookie].directory, function () {
-                                sendFiles(cookie, "UPLOAD_DONE");
-                            });
+            log(socket, " Received ", total, " files.");
+            (function processNext(next) {
+                var cbCount = 0, cbFired = 0;
+                while (next.length > 0) {
+                    cbCount++;
+                    processFile(next.pop(), function () {
+                        cbFired++;
+                        if (next.length === 0 && cbCount === cbFired) {
+                            if (files.length > 0) {
+                                processNext(files.pop());
+                            } else {
+                                readDirectory(clients[cookie].directory, function () {
+                                    sendFiles(cookie, "UPLOAD_DONE");
+                                });
+                            }
                         }
                     });
-                });
+                }
+            })(files.pop());
 
-                input.on("error", function (err) {
-                    logerror(err);
-                });
+            function processFile(file, callback) {
+                var input = fs.createReadStream(file.temppath, {bufferSize: 4096});
+                var output = fs.createWriteStream(file.savepath, {mode: config.filesMode});
 
-                output = fs.createWriteStream(uploadedFiles[file].savepath, {mode: config.filesMode});
+                input.on("error",  function (error) { logerror(error); callback(); });
+                output.on("error", function (error) { logerror(error); callback(); });
 
-                output.on("error", function (err) {
-                    logerror(err);
+                input.on("close", function () {
+                    fs.unlink(this.path, function (error) {
+                        if (error) logerror(error);
+                    });
+                    callback();
                 });
 
                 input.pipe(output);
             }
         });
 
-        form.on("error", function (err) {
-            if (err && err.message === "Request aborted") {
+        // if (deletecount === filescount) {
+            // readDirectory(clients[cookie].directory, function () {
+                // sendFiles(cookie, "UPLOAD_DONE");
+            // });
+        // }
+        form.on("error", function (error) {
+            if (error && error.message === "Request aborted") {
                 log(socket, " Upload cancelled.");
             } else {
-                logerror();
+                logerror(error);
             }
             readDirectory(clients[cookie].directory, function () {
                 sendFiles(cookie, "UPLOAD_DONE");
@@ -811,8 +844,8 @@ function handleUploadRequest(req, res) {
 //-----------------------------------------------------------------------------
 // Read the directory's content and store it in "dirs"
 function readDirectory(root, callback) {
-    fs.readdir(addFilePath(root), function (err, files) {
-        if (err) logerror(err);
+    fs.readdir(addFilePath(root), function (error, files) {
+        if (error) logerror(error);
         if (!files) return;
 
         var dirContents = {};
@@ -831,17 +864,17 @@ function readDirectory(root, callback) {
         }
 
         function inspectFile(filename) {
-            fs.stat(addFilePath(root) + "/" + filename, function (err, stats) {
+            fs.stat(addFilePath(root) + "/" + filename, function (error, stats) {
                 counter++;
-                if (!err && stats) {
+                if (!error && stats) {
                     if (stats.isFile())
                         type = "f";
                     if (stats.isDirectory())
                         type = "d";
                     if (type === "f" || type === "d")
                         dirContents[filename] = {"type": type, "size" : stats.size};
-                } else if (err) {
-                    logerror(err);
+                } else if (error) {
+                    logerror(error);
                 }
                 if (counter === lastFile) {
                     // All stat callbacks have fired
@@ -897,7 +930,7 @@ function readConfig() {
 
     var opts = [
         "debug", "useSSL", "port", "readInterval", "filesMode", "dirMode",
-        "linkLength", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"
+        "linkLength", "maxOpen", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"
     ];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
@@ -1004,9 +1037,9 @@ function createCookie(req, res, postData) {
 }
 
 function writeDB(callback) {
-    fs.writeFile(config.db, JSON.stringify(db, null, 4), function (err) {
-        if (err) {
-            logerror("Error writing ", config.db, "\n", util.inspect(err));
+    fs.writeFile(config.db, JSON.stringify(db, null, 4), function (error) {
+        if (error) {
+            logerror("Error writing ", config.db, "\n", util.inspect(error));
             if (isCLI) process.exit(1);
         }
         if (callback) callback();
@@ -1053,16 +1086,16 @@ function prettyStartup() {
 // Recursively walk a directory and return file paths in an array
 function walkDirectory(dir, callback) {
     var results = [];
-    fs.readdir(dir, function (err, list) {
-        if (err) return callback(err);
+    fs.readdir(dir, function (error, list) {
+        if (error) return callback(error);
         var i = 0;
         (function next() {
             var file = list[i++];
             if (!file) return callback(null, results);
             file = dir + '/' + file;
-            fs.stat(file, function (err, stats) {
+            fs.stat(file, function (error, stats) {
                 if (stats && stats.isDirectory()) {
-                    walkDirectory(file, function (err, res) {
+                    walkDirectory(file, function (error, res) {
                         results = results.concat(res);
                         next();
                     });
@@ -1091,27 +1124,24 @@ function setupDebugWatcher() {
                 "css"   : debugcss
             });
             if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
-                clients[cookie].ws.send(data, function (err) {
-                    if (err) logerror(err);
+                clients[cookie].ws.send(data, function (error) {
+                    if (error) logerror(error);
                 });
             }
         }
     }), 100);
 }
 
-// underscore's debounce - https://github.com/documentcloud/underscore
-function debounce(func, wait, immediate) {
+// debounce based on underscore.js
+function debounce(func, wait) {
     var timeout, result;
     return function () {
         var context = this, args = arguments;
-        var later = function () {
-            timeout = null;
-            if (!immediate) result = func.apply(context, args);
-        };
-        var callNow = immediate && !timeout;
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) result = func.apply(context, args);
+        timeout = setTimeout(function () {
+            timeout = null;
+            result = func.apply(context, args);
+        }, wait);
         return result;
     };
 }
@@ -1171,9 +1201,9 @@ function logsimple() {
     console.log(args.join(""));
 }
 
-process.on("uncaughtException", function (err) {
+process.on("uncaughtException", function (error) {
     logerror("=============== Uncaught exception! ===============");
-    logerror(err);
+    logerror(error);
 });
 
 function shutdown() {
