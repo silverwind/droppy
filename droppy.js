@@ -127,19 +127,15 @@ function prepareContent() {
 
         fs.writeFileSync(getResPath("client.js"), config.debug ? js : uglify.minify(js, {fromString: true}).code);
 
-        // Copy html from src to res - may do some preprocessing here later
         logsimple(" ->> preparing HTML...");
-        copyResource("base.html");
-        copyResource("auth.html");
-        copyResource("main.html");
+
+        fs.writeFileSync(getResPath("base.html"), fs.readFileSync(getSrcPath("base.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
+        fs.writeFileSync(getResPath("auth.html"), fs.readFileSync(getSrcPath("auth.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
+        fs.writeFileSync(getResPath("auth.html"), fs.readFileSync(getSrcPath("auth.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
     } catch (error) {
         logerror("Error reading client sources.\n", util.inspect(error));
         process.exit(1);
     }
-}
-
-function copyResource(filepath) {
-    fs.writeFileSync(getResPath(filepath), fs.readFileSync(getSrcPath(filepath)));
 }
 //-----------------------------------------------------------------------------
 // Set up the directory for files
