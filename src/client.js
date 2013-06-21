@@ -142,7 +142,7 @@
     var queuedData, reopen;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-        socket = new WebSocket(protocol + document.location.host + "/");
+        socket = new WebSocket(protocol + document.location.host + "/websocket");
 
         socket.onopen = function () {
             if (queuedData) {
@@ -231,7 +231,7 @@
 
     // Close the socket gracefully before navigating away
     $(window).register("beforeunload", function () {
-        if (socket && socket.close && socket.readyState < 2)
+        if (socket && socket.readyState < 2)
             socket.close(1001);
     });
 
@@ -299,6 +299,7 @@
             $.ajax({
                 type: "POST",
                 url: "/login",
+                dataType: "json",
                 data: form.serialize(),
                 success: function (response) {
                     if (response === "OK") {
@@ -533,7 +534,7 @@
 
         $("#logout").register("click", function () {
             hasLoggedOut = true;
-            socket.close(4001);
+            socket && socket.close(4001);
             deleteCookie("sid");
             initVariables(); // Reset vars to their init state
             getPage();

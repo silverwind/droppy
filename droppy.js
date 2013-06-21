@@ -610,7 +610,7 @@ function handlePOST(req, res) {
             }
             var json = JSON.stringify(response);
             res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json");
+            res.setHeader("Content-Type", "text/html");
             res.setHeader("Content-Length", json.length);
             res.end(json);
             logresponse(req, res);
