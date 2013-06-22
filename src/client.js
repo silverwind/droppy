@@ -107,7 +107,7 @@
             redraw();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
-                $("#navigation").addClass("farout");
+                $("#navigation").addClass("out");
                 setTimeout(function () {
                     login.removeClass("out").addClass("in");
                     setTimeout(function () {
