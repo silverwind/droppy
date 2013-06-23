@@ -154,6 +154,10 @@ body {
     user-select: none;
 }
 
+.button .icon {
+    padding-right: 5px;
+}
+
 @media all and (min-width: 1024px) { .button { width: 170px; font-size: .9em; line-height: 35px; height: 35px; } }
 @media all and (max-width: 1023px) { .button { width: 130px; font-size: .8em; line-height: 30px; height: 30px; } }
 @media all and (max-width:  800px) { .button { width: 80px; } .button-text { display: none } }
@@ -311,7 +315,7 @@ body {
 #path li:before { border-right: 2px solid #111; transform: skew( 45deg); top:    0 }
 #path li:after  { border-right: 2px solid #111; transform: skew(-45deg); bottom: 0 }
 
-#path li, #path li:before, #path li:after { transition: all 0.3s ease }
+#path li, #path li:before, #path li:after { transition: all .3s ease }
 #path li:hover, #path li:hover:before, #path li:hover:after { color: #fff }
 #path li:first-child { padding-left: 0.4em }
 
@@ -467,7 +471,7 @@ body {
     position: fixed;
     text-align: left;
     top: 50%;
-    transition: all 0.3s ease;
+    transition: all .3s ease;
     width: 300px;
     z-index: 32;
 }
@@ -499,7 +503,7 @@ body {
     padding-left: 10px;
     position: absolute;
     top: 50%;
-    transition: all 0.3s ease;
+    transition: all .3s ease;
     width: 260px;
 }
 
@@ -528,7 +532,7 @@ body {
     position: absolute;
     right: 20px;
     text-shadow: none;
-    transition: all .25s ease-in-out;
+    transition: all .25s ease;
     user-select: none;
 }
 

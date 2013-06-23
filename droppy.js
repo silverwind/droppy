@@ -656,19 +656,24 @@ function handleResourceRequest(req, res, resourceName) {
         } else {
             res.statusCode = 200;
 
-            if (req.url === "/content") {
+            if (req.url === "/") {
+                // Disallow framing except when debugging
+                config.debug && res.setHeader("X-Frame-Options", "DENY");
+                // Set the IE10 compatibility mode
+                if (req.headers["user-agent"].indexOf("MSIE") > 0)
+                    res.setHeader("X-UA-Compatible", "IE=Edge,chrome=1");
+            } else if (req.url === "/content") {
+                // Don't ever cache /content since it's content is dynamic
                 res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
             } else if (resourceName === "icon.ico") {
                 // Long cache on favicon, because some browsers seem to request them constantly
                 res.setHeader("Cache-Control", "max-age=7257600");
             } else {
+                // All other content can be cached
                 res.setHeader("ETag", cache[resourceName].etag);
             }
 
-            if (req.url === "/" && !config.debug)
-                res.setHeader("X-Frame-Options", "DENY");
-
-            if (resourceName.match(/.*(js|css|html)$/))
+            if (resourceName.match(/.*(js|css|html|svg)$/))
                 res.setHeader("Content-Type", cache[resourceName].mime + "; charset=utf-8");
             else
                 res.setHeader("Content-Type", cache[resourceName].mime);
@@ -678,7 +683,6 @@ function handleResourceRequest(req, res, resourceName) {
                 res.setHeader("Content-Encoding", "gzip");
                 res.setHeader("Content-Length", cache[resourceName].gzipData.length);
                 res.setHeader("Vary", "Accept-Encoding");
-
                 res.end(cache[resourceName].gzipData);
             } else {
                 res.setHeader("Content-Length", cache[resourceName].data.length);
