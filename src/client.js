@@ -455,13 +455,12 @@
             $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
-        var info        = $("#create-folder-info"),
-            nameinput   = $("#create-folder-input"),
-            createbox   = $("#create-folder-box"),
+        var info         = $("#create-folder-info"),
+            nameinput    = $("#create-folder-input"),
+            createbox    = $("#create-folder-box"),
             createButton = $("#create-folder-button"),
+            indicators   = $("#create-folder-button, #create-folder-input"),
             activeFiles;
-
-        var indicators = $("#create-folder-button, #create-folder-input");
 
         // Show popup for folder creation
         $("#create-folder").register("click", function () {
@@ -505,8 +504,6 @@
                 info.attr("class", "in");
             } else {
                 createButton.register("click", createFolderAndHide);
-                indicators.removeClass("invalid");
-                info.removeClass();
                 if (e.keyCode === 13) // Return Key
                     createFolderAndHide();
             }
@@ -517,8 +514,12 @@
             sendMessage("CREATE_FOLDER", folderName);
             createbox.attr("class", "out");
             toggleCatcher();
+
+            // Clean up after creation
+            createButton.off("click");
             nameinput.val("");
             indicators.removeClass("invalid");
+            info.removeClass();
         }
 
         var aboutbox = $("#about-box");

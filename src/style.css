@@ -282,13 +282,12 @@ body {
 #path li {
     cursor: pointer;
     float: left;
-    padding-left: 1.25em;
-    padding-right: .25em;
+
     position: relative;
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 37px; height: 35px } }
+@media all and (min-width: 1024px) { #path li { line-height: 37px; height: 35px; padding: 0 .5em 0 1.5em } }
 @media all and (max-width: 1023px) { #path li { line-height: 32px; height: 30px } }
 @media all and (max-width:  639px) { #path li { line-height: 27px; height: 25px } }
 
