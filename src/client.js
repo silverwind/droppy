@@ -455,22 +455,21 @@
             $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
-        var info        = $("#name-info"),
-            nameinput   = $("#name-input"),
-            aboutbox    = $("#about-box"),
+        var info        = $("#create-folder-info"),
+            nameinput   = $("#create-folder-input"),
             createbox   = $("#create-folder-box"),
+            createButton = $("#create-folder-button"),
             activeFiles;
+
+        var indicators = $("#create-folder-button, #create-folder-input");
 
         // Show popup for folder creation
         $("#create-folder").register("click", function () {
-            nameinput.removeClass("invalid").val("");
-            createbox.removeClass("invalid");
-            info.hide();
             requestAnimation(function () {
                 createbox.attr("class", createbox.attr("class") !== "in" ? "in" : "out");
-                toggleCatcher();
                 setTimeout(function () {
                     if (createbox.attr("class") === "in") {
+                        toggleCatcher();
                         activeFiles = [];
                         $(".filelink, .folderlink").each(function () {
                             activeFiles.push($(this).html().toLowerCase());
@@ -491,30 +490,38 @@
             var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/^(\.+)$/);
             var folderExists;
             for (var i = 0, len = activeFiles.length; i < len; i++)
-                if (activeFiles[i] === input.toLowerCase()) folderExists = true;
-            if (input === "") {
-                nameinput.removeClass();
-                createbox.removeClass("valid invalid");
-                info.fadeOut(300);
-            } else if (!valid || folderExists) {
-                nameinput.removeClass("valid").addClass("invalid");
-                createbox.addClass("invalid");
-                info.html(folderExists ? "File or folder already exists!" : "Invalid character(s) in filename!");
-                info.fadeIn(300);
-            } else {
-                createbox.removeClass("invalid").addClass("valid");
-                nameinput.removeClass("invalid").addClass("valid");
-                info.fadeOut(300);
-                if (e.keyCode === 13) { // Return Key
-                    if (currentFolder === "/")
-                        sendMessage("CREATE_FOLDER", "/" + input);
-                    else
-                        sendMessage("CREATE_FOLDER", currentFolder + "/" + input);
-                    createbox.removeClass("in").addClass("out");
-                    toggleCatcher();
+                if (activeFiles[i] === input.toLowerCase()) {
+                    folderExists = true;
+                    break;
                 }
+            if (input === "") {
+                createButton.off("click");
+                indicators.removeClass("invalid");
+                info.removeClass();
+            } else if (!valid || folderExists) {
+                createButton.off("click");
+                indicators.addClass("invalid");
+                info.html(folderExists ? "Already exists!" : "Invalid characters!");
+                info.attr("class", "in");
+            } else {
+                createButton.register("click", createFolderAndHide);
+                indicators.removeClass("invalid");
+                info.removeClass();
+                if (e.keyCode === 13) // Return Key
+                    createFolderAndHide();
             }
         });
+
+        function createFolderAndHide() {
+            var folderName = (currentFolder === "/") ? "/" + nameinput.val() : currentFolder + "/" + nameinput.val();
+            sendMessage("CREATE_FOLDER", folderName);
+            createbox.attr("class", "out");
+            toggleCatcher();
+            nameinput.val("");
+            indicators.removeClass("invalid");
+        }
+
+        var aboutbox = $("#about-box");
 
         $("#about").register("click", function () {
             requestAnimation(function () {
@@ -652,6 +659,7 @@
             }
         }
 
+        // Toggle the full-screen click catching frame to exit dialogs
         function toggleCatcher() {
             if (aboutbox.attr("class") === "in" || createbox.attr("class") === "in") {
                 $("#click-catcher").attr("class", "in");

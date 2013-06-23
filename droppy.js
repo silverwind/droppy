@@ -131,7 +131,7 @@ function prepareContent() {
 
         fs.writeFileSync(getResPath("base.html"), fs.readFileSync(getSrcPath("base.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
         fs.writeFileSync(getResPath("auth.html"), fs.readFileSync(getSrcPath("auth.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
-        fs.writeFileSync(getResPath("auth.html"), fs.readFileSync(getSrcPath("auth.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
+        fs.writeFileSync(getResPath("main.html"), fs.readFileSync(getSrcPath("main.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
     } catch (error) {
         logerror("Error reading client sources.\n", util.inspect(error));
         process.exit(1);
