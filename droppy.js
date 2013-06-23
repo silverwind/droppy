@@ -103,7 +103,7 @@ cacheResources(config.resDir, function () {
 });
 
 //-----------------------------------------------------------------------------
-// Read CSS and JS, minify them, and write them to /res
+// Read JS/CSS/HTML client resources, minify them, and write them to /res
 function prepareContent() {
     try {
         var css, js;
@@ -776,7 +776,7 @@ function handleUploadRequest(req, res) {
 
         });
 
-        // Process 100 files in batches of 100s
+        // Process files in batches of 100s
         var files = [], total = 0;
         form.on("fileBegin", function (name, file) {
             var set = Math.floor(total / 100);
@@ -827,11 +827,6 @@ function handleUploadRequest(req, res) {
             }
         });
 
-        // if (deletecount === filescount) {
-            // readDirectory(clients[cookie].directory, function () {
-                // sendFiles(cookie, "UPLOAD_DONE");
-            // });
-        // }
         form.on("error", function (error) {
             if (error && error.message === "Request aborted") {
                 log(socket, " Upload cancelled.");
@@ -1060,20 +1055,21 @@ function getSrcPath(name) {
 }
 
 function getTimestamp() {
-    if (isJitsu) return "";
-    var currentDate = new Date();
-    var day = currentDate.getDate();
-    var month = currentDate.getMonth() + 1;
-    var year = currentDate.getFullYear();
-    var hours = currentDate.getHours();
-    var minutes = currentDate.getMinutes();
-    var seconds = currentDate.getSeconds();
+    if (isJitsu) return ""; // Jitsu do their own timestamps
 
-    if (hours < 10) hours = "0" + hours;
-    if (minutes < 10) minutes = "0" + minutes;
-    if (seconds < 10) seconds = "0" + seconds;
+    var now   = new Date(),
+        day   = now.getDate(),
+        month = now.getMonth() + 1,
+        year  = now.getFullYear(),
+        hrs   = now.getHours(),
+        mins  = now.getMinutes(),
+        secs  = now.getSeconds();
 
-    return year + "-"  + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds + " ";
+    hrs  < 10 && (hrs  = "0" + hrs);
+    mins < 10 && (mins = "0" + mins);
+    secs < 10 && (secs = "0" + secs);
+
+    return year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs + " ";
 }
 
 function prettyStartup() {
@@ -1135,7 +1131,7 @@ function setupDebugWatcher() {
     }), 100);
 }
 
-// debounce based on underscore.js
+// Debounce a function, based on underscore.js
 function debounce(func, wait) {
     var timeout, result;
     return function () {
