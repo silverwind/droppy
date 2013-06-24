@@ -681,12 +681,13 @@ body {
 
 #login-icon {
     display: table;
-    height: calc(100% - 60px);
+    height: 290px;
     position: absolute;
     text-align: center;
     top: 0;
+    left: 0;
     user-select: none;
-    width: calc(100% - 120px);
+    width: 600px;
     z-index: -1;
 }
 
@@ -785,9 +786,8 @@ input[type=checkbox] {
 }
 
 #remember label:after {
-    border-right: none;
-    border-top: none;
-    border: 3px solid #fff;
+    border-left: 3px solid #fff;
+    border-bottom: 3px solid #fff;
     content: '';
     height: 5px;
     left: 4px;

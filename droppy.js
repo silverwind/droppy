@@ -105,35 +105,59 @@ cacheResources(config.resDir, function () {
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
 function prepareContent() {
+    var out = {}, resources = {
+        css  : ["style.css", "sprites.css"],
+        js   : ["modernizr.js", "jquery.js", "client.js"],
+        html : ["base.html", "auth.html", "main.html"]
+    };
+
+    // Read resources
+    logsimple(" ->> reading content...");
+    for (var type in resources) {
+        resources[type].forEach(function (file, key, array) {
+            try {
+                var data = fs.readFileSync(getSrcPath(file)).toString("utf8");
+                if (type === "html") {
+                    array[key] = {};
+                    array[key][file] = data;
+                } else
+                    array[key] = data;
+            } catch (error) {
+                logerror("Error reading " + file + ":\n", error);
+                process.exit(1);
+            }
+        });
+    }
+
+    // Concatenate CSS and JS data
+    logsimple(" ->> processing content...");
+    resources.css.forEach(function (data) {
+        out.css += data + "\n";
+    });
+    resources.js.forEach(function (data) {
+        out.js += data + ";\n";
+    });
+
+    // Add CSS vendor prefixes
+    out.css = autoprefixer.compile(out.css, ["last 2 versions"]);
+    // Minify CSS
+    config.debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
+    // Set the client debug variable according to the server's config
+    out.js = out.js.replace("var debug;", config.debug ? "var debug = true;" : "var debug = false;");
+    // Minify JS
+    config.debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
+
+    logsimple(" ->> saving content...");
     try {
-        var css, js;
-        logsimple(config.debug ? " ->> preparing CSS..." : " ->> minifying CSS...");
-
-        css = [
-            fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
-            fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
-        ].join("\n");
-
-        css = autoprefixer.compile(css, ["last 2 versions"]);
-        fs.writeFileSync(getResPath("style.css"), config.debug ? css : cleancss.process(css));
-
-        logsimple(config.debug ? " ->> preparing JS..." : " ->> minifying JS...");
-
-        js = [
-            fs.readFileSync(getSrcPath("modernizr.js")).toString("utf8"),
-            fs.readFileSync(getSrcPath("jquery.js")).toString("utf8"),
-            fs.readFileSync(getSrcPath("client.js")).toString("utf8").replace("debug;", config.debug ? "debug = true;" : "debug = false;")
-        ].join("\n");
-
-        fs.writeFileSync(getResPath("client.js"), config.debug ? js : uglify.minify(js, {fromString: true}).code);
-
-        logsimple(" ->> preparing HTML...");
-
-        fs.writeFileSync(getResPath("base.html"), fs.readFileSync(getSrcPath("base.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
-        fs.writeFileSync(getResPath("auth.html"), fs.readFileSync(getSrcPath("auth.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
-        fs.writeFileSync(getResPath("main.html"), fs.readFileSync(getSrcPath("main.html")).toString("utf8").replace(/[\t\r\n]/gm, ""));
+        resources.html.forEach(function (file) {
+            var name = Object.keys(file)[0];
+            // Minify HTML by removing tabs, and CR/LF
+            fs.writeFileSync(getResPath(name), file[name].replace(/[\t\r\n]/gm, ""));
+        });
+        fs.writeFileSync(getResPath("client.js"), out.js);
+        fs.writeFileSync(getResPath("style.css"), out.css);
     } catch (error) {
-        logerror("Error reading client sources.\n", util.inspect(error));
+        logerror("Error writing resources:\n", error);
         process.exit(1);
     }
 }
