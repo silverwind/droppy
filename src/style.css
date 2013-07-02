@@ -220,8 +220,8 @@ body {
     left: 0;
     position: absolute;
     top: 0;
-    transition: all .3s ease;
-    width: 50%;
+    transition: all .2s ease;
+    width: 0;
 }
 
 #upload-time {

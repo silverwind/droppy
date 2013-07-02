@@ -36,16 +36,9 @@
 
 "use strict";
 
-var cache        = {},
-    clients      = {},
-    db           = {},
-    dirs         = {},
-    watchedDirs  = {},
-    server       = false,
-    debugcss     = false,
-    config       = false;
-
-var autoprefixer    = require("autoprefixer"),
+var helpers         = require("./lib/helpers.js"),
+    log             = require("./lib/log.js"),
+    autoprefixer    = require("autoprefixer"),
     cleancss        = require("clean-css"),
     crypto          = require("crypto"),
     formidable      = require("formidable"),
@@ -59,16 +52,17 @@ var autoprefixer    = require("autoprefixer"),
     wrench          = require("wrench"),
     zlib            = require("zlib");
 
-var color = {
-    red     : "\u001b[31m",
-    green   : "\u001b[32m",
-    yellow  : "\u001b[33m",
-    blue    : "\u001b[34m",
-    reset   : "\u001b[0m"
-};
-
-var isCLI   = (process.argv.length > 2),
-    isJitsu = (process.env.NODE_ENV === "production");
+var cache        = {},
+    clients      = {},
+    db           = {},
+    dirs         = {},
+    watchedDirs  = {},
+    server       = false,
+    debug        = false,
+    debugcss     = false,
+    config       = false,
+    isCLI        = (process.argv.length > 2),
+    isJitsu      = (process.env.NODE_ENV === "production");
 
 // Argument handler
 if (isCLI) handleArguments();
@@ -76,9 +70,10 @@ if (isCLI) handleArguments();
 readConfig();
 
 fs.MAX_OPEN = config.maxOpen;
-
-logsimple(prettyStartup());
-logsimple(" ->> running on node " + process.version);
+debug = config.debug;
+log.useTimestamp = !isJitsu;
+log.simple(helpers.logo);
+log.simple(" ->> running on node " + process.version);
 
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
@@ -90,7 +85,7 @@ if (Object.keys(db.users).length < 1) {
 prepareContent();
 
 // Read and cache all resources
-logsimple(" ->> caching resources...\n");
+log.simple(" ->> caching resources...\n");
 cacheResources(config.resDir, function () {
     // Set up the exposed files folder
     setupFilesDir();
@@ -105,32 +100,34 @@ cacheResources(config.resDir, function () {
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
 function prepareContent() {
-    var out = {}, resources = {
-        css  : ["style.css", "sprites.css"],
-        js   : ["modernizr.js", "jquery.js", "client.js"],
-        html : ["base.html", "auth.html", "main.html"]
-    };
+    var out = {},
+        resources = {
+            css  : ["style.css", "sprites.css"],
+            js   : ["modernizr.js", "jquery.js", "client.js"],
+            html : ["base.html", "auth.html", "main.html"]
+        };
 
     // Read resources
-    logsimple(" ->> reading content...");
+    log.simple(" ->> reading resources...");
     for (var type in resources) {
         resources[type].forEach(function (file, key, array) {
+            var data;
             try {
-                var data = fs.readFileSync(getSrcPath(file)).toString("utf8");
-                if (type === "html") {
-                    array[key] = {};
-                    array[key][file] = data;
-                } else
-                    array[key] = data;
+                data = fs.readFileSync(getSrcPath(file)).toString("utf8");
             } catch (error) {
-                logerror("Error reading " + file + ":\n", error);
+                log.error("Error reading " + file + ":\n", error);
                 process.exit(1);
             }
+            if (type === "html") {
+                array[key] = {};
+                array[key][file] = data;
+            } else
+                array[key] = data;
         });
     }
 
-    // Concatenate CSS and JS data
-    logsimple(" ->> preprocessing content...");
+    // Concatenate CSS and JS
+    log.simple(" ->> preparing resources...");
     resources.css.forEach(function (data) {
         out.css += data + "\n";
     });
@@ -141,23 +138,23 @@ function prepareContent() {
     // Add CSS vendor prefixes
     out.css = autoprefixer.compile(out.css, ["last 2 versions"]);
     // Minify CSS
-    config.debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
-    // Set the client debug variable according to the server's config
-    out.js = out.js.replace("var debug;", config.debug ? "var debug = true;" : "var debug = false;");
+    !debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
+    // Set the client debug variable to mirror the server's
+    out.js = out.js.replace("var debug;", debug ? "var debug = true;" : "var debug = false;");
     // Minify JS
-    config.debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
+    !debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
 
-    logsimple(" ->> saving content...");
+    log.simple(" ->> writing resources...");
     try {
         resources.html.forEach(function (file) {
             var name = Object.keys(file)[0];
-            // Minify HTML by removing tabs, and CR/LF
+            // Minify HTML by removing tabs, CRs and LFs
             fs.writeFileSync(getResPath(name), file[name].replace(/[\t\r\n]/gm, ""));
         });
         fs.writeFileSync(getResPath("client.js"), out.js);
         fs.writeFileSync(getResPath("style.css"), out.css);
     } catch (error) {
-        logerror("Error writing resources:\n", error);
+        log.error("Error writing resources:\n", error);
         process.exit(1);
     }
 }
@@ -168,8 +165,8 @@ function setupFilesDir() {
         if (!error || error.code === "EEXIST") {
             return true;
         } else {
-            logerror("Error accessing ", config.filesDir);
-            logerror(util.inspect(error));
+            log.error("Error accessing ", config.filesDir);
+            log.error(util.inspect(error));
             process.exit(1);
         }
     });
@@ -205,24 +202,24 @@ function createListener() {
             cert = fs.readFileSync(config.httpsCert);
             server = require("https").createServer({key: key, cert: cert}, onRequest);
         } catch (error) {
-            logerror("Error reading SSL certificate or key.\n", util.inspect(error));
+            log.error("Error reading SSL certificate or key.\n", util.inspect(error));
             process.exit(1);
         }
     }
 
     server.on("listening", function () {
         setupSocket(server);
-        if (config.debug) setupDebugWatcher();
-        log("Listening on port ", server.address().port);
+        if (debug) setupDebugWatcher();
+        log.log("Listening on port ", server.address().port);
     });
 
     server.on("error", function (error) {
         if (error.code === "EADDRINUSE")
-            logerror("Failed to bind to port ", port, ". Address already in use.\n");
+            log.error("Failed to bind to port ", port, ". Address already in use.\n");
         else if (error.code === "EACCES")
-            logerror("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n");
+            log.error("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n");
         else
-            logerror("Error:", util.inspect(error));
+            log.error("Error:", util.inspect(error));
         process.exit(1);
     });
 
@@ -245,7 +242,7 @@ function onRequest(req, res) {
         res.statusCode = 405;
         res.setHeader("Allow", "GET, POST");
         res.end();
-        logresponse(req, res);
+        log.response(req, res);
     }
 }
 //-----------------------------------------------------------------------------
@@ -259,10 +256,10 @@ function setupSocket(server) {
 
         if (!cookie) {
             ws.close(4000);
-            log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
+            log.log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
             return;
         } else {
-            log(remoteIP, ":", remotePort, " WebSocket [", color.green, "connected", color.reset, "]");
+            log.log(remoteIP, ":", remotePort, " WebSocket ", "connected");
             if (!clients[cookie]) {
                 clients[cookie] = {};
                 clients[cookie].ws = ws;
@@ -286,13 +283,13 @@ function setupSocket(server) {
             case "CREATE_FOLDER":
                 var foldername = path.basename(dir);
                 if (foldername.match(/[\\*{}\/<>?|]/) || foldername.match(/^(\.+)$/)) {
-                    log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
+                    log.log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
                     return;
                 }
 
                 fs.mkdir(addFilePath(dir), config.dirMode, function (error) {
-                    if (error) logerror(error);
-                    log(remoteIP, ":", remotePort, " Created: ", dir);
+                    if (error) log.error(error);
+                    log.log(remoteIP, ":", remotePort, " Created: ", dir);
                     readDirectory(clients[cookie].directory, function () {
                         sendFiles(cookie, "UPDATE_FILES");
                     });
@@ -316,7 +313,7 @@ function setupSocket(server) {
                         link += chars.charAt(Math.floor(Math.random() * chars.length));
                 } while (db.shortlinks[link]); // In case the RNG generates an existing link, go again
 
-                log(remoteIP, ":", remotePort, " Shortlink created: " + link + " -> " + dir);
+                log.log(remoteIP, ":", remotePort, " Shortlink created: " + link + " -> " + dir);
                 // Store the created link
                 db.shortlinks[link] = dir;
 
@@ -325,14 +322,14 @@ function setupSocket(server) {
                 writeDB();
                 break;
             case "DELETE_FILE":
-                log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
+                log.log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
                 dir = addFilePath(dir);
 
                 fs.stat(dir, function (error, stats) {
                     if (stats && !error) {
                         if (stats.isFile()) {
                             fs.unlink(dir, function (error) {
-                                if (error) logerror(error);
+                                if (error) log.error(error);
                                 readDirectory(clients[cookie].directory, function () {
                                     sendFiles(cookie, "UPDATE_FILES");
                                 });
@@ -341,7 +338,7 @@ function setupSocket(server) {
                             try {
                                 wrench.rmdirSyncRecursive(dir);
                             } catch (error) {
-                                logerror(error);
+                                log.error(error);
                             }
 
                             readDirectory(clients[cookie].directory, function () {
@@ -379,11 +376,11 @@ function setupSocket(server) {
                 reason = "(Client going away)";
                 delete clients[cookie];
             }
-            log(remoteIP, ":", remotePort, " WebSocket [", color.red, "disconnected", color.reset, "] ", reason || "(Code: " + (code || "none")  + ")");
+            log.log(remoteIP, ":", remotePort, " WebSocket ", "disconnected", " ", reason || "(Code: " + (code || "none")  + ")");
         });
 
         ws.on("error", function (error) {
-            logerror(error);
+            log.error(error);
         });
     });
 }
@@ -415,7 +412,7 @@ function send(ws, data) {
         if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
         if (ws && ws.readyState === 1) {
             ws.send(data, function (error) {
-                if (error) logerror(error);
+                if (error) log.error(error);
             });
         } else {
             setTimeout(queue, 50, ws, data, time + 50);
@@ -425,12 +422,12 @@ function send(ws, data) {
 //-----------------------------------------------------------------------------
 // Watch the directory for realtime changes and send them to the appropriate clients.
 function createWatcher(folder) {
-    var watcher = fs.watch(folder, debounce(function () {
+    var watcher = fs.watch(folder, helpers.debounce(function () {
         updateClients(folder);
     }), config.readInterval);
 
     watcher.on("error", function (error) {
-        logerror("Error trying to watch ", removeFilePath(folder), "\n", error);
+        log.error("Error trying to watch ", removeFilePath(folder), "\n", error);
     });
 
     watchedDirs[removeFilePath(folder)] = watcher;
@@ -496,34 +493,21 @@ function checkWatchedDirs() {
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
 function cacheResources(dir, callback) {
+    var gzipFiles, relPath, fileName, fileData, fileTime;
     dir = dir.substring(0, dir.length - 1); // Strip trailing slash
 
     walkDirectory(dir, function (error, results) {
-        if (error) logerror(error);
-        var filesToGzip = [];
+        if (error) log.error(error);
+        gzipFiles = [];
         results.forEach(function (fullPath) {
-            var relPath = fullPath.substring(dir.length + 1);
-            var fileName = path.basename(fullPath);
-            var fileData, fileTime;
+            relPath = fullPath.substring(dir.length + 1);
+            fileName = path.basename(fullPath);
 
-            // This is rather hacky. node seems to throw ENOENT on files that
-            // clearly exist when reading them in quick succession. This code
-            // tries to read a file 20 times before quitting.
-            var readCount = 0;
             try {
-                var read = function () {
-                    fileData = fs.readFileSync(fullPath);
-                    fileTime = fs.statSync(fullPath).mtime;
-                    readCount++;
-                };
-                read();
+                fileData = fs.readFileSync(fullPath);
+                fileTime = fs.statSync(fullPath).mtime;
             } catch (error) {
-                if (readCount >= 20) {
-                    logerror(error);
-                    process.exit(1);
-                } else {
-                    read();
-                }
+                log.error(error);
             }
 
             cache[relPath] = {};
@@ -531,22 +515,22 @@ function cacheResources(dir, callback) {
             cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
             cache[relPath].mime = mime.lookup(fullPath);
             if (fileName.match(/.*(js|css|html|svg)$/)) {
-                filesToGzip.push(relPath);
+                gzipFiles.push(relPath);
             }
         });
 
-        if (filesToGzip.length > 0)
+        if (gzipFiles.length > 0)
             runGzip();
         else
             callback();
 
         function runGzip() {
-            var currentFile = filesToGzip[0];
+            var currentFile = gzipFiles[0];
             zlib.gzip(cache[currentFile].data, function (error, compressedData) {
-                if (error) logerror(error);
+                if (error) log.error(error);
                 cache[currentFile].gzipData = compressedData;
-                filesToGzip = filesToGzip.slice(1);
-                if (filesToGzip.length > 0)
+                gzipFiles = gzipFiles.slice(1);
+                if (gzipFiles.length > 0)
                     runGzip();
                 else
                     callback();
@@ -585,7 +569,7 @@ function handleGET(req, res) {
             res.statusCode = 301;
             res.setHeader("Location", "/");
             res.end();
-            logresponse(req, res);
+            log.response(req, res);
             return;
         }
 
@@ -604,7 +588,7 @@ function handleGET(req, res) {
                 res.statusCode = 301;
                 res.setHeader("Location", "/");
                 res.end();
-                logresponse(req, res);
+                log.response(req, res);
             }
         });
     }
@@ -616,7 +600,7 @@ function handlePOST(req, res) {
         if (!getCookie(req.headers.cookie)) {
             res.statusCode = 401;
             res.end();
-            logresponse(req, res);
+            log.response(req, res);
         }
         handleUploadRequest(req, res);
     } else if (URI === "/login") {
@@ -628,13 +612,13 @@ function handlePOST(req, res) {
             var postData = querystring.parse(body);
             var response;
             if (isValidUser(postData.username, postData.password)) {
-                log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                    "User ", postData.username, " [", color.green, "authenticated", color.reset, "]");
+                log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
+                    "User ", postData.username, "authenticated");
                 response = "OK";
                 createCookie(req, res, postData);
             } else {
-                log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                    "User ", postData.username, " [", color.red, "unauthorized", color.reset, "]");
+                log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
+                    "User ", postData.username, "unauthorized");
                 response = "NOK";
             }
             var json = JSON.stringify(response);
@@ -642,14 +626,13 @@ function handlePOST(req, res) {
             res.setHeader("Content-Type", "text/html");
             res.setHeader("Content-Length", json.length);
             res.end(json);
-            logresponse(req, res);
+            log.response(req, res);
         });
     }
 }
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
-
-    if (config.debug && resourceName === "style.css") {
+    if (debug && resourceName === "style.css") {
         // Shortcut for CSS debugging when no Websocket is available
         debugcss = [
             fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
@@ -682,7 +665,7 @@ function handleResourceRequest(req, res, resourceName) {
 
             if (req.url === "/") {
                 // Disallow framing except when debugging
-                config.debug && res.setHeader("X-Frame-Options", "DENY");
+                !debug && res.setHeader("X-Frame-Options", "DENY");
                 // Set the IE10 compatibility mode
                 if (req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
@@ -714,7 +697,7 @@ function handleResourceRequest(req, res, resourceName) {
             }
         }
     }
-    logresponse(req, res);
+    log.response(req, res);
 }
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res) {
@@ -727,7 +710,7 @@ function handleFileRequest(req, res) {
         res.statusCode = 301;
         res.setHeader("Location", "/");
         res.end();
-        logresponse(req, res);
+        log.response(req, res);
         return;
     }
     var filepath = directLink ? addFilePath(directLink) : addFilePath("/" + URI);
@@ -740,14 +723,14 @@ function handleFileRequest(req, res) {
                 res.setHeader("Content-Disposition", ['attachment; filename="', path.basename(filepath), '"'].join(""));
                 res.setHeader("Content-Type", mimeType);
                 res.setHeader("Content-Length", stats.size);
-                logresponse(req, res);
+                log.response(req, res);
                 fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
             } else {
                 res.statusCode = 500;
                 res.end();
-                logresponse(req, res);
+                log.response(req, res);
                 if (error)
-                    logerror(error);
+                    log.error(error);
             }
         });
     }
@@ -763,7 +746,7 @@ function handleUploadRequest(req, res) {
         if (!clients[cookie]) {
             res.statusCode = 500;
             res.end();
-            logresponse(req, res);
+            log.response(req, res);
             return;
         }
 
@@ -774,9 +757,9 @@ function handleUploadRequest(req, res) {
         form.parse(req, function (error, fields, files) {
             res.writeHead(200, {"content-type": "text/plain"});
             res.end();
-            logresponse(req, res);
+            log.response(req, res);
             if (error && error.message !== "Request aborted") {
-                logerror(error);
+                log.error(error);
                 readDirectory(clients[cookie].directory, function () {
                     sendFiles(cookie, "UPLOAD_DONE");
                 });
@@ -790,11 +773,11 @@ function handleUploadRequest(req, res) {
                             wrench.mkdirSyncRecursive(fullPath, config.dirMode);
                             createdPaths[fullPath] = true;
                         } catch (error) {
-                            logerror(error);
+                            log.error(error);
                         }
                     }
                 } catch (error) {
-                    if (error || error.code !== "EEXIST") logerror(error);
+                    if (error || error.code !== "EEXIST") log.error(error);
                 }
             }
 
@@ -813,7 +796,7 @@ function handleUploadRequest(req, res) {
         });
 
         form.on("end", function () {
-            log(socket, " Received ", total, " files.");
+            log.log(socket, " Received ", total, " files.");
             (function processNext(next) {
                 var cbCount = 0, cbFired = 0;
                 while (next.length > 0) {
@@ -837,12 +820,12 @@ function handleUploadRequest(req, res) {
                 var input = fs.createReadStream(file.temppath, {bufferSize: 4096});
                 var output = fs.createWriteStream(file.savepath, {mode: config.filesMode});
 
-                input.on("error",  function (error) { logerror(error); callback(); });
-                output.on("error", function (error) { logerror(error); callback(); });
+                input.on("error",  function (error) { log.error(error); callback(); });
+                output.on("error", function (error) { log.error(error); callback(); });
 
                 input.on("close", function () {
                     fs.unlink(this.path, function (error) {
-                        if (error) logerror(error);
+                        if (error) log.error(error);
                     });
                     callback();
                 });
@@ -853,9 +836,9 @@ function handleUploadRequest(req, res) {
 
         form.on("error", function (error) {
             if (error && error.message === "Request aborted") {
-                log(socket, " Upload cancelled.");
+                log.log(socket, " Upload cancelled.");
             } else {
-                logerror(error);
+                log.error(error);
             }
             readDirectory(clients[cookie].directory, function () {
                 sendFiles(cookie, "UPLOAD_DONE");
@@ -867,7 +850,7 @@ function handleUploadRequest(req, res) {
 // Read the directory's content and store it in "dirs"
 function readDirectory(root, callback) {
     fs.readdir(addFilePath(root), function (error, files) {
-        if (error) logerror(error);
+        if (error) log.error(error);
         if (!files) return;
 
         var dirContents = {};
@@ -896,7 +879,7 @@ function readDirectory(root, callback) {
                     if (type === "f" || type === "d")
                         dirContents[filename] = {"type": type, "size" : stats.size};
                 } else if (error) {
-                    logerror(error);
+                    log.error(error);
                 }
                 if (counter === lastFile) {
                     // All stat callbacks have fired
@@ -928,16 +911,16 @@ function handleArguments() {
         process.exit(0);
         break;
     default:
-        logsimple("Unknown argument. See 'node droppy --help for help.'\n");
+        log.simple("Unknown argument. See 'node droppy --help for help.'\n");
         process.exit(1);
         break;
     }
 
     function printUsage() {
-        logsimple("droppy - file server on node.js (https://github.com/silverwind/droppy)");
-        logsimple("Usage: node droppy [option] [option arguments]\n");
-        logsimple("-help \t\t\t\tPrint this help");
-        logsimple("-adduser username password\tCreate a new user for authentication\n");
+        log.simple("droppy - file server on node.js (https://github.com/silverwind/droppy)");
+        log.simple("Usage: node droppy [option] [option arguments]\n");
+        log.simple("-help \t\t\t\tPrint this help");
+        log.simple("-adduser username password\tCreate a new user for authentication\n");
     }
 }
 //-----------------------------------------------------------------------------
@@ -946,7 +929,7 @@ function readConfig() {
     try {
         config = JSON.parse(fs.readFileSync("./config.json"));
     } catch (e) {
-        logerror("Error reading config.json\n", util.inspect(e));
+        log.error("Error reading config.json\n", util.inspect(e));
         process.exit(1);
     }
 
@@ -956,7 +939,7 @@ function readConfig() {
     ];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
-            logerror("Error: Missing property in config.json:", opts[i]);
+            log.error("Error: Missing property in config.json:", opts[i]);
             process.exit(1);
         }
     }
@@ -979,11 +962,11 @@ function readDB() {
     } catch (e) {
         if (e.code === "ENOENT" || dbString.match(/^\s*$/)) {
             // Recreate DB file in case it doesn't exist / is empty
-            logsimple(" ->> creating " + path.basename(config.db) + "...");
+            log.simple(" ->> creating " + path.basename(config.db) + "...");
             db = {users: {}, sessions: {}, shortlinks: {}};
             doWrite = true;
         } else {
-            logerror("Error reading ", config.db, "\n", util.inspect(e));
+            log.error("Error reading ", config.db, "\n", util.inspect(e));
             process.exit(1);
         }
     }
@@ -1001,14 +984,14 @@ function getHash(string) {
 // Add a user to the database save it to disk
 function addUser(user, password) {
     if (db.users[user] !== undefined) {
-        logsimple("User ", user, " already exists!");
+        log.simple("User ", user, " already exists!");
         if (isCLI) process.exit(1);
     } else {
         var salt = crypto.randomBytes(4).toString("hex");
         db.users[user] = getHash(password + salt + user) + "$" + salt;
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
         writeDB(function () {
-            if (isCLI) logsimple("User ", user, " successfully added.");
+            if (isCLI) log.simple("User ", user, " successfully added.");
             if (isCLI) process.exit();
         });
     }
@@ -1061,7 +1044,7 @@ function createCookie(req, res, postData) {
 function writeDB(callback) {
     fs.writeFile(config.db, JSON.stringify(db, null, 4), function (error) {
         if (error) {
-            logerror("Error writing ", config.db, "\n", util.inspect(error));
+            log.error("Error writing ", config.db, "\n", util.inspect(error));
             if (isCLI) process.exit(1);
         }
         if (callback) callback();
@@ -1076,34 +1059,6 @@ function getResPath(name) {
 
 function getSrcPath(name) {
     return path.join(config.srcDir, name);
-}
-
-function getTimestamp() {
-    if (isJitsu) return ""; // Jitsu do their own timestamps
-
-    var now   = new Date(),
-        day   = now.getDate(),
-        month = now.getMonth() + 1,
-        year  = now.getFullYear(),
-        hrs   = now.getHours(),
-        mins  = now.getMinutes(),
-        secs  = now.getSeconds();
-
-    hrs  < 10 && (hrs  = "0" + hrs);
-    mins < 10 && (mins = "0" + mins);
-    secs < 10 && (secs = "0" + secs);
-
-    return year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs + " ";
-}
-
-function prettyStartup() {
-    return ([
-        "    __\n",
-        ".--|  .----.-----.-----.-----.--.--.\n",
-        "|  _  |   _|  _  |  _  |  _  |  |  |\n",
-        "|_____|__| |_____|   __|   __|___  |\n",
-        "                 |__|  |__|  |_____|\n"
-    ].join(""));
 }
 
 // Recursively walk a directory and return file paths in an array
@@ -1134,8 +1089,8 @@ function walkDirectory(dir, callback) {
 // Watch the CSS files and send updates to the client for live styling
 function setupDebugWatcher() {
     var cssfile = config.srcDir + "style.css";
-    fs.watch(cssfile, debounce(function () {
-        var debugcss = [
+    fs.watch(cssfile, helpers.debounce(function () {
+        debugcss = [
             fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
@@ -1148,88 +1103,28 @@ function setupDebugWatcher() {
             });
             if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
                 clients[cookie].ws.send(data, function (error) {
-                    if (error) logerror(error);
+                    if (error) log.error(error);
                 });
             }
         }
     }), 100);
 }
 
-// Debounce a function, based on underscore.js
-function debounce(func, wait) {
-    var timeout, result;
-    return function () {
-        var context = this, args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(function () {
-            timeout = null;
-            result = func.apply(context, args);
-        }, wait);
-        return result;
-    };
-}
 //============================================================================
-// Logging and error handling helpers
+// process event handlers
 //============================================================================
 
-function log() {
-    var args = Array.prototype.slice.call(arguments, 0);
-    args.unshift(getTimestamp());
-    for (var i = 1, len = args.length; i < len; i++) {
-        var argStr = String(args[i]);
-        if (typeof args[i] === "number" && [200, 301, 304, 307, 401, 404, 405, 500].indexOf(args[i]) > -1) {
-            switch (argStr.charAt(0)) {
-            case "2":
-                argStr = "[" + color.green + argStr + color.reset + "]";
-                break;
-            case "3":
-                argStr = "[" + color.yellow + argStr + color.reset + "]";
-                break;
-            case "4":
-            case "5":
-                argStr = "[" + color.red + argStr + color.reset + "]";
-                break;
-            }
-            args[i] = argStr;
-        } else if (argStr === "GET" || argStr === "POST") {
-            argStr = color.yellow + argStr + color.reset;
-        }
-    }
-    args.push(color.reset);
-    console.log(args.join(""));
-}
+process
+    .on("SIGINT",  function () { shutdown("SIGINT");  })
+    .on("SIGQUIT", function () { shutdown("SIGQUIT"); })
+    .on("SIGTERM", function () { shutdown("SIGTERM"); })
+    .on("uncaughtException", function (error) {
+        log.error("=============== Uncaught exception! ===============");
+        log.error(error);
+    });
 
-function logresponse(req, res) {
-    log(req.socket.remoteAddress, ":", req.socket.remotePort, " ", req.method.toUpperCase(), " ", decodeURIComponent(req.url), " ", res.statusCode);
-}
-
-function logerror(error) {
-    if (typeof error === "object") {
-        if (error.stack) {
-            logerror(String(error.stack));
-        }
-        if (error.message) {
-            logerror(String(error.message));
-        }
-    } else {
-        var args = Array.prototype.slice.call(arguments, 0);
-        args.unshift(color.red);
-        args.push(color.reset);
-        console.log(args.join(""));
-    }
-}
-
-function logsimple() {
-    var args = Array.prototype.slice.call(arguments, 0);
-    console.log(args.join(""));
-}
-
-process.on("uncaughtException", function (error) {
-    logerror("=============== Uncaught exception! ===============");
-    logerror(error);
-});
-
-function shutdown() {
+function shutdown(signal) {
+    log.log("Received " + signal + " - Shutting down...");
     var count = 0;
     for (var client in clients) {
         if (!clients[client] || !clients[client].ws) continue;
@@ -1239,19 +1134,6 @@ function shutdown() {
         }
     }
 
-    if (count > 0) log("Closed " + count + " active WebSockets");
+    if (count > 0) log.log("Closed " + count + " active WebSockets");
     process.exit();
 }
-
-process.on("SIGINT", function () {
-    log("Received SIGINT - Shutting down...");
-    shutdown();
-});
-process.on("SIGQUIT", function () {
-    log("Received SIGQUIT - Shutting down...");
-    shutdown();
-});
-process.on("SIGTERM", function () {
-    log("Received SIGTERM - Shutting down...");
-    shutdown();
-});
