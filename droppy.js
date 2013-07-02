@@ -24,14 +24,14 @@
  SOFTWARE.
  ------------------------------------------------------------------------------
   TODOs:
-  - Touch events
-  - Thumbnail icons for images
-  - Async downloads through FileSystem API
-  - User privilege levels and a admin panel to add/remove users
+  - Improve perceived responsivness through preloading/caching of content
   - Rework client <-> server communication so that the server has more
     control over the client's current location in the file system
-  - Drag and drop moving of files/folders
+  - User privilege levels and a interface to add/remove users
+  - Drag and drop to move/copy entries
+  - Image thumbnails
   - Keybindings
+  - SVG icons
  --------------------------------------------------------------------------- */
 
 "use strict";
@@ -130,7 +130,7 @@ function prepareContent() {
     }
 
     // Concatenate CSS and JS data
-    logsimple(" ->> processing content...");
+    logsimple(" ->> preprocessing content...");
     resources.css.forEach(function (data) {
         out.css += data + "\n";
     });
@@ -561,7 +561,7 @@ function handleGET(req, res) {
 
     if (URI === "/") {
         handleResourceRequest(req, res, "base.html");
-    } else if (URI === "/content") {
+    } else if (/^\/content\//.test(URI)) {
         if (getCookie(req.headers.cookie)) {
             res.setHeader("X-Page-Type", "main");
             handleResourceRequest(req, res, "main.html");
@@ -674,7 +674,7 @@ function handleResourceRequest(req, res, resourceName) {
         res.end();
     } else {
         var ifNoneMatch = req.headers["if-none-match"] || "";
-        if (ifNoneMatch === cache[resourceName].etag && req.url !== "/content") {
+        if (ifNoneMatch === cache[resourceName].etag) {
             res.statusCode = 304;
             res.end();
         } else {
@@ -685,12 +685,12 @@ function handleResourceRequest(req, res, resourceName) {
                 config.debug && res.setHeader("X-Frame-Options", "DENY");
                 // Set the IE10 compatibility mode
                 if (req.headers["user-agent"].indexOf("MSIE") > 0)
-                    res.setHeader("X-UA-Compatible", "IE=Edge,chrome=1");
-            } else if (req.url === "/content") {
-                // Don't ever cache /content since it's content is dynamic
+                    res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
+            } else if (/^\/content\//.test(req.url)) {
+                // Don't ever cache /content since its data is dynamic
                 res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
             } else if (resourceName === "icon.ico") {
-                // Long cache on favicon, because some browsers seem to request them constantly
+                // Set a long cache on the favicon, as some browsers seem to request them constantly
                 res.setHeader("Cache-Control", "max-age=7257600");
             } else {
                 // All other content can be cached

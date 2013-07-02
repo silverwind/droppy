@@ -24,6 +24,7 @@ button, body, div, header, input, label, li, nav, p, section, span, ul {
     padding: 0;
 }
 
+
 li { list-style: none }
 a  { text-decoration: none }
 
@@ -282,8 +283,8 @@ body {
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 37px; height: 35px; padding: 0 .5em 0 1.5em } }
-@media all and (max-width: 1023px) { #path li { line-height: 32px; height: 30px } }
+@media all and (min-width: 1024px) { #path li { line-height: 37px; height: 35px; padding: 0 0.5em 0 1.5em } }
+@media all and (max-width: 1023px) { #path li { line-height: 32px; height: 30px; padding-left: 1em; } }
 @media all and (max-width:  639px) { #path li { line-height: 27px; height: 25px } }
 
 @media all and (min-width: 1024px) { #path li:first-child { line-height: 35px } }
@@ -474,9 +475,10 @@ body {
 
 #create-folder-label {
     color: #333;
-    font-size: 120px;
+    font-size: 125px;
     height: 100%;
     position: absolute;
+    top: -5px;
     text-align: center;
     width: 1em;
 }
@@ -490,13 +492,13 @@ body {
     font-size: 1.2em;
     height: 40px;
     left: 50%;
-    margin-left: -130px;
+    margin-left: -140px;
     margin-top: -20px;
     padding-left: 10px;
     position: absolute;
     top: 50%;
     transition: all .3s ease;
-    width: 260px;
+    width: 280px;
 }
 
 #create-folder-input.invalid { background: #f33; box-shadow: none; }
@@ -520,21 +522,20 @@ body {
     border-radius: 6px;
     bottom: 10px;
     cursor: pointer;
-    padding: 0 8px;
     position: absolute;
-    right: 20px;
-    text-shadow: none;
+    height: 24px;
+    right: 10px;
+    padding: 0 10px;
+    text-align: center;
     transition: all .25s ease;
     user-select: none;
 }
 
-#create-folder-button .icon {  margin-right: 5px }
+#create-folder-button .icon { margin-right: 5px }
 #create-folder-button:hover { background: #35a; color: #fff }
 #create-folder-button.invalid:hover { background: #f22 }
-/* =============================== About box =============================== */
 
-@media all and (min-width: 1024px) { #about-trigger { font-size: 1em; top: 2em } }
-@media all and (max-width:  639px) { #about-trigger { font-size: .8em; top: 2em } }
+/* =============================== About box =============================== */
 
 #about-box {
     background: #222;
@@ -907,13 +908,14 @@ input[type=checkbox] {
     text-align: center;
     top: 0;
     user-select: none;
+    cursor: default;
     width: 100%;
     z-index: -10;
 }
 
 #loading span {
-    animation: 2.5s linear 0s normal none infinite spin;
-    color: #666;
+    animation: 2s linear 0s normal none infinite spin;
+    color: #999;
     display: table-cell;
     font-size: 7em;
     vertical-align: middle;
