@@ -20,8 +20,8 @@ or just
 By default, the server will listen on [port 80](http://localhost/), which can be changed in config.json. The default login is user `droppy` with password `droppy`. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
 
 ##Supported Browsers
-- Firefox 21 or higher
-- Chrome 28 or higher
+- Firefox (last 2 versions)
+- Chrome (last 2 versions)
 - Internet Explorer 10 or higher
 
 In case of Chrome and Firefox, slightly older versions may work resonably well.

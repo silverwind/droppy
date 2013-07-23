@@ -526,7 +526,8 @@
             info.removeClass();
         }
 
-        var aboutbox = $("#about-box");
+        var aboutbox  = $("#about-box"),
+            configbox = $("#config-box");
 
         $("#about").register("click", function () {
             requestAnimation(function () {
@@ -535,10 +536,18 @@
             });
         });
 
+        $("#config").register("click", function () {
+            requestAnimation(function () {
+                configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
+                toggleCatcher();
+            });
+        });
+
         $("#click-catcher").register("click", function () {
             $("#click-catcher").attr("class", "out");
             createbox.attr("class", "out");
             aboutbox.attr("class", "out");
+            configbox.attr("class", "out");
         });
 
         $("#logout").register("click", function () {
@@ -666,7 +675,10 @@
 
         // Toggle the full-screen click catching frame to exit dialogs
         function toggleCatcher() {
-            if (aboutbox.attr("class") === "in" || createbox.attr("class") === "in") {
+            if (aboutbox.attr("class") === "in"  ||
+                createbox.attr("class") === "in" ||
+                configbox.attr("class") === "in"
+            ) {
                 $("#click-catcher").attr("class", "in");
             } else
                 $("#click-catcher").attr("class", "out");
