@@ -7,10 +7,10 @@
   "bugs": "https://github.com/silverwind/droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
-    "autoprefixer": "~0.5.20130629",
-    "clean-css": "~1.0.10",
+    "autoprefixer": "~0.6.20130721",
+    "clean-css": "~1.0.12",
     "formidable": "~1.0.14",
-    "graceful-fs": "~1.2.2",
+    "graceful-fs": "~2.0.0",
     "mime": "~1.2.9",
     "uglify-js": "~2.3.6",
     "wrench": "~1.5.1",

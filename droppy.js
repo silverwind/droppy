@@ -136,7 +136,7 @@ function prepareContent() {
     });
 
     // Add CSS vendor prefixes
-    out.css = autoprefixer.compile(out.css, ["last 2 versions"]);
+    out.css = autoprefixer("last 2 versions").compile(out.css);
     // Minify CSS
     !debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
     // Set the client debug variable to mirror the server's
@@ -638,7 +638,7 @@ function handleResourceRequest(req, res, resourceName) {
             fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
-        debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
+        debugcss = autoprefixer("last 2 versions").compile(debugcss);
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/css; charset=utf-8");
         res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
@@ -1094,7 +1094,7 @@ function setupDebugWatcher() {
             fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
-        debugcss = autoprefixer.compile(debugcss, ["last 2 versions"]);
+        debugcss = autoprefixer("last 2 versions").compile(debugcss);
 
         for (var cookie in clients) {
             var data = JSON.stringify({
