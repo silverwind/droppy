@@ -277,15 +277,15 @@
         });
 
         // Return submits the form
-        $(".login-input").register("keyup", function (e) {
-            if (e.keyCode === 13) {
+        $(".login-input").register("keyup", function (event) {
+            if (event.keyCode === 13) {
                 submitForm();
             }
         });
 
         // Spacebar toggles the checkbox
-        $("#remember").register("keyup", function (e) {
-            if (e.keyCode === 32) {
+        $("#remember").register("keyup", function (event) {
+            if (event.keyCode === 32) {
                 $("#check").trigger("click");
             }
         });

@@ -598,6 +598,7 @@ function handleGET(req, res) {
     }
 }
 //-----------------------------------------------------------------------------
+var blocked = [];
 function handlePOST(req, res) {
     var URI = decodeURIComponent(req.url);
     if (URI === "/upload") {
@@ -608,6 +609,18 @@ function handlePOST(req, res) {
         }
         handleUploadRequest(req, res);
     } else if (URI === "/login") {
+        // Throttle login attempts to 1 per second
+        if (blocked.indexOf(req.socket.remoteAddress) >= 0) {
+            res.end();
+            return;
+        }
+        blocked.push(req.socket.remoteAddress);
+        (function (ip) {
+            setTimeout(function () {
+                blocked.pop(ip);
+            }, 1000);
+        })(req.socket.remoteAddress);
+
         var body = "";
         req.on("data", function (data) {
             body += data;
@@ -987,14 +1000,16 @@ function getHash(string) {
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
 function addUser(user, password, privileged) {
+    var salt;
     if (db.users[user] !== undefined) {
         log.simple("User ", user, " already exists!");
         if (isCLI) process.exit(1);
     } else {
-        var salt = crypto.randomBytes(4).toString("hex");
-        db.users[user] = {};
-        db.users[user].hash = getHash(password + salt + user) + "$" + salt;
-        db.users[user].privileged = privileged;
+        salt = crypto.randomBytes(4).toString("hex");
+        db.users[user] = {
+            hash: getHash(password + salt + user) + "$" + salt,
+            privileged: privileged
+        };
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
         writeDB(function () {
             if (isCLI) log.simple("User ", user, " successfully added.");
@@ -1005,8 +1020,9 @@ function addUser(user, password, privileged) {
 //-----------------------------------------------------------------------------
 // Check if user/password is valid
 function isValidUser(user, password) {
+    var parts;
     if (db.users[user]) {
-        var parts = db.users[user].hash.split("$");
+        parts = db.users[user].hash.split("$");
         if (parts.length === 2 && parts[0] === getHash(password + parts[1] + user))
             return true;
     }
@@ -1034,6 +1050,8 @@ function getCookie(cookie) {
 
 function createCookie(req, res, postData) {
     var sessionID = crypto.randomBytes(32).toString("base64");
+    var priv = db.users[postData.username].privileged;
+
     if (postData.check === "on") {
         // Create a semi-permanent cookie
         var dateString = new Date(new Date().getTime() + 31536000000).toUTCString();
@@ -1043,7 +1061,7 @@ function createCookie(req, res, postData) {
         // TODO: Delete these session ids after a certain period of inactivity from the client
         res.setHeader("Set-Cookie", "sid=" + sessionID + ";");
     }
-    db.sessions[sessionID] = true;
+    db.sessions[sessionID] = {privileged : priv};
     writeDB();
 }
 
