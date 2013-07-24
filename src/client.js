@@ -673,7 +673,7 @@
             }
         }
 
-        // Toggle the full-screen click catching frame to exit dialogs
+        // Toggle the full-screen click catching frame to exit modal dialogs
         function toggleCatcher() {
             if (aboutbox.attr("class") === "in"  ||
                 createbox.attr("class") === "in" ||
@@ -710,7 +710,7 @@
         document.title = [prefix, suffix].join(" - ");
     }
 
-    // Listen for "popstate" events, which indicate the user navigated back
+    // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         (function queue(time) {
             if ((!socketWait && !isAnimating) || time > 2000)
@@ -737,7 +737,7 @@
                 currentFolder = path;
                 sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
 
-                // Skip the push if we're already navigation through history
+                // Skip the push if we're already navigating through history
                 if (!skipPush) window.history.pushState(null, null, currentFolder);
             } else
                 setTimeout(queue, 50, time + 50);

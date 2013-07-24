@@ -32,6 +32,7 @@
   - Image thumbnails
   - Keybindings
   - SVG icons
+  - Modularize both client and server javascript code
  --------------------------------------------------------------------------- */
 
 "use strict";
@@ -78,7 +79,7 @@ log.simple(" ->> running on node " + process.version);
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
 if (Object.keys(db.users).length < 1) {
-    addUser("droppy", "droppy");
+    addUser("droppy", "droppy", true);
 }
 
 // Copy/Minify JS,CSS and HTML content
@@ -362,6 +363,9 @@ function setupSocket(server) {
                     });
                 });
 
+                break;
+            case "GET_USERS":
+                //Object.keys(db.users);
                 break;
             }
         });
@@ -982,13 +986,15 @@ function getHash(string) {
 }
 //-----------------------------------------------------------------------------
 // Add a user to the database save it to disk
-function addUser(user, password) {
+function addUser(user, password, privileged) {
     if (db.users[user] !== undefined) {
         log.simple("User ", user, " already exists!");
         if (isCLI) process.exit(1);
     } else {
         var salt = crypto.randomBytes(4).toString("hex");
-        db.users[user] = getHash(password + salt + user) + "$" + salt;
+        db.users[user] = {};
+        db.users[user].hash = getHash(password + salt + user) + "$" + salt;
+        db.users[user].privileged = privileged;
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
         writeDB(function () {
             if (isCLI) log.simple("User ", user, " successfully added.");
@@ -1000,7 +1006,7 @@ function addUser(user, password) {
 // Check if user/password is valid
 function isValidUser(user, password) {
     if (db.users[user]) {
-        var parts = db.users[user].split("$");
+        var parts = db.users[user].hash.split("$");
         if (parts.length === 2 && parts[0] === getHash(password + parts[1] + user))
             return true;
     }
