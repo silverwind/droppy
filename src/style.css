@@ -28,7 +28,7 @@ button, body, div, header, input, label, li, nav, p, section, span, ul {
 li { list-style: none }
 a  { text-decoration: none }
 
-input:focus, button:focus, div:focus { outline: none }
+input:focus, button:focus, div:focus, a:focus { outline: none }
 input::-moz-focus-inner, button::-moz-focus-inner { border: 0; padding: 0 }
 button, input { font-family: inherit; font-size: 100%; margin: 0; line-height: normal; border: none }
 button, html input[type="button"], input[type="submit"] { -webkit-appearance: button; cursor: pointer }
@@ -652,10 +652,10 @@ body {
 
 #userlist-header {
     display: block;
-    margin: 1em 1em .5em 1em;
+    margin: .75em 0 .25em 0;
     color: #ddd;
     text-align: center;
-    font-size: 1.5em;
+    font-size: 1.25em;
 }
 
 #userlist {
@@ -665,12 +665,26 @@ body {
 .user-entry {
     line-height: 1.4em;
     cursor: pointer;
-    padding: 0 .4em;
+    padding: 0 .2em;
+    color: #bbb;
+    position: relative;
+    clear: right;
 }
 
-.user-entry:hover {
+
+.user-entry:hover, .user-entry:hover .user-edit {
     background: #333;
     border-radius: 6px;
+    color: #fff;
+}
+
+.user-edit {
+    float: left;
+    clear: right;
+    position: relative;
+    left: 0;
+    font-size: .66em;
+    width: 100%;
 }
 
 .user-delete, .user-edit {
@@ -681,7 +695,6 @@ body {
 .user-delete:hover {
     color: #f22;
 }
-
 
 /* ============================== Login Form =============================== */
 

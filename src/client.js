@@ -28,7 +28,7 @@
             // is fired on the element, we know it is ready to be transitioned.
             this.css("animation", "nodeInserted 0.001s");
 
-            // Set the new class as a data attribute. T
+            // Set the new class as a data attribute.
             this.data("newclass", newclass);
         } else {
             // If we don't support animations, fallback to a simple timeout
@@ -197,6 +197,9 @@
                 // TODO: UI for this
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
                 break;
+            case "USER_LIST":
+                console.log(msg.users);
+                break;
             }
         };
     }
@@ -237,7 +240,7 @@
     });
 
 // ============================================================================
-//  Authentication page JS
+//  Authentication page
 // ============================================================================
     var du, dp;
     function initAuthPage() {
@@ -249,7 +252,7 @@
         // Switch in username and password fields from a dummy form in the
         // base page. This allows password saving in all browsers. Chrome
         // additionally needs the form to submit to an actual URL, so we add
-        // an iframe where Chrome can post to.
+        // an iframe where Chrome can POST to.
         // Relevant bugs:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=355063
         // http://code.google.com/p/chromium/issues/detail?id=43219
@@ -324,7 +327,7 @@
         }
     }
 // ============================================================================
-//  Main page JS
+//  Main page
 // ============================================================================
     function initMainPage() {
         // Initialize the current folder, in case the user navigated to it through the URL.
@@ -334,8 +337,8 @@
         openSocket();
 
         // Stop dragenter and dragover from killing our drop event
-        $(document.documentElement).register("dragenter", function (e) { e.preventDefault(); });
-        $(document.documentElement).register("dragover", function (e) { e.preventDefault(); });
+        $(document.documentElement).register("dragenter", function (event) { event.preventDefault(); });
+        $(document.documentElement).register("dragover", function (event) { event.preventDefault(); });
 
         // File drop handler
         $(document.documentElement).register("drop", function (event) {
@@ -484,8 +487,8 @@
         });
 
         // Handler for the input of the folder name
-        nameinput.register("keyup", function (e) {
-            if (e.keyCode === 27) { // Escape Key
+        nameinput.register("keyup", function (event) {
+            if (event.keyCode === 27) { // Escape Key
                 createbox.attr("class", "out");
                 toggleCatcher();
             }
@@ -508,7 +511,7 @@
                 info.attr("class", "in");
             } else {
                 createButton.register("click", createFolderAndHide);
-                if (e.keyCode === 13) // Return Key
+                if (event.keyCode === 13) // Return Key
                     createFolderAndHide();
             }
         });
@@ -539,8 +542,13 @@
         $("#config").register("click", function () {
             requestAnimation(function () {
                 configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
+                sendMessage("GET_USERS");
                 toggleCatcher();
             });
+        });
+
+        $(".user-entry").register("click", function () {
+            $(this).find(".user-edit").slideToggle();
         });
 
         $("#click-catcher").register("click", function () {

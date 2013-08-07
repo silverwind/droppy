@@ -34,7 +34,6 @@
   - SVG icons
   - Modularize both client and server javascript code
  --------------------------------------------------------------------------- */
-
 "use strict";
 
 var helpers         = require("./lib/helpers.js"),
@@ -365,7 +364,23 @@ function setupSocket(server) {
 
                 break;
             case "GET_USERS":
-                //Object.keys(db.users);
+                // Only allow priviledged users to administer accounts
+                if (!db.sessions[cookie].privileged) {
+                    return;
+                }
+                // Only send relevant data for the user list
+                var userlist = {};
+                for (var user in db.users) {
+                    userlist[user] = {
+                        "privileged": db.users[user].privileged
+                    };
+                }
+                var data = JSON.stringify({
+                    type   : "USER_LIST",
+                    users  : userlist
+                });
+
+                send(clients[cookie].ws, data);
                 break;
             }
         });

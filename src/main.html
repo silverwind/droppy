@@ -36,7 +36,7 @@
 <div id="click-catcher" class="out"></div>
 <div id="create-folder-box" class="out">
 	<label id="create-folder-label" class="icon"></label>
-	<input type="text" id="create-folder-input" placeholder="Folder Name">
+	<input type="text" id="create-folder-input" placeholder="Folder Name" />
 	<div id="create-folder-info">Invalid characters!</div>
 	<div id="create-folder-button"><span class="icon"></span>Create</div>
 </div>
@@ -52,22 +52,35 @@
 	</div>
 </div>
 <div id="config-box" class="out">
-	<span id="userlist-header">Active Users</span>
+	<!-- TODO: Generate this from JS -->
+	<span id="userlist-header">User Configuration</span>
 	<ul id="userlist">
 		<li class="user-entry">
 			<span class="user-name">droppy</span>
 			<span class="user-delete icon"></span>
-			<span class="user-edit icon"></span>
+			<div class="user-edit">
+				<input id="user-edit-password" type="password" placeholder="xxx" />
+				<input id="user-edit-priv" type="checkbox" checked="checked" name="user-edit-priv" />
+				<label for="user-edit-priv"><span>priviledged</span></label>
+			</div>
 		</li>
 		<li class="user-entry">
 			<span class="user-name">anotheruser</span>
 			<span class="user-delete icon"></span>
-			<span class="user-edit icon"></span>
+			<div class="user-edit">
+				<input id="user-edit-password" type="password" placeholder="xxx" />
+				<input id="user-edit-priv" type="checkbox" checked="checked" name="user-edit-priv" />
+				<label for="user-edit-priv"><span>priviledged</span></label>
+			</div>
 		</li>
 		<li class="user-entry">
 			<span class="user-name">yetanotheruser</span>
 			<span class="user-delete icon"></span>
-			<span class="user-edit icon"></span>
+			<div class="user-edit">
+				<input id="user-edit-password" type="password" placeholder="xxx" />
+				<input id="user-edit-priv" type="checkbox" checked="checked" name="user-edit-priv" />
+				<label for="user-edit-priv"><span>priviledged</span></label>
+			</div>
 		</li>
 	</ul>
 </div>
