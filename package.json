@@ -7,16 +7,14 @@
   "bugs": "https://github.com/silverwind/droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
-    "autoprefixer": "~0.6.20130721",
+    "autoprefixer": "~0.7.20130808",
     "clean-css": "~1.0.12",
     "formidable": "~1.0.14",
     "graceful-fs": "~2.0.0",
-    "mime": "~1.2.9",
+    "mime": "~1.2.10",
     "uglify-js": "~2.3.6",
     "wrench": "~1.5.1",
-    "ws": "~0.4.27"
-  },
-  "devDependencies": {
+    "ws": "~0.4.27",
     "grunt-exec": "~0.4.2",
     "grunt": "~0.4.1"
   },
@@ -27,7 +25,7 @@
     "keys": "./keys"
   },
   "engines": {
-    "node": ">=0.8.0"
+    "node": "~0.10.0"
   },
   "keywords": [
     "http",

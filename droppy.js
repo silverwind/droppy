@@ -1013,7 +1013,7 @@ function getHash(string) {
     return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
 }
 //-----------------------------------------------------------------------------
-// Add a user to the database save it to disk
+// Add a user to the database and save it to disk
 function addUser(user, password, privileged) {
     var salt;
     if (db.users[user] !== undefined) {
