@@ -549,11 +549,11 @@
 
         $(".user-entry").register("click", function () {
             $(this)
-                .addClass("user-highlight");
+                .toggleClass("user-highlight");
             $(this).find(".user-edit")
-                .removeClass("edit-hidden")
-                .addClass("edit-shown")
-                .addClass("user-highlight");
+                .toggleClass("edit-hidden")
+                .toggleClass("edit-shown")
+                .toggleClass("user-highlight");
 
             $(this).siblings()
                 .removeClass("user-highlight");
