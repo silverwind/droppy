@@ -132,6 +132,9 @@ function prepareContent() {
         out.css += data + "\n";
     });
     resources.js.forEach(function (data) {
+        // Append a semicolon to each javascript file to make sure it's
+        // properly terminated. The minifier afterwards will take care of
+        // any double-semicolons and whitespace.
         out.js += data + ";\n";
     });
 
