@@ -548,7 +548,19 @@
         });
 
         $(".user-entry").register("click", function () {
-            $(this).find(".user-edit").slideToggle();
+            $(this)
+                .addClass("user-highlight");
+            $(this).find(".user-edit")
+                .removeClass("edit-hidden")
+                .addClass("edit-shown")
+                .addClass("user-highlight");
+
+            $(this).siblings()
+                .removeClass("user-highlight");
+            $(this).siblings().find(".user-edit")
+                .removeClass("edit-shown")
+                .addClass("edit-hidden")
+                .removeClass("user-highlight");
         });
 
         $("#click-catcher").register("click", function () {

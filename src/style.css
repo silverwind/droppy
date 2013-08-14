@@ -665,16 +665,18 @@ body {
 .user-entry {
     line-height: 1.4em;
     cursor: pointer;
-    padding: 0 .2em;
     color: #bbb;
     position: relative;
     clear: right;
 }
 
+.user-entry:hover:not(.user-highlight), .user-entry:hover .user-edit:not(.user-highlight) {
+    background: #222;
+    color: #eee;
+}
 
-.user-entry:hover, .user-entry:hover .user-edit {
-    background: #333;
-    /*border-radius: 3px;*/
+.user-highlight {
+    background: #444;
     color: #fff;
 }
 
@@ -683,8 +685,17 @@ body {
     clear: right;
     position: relative;
     left: 0;
+    right: 0;
     font-size: .66em;
     width: 100%;
+}
+
+.edit-hidden {
+    display: none;
+}
+
+.edit-shown {
+    display: block;
 }
 
 .user-delete, .user-edit {
@@ -885,7 +896,6 @@ input[type=checkbox] {
     width: 100%;
 }
 
-#submit:focus  { box-shadow: inset 0 0 15px 5px rgba(0, 0, 0, .5) }
 #submit:active { transform: translateY(3px) }
 #submit:hover  { opacity: .9 }
 
