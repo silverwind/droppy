@@ -935,8 +935,10 @@ function handleArguments() {
     switch (option) {
     case "-adduser":
         if (args.length === 3) {
+            readConfig();
             readDB();
-            addUser(args[1], args[2]);
+            addUser(args[1], args[2], true); //TODO: Privilege flag
+            process.exit(1);
         } else {
             printUsage();
             process.exit(1);
@@ -1029,11 +1031,10 @@ function addUser(user, password, privileged) {
             hash: getHash(password + salt + user) + "$" + salt,
             privileged: privileged
         };
-        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-        writeDB(function () {
-            if (isCLI) log.simple("User ", user, " successfully added.");
-            if (isCLI) process.exit();
-        });
+       // fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
+        writeDB();
+        if (isCLI) log.simple("User ", user, " successfully added.");
+        if (isCLI) process.exit(1);
     }
 }
 //-----------------------------------------------------------------------------
@@ -1085,13 +1086,7 @@ function createCookie(req, res, postData) {
 }
 
 function writeDB(callback) {
-    fs.writeFile(config.db, JSON.stringify(db, null, 4), function (error) {
-        if (error) {
-            log.error("Error writing ", config.db, "\n", util.inspect(error));
-            if (isCLI) process.exit(1);
-        }
-        if (callback) callback();
-    });
+    fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
 }
 //============================================================================
 // Misc helper functions
