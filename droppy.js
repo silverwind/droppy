@@ -629,6 +629,7 @@ function handlePOST(req, res) {
     } else if (URI === "/login") {
         // Throttle login attempts to 1 per second
         if (blocked.indexOf(req.socket.remoteAddress) >= 0) {
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
             res.end();
             return;
         }
@@ -658,7 +659,7 @@ function handlePOST(req, res) {
             }
             var json = JSON.stringify(response);
             res.statusCode = 200;
-            res.setHeader("Content-Type", "text/html");
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
             res.setHeader("Content-Length", json.length);
             res.end(json);
             log.response(req, res);

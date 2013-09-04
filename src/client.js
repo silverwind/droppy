@@ -118,9 +118,9 @@
                         finalize();
                         if (hasLoggedOut) {
                             setTimeout(function () {
-                                $("#login-info").attr("class", "info");
+                                $("#login-info-box").attr("class", "info");
                                 $("#login-info").html("Logged out!");
-                                $("#login-info").fadeIn(250);
+                                $("#login-info-box").fadeIn(250);
                             }, 250);
                         }
                     }, 250);
@@ -245,7 +245,6 @@
     var du, dp;
     function initAuthPage() {
         var loginform = $("#login-form"),
-            logininfo = $("#login-info"),
             submit    = $("#submit"),
             form      = $("#form");
 
@@ -276,7 +275,7 @@
         $(".login-input").register("click keydown focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
-            logininfo.fadeOut(300);
+            $("#login-info-box").fadeOut(300);
         });
 
         // Return submits the form
@@ -312,15 +311,16 @@
                     } else {
                         submit.addClass("invalid");
                         loginform.addClass("invalid");
-                        if ($("#login-info").is(":visible")) {
+                        if ($("#login-info-box").is(":visible")) {
                             $("#login-info").addClass("shake");
                             setTimeout(function () {
                                 $("#login-info").removeClass("shake");
                             }, 500);
+                        } else {
+                            $("#login-info-box").addClass("error");
+                            $("#login-info").html("Wrong login!");
+                            $("#login-info-box").fadeIn(300);
                         }
-                        $("#login-info").addClass("error");
-                        $("#login-info").html("Wrong login!");
-                        $("#login-info").fadeIn(300);
                     }
                 }
             });

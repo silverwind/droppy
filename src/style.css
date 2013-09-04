@@ -798,27 +798,48 @@ body {
     #login-icon span { font-size: 13em }
 }
 
-#login-info {
-    border-radius: 6px;
-    color: #eee;
-    display: none;
+#login-info-box {
+    border-radius: 6px 6px 0 0;
+    top: 0;
+    color: #fff;
+    font-size: 1.5em;
+    height: 60px;
     left: 50%;
-    line-height: 1.5em;
-    margin-left: -75px;
+    margin-left: -300px;
     position: absolute;
     text-align: center;
-    top: 1.25em;
-    width: 150px;
+    display: none;
+    width: 100%;
 }
 
-#login-info.info  { color: #9c0; background: rgba(16,16,16,0.6); box-shadow: 0 0 0 3px #9c0 }
-#login-info.error { color: #f44; background: rgba(16,16,16,0.6); box-shadow: 0 0 0 3px #f44 }
-@media all and (max-height: 360px) { #login-info { top: 2em } }
+#login-info-box.info  { background: linear-gradient(#7a0, #9c0); text-shadow: 2px 2px 0 #581; }
+#login-info-box.error { background: linear-gradient(#f43, #d21); text-shadow: 2px 2px 0 #811; }
 
-#login-info.shake { animation: shake .4s ease }
+@media all and (max-width: 639px), all and (max-height: 399px) {
+    #login-info-box {
+        border-radius: 0;
+        height: 32px;
+        left: 0;
+        margin-left: 0;
+        position: fixed;
+    }
+}
+
+#login-info {
+    display: inline-block;
+    line-height: 60px;
+}
+
+@media all and (max-width: 639px), all and (max-height: 399px) {
+    #login-info {
+        line-height: 32px;
+    }
+}
+
+#login-info.shake { animation: shake .5s ease }
 @keyframes shake {
-    10%, 30%, 50%, 70%, 90% {transform: translateX(-8px)}
-    20%, 40%, 60%, 80% {transform: translateX(8px)}
+    10%, 30%, 50%, 70%, 90% {transform: translateX(-6px)}
+    20%, 40%, 60%, 80% {transform: translateX(6px)}
 }
 
 .login-input {
