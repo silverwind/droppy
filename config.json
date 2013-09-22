@@ -1,7 +1,7 @@
 {
     "debug"        : true,
-    "useHTTPS"     : false,
-    "port"         : 80,
+    "useHTTPS"     : true,
+    "port"         : 443,
     "readInterval" : 50,
     "filesMode"    : "644",
     "dirMode"      : "755",

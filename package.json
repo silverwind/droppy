@@ -9,14 +9,15 @@
   "dependencies": {
     "autoprefixer": "~0.8.20130919",
     "clean-css": "~1.1.1",
-    "multiparty": "~2.1.8",
     "graceful-fs": "~2.0.1",
-    "mime": "~1.2.11",
-    "uglify-js": "~2.4.0",
-    "wrench": "~1.5.1",
-    "ws": "~0.4.30",
+    "grunt": "~0.4.1",
     "grunt-exec": "~0.4.2",
-    "grunt": "~0.4.1"
+    "mime": "~1.2.11",
+    "multiparty": "~2.1.8",
+    "uglify-js": "~2.4.0",
+    "spdy": "~1.11.0",
+    "wrench": "~1.5.1",
+    "ws": "~0.4.30"
   },
   "directories": {
     "src": "./src",

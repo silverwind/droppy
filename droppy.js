@@ -202,7 +202,7 @@ function createListener() {
         try {
             key = fs.readFileSync(config.httpsKey);
             cert = fs.readFileSync(config.httpsCert);
-            server = require("https").createServer({key: key, cert: cert}, onRequest);
+            server = require("spdy").createServer({key: key, cert: cert}, onRequest);
         } catch (error) {
             log.error("Error reading SSL certificate or key.\n", util.inspect(error));
             process.exit(1);
