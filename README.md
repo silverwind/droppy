@@ -48,7 +48,7 @@ Configuration is done through the `config.json` file, located in the same direct
 }
 ````
 
-#General options
+###General options
 - `debug`: Skip resource minification and enable automatic CSS reloading.
 - `useHTTPS`: Whether the server should use HTTPS.
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
@@ -59,7 +59,7 @@ Configuration is done through the `config.json` file, located in the same direct
 - `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Linux, you can probably go higher.
 - `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useHTTPS` is enabled. Sample self-signed files are provided.
 
-#Path options
+###Path options
 - `db` Location of the user database file.
 - `filesDir`: The directory which serves as the server's root.
 - `incomingDir`: The directory which serves as the server's root.
