@@ -98,7 +98,10 @@ cacheResources(config.resDir, function () {
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
 function prepareContent() {
-    var out = {},
+    var out = {
+            css : "",
+            js  : ""
+        },
         resources = {
             css  : ["style.css", "sprites.css"],
             js   : ["modernizr.js", "jquery.js", "client.js"],
@@ -202,7 +205,7 @@ function createListener() {
         try {
             key = fs.readFileSync(config.httpsKey);
             cert = fs.readFileSync(config.httpsCert);
-            server = require("spdy").createServer({key: key, cert: cert}, onRequest);
+            server = require("spdy").createServer({key: key, cert: cert, windowSize: 1024}, onRequest);
         } catch (error) {
             log.error("Error reading SSL certificate or key.\n", util.inspect(error));
             process.exit(1);
@@ -225,7 +228,6 @@ function createListener() {
         process.exit(1);
     });
 
-    // Bind to 8080 on jitsu
     var port =  isLive ? process.env.PORT : config.port;
     server.listen(port);
 }
