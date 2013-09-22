@@ -87,12 +87,10 @@ prepareContent();
 // Read and cache all resources
 log.simple(" ->> caching resources...\n");
 cacheResources(config.resDir, function () {
-    // Set up the exposed files folder
-    setupFilesDir();
-
+    // Set up our directories
+    setupDirectories();
     // Clean up our shortened links
     cleanUpLinks();
-
     // Bind to the listening port
     createListener();
 });
@@ -163,16 +161,17 @@ function prepareContent() {
 }
 //-----------------------------------------------------------------------------
 // Set up the directory for files
-function setupFilesDir() {
-    fs.mkdir(config.filesDir, config.dirMode, function (error) {
+function setupDirectories() {
+    function onerror(error) {
         if (!error || error.code === "EEXIST") {
             return true;
         } else {
-            log.error("Error accessing ", config.filesDir);
             log.error(util.inspect(error));
             process.exit(1);
         }
-    });
+    }
+    fs.mkdir(config.filesDir, config.dirMode, onerror);
+    fs.mkdir(config.incomingDir, config.dirMode, onerror);
 }
 //-----------------------------------------------------------------------------
 // Clean up our shortened links by removing links to nonexistant files
