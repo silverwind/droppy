@@ -658,7 +658,7 @@
 
         function uploadDone() {
             // After this point, the server is moving the temp files into place
-            // and we finalized the upload once UPLOAD_DONE fires.
+            // and we finalize the upload once UPLOAD_DONE fires.
             title.html("Processing Files...");
             updateTitle("100%");
             prog.css("width", "100%");

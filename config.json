@@ -1,6 +1,6 @@
 {
     "debug"        : true,
-    "useSSL"       : false,
+    "useHTTPS"     : false,
     "port"         : 80,
     "readInterval" : 50,
     "filesMode"    : "644",
@@ -11,6 +11,7 @@
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
     "filesDir"     : "./files/",
+    "incomingDir"  : "./incoming/",
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }

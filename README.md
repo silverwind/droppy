@@ -25,6 +25,7 @@ By default, the server will listen on [port 80](http://localhost/), which can be
 - Internet Explorer 10 or higher
 
 In case of Chrome and Firefox, slightly older versions may work resonably well.
+
 ##Configuration
 Configuration is done through the `config.json` file, located in the same directory as `droppy.js`.
 ````javascript
@@ -41,21 +42,26 @@ Configuration is done through the `config.json` file, located in the same direct
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
     "filesDir"     : "./files/",
+    "incomingDir"  : "./incoming/",
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }
 ````
 
-- `debug`: With debug enabled, client JS/CSS resources won't be minfied and the stylesheet will get refreshed automatically when changed on the server.
-- `useSSL`: Whether the server should use HTTPS (SSL).
+#General options
+- `debug`: Skip resource minification and enable automatic CSS reloading.
+- `useHTTPS`: Whether the server should use HTTPS.
 - `port`: The listening port. For HTTPS, you may want to set it to 443.
-- `readInterval`: The minimum interval in milliseconds in which updates to a directory are sent. In case a directory gets constantly written to, this helps to keep the amount of updates (and I/O) in check.
+- `readInterval`: The minimum time gap in milliseconds in which updates to a directory are sent.
 - `filesMode`: The access mask with which files are created.
 - `dirMode`: The access mask with which directories are created.
-- `linkLength` : The amount of characters in a shortened link to a file
+- `linkLength` : The amount of characters in a shortened link to a file.
 - `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Linux, you can probably go higher.
-- `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useSSL` is enabled. Sample self-signed files are provided.
+- `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useHTTPS` is enabled. Sample self-signed files are provided.
+
+#Path options
 - `db` Location of the user database file.
 - `filesDir`: The directory which serves as the server's root.
+- `incomingDir`: The directory which serves as the server's root.
 - `resDir`: The directory which contains the compiled resources and images.
 - `srcDir`: The directory which contains the html/js/css sources.

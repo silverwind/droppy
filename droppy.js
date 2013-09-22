@@ -41,9 +41,9 @@ var helpers         = require("./lib/helpers.js"),
     autoprefixer    = require("autoprefixer"),
     cleancss        = require("clean-css"),
     crypto          = require("crypto"),
-    formidable      = require("formidable"),
     fs              = require("graceful-fs"),
     mime            = require("mime"),
+    multiparty      = require("multiparty"),
     path            = require("path"),
     querystring     = require("querystring"),
     uglify          = require("uglify-js"),
@@ -62,7 +62,7 @@ var cache        = {},
     debugcss     = false,
     config       = false,
     isCLI        = (process.argv.length > 2),
-    isJitsu      = (process.env.NODE_ENV === "production");
+    isLive       = (process.env.NODE_ENV === "production");
 
 // Argument handler
 if (isCLI) handleArguments();
@@ -71,7 +71,7 @@ readConfig();
 
 fs.MAX_OPEN = config.maxOpen;
 debug = config.debug;
-log.useTimestamp = !isJitsu;
+log.useTimestamp = !isLive;
 log.simple(helpers.logo);
 log.simple(" ->> running on node " + process.version);
 
@@ -196,7 +196,7 @@ function cleanUpLinks() {
 //-----------------------------------------------------------------------------
 // Bind to listening port
 function createListener() {
-    if (!config.useSSL) {
+    if (!config.useHTTPS) {
         server = require("http").createServer(onRequest);
     } else {
         var key, cert;
@@ -227,7 +227,7 @@ function createListener() {
     });
 
     // Bind to 8080 on jitsu
-    var port =  isJitsu ? process.env.PORT : config.port;
+    var port =  isLive ? process.env.PORT : config.port;
     server.listen(port);
 }
 
@@ -786,99 +786,44 @@ function handleUploadRequest(req, res) {
             return;
         }
 
-        var form = new formidable.IncomingForm();
-        var basePath = path.join(config.filesDir + clients[cookie].directory);
+        var form = new multiparty.Form();
+        form.uploadDir = config.incomingDir;
+        form.autoFiles = true;
 
-        form.type = "multipart";
         form.parse(req, function (error, fields, files) {
-            res.writeHead(200, {"content-type": "text/plain"});
+            res.writeHead(200);
             res.end();
             log.response(req, res);
+            if (typeof files !== "object") return;
             if (error && error.message !== "Request aborted") {
                 log.error(error);
-                readDirectory(clients[cookie].directory, function () {
-                    sendFiles(cookie, "UPLOAD_DONE");
-                });
-            }
-            var createdPaths = {};
-            for (var file in files) {
-                try {
-                    var fullPath = path.dirname(path.join(basePath, file));
-                    if (!createdPaths[fullPath]) {
-                        try {
-                            wrench.mkdirSyncRecursive(fullPath, config.dirMode);
-                            createdPaths[fullPath] = true;
-                        } catch (error) {
-                            log.error(error);
-                        }
-                    }
-                } catch (error) {
-                    if (error || error.code !== "EEXIST") log.error(error);
-                }
+                done();
             }
 
-        });
-
-        // Process files in batches of 100s
-        var files = [], total = 0;
-        form.on("fileBegin", function (name, file) {
-            var set = Math.floor(total / 100);
-            if (!files[set]) files[set] = [];
-            files[Math.floor(total / 100)].push({
-                "temppath" : file.path,
-                "savepath" : path.join(basePath, file.name)
-            });
-            total++;
-        });
-
-        form.on("end", function () {
-            log.log(socket, " Received ", total, " files.");
-            (function processNext(next) {
-                var cbCount = 0, cbFired = 0;
-                while (next.length > 0) {
-                    cbCount++;
-                    processFile(next.pop(), function () {
-                        cbFired++;
-                        if (next.length === 0 && cbCount === cbFired) {
-                            if (files.length > 0) {
-                                processNext(files.pop());
-                            } else {
-                                readDirectory(clients[cookie].directory, function () {
-                                    sendFiles(cookie, "UPLOAD_DONE");
-                                });
-                            }
-                        }
-                    });
-                }
-            })(files.pop());
-
-            function processFile(file, callback) {
-                var input = fs.createReadStream(file.temppath, {bufferSize: 4096});
-                var output = fs.createWriteStream(file.savepath, {mode: config.filesMode});
-
-                input.on("error",  function (error) { log.error(error); callback(); });
-                output.on("error", function (error) { log.error(error); callback(); });
-
-                input.on("close", function () {
-                    fs.unlink(this.path, function (error) {
-                        if (error) log.error(error);
-                    });
-                    callback();
+            var names = Object.keys(files);
+            while (names.length > 0) {
+                var name = names.pop();
+                var src = path.join(config.incomingDir, path.basename(files[name].path));
+                var dst = path.join(config.filesDir, clients[cookie].directory, files[name].originalFilename);
+                wrench.mkdirSyncRecursive(path.dirname(dst), config.dirMode);
+                fs.rename(src, dst, function () {
+                    if (names.length === 0) done();
                 });
-
-                input.pipe(output);
             }
         });
 
         form.on("error", function (error) {
-            if (error && error.message === "Request aborted") {
+            if (error && error.message === "Request aborted")
                 log.log(socket, " Upload cancelled.");
-            } else {
+            else
                 log.error(error);
-            }
-            readDirectory(clients[cookie].directory, function () {
-                sendFiles(cookie, "UPLOAD_DONE");
-            });
+            done();
+        });
+    }
+
+    function done() {
+        readDirectory(clients[cookie].directory, function () {
+            sendFiles(cookie, "UPLOAD_DONE");
         });
     }
 }
@@ -972,8 +917,8 @@ function readConfig() {
     }
 
     var opts = [
-        "debug", "useSSL", "port", "readInterval", "filesMode", "dirMode",
-        "linkLength", "maxOpen", "httpsKey", "httpsCert", "db", "filesDir", "resDir", "srcDir"
+        "debug", "useHTTPS", "port", "readInterval", "filesMode", "dirMode", "linkLength",
+        "maxOpen", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
     ];
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
