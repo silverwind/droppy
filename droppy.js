@@ -224,7 +224,7 @@ function createListener() {
             cert             : cert,
             windowSize       : 1024,
             honorCipherOrder : true,
-            ciphers          : "DHE-RSA-AES128-SHA256:AES128-GCM-SHA256:HIGH:!MD5:!aNULL:!EDH",
+            ciphers          : "AES128-GCM-SHA256:!RC4:!MD5:!aNULL:!NULL:!EDH:HIGH",
             secureProtocol   : "SSLv23_server_method"
         };
 
