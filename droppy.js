@@ -46,6 +46,7 @@ var helpers         = require("./lib/helpers.js"),
     multiparty      = require("multiparty"),
     path            = require("path"),
     querystring     = require("querystring"),
+    spdy            = require("spdy"),
     uglify          = require("uglify-js"),
     util            = require("util"),
     WebSocketServer = require("ws").Server,
@@ -205,11 +206,40 @@ function createListener() {
         try {
             key = fs.readFileSync(config.httpsKey);
             cert = fs.readFileSync(config.httpsCert);
-            server = require("spdy").createServer({key: key, cert: cert, windowSize: 1024}, onRequest);
         } catch (error) {
             log.error("Error reading SSL certificate or key.\n", util.inspect(error));
             process.exit(1);
         }
+
+        // TLS options
+        // TODOs :
+        // - Find the correct SSL_METHOD for TLS-only negotiation
+        // - Add ECDHE cipers once node supports it
+        // References:
+        // - https://github.com/joyent/node/issues/4315
+        // - http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS
+        // - http://baudehlo.wordpress.com/2013/06/24/setting-up-perfect-forward-secrecy-for-nginx-or-stud/
+        var options = {
+            key              : key,
+            cert             : cert,
+            windowSize       : 1024,
+            honorCipherOrder : true,
+            ciphers          : "DHE-RSA-AES128-SHA256:AES128-GCM-SHA256:HIGH:!MD5:!aNULL:!EDH",
+            secureProtocol   : "SSLv23_server_method"
+        };
+
+        server = spdy.createServer(options, onRequest);
+
+        // TLS session resumption
+        var sessions = {};
+
+        server.on("newSession", function (id, data) {
+            sessions[id] = data;
+        });
+
+        server.on("resumeSession", function (id, callback) {
+            callback(null, (id in sessions) ? sessions[id] : null);
+        });
     }
 
     server.on("listening", function () {
