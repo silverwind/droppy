@@ -58,10 +58,9 @@ var cache        = {},
     db           = {},
     dirs         = {},
     watchedDirs  = {},
-    server       = false,
-    debug        = false,
-    debugcss     = false,
-    config       = false,
+    server       = null,
+    cssCache     = null,
+    config       = null,
     isCLI        = (process.argv.length > 2),
     isLive       = (process.env.NODE_ENV === "production");
 
@@ -69,10 +68,8 @@ var cache        = {},
 if (isCLI) handleArguments();
 
 readConfig();
-
 fs.MAX_OPEN = config.maxOpen;
-debug = config.debug;
-log.useTimestamp = !isLive;
+log.useTimestamp = config.timestamps;
 log.simple(helpers.logo);
 log.simple(" ->> running on node " + process.version);
 
@@ -143,11 +140,11 @@ function prepareContent() {
     // Add CSS vendor prefixes
     out.css = autoprefixer("last 2 versions").compile(out.css);
     // Minify CSS
-    !debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
+    !config.debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
     // Set the client debug variable to mirror the server's
-    out.js = out.js.replace("var debug;", debug ? "var debug = true;" : "var debug = false;");
+    out.js = out.js.replace("var debug;", config.debug ? "var debug = true;" : "var debug = false;");
     // Minify JS
-    !debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
+    !config.debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
 
     log.simple(" ->> writing resources...");
     try {
@@ -212,13 +209,8 @@ function createListener() {
         }
 
         // TLS options
-        // TODOs :
-        // - Find the correct SSL_METHOD for TLS-only negotiation
-        // - Add ECDHE cipers once node supports it
-        // References:
-        // - https://github.com/joyent/node/issues/4315
-        // - http://www.openssl.org/docs/ssl/ssl.html#DEALING_WITH_PROTOCOL_METHODS
-        // - http://baudehlo.wordpress.com/2013/06/24/setting-up-perfect-forward-secrecy-for-nginx-or-stud/
+        // TODO: Add ECDHE cipers once node supports it (https://github.com/joyent/node/issues/4315)
+        // TODO: Use GCM instead of CBC ciphers, once node supports them.
         var options = {
             key              : key,
             cert             : cert,
@@ -244,8 +236,8 @@ function createListener() {
 
     server.on("listening", function () {
         setupSocket(server);
-        if (debug) setupDebugWatcher();
-        log.log("Listening on port ", server.address().port);
+        if (config.debug) setupDebugWatcher();
+        log.simple(" ->> listening on port ", server.address().port);
     });
 
     server.on("error", function (error) {
@@ -699,18 +691,18 @@ function handlePOST(req, res) {
 }
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
-    if (debug && resourceName === "style.css") {
+    if (config.debug && resourceName === "style.css") {
         // Shortcut for CSS debugging when no Websocket is available
-        debugcss = [
+        cssCache = [
             fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
-        debugcss = autoprefixer("last 2 versions").compile(debugcss);
+        cssCache = autoprefixer("last 2 versions").compile(cssCache);
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/css; charset=utf-8");
         res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
-        res.setHeader("Content-Length", Buffer.byteLength(debugcss, 'utf8'));
-        res.end(debugcss);
+        res.setHeader("Content-Length", Buffer.byteLength(cssCache, 'utf8'));
+        res.end(cssCache);
         return;
     }
 
@@ -732,7 +724,7 @@ function handleResourceRequest(req, res, resourceName) {
 
             if (req.url === "/") {
                 // Disallow framing except when debugging
-                !debug && res.setHeader("X-Frame-Options", "DENY");
+                !config.debug && res.setHeader("X-Frame-Options", "DENY");
                 // Set the IE10 compatibility mode
                 if (req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
@@ -948,9 +940,10 @@ function readConfig() {
     }
 
     var opts = [
-        "debug", "useHTTPS", "port", "readInterval", "filesMode", "dirMode", "linkLength",
-        "maxOpen", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
+        "debug", "useHTTPS", "port", "readInterval", "filesMode", "dirMode", "linkLength", "maxOpen",
+        "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
     ];
+
     for (var i = 0, len = opts.length; i < len; i++) {
         if (config[opts[i]] === undefined) {
             log.error("Error: Missing property in config.json:", opts[i]);
@@ -1104,16 +1097,16 @@ function walkDirectory(dir, callback) {
 function setupDebugWatcher() {
     var cssfile = config.srcDir + "style.css";
     fs.watch(cssfile, helpers.debounce(function () {
-        debugcss = [
+        cssCache = [
             fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
             fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
         ].join("\n");
-        debugcss = autoprefixer("last 2 versions").compile(debugcss);
+        cssCache = autoprefixer("last 2 versions").compile(cssCache);
 
         for (var cookie in clients) {
             var data = JSON.stringify({
                 "type"  : "UPDATE_CSS",
-                "css"   : debugcss
+                "css"   : cssCache
             });
             if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
                 clients[cookie].ws.send(data, function (error) {

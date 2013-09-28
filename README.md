@@ -38,6 +38,7 @@ Configuration is done through the `config.json` file, located in the same direct
     "dirMode"      : "755",
     "linkLength"   : 3,
     "maxOpen"      : 256,
+    "timestamps"   : true,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
@@ -55,8 +56,9 @@ Configuration is done through the `config.json` file, located in the same direct
 - `readInterval`: The minimum time gap in milliseconds in which updates to a directory are sent.
 - `filesMode`: The access mask with which files are created.
 - `dirMode`: The access mask with which directories are created.
-- `linkLength` : The amount of characters in a shortened link to a file.
+- `linkLength` : The amount of characters in a shortlink to a file.
 - `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Linux, you can probably go higher.
+- `timestamps` : Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 - `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useHTTPS` is enabled. Sample self-signed files are provided.
 
 ###Path options

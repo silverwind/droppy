@@ -7,6 +7,7 @@
     "dirMode"      : "755",
     "linkLength"   : 3,
     "maxOpen"      : 256,
+    "timestamps"   : true,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
