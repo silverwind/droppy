@@ -76,38 +76,51 @@ log.simple(" ->> running on node " + process.version);
 // Read user/sessions from DB and add a default user if no users exist
 readDB();
 if (Object.keys(db.users).length < 1) {
-    addUser("droppy", "droppy", true);
+    log.simple("Please create a user first through: -add USER PASS");
 }
 
 // Copy/Minify JS,CSS and HTML content
 prepareContent();
 
-// Read and cache all resources
-log.simple(" ->> caching resources...\n");
+// Prepare to get up and running
 cacheResources(config.resDir, function () {
-    // Set up our directories
     setupDirectories();
-    // Clean up our shortened links
     cleanUpLinks();
-    // Bind to the listening port
     createListener();
 });
 
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
 function prepareContent() {
-    var out = {
-            css : "",
-            js  : ""
-        },
+    var out = { css : "", js  : "" },
         resources = {
             css  : ["style.css", "sprites.css"],
             js   : ["modernizr.js", "jquery.js", "client.js"],
             html : ["base.html", "auth.html", "main.html"]
-        };
+        },
+        compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
+        resourceList = helpers.objToFlatArray(resources),
+        matches = { resource: 0, compiled: 0 };
+
+    // Check if we to actually need to recompile resources
+    resourceList.forEach(function (file) {
+        try {
+            if (crypto.createHash("md5").update(fs.readFileSync(getSrcPath(file))).digest("base64") === db.resourceHashes[file])
+                matches.resource++;
+            else return;
+        } catch (e) { return; }
+    });
+    compiledList.forEach(function (file) {
+        try {
+            if (fs.statSync(getResPath(file)))
+                matches.compiled++;
+            else return;
+        } catch (e) { return; }
+    });
+
+    if (matches.resource === resourceList.length && matches.compiled === compiledList.length) return;
 
     // Read resources
-    log.simple(" ->> reading resources...");
     for (var type in resources) {
         resources[type].forEach(function (file, key, array) {
             var data;
@@ -146,7 +159,6 @@ function prepareContent() {
     // Minify JS
     !config.debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
 
-    log.simple(" ->> writing resources...");
     try {
         resources.html.forEach(function (file) {
             var name = Object.keys(file)[0];
@@ -159,6 +171,15 @@ function prepareContent() {
         log.error("Error writing resources:\n", error);
         process.exit(1);
     }
+
+    // Save the hashes of all compiled files
+    resourceList.forEach(function (file) {
+        if (!db.resourceHashes) db.resourceHashes = {};
+        db.resourceHashes[file] = crypto.createHash("md5")
+            .update(fs.readFileSync(getSrcPath(file)))
+            .digest("base64");
+        writeDB();
+    });
 }
 //-----------------------------------------------------------------------------
 // Set up the directory for files
@@ -900,8 +921,8 @@ function handleArguments() {
     var args = process.argv.slice(2);
     var option = args[0];
 
-    switch (option) {
-    case "-adduser":
+
+    if (option.indexOf("-add") === 0) {
         if (args.length === 3) {
             readConfig();
             readDB();
@@ -911,22 +932,18 @@ function handleArguments() {
             printUsage();
             process.exit(1);
         }
-        break;
-    case "--help":
+    } else if (option.indexOf("version") === 0) {
+        console.log(require("./package.json").version);
+        process.exit(0);
+    } else {
         printUsage();
         process.exit(0);
-        break;
-    default:
-        log.simple("Unknown argument. See 'node droppy --help for help.'\n");
-        process.exit(1);
-        break;
     }
 
     function printUsage() {
-        log.simple("droppy - file server on node.js (https://github.com/silverwind/droppy)");
         log.simple("Usage: node droppy [option] [option arguments]\n");
-        log.simple("-help \t\t\t\tPrint this help");
-        log.simple("-adduser username password\tCreate a new user for authentication\n");
+        log.simple("Options:");
+        log.simple(" -add USER PASS\tCreate a new user for authentication");
     }
 }
 //-----------------------------------------------------------------------------
@@ -1054,7 +1071,7 @@ function createCookie(req, res, postData) {
     writeDB();
 }
 
-function writeDB(callback) {
+function writeDB() {
     fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
 }
 //============================================================================

@@ -1,5 +1,5 @@
 {
-    "debug"        : true,
+    "debug"        : false,
     "useHTTPS"     : true,
     "port"         : 443,
     "readInterval" : 50,
