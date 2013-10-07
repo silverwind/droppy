@@ -120,7 +120,9 @@
                             setTimeout(function () {
                                 $("#login-info-box").attr("class", "info");
                                 $("#login-info").html("Logged out!");
-                                $("#login-info-box").fadeIn(250);
+                                setTimeout(function () {
+                                    $("#login-info-box").removeClass("info error");
+                                }, 2500);
                             }, 250);
                         }
                     }, 250);
@@ -275,7 +277,6 @@
         $(".login-input").register("click keydown focus", function () {
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
-            $("#login-info-box").fadeOut(300);
         });
 
         // Return submits the form
@@ -311,7 +312,7 @@
                     } else {
                         submit.addClass("invalid");
                         loginform.addClass("invalid");
-                        if ($("#login-info-box").is(":visible")) {
+                        if ($("#login-info-box").hasClass("info") || $("#login-info-box").hasClass("error")) {
                             $("#login-info").addClass("shake");
                             setTimeout(function () {
                                 $("#login-info").removeClass("shake");
@@ -319,7 +320,10 @@
                         } else {
                             $("#login-info-box").addClass("error");
                             $("#login-info").html("Wrong login!");
-                            $("#login-info-box").fadeIn(300);
+                            redraw();
+                            setTimeout(function () {
+                                $("#login-info-box").removeClass("info error");
+                            }, 2500);
                         }
                     }
                 }

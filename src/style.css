@@ -800,20 +800,21 @@ body {
 
 #login-info-box {
     border-radius: 6px 6px 0 0;
-    top: 0;
     color: #fff;
     font-size: 1.5em;
+    opacity: 0;
     height: 60px;
     left: 50%;
     margin-left: -300px;
     position: absolute;
     text-align: center;
-    display: none;
+    top: 0;
     width: 100%;
+    transition: opacity 0.2s ease;
 }
 
-#login-info-box.info  { background: linear-gradient(#7a0, #9c0); text-shadow: 2px 2px 0 #581; }
-#login-info-box.error { background: linear-gradient(#f43, #d21); text-shadow: 2px 2px 0 #811; }
+#login-info-box.info  { opacity: 1; background: linear-gradient(#7a0, #9c0); text-shadow: 2px 2px 0 #581; transition: opacity 0.2s ease }
+#login-info-box.error { opacity: 1; background: linear-gradient(#f43, #d21); text-shadow: 2px 2px 0 #811; transition: opacity 0.2s ease }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
     #login-info-box {
@@ -826,8 +827,9 @@ body {
 }
 
 #login-info {
-    display: inline-block;
     line-height: 60px;
+    position: relative;
+    margin: 0 auto;
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
@@ -924,7 +926,7 @@ input[type=checkbox] {
     margin-left: -300px;
     position: absolute;
     text-shadow: 2px 2px 0 #581;
-    transition: transform .3s ease;
+    transition: transform .1s ease;
     width: 100%;
 }
 
