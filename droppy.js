@@ -49,7 +49,7 @@ var helpers         = require("./lib/helpers.js"),
     spdy            = require("spdy"),
     uglify          = require("uglify-js"),
     util            = require("util"),
-    WebSocketServer = require("ws").Server,
+    wss             = require("ws").Server,
     wrench          = require("wrench"),
     zlib            = require("zlib");
 
@@ -295,8 +295,7 @@ function onRequest(req, res) {
 //-----------------------------------------------------------------------------
 // WebSocket functions
 function setupSocket(server) {
-    var wss = new WebSocketServer({server : server});
-    wss.on("connection", function (ws) {
+    new wss({server : server}).on("connection", function (ws) {
         var remoteIP   = ws._socket.remoteAddress;
         var remotePort = ws._socket.remotePort;
         var cookie     = getCookie(ws.upgradeReq.headers.cookie);

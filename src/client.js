@@ -122,7 +122,7 @@
                                 $("#login-info").html("Logged out!");
                                 setTimeout(function () {
                                     $("#login-info-box").removeClass("info error");
-                                }, 2500);
+                                }, 3000);
                             }, 250);
                         }
                     }, 250);
@@ -245,6 +245,7 @@
 //  Authentication page
 // ============================================================================
     var du, dp;
+
     function initAuthPage() {
         var loginform = $("#login-form"),
             submit    = $("#submit"),
@@ -275,6 +276,7 @@
 
         // Remove invalid class on user action
         $(".login-input").register("click keydown focus", function () {
+            $("#login-info-box").removeClass("info error");
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
         });
@@ -310,6 +312,8 @@
                         hasLoggedOut = false;
                         getPage();
                     } else {
+                        $("#pass").val("");
+                        $("#dummy-pass").val("");
                         submit.addClass("invalid");
                         loginform.addClass("invalid");
                         if ($("#login-info-box").hasClass("info") || $("#login-info-box").hasClass("error")) {
@@ -320,10 +324,9 @@
                         } else {
                             $("#login-info-box").addClass("error");
                             $("#login-info").html("Wrong login!");
-                            redraw();
                             setTimeout(function () {
                                 $("#login-info-box").removeClass("info error");
-                            }, 2500);
+                            }, 3000);
                         }
                     }
                 }
