@@ -172,11 +172,7 @@
                 updateData(msg.folder, msg.data);
                 break;
             case "UPLOAD_DONE":
-                isUploading = false;
-                updateLocation(currentFolder, false);
-                updateTitle(currentFolder, true);
-                updateData(msg.folder, msg.data);
-                $("#upload-info").attr("class", "out");
+                finishUpload(msg);
                 break;
             case "NEW_FOLDER":
                 if (isUploading) return;
@@ -664,12 +660,8 @@
         }
 
         function uploadDone() {
-            // After this point, the server is moving the temp files into place
-            // and we finalize the upload once UPLOAD_DONE fires.
-            title.html("Processing Files...");
-            updateTitle("100%");
             prog.css("width", "100%");
-            timeleft.html("finished");
+            finishUpload();
         }
 
         function uploadProgress(event) {
@@ -735,6 +727,14 @@
             prefix = text;
         }
         document.title = [prefix, suffix].join(" - ");
+    }
+
+    function finishUpload(msg) {
+        isUploading = false;
+        updateLocation(currentFolder, false);
+        updateTitle(currentFolder, true);
+        msg && updateData(msg.folder, msg.data);
+        $("#upload-info").attr("class", "out");
     }
 
     // Listen for popstate events, which indicate the user navigated back
