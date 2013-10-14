@@ -746,7 +746,7 @@ function handleResourceRequest(req, res, resourceName) {
                 // Disallow framing except when debugging
                 !config.debug && res.setHeader("X-Frame-Options", "DENY");
                 // Set the IE10 compatibility mode
-                if (req.headers["user-agent"].indexOf("MSIE") > 0)
+                if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
             } else if (/^\/content\//.test(req.url)) {
                 // Don't ever cache /content since its data is dynamic
