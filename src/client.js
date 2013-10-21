@@ -56,11 +56,20 @@
     }
 
     // Add a modernizr test for directory input
-    Modernizr.addTest("inputdirectory", function () {
-        var input = document.createElement("input");
-        input.type = "file";
-        return "webkitdirectory" in input || "mozdirectory" in input ||
-               "msdirectory" in input || "odirectory" in input || "directory" in input;
+    // [Landed] https://github.com/Modernizr/Modernizr/pull/965
+    Modernizr.addTest("fileinputdirectory", function () {
+        var elem = document.createElement("input"), dir = "directory";
+        elem.type = "file";
+        if (dir in elem) {
+            return true;
+        } else {
+            for (var i = 0, len = Modernizr._domPrefixes.length; i < len; i++) {
+                if (Modernizr._domPrefixes[i] + dir in elem) {
+                    return true;
+                }
+            }
+        }
+        return false;
     });
 
     // Alias requestAnimationFrame
@@ -252,7 +261,7 @@
         // additionally needs the form to submit to an actual URL, so we add
         // an iframe where Chrome can POST to.
         // Relevant bugs:
-        // [Fixed: Firefox26] https://bugzilla.mozilla.org/show_bug.cgi?id=355063
+        // [Fixed: Firefox 26] https://bugzilla.mozilla.org/show_bug.cgi?id=355063
         // [Partially Fixed: Chrome 28] http://code.google.com/p/chromium/issues/detail?id=43219
         if ($("#dummy-user").length) {
             // Store a copy of the old inputs
@@ -422,7 +431,7 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
-            if (Modernizr.inputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
+            if (Modernizr.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
                 var files = event.target.files;
                 var obj = {};
                 for (var i = 0; i < files.length; i++) {
