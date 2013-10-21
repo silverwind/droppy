@@ -964,11 +964,6 @@
             if (socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
-
-        // Mark websocket for reopening in case the browser unexpectedly closes when clicking on <a> tags (Firefox < 23)
-        $("a").register("click", function () {
-            reopen = true;
-        });
     }
 
     // Extract the extension from a file name
