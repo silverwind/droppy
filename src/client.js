@@ -342,6 +342,8 @@
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).register("dragenter", function (event) { event.preventDefault(); });
         $(document.documentElement).register("dragover", function (event) { event.preventDefault(); });
+        // Catch the spacebar to avoid a scrolling bug in Firefox
+        $(document.documentElement).register("keydown", function (event) { if (event.keyCode === 32) event.preventDefault(); });
 
         // File drop handler
         $(document.documentElement).register("drop", function (event) {
@@ -862,7 +864,7 @@
             tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
             if (type === "f" || type === "nf") { // Create a file row
-                downloadURL = window.location.protocol + "//" + window.location.host + "/get" + encodeURIComponent(id);
+                downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
                 var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +

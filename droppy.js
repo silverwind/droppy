@@ -79,7 +79,7 @@ if (Object.keys(db.users).length < 1) {
     log.simple("Please create a user first through: -add USER PASS");
 }
 
-// Copy/Minify JS,CSS and HTML content
+// Copy/Minify JS, CSS and HTML content
 prepareContent();
 
 // Prepare to get up and running

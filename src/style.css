@@ -311,7 +311,7 @@ body {
 #path li:after  { border-right: 2px solid #111; transform: skew(-45deg); bottom: 0 }
 
 #path li, #path li:before, #path li:after { transition: all .3s ease }
-#path li:hover, #path li:hover:before, #path li:hover:after { color: #fff }
+#path li:hover { color: #fff }
 #path li:first-child { padding-left: 0.4em }
 
 #path li:nth-child(odd)        { background: #146 }
@@ -358,8 +358,8 @@ body {
 }
 
 .data-row:not(.animating):hover {
-    background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,.666));
-    border-radius: 4px;
+    background: linear-gradient(rgba(255,255,255,0), rgba(0,0,0,.15));
+    border-radius: 2px;
 }
 
 .tag-uploading:after {
@@ -375,10 +375,14 @@ body {
     position: relative;
     top: -2px;
 }
+
+.data-row {
+    padding-top: 2px;
+}
+
 /* TODO: Investigate why IOS7's ellipsis won't overflow correctly */
 .filelink, .folderlink {
     line-height: 1.5em;
-    margin-top: 1px;
     overflow: hidden;
     position: absolute;
     text-overflow: ellipsis;
