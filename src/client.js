@@ -252,8 +252,8 @@
         // additionally needs the form to submit to an actual URL, so we add
         // an iframe where Chrome can POST to.
         // Relevant bugs:
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=355063
-        // http://code.google.com/p/chromium/issues/detail?id=43219
+        // [Fixed: Firefox26] https://bugzilla.mozilla.org/show_bug.cgi?id=355063
+        // [Partially Fixed: Chrome 28] http://code.google.com/p/chromium/issues/detail?id=43219
         if ($("#dummy-user").length) {
             // Store a copy of the old inputs
             du = $("#dummy-user").clone();
@@ -996,20 +996,6 @@
             step++;
         }
         return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
-    }
-
-    // debounce based on underscore.js
-    function debounce(func, wait) {
-        var timeout, result;
-        return function () {
-            var context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(function () {
-                timeout = null;
-                result = func.apply(context, args);
-            }, wait);
-            return result;
-        };
     }
 
     // This seems to fix weird Webkit rendering after animations
