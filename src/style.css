@@ -358,8 +358,8 @@ body {
 }
 
 .data-row:not(.animating):hover {
-    background: linear-gradient(rgba(255,255,255,0), rgba(0,0,0,.15));
-    border-radius: 2px;
+    background: #fff;
+    border-radius: 3px;
 }
 
 .tag-uploading:after {
@@ -675,7 +675,6 @@ body {
     cursor: pointer;
     color: #bbb;
     position: relative;
-    clear: right;
 }
 
 .user-entry:hover:not(.user-highlight), .user-entry:hover .user-edit:not(.user-highlight) {
@@ -695,24 +694,40 @@ body {
 }
 
 .user-edit {
-    float: left;
-    clear: right;
     position: relative;
-    left: 0;
-    right: 0;
     font-size: .66em;
-    width: 100%;
-    transition: height .2s linear;
 }
 
-.edit-hidden {
-    opacity: 0;
-    height: 0;
+.edit-hidden { opacity: 0 }
+.edit-shown  { opacity: 1 }
+
+.user-edit-password {
+    position: relative;
+    top: 2px;
+    float: right;
+    width: 5em;
+    padding: 0 .25em;
+    height: calc(1.4em - 3px);
+    line-height: 1.6em;
+    background: #151515;
+    color: #eee;
+    border: 1px solid #444;
 }
 
-.edit-shown {
-    opacity: 1;
-    height: 2em ;
+.user-edit-priv {
+    display: block !important;
+    position:absolute;
+    top:50%;
+    height:1em;
+    margin-top:-.5em;
+    right: 8em;
+    background: red;
+}
+.user-edit-password:before {
+    content: "#";
+
+    padding: 2px;
+    margin: 0 10px 0 0;
 }
 
 .user-delete, .user-edit {

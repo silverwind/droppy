@@ -16,7 +16,7 @@
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
 
-    // Shorthand for save event listeners
+    // Shorthand for safe event listeners
     $.fn.register = function (events, callback) {
         return this.off(events).on(events, callback);
     };
