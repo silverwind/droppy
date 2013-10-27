@@ -57,9 +57,10 @@ Configuration is done through the `config.json` file, located in the same direct
 - `filesMode`: The access mask with which files are created.
 - `dirMode`: The access mask with which directories are created.
 - `linkLength` : The amount of characters in a shortlink to a file.
-- `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Linux, you can probably go higher.
+- `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Unix, you can probably go higher.
 - `timestamps` : Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
-- `httpsKey` and `httpsCert`: The paths to you RSA private key and SSL certificate. Only used if `useHTTPS` is enabled. Sample self-signed files are provided.
+- `httpsKey` : Path to your openSSL private key. Used in conjunction with `useHTTPS`.
+- `httpsCert` : Path to your openSSL cert(s). Used in conjunction with `useHTTPS`.
 
 ###Path options
 - `db` Location of the user database file.
