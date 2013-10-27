@@ -50,21 +50,21 @@ Configuration is done through the `config.json` file, located in the same direct
 ````
 
 ###General options
-- `debug`: Skip resource minification and enable automatic CSS reloading.
-- `useHTTPS`: Whether the server should use HTTPS.
-- `port`: The listening port. For HTTPS, you may want to set it to 443.
-- `readInterval`: The minimum time gap in milliseconds in which updates to a directory are sent.
-- `filesMode`: The access mask with which files are created.
-- `dirMode`: The access mask with which directories are created.
-- `linkLength` : The amount of characters in a shortlink to a file.
-- `maxOpen` : The maximum number of concurrently opened files. 256 seems safe for Windows. On Unix, you can probably go higher.
-- `timestamps` : Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
-- `httpsKey` : Path to your openSSL private key. Used in conjunction with `useHTTPS`.
-- `httpsCert` : Path to your openSSL cert(s). Used in conjunction with `useHTTPS`.
+- `debug` Skip resource minification and enable automatic CSS reloading.
+- `useHTTPS` Whether the server should use HTTPS.
+- `port` The listening port. For HTTPS, you may want to set it to 443.
+- `readInterval` The minimum time gap in milliseconds in which updates to a directory are sent.
+- `filesMode` The access mask with which files are created.
+- `dirMode` The access mask with which directories are created.
+- `linkLength` The amount of characters in a shortlink to a file.
+- `maxOpen` The maximum number of concurrently opened files. 256 seems safe for Windows. On Unix, you can probably go higher.
+- `timestamps` Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
+- `httpsKey` Path to your openSSL private key. Used in conjunction with `useHTTPS`.
+- `httpsCert` Path to your openSSL cert(s). Used in conjunction with `useHTTPS`.
 
 ###Path options
 - `db` Location of the user database file.
-- `filesDir`: The directory which serves as the server's root.
-- `incomingDir`: The directory which serves as the server's root.
-- `resDir`: The directory which contains the compiled resources and images.
-- `srcDir`: The directory which contains the html/js/css sources.
+- `filesDir` The directory which serves as the server's root.
+- `incomingDir` The directory which serves as the server's root.
+- `resDir` The directory which contains the compiled resources and images.
+- `srcDir` The directory which contains the html/js/css sources.
