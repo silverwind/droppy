@@ -387,7 +387,7 @@ body {
     position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 10em);
+    width: calc(100% - 20em);
 }
 
 @media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 9em) } }
@@ -395,6 +395,15 @@ body {
 .data-info {
     float: right;
     white-space: nowrap;
+    width: 3.5em;
+    text-align: right;
+    margin-right: .5em;
+}
+
+.data-mtime {
+    float: right;
+    white-space: nowrap;
+    margin-right: .5em;
 }
 
 

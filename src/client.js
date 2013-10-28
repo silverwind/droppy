@@ -604,7 +604,11 @@
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
                     numFiles++;
-                    currentData[data[i].name] = { size: data[i].size, type: "nf" };
+                    currentData[data[i].name] = {
+                        size  : data[i].size,
+                        type  : "nf",
+                        mtime : new Date().getTime()
+                    };
                     formData.append(data[i].name, data[i]);
                 }
             } else { // We got an object for recursive folder uploads
@@ -615,14 +619,21 @@
                     switch (Object.prototype.toString.call(data[path])) {
                     case "[object Object]":
                         if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                            currentData[name] = { size: 0, type: "nd" };
+                            currentData[name] = {
+                                size : 0,
+                                type : "nd"
+                            };
                             addedDirs[name] = true;
                         }
                         break;
                     case "[object File]":
                         numFiles++;
                         if (!addedDirs[name]) {
-                            currentData[name] = { size: data[path].size, type: "nf" };
+                            currentData[name] = {
+                                size  : data[path].size,
+                                type  : "nf",
+                                mtime : new Date().getTime()
+                            };
                         }
                         break;
                     }
@@ -864,11 +875,13 @@
 
     // Convert the received data into HTML
     function buildHTML(fileList, root) {
-        var list = $("<ul></ul>"), downloadURL, type, size, id, tags;
+        var list = $("<ul></ul>"), downloadURL, type, size, mtime, id, tags;
 
         for (var file in fileList) {
             type = fileList[file].type;
             size = convertToSI(fileList[file].size);
+            mtime = fileList[file].mtime ? formatTime(new Date(fileList[file].mtime)) : "";
+            // mtime = "a";
             id = (root === "/") ? "/" + file : root + "/" + file;
             tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
@@ -880,7 +893,8 @@
                     '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                     '<span class="icon-delete icon"></span>' +
                     '<span class="icon-link icon"></span>' +
-                    '<span class="data-info">' + size + '</span></li>'
+                    '<span class="data-info">' + size + '</span>' +
+                    '<span class="data-mtime">' + mtime + '</span></li>'
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
@@ -1091,4 +1105,22 @@
         "xml":      ["xml"],
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
+
+    function formatTime(date) {
+        var day   = date.getDate(),
+            month = date.getMonth() + 1,
+            year  = date.getFullYear(),
+            hrs   = date.getHours(),
+            mins  = date.getMinutes(),
+            secs  = date.getSeconds();
+
+        month < 10 && (month = "0" + month);
+        day   < 10 && (day   = "0" + day);
+        hrs   < 10 && (hrs   = "0" + hrs);
+        mins  < 10 && (mins  = "0" + mins);
+        secs  < 10 && (secs  = "0" + secs);
+
+        return year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
+    }
+
 }(jQuery, window, document));

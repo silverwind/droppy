@@ -901,7 +901,11 @@ function readDirectory(root, callback) {
                     if (stats.isDirectory())
                         type = "d";
                     if (type === "f" || type === "d")
-                        dirContents[filename] = {"type": type, "size" : stats.size};
+                        dirContents[filename] = {
+                            "type"  : type,
+                            "size"  : stats.size,
+                            "mtime" : stats.mtime.getTime() || 0
+                        };
                 } else if (error) {
                     log.error(error);
                 }
