@@ -17,7 +17,7 @@ or just
 ````
 ./droppy.js
 ````
-By default, the server will listen on [https](http://localhost/), which can be configured in config.json. On first startup, a user `droppy` with password `droppy` will be created. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
+By default, the server will listen on [https](https://localhost/), which can be configured in config.json. On first startup, a user `droppy` with password `droppy` will be created. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
 
 ##Supported Browsers
 - Firefox (last 2 versions)
