@@ -24,15 +24,18 @@
  SOFTWARE.
  ------------------------------------------------------------------------------
   TODOs:
-  - Improve perceived responsivness through preloading/caching of content
+  - Improve perceived responsivness through preloading of directories
   - Rework client <-> server communication so that the server has more
     control over the client's current location in the file system
   - User privilege levels and a interface to add/remove users
+  - Modularize client and server javascript code more
+  - Investigate if <canvas> is faster than the current approach,
+    especially on mobile, where CSS transitions can get choppy
   - Drag and drop to move/copy entries
   - Image thumbnails
-  - Keybindings
+  - Inline <audio> player for mp3/ogg/flac content
+  - Keyboard navigation
   - SVG icons
-  - Modularize both client and server javascript code
  --------------------------------------------------------------------------- */
 "use strict";
 
