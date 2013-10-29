@@ -389,6 +389,7 @@ body {
 @media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 9em) } }
 
 .data-info {
+    color: #555;
     float: right;
     white-space: nowrap;
     width: 4em;
@@ -397,6 +398,7 @@ body {
 }
 
 .data-mtime {
+    color: #555;
     float: right;
     white-space: nowrap;
     margin-right: .5em;
@@ -595,7 +597,7 @@ body {
     float: left;
     height: 100%;
     text-align: left;
-    width: 350px;
+    width: 320px;
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
@@ -638,7 +640,7 @@ body {
     font-size: 2rem;
     padding: 8px;
     position: absolute;
-    right: -4px;
+    right: 0;
 }
 
 /* =============================== Config box ============================== */
