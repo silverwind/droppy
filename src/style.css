@@ -997,10 +997,12 @@ input[type=checkbox] {
     position: absolute;
     width: 100%;
     z-index: 31;
+    background: #000;
+    transition: all 0.2s ease-in-out;
 }
 
 #click-catcher.out { opacity: 0; display: none  }
-#click-catcher.in  { opacity: 1; display: block }
+#click-catcher.in  { opacity: .33; display: block }
 
 #noscript {
     background: #111;
