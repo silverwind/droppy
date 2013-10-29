@@ -44,8 +44,8 @@
     "type": "git",
     "url": "https://github.com/silverwind/droppy.git"
   },
-  "scripts": {
-    "start": "node droppy.js"
+  "bin": {
+    "droppy": "./droppy.js"
   },
   "subdomain": "droppy"
 }
