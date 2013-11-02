@@ -285,9 +285,9 @@ body {
     box-shadow: 0 0 2em .75em #111;
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 37px; height: 35px; padding: 0 0.5em 0 1.5em } }
-@media all and (max-width: 1023px) { #path li { line-height: 32px; height: 30px; padding-left: 1em; } }
-@media all and (max-width:  639px) { #path li { line-height: 27px; height: 25px } }
+@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px; padding: 0 0.5em 0 1.5em } }
+@media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding-left: 1em; } }
+@media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px } }
 
 @media all and (min-width: 1024px) { #path li:first-child { line-height: 35px } }
 @media all and (max-width: 1023px) { #path li:first-child { line-height: 30px } }
