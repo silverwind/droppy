@@ -27,9 +27,10 @@ In case of Firefox and Chrome older version may still work, but I'm not targetin
 Configuration is done through the `config.json` file, located in the same directory as `droppy.js`.
 ````javascript
 {
-    "debug"        : true,
-    "useSSL"       : false,
-    "port"         : 80,
+    "debug"        : false,
+    "useHTTPS"     : true,
+    "useSPDY"      : false,
+    "port"         : 443,
     "readInterval" : 50,
     "filesMode"    : "644",
     "dirMode"      : "755",
@@ -47,8 +48,9 @@ Configuration is done through the `config.json` file, located in the same direct
 ````
 
 ###General options
-- `debug` Skip resource minification and enable automatic CSS reloading.
+- `debug` Skip resource minification and enable automatic CSS reloading when the source files change.
 - `useHTTPS` Whether the server should use HTTPS.
+- `useSPDY` Enables the SPDY protocol, in conjunction with `useHTTPS`.
 - `port` The listening port. For HTTPS, you may want to set it to 443.
 - `readInterval` The minimum time gap in milliseconds in which updates to a directory are sent.
 - `filesMode` The access mask with which files are created.

@@ -48,7 +48,6 @@ var helpers         = require("./lib/helpers.js"),
     mime            = require("mime"),
     path            = require("path"),
     querystring     = require("querystring"),
-    spdy            = require("spdy"),
     uglify          = require("uglify-js"),
     util            = require("util"),
     wss             = require("ws").Server,
@@ -141,7 +140,7 @@ function prepareContent() {
     }
 
     // Concatenate CSS and JS
-    log.simple(" ->> preparing resources...");
+    log.simple(" ->> minifying resources...");
     resources.css.forEach(function (data) {
         out.css += data + "\n";
     });
@@ -243,7 +242,11 @@ function createListener() {
             secureProtocol   : "SSLv23_server_method"
         };
 
-        server = spdy.createServer(options, onRequest);
+        if (config.useSPDY) {
+            server = require("spdy").createServer(options, onRequest);
+        } else {
+            server = require("https").createServer(options, onRequest);
+        }
 
         // TLS session resumption
         var sessions = {};
@@ -977,8 +980,8 @@ function readConfig() {
     }
 
     var opts = [
-        "debug", "useHTTPS", "port", "readInterval", "filesMode", "dirMode", "linkLength", "maxOpen",
-        "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
+        "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength",
+        "maxOpen", "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
     ];
 
     for (var i = 0, len = opts.length; i < len; i++) {
