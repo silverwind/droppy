@@ -888,7 +888,7 @@
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
-                audio = /^.+\.mp3$/.test(file) ? '<span class="play-audio icon"></span>' : "";
+                audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="play-audio icon"></span>' : "";
                 var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '">' +
