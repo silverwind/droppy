@@ -1,20 +1,17 @@
 #droppy
 A modern, [node](http://nodejs.org/)-based file server web application utilizing WebSockets for realtime updates. It supports dropping one or more files into the window, and with Chrome, directories can be recursively uploaded.
 
-![droppy](http://i.imgur.com/wMrqtEu.png)
+![droppy](http://i.imgur.com/eV8AHnM.png)
 
 ##Installation
 With [node](http://nodejs.org/) installed, run:
-````
+````bash
 git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
 ````
 ##Usage
-To start the server, run either
-````
+To start the server, run either of these:
+````bash
 node droppy
-````
-or just
-````
 ./droppy.js
 ````
 By default, the server will listen on [https](https://localhost/), which can be configured in config.json. On first startup, a user `droppy` with password `droppy` will be created. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
@@ -24,7 +21,7 @@ By default, the server will listen on [https](https://localhost/), which can be 
 - Chrome (last 2 versions)
 - Internet Explorer 10 or higher
 
-In case of Chrome and Firefox, slightly older versions may work resonably well.
+In case of Firefox and Chrome older version may still work, but I'm not targeting CSS at them.
 
 ##Configuration
 Configuration is done through the `config.json` file, located in the same directory as `droppy.js`.

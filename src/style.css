@@ -283,11 +283,12 @@ body {
     position: relative;
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
     box-shadow: 0 0 2em .75em #111;
+    padding: 0 0.5em 0 1.5em
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px; padding: 0 0.5em 0 1.5em } }
-@media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding-left: 1em; } }
-@media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px } }
+@media all and (min-width: 1024px) { #path li { line-height: 33px; height: 35px } }
+@media all and (max-width: 1023px) { #path li { line-height: 28px; height: 30px } }
+@media all and (max-width:  639px) { #path li { line-height: 23px; height: 25px } }
 
 @media all and (min-width: 1024px) { #path li:first-child { line-height: 35px } }
 @media all and (max-width: 1023px) { #path li:first-child { line-height: 30px } }
