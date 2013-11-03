@@ -849,12 +849,17 @@ function handleUploadRequest(req, res) {
             var names = Object.keys(files);
             while (names.length > 0) {
                 var name = names.pop();
-                var src = path.join(config.incomingDir, path.basename(files[name].path));
-                var dst = path.join(config.filesDir, clients[cookie].directory, files[name].originalFilename);
+                if (files[name].length > 1) {
+                    log.log("Warning: Received multiple files under the same name.");
+                }
+
+                var src = path.join(config.incomingDir, path.basename(files[name][0].path));
+                var dst = path.join(config.filesDir, clients[cookie].directory, files[name][0].originalFilename);
                 wrench.mkdirSyncRecursive(path.dirname(dst), config.dirMode);
                 fs.rename(src, dst, function () {
                     if (names.length === 0) done();
                 });
+                log.log(socket, " Received: " + (clients[cookie].directory !== "/" ? clients[cookie].directory + "/" : "/") + files[name][0].originalFilename);
             }
         });
 

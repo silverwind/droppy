@@ -875,18 +875,20 @@
 
     // Convert the received data into HTML
     function buildHTML(fileList, root) {
-        var list = $("<ul></ul>"), downloadURL, type, size, mtime, id, tags;
+        var list = $("<ul></ul>"), downloadURL, type, size, mtime, id, tags, audio;
 
         for (var file in fileList) {
             type = fileList[file].type;
             size = convertToSI(fileList[file].size);
             mtime = fileList[file].mtime ? formatTime(new Date(fileList[file].mtime)) : "";
+
             // mtime = "a";
             id = (root === "/") ? "/" + file : root + "/" + file;
             tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
+                audio = /.*\.mp3/.test(fileList[file]) ? '<audio src="' + downloadURL + '">no audio, sry</audio>' : "";
                 var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +
@@ -894,7 +896,8 @@
                     '<span class="icon-delete icon"></span>' +
                     '<span class="icon-link icon"></span>' +
                     '<span class="data-info">' + size + '</span>' +
-                    '<span class="data-mtime">' + mtime + '</span></li>'
+                    '<span class="data-mtime">' + mtime + '</span>' +
+                    '<span class="data-audio">' + audio + '</span></li>'
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
