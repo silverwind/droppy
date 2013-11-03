@@ -13,7 +13,7 @@
     "grunt": "~0.4.1",
     "grunt-exec": "~0.4.2",
     "mime": "~1.2.11",
-    "multiparty": "~3.0.0",
+    "busboy": "0.0.8",
     "uglify-js": "~2.4.1",
     "spdy": "~1.14.12",
     "wrench": "~1.5.4",

@@ -41,11 +41,11 @@
 var helpers         = require("./lib/helpers.js"),
     log             = require("./lib/log.js"),
     autoprefixer    = require("autoprefixer"),
+    Busboy          = require("busboy"),
     cleancss        = require("clean-css"),
     crypto          = require("crypto"),
     fs              = require("graceful-fs"),
     mime            = require("mime"),
-    multiparty      = require("multiparty"),
     path            = require("path"),
     querystring     = require("querystring"),
     spdy            = require("spdy"),
@@ -819,62 +819,72 @@ function handleFileRequest(req, res) {
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
     var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
-    if (req.url === "/upload") {
-        var cookie = getCookie(req.headers.cookie);
+    var cookie = getCookie(req.headers.cookie);
+    log.log(socket, " Upload started");
 
-        // TODO: Figure out a client's directory if don't have it at this point
-        // (happens on server shutdown with the client staying on the page)
-        if (!clients[cookie]) {
-            res.statusCode = 500;
-            res.end();
-            log.response(req, res);
-            return;
-        }
-
-        var form = new multiparty.Form();
-        form.uploadDir = config.incomingDir;
-        form.autoFiles = true;
-
-        form.parse(req, function (error, fields, files) {
-            res.writeHead(200);
-            res.end();
-            log.response(req, res);
-            if (typeof files !== "object") return;
-            if (error && error.message !== "Request aborted") {
-                log.error(error);
-                done();
-            }
-
-            var names = Object.keys(files);
-            while (names.length > 0) {
-                var name = names.pop();
-                if (files[name].length > 1) {
-                    log.log("Warning: Received multiple files under the same name.");
-                }
-
-                var src = path.join(config.incomingDir, path.basename(files[name][0].path));
-                var dst = path.join(config.filesDir, clients[cookie].directory, files[name][0].originalFilename);
-                wrench.mkdirSyncRecursive(path.dirname(dst), config.dirMode);
-                fs.rename(src, dst, function () {
-                    if (names.length === 0) done();
-                });
-                log.log(socket, " Received: " + (clients[cookie].directory !== "/" ? clients[cookie].directory + "/" : "/") + files[name][0].originalFilename);
-            }
-        });
-
-        form.on("error", function (error) {
-            if (error && error.message === "Request aborted")
-                log.log(socket, " Upload cancelled.");
-            else
-                log.error(error);
-            done();
-        });
+    // TODO: Figure out a client's directory if we don't have it at this point
+    // (happens on server shutdown with the client staying on the page)
+    if (!clients[cookie]) {
+        res.statusCode = 500;
+        res.end();
+        log.response(req, res);
+        return;
     }
 
-    function done() {
-        readDirectory(clients[cookie].directory, function () {
-            sendFiles(cookie, "UPLOAD_DONE");
+    var infiles = 0,
+        outfiles = 0,
+        done = false,
+        busboy = new Busboy({ headers: req.headers }),
+        files = [];
+
+    busboy.on("file", function (fieldname, file, filename) {
+        ++infiles;
+        onFile(fieldname, file, filename, function () {
+            ++outfiles;
+            if (done && infiles === outfiles) {
+                var names = Object.keys(files);
+                while (names.length > 0) {
+                    (function (name) {
+                        wrench.mkdirSyncRecursive(path.dirname(files[name].dst), config.dirMode);
+                        fs.rename(files[name].src, files[name].dst, function () {
+                            log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
+                            if (names.length === 0) {
+                                res.writeHead(200, { "Connection": "close" });
+                                res.end();
+                                readDirectory(clients[cookie].directory, function () {
+                                    sendFiles(cookie, "UPLOAD_DONE");
+                                });
+                            }
+                        });
+                    })(names.pop());
+                }
+            }
         });
+    });
+    busboy.on("end", function () {
+        done = true;
+    });
+    req.on("close", function () {
+        if (!done) {
+            log.log(socket, " Upload cancelled");
+        }
+    });
+    req.pipe(busboy);
+
+    function onFile(fieldname, file, filename, next) {
+        var dst = path.join(config.filesDir, clients[cookie].directory, filename);
+        var tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
+
+        files[filename] = {
+            src: tmp,
+            dst: dst
+        };
+
+        var fstream = fs.createWriteStream(tmp);
+        fstream.on("close", function () {
+            next();
+        });
+        file.pipe(fstream);
     }
 }
 //-----------------------------------------------------------------------------

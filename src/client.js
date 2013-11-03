@@ -453,13 +453,13 @@
         // File upload button
         $("#upload-file").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog
-            if (Modernizr.inputdirectory)
+            if (Modernizr.fileinputdirectory)
                 fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
             fileInput.click();
         });
 
         // Folder upload button - check if we support directory uploads
-        if (Modernizr.inputdirectory) {
+        if (Modernizr.fileinputdirectory) {
             // Directory uploads supported - enable the button
             $("#upload-folder").register("click", function () {
                 // Set the directory attribute so we get a directory picker dialog
@@ -882,7 +882,6 @@
             size = convertToSI(fileList[file].size);
             mtime = fileList[file].mtime ? formatTime(new Date(fileList[file].mtime)) : "";
 
-            // mtime = "a";
             id = (root === "/") ? "/" + file : root + "/" + file;
             tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
