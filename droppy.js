@@ -33,7 +33,6 @@
     especially on mobile, where CSS transitions can get choppy
   - Drag and drop to move/copy entries
   - Image thumbnails
-  - Inline <audio> player for mp3/ogg/flac content
   - Keyboard navigation
   - SVG icons
  --------------------------------------------------------------------------- */

@@ -384,7 +384,7 @@ body {
     position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 20em);
+    width: calc(100% - 22em);
 }
 
 @media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 9em) } }
@@ -405,11 +405,16 @@ body {
     margin-right: .5em;
 }
 
-.data-audio {
+.play-audio {
     float: right;
+    white-space: nowrap;
     margin-right: .5em;
+    color: #666;
 }
 
+.play-audio.active {
+    color: #c12;
+}
 
 /* ============================= Empty Folder ============================== */
 
@@ -438,7 +443,7 @@ body {
 }
 
 #upload-inline .icon { margin-right: 5px }
-#upload-inline:hover { background:  #f1a }
+#upload-inline:hover { background:  #c12 }
 /* ================================= Icons ================================= */
 
 .icon { font-family: "icons" }

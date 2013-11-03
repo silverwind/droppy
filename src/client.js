@@ -888,21 +888,26 @@
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
-                audio = /.*\.mp3/.test(fileList[file]) ? '<audio src="' + downloadURL + '">no audio, sry</audio>' : "";
+                audio = /^.+\.mp3$/.test(file) ? '<span class="play-audio icon"></span>' : "";
                 var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
-                    '<li class="data-row" data-type="file" data-id="' + id + '"><span class="' + spriteClass + '"></span>' +
-                    '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                    '<span class="icon-delete icon"></span>' +
-                    '<span class="icon-link icon"></span>' +
-                    '<span class="data-info">' + size + '</span>' +
-                    '<span class="data-mtime">' + mtime + '</span>' +
-                    '<span class="data-audio">' + audio + '</span></li>'
+                    '<li class="data-row" data-type="file" data-id="' + id + '">' +
+                        '<span class="' + spriteClass + '"></span>' +
+                        '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                        '<span class="icon-delete icon"></span>' +
+                        '<span class="icon-link icon"></span>' +
+                        '<span class="data-info">' + size + '</span>' +
+                        '<span class="data-mtime">' + mtime + '</span>' +
+                        audio +
+                    '</li>'
                 );
             } else if (type === "d" || type === "nd") {  // Create a folder row
                 list.append(
-                    '<li class="data-row" data-type="folder" data-id="' + id + '"><span class="sprite sprite-folder"></span>' +
-                    '<span class="folderlink ' + tags + '">' + file + '</span><span class="icon-delete icon"></span></li>'
+                    '<li class="data-row" data-type="folder" data-id="' + id + '">' +
+                        '<span class="sprite sprite-folder"></span>' +
+                        '<span class="folderlink ' + tags + '">' + file + '</span>' +
+                        '<span class="icon-delete icon"></span>' +
+                    '</li>'
                 );
             }
         }
@@ -989,6 +994,32 @@
         $(".icon-delete").register("click", function () {
             if (socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
+        });
+
+        $(".play-audio").register("click", function () {
+            if (socketWait) return;
+            var player    = $("#audio-player")[0],
+                source    = $(this).parent().find("a.filelink").attr("href"),
+                iconPlay  = "",
+                iconPause = "";
+
+            $(".play-audio").removeClass("active").text(iconPlay);
+            $(this).addClass("active");
+
+            if (player.paused) {
+                player.src = source;
+                player.play();
+                $(this).text(iconPause);
+            } else {
+                if (decodeURI(player.src) === source) {
+                    player.pause();
+                    $(this).text(iconPlay);
+                } else {
+                    player.src = source;
+                    player.play();
+                    $(this).text(iconPause);
+                }
+            }
         });
     }
 
