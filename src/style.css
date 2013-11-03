@@ -406,17 +406,6 @@ body {
     margin-right: .5em;
 }
 
-.play-audio {
-    float: right;
-    white-space: nowrap;
-    margin-right: .5em;
-    color: #666;
-}
-
-.play-audio.active {
-    color: #c12;
-}
-
 /* ============================= Empty Folder ============================== */
 
 #empty {
@@ -463,9 +452,17 @@ body {
 @media all and (max-width: 1023px) { .sprite { transform: scale(.9) } }
 @media all and (max-width:  639px) { .sprite { transform: scale(.8) } }
 
-.icon-delete, .icon-link {
-    cursor: pointer;
+.icon-play {
+    white-space: nowrap;
+    margin-right: .5em;
+    color: #666;
+}
+
+.icon-play.active { color: #c12 }
+
+.icon-delete, .icon-link, .icon-play {
     float: right;
+    cursor: pointer;
     text-align: center;
     transition: all .2s ease;
     width: 1.5em;
@@ -474,7 +471,7 @@ body {
 .icon-link         { padding-left: .25em }
 .icon-delete:hover { color: #f33; transform: scale(1.3) }
 .icon-link:hover   { color: #29f; transform: scale(1.3) }
-
+.icon-play:hover   { transform: scale(1.3) }
 /* ========================= Directory Name Input ========================== */
 
 #create-folder-box {

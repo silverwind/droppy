@@ -888,7 +888,7 @@
 
             if (type === "f" || type === "nf") { // Create a file row
                 downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
-                audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="play-audio icon"></span>' : "";
+                audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
                 var spriteClass = getSpriteClass(extractExtension(file));
                 list.append(
                     '<li class="data-row" data-type="file" data-id="' + id + '">' +
@@ -996,14 +996,14 @@
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
-        $(".play-audio").register("click", function () {
+        $(".icon-play").register("click", function () {
             if (socketWait) return;
             var player    = $("#audio-player")[0],
                 source    = $(this).parent().find("a.filelink").attr("href"),
                 iconPlay  = "",
                 iconPause = "";
 
-            $(".play-audio").removeClass("active").text(iconPlay);
+            $(".icon-play").removeClass("active").text(iconPlay);
             $(this).addClass("active");
 
             if (player.paused) {
