@@ -38,6 +38,12 @@
  --------------------------------------------------------------------------- */
 "use strict";
 
+require('nodetime').profile({
+    accountKey: 'dc3d7dfd1f9352172d7f953a90d78d5cfc1e35c2',
+    appName: 'droppy-speedtest'
+});
+
+
 var helpers         = require("./lib/helpers.js"),
     log             = require("./lib/log.js"),
     autoprefixer    = require("autoprefixer"),
@@ -236,7 +242,7 @@ function createListener() {
         var options = {
             key              : key,
             cert             : cert,
-            windowSize       : 1024,
+            windowSize       : 1024 * 1024,
             honorCipherOrder : true,
             ciphers          : "AES128-GCM-SHA256:!RC4:!MD5:!aNULL:!NULL:!EDH:HIGH",
             secureProtocol   : "SSLv23_server_method"

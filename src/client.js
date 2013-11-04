@@ -695,11 +695,11 @@
 
                 var bytesSent  = event.loaded,
                     bytesTotal = event.total,
-                    progress   = Math.round((bytesSent / bytesTotal) * 100) + "%";
-
+                    progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
+                    speed      = convertToSI(Math.round(bytesSent / ((new Date().getTime() - start) / 1000))) + "/s";
                 prog.css("width", progress);
                 updateTitle(progress);
-                uperc.html(progress);
+                uperc.html(progress + " - " + speed);
 
                 // Calculate estimated time left
                 var elapsed = (new Date().getTime()) - start;
