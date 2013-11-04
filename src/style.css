@@ -144,7 +144,6 @@ body {
     color: #ddd;
     cursor: pointer;
     padding: 0;
-    transition: all .2s ease;
     user-select: none;
 }
 
@@ -157,8 +156,6 @@ body {
 @media all and (max-width:  800px) { .button { width: 80px; } .button-text { display: none } }
 @media all and (max-width:  639px) { .button { width: 50px; font-size: .7em; line-height: 25px; height: 25px; } }
 @media all and (max-width:  319px) { .button { width: 30px } }
-
-.button:hover { transform: translateY(-2px) }
 
 #upload-file:hover   { color: #ae5 }
 #upload-folder:hover { color: #f1a }
