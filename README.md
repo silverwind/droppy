@@ -1,5 +1,5 @@
 #droppy
-A modern file server web application utilizing WebSockets for realtime updates, running on [node](http://nodejs.org/). It supports dropping one or more files into the window, and with Chrome, directories can be recursively uploaded.
+A modern file server web application utilizing WebSockets for realtime updates, running on [node](http://nodejs.org/). It supports dropping one or more files into the window, and if browser support is given, also folders (WebKit/Blink only as of Nov. 2013).
 
 ![droppy](http://i.imgur.com/eV8AHnM.png)
 
@@ -8,23 +8,22 @@ With [node](http://nodejs.org/) installed, run:
 ````bash
 git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
 ````
-##Usage
-To start the server, run either of these:
+##Running the server
+To start the server, run:
 ````bash
 ./droppy.js
-node droppy
 ````
-By default, the server will listen on [https](https://localhost/), which can be configured in config.json. On first startup, a user `droppy` with password `droppy` will be created. To add more users, run `./droppy.js -adduser username password`. To remove users, edit db.json (for now).
+By default, the server will listen on [https](https://localhost/). On first startup, a user `droppy` with password `droppy` will be created. To add users, run `./droppy.js -adduser [user] [pass]`. To remove users, you'll have to edit `db.json` for now.
 
 ##Supported Browsers
 - Firefox (last 2 versions)
 - Chrome (last 2 versions)
 - Internet Explorer 10 or higher
 
-In case of Firefox and Chrome older version may still work, but I'm not targeting CSS at them.
+In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
 
 ##Configuration
-Configuration is done through the `config.json` file, located in the same directory as `droppy.js`.
+Configuration is done through `config.json`:
 ````javascript
 {
     "debug"        : false,
