@@ -696,7 +696,7 @@
                 var bytesSent  = event.loaded,
                     bytesTotal = event.total,
                     progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                    speed      = convertToSI(Math.round(bytesSent / ((new Date().getTime() - start) / 1000))) + "/s";
+                    speed      = convertToSI(bytesSent / ((new Date().getTime() - start) / 1000), 2) + "/s";
                 prog.css("width", progress);
                 updateTitle(progress);
                 uperc.html(progress + " - " + speed);
@@ -1045,13 +1045,16 @@
     }
 
     // Convert raw byte numbers to SI values
-    function convertToSI(bytes) {
+    function convertToSI(bytes, decimals) {
         var step = 0, units = ["B", "KiB", "MiB", "GiB", "TiB"];
         while (bytes >= 1024) {
             bytes /= 1024;
             step++;
         }
-        return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
+        if (!decimals)
+            return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
+        else
+            return [(step === 0) ? bytes : (bytes).toFixed(decimals), units[step]].join(" ");
     }
 
     // This seems to fix weird Webkit rendering after animations
