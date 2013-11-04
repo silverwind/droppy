@@ -236,13 +236,13 @@ function createListener() {
         var options = {
             key              : key,
             cert             : cert,
-            windowSize       : 1024 * 1024,
             honorCipherOrder : true,
             ciphers          : "AES128-GCM-SHA256:!RC4:!MD5:!aNULL:!NULL:!EDH:HIGH",
             secureProtocol   : "SSLv23_server_method"
         };
 
         if (config.useSPDY) {
+            options.windowSize = 1024 * 1024,
             server = require("spdy").createServer(options, onRequest);
         } else {
             server = require("https").createServer(options, onRequest);
