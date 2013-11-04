@@ -4,10 +4,11 @@ A modern file server web application utilizing WebSockets for realtime updates, 
 ![droppy](http://i.imgur.com/eV8AHnM.png)
 
 ##Installation
-With [node](http://nodejs.org/) installed, run:
+With [node](http://nodejs.org/download/) installed, run:
 ````bash
 git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
 ````
+
 ##Running the server
 To start the server, run:
 ````bash
@@ -15,15 +16,8 @@ To start the server, run:
 ````
 By default, the server will listen on [https](https://localhost/). On first startup, a user `droppy` with password `droppy` will be created. To add users, run `./droppy.js -adduser [user] [pass]`. To remove users, you'll have to edit `db.json` for now.
 
-##Supported Browsers
-- Firefox (last 2 versions)
-- Chrome (last 2 versions)
-- Internet Explorer 10 or higher
-
-In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
-
 ##Configuration
-Configuration is done through `config.json`:
+Configuration is done through `config.json`
 ````javascript
 {
     "debug"        : false,
@@ -45,7 +39,6 @@ Configuration is done through `config.json`:
     "srcDir"       : "./src/"
 }
 ````
-
 ###General options
 - `debug` Skip resource minification and enable automatic CSS reloading when the source files change.
 - `useHTTPS` Whether the server should use HTTPS.
@@ -57,12 +50,19 @@ Configuration is done through `config.json`:
 - `linkLength` The amount of characters in a shortlink to a file.
 - `maxOpen` The maximum number of concurrently opened files. 256 seems safe for Windows. On Unix, you can probably go higher.
 - `timestamps` Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
-- `httpsKey` Path to your openSSL private key. Used in conjunction with `useHTTPS`.
-- `httpsCert` Path to your openSSL cert(s). Used in conjunction with `useHTTPS`.
 
 ###Path options
+- `httpsKey` Path to your openSSL private key. Used in conjunction with `useHTTPS`.
+- `httpsCert` Path to your openSSL cert(s). Used in conjunction with `useHTTPS`.
 - `db` Location of the user database file.
 - `filesDir` The directory which serves as the server's root.
 - `incomingDir` The directory which serves as the server's root.
 - `resDir` The directory which contains the compiled resources and images.
 - `srcDir` The directory which contains the html/js/css sources.
+
+##Supported Browsers
+- Firefox (last 2 versions)
+- Chrome (last 2 versions)
+- Internet Explorer 10 or higher
+
+In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
