@@ -38,12 +38,6 @@
  --------------------------------------------------------------------------- */
 "use strict";
 
-require('nodetime').profile({
-    accountKey: 'dc3d7dfd1f9352172d7f953a90d78d5cfc1e35c2',
-    appName: 'droppy-speedtest'
-});
-
-
 var helpers         = require("./lib/helpers.js"),
     log             = require("./lib/log.js"),
     autoprefixer    = require("autoprefixer"),
