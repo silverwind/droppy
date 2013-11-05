@@ -636,7 +636,7 @@ function handleGET(req, res) {
         resourceName = (dirName === "") ? fileName : dirName + "/" + fileName;
         handleResourceRequest(req, res, resourceName);
     } else if (URI === "/favicon.ico") {
-        handleResourceRequest(req, res, "icon.ico");
+        handleResourceRequest(req, res, "favicon.ico");
     } else {
         var cookie = getCookie(req.headers.cookie);
         if (!cookie) {
@@ -760,7 +760,7 @@ function handleResourceRequest(req, res, resourceName) {
             } else if (/^\/content\//.test(req.url)) {
                 // Don't ever cache /content since its data is dynamic
                 res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
-            } else if (resourceName === "icon.ico") {
+            } else if (resourceName === "favicon.ico") {
                 // Set a long cache on the favicon, as some browsers seem to request them constantly
                 res.setHeader("Cache-Control", "max-age=7257600");
             } else {
