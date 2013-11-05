@@ -995,35 +995,46 @@
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
-        $(".icon-play").register("click", function () {
+        $(".icon-play").register("click", function (event) {
+            play($(event.target));
+        });
+
+        function play(playButton) {
             if (socketWait) return;
-            var player    = $("#audio-player")[0],
-                source    = $(this).parent().find("a.filelink").attr("href"),
-                iconPlay  = "",
-                iconPause = "";
+            var player     = $("#audio-player").get(0),
+                source     = playButton.parent().find(".filelink").attr("href"),
+                iconPlay   = "",
+                iconPause  = "";
+
+            // Play the next file in the list when playback ends and loop around too
+            // TODO: Loop around non-audio files
+            player.onended = function () {
+                var current = $(".playing").parent(),
+                    next    = current.next();
+                play((next.length) ? next.find(".icon-play") : current.prevAll().last().find(".icon-play"));
+            };
 
             $(".filelink").removeClass("playing");
             $(".icon-play").removeClass("active").text(iconPlay);
-            $(this).addClass("active");
+            playButton.addClass("active");
 
-            if (player.paused) {
+            if (player.paused)
+                loadAndPlay();
+             else
+                decodeURI(player.src) === source ? pause() : loadAndPlay();
+
+            function loadAndPlay() {
                 player.src = source;
                 player.play();
-                $(this).text(iconPause);
-                $(this).parent().find(".filelink").addClass("playing");
-            } else {
-                if (decodeURI(player.src) === source) {
-                    player.pause();
-                    $(this).text(iconPlay);
-                    $(".icon-play").removeClass("active")
-                } else {
-                    player.src = source;
-                    player.play();
-                    $(this).text(iconPause);
-                    $(this).parent().find(".filelink").addClass("playing");
-                }
+                playButton.text(iconPause);
+                playButton.parent().find(".filelink").addClass("playing");
             }
-        });
+            function pause() {
+                player.pause();
+                playButton.text(iconPlay);
+                $(".icon-play").removeClass("active");
+            }
+        }
     }
 
     // Extract the extension from a file name

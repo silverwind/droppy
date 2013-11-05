@@ -387,7 +387,7 @@ body {
     width: calc(100% - 22em);
 }
 
-.filelink.playing:after {
+.playing:after {
     position: absolute;
     content: "";
     font-family: "icons";
