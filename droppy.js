@@ -242,7 +242,7 @@ function createListener() {
         };
 
         if (config.useSPDY) {
-            options.windowSize = 1024 * 1024,
+            options.windowSize = 1024 * 1024;
             server = require("spdy").createServer(options, onRequest);
         } else {
             server = require("https").createServer(options, onRequest);
@@ -270,7 +270,7 @@ function createListener() {
         if (error.code === "EADDRINUSE")
             log.error("Failed to bind to port ", port, ". Address already in use.\n");
         else if (error.code === "EACCES")
-            log.error("Failed to bind to port ", port, ". Need root to bind to ports < 1024.\n");
+            log.error("Failed to bind to port ", port, ". Need permission to bind to ports < 1024.\n");
         else
             log.error("Error:", util.inspect(error));
         process.exit(1);
@@ -290,10 +290,14 @@ function onRequest(req, res) {
     case "POST":
         handlePOST(req, res);
         break;
+    case "OPTIONS":
+        res.setHeader("Allow", "GET,POST,OPTIONS");
+        res.end("\n");
+        log.response(req, res);
+        break;
     default:
         res.statusCode = 405;
-        res.setHeader("Allow", "GET, POST");
-        res.end();
+        res.end("\n");
         log.response(req, res);
     }
 }
