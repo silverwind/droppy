@@ -354,7 +354,7 @@ body {
     line-height: 1.5em;
 }
 
-.data-row, .data-row > .icon, .data-row > a {
+.data-row, .data-row > .icon:not(.icon-play), .data-row > a {
     color: #333;
 }
 
@@ -385,6 +385,21 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     width: calc(100% - 22em);
+}
+
+.filelink.playing:after {
+    position: absolute;
+    content: "";
+    font-family: "icons";
+    margin-left: .5em;
+    color: #25a;
+    animation: zoom .75s linear infinite;
+}
+
+@keyframes zoom {
+  0%   { transform: scale(1.2) }
+  50%  { transform: scale(0.9) }
+  100% { transform: scale(1.2) }
 }
 
 @media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 9em) } }
@@ -457,7 +472,9 @@ body {
     color: #666;
 }
 
-.icon-play.active { color: #c12 }
+.icon-play.active {
+    color: #25a;
+}
 
 .icon-delete, .icon-link, .icon-play {
     float: right;

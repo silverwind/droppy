@@ -1002,6 +1002,7 @@
                 iconPlay  = "",
                 iconPause = "";
 
+            $(".filelink").removeClass("playing");
             $(".icon-play").removeClass("active").text(iconPlay);
             $(this).addClass("active");
 
@@ -1009,14 +1010,17 @@
                 player.src = source;
                 player.play();
                 $(this).text(iconPause);
+                $(this).parent().find(".filelink").addClass("playing");
             } else {
                 if (decodeURI(player.src) === source) {
                     player.pause();
                     $(this).text(iconPlay);
+                    $(".icon-play").removeClass("active")
                 } else {
                     player.src = source;
                     player.play();
                     $(this).text(iconPause);
+                    $(this).parent().find(".filelink").addClass("playing");
                 }
             }
         });
