@@ -94,7 +94,7 @@
                 html : ["base.html", "auth.html", "main.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-            resourceList = helpers.objToFlatArray(resources),
+            resourceList = helpers.flattenObj(resources),
             matches = { resource: 0, compiled: 0 };
 
         // Check if we to actually need to recompile resources
@@ -261,7 +261,7 @@
 
         server.on("listening", function () {
             setupSocket(server);
-            if (config.debug) setupDebugWatcher();
+            if (config.debug) watchCSS();
             log.simple(" ->> listening on port ", server.address().port);
         });
 
@@ -337,7 +337,7 @@
                     break;
                 case "CREATE_FOLDER":
                     var foldername = path.basename(dir);
-                    if (foldername.match(/[\\*{}\/<>?|]/) || foldername.match(/^(\.+)$/)) {
+                    if (/[\\*{}\/<>?|]/.test(foldername) || /^(\.+)$/.test(foldername)) {
                         log.log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
                         return;
                     }
@@ -404,7 +404,7 @@
                     });
                     break;
                 case "SWITCH_FOLDER":
-                    if (!dir.match(/^\//) || dir.match(/\.\./)) return;
+                    if (!/^\//.test(dir) || /\.\./.test(dir)) return;
                     clients[cookie].directory = dir;
                     updateWatchers(dir, function (ok) {
                         // Send client back to root in case the requested directory can't be read
@@ -529,18 +529,6 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Add ./files/ to a path
-    function addFilePath(p) {
-        return config.filesDir.substring(0, config.filesDir.length - 1) + p;
-    }
-
-    //-----------------------------------------------------------------------------
-    // Remove ./files/ from a path
-    function removeFilePath(p) {
-        return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), "");
-    }
-
-    //-----------------------------------------------------------------------------
     // Watch given directory
     function updateWatchers(newDir, callback) {
         if (!watchers[newDir]) {
@@ -586,7 +574,7 @@
         var gzipFiles, relPath, fileName, fileData, fileTime;
         dir = dir.substring(0, dir.length - 1); // Strip trailing slash
 
-        walkDirectory(dir, function (error, results) {
+        helpers.walkDirectory(dir, function (error, results) {
             if (error) log.error(error);
             gzipFiles = [];
             results.forEach(function (fullPath) {
@@ -604,7 +592,7 @@
                 cache[relPath].data = fileData;
                 cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
                 cache[relPath].mime = mime.lookup(fullPath);
-                if (fileName.match(/.*(js|css|html|svg)$/)) {
+                if (/.*(js|css|html|svg)$/.test(fileName)) {
                     gzipFiles.push(relPath);
                 }
             });
@@ -644,9 +632,9 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
-        } else if (URI.match(/^\/get\//)) {
+        } else if (/^\/get\//.test(URI)) {
             handleFileRequest(req, res);
-        } else if (URI.match(/^\/res\//)) {
+        } else if (/^\/res\//.test(URI)) {
             var fileName = path.basename(req.url);
             var dirName = path.dirname(req.url);
             dirName = dirName.substring(5);
@@ -787,13 +775,13 @@
                     res.setHeader("ETag", cache[resourceName].etag);
                 }
 
-                if (resourceName.match(/.*(js|css|html|svg)$/))
+                if (/.*(js|css|html|svg)$/.test(resourceName))
                     res.setHeader("Content-Type", cache[resourceName].mime + "; charset=utf-8");
                 else
                     res.setHeader("Content-Type", cache[resourceName].mime);
 
                 var acceptEncoding = req.headers["accept-encoding"] || "";
-                if (acceptEncoding.match(/\bgzip\b/) && cache[resourceName].gzipData !== undefined) {
+                if (/\bgzip\b/.test(acceptEncoding) && cache[resourceName].gzipData !== undefined) {
                     res.setHeader("Content-Encoding", "gzip");
                     res.setHeader("Content-Length", cache[resourceName].gzipData.length);
                     res.setHeader("Vary", "Accept-Encoding");
@@ -889,14 +877,9 @@
                 }
             });
         });
-        busboy.on("end", function () {
-            done = true;
-        });
-        req.on("close", function () {
-            if (!done) {
-                log.log(socket, " Upload cancelled");
-            }
-        });
+
+        busboy.on("end", function () { done = true; });
+        req.on("close", function () { !done && log.log(socket, " Upload cancelled"); });
         req.pipe(busboy);
 
         function onFile(fieldname, file, filename, next) {
@@ -968,9 +951,7 @@
     //-----------------------------------------------------------------------------
     // Argument handler
     function handleArguments() {
-        var args = process.argv.slice(2);
-        var option = args[0];
-
+        var args = process.argv.slice(2), option = args[0];
 
         if (option.indexOf("-add") === 0) {
             if (args.length === 3) {
@@ -983,7 +964,7 @@
                 process.exit(1);
             }
         } else if (option.indexOf("version") === 0) {
-            console.log(require("./package.json").version);
+            log.simple(require("./package.json").version);
             process.exit(0);
         } else {
             printUsage();
@@ -1021,7 +1002,7 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Read and validate user database
+    // Read and validate the user database
     function readDB() {
         var dbString = "";
         var doWrite = false;
@@ -1036,7 +1017,7 @@
             if (!db.sessions) db.sessions = {};
             if (!db.shortlinks) db.shortlinks = {};
         } catch (e) {
-            if (e.code === "ENOENT" || dbString.match(/^\s*$/)) {
+            if (e.code === "ENOENT" || /^\s*$/.test(dbString)) {
                 // Recreate DB file in case it doesn't exist / is empty
                 log.simple(" ->> creating " + path.basename(config.db) + "...");
                 db = {users: {}, sessions: {}, shortlinks: {}};
@@ -1048,8 +1029,7 @@
         }
 
         // Write a new DB if necessary
-        if (doWrite)
-            writeDB();
+        doWrite && writeDB();
     }
 
     //-----------------------------------------------------------------------------
@@ -1097,7 +1077,7 @@
         if (cookie) {
             var cookies = cookie.split("; ");
             cookies.forEach(function (c) {
-                if (c.match(/^sid.*/)) {
+                if (/^sid.*/.test(c)) {
                     sid = c.substring(4);
                 }
             });
@@ -1129,49 +1109,8 @@
     }
 
     //-----------------------------------------------------------------------------
-    function writeDB() {
-        fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
-    }
-
-    //-----------------------------------------------------------------------------
-    function getResPath(name) {
-        return path.join(config.resDir, name);
-    }
-
-    //-----------------------------------------------------------------------------
-    function getSrcPath(name) {
-        return path.join(config.srcDir, name);
-    }
-
-    //-----------------------------------------------------------------------------
-    // Recursively walk a directory and return file paths in an array
-    function walkDirectory(dir, callback) {
-        var results = [];
-        fs.readdir(dir, function (error, list) {
-            if (error) return callback(error);
-            var i = 0;
-            (function next() {
-                var file = list[i++];
-                if (!file) return callback(null, results);
-                file = dir + '/' + file;
-                fs.stat(file, function (error, stats) {
-                    if (stats && stats.isDirectory()) {
-                        walkDirectory(file, function (error, res) {
-                            results = results.concat(res);
-                            next();
-                        });
-                    } else {
-                        results.push(file);
-                        next();
-                    }
-                });
-            })();
-        });
-    }
-
-    //-----------------------------------------------------------------------------
     // Watch the CSS files and send updates to the client for live styling
-    function setupDebugWatcher() {
+    function watchCSS() {
         var cssfile = config.srcDir + "style.css";
         fs.watch(cssfile, helpers.debounce(function () {
             cssCache = [
@@ -1195,6 +1134,13 @@
             }
         }), 100);
     }
+
+    //-----------------------------------------------------------------------------
+    function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
+    function getResPath(name)  { return path.join(config.resDir, name); }
+    function getSrcPath(name)  { return path.join(config.srcDir, name); }
+    function addFilePath(p)    { return config.filesDir.substring(0, config.filesDir.length - 1) + p; }
+    function removeFilePath(p) { return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), ""); }
 
     //-----------------------------------------------------------------------------
     process

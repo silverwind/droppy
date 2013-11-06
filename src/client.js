@@ -507,7 +507,7 @@
                 toggleCatcher();
             }
             var input = nameinput.val();
-            var valid = !input.match(/[\\*{}\/<>?|]/) && !input.match(/^(\.+)$/);
+            var valid = !/[\\*{}\/<>?|]/.test(input) && !/^(\.+)$/.test(input);
             var folderExists;
             for (var i = 0, len = activeFiles.length; i < len; i++)
                 if (activeFiles[i] === input.toLowerCase()) {
@@ -614,28 +614,30 @@
             } else { // We got an object for recursive folder uploads
                 var addedDirs = {};
                 for (var path in data) {
-                    formData.append(path, data[path], path);
-                    var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
-                    switch (Object.prototype.toString.call(data[path])) {
-                    case "[object Object]":
-                        if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                            currentData[name] = {
-                                size : 0,
-                                type : "nd"
-                            };
-                            addedDirs[name] = true;
+                    if (data.hasOwnProperty(path)) {
+                        formData.append(path, data[path], path);
+                        var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
+                        switch (Object.prototype.toString.call(data[path])) {
+                        case "[object Object]":
+                            if (!addedDirs[name] && data.hasOwnProperty(path)) {
+                                currentData[name] = {
+                                    size : 0,
+                                    type : "nd"
+                                };
+                                addedDirs[name] = true;
+                            }
+                            break;
+                        case "[object File]":
+                            numFiles++;
+                            if (!addedDirs[name]) {
+                                currentData[name] = {
+                                    size  : data[path].size,
+                                    type  : "nf",
+                                    mtime : new Date().getTime()
+                                };
+                            }
+                            break;
                         }
-                        break;
-                    case "[object File]":
-                        numFiles++;
-                        if (!addedDirs[name]) {
-                            currentData[name] = {
-                                size  : data[path].size,
-                                type  : "nf",
-                                mtime : new Date().getTime()
-                            };
-                        }
-                        break;
                     }
                 }
             }
