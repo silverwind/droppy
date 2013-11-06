@@ -39,33 +39,25 @@
 "use strict";
 
 (function () {
-
-    var helpers         = require("./lib/helpers.js"),
-        log             = require("./lib/log.js"),
-        autoprefixer    = require("autoprefixer"),
-        Busboy          = require("busboy"),
-        cleancss        = require("clean-css"),
-        crypto          = require("crypto"),
-        fs              = require("graceful-fs"),
-        mime            = require("mime"),
-        path            = require("path"),
-        querystring     = require("querystring"),
-        uglify          = require("uglify-js"),
-        util            = require("util"),
-        wss             = require("ws").Server,
-        wrench          = require("wrench"),
-        zlib            = require("zlib");
-
-    var cache        = {},
-        clients      = {},
-        db           = {},
-        dirs         = {},
-        watchedDirs  = {},
-        server       = null,
-        cssCache     = null,
-        config       = null,
-        isCLI        = (process.argv.length > 2),
-        isLive       = (process.env.NODE_ENV === "production");
+    var helpers  = require("./lib/helpers.js"),
+        log      = require("./lib/log.js"),
+        ap       = require("autoprefixer"),
+        Busboy   = require("busboy"),
+        crypto   = require("crypto"),
+        fs       = require("graceful-fs"),
+        mime     = require("mime"),
+        path     = require("path"),
+        util     = require("util"),
+        Wss      = require("ws").Server,
+        wrench   = require("wrench"),
+        cache    = {},
+        clients  = {},
+        db       = {},
+        dirs     = {},
+        watchers = {},
+        cssCache = null,
+        config   = null,
+        isCLI    = (process.argv.length > 2);
 
     // Argument handler
     if (isCLI) handleArguments();
@@ -125,20 +117,22 @@
 
         // Read resources
         for (var type in resources) {
-            resources[type].forEach(function (file, key, array) {
-                var data;
-                try {
-                    data = fs.readFileSync(getSrcPath(file)).toString("utf8");
-                } catch (error) {
-                    log.error("Error reading " + file + ":\n", error);
-                    process.exit(1);
-                }
-                if (type === "html") {
-                    array[key] = {};
-                    array[key][file] = data;
-                } else
-                    array[key] = data;
-            });
+            if (resources.hasOwnProperty(type)) {
+                resources[type].forEach(function (file, key, array) {
+                    var data;
+                    try {
+                        data = fs.readFileSync(getSrcPath(file)).toString("utf8");
+                    } catch (error) {
+                        log.error("Error reading " + file + ":\n", error);
+                        process.exit(1);
+                    }
+                    if (type === "html") {
+                        array[key] = {};
+                        array[key][file] = data;
+                    } else
+                        array[key] = data;
+                });
+            }
         }
 
         // Concatenate CSS and JS
@@ -154,13 +148,13 @@
         });
 
         // Add CSS vendor prefixes
-        out.css = autoprefixer("last 2 versions").compile(out.css);
+        out.css = ap("last 2 versions").compile(out.css);
         // Minify CSS
-        !config.debug && (out.css = cleancss.process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
+        !config.debug && (out.css = require("clean-css").process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
         // Set the client debug variable to mirror the server's
         out.js = out.js.replace("var debug;", config.debug ? "var debug = true;" : "var debug = false;");
         // Minify JS
-        !config.debug && (out.js = uglify.minify(out.js, {fromString: true}).code);
+        !config.debug && (out.js = require("uglify-js").minify(out.js, {fromString: true}).code);
 
         try {
             resources.html.forEach(function (file) {
@@ -178,12 +172,11 @@
         // Save the hashes of all compiled files
         resourceList.forEach(function (file) {
             if (!db.resourceHashes) db.resourceHashes = {};
-            db.resourceHashes[file] = crypto.createHash("md5")
-                .update(fs.readFileSync(getSrcPath(file)))
-                .digest("base64");
+            db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(getSrcPath(file))).digest("base64");
             writeDB();
         });
     }
+
     //-----------------------------------------------------------------------------
     // Set up the directory for files
     function setupDirectories() {
@@ -198,32 +191,36 @@
         fs.mkdir(config.filesDir, config.dirMode, onerror);
         fs.mkdir(config.incomingDir, config.dirMode, onerror);
     }
+
     //-----------------------------------------------------------------------------
     // Clean up our shortened links by removing links to nonexistant files
     function cleanUpLinks() {
         var linkcount = 0, cbcount = 0;
         for (var link in db.shortlinks) {
-            linkcount++;
-            (function (shortlink, location) {
-                fs.stat(path.join(config.filesDir, location), function (error, stats) {
-                    cbcount++;
-                    if (!stats || error) {
-                        delete db.shortlinks[shortlink];
-                    }
-                    if (cbcount === linkcount) {
-                        writeDB();
-                    }
-                });
-            })(link, db.shortlinks[link]);
+            if (db.shortlinks.hasOwnProperty(link)) {
+                linkcount++;
+                (function (shortlink, location) {
+                    fs.stat(path.join(config.filesDir, location), function (error, stats) {
+                        cbcount++;
+                        if (!stats || error) {
+                            delete db.shortlinks[shortlink];
+                        }
+                        if (cbcount === linkcount) {
+                            writeDB();
+                        }
+                    });
+                })(link, db.shortlinks[link]);
+            }
         }
     }
+
     //-----------------------------------------------------------------------------
     // Bind to listening port
     function createListener() {
+        var server, key, cert;
         if (!config.useHTTPS) {
             server = require("http").createServer(onRequest);
         } else {
-            var key, cert;
             try {
                 key = fs.readFileSync(config.httpsKey);
                 cert = fs.readFileSync(config.httpsCert);
@@ -278,7 +275,7 @@
             process.exit(1);
         });
 
-        var port =  isLive ? process.env.PORT : config.port;
+        var port = (process.env.NODE_ENV === "production") ? process.env.PORT : config.port;
         server.listen(port);
     }
 
@@ -303,10 +300,11 @@
             log.response(req, res);
         }
     }
+
     //-----------------------------------------------------------------------------
     // WebSocket functions
     function setupSocket(server) {
-        new wss({server : server}).on("connection", function (ws) {
+        new Wss({server : server}).on("connection", function (ws) {
             var remoteIP   = ws._socket.remoteAddress;
             var remotePort = ws._socket.remotePort;
             var cookie     = getCookie(ws.upgradeReq.headers.cookie);
@@ -428,9 +426,11 @@
                     // Only send relevant data for the user list
                     var userlist = {};
                     for (var user in db.users) {
-                        userlist[user] = {
-                            "privileged": db.users[user].privileged
-                        };
+                        if (db.users.hasOwnProperty(user)) {
+                            userlist[user] = {
+                                "privileged": db.users[user].privileged
+                            };
+                        }
                     }
                     var data = JSON.stringify({
                         type   : "USER_LIST",
@@ -461,6 +461,7 @@
         });
     }
 
+    //-----------------------------------------------------------------------------
     // Send a WS event to the client containing an file list update
     function sendFiles(cookie, eventType) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
@@ -473,6 +474,7 @@
         send(clients[cookie].ws, data);
     }
 
+    //-----------------------------------------------------------------------------
     // Send a file link to a client
     function sendLink(cookie, link) {
         if (!clients[cookie] || !clients[cookie].ws) return;
@@ -482,6 +484,7 @@
         }));
     }
 
+    //-----------------------------------------------------------------------------
     // Do the actual sending
     function send(ws, data) {
         (function queue(ws, data, time) {
@@ -495,6 +498,7 @@
             }
         })(ws, data, 0);
     }
+
     //-----------------------------------------------------------------------------
     // Watch the directory for realtime changes and send them to the appropriate clients.
     function createWatcher(folder) {
@@ -506,34 +510,40 @@
             log.error("Error trying to watch ", removeFilePath(folder), "\n", error);
         });
 
-        watchedDirs[removeFilePath(folder)] = watcher;
+        watchers[removeFilePath(folder)] = watcher;
 
         function updateClients(folder) {
             var clientsToUpdate = [];
             for (var client in clients) {
-                var clientDir = clients[client].directory;
-                if (clientDir === removeFilePath(folder)) {
-                    clientsToUpdate.push(client);
-                    readDirectory(clientDir, function () {
-                        sendFiles(clientsToUpdate.pop(), "UPDATE_FILES");
-                    });
+                if (clients.hasOwnProperty(client)) {
+                    var clientDir = clients[client].directory;
+                    if (clientDir === removeFilePath(folder)) {
+                        clientsToUpdate.push(client);
+                        readDirectory(clientDir, function () {
+                            sendFiles(clientsToUpdate.pop(), "UPDATE_FILES");
+                        });
+                    }
                 }
             }
         }
     }
+
     //-----------------------------------------------------------------------------
     // Add ./files/ to a path
     function addFilePath(p) {
         return config.filesDir.substring(0, config.filesDir.length - 1) + p;
     }
+
+    //-----------------------------------------------------------------------------
     // Remove ./files/ from a path
     function removeFilePath(p) {
         return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), "");
     }
+
     //-----------------------------------------------------------------------------
     // Watch given directory
     function updateWatchers(newDir, callback) {
-        if (!watchedDirs[newDir]) {
+        if (!watchers[newDir]) {
             newDir = addFilePath(newDir);
             fs.stat(newDir, function (error, stats) {
                 if (error || !stats) {
@@ -551,21 +561,25 @@
             callback && callback(true);
         }
     }
+
     //-----------------------------------------------------------------------------
     // Check if we need the other active watchers
     function checkWatchedDirs() {
         var neededDirs = {};
         for (var client in clients) {
-            neededDirs[clients[client].directory] = true;
+            if (clients.hasOwnProperty(client)) {
+                neededDirs[clients[client].directory] = true;
+            }
         }
 
-        for (var directory in watchedDirs) {
+        for (var directory in watchers) {
             if (!neededDirs[directory]) {
-                watchedDirs[directory].close();
-                delete watchedDirs[directory];
+                watchers[directory].close();
+                delete watchers[directory];
             }
         }
     }
+
     //-----------------------------------------------------------------------------
     // Read resources and store them in the cache object
     function cacheResources(dir, callback) {
@@ -602,7 +616,7 @@
 
             function runGzip() {
                 var currentFile = gzipFiles[0];
-                zlib.gzip(cache[currentFile].data, function (error, compressedData) {
+                require("zlib").gzip(cache[currentFile].data, function (error, compressedData) {
                     if (error) log.error(error);
                     cache[currentFile].gzipData = compressedData;
                     gzipFiles = gzipFiles.slice(1);
@@ -614,6 +628,7 @@
             }
         });
     }
+
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url);
@@ -669,6 +684,7 @@
             });
         }
     }
+
     //-----------------------------------------------------------------------------
     var blocked = [];
     function handlePOST(req, res) {
@@ -699,7 +715,7 @@
                 body += data;
             });
             req.on("end", function () {
-                var postData = querystring.parse(body);
+                var postData = require("querystring").parse(body);
                 var response;
                 if (isValidUser(postData.username, postData.password)) {
                     log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
@@ -720,6 +736,7 @@
             });
         }
     }
+
     //-----------------------------------------------------------------------------
     function handleResourceRequest(req, res, resourceName) {
         if (config.debug && resourceName === "style.css") {
@@ -728,7 +745,7 @@
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
-            cssCache = autoprefixer("last 2 versions").compile(cssCache);
+            cssCache = ap("last 2 versions").compile(cssCache);
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/css; charset=utf-8");
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
@@ -789,6 +806,7 @@
         }
         log.response(req, res);
     }
+
     //-----------------------------------------------------------------------------
     function handleFileRequest(req, res) {
         var URI = decodeURIComponent(req.url).substring(5, req.url.length); // Strip "/get/" off the URI
@@ -825,6 +843,7 @@
             });
         }
     }
+
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
         var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
@@ -896,6 +915,7 @@
             file.pipe(fstream);
         }
     }
+
     //-----------------------------------------------------------------------------
     // Read the directory's content and store it in "dirs"
     function readDirectory(root, callback) {
@@ -944,6 +964,7 @@
             }
         });
     }
+
     //-----------------------------------------------------------------------------
     // Argument handler
     function handleArguments() {
@@ -975,6 +996,7 @@
             log.simple(" -add USER PASS\tCreate a new user for authentication");
         }
     }
+
     //-----------------------------------------------------------------------------
     // Read and validate config.json
     function readConfig() {
@@ -997,6 +1019,7 @@
             }
         }
     }
+
     //-----------------------------------------------------------------------------
     // Read and validate user database
     function readDB() {
@@ -1028,11 +1051,13 @@
         if (doWrite)
             writeDB();
     }
+
     //-----------------------------------------------------------------------------
     // Get a SHA256 hash of a string
     function getHash(string) {
         return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
     }
+
     //-----------------------------------------------------------------------------
     // Add a user to the database and save it to disk
     function addUser(user, password, privileged) {
@@ -1052,17 +1077,19 @@
             if (isCLI) process.exit(1);
         }
     }
+
     //-----------------------------------------------------------------------------
     // Check if user/password is valid
-    function isValidUser(user, password) {
+    function isValidUser(user, pass) {
         var parts;
         if (db.users[user]) {
             parts = db.users[user].hash.split("$");
-            if (parts.length === 2 && parts[0] === getHash(password + parts[1] + user))
+            if (parts.length === 2 && parts[0] === getHash(pass + parts[1] + user))
                 return true;
         }
         return false;
     }
+
     //-----------------------------------------------------------------------------
     // Cookie helpers
     function getCookie(cookie) {
@@ -1083,6 +1110,7 @@
         return false;
     }
 
+    //-----------------------------------------------------------------------------
     function createCookie(req, res, postData) {
         var sessionID = crypto.randomBytes(32).toString("base64");
         var priv = db.users[postData.username].privileged;
@@ -1100,20 +1128,22 @@
         writeDB();
     }
 
+    //-----------------------------------------------------------------------------
     function writeDB() {
         fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
     }
-    //============================================================================
-    // Misc helper functions
-    //============================================================================
+
+    //-----------------------------------------------------------------------------
     function getResPath(name) {
         return path.join(config.resDir, name);
     }
 
+    //-----------------------------------------------------------------------------
     function getSrcPath(name) {
         return path.join(config.srcDir, name);
     }
 
+    //-----------------------------------------------------------------------------
     // Recursively walk a directory and return file paths in an array
     function walkDirectory(dir, callback) {
         var results = [];
@@ -1139,6 +1169,7 @@
         });
     }
 
+    //-----------------------------------------------------------------------------
     // Watch the CSS files and send updates to the client for live styling
     function setupDebugWatcher() {
         var cssfile = config.srcDir + "style.css";
@@ -1147,26 +1178,25 @@
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
-            cssCache = autoprefixer("last 2 versions").compile(cssCache);
+            cssCache = ap("last 2 versions").compile(cssCache);
 
-            for (var cookie in clients) {
-                var data = JSON.stringify({
-                    "type"  : "UPDATE_CSS",
-                    "css"   : cssCache
-                });
-                if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
-                    clients[cookie].ws.send(data, function (error) {
-                        if (error) log.error(error);
+            for (var client in clients) {
+                if (clients.hasOwnProperty(client)) {
+                    var data = JSON.stringify({
+                        "type"  : "UPDATE_CSS",
+                        "css"   : cssCache
                     });
+                    if (clients[client].ws && clients[client].ws.readyState === 1) {
+                        clients[client].ws.send(data, function (error) {
+                            if (error) log.error(error);
+                        });
+                    }
                 }
             }
         }), 100);
     }
 
-    //============================================================================
-    // process event handlers
-    //============================================================================
-
+    //-----------------------------------------------------------------------------
     process
         .on("SIGINT",  function () { shutdown("SIGINT");  })
         .on("SIGQUIT", function () { shutdown("SIGQUIT"); })
@@ -1176,14 +1206,17 @@
             log.error(error);
         });
 
+    //-----------------------------------------------------------------------------
     function shutdown(signal) {
         log.log("Received " + signal + " - Shutting down...");
         var count = 0;
         for (var client in clients) {
-            if (!clients[client] || !clients[client].ws) continue;
-            if (clients[client].ws.readyState < 2) {
-                count++;
-                clients[client].ws.close(1001);
+            if (clients.hasOwnProperty(client)) {
+                if (!clients[client] || !clients[client].ws) continue;
+                if (clients[client].ws.readyState < 2) {
+                    count++;
+                    clients[client].ws.close(1001);
+                }
             }
         }
 
