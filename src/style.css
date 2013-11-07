@@ -351,9 +351,21 @@ body {
     color: #333;
 }
 
-.data-row:not(.animating):hover {
+.data-row:not(.animating):not(.playing-row):hover {
     background: #fff;
     border-radius: 3px;
+}
+
+.playing-row {
+    background: #b4d4f4;
+    border-radius: 3px;
+    animation: flash 1.5s linear infinite;
+}
+
+@keyframes flash {
+  0%   { background: #acf }
+  50%  { background: #8af }
+  100% { background: #acf }
 }
 
 .tag-uploading:after {

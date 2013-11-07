@@ -1014,8 +1014,8 @@
                 play((next.length) ? next.find(".icon-play") : current.prevAll().last().find(".icon-play"));
             };
 
-            $(".filelink").removeClass("playing");
-            $(".icon-play").removeClass("active").text(iconPlay);
+            resetClasses();
+            $(".icon-play").text(iconPlay);
             playButton.addClass("active");
 
             if (player.paused)
@@ -1027,12 +1027,19 @@
                 player.src = source;
                 player.play();
                 playButton.text(iconPause);
+                playButton.parent().addClass("playing-row");
                 playButton.parent().find(".filelink").addClass("playing");
             }
             function pause() {
                 player.pause();
                 playButton.text(iconPlay);
+                resetClasses();
+            }
+
+            function resetClasses() {
+                $(".filelink").removeClass("playing");
                 $(".icon-play").removeClass("active");
+                $(".data-row").removeClass("playing-row");
             }
         }
     }
