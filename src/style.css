@@ -254,7 +254,7 @@ body {
 /* ================================== Path ================================= */
 
 #path {
-   background: linear-gradient(#111,#222);
+   background: linear-gradient(#111,#333);
    border-bottom: 1.5px solid #222;
    border-top: 1.5px solid #111;
    height: auto;
@@ -274,7 +274,7 @@ body {
     float: left;
     position: relative;
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
-    box-shadow: 0 0 2em .75em #111;
+    box-shadow: 0 0 1.5em .75em #111;
     padding: 0 0.5em 0 1.5em
 }
 
@@ -304,25 +304,24 @@ body {
 #path li:before { border-right: 2px solid #111; transform: skew( 45deg); top:    0 }
 #path li:after  { border-right: 2px solid #111; transform: skew(-45deg); bottom: 0 }
 
-#path li, #path li:before, #path li:after { transition: all .3s ease }
+#path li, #path li:before, #path li:after { color: #ccc; transition: all .1s ease }
 #path li:hover { color: #fff }
 #path li:first-child { padding-left: 0.4em }
 
-#path li:nth-child(odd)        { background: #146 }
-#path li:nth-child(odd):before { background: #146 }
-#path li:nth-child(odd):after  { background: #146 }
+#path li:nth-child(odd)        { background: #135 }
+#path li:nth-child(odd):before { background: #135 }
+#path li:nth-child(odd):after  { background: #135 }
 
-#path li:nth-child(even)        { background: #812 }
-#path li:nth-child(even):before { background: #812 }
-#path li:nth-child(even):after  { background: #812 }
+#path li:nth-child(even)        { background: #512 }
+#path li:nth-child(even):before { background: #512 }
+#path li:nth-child(even):after  { background: #512 }
 
-#path li:nth-child(odd):hover         { background: #26a }
-#path li:nth-child(odd):hover:before  { background: #26a }
-#path li:nth-child(odd):hover:after   { background: #26a }
-
-#path li:nth-child(even):hover        { background: #c12 }
-#path li:nth-child(even):hover:before { background: #c12 }
-#path li:nth-child(even):hover:after  { background: #c12 }
+#path li:nth-child(odd):hover         { background: #157 }
+#path li:nth-child(odd):hover:before  { background: #157 }
+#path li:nth-child(odd):hover:after   { background: #157 }
+#path li:nth-child(even):hover        { background: #812 }
+#path li:nth-child(even):hover:before { background: #812 }
+#path li:nth-child(even):hover:after  { background: #812 }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -364,7 +363,7 @@ body {
 
 @keyframes flash {
   0%   { background: #acf }
-  50%  { background: #8af }
+  50%  { background: #9bf }
   100% { background: #acf }
 }
 
