@@ -188,7 +188,9 @@
                 updateData(msg.folder, msg.data);
                 break;
             case "UPDATE_CSS":
+                console.log("up");
                 if (debug) {
+                    console.log("doin");
                     // Live reload the stylesheet(s) for easy designing
                     $('link[rel="stylesheet"]').remove();
 

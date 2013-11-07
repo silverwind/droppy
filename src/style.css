@@ -129,40 +129,33 @@ body {
 }
 /* ============================= Header Buttons ============================ */
 
-#left-buttons, #left-buttons li {
-    box-shadow: 10px 0 20px -2px rgba(0, 0, 0, 0.5);
-    float: left;
-}
-
-#right-buttons, #right-buttons li {
-    box-shadow: -10px 0 20px -2px rgba(0, 0, 0, 0.5);
-    float: right;
-}
-
 .button {
     border: 0;
     color: #ddd;
     cursor: pointer;
     padding: 0;
     user-select: none;
+    background: #222;
+    width: 16.666%;
+    float: left;
+    border-bottom: 2px solid #333;
 }
 
 .button .icon {
     padding-right: 5px;
 }
 
-@media all and (min-width: 1024px) { .button { width: 170px; font-size: .9em; line-height: 35px; height: 35px; } }
-@media all and (max-width: 1023px) { .button { width: 130px; font-size: .8em; line-height: 30px; height: 30px; } }
-@media all and (max-width:  800px) { .button { width: 80px; } .button-text { display: none } }
-@media all and (max-width:  639px) { .button { width: 50px; font-size: .7em; line-height: 25px; height: 25px; } }
-@media all and (max-width:  319px) { .button { width: 30px } }
+@media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px; } }
+@media all and (max-width: 1023px) { .button { font-size: .8em; line-height: 30px; height: 30px; } }
+@media all and (max-width:  750px) { .button-text { display: none } }
+@media all and (max-width:  639px) { .button {  font-size: .7em; line-height: 25px; height: 25px; } }
 
-#upload-file:hover   { color: #ae5 }
-#upload-folder:hover { color: #f1a }
-#create-folder:hover { color: #29f }
-#about:hover         { color: #f71 }
-#config:hover        { color: #ff5 }
-#logout:hover        { color: #e33 }
+#upload-file:hover   { color: #ae5; border-bottom: 2px solid #ae5; }
+#upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a; }
+#create-folder:hover { color: #29f; border-bottom: 2px solid #29f; }
+#about:hover         { color: #f71; border-bottom: 2px solid #f71; }
+#config:hover        { color: #ff5; border-bottom: 2px solid #ff5; }
+#logout:hover        { color: #e33; border-bottom: 2px solid #e33; }
 
 /* ============================ Upload Progress ============================ */
 
@@ -387,6 +380,8 @@ body {
     width: calc(100% - 22em);
 }
 
+@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 12em) } }
+
 .playing:after {
     position: absolute;
     content: "";
@@ -401,8 +396,6 @@ body {
   50%  { transform: scale(0.9) }
   100% { transform: scale(1.2) }
 }
-
-@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 9em) } }
 
 .data-info {
     color: #555;
@@ -420,6 +413,7 @@ body {
     margin-right: .5em;
 }
 
+@media all and (max-width: 639px) { .data-mtime { display: none; } }
 /* ============================= Empty Folder ============================== */
 
 #empty {

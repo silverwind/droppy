@@ -1118,7 +1118,6 @@
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
             cssCache = ap("last 2 versions").compile(cssCache);
-
             for (var client in clients) {
                 if (clients.hasOwnProperty(client)) {
                     var data = JSON.stringify({
