@@ -2,28 +2,27 @@
   "name": "droppy",
   "version": "0.5.2",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "HTML5 file manager with realtime updates",
+  "description": "HTML5 file-server with realtime updates",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": "https://github.com/silverwind/droppy/issues",
   "main": "./droppy.js",
   "dependencies": {
-    "autoprefixer": "~0.8.20131029",
-    "clean-css": "~1.1.7",
+    "autoprefixer": "~0.8.20131104",
+    "clean-css": "~2.0.0",
     "graceful-fs": "~2.0.1",
     "grunt": "~0.4.1",
     "grunt-exec": "~0.4.2",
     "mime": "~1.2.11",
-    "busboy": "0.0.8",
-    "uglify-js": "~2.4.1",
-    "spdy": "~1.14.12",
+    "busboy": "0.0.10",
+    "uglify-js": "~2.4.3",
+    "spdy": "~1.14.14",
     "wrench": "~1.5.4",
     "ws": "~0.4.31"
   },
   "directories": {
     "src": "./src",
     "res": "./res",
-    "files": "./files",
-    "keys": "./keys"
+    "lib": "./lib"
   },
   "engines": {
     "node": "~0.10.0"
@@ -46,6 +45,5 @@
   },
   "bin": {
     "droppy": "./droppy.js"
-  },
-  "subdomain": "droppy"
+  }
 }
