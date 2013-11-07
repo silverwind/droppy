@@ -112,7 +112,6 @@
                 else return;
             } catch (e) { return; }
         });
-
         if (matches.resource === resourceList.length && matches.compiled === compiledList.length) return;
 
         // Read resources
@@ -152,7 +151,7 @@
         // Minify CSS
         !config.debug && (out.css = require("clean-css").process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
         // Set the client debug variable to mirror the server's
-        out.js = out.js.replace("var debug;", config.debug ? "var debug = true;" : "var debug = false;");
+        out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
         !config.debug && (out.js = require("uglify-js").minify(out.js, {fromString: true}).code);
 

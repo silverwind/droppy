@@ -2,14 +2,9 @@
 (function ($, window, document) {
     "use strict";
 
-    var debug; // live css reload and debug logging - this variable is set by the server
-    var smallScreen = $(window).width() < 640;
-
-    var currentData, currentFolder, hasLoggedOut, isAnimating,
-        isUploading, savedParts, socket, socketWait;
-
-    initVariables(); // Separately init the variables so we can init them on demand
-
+    var droppy = {};
+    droppy.debug = null;  // live css reload and debug logging - this variable is set by the server
+    initVariables();
 // ============================================================================
 //  Set up a few things before we start
 // ============================================================================
@@ -103,7 +98,7 @@
             oldPage = $("#page"),
             login = $("#login-form");
         if (type === "main") {
-            hasLoggedOut = false;
+            droppy.hasLoggedOut = false;
             initMainPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
@@ -125,7 +120,7 @@
                     login.removeClass("out").addClass("in");
                     setTimeout(function () {
                         finalize();
-                        if (hasLoggedOut) {
+                        if (droppy.hasLoggedOut) {
                             setTimeout(function () {
                                 $("#login-info-box").attr("class", "info");
                                 $("#login-info").html("Logged out!");
@@ -152,17 +147,17 @@
     var queuedData, reopen;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-        socket = new WebSocket(protocol + document.location.host + "/websocket");
+        droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
 
-        socket.onopen = function () {
+        droppy.socket.onopen = function () {
             if (queuedData) {
                 sendMessage();
             } else
-                updateLocation(currentFolder || "/", false); // Request initial update
+                updateLocation(droppy.currentFolder || "/", false); // Request initial update
         };
 
-        socket.onclose = function (event) {
-            if (hasLoggedOut || event.code === 4000) return;
+        droppy.socket.onclose = function (event) {
+            if (droppy.hasLoggedOut || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 log("Websocket closed unexpectedly with code " + event.code + ". Reconnecting...");
                 openSocket();
@@ -172,26 +167,25 @@
             }
         };
 
-        socket.onmessage = function (event) {
-            socketWait = false;
+        droppy.socket.onmessage = function (event) {
+            droppy.socketWait = false;
             var msg = JSON.parse(event.data);
             switch (msg.type) {
             case "UPDATE_FILES":
-                if (isUploading) return;
+                if (droppy.isUploading) return;
                 updateData(msg.folder, msg.data);
                 break;
             case "UPLOAD_DONE":
                 finishUpload(msg);
                 break;
             case "NEW_FOLDER":
-                if (isUploading) return;
+                if (droppy.isUploading) return;
                 updateData(msg.folder, msg.data);
                 break;
             case "UPDATE_CSS":
-                console.log("up");
-                if (debug) {
-                    console.log("doin");
-                    // Live reload the stylesheet(s) for easy designing
+                // Live reload the stylesheet(s)
+                if (droppy.debug) {
+                    console.log("Reloading CSS...");
                     $('link[rel="stylesheet"]').remove();
 
                     var i = 0;
@@ -214,28 +208,28 @@
     }
 
     function sendMessage(msgType, msgData) {
-        if (socket.readyState === 1) { // open
+        if (droppy.socket.readyState === 1) { // open
             // Lock the UI while we wait for a socket response
-            socketWait = true;
+            droppy.socketWait = true;
 
             // Unlock the UI in case we get no socket resonse after waiting for 1 second
             setTimeout(function () {
-                socketWait = false;
+                droppy.socketWait = false;
             }, 1000);
 
             if (queuedData) {
-                socket.send(queuedData);
+                droppy.socket.send(queuedData);
                 queuedData = false;
             } else
-                socket.send(JSON.stringify({type: msgType, data: msgData}));
+                droppy.socket.send(JSON.stringify({type: msgType, data: msgData}));
         } else {
             // We can't send right now, so queue up the last added message to be sent later
             queuedData = JSON.stringify({type: msgType, data: msgData});
 
-            if (socket.readyState === 2) { // closing
+            if (droppy.socket.readyState === 2) { // closing
                 // Socket is closing, queue a re-opening
                 reopen = true;
-            } else if (socket.readyState === 3) { // closed
+            } else if (droppy.socket.readyState === 3) { // closed
                 // Socket is closed, we can re-open it right now
                 openSocket();
             }
@@ -244,8 +238,8 @@
 
     // Close the socket gracefully before navigating away
     $(window).register("beforeunload", function () {
-        if (socket && socket.readyState < 2)
-            socket.close(1001);
+        if (droppy.socket && droppy.socket.readyState < 2)
+            droppy.socket.close(1001);
     });
 
 // ============================================================================
@@ -316,7 +310,7 @@
                 data: form.serialize(),
                 success: function (response) {
                     if (response === "OK") {
-                        hasLoggedOut = false;
+                        droppy.hasLoggedOut = false;
                         getPage();
                     } else {
                         $("#pass").val("");
@@ -345,7 +339,7 @@
 // ============================================================================
     function initMainPage() {
         // Initialize the current folder, in case the user navigated to it through the URL.
-        currentFolder = decodeURIComponent(window.location.pathname);
+        droppy.currentFolder = decodeURIComponent(window.location.pathname);
 
         // Open the WebSocket
         openSocket();
@@ -426,7 +420,7 @@
         $(window).register("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
-                smallScreen = $(window).width() < 640;
+                droppy.smallScreen = $(window).width() < 640;
                 checkPathOverflow();
             }, 100);
         });
@@ -533,7 +527,7 @@
         });
 
         function createFolderAndHide() {
-            var folderName = (currentFolder === "/") ? "/" + nameinput.val() : currentFolder + "/" + nameinput.val();
+            var folderName = (droppy.currentFolder === "/") ? "/" + nameinput.val() : droppy.currentFolder + "/" + nameinput.val();
             sendMessage("CREATE_FOLDER", folderName);
             createbox.attr("class", "out");
             toggleCatcher();
@@ -587,8 +581,8 @@
         });
 
         $("#logout").register("click", function () {
-            hasLoggedOut = true;
-            socket && socket.close(4001);
+            droppy.hasLoggedOut = true;
+            droppy.socket && droppy.socket.close(4001);
             deleteCookie("sid");
             initVariables(); // Reset vars to their init state
             getPage();
@@ -606,7 +600,7 @@
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
                     numFiles++;
-                    currentData[data[i].name] = {
+                    droppy.currentData[data[i].name] = {
                         size  : data[i].size,
                         type  : "nf",
                         mtime : new Date().getTime()
@@ -622,7 +616,7 @@
                         switch (Object.prototype.toString.call(data[path])) {
                         case "[object Object]":
                             if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                                currentData[name] = {
+                                droppy.currentData[name] = {
                                     size : 0,
                                     type : "nd"
                                 };
@@ -632,7 +626,7 @@
                         case "[object File]":
                             numFiles++;
                             if (!addedDirs[name]) {
-                                currentData[name] = {
+                                droppy.currentData[name] = {
                                     size  : data[path].size,
                                     type  : "nf",
                                     mtime : new Date().getTime()
@@ -645,7 +639,7 @@
             }
 
             // Load the new files into view, tagged
-            buildHTML(currentData, currentFolder);
+            buildHTML(droppy.currentData, droppy.currentFolder);
 
             // Create the XHR2
             var xhr = new XMLHttpRequest();
@@ -657,7 +651,7 @@
             uploadInit(xhr);
 
             // And send the files
-            isUploading = true;
+            droppy.isUploading = true;
             xhr.open("post", "/upload", true);
             xhr.send(formData);
         }
@@ -734,12 +728,12 @@
 // ============================================================================
     // Update data as received from the server
     function updateData(folder, data) {
-        if (folder !== currentFolder)
+        if (folder !== droppy.currentFolder)
             updateLocation(folder);
 
         updateTitle(folder, true);
         updatePath(folder);
-        currentData = data;
+        droppy.currentData = data;
         buildHTML(data, folder);
     }
 
@@ -756,9 +750,9 @@
     }
 
     function finishUpload(msg) {
-        isUploading = false;
-        updateLocation(currentFolder, false);
-        updateTitle(currentFolder, true);
+        droppy.isUploading = false;
+        updateLocation(droppy.currentFolder, false);
+        updateTitle(droppy.currentFolder, true);
         msg && updateData(msg.folder, msg.data);
         $("#upload-info").attr("class", "out");
     }
@@ -766,7 +760,7 @@
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         (function queue(time) {
-            if ((!socketWait && !isAnimating) || time > 2000)
+            if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000)
                 updateLocation(decodeURIComponent(window.location.pathname), true, true);
             else
                 setTimeout(queue, 50, time + 50);
@@ -778,20 +772,20 @@
     function updateLocation(path, doSwitch, skipPush) {
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
-            if ((!socketWait && !isAnimating) || time > 2000) {
+            if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
                 // Find the direction in which we should animate
-                if (path.length > currentFolder.length)
+                if (path.length > droppy.currentFolder.length)
                     nav = "forward";
-                else if (path.length === currentFolder.length)
+                else if (path.length === droppy.currentFolder.length)
                     nav = "same";
                 else
                     nav = "back";
 
-                currentFolder = path;
-                sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", currentFolder);
+                droppy.currentFolder = path;
+                sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", droppy.currentFolder);
 
                 // Skip the push if we're already navigating through history
-                if (!skipPush) window.history.pushState(null, null, currentFolder);
+                if (!skipPush) window.history.pushState(null, null, droppy.currentFolder);
             } else
                 setTimeout(queue, 50, time + 50);
         })(0);
@@ -805,17 +799,17 @@
         parts[0] = '<span class="icon">' + home + '<span>';
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
         var pathStr = "";
-        if (savedParts) {
+        if (droppy.savedParts) {
             i = 1; // Skip the first element as it's always the same
             while (true) {
                 pathStr += "/" + parts[i];
-                if (!parts[i] && !savedParts[i]) break;
-                if (parts[i] !== savedParts[i]) {
-                    if (savedParts[i] && !parts[i]) {
+                if (!parts[i] && !droppy.savedParts[i]) break;
+                if (parts[i] !== droppy.savedParts[i]) {
+                    if (droppy.savedParts[i] && !parts[i]) {
                         $("#path li").slice(i).remove();
                         break;
                     }
-                    else if (parts[i] && !savedParts[i])
+                    else if (parts[i] && !droppy.savedParts[i])
                         create(parts[i], pathStr);
                 }
                 i++;
@@ -834,7 +828,7 @@
             }, 300);
         }
 
-        savedParts = parts;
+        droppy.savedParts = parts;
 
         function create(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
@@ -860,7 +854,7 @@
     function checkPathOverflow() {
         var last = $("#path li:last-child");
         if (!last.position()) return;
-        var margin = smallScreen ? 95 : 110;
+        var margin = droppy.smallScreen ? 95 : 110;
         var space = $(window).width();
         var right = last.position().left + last.width();
 
@@ -882,36 +876,38 @@
         var list = $("<ul></ul>"), downloadURL, type, size, mtime, id, tags, audio;
 
         for (var file in fileList) {
-            type = fileList[file].type;
-            size = convertToSI(fileList[file].size);
-            mtime = fileList[file].mtime ? formatTime(new Date(fileList[file].mtime)) : "";
+            if (fileList.hasOwnProperty(file)) {
+                type = fileList[file].type;
+                size = convertToSI(fileList[file].size);
+                mtime = fileList[file].mtime ? formatTime(new Date(fileList[file].mtime)) : "";
 
-            id = (root === "/") ? "/" + file : root + "/" + file;
-            tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
+                id = (root === "/") ? "/" + file : root + "/" + file;
+                tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
-            if (type === "f" || type === "nf") { // Create a file row
-                downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
-                audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
-                var spriteClass = getSpriteClass(extractExtension(file));
-                list.append(
-                    '<li class="data-row" data-type="file" data-id="' + id + '">' +
-                        '<span class="' + spriteClass + '"></span>' +
-                        '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                        '<span class="icon-delete icon"></span>' +
-                        '<span class="icon-link icon"></span>' +
-                        '<span class="data-info">' + size + '</span>' +
-                        '<span class="data-mtime">' + mtime + '</span>' +
-                        audio +
-                    '</li>'
-                );
-            } else if (type === "d" || type === "nd") {  // Create a folder row
-                list.append(
-                    '<li class="data-row" data-type="folder" data-id="' + id + '">' +
-                        '<span class="sprite sprite-folder"></span>' +
-                        '<span class="folderlink ' + tags + '">' + file + '</span>' +
-                        '<span class="icon-delete icon"></span>' +
-                    '</li>'
-                );
+                if (type === "f" || type === "nf") { // Create a file row
+                    downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
+                    audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
+                    var spriteClass = getSpriteClass(extractExtension(file));
+                    list.append(
+                        '<li class="data-row" data-type="file" data-id="' + id + '">' +
+                            '<span class="' + spriteClass + '"></span>' +
+                            '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                            '<span class="icon-delete icon"></span>' +
+                            '<span class="icon-link icon"></span>' +
+                            '<span class="data-info">' + size + '</span>' +
+                            '<span class="data-mtime">' + mtime + '</span>' +
+                            audio +
+                        '</li>'
+                    );
+                } else if (type === "d" || type === "nd") {  // Create a folder row
+                    list.append(
+                        '<li class="data-row" data-type="folder" data-id="' + id + '">' +
+                            '<span class="sprite sprite-folder"></span>' +
+                            '<span class="folderlink ' + tags + '">' + file + '</span>' +
+                            '<span class="icon-delete icon"></span>' +
+                        '</li>'
+                    );
+                }
             }
         }
 
@@ -954,14 +950,14 @@
             } else {
                 $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
                 $("#newcontent").html(list || emptyPage);
-                isAnimating = true;
+                droppy.isAnimating = true;
                 $(".data-row").addClass("animating");
                 $("#content").attr("class", (nav === "forward") ? "back" : "forward");
                 $("#newcontent").setTransitionClass("center");
 
                 // Switch classes once the transition has finished
                 setTimeout(function () {
-                    isAnimating = false;
+                    droppy.isAnimating = false;
                     $("#content").remove();
                     $("#newcontent").attr("id", "content");
                     $(".data-row").removeClass("animating");
@@ -982,20 +978,20 @@
 
         // Switch into a folder
         $(".data-row[data-type='folder']").register("click", function () {
-            if (socketWait) return;
+            if (droppy.socketWait) return;
             var destination = $(this).data("id");
             updateLocation(destination, true);
         });
 
         // Request a shortlink
         $(".icon-link").register("click", function () {
-            if (socketWait) return;
+            if (droppy.socketWait) return;
             sendMessage("REQUEST_SHORTLINK", $(this).parent().data("id"));
         });
 
         // Delete a file/folder
         $(".icon-delete").register("click", function () {
-            if (socketWait) return;
+            if (droppy.socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
@@ -1004,7 +1000,7 @@
         });
 
         function play(playButton) {
-            if (socketWait) return;
+            if (droppy.socketWait) return;
             var player     = $("#audio-player").get(0),
                 source     = playButton.parent().find(".filelink").attr("href"),
                 iconPlay   = "",
@@ -1055,12 +1051,15 @@
     }
 
     function initVariables() {
-        currentData = false;
-        currentFolder = false;
-        isUploading = false;
-        savedParts = false;
-        socket = false;
-        socketWait = false;
+        droppy.smallScreen = $(window).width() < 640;
+        droppy.currentData = null;
+        droppy.currentFolder = null;
+        droppy.hasLoggedOut = null;
+        droppy.isAnimating = null;
+        droppy.isUploading = null;
+        droppy.savedParts = null;
+        droppy.socket = null;
+        droppy.socketWait = null;
     }
 
     // Convert raw byte numbers to SI values
@@ -1088,7 +1087,7 @@
 
     // Debug logging
     function log() {
-        if (debug && console)
+        if (droppy.debug && console)
             console.log.apply(console, arguments);
     }
 
