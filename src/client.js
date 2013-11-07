@@ -588,6 +588,10 @@
             getPage();
         });
 
+        $("#volume-slider").register("input", function () {
+            $("#audio-player")[0].volume = $("#volume-slider").val() / 100;
+        });
+
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
@@ -1025,6 +1029,7 @@
 
             function loadAndPlay() {
                 player.src = source;
+                player.load();
                 player.play();
                 playButton.text(iconPause);
                 playButton.parent().addClass("playing-row");

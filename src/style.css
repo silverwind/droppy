@@ -18,7 +18,7 @@
 
 /* ============================ General Styles ============================= */
 
-button, body, div, header, input, label, li, nav, p, section, span, ul {
+body, div, header, input, label, li, nav, p, section, span, ul {
     -webkit-touch-callout: none;
     box-sizing: border-box;
     margin: 0;
@@ -29,10 +29,10 @@ button, body, div, header, input, label, li, nav, p, section, span, ul {
 li { list-style: none }
 a  { text-decoration: none }
 
-input:focus, button:focus, div:focus, a:focus { outline: none }
-input::-moz-focus-inner, button::-moz-focus-inner { border: 0; padding: 0 }
+:focus { outline: none }
+::-moz-focus-inner { border: none; padding: 0; outline: 0 }
 button, input { font-family: inherit; font-size: 100%; margin: 0; line-height: normal; border: none }
-button, html input[type="button"], input[type="submit"] { -webkit-appearance: button; cursor: pointer }
+button, html input[type="button"] { cursor: pointer }
 
 input::-moz-placeholder          { color: #555 }
 input:-ms-input-placeholder      { color: #555 }
@@ -80,8 +80,7 @@ body {
     overflow-y: auto;
     padding: .5em .25em 0 .5em;
     position: absolute;
-    text-shadow: 0 1px 0 rgba(255,255,255,.4);
-    transition: left .25s ease;
+    transition: left .2s ease;
     user-select: none;
     width: calc(100% - 1em);
     z-index: -1;
@@ -97,9 +96,9 @@ body {
 
 #content.out { opacity: 0 }
 
-@media all and (min-width: 1024px) { #content, #newcontent { top: 68px; max-height: calc(100% - 68px - 1em); font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { top: 58px; max-height: calc(100% - 58px - 1em); font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { top: 48px; max-height: calc(100% - 48px - 1em); font-size: .8em } }
+@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 72px - 1em); font-size:  1em } }
+@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 62px - 1em); font-size: .9em } }
+@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 52px - 1em); font-size: .8em } }
 
 #content.center,  #newcontent.center  { left: 0     }
 #content.back,    #newcontent.back    { left: -100% }
@@ -130,7 +129,7 @@ body {
 /* ============================= Header Buttons ============================ */
 
 .button {
-    border: 0;
+    border: none;
     color: #ddd;
     cursor: pointer;
     padding: 0;
@@ -254,7 +253,7 @@ body {
 /* ================================== Path ================================= */
 
 #path {
-   background: linear-gradient(#111,#333);
+   background: linear-gradient(#111,#222);
    border-bottom: 1.5px solid #222;
    border-top: 1.5px solid #111;
    height: auto;
@@ -362,9 +361,9 @@ body {
 }
 
 @keyframes flash {
-  0%   { background: #acf }
-  50%  { background: #9bf }
-  100% { background: #acf }
+  0%   { background: #bdf }
+  50%  { background: #acf }
+  100% { background: #bdf }
 }
 
 .tag-uploading:after {
@@ -475,7 +474,7 @@ body {
 .icon-play {
     white-space: nowrap;
     margin-right: .5em;
-    color: #666;
+    color: #555;
 }
 
 @media all and (max-width: 639px) { .icon-play { margin-right: 0; } }
@@ -580,6 +579,74 @@ body {
 #create-folder-button .icon { margin-right: 5px }
 #create-folder-button:hover { background: #35a; color: #fff }
 #create-folder-button.invalid:hover { background: #f22 }
+
+/* =============================== Volume Control =============================== */
+
+#audio-controls {
+    position: fixed;
+    top: 34px;
+    right: .5em;
+    width: 10em;
+    height: 2em;
+    opacity: 1;
+    border-radius: 12px;
+    background: transparent;
+    color: #bbb;
+    text-align: center;
+}
+
+@media all and (min-width: 1024px) { #audio-controls { top: 34px } }
+@media all and (max-width: 1023px) { #audio-controls { top: 26px } }
+@media all and (max-width:  639px) { #audio-controls { top: 18px; width: 8em; } }
+
+
+#volume-label {
+    position: absolute;
+    margin: 0 auto;
+    line-height: 2em;
+    left: .5em;
+}
+
+@media all and (max-width:  639px) { #volume-label {
+    font-size: .8em; line-height: 2.5em; left: 1em;
+}}
+
+#volume-slider {
+    background: transparent;
+    position: absolute;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 6px;
+    height: 2em;
+    left: 2em;
+    width: 8em;
+    cursor: pointer;
+}
+
+@media all and (max-width:  639px) { #volume-slider { width: 6em } }
+
+#volume-slider::-moz-range-track {
+    background: #666;
+    height: .6em;
+    border-radius: 1em;
+    border: none;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    height: .6em;
+    width: 2em;
+    border-radius: 1em;
+    border: none;
+    background: #ddd;
+}
+
+#volume-slider::-moz-range-thumb {
+    height: .6em;
+    width: 2em;
+    border-radius: 1em;
+    border: none;
+    background: #ddd;
+}
 
 /* =============================== About box =============================== */
 

@@ -12,10 +12,6 @@
 			<span class="icon"></span>
 			<span class="button-text">New Folder</span>
 		</li>
-		<li id="logout" class="button" title="Sign out of droppy">
-			<span class="icon"></span>
-			<span class="button-text">Sign out</span>
-		</li>
 		<li id="config" class="button" title="Configure droppy">
 			<span class="icon"></span>
 			<span class="button-text">Configure</span>
@@ -23,6 +19,10 @@
 		<li id="about" class="button" title="About droppy">
 			<span class="icon"></span>
 			<span class="button-text">About</span>
+		</li>
+		<li id="logout" class="button" title="Sign out of droppy">
+			<span class="icon"></span>
+			<span class="button-text">Sign out</span>
 		</li>
 	</ul>
 	<ul id="path">
@@ -85,3 +85,7 @@
 	<div id="upload-cancel"><span class="icon"></span>Cancel Upload</div>
 </div>
 <audio id="audio-player" preload="none"></audio>
+<div id="audio-controls">
+	<span id="volume-label" class="icon"></span>
+	<input type="range" id="volume-slider" min="0" max="100" step="1"></input>
+<div>
