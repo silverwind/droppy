@@ -370,7 +370,6 @@ body {
     top: -2px;
 }
 
-/* TODO: Investigate why IOS7's ellipsis won't overflow correctly */
 .filelink, .folderlink {
     line-height: 1.5em;
     overflow: hidden;
@@ -380,7 +379,7 @@ body {
     width: calc(100% - 22em);
 }
 
-@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 12em) } }
+@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 7em) } }
 
 .playing:after {
     position: absolute;
@@ -405,6 +404,8 @@ body {
     text-align: right;
     margin-right: .5em;
 }
+
+@media all and (max-width: 639px) { .data-info { display: none; } }
 
 .data-mtime {
     color: #555;
@@ -465,6 +466,8 @@ body {
     margin-right: .5em;
     color: #666;
 }
+
+@media all and (max-width: 639px) { .icon-play { margin-right: 0; } }
 
 .icon-play.active {
     color: #25a;
