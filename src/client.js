@@ -170,6 +170,7 @@
         droppy.socket.onmessage = function (event) {
             droppy.socketWait = false;
             var msg = JSON.parse(event.data);
+            console.log(msg.type);
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
@@ -359,13 +360,18 @@
                 fileItem = null,
                 entryFunc = null;
 
-
             fileItem = (items && items[0] && items[0].type === "text/uri-list") ? items[1] : items[0];
 
-            // Check if we support GetAsEntry();
-            ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"].forEach(function (func) {
-                if (fileItem[func]) entryFunc = func;
-            });
+            // Try to find the supported getAsEntry function
+            var funcs = ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"];
+            for (var f = 0; f < funcs.length; f++) {
+                if (fileItem[funcs[f]]) {
+                    entryFunc = funcs[f];
+                    break;
+                }
+            }
+
+            // Check if we support getAsEntry();
             if (!items || !fileItem[entryFunc]()) {
                 // No support, fallback to normal File API
                 upload(event.dataTransfer.files, true);
