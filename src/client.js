@@ -356,12 +356,17 @@
             event.preventDefault();
 
             var items = event.dataTransfer.items,
-                fileItem = null;
+                fileItem = null,
+                entryFunc = null;
+
 
             fileItem = (items && items[0] && items[0].type === "text/uri-list") ? items[1] : items[0];
 
             // Check if we support GetAsEntry();
-            if (!items || !fileItem.webkitGetAsEntry()) {
+            ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"].forEach(function (func) {
+                if (fileItem[func]) entryFunc = func;
+            });
+            if (!items || !fileItem[entryFunc]()) {
                 // No support, fallback to normal File API
                 upload(event.dataTransfer.files, true);
                 return;
@@ -372,7 +377,7 @@
             var cbCount = 0, cbFired = 0, dirCount = 0;
             var length = event.dataTransfer.items.length;
             for (var i = 0; i < length; i++) {
-                var entry = event.dataTransfer.items[i].webkitGetAsEntry();
+                var entry = event.dataTransfer.items[i][entryFunc]();
                 if (!entry) continue;
                 if (entry.isFile) {
                     cbCount++;
