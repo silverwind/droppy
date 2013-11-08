@@ -624,7 +624,7 @@
                     droppy.currentData[data[i].name] = {
                         size  : data[i].size,
                         type  : "nf",
-                        mtime : new Date().getTime()
+                        mtime : Date.now()
                     };
                     formData.append(data[i].name, data[i]);
                 }
@@ -650,7 +650,7 @@
                                 droppy.currentData[name] = {
                                     size  : data[path].size,
                                     type  : "nf",
-                                    mtime : new Date().getTime()
+                                    mtime : Date.now()
                                 };
                             }
                             break;
@@ -689,7 +689,7 @@
                 uploadDone();
             });
 
-            start = new Date().getTime();
+            start = Date.now();
 
             title.html(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
             updateTitle("0%");
@@ -715,13 +715,13 @@
                 var bytesSent  = event.loaded,
                     bytesTotal = event.total,
                     progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                    speed      = convertToSI(bytesSent / ((new Date().getTime() - start) / 1000), 2) + "/s";
+                    speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2) + "/s";
                 prog.css("width", progress);
                 updateTitle(progress);
                 uperc.html(progress + " - " + speed);
 
                 // Calculate estimated time left
-                var elapsed = (new Date().getTime()) - start;
+                var elapsed = Date.now() - start;
                 var estimate = bytesTotal / (bytesSent / elapsed);
                 var secs = (estimate - elapsed) / 1000;
 

@@ -1096,7 +1096,7 @@
 
         if (postData.check === "on") {
             // Create a semi-permanent cookie
-            var dateString = new Date(new Date().getTime() + 31536000000).toUTCString();
+            var dateString = new Date(Date.now() + 31536000000).toUTCString();
             res.setHeader("Set-Cookie", "sid=" + sessionID + "; Expires=" + dateString);
         } else {
             // Create a single-session cookie
