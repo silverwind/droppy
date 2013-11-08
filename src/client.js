@@ -185,7 +185,7 @@
             case "UPDATE_CSS":
                 // Live reload the stylesheet(s)
                 if (droppy.debug) {
-                    console.log("Reloading CSS...");
+                    log("Reloading CSS...");
                     $('link[rel="stylesheet"]').remove();
 
                     var i = 0;
@@ -201,7 +201,7 @@
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
                 break;
             case "USER_LIST":
-                console.log(msg.users);
+                log(msg.users);
                 break;
             }
         };
@@ -1090,11 +1090,6 @@
     // This seems to fix weird Webkit rendering after animations
     function redraw() {
         $("<style>").appendTo($(document.body)).remove();
-    }
-
-    // Fix console.log on IE9
-    if (Function.prototype.bind && console && typeof console.log === "object") {
-        console.log = Function.prototype.bind.call(console.log, console);
     }
 
     // Debug logging
