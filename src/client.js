@@ -355,12 +355,18 @@
             event.stopPropagation();
             event.preventDefault();
 
+            var items = event.dataTransfer.items,
+                fileItem = null;
+
+            fileItem = (items && items[0] && items[0].type === "text/uri-list") ? items[1] : items[0];
+
             // Check if we support GetAsEntry();
-            if (!event.dataTransfer.items || !event.dataTransfer.items[0].webkitGetAsEntry()) {
+            if (!items || !fileItem.webkitGetAsEntry()) {
                 // No support, fallback to normal File API
                 upload(event.dataTransfer.files, true);
                 return;
             }
+
             // We support GetAsEntry, go ahead and read recursively
             var obj = {};
             var cbCount = 0, cbFired = 0, dirCount = 0;
