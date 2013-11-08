@@ -462,14 +462,17 @@
 
     //-----------------------------------------------------------------------------
     // Send a WS event to the client containing an file list update
+    var last = {};
     function sendFiles(cookie, eventType) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
+        if (last[cookie] && Date.now() - last[cookie] < 250) return;
         var dir = clients[cookie].directory;
         var data = JSON.stringify({
             type   : eventType,
             folder : dir,
             data   : dirs[dir]
         });
+        last[cookie] = Date.now();
         send(clients[cookie].ws, data);
     }
 
