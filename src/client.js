@@ -170,7 +170,7 @@
         droppy.socket.onmessage = function (event) {
             droppy.socketWait = false;
             var msg = JSON.parse(event.data);
-            console.log(msg.type);
+            log(document.domain + " -> " + msg.type);
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
@@ -184,25 +184,16 @@
                 updateData(msg.folder, msg.data);
                 break;
             case "UPDATE_CSS":
-                // Live reload the stylesheet(s)
-                if (droppy.debug) {
-                    log("Reloading CSS...");
-                    $('link[rel="stylesheet"]').remove();
-
-                    var i = 0;
-                    while (document.styleSheets[i])
-                        document.styleSheets[i++].disabled = true;
-
-                    var style = $('<style type="text/css"></style>');
-                    style.text(msg.css).appendTo($("head"));
-                }
+                reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                // TODO: UI for this
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
                 break;
             case "USER_LIST":
                 log(msg.users);
+                break;
+            case "MIME_TYPE":
+                droppy.mimeTypes[getExt(msg.req)] = msg.mime;
                 break;
             }
         };
@@ -217,6 +208,8 @@
             setTimeout(function () {
                 droppy.socketWait = false;
             }, 1000);
+
+            log(document.domain + " <- " + msgType);
 
             if (queuedData) {
                 droppy.socket.send(queuedData);
@@ -908,7 +901,7 @@
                 if (type === "f" || type === "nf") { // Create a file row
                     downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
                     audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
-                    var spriteClass = getSpriteClass(extractExtension(file));
+                    var spriteClass = getSpriteClass(getExt(file));
                     list.append(
                         '<li class="data-row" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '"></span>' +
@@ -934,8 +927,8 @@
 
         $(list).children("li").sort(function (a, b) {
             var type = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
-            var extension = extractExtension($(a).children(".filelink").text().toUpperCase())
-                                 .localeCompare(extractExtension($(b).children(".filelink").text().toUpperCase()));
+            var extension = getExt($(a).children(".filelink").text().toUpperCase())
+                                 .localeCompare(getExt($(b).children(".filelink").text().toUpperCase()));
             var text = $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
             if (type < 0)
                 return -1;
@@ -1017,15 +1010,37 @@
         });
 
         $(".icon-play").register("click", function (event) {
-            play($(event.target));
+            preparePlayback($(event.target));
         });
 
-        function play(playButton) {
+        function preparePlayback(playButton) {
             if (droppy.socketWait) return;
-            var player     = $("#audio-player").get(0),
-                source     = playButton.parent().find(".filelink").attr("href"),
-                iconPlay   = "",
-                iconPause  = "";
+            var source = playButton.parent().find(".filelink").attr("href"),
+                ext    = getExt(source);
+
+            if (droppy.mimeTypes[ext]) {
+                play(source, playButton);
+            } else {
+                // Request the mime type from the server if we don't know it yet
+                sendMessage("GET_MIME", ext);
+                // Wait for the server's respone
+                Object.defineProperty(droppy.mimeTypes, ext, {
+                    val: undefined,
+                    get: function () { return this.val; },
+                    set: function (v) { this.val = v; play(source, playButton); }
+                });
+            }
+        }
+
+        function play(source, playButton) {
+            var player    = $("#audio-player").get(0),
+                iconPlay  = "",
+                iconPause = "";
+
+            if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
+                window.alert("Sorry, your browser can't play this file.");
+                return;
+            }
 
             // Play the next file in the list when playback ends and loop around too
             // TODO: Loop around non-audio files
@@ -1067,7 +1082,7 @@
     }
 
     // Extract the extension from a file name
-    function extractExtension(filename) {
+    function getExt(filename) {
         var dot = filename.lastIndexOf(".");
         if (dot > -1 && dot < filename.length)
             return filename.substring(dot + 1, filename.length);
@@ -1089,6 +1104,7 @@
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
+        droppy.mimeTypes = {};
     }
 
     // Convert raw byte numbers to SI values
@@ -1201,4 +1217,16 @@
         return year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
     }
 
+    function reloadCSS(css) {
+        if (!droppy.debug) return;
+        log("Reloading CSS...");
+        $('link[rel="stylesheet"]').remove();
+
+        var i = 0;
+        while (document.styleSheets[i])
+            document.styleSheets[i++].disabled = true;
+
+        var style = $('<style type="text/css"></style>');
+        style.text(css).appendTo($("head"));
+    }
 }(jQuery, window, document));

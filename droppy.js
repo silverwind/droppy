@@ -322,11 +322,10 @@
 
             ws.on("message", function (message) {
                 var msg = JSON.parse(message);
-                var dir = msg.data;
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
                     clients[cookie] = {
-                        directory: dir,
+                        directory: msg.data,
                         ws: ws
                     };
                     readDirectory(clients[cookie].directory, function () {
@@ -334,25 +333,10 @@
                     });
                     updateWatchers(clients[cookie].directory);
                     break;
-                case "CREATE_FOLDER":
-                    var foldername = path.basename(dir);
-                    if (/[\\*{}\/<>?|]/.test(foldername) || /^(\.+)$/.test(foldername)) {
-                        log.log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
-                        return;
-                    }
-
-                    fs.mkdir(addFilePath(dir), config.dirMode, function (error) {
-                        if (error) log.error(error);
-                        log.log(remoteIP, ":", remotePort, " Created: ", dir);
-                        readDirectory(clients[cookie].directory, function () {
-                            sendFiles(cookie, "UPDATE_FILES");
-                        });
-                    });
-                    break;
                 case "REQUEST_SHORTLINK":
                     // Check if we already have a link for that file
                     for (var link in db.shortlinks) {
-                        if (db.shortlinks[link] === dir) {
+                        if (db.shortlinks[link] === msg.data) {
                             sendLink(cookie, link);
                             return;
                         }
@@ -367,22 +351,22 @@
                             link += chars.charAt(Math.floor(Math.random() * chars.length));
                     } while (db.shortlinks[link]); // In case the RNG generates an existing link, go again
 
-                    log.log(remoteIP, ":", remotePort, " Shortlink created: " + link + " -> " + dir);
+                    log.log(remoteIP, ":", remotePort, " Shortlink created: " + link + " -> " + msg.data);
                     // Store the created link
-                    db.shortlinks[link] = dir;
+                    db.shortlinks[link] = msg.data;
 
                     // Send the shortlink to the client
                     sendLink(cookie, link);
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    log.log(remoteIP, ":", remotePort, " Deleting: " + dir.substring(1));
-                    dir = addFilePath(dir);
+                    log.log(remoteIP, ":", remotePort, " Deleting: " + msg.data.substring(1));
+                    msg.data = addFilePath(msg.data);
 
-                    fs.stat(dir, function (error, stats) {
+                    fs.stat(msg.data, function (error, stats) {
                         if (stats && !error) {
                             if (stats.isFile()) {
-                                fs.unlink(dir, function (error) {
+                                fs.unlink(msg.data, function (error) {
                                     if (error) log.error(error);
                                     readDirectory(clients[cookie].directory, function () {
                                         sendFiles(cookie, "UPDATE_FILES");
@@ -390,7 +374,7 @@
                                 });
                             } else if (stats.isDirectory()) {
                                 try {
-                                    wrench.rmdirSyncRecursive(dir);
+                                    wrench.rmdirSyncRecursive(msg.data);
                                 } catch (error) {
                                     log.error(error);
                                 }
@@ -402,10 +386,25 @@
                         }
                     });
                     break;
+                case "CREATE_FOLDER":
+                    var foldername = path.basename(msg.data);
+                    if (/[\\*{}\/<>?|]/.test(foldername) || /^(\.+)$/.test(foldername)) {
+                        log.log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
+                        return;
+                    }
+
+                    fs.mkdir(addFilePath(msg.data), config.dirMode, function (error) {
+                        if (error) log.error(error);
+                        log.log(remoteIP, ":", remotePort, " Created: ", msg.data);
+                        readDirectory(clients[cookie].directory, function () {
+                            sendFiles(cookie, "UPDATE_FILES");
+                        });
+                    });
+                    break;
                 case "SWITCH_FOLDER":
-                    if (!/^\//.test(dir) || /\.\./.test(dir)) return;
-                    clients[cookie].directory = dir;
-                    updateWatchers(dir, function (ok) {
+                    if (!/^\//.test(msg.data) || /\.\./.test(msg.data)) return;
+                    clients[cookie].directory = msg.data;
+                    updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read
                         var msg = ok ? "UPDATE_FILES" : "NEW_FOLDER";
                         if (!ok) {
@@ -431,12 +430,17 @@
                             };
                         }
                     }
-                    var data = JSON.stringify({
-                        type   : "USER_LIST",
-                        users  : userlist
-                    });
-
-                    send(clients[cookie].ws, data);
+                    send(clients[cookie].ws, JSON.stringify({
+                        type  : "USER_LIST",
+                        users : userlist
+                    }));
+                    break;
+                case "GET_MIME":
+                    send(clients[cookie].ws, JSON.stringify({
+                        type : "MIME_TYPE",
+                        req  : msg.data,
+                        mime : mime.lookup(msg.data)
+                    }));
                     break;
                 }
             });
@@ -618,7 +622,6 @@
             }
         });
     }
-
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url);
