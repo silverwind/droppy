@@ -905,6 +905,7 @@
             });
 
             $("#path").append(li);
+            li.append('<svg class="arrow" viewBox="0 0 100 100"><polyline points="0,0 0,100 70,50"/></svg>');
         }
 
         function finalize() {

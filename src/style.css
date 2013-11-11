@@ -72,7 +72,7 @@ body {
 #navigation.in  { top: 0     }
 #navigation.out { top: -75px }
 
-/* TODO: Try to increase FPS on this transition */
+/* TODO: Increase FPS on this transition */
 #content, #newcontent {
     -webkit-backface-visibility: hidden;
     background-image: url(data:image/png;base64,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);
@@ -255,8 +255,8 @@ r
 
 #path {
    background: linear-gradient(#111,#222);
-   border-bottom: 2px solid #444;
-   height: auto;
+   /*border-bottom: 2px solid #444;*/
+   /*height: auto;*/
    overflow: hidden;
    position: relative;
    top: 0;
@@ -264,59 +264,32 @@ r
    width: 1000%;
 }
 
-@media all and (min-width: 1024px) { #path { font-size: 1em } }
-@media all and (max-width: 1023px) { #path { font-size: .9em } }
-@media all and (max-width:  639px) { #path { font-size: .8em } }
+@media all and (min-width: 1024px) { #path { font-size: .9em } }
+@media all and (max-width: 1023px) { #path { font-size: .8em } }
+@media all and (max-width:  639px) { #path { font-size: .7em } }
 
 #path li {
     cursor: pointer;
     float: left;
     position: relative;
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
-    box-shadow: 0 0 1.5em .75em #111;
-    padding: 0 0.5em 0 1.5em;
+    padding: 0 1em 0 .8em;
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 33px; height: 35px } }
-@media all and (max-width: 1023px) { #path li { line-height: 28px; height: 30px } }
-@media all and (max-width:  639px) { #path li { line-height: 23px; height: 25px } }
-
-/* TODO: Check why IOS7 mis-calculates the height here. */
-#path li:before, #path li:after {
-  content: "";
-  display: block;
-  height: 50.7%;
-  position: absolute;
-  right: -.5em;
-  width: .9em;
-  z-index: -1;
-}
+@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px } }
+@media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px } }
+@media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px } }
 
 #path li.in  { left: 0    }
 #path li.out { left: -10% }
 #path li.placeholder { opacity: 0 }
 
-#path li:before { border-right: 2px solid #111; transform: skew( 45deg); top:    0 }
-#path li:after  { border-right: 2px solid #111; transform: skew(-45deg); bottom: 0 }
+#path li { color: #ccc; transition: all .1s ease }
 
-#path li, #path li:before, #path li:after { color: #ccc; transition: all .1s ease }
-#path li:hover { color: #fff }
-#path li:first-child { padding-left: 0.4em }
-
-#path li:nth-child(odd)        { background: #135 }
-#path li:nth-child(odd):before { background: #135 }
-#path li:nth-child(odd):after  { background: #135 }
-
-#path li:nth-child(even)        { background: #512 }
-#path li:nth-child(even):before { background: #512 }
-#path li:nth-child(even):after  { background: #512 }
-
-#path li:nth-child(odd):hover         { background: #157 }
-#path li:nth-child(odd):hover:before  { background: #157 }
-#path li:nth-child(odd):hover:after   { background: #157 }
-#path li:nth-child(even):hover        { background: #812 }
-#path li:nth-child(even):hover:before { background: #812 }
-#path li:nth-child(even):hover:after  { background: #812 }
+#path li:nth-child(odd):hover           { color: #1af }
+#path li:nth-child(odd):hover > .arrow  { fill:  #1af }
+#path li:nth-child(even):hover          { color: #f27 }
+#path li:nth-child(even):hover > .arrow { fill:  #f27 }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -333,6 +306,19 @@ r
 #path li:nth-child(14) { z-index: 3 }
 #path li:nth-child(15) { z-index: 2 }
 #path li:nth-child(16) { z-index: 1 }
+
+.arrow {
+    position: absolute;
+    height: 33%;
+    right: -10px;
+    top: 33%;
+    fill: #aaa;
+    width: 20px;
+}
+
+.arrow:hover {
+    fill: #fff;
+}
 
 /* ========================= File/Folder Display =========================== */
 .data-row {
