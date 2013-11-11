@@ -575,7 +575,7 @@ r
 #create-folder-button:hover { background: #35a; color: #fff }
 #create-folder-button.invalid:hover { background: #f22 }
 
-/* =============================== Volume Control =============================== */
+/* =============================== Audio Panel =============================== */
 
 #audio-controls {
     position: absolute;
@@ -608,7 +608,7 @@ r
 @media all and (max-width: 1023px) { #volume-icon { width: 35px; } }
 @media all and (max-width:  639px) { #volume-icon { width: 30px; } }
 
-/* input[range] focusring is unremoveable in Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=932410 */
+/* input[range]'s focusring is unremoveable in Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=932410 */
 #volume-slider {
     transform: rotateZ(270deg);
     -webkit-appearance: none;
@@ -627,7 +627,7 @@ r
 @media all and (max-width: 1023px) { #volume-slider { left: -83px; bottom: 110px; height: 35px; box-shadow: inset 0px 0 0 16px #222;} }
 @media all and (max-width:  639px) { #volume-slider { left: -85px; bottom: 108px; height: 30px; box-shadow: inset 0px 0 0 14px #222;} }
 
-#volume-slider.out { opacity: 0 }
+#volume-slider.out { opacity: 0; visibility: hidden; }
 #volume-slider.in  { opacity: 1 }
 
 #volume-slider::-moz-range-thumb {

@@ -598,17 +598,34 @@
             getPage();
         });
 
-        var slider = $("#volume-slider");
-        $("#volume-icon").register("click", function () {
+        var slider = $("#volume-slider"),
+            volumeIcon = $("#volume-icon");
+
+        volumeIcon.register("click", function () {
             requestAnimation(function () {
                 slider.attr("class", slider.attr("class") !== "in" ? "in" : "out");
             });
         });
 
         var player = document.getElementById("audio-player");
-        slider.register("input", function () {
+        player.volume = localStorage.getItem("volume") || 0.2;
+        slider.attr("value", player.volume * 100);
+
+        function setVolume() {
             player.volume = slider.val() / 100;
-        });
+            localStorage.setItem("volume", player.volume);
+            if (player.volume === 0)
+                volumeIcon.html("");
+            else if (player.volume <= 0.33)
+                volumeIcon.html("");
+            else if (player.volume <= 0.67)
+                volumeIcon.html("");
+            else
+                volumeIcon.html("");
+        }
+
+        slider.register("input", setVolume);
+        setVolume();
 
         // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
         function stop() { document.getElementById("audio-title").innerHTML = ""; }
