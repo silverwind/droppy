@@ -255,11 +255,9 @@ r
 
 #path {
    background: linear-gradient(#111,#222);
-   /*border-bottom: 2px solid #444;*/
-   /*height: auto;*/
+   border-bottom: 2px solid #444;
    overflow: hidden;
    position: relative;
-   top: 0;
    user-select: none;
    width: 1000%;
 }
