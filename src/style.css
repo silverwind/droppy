@@ -608,6 +608,7 @@ r
 @media all and (max-width: 1023px) { #volume-icon { width: 35px; } }
 @media all and (max-width:  639px) { #volume-icon { width: 30px; } }
 
+/* input[range] focusring is unremoveable in Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=932410 */
 #volume-slider {
     transform: rotateZ(270deg);
     -webkit-appearance: none;
@@ -615,34 +616,19 @@ r
     appearance: none;
     border-radius: 0 12px 12px 0;
     width: 200px;
-    background: #222;
+    background: #555;
     transition: opacity .2s ease-in;
-    padding: 0 10px;
+    padding: 0 16px;
     cursor: pointer;
     position: absolute;
 }
 
-@media all and (min-width: 1024px) { #volume-slider { left: -81px; bottom: 112px; height: 40px;} }
-@media all and (max-width: 1023px) { #volume-slider { left: -83px; bottom: 110px; height: 35px;} }
-@media all and (max-width:  639px) { #volume-slider { left: -85px; bottom: 108px; height: 30px;} }
+@media all and (min-width: 1024px) { #volume-slider { left: -81px; bottom: 112px; height: 40px; box-shadow: inset 0px 0 0 19px #222;} }
+@media all and (max-width: 1023px) { #volume-slider { left: -83px; bottom: 110px; height: 35px; box-shadow: inset 0px 0 0 16px #222;} }
+@media all and (max-width:  639px) { #volume-slider { left: -85px; bottom: 108px; height: 30px; box-shadow: inset 0px 0 0 14px #222;} }
 
 #volume-slider.out { opacity: 0 }
 #volume-slider.in  { opacity: 1 }
-
-#volume-slider::-moz-range-track {
-    background: #444;
-    height: 30%;
-    border: none;
-    border-radius: 1em;
-}
-
-#volume-slider::-webkit-slider-thumb {
-    height: 40%;
-    width: 2em;
-    border-radius: 1em;
-    border: none;
-    background: #ccc;
-}
 
 #volume-slider::-moz-range-thumb {
     height: 40%;
@@ -650,6 +636,19 @@ r
     border-radius: 1em;
     border: none;
     background: #ccc;
+}
+
+#volume-slider::-moz-range-track {
+    -moz-appearance: none;
+    opacity: 0;
+}
+
+#volume-slider::-webkit-slider-thumb {
+     -webkit-appearance: none;
+    background: #ccc;
+    border-radius: 1em;
+    width: 2em;
+    height: 13px;
 }
 
 #audio-title {
