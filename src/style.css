@@ -587,9 +587,9 @@ r
     /*text-align: center;*/
 }
 
-@media all and (min-width: 1024px) { #audio-controls { height: 35px; line-height: 33px; font-size:  1em} }
-@media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .9em} }
-@media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .8em} }
+@media all and (min-width: 1024px) { #audio-controls { height: 35px; line-height: 33px; font-size: .9em} }
+@media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .8em} }
+@media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .7em} }
 
 #volume-icon {
     position: absolute;

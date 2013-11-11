@@ -607,21 +607,39 @@
             });
         });
 
+        function onWheel(event) {
+            setVolume(event.wheelDelta || -event.detail);
+        }
+
+        volumeIcon[0].addEventListener("mousewheel", onWheel, false);
+        volumeIcon[0].addEventListener("DOMMouseScroll", onWheel, false);
+
         var player = document.getElementById("audio-player");
         player.volume = localStorage.getItem("volume") || 0.2;
         slider.attr("value", player.volume * 100);
 
-        function setVolume() {
-            player.volume = slider.val() / 100;
-            localStorage.setItem("volume", player.volume);
-            if (player.volume === 0)
-                volumeIcon.html("");
-            else if (player.volume <= 0.33)
-                volumeIcon.html("");
-            else if (player.volume <= 0.67)
-                volumeIcon.html("");
-            else
-                volumeIcon.html("");
+        function setVolume(delta) {
+            var volume = player.volume;
+            if (typeof delta === "number") {
+                if (delta > 0) {
+                    volume += 0.05;
+                    volume > 1 && (volume = 1);
+                } else {
+                    volume -= 0.05;
+                    volume < 0 && (volume = 0);
+                }
+            } else {
+                volume = slider.val() / 100;
+            }
+
+            player.volume = volume;
+            localStorage.setItem("volume", volume);
+            slider.attr("value", volume * 100);
+
+            if (player.volume === 0) volumeIcon.html("");
+            else if (player.volume <= 0.33) volumeIcon.html("");
+            else if (player.volume <= 0.67) volumeIcon.html("");
+            else volumeIcon.html("");
         }
 
         slider.register("input", setVolume);
