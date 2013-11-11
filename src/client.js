@@ -598,8 +598,26 @@
             getPage();
         });
 
-        $("#volume-slider").register("input", function () {
-            $("#audio-player")[0].volume = $("#volume-slider").val() / 100;
+        var slider = $("#volume-slider");
+        $("#volume-icon").register("click", function () {
+            requestAnimation(function () {
+                slider.attr("class", slider.attr("class") !== "in" ? "in" : "out");
+            });
+        });
+
+        var player = document.getElementById("audio-player");
+        slider.register("input", function () {
+            player.volume = slider.val() / 100;
+        });
+
+        // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
+        function stop() { document.getElementById("audio-title").innerHTML = ""; }
+        player.addEventListener("pause", stop);
+        player.addEventListener("ended", stop);
+        player.addEventListener("play", function () {
+            var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
+            var songname = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
+            document.getElementById("audio-title").innerHTML = songname;
         });
 
         // ============================================================================
@@ -975,7 +993,7 @@
                     $("#content").remove();
                     $("#newcontent").attr("id", "content");
                     $(".data-row").removeClass("animating");
-                }, 250);
+                }, 200);
             }
             redraw();
             bindEvents();

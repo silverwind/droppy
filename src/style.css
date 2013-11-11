@@ -5,7 +5,8 @@
     font-family: "Open Sans Light";
     font-weight: 200;
     src: local(Open Sans Light),
-         url(/res/OpenSans-Light.woff)  format("woff")
+         url(/res/OpenSans-Light.svg)  format("svg"),
+         url(/res/OpenSans-Light.woff) format("woff");
 }
 
 @font-face {
@@ -80,7 +81,7 @@ body {
     overflow-y: auto;
     padding: .5em .25em 0 .5em;
     position: absolute;
-    transition: left .2s ease;
+    transition: left .2s ease-in;
     user-select: none;
     width: calc(100% - 1em);
     z-index: -1;
@@ -96,10 +97,10 @@ body {
 
 #content.out { opacity: 0 }
 
-@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 72px - 1em); font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 62px - 1em); font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 52px - 1em); font-size: .8em } }
-
+@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 126px); font-size:  1em } }
+@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 112px); font-size: .9em } }
+@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 96px); font-size: .8em } }
+r
 #content.center,  #newcontent.center  { left: 0     }
 #content.back,    #newcontent.back    { left: -100% }
 #content.forward, #newcontent.forward { left: 100%  }
@@ -577,69 +578,89 @@ body {
 /* =============================== Volume Control =============================== */
 
 #audio-controls {
-    position: fixed;
-    top: 34px;
-    right: .5em;
-    width: 10em;
-    height: 2em;
-    opacity: 1;
-    border-radius: 12px;
-    background: transparent;
-    color: #bbb;
-    text-align: center;
-}
-
-@media all and (min-width: 1024px) { #audio-controls { top: 34px } }
-@media all and (max-width: 1023px) { #audio-controls { top: 26px } }
-@media all and (max-width:  639px) { #audio-controls { top: 18px; width: 8em; } }
-
-
-#volume-label {
     position: absolute;
-    margin: 0 auto;
-    line-height: 2em;
-    left: .5em;
+    bottom: 0;
+    width: 100%;
+    background: #222;
+    border-top: 2px solid #444;
+    color: #ccc;
+    /*text-align: center;*/
 }
 
-@media all and (max-width:  639px) { #volume-label {
-    font-size: .8em; line-height: 2.5em; left: 1em;
-}}
+@media all and (min-width: 1024px) { #audio-controls { height: 35px; line-height: 33px; font-size:  1em} }
+@media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .9em} }
+@media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .8em} }
+
+#volume-icon {
+    position: absolute;
+    width: 40px;
+    text-align: center;
+    color: #888;
+    cursor: pointer;
+    user-select: none;
+}
+
+#volume-icon:hover {
+    color: #ccc;
+}
+
+@media all and (min-width: 1024px) { #volume-icon { width: 40px; } }
+@media all and (max-width: 1023px) { #volume-icon { width: 35px; } }
+@media all and (max-width:  639px) { #volume-icon { width: 30px; } }
 
 #volume-slider {
-    background: transparent;
-    position: absolute;
+    transform: rotateZ(270deg);
     -webkit-appearance: none;
     -moz-appearance: none;
-    border-radius: 6px;
-    height: 2em;
-    left: 2em;
-    width: 8em;
+    appearance: none;
+    border-radius: 0 12px 12px 0;
+    width: 200px;
+    background: #222;
+    transition: opacity .2s ease-in;
+    padding: 0 10px;
     cursor: pointer;
+    position: absolute;
 }
 
-@media all and (max-width:  639px) { #volume-slider { width: 6em } }
+@media all and (min-width: 1024px) { #volume-slider { left: -81px; bottom: 112px; height: 40px;} }
+@media all and (max-width: 1023px) { #volume-slider { left: -83px; bottom: 110px; height: 35px;} }
+@media all and (max-width:  639px) { #volume-slider { left: -85px; bottom: 108px; height: 30px;} }
+
+#volume-slider.out { opacity: 0 }
+#volume-slider.in  { opacity: 1 }
 
 #volume-slider::-moz-range-track {
-    background: #666;
-    height: .6em;
-    border-radius: 1em;
+    background: #444;
+    height: 30%;
     border: none;
+    border-radius: 1em;
 }
 
 #volume-slider::-webkit-slider-thumb {
-    height: .6em;
+    height: 40%;
     width: 2em;
     border-radius: 1em;
     border: none;
-    background: #ddd;
+    background: #ccc;
 }
 
 #volume-slider::-moz-range-thumb {
-    height: .6em;
+    height: 40%;
     width: 2em;
     border-radius: 1em;
     border: none;
-    background: #ddd;
+    background: #ccc;
+}
+
+#audio-title {
+    position: absolute;
+    margin: 0 auto;
+    text-align: center;
+    left: 2em;
+    width: calc(100% - 2em);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 /* =============================== About box =============================== */
