@@ -1,7 +1,17 @@
 #droppy
-A modern file server web application utilizing WebSockets for realtime updates, running on [node](http://nodejs.org/). It supports dropping one or more files into the window, and if browser support is given, also folders (WebKit/Blink only as of Nov. 2013).
+Pure HTML5 file-server web application running on [node](http://nodejs.org/).
 
-![droppy](http://i.imgur.com/eV8AHnM.png)
+![droppy](http://i.imgur.com/9dupKrP.png)
+
+###Features
+
+*Realtime updating of all connected clients via WebSockets.
+*Drop uploads of multiple files in all browsers.
+*Recursive directory uploads in Webkit browsers.
+*Asynchronous uploads over XMLHTTPRequest2.
+*Playback of audio files via HTML5 <audio>, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+*Generation of shortened and easy shareable links for quick and unauthenticted downloads.
+*Clean and almost dependency-free JavaScript code.
 
 ##Installation
 With [node](http://nodejs.org/download/) installed, run:
@@ -14,7 +24,7 @@ To start the server, run:
 ````bash
 ./droppy.js
 ````
-By default, the server will listen on [https](https://localhost/). On first startup, a user `droppy` with password `droppy` will be created. To add users, run `./droppy.js -adduser [user] [pass]`. To remove users, you'll have to edit `db.json` for now.
+By default, the server will listen on [https](https://localhost/). On first startup, a user `droppy` with password `droppy` will be created. To add users, run `./droppy.js -adduser [user] [pass]`. To remove users, you'll have to edit `db.json` (until user management is implemented).
 
 ##Configuration
 Configuration is done through `config.json`
