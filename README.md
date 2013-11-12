@@ -9,7 +9,7 @@ Pure HTML5 file-server web application running on [node](http://nodejs.org/).
 * Drop uploads of multiple files in all browsers.
 * Recursive directory uploads in Webkit browsers.
 * Asynchronous uploads over XMLHTTPRequest2.
-* Playback of audio files via HTML5 <audio>, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+* Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Generation of shortened and easy shareable links for quick and unauthenticted downloads.
 * Clean and almost dependency-free JavaScript code.
 
