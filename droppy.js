@@ -66,12 +66,12 @@
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
     log.simple(helpers.logo);
-    log.simple(" ->> running on node " + process.version);
+    log.simple(" ->> droppy v" + require("./package.json").version + " running on node " + process.version);
 
     // Read user/sessions from DB and add a default user if no users exist
     readDB();
     if (Object.keys(db.users).length < 1) {
-        log.simple("Please create a user first through: -add USER PASS");
+        addUser("droppy", "droppy", true);
     }
 
     // Copy/Minify JS, CSS and HTML content
