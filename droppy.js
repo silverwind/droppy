@@ -39,7 +39,8 @@
 "use strict";
 
 (function () {
-    var helpers  = require("./lib/helpers.js"),
+    var version  = require("./package.json").version,
+        helpers  = require("./lib/helpers.js"),
         log      = require("./lib/log.js"),
         ap       = require("autoprefixer"),
         Busboy   = require("busboy"),
@@ -66,7 +67,7 @@
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
     log.simple(helpers.logo);
-    log.simple(" ->> droppy v" + require("./package.json").version + " running on node " + process.version);
+    log.simple(" ->> droppy v" + version + " running on node " + process.version);
 
     // Read user/sessions from DB and add a default user if no users exist
     readDB();
@@ -159,7 +160,7 @@
             resources.html.forEach(function (file) {
                 var name = Object.keys(file)[0];
                 // Minify HTML by removing tabs, CRs and LFs
-                fs.writeFileSync(getResPath(name), file[name].replace(/[\t\r\n]/gm, ""));
+                fs.writeFileSync(getResPath(name), file[name].replace(/[\t\r\n]/gm, "").replace("{{version}}", version));
             });
             fs.writeFileSync(getResPath("client.js"), out.js);
             fs.writeFileSync(getResPath("style.css"), out.css);
@@ -973,7 +974,7 @@
                 process.exit(1);
             }
         } else if (option.indexOf("version") === 0) {
-            log.simple(require("./package.json").version);
+            log.simple(version);
             process.exit(0);
         } else {
             printUsage();

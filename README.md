@@ -16,11 +16,12 @@ Pure HTML5 file-server web application running on [node](http://nodejs.org/).
 ##Installation
 With [node](http://nodejs.org/download/) installed, run:
 ````bash
-git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
+npm install droppy
 ````
+The above will install droppy in `node_modules/droppy` which is a self-contained directory.
 
 ##Running the server
-To start the server, run:
+Inside `node_modules/droppy` run:
 ````bash
 ./droppy.js
 ````
