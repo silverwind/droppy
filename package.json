@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "HTML5 file-server with realtime updates",
   "homepage": "https://github.com/silverwind/droppy",
