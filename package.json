@@ -2,16 +2,16 @@
   "name": "droppy",
   "version": "0.5.7",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "HTML5 file-server with realtime updates",
+  "description": "Pure HTML5 file-server web application",
   "homepage": "https://github.com/silverwind/droppy",
-  "bugs": "https://github.com/silverwind/droppy/issues",
-  "main": "./droppy.js",
+  "bugs": {
+    "url": "https://github.com/silverwind/droppy/issues"
+  },
+  "main": "droppy.js",
   "dependencies": {
     "autoprefixer": "~0.8.20131104",
     "clean-css": "~2.0.0",
     "graceful-fs": "~2.0.1",
-    "grunt": "~0.4.1",
-    "grunt-exec": "~0.4.2",
     "mime": "~1.2.11",
     "busboy": "0.0.11",
     "uglify-js": "~2.4.3",
@@ -20,10 +20,11 @@
     "ws": "~0.4.31"
   },
   "directories": {
-    "src": "./src",
-    "res": "./res",
-    "lib": "./lib"
+     "src": "src",
+     "res": "res",
+     "lib": "lib"
   },
+  "files" : ["lib/helpers.js", "lib/log.js"],
   "engines": {
     "node": "~0.10.0"
   },
@@ -33,17 +34,12 @@
     "fileserver",
     "websocket"
   ],
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/silverwind/droppy/raw/master/LICENSE"
-    }
-  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/silverwind/droppy.git"
+    "url": "git://github.com/silverwind/droppy.git"
   },
   "bin": {
     "droppy": "./droppy.js"
-  }
+  },
+  "license": "BSD-2-Clause"
 }
