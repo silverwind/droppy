@@ -891,10 +891,10 @@
         req.pipe(busboy);
 
         function onFile(fieldname, file, filename, next) {
-            var dst = path.join(config.filesDir, clients[cookie].directory, filename);
+            var dst = path.join(config.filesDir, clients[cookie].directory, fieldname);
             var tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
-            files[filename] = {
+            files[fieldname] = {
                 src: tmp,
                 dst: dst
             };
@@ -903,6 +903,7 @@
             fstream.on("close", function () {
                 next();
             });
+
             file.pipe(fstream);
         }
     }
