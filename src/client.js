@@ -353,14 +353,15 @@
                 fileItem = null,
                 entryFunc = null;
 
-            fileItem = (items && items[0] && items[0].type === "text/uri-list") ? items[1] : items[0];
-
             // Try to find the supported getAsEntry function
-            var funcs = ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"];
-            for (var f = 0; f < funcs.length; f++) {
-                if (fileItem[funcs[f]]) {
-                    entryFunc = funcs[f];
-                    break;
+            if (items && items[0]) {
+                fileItem = (items[0].type === "text/uri-list") ? items[1] : items[0];
+                var funcs = ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"];
+                for (var f = 0; f < funcs.length; f++) {
+                    if (fileItem[funcs[f]]) {
+                        entryFunc = funcs[f];
+                        break;
+                    }
                 }
             }
 
