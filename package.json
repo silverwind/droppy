@@ -20,11 +20,10 @@
     "ws": "~0.4.31"
   },
   "directories": {
-     "src": "src",
-     "res": "res",
-     "lib": "lib"
+    "src": "src",
+    "res": "res",
+    "lib": "lib"
   },
-  "files" : ["lib/helpers.js", "lib/log.js"],
   "engines": {
     "node": "~0.10.0"
   },
