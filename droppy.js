@@ -449,11 +449,11 @@
             ws.on("close", function (code) {
                 var reason;
                 if (code === 4001) {
-                    reason = "(Client logged out)";
+                    reason = "(Logged out)";
                     delete db.sessions[cookie];
                     writeDB();
                 } else if (code === 1001) {
-                    reason = "(Client going away)";
+                    reason = "(Going away)";
                     delete clients[cookie];
                 }
                 log.log(remoteIP, ":", remotePort, " WebSocket ", "disconnected", " ", reason || "(Code: " + (code || "none")  + ")");
@@ -1083,17 +1083,17 @@
     //-----------------------------------------------------------------------------
     // Cookie helpers
     function getCookie(cookie) {
-        var sid = "";
+        var session = "";
         if (cookie) {
             var cookies = cookie.split("; ");
             cookies.forEach(function (c) {
-                if (/^sid.*/.test(c)) {
-                    sid = c.substring(4);
+                if (/^session.*/.test(c)) {
+                    session = c.substring(8);
                 }
             });
-            for (var savedsid in db.sessions) {
-                if (savedsid === sid) {
-                    return sid;
+            for (var savedsession in db.sessions) {
+                if (savedsession === session) {
+                    return session;
                 }
             }
         }
@@ -1108,11 +1108,11 @@
         if (postData.check === "on") {
             // Create a semi-permanent cookie
             var dateString = new Date(Date.now() + 31536000000).toUTCString();
-            res.setHeader("Set-Cookie", "sid=" + sessionID + "; Expires=" + dateString);
+            res.setHeader("Set-Cookie", "session=" + sessionID + "; Expires=" + dateString);
         } else {
             // Create a single-session cookie
             // TODO: Delete these session ids after a certain period of inactivity from the client
-            res.setHeader("Set-Cookie", "sid=" + sessionID + ";");
+            res.setHeader("Set-Cookie", "session=" + sessionID + ";");
         }
         db.sessions[sessionID] = {privileged : priv};
         writeDB();

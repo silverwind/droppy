@@ -107,8 +107,8 @@
                     $("#navigation").attr("class", "in");
                     setTimeout(function () {
                         finalize();
-                    }, 250);
-                }, 250);
+                    }, 100);
+                }, 100);
             });
         } else if (type === "auth") {
             initAuthPage();
@@ -127,10 +127,10 @@
                                 setTimeout(function () {
                                     $("#login-info-box").removeClass("info error");
                                 }, 3000);
-                            }, 250);
+                            }, 100);
                         }
-                    }, 250);
-                }, 250);
+                    }, 100);
+                }, 100);
             });
         }
 
@@ -585,7 +585,7 @@
         });
 
         $("#click-catcher").register("click", function () {
-            $("#click-catcher").attr("class", "out");
+            $(this).attr("class", "out");
             createbox.attr("class", "out");
             aboutbox.attr("class", "out");
             configbox.attr("class", "out");
@@ -594,7 +594,7 @@
         $("#logout").register("click", function () {
             droppy.hasLoggedOut = true;
             droppy.socket && droppy.socket.close(4001);
-            deleteCookie("sid");
+            deleteCookie("session");
             initVariables(); // Reset vars to their init state
             getPage();
         });
@@ -906,7 +906,7 @@
             });
 
             $("#path").append(li);
-            li.append('<svg class="arrow" viewBox="0 0 100 100"><polyline points="0,0 0,100 70,50"/></svg>');
+            li.append('<svg class="arrow" viewBox="0 0 100 100"><polyline points="0,0 0,100 60,50"/></svg>');
         }
 
         function finalize() {
@@ -915,7 +915,7 @@
                 // Remove the class after the transition and keep the list scrolled to the last element
                 $("#path li.in").removeClass();
                 checkPathOverflow();
-            }, 300);
+            }, 200);
         }
     }
 

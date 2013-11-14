@@ -54,7 +54,7 @@ body {
 /* ============================ Main Page Layout =========================== */
 
 #page, #newpage {
-    transition: all .25s ease;
+    transition: all .15s ease;
 }
 
 #page.out { opacity: 0 }
@@ -65,7 +65,7 @@ body {
     color: #eee;
     position: fixed;
     text-align: center;
-    transition: top .5s ease;
+    transition: top .35s ease-in;
     width: 100%;
 }
 
@@ -81,7 +81,7 @@ body {
     overflow-y: auto;
     padding: .5em .25em 0 .5em;
     position: absolute;
-    transition: left .2s ease-in;
+    transition: left .15s ease-in;
     user-select: none;
     width: calc(100% - 1em);
     z-index: -1;
@@ -169,7 +169,7 @@ r
     margin-left: -150px;
     position: absolute;
     text-shadow: 0 0 5px #000;
-    transition: all .4s ease;
+    transition: all .3s ease;
     user-select: none;
     width: 300px;
 }
@@ -237,7 +237,6 @@ r
     text-shadow: none;
     text-align: center;
     transition: all .25s ease-in-out;
-
 }
 
 #upload-cancel span.icon, #upload-time span.icon {
@@ -271,23 +270,27 @@ r
     float: left;
     position: relative;
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
-    padding: 0 1em 0 .8em;
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px } }
-@media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px } }
-@media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px } }
+@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px; padding: 0 .3em 0 1.6em } }
+@media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding: 0 .2em 0 1.4em } }
+@media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px; padding: 0 .1em 0 1.2em } }
 
 #path li.in  { left: 0    }
 #path li.out { left: -10% }
 #path li.placeholder { opacity: 0 }
+#path li:first-child { padding-left: .5em }
+#path li, .arrow { color: #ccc; transition: all .15s ease }
 
-#path li { color: #ccc; transition: all .1s ease }
+#path li:nth-child(odd)           { background: #222 }
+#path li:nth-child(odd) > .arrow  { fill:       #222 }
+#path li:nth-child(even)          { background: #333 }
+#path li:nth-child(even) > .arrow { fill:       #333 }
 
-#path li:nth-child(odd):hover           { color: #1af }
-#path li:nth-child(odd):hover > .arrow  { fill:  #1af }
-#path li:nth-child(even):hover          { color: #f27 }
-#path li:nth-child(even):hover > .arrow { fill:  #f27 }
+#path li:nth-child(odd):hover           { background: #124; color: #1af; }
+#path li:nth-child(odd):hover > .arrow  { fill:       #124 }
+#path li:nth-child(even):hover          { background: #413; color: #f1a; }
+#path li:nth-child(even):hover > .arrow { fill:       #412 }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -307,16 +310,11 @@ r
 
 .arrow {
     position: absolute;
-    height: 33%;
-    right: -10px;
-    top: 33%;
-    fill: #aaa;
-    width: 20px;
 }
 
-.arrow:hover {
-    fill: #fff;
-}
+@media all and (min-width: 1024px) { .arrow { height: 35px; width: 35px;; right: -35px } }
+@media all and (max-width: 1023px) { .arrow { height: 30px; width: 30px;; right: -30px } }
+@media all and (max-width:  639px) { .arrow { height: 25px; width: 25px;; right: -25px } }
 
 /* ========================= File/Folder Display =========================== */
 .data-row {

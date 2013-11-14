@@ -11,14 +11,14 @@ Pure HTML5 file-server web application running on [node](http://nodejs.org/).
 * Asynchronous uploads over XMLHTTPRequest2.
 * Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Generation of shortened and easy shareable links for quick and unauthenticted downloads.
-* Clean and almost dependency-free JavaScript code.
+* Clean and almost dependency-free client-side JavaScript code.
 
 ##Installation
 With [node](http://nodejs.org/download/) installed, run:
 ````bash
 npm install droppy
 ````
-The above will install droppy in `node_modules/droppy` which is a self-contained directory.
+This will install droppy in `node_modules/droppy` which is a self-contained directory.
 
 ##Running the server
 Inside `node_modules/droppy` run:
