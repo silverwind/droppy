@@ -112,7 +112,6 @@
             });
         } else if (type === "auth") {
             initAuthPage();
-            redraw();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("out");
@@ -1032,7 +1031,6 @@
                     $(".data-row").removeClass("animating");
                 }, 200);
             }
-            redraw();
             bindEvents();
             nav = "same";
         });
@@ -1173,11 +1171,6 @@
             return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
         else
             return [(step === 0) ? bytes : (bytes).toFixed(decimals), units[step]].join(" ");
-    }
-
-    // This seems to fix weird Webkit rendering after animations
-    function redraw() {
-        $("<style>").appendTo($(document.body)).remove();
     }
 
     // Debug logging
