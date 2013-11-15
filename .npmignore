@@ -1,7 +1,7 @@
 files/
-icons/
 incoming/
-res/client.js
-res/css.css
-.git/
+media/
+res/*.js
+res/*.css
+res/*.html
 db.json
