@@ -1,5 +1,5 @@
 #droppy
-Pure HTML5 file-server web application running on [node](http://nodejs.org/).
+Pure HTML5 file-server web application running on [node.js](http://nodejs.org/).
 
 ![droppy](http://i.imgur.com/9dupKrP.png)
 
@@ -13,15 +13,20 @@ Pure HTML5 file-server web application running on [node](http://nodejs.org/).
 * Generation of shortened and easy shareable links for quick and unauthenticted downloads.
 * Clean and almost dependency-free client-side JavaScript code.
 
+mv node_modules/droppy . && rm -r node_modules
+
 ##Installation
-With [node](http://nodejs.org/download/) installed, run:
+You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
 ````bash
-npm install droppy
+npm install droppy && mv node_modules/droppy . && rm -r node_modules
 ````
-This will install droppy in `node_modules/droppy` which is a self-contained directory.
+Or through git for simple updating:
+````bash
+git clone git://github.com/silverwind/droppy.git
+````
 
 ##Running the server
-Inside `node_modules/droppy` run:
+Inside `droppy`'s folder run:
 ````bash
 ./droppy.js
 ````
