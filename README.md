@@ -13,8 +13,6 @@ Pure HTML5 file-server/cloud running on [node.js](http://nodejs.org/).
 * Generation of shortened and easy shareable links for quick and unauthenticted downloads.
 * Clean and almost dependency-free client-side JavaScript code.
 
-mv node_modules/droppy . && rm -r node_modules
-
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
 ````bash
