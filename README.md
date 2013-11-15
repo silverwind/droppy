@@ -1,7 +1,7 @@
 #droppy
 Pure HTML5 file-server/cloud running on [node.js](http://nodejs.org/).
 
-![droppy](http://i.imgur.com/9dupKrP.png)
+![droppy](http://i.imgur.com/pnWbq98.png)
 
 ###Features
 
