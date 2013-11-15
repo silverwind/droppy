@@ -1,5 +1,5 @@
 #droppy
-Pure HTML5 file-server web application running on [node.js](http://nodejs.org/).
+Pure HTML5 file-server/cloud running on [node.js](http://nodejs.org/).
 
 ![droppy](http://i.imgur.com/9dupKrP.png)
 
@@ -20,7 +20,7 @@ You can install droppy's self-contained directory from [npm](https://npmjs.org/p
 ````bash
 npm install droppy && mv node_modules/droppy . && rm -r node_modules
 ````
-Or through git for simple updating:
+Or through git:
 ````bash
 git clone git://github.com/silverwind/droppy.git
 ````

@@ -2,7 +2,7 @@
   "name": "droppy",
   "version": "0.6.3",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "Pure HTML5 file-server web application",
+  "description": "Pure HTML5 file-server/cloud",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": {
     "url": "https://github.com/silverwind/droppy/issues"
