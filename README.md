@@ -7,7 +7,7 @@ Pure HTML5 file-server/cloud running on [node.js](http://nodejs.org/).
 
 * Realtime updating of all connected clients via WebSockets.
 * Drop uploads of multiple files in all browsers.
-* Recursive directory uploads in Webkit browsers.
+* Recursive directory uploads in all supported browsers (WebKit only as of 11/13).
 * Asynchronous uploads over XMLHTTPRequest2.
 * Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Generation of shortened and easy shareable links for quick and unauthenticted downloads.
