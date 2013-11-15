@@ -10,12 +10,12 @@
   "main": "droppy.js",
   "dependencies": {
     "autoprefixer": "~0.8.20131104",
-    "clean-css": "~2.0.0",
+    "clean-css": "~2.0.1",
     "graceful-fs": "~2.0.1",
     "mime": "~1.2.11",
-    "busboy": "0.0.11",
+    "busboy": "0.0.12",
     "uglify-js": "~2.4.3",
-    "spdy": "~1.15.6",
+    "spdy": "~1.16.0",
     "wrench": "~1.5.4",
     "ws": "~0.4.31"
   },

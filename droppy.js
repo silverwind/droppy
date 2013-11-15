@@ -81,7 +81,7 @@
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
         setupDirectories();
-        cleanUpLinks();
+        cleanupLinks();
         createListener();
     });
 
@@ -90,7 +90,7 @@
     function prepareContent() {
         var out = { css : "", js  : "" },
             resources = {
-                css  : ["style.css", "sprites.css"],
+                css  : ["normalize.css", "style.css", "sprites.css"],
                 js   : ["modernizr.js", "jquery.js", "client.js"],
                 html : ["base.html", "auth.html", "main.html"]
             },
@@ -113,7 +113,12 @@
                 else return;
             } catch (e) { return; }
         });
-        if (matches.resource === resourceList.length && matches.compiled === compiledList.length) return;
+        if (matches.resource === resourceList.length &&
+            matches.compiled === compiledList.length &&
+            db.resourceDebug !== undefined &&
+            db.resourceDebug === config.debug) {
+            return;
+        }
 
         // Read resources
         for (var type in resources) {
@@ -150,7 +155,7 @@
         // Add CSS vendor prefixes
         out.css = ap("last 2 versions").compile(out.css);
         // Minify CSS
-        !config.debug && (out.css = require("clean-css").process(out.css, {keepSpecialComments : 0, removeEmpty : true}));
+        out.css = new require("clean-css")({keepSpecialComments : 0, removeEmpty : true}).minify(out.css);
         // Set the client debug variable to mirror the server's
         out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
@@ -173,8 +178,9 @@
         resourceList.forEach(function (file) {
             if (!db.resourceHashes) db.resourceHashes = {};
             db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(getSrcPath(file))).digest("base64");
-            writeDB();
+            db.resourceDebug = config.debug; // Save the state of the last resource compilation
         });
+        writeDB();
     }
 
     //-----------------------------------------------------------------------------
@@ -194,7 +200,7 @@
 
     //-----------------------------------------------------------------------------
     // Clean up our shortened links by removing links to nonexistant files
-    function cleanUpLinks() {
+    function cleanupLinks() {
         var linkcount = 0, cbcount = 0;
         for (var link in db.shortlinks) {
             if (db.shortlinks.hasOwnProperty(link)) {
@@ -739,6 +745,7 @@
         if (config.debug && resourceName === "style.css") {
             // Shortcut for CSS debugging when no Websocket is available
             cssCache = [
+                fs.readFileSync(getSrcPath("normalize.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
@@ -748,6 +755,7 @@
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
             res.setHeader("Content-Length", Buffer.byteLength(cssCache, 'utf8'));
             res.end(cssCache);
+            log.response(req, res);
             return;
         }
 
