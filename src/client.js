@@ -666,19 +666,21 @@
             if (isArray) { // We got a normal File array
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
+                    var filename = encodeURIComponent(data[i].name);
                     numFiles++;
-                    droppy.currentData[data[i].name] = {
+                    droppy.currentData[filename] = {
                         size  : data[i].size,
                         type  : "nf",
                         mtime : Date.now()
                     };
-                    formData.append(data[i].name, data[i]);
+                    formData.append(filename, data[i], filename);
                 }
             } else { // We got an object for recursive folder uploads
                 var addedDirs = {};
                 for (var path in data) {
                     if (data.hasOwnProperty(path)) {
-                        formData.append(path, data[path], path);
+                        console.log(path);
+                        formData.append(path, data[path], encodeURIComponent(path));
                         var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
                         switch (Object.prototype.toString.call(data[path])) {
                         case "[object Object]":
@@ -706,7 +708,7 @@
             }
 
             // Load the new files into view, tagged
-            buildHTML(droppy.currentData, droppy.currentFolder);
+            buildHTML(droppy.currentData, droppy.currentFolder, true);
 
             // Create the XHR2
             var xhr = new XMLHttpRequest();
@@ -719,6 +721,7 @@
 
             // And send the files
             droppy.isUploading = true;
+            xhr.overrideMimeType("utf-8");
             xhr.open("post", "/upload", true);
             xhr.send(formData);
         }
@@ -940,7 +943,7 @@
     }
 
     // Convert the received data into HTML
-    function buildHTML(fileList, root) {
+    function buildHTML(fileList, root, isUpload) {
         var list = $("<ul></ul>"), downloadURL, type, size, mtime, id, tags, audio;
 
         for (var file in fileList) {
@@ -956,6 +959,7 @@
                     downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
                     audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
                     var spriteClass = getSpriteClass(getExt(file));
+                    if (isUpload) file = decodeURIComponent(file);
                     list.append(
                         '<li class="data-row" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '"></span>' +
@@ -968,6 +972,7 @@
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
+                    if (isUpload) file = decodeURIComponent(file);
                     list.append(
                         '<li class="data-row" data-type="folder" data-id="' + id + '">' +
                             '<span class="sprite sprite-folder"></span>' +

@@ -369,6 +369,7 @@
                 case "DELETE_FILE":
                     log.log(remoteIP, ":", remotePort, " Deleting: " + msg.data.substring(1));
                     msg.data = addFilePath(msg.data);
+                    checkWatchedDirs();
 
                     fs.stat(msg.data, function (error, stats) {
                         if (stats && !error) {
@@ -383,6 +384,9 @@
                                 try {
                                     wrench.rmdirSyncRecursive(msg.data);
                                 } catch (error) {
+                                    // Specifically log this error as it possibly has to do with
+                                    // wrench not using graceful-fs
+                                    log.error("Error applying wrench.rmdirSyncRecursive");
                                     log.error(error);
                                 }
 
@@ -900,12 +904,13 @@
         req.pipe(busboy);
 
         function onFile(fieldname, file, filename, next) {
-            var dst = path.join(config.filesDir, clients[cookie].directory, fieldname);
+            var destpath = filename ? decodeURIComponent(filename) : fieldname;
+            var dst = path.join(config.filesDir, clients[cookie].directory, destpath);
             var tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
-            files[fieldname] = {
+            files[destpath] = {
                 src: tmp,
-                dst: dst
+                dst: decodeURIComponent(dst)
             };
 
             var fstream = fs.createWriteStream(tmp);
