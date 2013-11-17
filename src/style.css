@@ -175,8 +175,13 @@ r
     width: 300px;
 }
 
-#upload-info.out {opacity: 0; bottom: -125px;}
-#upload-info.in  {opacity: 1; bottom: 0;}
+#upload-info.out { opacity: 0; bottom: -125px }
+
+@media all and (min-width: 1024px) { #upload-info.in  {opacity: 1; bottom: 35px } }
+@media all and (max-width: 1023px) { #upload-info.in  {opacity: 1; bottom: 30px } }
+@media all and (max-width:  639px) { #upload-info.in  {opacity: 1; bottom: 25px } }
+
+
 
 #upload-title {
     color: #ddd;
@@ -285,13 +290,13 @@ r
 
 #path li:nth-child(odd)           { background: #222 }
 #path li:nth-child(odd) > .arrow  { fill:       #222 }
-#path li:nth-child(even)          { background: #333 }
-#path li:nth-child(even) > .arrow { fill:       #333 }
+#path li:nth-child(even)          { background: #444 }
+#path li:nth-child(even) > .arrow { fill:       #444 }
 
-#path li:nth-child(odd):hover           { background: #124; color: #1af; }
-#path li:nth-child(odd):hover > .arrow  { fill:       #124 }
-#path li:nth-child(even):hover          { background: #413; color: #f1a; }
-#path li:nth-child(even):hover > .arrow { fill:       #412 }
+#path li:nth-child(odd):hover           { background: #136; color: #1af; }
+#path li:nth-child(odd):hover > .arrow  { fill:       #136 }
+#path li:nth-child(even):hover          { background: #513; color: #f1a; }
+#path li:nth-child(even):hover > .arrow { fill:       #513 }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -313,9 +318,9 @@ r
     position: absolute;
 }
 
-@media all and (min-width: 1024px) { .arrow { height: 35px; width: 35px;; right: -35px } }
-@media all and (max-width: 1023px) { .arrow { height: 30px; width: 30px;; right: -30px } }
-@media all and (max-width:  639px) { .arrow { height: 25px; width: 25px;; right: -25px } }
+@media all and (min-width: 1024px) { .arrow { height: 35px; width: 35px;; right: -34.5px } }
+@media all and (max-width: 1023px) { .arrow { height: 30px; width: 30px;; right: -29.5px } }
+@media all and (max-width:  639px) { .arrow { height: 25px; width: 25px;; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
 .data-row {
