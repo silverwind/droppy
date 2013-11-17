@@ -26,7 +26,7 @@ git clone git://github.com/silverwind/droppy.git
 ##Running the server
 Inside `droppy`'s folder run:
 ````bash
-./droppy.js
+node droppy.js
 ````
 By default, the server will listen on [https](https://localhost/). On first startup, a user `droppy` with password `droppy` will be created. To add users, run `./droppy.js -adduser [user] [pass]`. To remove users, you'll have to edit `db.json` (until user management is implemented).
 
