@@ -101,7 +101,7 @@
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"),
             oldPage = $("#page"),
-            box = $(".center-box");
+            box     = $("#center-box");
         if (type === "main") {
             droppy.hasLoggedOut = false;
             initMainPage();
@@ -116,24 +116,20 @@
                 }, 100);
             });
         } else if (type === "auth") {
+            log(droppy.hasLoggedOut);
             initAuthPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("out");
                 setTimeout(function () {
                     box.removeClass("out").addClass("in");
+                    finalize();
                     setTimeout(function () {
-                        finalize();
                         if (droppy.hasLoggedOut) {
-                            setTimeout(function () {
-                                $("#login-info-box").attr("class", "info");
-                                $("#login-info").html("Logged out!");
-                                setTimeout(function () {
-                                    $("#login-info-box").removeClass("info error");
-                                }, 3000);
-                            }, 100);
+                            $("#login-info").html("Logged out!");
+                            $("#login-info-box").attr("class", "info");
                         }
-                    }, 100);
+                    }, 500);
                 }, 100);
             });
         } else if (type === "firstrun") {
@@ -143,6 +139,10 @@
                 setTimeout(function () {
                     box.removeClass("out").addClass("in");
                     finalize();
+                    setTimeout(function () {
+                        $("#login-info").html("Hello! Choose your creditentials.");
+                        $("#login-info-box").attr("class", "info");
+                    }, 500);
                 }, 200);
             });
         }
@@ -253,21 +253,19 @@
 //  Authentication page
 // ============================================================================
     function initAuthPage(firstrun) {
-        var loginform = $(".center-box"),
+        var loginform = $("#center-box"),
             submit    = $("#submit"),
             form      = $("#form");
 
         // Auto-focus the user input on load
         $("#user").focus();
 
-        if (!firstrun) {
-            // Remove invalid class on user action
-            $(".login-input").register("click keydown focus", function () {
-                $("#login-info-box").removeClass("info error");
-                submit.removeClass("invalid");
-                loginform.removeClass("invalid");
-            });
-        }
+        // Remove invalid class on user action
+        $(".login-input").register("click keydown focus", function () {
+            $("#login-info-box").removeClass("info error");
+            submit.removeClass("invalid");
+            loginform.removeClass("invalid");
+        });
 
         // Return submits the form
         $(".login-input").register("keyup", function (event) {
@@ -299,8 +297,10 @@
                             droppy.hasLoggedOut = false;
                             getPage();
                         } else {
-                            // TODO: UI
-                            window.alert("User name or password not acceptable.");
+                            submit.addClass("invalid");
+                            loginform.addClass("invalid");
+                            $("#login-info").html("Creditentials not acceptable.");
+                            $("#login-info-box").attr("class", "error");
                         }
                     }
                 });
@@ -326,9 +326,6 @@
                             } else {
                                 $("#login-info-box").addClass("error");
                                 $("#login-info").html("Wrong login!");
-                                setTimeout(function () {
-                                    $("#login-info-box").removeClass("info error");
-                                }, 3000);
                             }
                         }
                     }
@@ -600,10 +597,10 @@
         });
 
         $("#logout").register("click", function () {
-            droppy.hasLoggedOut = true;
             droppy.socket && droppy.socket.close(4001);
             deleteCookie("session");
             initVariables(); // Reset vars to their init state
+            droppy.hasLoggedOut = true;
             getPage();
         });
 

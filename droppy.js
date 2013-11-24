@@ -89,7 +89,7 @@
             resources = {
                 css  : ["normalize.css", "style.css", "sprites.css"],
                 js   : ["jquery.js", "client.js"],
-                html : ["base.html", "auth.html", "main.html", "firstrun.html"]
+                html : ["base.html", "auth.html", "main.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
             resourceList = helpers.flattenObj(resources),
@@ -643,7 +643,7 @@
         } else if (/^\/content\//.test(URI)) {
             if (firstRun) {
                 res.setHeader("X-Page-Type", "firstrun");
-                handleResourceRequest(req, res, "firstrun.html");
+                handleResourceRequest(req, res, "auth.html");
             } else if (getCookie(req.headers.cookie)) {
                 res.setHeader("X-Page-Type", "main");
                 handleResourceRequest(req, res, "main.html");
@@ -721,20 +721,17 @@
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
                 if (isValidUser(postData.user, postData.pass)) {
-                    log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                        "User ", postData.user, "authenticated");
+                    log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " User ", postData.user, "authenticated");
                     createCookie(req, res, postData);
                     endReq(req, res, "OK");
                 } else {
-                    log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                        "User ", postData.user, "unauthorized");
+                    log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " User ", postData.user, "unauthorized");
                     endReq(req, res, "NOK");
                 }
             });
         } else if (URI === "/adduser" && firstRun) {
             req.on("data", function (data) { body += data; });
             req.on("end", function () {
-                console.log(body);
                 var postData = require("querystring").parse(body);
                 if (postData.user !== "" && postData.pass !== "") {
                     addUser(postData.user, postData.pass, true);
@@ -748,7 +745,6 @@
         }
 
         function endReq(req, res, response) {
-            console.log(response);
             var json = JSON.stringify(response);
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/html; charset=utf-8");

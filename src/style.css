@@ -35,12 +35,12 @@ a  { text-decoration: none }
 button, input { font-family: inherit; font-size: 100%; margin: none; line-height: normal; border: none }
 button, html input[type="button"] { cursor: pointer }
 
-input::-moz-placeholder                { color: #999; transition: color .25 ease }
-input:-ms-input-placeholder            { color: #999; transition: color .25 ease }
-input::-webkit-input-placeholder       { color: #999; transition: color .25 ease }
-input:hover::-moz-placeholder          { color: #fff; transition: color .25 ease }
-input:hover:-ms-input-placeholder      { color: #fff; transition: color .25 ease }
-input:hover::-webkit-input-placeholder { color: #fff; transition: color .25 ease }
+input::-moz-placeholder                { color: #999 }
+input:-ms-input-placeholder            { color: #999 }
+input::-webkit-input-placeholder       { color: #999 }
+input:hover::-moz-placeholder          { color: #fff }
+input:hover:-ms-input-placeholder      { color: #fff }
+input:hover::-webkit-input-placeholder { color: #fff }
 input:-webkit-autofill {
   background-color: #221 !important;
   background-image: none !important;
@@ -296,8 +296,8 @@ r
 #path li:first-child { padding-left: .5em }
 #path li, .arrow { color: #ccc; transition: all .15s ease }
 
-#path li:nth-child(odd)           { background: #222 }
-#path li:nth-child(odd) > .arrow  { fill:       #222 }
+#path li:nth-child(odd)           { background: #333 }
+#path li:nth-child(odd) > .arrow  { fill:       #333 }
 #path li:nth-child(even)          { background: #444 }
 #path li:nth-child(even) > .arrow { fill:       #444 }
 
@@ -857,7 +857,7 @@ r
 
 /* ============================== Login Form =============================== */
 
-.center-box {
+#center-box {
     background: #181818;
     border-radius: 6px;
     box-shadow: 0 0 0 2px #08f;
@@ -874,18 +874,18 @@ r
     z-index: 0;
 }
 
-.center-box.invalid { box-shadow: 0 0 0 2px #f55 }
+#center-box.invalid { box-shadow: 0 0 0 2px #f55 }
 
-.center-box.in  { top: 50% ; opacity: 1 }
-.center-box.out { top: 60% ; opacity: 0 }
+#center-box.in  { top: 50% ; opacity: 1 }
+#center-box.out { top: 60% ; opacity: 0 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
-    .center-box.in  { top: 0   ; opacity: 1 }
-    .center-box.out { top: 10% ; opacity: 0 }
+    #center-box.in  { top: 0   ; opacity: 1 }
+    #center-box.out { top: 10% ; opacity: 0 }
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
-    .center-box {
+    #center-box {
         border-radius: 0;
         box-shadow: none;
         font-size: .7em;
@@ -946,32 +946,16 @@ r
 }
 
 #login-info-box {
-    border-radius: 6px 6px 0 0;
-    color: #fff;
     font-size: 1.5em;
     opacity: 0;
     height: 60px;
-    left: 50%;
-    margin-left: -300px;
-    position: absolute;
-    text-align: center;
-    top: 0;
+    margin-top: 25px;
     width: 100%;
-    transition: opacity 0.2s ease;
+    transition: all 0.5s ease;
 }
 
-#login-info-box.info  { opacity: 1; background: linear-gradient(#7a0, #9c0); transition: opacity 0.2s ease }
-#login-info-box.error { opacity: 1; background: linear-gradient(#f43, #d21); transition: opacity 0.2s ease }
-
-@media all and (max-width: 639px), all and (max-height: 399px) {
-    #login-info-box {
-        border-radius: 0;
-        height: 32px;
-        left: 0;
-        margin-left: 0;
-        position: fixed;
-    }
-}
+#login-info-box.info  { color: #5af; opacity: 1; transition: all 0.5s ease }
+#login-info-box.error { color: #f44; opacity: 1; transition: all 0.5s ease }
 
 #login-info {
     line-height: 60px;
@@ -1001,12 +985,10 @@ r
     transition: all .35s ease;
 }
 
+.login-input:focus { border: 2px solid #aaa; color: #ddd}
+
 #user { margin-top: 40px }
 #pass { margin-top: 10px }
-#user.firstrun { margin-top: 50px }
-#pass.firstrun { margin-top: 10px }
-
-.login-input:focus { border: 2px solid #48f; color: #48f;}
 
 @media all and (max-width: 639px), all and (max-height: 399px) { .login-input { margin-top: 25px } }
 
@@ -1054,7 +1036,7 @@ r
     width: 10px;
 }
 
-#remember label:hover { transition: all .25s ease; box-shadow: 0 0 0 2px #48f }
+#remember label:hover { transition: all .25s ease; box-shadow: 0 0 0 2px #999 }
 
 #check { display: none }
 #check:checked + label:after { opacity: 1 }
