@@ -90,7 +90,7 @@ html {
     overflow-y: auto;
     padding: .5em .25em 0 .5em;
     position: absolute;
-    transition: left .15s ease-in;
+    transition: left .15s ease-in, max-height .25s ease;
     user-select: none;
     width: calc(100% - 1em);
     z-index: -1;
@@ -106,10 +106,14 @@ html {
 
 #content.out { opacity: 0 }
 
-@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 126px); font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 112px); font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 96px); font-size: .8em } }
-r
+@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 91px); font-size:  1em } }
+@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 82px); font-size: .9em } }
+@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 61px); font-size: .8em } }
+@media all and (min-width: 1024px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 126px); } }
+@media all and (max-width: 1023px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 112px); } }
+@media all and (max-width:  639px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 96px);  } }
+
+
 #content.center,  #newcontent.center  { left: 0     }
 #content.back,    #newcontent.back    { left: -100% }
 #content.forward, #newcontent.forward { left: 100%  }
@@ -585,12 +589,12 @@ r
     background: #222;
     border-top: 2px solid #444;
     color: #ccc;
-    /*text-align: center;*/
+    transition: bottom .25s ease;
 }
 
-@media all and (min-width: 1024px) { #audio-controls { height: 35px; line-height: 33px; font-size: .9em} }
-@media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .8em} }
-@media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .7em} }
+@media all and (min-width: 1024px) { #audio-controls { height: 35px; line-height: 33px; font-size: .9em} #audio-controls.out { bottom: -35px;} }
+@media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .8em} #audio-controls.out { bottom: -30px;} }
+@media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .7em} #audio-controls.out { bottom: -25px;} }
 
 #volume-icon {
     position: absolute;

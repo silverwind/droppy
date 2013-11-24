@@ -611,8 +611,9 @@
             getPage();
         });
 
-        var slider = $("#volume-slider"),
-            volumeIcon = $("#volume-icon");
+        var slider     = $("#volume-slider"),
+            volumeIcon = $("#volume-icon"),
+            controls   = $("#audio-controls");
 
         volumeIcon.register("click", function () {
             requestAnimation(function () {
@@ -659,13 +660,19 @@
         setVolume();
 
         // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
-        function stop() { document.getElementById("audio-title").innerHTML = ""; }
+        function stop() {
+            document.getElementById("audio-title").innerHTML = "";
+            controls.addClass("out");
+            $("#content, #newcontent").removeClass("squeeze");
+        }
         player.addEventListener("pause", stop);
         player.addEventListener("ended", stop);
         player.addEventListener("play", function () {
             var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
             var songname = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
             document.getElementById("audio-title").innerHTML = songname;
+            controls.removeClass("out");
+            $("#content, #newcontent").addClass("squeeze");
         });
 
         // ============================================================================
