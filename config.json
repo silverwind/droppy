@@ -1,5 +1,5 @@
 {
-    "debug"        : false,
+    "debug"        : true,
     "useHTTPS"     : true,
     "useSPDY"      : false,
     "port"         : 443,

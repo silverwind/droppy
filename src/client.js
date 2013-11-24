@@ -116,7 +116,6 @@
                 }, 100);
             });
         } else if (type === "auth") {
-            log(droppy.hasLoggedOut);
             initAuthPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
@@ -245,8 +244,16 @@
 
     // Close the socket gracefully before navigating away
     $(window).register("beforeunload", function () {
-        if (droppy.socket && droppy.socket.readyState < 2)
-            droppy.socket.close(1001);
+        if (droppy.socket && droppy.socket.readyState < 2) {
+            // 1001 aka CLOSE_GOING_AWAY is a valid status code, though Firefox still throws an INVALID_ACCESS_ERR
+            // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
+            try {
+                droppy.socket.close(1001);
+            } catch (error) {
+                log(error.message);
+            }
+        }
+
     });
 
 // ============================================================================
@@ -281,7 +288,7 @@
             }
         });
 
-        $("#submit").register("click", function () {
+        submit.register("click", function () {
             submitForm();
         });
 
