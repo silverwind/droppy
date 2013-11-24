@@ -88,7 +88,7 @@
         var out = { css : "", js  : "" },
             resources = {
                 css  : ["normalize.css", "style.css", "sprites.css"],
-                js   : ["modernizr.js", "jquery.js", "client.js"],
+                js   : ["jquery.js", "client.js"],
                 html : ["base.html", "auth.html", "main.html", "firstrun.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],

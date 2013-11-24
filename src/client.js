@@ -1,12 +1,32 @@
-/* globals Modernizr */
-(function ($, window, document) {
-    "use strict";
+"use strict";
 
+(function ($, window, document) {
     var droppy = {};
     droppy.debug = null;  // live css reload and debug logging - this variable is set by the server
     initVariables();
 // ============================================================================
-//  Set up a few things before we start
+//  Feature Detects
+// ============================================================================
+    droppy.detects = {
+        animation : (function () {
+            var props = ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
+                   el = document.createElement("div");
+            while (props.length) {
+                if (props.pop() in el.style) return true;
+            }
+            return false;
+        })(),
+        fileinputdirectory : (function () {
+            var props = ["directory", "mozdirectory", "webkitdirectory", "msdirectory"],
+                   el = document.createElement("input");
+            while (props.length) {
+                if (props.pop() in el) return true;
+            }
+            return false;
+        })()
+    };
+// ============================================================================
+//  Set up a few more things
 // ============================================================================
     // Add the dataTransfer property to the "drop" event.
     $.event.props.push("dataTransfer");
@@ -18,7 +38,7 @@
 
     // Set a new class on an element, and make sure it is ready to be transitioned.
     $.fn.setTransitionClass = function (newclass) {
-        if (Modernizr.cssanimations) {
+        if (droppy.detects.animation) {
             // Add a pseudo-animation to the element. When the "animationstart" event
             // is fired on the element, we know it is ready to be transitioned.
             this.css("animation", "nodeInserted 0.001s");
@@ -34,9 +54,9 @@
         return this;
     };
 
-    if (Modernizr.cssanimations) {
+    if (droppy.detects.animation) {
         // Listen for the animation event for our pseudo-animation
-        ["animationstart", "webkitAnimationStart", "mozAnimationStart", "MSAnimationStart"].forEach(function (eventName) {
+        ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"].forEach(function (eventName) {
             document.addEventListener(eventName, function (event) {
                 if (event.animationName === "nodeInserted") {
                     var target = $(event.target);
@@ -50,27 +70,12 @@
         });
     }
 
-    // Add a modernizr test for directory input
-    // [Landed] https://github.com/Modernizr/Modernizr/pull/965
-    Modernizr.addTest("fileinputdirectory", function () {
-        var elem = document.createElement("input"), dir = "directory";
-        elem.type = "file";
-        if (dir in elem) {
-            return true;
-        } else {
-            for (var i = 0, len = Modernizr._domPrefixes.length; i < len; i++) {
-                if (Modernizr._domPrefixes[i] + dir in elem) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    });
-
     // Alias requestAnimationFrame
     var requestAnimation = (function () {
-        return window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-               window.webkitRequestAnimationFrame || function (callback) { setTimeout(callback, 1000 / 60); };
+        return window.requestAnimationFrame ||
+               window.mozRequestAnimationFrame ||
+               window.webkitRequestAnimationFrame ||
+               function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 // ============================================================================
 //  Page loading functions
@@ -441,7 +446,7 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
-            if (Modernizr.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
+            if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
                 var files = event.target.files;
                 var obj = {};
                 for (var i = 0; i < files.length; i++) {
@@ -463,13 +468,13 @@
         // File upload button
         $("#upload-file").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog
-            if (Modernizr.fileinputdirectory)
+            if (droppy.detects.fileinputdirectory)
                 fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
             fileInput.click();
         });
 
         // Folder upload button - check if we support directory uploads
-        if (Modernizr.fileinputdirectory) {
+        if (droppy.detects.fileinputdirectory) {
             // Directory uploads supported - enable the button
             $("#upload-folder").register("click", function () {
                 // Set the directory attribute so we get a directory picker dialog
