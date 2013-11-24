@@ -66,7 +66,10 @@
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
     log.simple(helpers.logo);
-    log.simple(" ->> droppy v" + version + " running on node " + process.version);
+    log.simple(log.color.yellow, " ->> ", log.color.blue, "droppy ", log.color.reset,
+               log.color.green, version, log.color.reset, " running on ", log.color.blue, "node ", log.color.reset,
+               log.color.green, process.version.substring(1), log.color.reset
+    );
 
     // Read user/sessions from DB and check if its the first run
     readDB();
@@ -138,7 +141,7 @@
         }
 
         // Concatenate CSS and JS
-        log.simple(" ->> minifying resources...");
+        log.simple(log.color.yellow, " ->> ", log.color.reset, "minifying resources...");
         resources.css.forEach(function (data) {
             out.css += data + "\n";
         });
@@ -265,7 +268,10 @@
         server.on("listening", function () {
             setupSocket(server);
             if (config.debug) watchCSS();
-            log.simple(" ->> listening on port ", server.address().port);
+            log.simple(log.color.yellow, " ->> ", log.color.reset, "listening on ",
+                       log.color.green, server.address().address, log.color.reset, ":",
+                       log.color.yellow, server.address().port, log.color.reset
+            );
         });
 
         server.on("error", function (error) {
@@ -1052,7 +1058,7 @@
         } catch (e) {
             if (e.code === "ENOENT" || /^\s*$/.test(dbString)) {
                 // Recreate DB file in case it doesn't exist / is empty
-                log.simple(" ->> creating " + path.basename(config.db) + "...");
+                log.simple(log.color.yellow, " ->> ", log.color.reset,"creating " + path.basename(config.db) + "...");
                 db = {users: {}, sessions: {}, shortlinks: {}};
                 doWrite = true;
             } else {
