@@ -6,19 +6,19 @@ Pure HTML5 file-server/cloud storage running on [node.js](http://nodejs.org/).
 ###Features
 
 * Realtime updating of all connected clients via WebSockets.
-* Drop uploads of multiple files in all browsers.
-* Recursive directory uploads in all supported browsers (WebKit only as of 11/13).
+* Drag-and-Drop uploads of multiple files in all browsers.
+* Recursive directory uploads in all supported browsers (WebKit-only as of now, Mozilla is [working on it](https://bugzilla.mozilla.org/show_bug.cgi?id=846931)).
 * Asynchronous uploads over XMLHTTPRequest2.
 * Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Generation of shortened and easy shareable links for quick and unauthenticted downloads.
-* Clean and almost dependency-free client-side JavaScript code.
+* Clean and almost dependency-free client-side JavaScript code (Just jQuery which I plan to remove).
 
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
 ````bash
-npm install droppy && mv node_modules/droppy . && rm -r node_modules
+npm install droppy && mv node_modules/droppy . && rm -rf node_modules
 ````
-Or through git:
+Or get the latest development version through git:
 ````bash
 git clone git://github.com/silverwind/droppy.git
 ````
