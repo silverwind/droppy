@@ -464,8 +464,13 @@ r
 @media all and (max-width:  639px) { .sprite { transform: scale(.8) } }
 
 .icon-play {
+    display: none;
     white-space: nowrap;
     margin-right: .5em;
+}
+
+.data-row:hover .icon-play {
+    display: inline;
 }
 
 @media all and (max-width: 639px) { .icon-play { margin-right: 0; } }
