@@ -24,17 +24,15 @@
  SOFTWARE.
  ------------------------------------------------------------------------------
   TODOs:
-  - Improve perceived responsivness through preloading of directories
-  - Rework client <-> server communication so that the server has more
-    control over the client's current location in the file system
-  - User privilege levels and a interface to add/remove users
-  - Modularize client and server javascript code more
-  - Investigate if <canvas> is faster than the current approach,
-    especially on mobile, where CSS transitions can get choppy
+  - Improve perceived responsivness through preloading/caching
+  - Add  a interface to add/remove users
+  - Improve performance of CSS transitions
   - Drag and drop to move/copy entries
   - Image thumbnails
   - Keyboard navigation
   - SVG icons
+  - Rework client <-> server communication
+  - Modularize client and server javascript code more
  --------------------------------------------------------------------------- */
 "use strict";
 
@@ -58,6 +56,7 @@
         watchers = {},
         cssCache = null,
         config   = null,
+        firstRun = null,
         isCLI    = (process.argv.length > 2);
 
     // Argument handler
@@ -69,11 +68,9 @@
     log.simple(helpers.logo);
     log.simple(" ->> droppy v" + version + " running on node " + process.version);
 
-    // Read user/sessions from DB and add a default user if no users exist
+    // Read user/sessions from DB and check if its the first run
     readDB();
-    if (Object.keys(db.users).length < 1) {
-        addUser("droppy", "droppy", true);
-    }
+    firstRun = Object.keys(db.users).length < 1;
 
     // Copy/Minify JS, CSS and HTML content
     prepareContent();
@@ -92,7 +89,7 @@
             resources = {
                 css  : ["normalize.css", "style.css", "sprites.css"],
                 js   : ["modernizr.js", "jquery.js", "client.js"],
-                html : ["base.html", "auth.html", "main.html"]
+                html : ["base.html", "auth.html", "main.html", "firstrun.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
             resourceList = helpers.flattenObj(resources),
@@ -644,7 +641,10 @@
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/content\//.test(URI)) {
-            if (getCookie(req.headers.cookie)) {
+            if (firstRun) {
+                res.setHeader("X-Page-Type", "firstrun");
+                handleResourceRequest(req, res, "firstrun.html");
+            } else if (getCookie(req.headers.cookie)) {
                 res.setHeader("X-Page-Type", "main");
                 handleResourceRequest(req, res, "main.html");
             } else {
@@ -695,7 +695,7 @@
     //-----------------------------------------------------------------------------
     var blocked = [];
     function handlePOST(req, res) {
-        var URI = decodeURIComponent(req.url);
+        var URI = decodeURIComponent(req.url), body = "";
         if (URI === "/upload") {
             if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 401;
@@ -717,30 +717,44 @@
                 }, 1000);
             })(req.socket.remoteAddress);
 
-            var body = "";
-            req.on("data", function (data) {
-                body += data;
-            });
+            req.on("data", function (data) { body += data; });
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
-                var response;
-                if (isValidUser(postData.username, postData.password)) {
+                if (isValidUser(postData.user, postData.pass)) {
                     log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                        "User ", postData.username, "authenticated");
-                    response = "OK";
+                        "User ", postData.user, "authenticated");
                     createCookie(req, res, postData);
+                    endReq(req, res, "OK");
                 } else {
                     log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " ",
-                        "User ", postData.username, "unauthorized");
-                    response = "NOK";
+                        "User ", postData.user, "unauthorized");
+                    endReq(req, res, "NOK");
                 }
-                var json = JSON.stringify(response);
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "text/html; charset=utf-8");
-                res.setHeader("Content-Length", json.length);
-                res.end(json);
-                log.response(req, res);
             });
+        } else if (URI === "/adduser" && firstRun) {
+            req.on("data", function (data) { body += data; });
+            req.on("end", function () {
+                console.log(body);
+                var postData = require("querystring").parse(body);
+                if (postData.user !== "" && postData.pass !== "") {
+                    addUser(postData.user, postData.pass, true);
+                    createCookie(req, res, postData);
+                    firstRun = false;
+                    endReq(req, res, "OK");
+                } else {
+                    endReq(req, res, "NOK");
+                }
+            });
+        }
+
+        function endReq(req, res, response) {
+            console.log(response);
+            var json = JSON.stringify(response);
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.setHeader("Content-Length", json.length);
+            res.end(json);
+            log.response(req, res);
         }
     }
 
@@ -868,10 +882,10 @@
             return;
         }
 
-        var infiles = 0,
+        var busboy = new Busboy({ headers: req.headers }),
+            infiles = 0,
             outfiles = 0,
             done = false,
-            busboy = new Busboy({ headers: req.headers }),
             files = [];
 
         busboy.on("file", function (fieldname, file, filename) {
@@ -1116,7 +1130,7 @@
     //-----------------------------------------------------------------------------
     function createCookie(req, res, postData) {
         var sessionID = crypto.randomBytes(32).toString("base64");
-        var priv = db.users[postData.username].privileged;
+        var priv = db.users[postData.user].privileged;
 
         if (postData.check === "on") {
             // Create a semi-permanent cookie
@@ -1171,7 +1185,7 @@
         .on("SIGTERM", function () { shutdown("SIGTERM"); })
         .on("uncaughtException", function (error) {
             log.error("=============== Uncaught exception! ===============");
-            log.error(error);
+            log.error(error.stack);
         });
 
     //-----------------------------------------------------------------------------

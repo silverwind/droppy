@@ -1,5 +1,5 @@
 #droppy
-Pure HTML5 file-server/cloud running on [node.js](http://nodejs.org/).
+Pure HTML5 file-server/cloud storage running on [node.js](http://nodejs.org/).
 
 ![droppy](http://i.imgur.com/pnWbq98.png)
 
@@ -28,7 +28,7 @@ Inside `droppy`'s folder run:
 ````bash
 node droppy.js
 ````
-By default, the server will listen on [https](https://localhost/). On first startup, a user `droppy` with password `droppy` will be created. To add users, run `./droppy.js -adduser [user] [pass]`. To remove users, you'll have to edit `db.json` (until user management is implemented).
+By default, the server will listen on [https](https://localhost/). On first startup, you'll be prompted to create a user/pass for future logins. To add users, run `./droppy.js -add [user] [pass]`. To remove users, you'll have to edit `db.json` (for now).
 
 ##Configuration
 Configuration is done through `config.json`

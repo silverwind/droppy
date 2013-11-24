@@ -1,15 +1,16 @@
-<div id="login-form" class="out">
+<section class="center-box out">
 	<div id="login-info-box"><span id="login-info"></span></div>
 	<div id="login-icon"><span class="icon"></span></div>
-	<iframe src="/res/null" name="dummy-iframe"></iframe>
-	<form id="form" action="/login" method="post" target="dummy-iframe" accept-charset="UTF-8" autocomplete="on">
+	<form id="form" method="post" accept-charset="UTF-8" autocomplete="on">
+		<input type="text" id="user" name="user" class="login-input" placeholder="User name"></input>
+		<input type="password" id="pass" name="pass" class="login-input" placeholder="Password"></input>
 		<div id="remember" class="check" tabindex="3">
 			<input type="checkbox" checked="checked" id="check" name="check" />
 			<label for="check"><span>Remember me</span></label>
 		</div>
-		<button id="submit" tabindex="4">
-			<span class="icon"></span>
-			<span>Sign in</span>
-		</button>
 	</form>
-</div>
+	<button id="submit" class="submit" tabindex="4">
+		<span class="icon"></span>
+		<span>Sign in</span>
+	</button>
+</section>

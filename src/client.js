@@ -96,13 +96,13 @@
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"),
             oldPage = $("#page"),
-            login = $("#login-form");
+            box = $(".center-box");
         if (type === "main") {
             droppy.hasLoggedOut = false;
             initMainPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
-                login.removeClass("in").addClass("out");
+                box.removeClass("in").addClass("out");
                 setTimeout(function () {
                     $("#navigation").attr("class", "in");
                     setTimeout(function () {
@@ -116,7 +116,7 @@
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("out");
                 setTimeout(function () {
-                    login.removeClass("out").addClass("in");
+                    box.removeClass("out").addClass("in");
                     setTimeout(function () {
                         finalize();
                         if (droppy.hasLoggedOut) {
@@ -130,6 +130,15 @@
                         }
                     }, 100);
                 }, 100);
+            });
+        } else if (type === "firstrun") {
+            initAuthPage(true);
+            requestAnimation(function () {
+                oldPage.attr("class", "out");
+                setTimeout(function () {
+                    box.removeClass("out").addClass("in");
+                    finalize();
+                }, 200);
             });
         }
 
@@ -238,42 +247,22 @@
 // ============================================================================
 //  Authentication page
 // ============================================================================
-    var du, dp;
-
-    function initAuthPage() {
-        var loginform = $("#login-form"),
+    function initAuthPage(firstrun) {
+        var loginform = $(".center-box"),
             submit    = $("#submit"),
             form      = $("#form");
-
-        // Switch in username and password fields from a dummy form in the
-        // base page. This allows password saving in all browsers. Chrome
-        // additionally needs the form to submit to an actual URL, so we add
-        // an iframe where Chrome can POST to.
-        // Relevant bugs:
-        // [Fixed: Firefox 26] https://bugzilla.mozilla.org/show_bug.cgi?id=355063
-        // [Partially Fixed: Chrome 28] http://code.google.com/p/chromium/issues/detail?id=43219
-        if ($("#dummy-user").length) {
-            // Store a copy of the old inputs
-            du = $("#dummy-user").clone();
-            dp = $("#dummy-pass").clone();
-            // Move the dummies in place
-            $("#dummy-pass").prependTo(form);
-            $("#dummy-user").prependTo(form);
-        } else {
-            // On further logins, restore our copies
-            dp.prependTo(form);
-            du.prependTo(form);
-        }
 
         // Auto-focus the user input on load
         $("#user").focus();
 
-        // Remove invalid class on user action
-        $(".login-input").register("click keydown focus", function () {
-            $("#login-info-box").removeClass("info error");
-            submit.removeClass("invalid");
-            loginform.removeClass("invalid");
-        });
+        if (!firstrun) {
+            // Remove invalid class on user action
+            $(".login-input").register("click keydown focus", function () {
+                $("#login-info-box").removeClass("info error");
+                submit.removeClass("invalid");
+                loginform.removeClass("invalid");
+            });
+        }
 
         // Return submits the form
         $(".login-input").register("keyup", function (event) {
@@ -289,42 +278,57 @@
             }
         });
 
-        // Submit the form over Ajax, but also let it submit over
-        // a normal POST, which just goes into the iframe.
-        form.register("submit", function () {
+        $("#submit").register("click", function () {
             submitForm();
         });
 
         function submitForm() {
-            $.ajax({
-                type: "POST",
-                url: "/login",
-                dataType: "json",
-                data: form.serialize(),
-                success: function (response) {
-                    if (response === "OK") {
-                        droppy.hasLoggedOut = false;
-                        getPage();
-                    } else {
-                        $("#pass").val("");
-                        $("#dummy-pass").val("");
-                        submit.addClass("invalid");
-                        loginform.addClass("invalid");
-                        if ($("#login-info-box").hasClass("info") || $("#login-info-box").hasClass("error")) {
-                            $("#login-info").addClass("shake");
-                            setTimeout(function () {
-                                $("#login-info").removeClass("shake");
-                            }, 500);
+            if (firstrun) {
+                $.ajax({
+                    type: "POST",
+                    url: "/adduser",
+                    dataType: "json",
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response === "OK") {
+                            droppy.hasLoggedOut = false;
+                            getPage();
                         } else {
-                            $("#login-info-box").addClass("error");
-                            $("#login-info").html("Wrong login!");
-                            setTimeout(function () {
-                                $("#login-info-box").removeClass("info error");
-                            }, 3000);
+                            // TODO: UI
+                            window.alert("User name or password not acceptable.");
                         }
                     }
-                }
-            });
+                });
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/login",
+                    dataType: "json",
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response === "OK") {
+                            droppy.hasLoggedOut = false;
+                            getPage();
+                        } else {
+                            $("#pass").val("");
+                            submit.addClass("invalid");
+                            loginform.addClass("invalid");
+                            if ($("#login-info-box").hasClass("info") || $("#login-info-box").hasClass("error")) {
+                                $("#login-info").addClass("shake");
+                                setTimeout(function () {
+                                    $("#login-info").removeClass("shake");
+                                }, 500);
+                            } else {
+                                $("#login-info-box").addClass("error");
+                                $("#login-info").html("Wrong login!");
+                                setTimeout(function () {
+                                    $("#login-info-box").removeClass("info error");
+                                }, 3000);
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
 // ============================================================================
