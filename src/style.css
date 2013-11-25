@@ -4,8 +4,7 @@
 @font-face {
     font-family: "Open Sans Light";
     font-weight: 200;
-    src: url(/res/OpenSans-Light.svg)  format("svg"),
-         url(/res/OpenSans-Light.woff) format("woff");
+    src: url(/res/OpenSans-Light.woff) format("woff");
 }
 
 @font-face {
