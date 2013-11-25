@@ -699,7 +699,6 @@
                 var addedDirs = {};
                 for (var path in data) {
                     if (data.hasOwnProperty(path)) {
-                        console.log(path);
                         formData.append(path, data[path], encodeURIComponent(path));
                         var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
                         switch (Object.prototype.toString.call(data[path])) {
@@ -737,12 +736,18 @@
             xhr.upload.addEventListener("error", uploadDone, false);
 
             // Init the UI
-            uploadInit(xhr);
+            $("#upload-cancel").register("click", function () { xhr.abort(); uploadDone(); });
+            title.html(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
+            start = Date.now();
+            updateTitle("0%");
+            uperc.html("0%");
+            prog.css("width", "0%");
+            timeleft.html("");
+            $("#upload-info").addClass($("#audio-controls").hasClass("out") ? "in" : "in-space");
 
             // And send the files
             droppy.isUploading = true;
-            xhr.overrideMimeType("utf-8");
-            xhr.open("post", "/upload", true);
+            xhr.open("POST", "/upload");
             xhr.send(formData);
         }
 
@@ -751,23 +756,6 @@
             prog     = $("#upload-bar-inner"),
             title    = $("#upload-title"),
             uperc    = $("#upload-percentage");
-
-        function uploadInit(xhr) {
-            $("#upload-cancel").register("click", function () {
-                xhr.abort();
-                uploadDone();
-            });
-
-            start = Date.now();
-
-            title.html(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
-            updateTitle("0%");
-            uperc.html("0%");
-
-            prog.css("width", "0%");
-            timeleft.html("");
-            $("#upload-info").attr("class", "in");
-        }
 
         function uploadDone() {
             prog.css("width", "100%");
@@ -844,7 +832,7 @@
         updateLocation(droppy.currentFolder, false);
         updateTitle(droppy.currentFolder, true);
         msg && updateData(msg.folder, msg.data);
-        $("#upload-info").attr("class", "out");
+        $("#upload-info").removeClass("in").removeClass("in-space");
     }
 
     // Listen for popstate events, which indicate the user navigated back

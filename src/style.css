@@ -4,8 +4,7 @@
 @font-face {
     font-family: "Open Sans Light";
     font-weight: 200;
-    src: local(Open Sans Light),
-         url(/res/OpenSans-Light.svg)  format("svg"),
+    src: url(/res/OpenSans-Light.svg)  format("svg"),
          url(/res/OpenSans-Light.woff) format("woff");
 }
 
@@ -175,11 +174,13 @@ html {
 #upload-info {
     background: #222;
     border-radius: 5px 5px 0 0;
+    bottom: -125px;
     box-shadow: inset 0 0 25px #111;
     color: #ccc;
     height: 120px;
     left: 50%;
     margin-left: -150px;
+    opacity: 0;
     position: absolute;
     text-shadow: 0 0 5px #000;
     transition: all .3s ease;
@@ -187,12 +188,12 @@ html {
     width: 300px;
 }
 
-#upload-info.out { opacity: 0; bottom: -125px }
-
-@media all and (min-width: 1024px) { #upload-info.in  {opacity: 1; bottom: 35px } }
-@media all and (max-width: 1023px) { #upload-info.in  {opacity: 1; bottom: 30px } }
-@media all and (max-width:  639px) { #upload-info.in  {opacity: 1; bottom: 25px } }
-
+@media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 35px } }
+@media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 30px } }
+@media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 25px } }
+@media all and (min-width: 1024px) { #upload-info.in       {opacity: 1; bottom: 0 } }
+@media all and (max-width: 1023px) { #upload-info.in       {opacity: 1; bottom: 0 } }
+@media all and (max-width:  639px) { #upload-info.in       {opacity: 1; bottom: 0 } }
 
 
 #upload-title {

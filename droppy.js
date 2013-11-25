@@ -853,7 +853,7 @@
             fs.stat(filepath, function (error, stats) {
                 if (!error && stats) {
                     res.statusCode = 200;
-                    res.setHeader("Content-Disposition", ['attachment; filename="', path.basename(filepath), '"'].join(""));
+                    res.setHeader("Content-Disposition", "attachment");
                     res.setHeader("Content-Type", mimeType);
                     res.setHeader("Content-Length", stats.size);
                     log.response(req, res);
