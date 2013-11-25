@@ -692,20 +692,18 @@ html {
 #about-logo {
     cursor: default;
     float: left;
-    font-size: 10rem;
+    font-size: 8rem;
     line-height: 200px;
     text-align: center;
-    text-shadow: 1px 1px 0 #fff;
     width: 130px;
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
     #about-logo {
-        color: #444;
-        font-size: 12rem;
+        color: #333;
+        font-size: 9rem;
         line-height: 200px;
         position: absolute;
-        text-shadow: .5px .5px 0 #777;
         width: 100%;
         z-index: -1;
     }
@@ -738,24 +736,24 @@ html {
 #about-title {
     color: #fff;
     font-size: 1.5em;
-    line-height: 2em;
+    line-height: 1.75em;
 }
 
 #about-text {
-    font-size: 1rem;
-    line-height: 1.5rem;
+    font-size: .8rem;
+    line-height: 1.2rem;
 }
 
 #about-copy {
     bottom: 0;
-    font-size: 1rem;
+    font-size: .8rem;
     margin-bottom: .5rem;
     position: absolute;
 }
 
 #about-box #github {
     bottom: 0;
-    font-size: 2rem;
+    font-size: 1.5rem;
     padding: 8px;
     position: absolute;
     right: 0;

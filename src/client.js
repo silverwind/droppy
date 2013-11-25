@@ -492,7 +492,7 @@
             });
         } else {
             // No directory upload support - disable the button (might be better to remove it completely)
-            $("#upload-folder").css("color", "#444").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
+            $("#upload-folder").css("color", "#666").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
         var info         = $("#create-folder-info"),
@@ -572,13 +572,19 @@
             });
         });
 
-        $("#config").register("click", function () {
-            requestAnimation(function () {
-                configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
-                sendMessage("GET_USERS");
-                toggleCatcher();
+        if (false) {
+            $("#config").register("click", function () {
+                requestAnimation(function () {
+                    configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
+                    sendMessage("GET_USERS");
+                    toggleCatcher();
+                });
             });
-        });
+
+        } else {
+            $("#config").css("color", "#666").attr("title", "Configuration isn't finished yet.");
+        }
+
 
         $(".user-entry").register("click", function () {
             $(this)
@@ -1175,7 +1181,7 @@
 
     // Convert raw byte numbers to SI values
     function convertToSI(bytes, decimals) {
-        var step = 0, units = ["B", "KiB", "MiB", "GiB", "TiB"];
+        var step = 0, units = ["B", "KB", "MB", "GB", "TB"];
         while (bytes >= 1024) {
             bytes /= 1024;
             step++;
