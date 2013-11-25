@@ -729,7 +729,7 @@
             // Load the new files into view, tagged
             buildHTML(droppy.currentData, droppy.currentFolder, true);
 
-            // Create the XHR2
+            // Create the XHR2 and bind the progress events
             var xhr = new XMLHttpRequest();
             xhr.upload.addEventListener("progress", uploadProgress, false);
             xhr.upload.addEventListener("load", uploadDone, false);

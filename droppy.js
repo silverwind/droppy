@@ -65,7 +65,7 @@
     readConfig();
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
-    log.simple(helpers.logo);
+    log.simple(log.logo);
     log.simple(log.color.yellow, " ->> ", log.color.blue, "droppy ", log.color.reset,
                log.color.green, version, log.color.reset, " running on ", log.color.blue, "node ", log.color.reset,
                log.color.green, process.version.substring(1), log.color.reset
@@ -269,16 +269,16 @@
             setupSocket(server);
             if (config.debug) watchCSS();
             log.simple(log.color.yellow, " ->> ", log.color.reset, "listening on ",
-                       log.color.green, server.address().address, log.color.reset, ":",
-                       log.color.yellow, server.address().port, log.color.reset
+                       log.color.cyan, server.address().address, log.color.reset, ":",
+                       log.color.magenta, server.address().port, log.color.reset
             );
         });
 
         server.on("error", function (error) {
             if (error.code === "EADDRINUSE")
-                log.error("Failed to bind to port ", port, ". Address already in use.\n");
+                log.error("Failed to bind to port ", log.color.magenta, port, log.color.reset, ". Address already in use.\n");
             else if (error.code === "EACCES")
-                log.error("Failed to bind to port ", port, ". Need permission to bind to ports < 1024.\n");
+                log.error("Failed to bind to port ", log.color.magenta, port, log.color.reset, ". Need permission to bind to ports < 1024.\n");
             else
                 log.error("Error:", util.inspect(error));
             process.exit(1);
@@ -320,10 +320,11 @@
 
             if (!cookie) {
                 ws.close(4000);
-                log.log(remoteIP, ":", remotePort, " Unauthorized WebSocket connection closed.");
+
+                log.log(colorSocket(remoteIP, remotePort), " Unauthorized WebSocket connection closed.");
                 return;
             } else {
-                log.log(remoteIP, ":", remotePort, " WebSocket ", "connected");
+                log.log(colorSocket(remoteIP, remotePort), " WebSocket ", "connected");
                 if (!clients[cookie]) {
                     clients[cookie] = {};
                     clients[cookie].ws = ws;
@@ -361,7 +362,7 @@
                             link += chars.charAt(Math.floor(Math.random() * chars.length));
                     } while (db.shortlinks[link]); // In case the RNG generates an existing link, go again
 
-                    log.log(remoteIP, ":", remotePort, " Shortlink created: " + link + " -> " + msg.data);
+                    log.log(colorSocket(remoteIP, remotePort), " Shortlink created: " + link + " -> " + msg.data);
                     // Store the created link
                     db.shortlinks[link] = msg.data;
 
@@ -370,7 +371,7 @@
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    log.log(remoteIP, ":", remotePort, " Deleting: " + msg.data.substring(1));
+                    log.log(colorSocket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
                     msg.data = addFilePath(msg.data);
                     checkWatchedDirs();
 
@@ -403,13 +404,13 @@
                 case "CREATE_FOLDER":
                     var foldername = path.basename(msg.data);
                     if (/[\\*{}\/<>?|]/.test(foldername) || /^(\.+)$/.test(foldername)) {
-                        log.log(remoteIP, ":", remotePort, " Invalid directory creation request: " + foldername);
+                        log.log(colorSocket(remoteIP, remotePort), " Invalid directory creation request: " + foldername);
                         return;
                     }
 
                     fs.mkdir(addFilePath(msg.data), config.dirMode, function (error) {
                         if (error) log.error(error);
-                        log.log(remoteIP, ":", remotePort, " Created: ", msg.data);
+                        log.log(colorSocket(remoteIP, remotePort), " Created: ", msg.data);
                         readDirectory(clients[cookie].directory, function () {
                             sendFiles(cookie, "UPDATE_FILES");
                         });
@@ -469,7 +470,7 @@
                     reason = "(Going away)";
                     delete clients[cookie];
                 }
-                log.log(remoteIP, ":", remotePort, " WebSocket ", "disconnected", " ", reason || "(Code: " + (code || "none")  + ")");
+                log.log(colorSocket(remoteIP, remotePort), " WebSocket ", "disconnected", " ", reason || "(Code: " + (code || "none")  + ")");
             });
 
             ws.on("error", function (error) {
@@ -727,11 +728,12 @@
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
                 if (isValidUser(postData.user, postData.pass)) {
-                    log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " User ", postData.user, "authenticated");
+
+                    log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.user, "authenticated");
                     createCookie(req, res, postData);
                     endReq(req, res, "OK");
                 } else {
-                    log.log(req.socket.remoteAddress, ":", req.socket.remotePort, " User ", postData.user, "unauthorized");
+                    log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.user, "unauthorized");
                     endReq(req, res, "NOK");
                 }
             });
@@ -871,7 +873,7 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var socket = req.socket.remoteAddress + ":" + req.socket.remotePort;
+        var socket = colorSocket(req.socket.remoteAddress, req.socket.remotePort);
         var cookie = getCookie(req.headers.cookie);
         log.log(socket, " Upload started");
 
@@ -1058,7 +1060,7 @@
         } catch (e) {
             if (e.code === "ENOENT" || /^\s*$/.test(dbString)) {
                 // Recreate DB file in case it doesn't exist / is empty
-                log.simple(log.color.yellow, " ->> ", log.color.reset,"creating " + path.basename(config.db) + "...");
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating " + path.basename(config.db) + "...");
                 db = {users: {}, sessions: {}, shortlinks: {}};
                 doWrite = true;
             } else {
@@ -1179,7 +1181,7 @@
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
     function addFilePath(p)    { return config.filesDir.substring(0, config.filesDir.length - 1) + p; }
     function removeFilePath(p) { return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), ""); }
-
+    function colorSocket(ip, port) { return [log.color.cyan, ip, log.color.reset, ":", log.color.magenta, port, log.color.reset].join(""); }
     //-----------------------------------------------------------------------------
     process
         .on("SIGINT",  function () { shutdown("SIGINT");  })
