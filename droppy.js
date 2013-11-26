@@ -1021,6 +1021,7 @@
         function printUsage(exitCode) {
             log.simple("Usage: node droppy [list|add|del] {arguments}\n");
             log.simple("Options:");
+            log.simple(" version\t\t\tPrint the version.");
             log.simple(" list\t\t\t\tList active users.");
             log.simple(" add <username> <password>\tCreate a new user.");
             log.simple(" del <username>\t\t\tDelete a user.");
