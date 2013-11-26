@@ -6,11 +6,12 @@ Pure HTML5 file-server/cloud storage running on [node.js](http://nodejs.org/).
 ###Features
 
 * Realtime updating of all connected clients via WebSockets.
+* Lightweight. Performs great on a Raspberry Pi.
 * Drag-and-Drop uploads of multiple files in all browsers.
 * Recursive directory uploads in all supported browsers (WebKit-only as of now, Mozilla is [working on it](https://bugzilla.mozilla.org/show_bug.cgi?id=846931)).
 * Asynchronous uploads over XMLHTTPRequest2.
 * Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
-* Generation of shortened and easy shareable links for quick and unauthenticted downloads.
+* Support for shortened and easy shareable links for unauthenticted downloads.
 * Clean and almost dependency-free client-side JavaScript code (Just jQuery which I plan to remove).
 
 ##Installation
@@ -26,7 +27,7 @@ git clone git://github.com/silverwind/droppy.git
 ##Running the server
 Inside `droppy`'s folder run:
 ````bash
-node droppy.js
+node droppy
 ````
 By default, the server will listen on [https](https://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, see `node droppy help`.
 
@@ -55,14 +56,14 @@ Configuration is done through `config.json`
 ````
 ###General options
 - `debug` Skip resource minification and enable automatic CSS reloading when the source files change.
-- `useHTTPS` Whether the server should use HTTPS.
-- `useSPDY` Enables the SPDY protocol, in conjunction with `useHTTPS`.
-- `port` The listening port. For HTTPS, you may want to set it to 443.
+- `useHTTPS` Whether the server should use SSL/TLS encryption.
+- `useSPDY` Enables the SPDYv3 protocol. Use in conjunction with `useHTTPS`.
+- `port` The listening port.
 - `readInterval` The minimum time gap in milliseconds in which updates to a directory are sent.
 - `filesMode` The access mask with which files are created.
 - `dirMode` The access mask with which directories are created.
-- `linkLength` The amount of characters in a shortlink to a file.
-- `maxOpen` The maximum number of concurrently opened files. 256 seems safe for Windows. On Unix, you can probably go higher.
+- `linkLength` The amount of characters in a shortlink.
+- `maxOpen` The maximum number of concurrently opened files. This option is primarily there for Windows servers.
 - `timestamps` Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
 ###Path options
