@@ -994,28 +994,37 @@
     function handleArguments() {
         var args = process.argv.slice(2), option = args[0];
 
-        if (option.indexOf("-add") === 0) {
-            if (args.length === 3) {
-                readConfig();
-                readDB();
-                addUser(args[1], args[2], true); //TODO: Privilege flag
-                process.exit(1);
-            } else {
-                printUsage();
-                process.exit(1);
-            }
-        } else if (option.indexOf("version") === 0) {
+        if (option === "list" && args.length === 1) {
+            readConfig();
+            readDB();
+            var out = ["Active Users: "];
+            Object.keys(db.users).forEach(function (user) {
+                out.push(log.color.magenta, user, log.color.reset, ", ");
+            });
+            log.simple.apply(null, out.length > 1 ? out.slice(0, out.length - 2) : out);
+            process.exit(0);
+        } else if (option === "add" && args.length === 3) {
+            readConfig();
+            readDB();
+            process.exit(addUser(args[1], args[2], true));
+        } else if (option === "del" && args.length === 2) {
+            readConfig();
+            readDB();
+            process.exit(delUser(args[1]));
+        } else if (option === "version") {
             log.simple(version);
             process.exit(0);
         } else {
-            printUsage();
-            process.exit(0);
+            printUsage(1);
         }
 
-        function printUsage() {
-            log.simple("Usage: node droppy [option] [option arguments]\n");
+        function printUsage(exitCode) {
+            log.simple("Usage: node droppy [list|add|del] {arguments}\n");
             log.simple("Options:");
-            log.simple(" -add USER PASS\tCreate a new user for authentication");
+            log.simple(" list\t\t\t\tList active users.");
+            log.simple(" add <username> <password>\tCreate a new user.");
+            log.simple(" del <username>\t\t\tDelete a user.");
+            process.exit(exitCode);
         }
     }
 
@@ -1080,22 +1089,34 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Add a user to the database and save it to disk
+    // Add a user to the database
     function addUser(user, password, privileged) {
         var salt;
-        if (db.users[user] !== undefined) {
-            log.simple("User ", user, " already exists!");
-            if (isCLI) process.exit(1);
+        if (db.users[user]) {
+            log.simple(log.color.magenta, user, log.color.reset, " already exists!");
+            return 0;
         } else {
             salt = crypto.randomBytes(4).toString("hex");
             db.users[user] = {
                 hash: getHash(password + salt + user) + "$" + salt,
                 privileged: privileged
             };
-           // fs.writeFileSync(config.db, JSON.stringify(db, null, 4));
             writeDB();
-            if (isCLI) log.simple("User ", user, " successfully added.");
-            if (isCLI) process.exit(1);
+            if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " successfully added.");
+            return 1;
+        }
+    }
+    //-----------------------------------------------------------------------------
+    // Remove a user from the database
+    function delUser(user) {
+        if (db.users[user]) {
+            delete db.users[user];
+            writeDB();
+            if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " successfully removed.");
+            return 0;
+        } else {
+            if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " does not exist!");
+            return 1;
         }
     }
 
