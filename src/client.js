@@ -1087,6 +1087,7 @@
 
         function preparePlayback(playButton) {
             if (droppy.socketWait) return;
+
             var source = playButton.parent().find(".filelink").attr("href"),
                 ext    = getExt(source);
 
@@ -1114,12 +1115,9 @@
                 return;
             }
 
-            // Play the next file in the list when playback ends and loop around too
-            // TODO: Loop around non-audio files
             player.onended = function () {
-                var current = $(".playing").parent(),
-                    next    = current.next();
-                play((next.length) ? next.find(".icon-play") : current.prevAll().last().find(".icon-play"));
+                var next = $(".playing").parent().next();
+                preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
             };
 
             resetClasses();
