@@ -727,13 +727,13 @@
             req.on("data", function (data) { body += data; });
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
-                if (isValidUser(postData.user, postData.pass)) {
+                if (isValidUser(postData.username, postData.password)) {
 
-                    log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.user, "authenticated");
+                    log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                     createCookie(req, res, postData);
                     endReq(req, res, "OK");
                 } else {
-                    log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.user, "unauthorized");
+                    log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "unauthorized");
                     endReq(req, res, "NOK");
                 }
             });
@@ -741,8 +741,8 @@
             req.on("data", function (data) { body += data; });
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
-                if (postData.user !== "" && postData.pass !== "") {
-                    addUser(postData.user, postData.pass, true);
+                if (postData.username !== "" && postData.password !== "") {
+                    addUser(postData.username, postData.password, true);
                     createCookie(req, res, postData);
                     firstRun = false;
                     endReq(req, res, "OK");
@@ -1156,7 +1156,7 @@
     //-----------------------------------------------------------------------------
     function createCookie(req, res, postData) {
         var sessionID = crypto.randomBytes(32).toString("base64");
-        var priv = db.users[postData.user].privileged;
+        var priv = db.users[postData.username].privileged;
 
         if (postData.check === "on") {
             // Create a semi-permanent cookie
