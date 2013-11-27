@@ -967,8 +967,7 @@
             if (fileList.hasOwnProperty(file)) {
                 type = fileList[file].type;
                 size = convertToSI(fileList[file].size);
-                mtime = fileList[file].mtime ? formatTime(new Date(fileList[file].mtime)) : "";
-
+                mtime = fileList[file].mtime;
                 id = (root === "/") ? "/" + file : root + "/" + file;
                 tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
@@ -984,7 +983,7 @@
                             '<span class="icon-delete icon"></span>' +
                             '<span class="icon-link icon"></span>' +
                             '<span class="data-info">' + size + '</span>' +
-                            '<span class="data-mtime">' + mtime + '</span>' +
+                            '<span class="data-mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             audio +
                         '</li>'
                     );
@@ -1268,22 +1267,46 @@
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
 
-    function formatTime(date) {
-        var day   = date.getDate(),
-            month = date.getMonth() + 1,
-            year  = date.getFullYear(),
-            hrs   = date.getHours(),
-            mins  = date.getMinutes(),
-            secs  = date.getSeconds();
+    function timeDifference(previous) {
+        var msPerMinute = 60 * 1000,
+            msPerHour = msPerMinute * 60,
+            msPerDay = msPerHour * 24,
+            msPerMonth = msPerDay * 30,
+            msPerYear = msPerDay * 365,
+            elapsed = Date.now() - previous,
+            retval = "";
 
-        month < 10 && (month = "0" + month);
-        day   < 10 && (day   = "0" + day);
-        hrs   < 10 && (hrs   = "0" + hrs);
-        mins  < 10 && (mins  = "0" + mins);
-        secs  < 10 && (secs  = "0" + secs);
-
-        return year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
+        if (elapsed < 0) elapsed = 0;
+        if (elapsed < msPerMinute) {
+            retval = Math.round(elapsed / 1000);
+            retval += (retval === 1) ? " sec ago" : " secs ago";
+        } else if (elapsed < msPerHour) {
+            retval = Math.round(elapsed / msPerMinute);
+            retval += (retval === 1) ? " min ago" : " mins ago";
+        } else if (elapsed < msPerDay) {
+            retval = Math.round(elapsed / msPerHour);
+            retval += (retval === 1) ? " hour ago" : " hours ago";
+        } else if (elapsed < msPerMonth) {
+            retval = Math.round(elapsed / msPerDay);
+            retval += (retval === 1) ? " day ago" : " days ago";
+        } else if (elapsed < msPerYear) {
+            retval = Math.round(elapsed / msPerMonth);
+            retval += (retval === 1) ? " month ago" : " months ago";
+        } else {
+            retval = Math.round(elapsed / msPerYear);
+            retval += (retval === 1) ? " year ago" : " years ago";
+        }
+        return retval;
     }
+
+    setInterval(function () {
+        var dates = document.getElementsByClassName("data-mtime");
+        for (var i = 0; i < dates.length; i++)
+            if (dates[i].dataset.timestamp) {
+                var reltime = timeDifference(dates[i].dataset.timestamp);
+                if (reltime) dates[i].innerHTML = reltime;
+            }
+    }, 1000);
 
     function reloadCSS(css) {
         if (!droppy.debug) return;
