@@ -107,7 +107,6 @@
             initMainPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
-                box.removeClass("in").addClass("out");
                 setTimeout(function () {
                     $("#navigation").attr("class", "in");
                     setTimeout(function () {
@@ -121,14 +120,14 @@
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("out");
                 setTimeout(function () {
-                    box.removeClass("out").addClass("in");
+                    box.removeClass("out");
                     finalize();
                     setTimeout(function () {
                         if (droppy.hasLoggedOut) {
                             $("#login-info").html("Logged out!");
                             $("#login-info-box").attr("class", "info");
                         }
-                    }, 500);
+                    }, 100);
                 }, 100);
             });
         } else if (type === "firstrun") {
@@ -141,8 +140,8 @@
                     setTimeout(function () {
                         $("#login-info").html("Hello! Choose your creditentials.");
                         $("#login-info-box").attr("class", "info");
-                    }, 500);
-                }, 200);
+                    }, 100);
+                }, 100);
             });
         }
 
@@ -288,8 +287,12 @@
             }
         });
 
-        submit.register("click", function () {
+        form.register("submit", function () {
             submitForm();
+        });
+
+        submit.register("click", function () {
+            form.submit();
         });
 
         function submitForm() {

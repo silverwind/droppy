@@ -728,7 +728,6 @@
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
                 if (isValidUser(postData.username, postData.password)) {
-
                     log.log(colorSocket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                     createCookie(req, res, postData);
                     endReq(req, res, "OK");
