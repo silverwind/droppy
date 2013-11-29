@@ -96,7 +96,6 @@
     }
 
     // Switch the page content with an animation
-    // TODO: Clean up
     function load(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"),
@@ -107,41 +106,23 @@
             initMainPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
-                setTimeout(function () {
-                    $("#navigation").attr("class", "in");
-                    setTimeout(function () {
-                        finalize();
-                    }, 100);
-                }, 100);
+                $("#navigation").attr("class", "in");
+                finalize();
             });
-        } else if (type === "auth") {
-            initAuthPage();
+        } else if (type === "auth" || type === "firstrun") {
+            initAuthPage(type === "firstrun");
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("out");
-                setTimeout(function () {
-                    box.removeClass("out");
-                    finalize();
-                    setTimeout(function () {
-                        if (droppy.hasLoggedOut) {
-                            $("#login-info").html("Logged out!");
-                            $("#login-info-box").attr("class", "info");
-                        }
-                    }, 100);
-                }, 100);
-            });
-        } else if (type === "firstrun") {
-            initAuthPage(true);
-            requestAnimation(function () {
-                oldPage.attr("class", "out");
-                setTimeout(function () {
-                    box.removeClass("out").addClass("in");
-                    finalize();
-                    setTimeout(function () {
-                        $("#login-info").html("Hello! Choose your creditentials.");
-                        $("#login-info-box").attr("class", "info");
-                    }, 100);
-                }, 100);
+                box.removeClass("out");
+                finalize();
+                if (type === "firstrun") {
+                    $("#login-info").html("Hello! Choose your creditentials.");
+                    $("#login-info-box").attr("class", "info");
+                } else if (droppy.hasLoggedOut) {
+                    $("#login-info").html("Logged out!");
+                    $("#login-info-box").attr("class", "info");
+                }
             });
         }
 

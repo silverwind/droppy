@@ -59,11 +59,6 @@ html {
 }
 
 /* ============================ Main Page Layout =========================== */
-
-#page, #newpage {
-    transition: all .15s ease;
-}
-
 #page.out { opacity: 0 }
 
 #navigation {
@@ -872,7 +867,7 @@ html {
     position: absolute;
     text-align: center;
     top: 50% ;
-    transition: all .5s ease;
+    transition: top .5s ease, box-shadow .15s ease;
     user-select: none;
     width: 600px;
     z-index: 0;
@@ -1057,6 +1052,10 @@ html {
 .submit:active { transform: translateY(3px) }
 .submit:hover  { opacity: .9 }
 
+.submit.invalid {
+    background: linear-gradient(#f43, #d21);
+    border: 1px solid #f43;
+}
 @media all and (max-width: 639px), all and (max-height: 399px) {
     .submit {
         border-radius: 0;
@@ -1079,11 +1078,6 @@ html {
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) { .submit span { line-height: 32px } }
-
-.submit.invalid {
-    background: linear-gradient(#f43, #d21);
-    border: 1px solid #f43;
-}
 
 /* ============================= Misc Elements ============================= */
 
