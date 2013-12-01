@@ -182,7 +182,7 @@
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
             case "USER_LIST":
-                log(msg.users);
+                populateUserList(msg.users);
                 break;
             case "MIME_TYPE":
                 droppy.mimeTypes[getExt(msg.req)] = msg.mime;
@@ -229,9 +229,7 @@
             // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
             try {
                 droppy.socket.close(1001);
-            } catch (error) {
-                log(error.message);
-            }
+            } catch (error) {}
         }
 
     });
@@ -264,17 +262,12 @@
         // Spacebar toggles the checkbox
         $("#remember").register("keyup", function (event) {
             if (event.keyCode === 32) {
-                $("#check").trigger("click");
+                $("#remember > input").trigger("click");
             }
         });
 
-        form.register("submit", function () {
-            submitForm();
-        });
-
-        submit.register("click", function () {
-            form.submit();
-        });
+        submit.register("click", function () { form.submit(); });
+        form.register("submit", submitForm);
 
         function submitForm() {
             if (firstrun) {
@@ -556,42 +549,60 @@
             });
         });
 
-        if (false) {
-            $("#config").register("click", function () {
-                requestAnimation(function () {
-                    configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
-                    sendMessage("GET_USERS");
-                    toggleCatcher();
-                });
+
+        $("#config").register("click", function () {
+            requestAnimation(function () {
+                configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
+                sendMessage("GET_USERS");
+                toggleCatcher();
             });
-
-        } else {
-            $("#config").css("color", "#666").attr("title", "Configuration isn't finished yet.");
-        }
-
-
-        $(".user-entry").register("click", function () {
-            $(this)
-                .toggleClass("user-highlight");
-            $(this).find(".user-edit")
-                .toggleClass("edit-hidden")
-                .toggleClass("edit-shown")
-                .toggleClass("user-highlight");
-
-            $(this).siblings()
-                .removeClass("user-highlight");
-            $(this).siblings().find(".user-edit")
-                .removeClass("edit-shown")
-                .addClass("edit-hidden")
-                .removeClass("user-highlight");
         });
 
-        $("#click-catcher").register("click", function () {
-            $(this).attr("class", "out");
+        $("#user-add").register("click", function () {
+            //TODO: UI
+            var user = window.prompt("Username?");
+            var pass = window.prompt("Password?");
+            sendMessage("UPDATE_USER", {
+                name: user,
+                pass: pass,
+                priv: true
+            });
+        });
+
+        $("#save-users").register("click", function () {
+            var users = [], entry, user, isChanged;
+            var entries = document.getElementsByClassName("user-entry");
+            for (var i = 0, l = entries.length; i < l; i++) {
+                entry = entries[i];
+                user = {};
+                isChanged = false;
+                for (var j = 0, k = entry.childNodes.length; j < k; j++) {
+                    if (entry.dataset.changed === "true") {
+                        if      (entry.childNodes[j].className === "user-name") user.name = entry.childNodes[j].innerHTML;
+                        else if (entry.childNodes[j].className === "user-pass") user.pass = entry.childNodes[j].value;
+                        else if (entry.childNodes[j].className === "user-priv") user.priv = entry.childNodes[j].checked;
+                        if (user.pass && user.pass.length > 0) {
+                            isChanged = true;
+                        }
+                    }
+                }
+                if (isChanged) users.push(user);
+            }
+
+            users.forEach(function (user) {
+                sendMessage("UPDATE_USER", user);
+            });
+            hideModals();
+        });
+
+        $("#click-catcher").register("click", hideModals);
+
+        function hideModals() {
+            $("#click-catcher").attr("class", "out");
             createbox.attr("class", "out");
             aboutbox.attr("class", "out");
             configbox.attr("class", "out");
-        });
+        }
 
         $("#logout").register("click", function () {
             droppy.socket && droppy.socket.close(4001);
@@ -794,6 +805,48 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
+    function populateUserList(userList) {
+        var temp, entry;
+        document.getElementById("userlist").innerHTML = "";
+        for (var user in userList) {
+            if (userList.hasOwnProperty(user)) {
+                entry = createElement("li", "user-entry");
+                entry.appendChild(createElement("span", "user-name", user));
+                temp = createElement("input", "user-pass");
+                temp.type = "password";
+                temp.onkeyup = function () {
+                    this.parentNode.dataset.changed = "true";
+                    $(this.parentNode).addClass("changed");
+                };
+                entry.appendChild(temp);
+                temp = createElement("input", "user-priv");
+                temp.type = "checkbox";
+                temp.id = "check-" + user;
+                temp.checked = userList[user] ? "checked" : "";
+                temp.onchange = function () {
+                    this.parentNode.dataset.changed = "true";
+                    $(this.parentNode).addClass("changed");
+                };
+                entry.appendChild(temp);
+                temp = createElement("label", "icon");
+                temp.setAttribute("for", "check-" + user);
+                temp.checked = userList[user] ? "checked" : "";
+                entry.appendChild(temp);
+                temp = createElement("span", "user-delete icon", "");
+                temp.onclick = function () {
+                    var children = this.parentNode.childNodes;
+                    for (var i = 0, l = children.length; i < l; i++) {
+                        if (children[i].className === "user-name") {
+                            sendMessage("UPDATE_USER", { name: children[i].innerHTML, pass: ""});
+                            break;
+                        }
+                    }
+                };
+                entry.appendChild(temp);
+                document.getElementById("userlist").appendChild(entry);
+            }
+        }
+    }
     // Update data as received from the server
     function updateData(folder, data) {
         if (folder !== droppy.currentFolder)
@@ -878,7 +931,7 @@
                         break;
                     }
                     else if (parts[i] && !droppy.savedParts[i])
-                        create(parts[i], pathStr);
+                        createPart(parts[i], pathStr);
                 }
                 i++;
             }
@@ -887,10 +940,10 @@
             // Delay initial slide-in
             setTimeout(function () {
                 $(".placeholder").remove(); // Invisible placeholder so height:auto works during the initial animation
-                create(parts[0]);
+                createPart(parts[0]);
                 for (i = 1, len = parts.length; i < len; i++) {
                     pathStr += "/" + parts[i];
-                    create(parts[i], pathStr);
+                    createPart(parts[i], pathStr);
                 }
                 requestAnimation(finalize);
             }, 300);
@@ -898,7 +951,7 @@
 
         droppy.savedParts = parts;
 
-        function create(name, path) {
+        function createPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path || "/");
             li.click(function () {
@@ -1175,8 +1228,10 @@
 
     // Debug logging
     function log() {
-        if (droppy.debug && console)
-            console.log.apply(console, arguments);
+        if (droppy.debug) {
+            var args = Array.prototype.slice.call(arguments);
+            console.log(args.join(" "));
+        }
     }
 
     // Find the corrects class for an icon sprite
@@ -1288,6 +1343,13 @@
                 if (reltime) dates[i].innerHTML = reltime;
             }
     }, 1000);
+
+    function createElement(type, className, text) {
+        var el = document.createElement(type);
+        if (className) el.className = className;
+        if (text) el.appendChild(document.createTextNode(text));
+        return el;
+    }
 
     function reloadCSS(css) {
         if (!droppy.debug) return;

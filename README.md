@@ -29,7 +29,7 @@ Inside `droppy`'s folder run:
 ````bash
 node droppy
 ````
-By default, the server will listen on [https](https://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, see `node droppy help`.
+By default, the server will listen on [https](https://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
 
 ##Configuration
 Configuration is done through `config.json`

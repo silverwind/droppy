@@ -5,4 +5,5 @@ res/*.js
 res/*.css
 res/*.html
 db.json
-npm-debug.log
+config.json
+droppy*.tgz

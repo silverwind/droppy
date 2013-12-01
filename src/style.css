@@ -756,19 +756,19 @@ html {
 /* =============================== Config box ============================== */
 
 #config-box {
-    background: #222;
+    background: #181818;
     border-radius: 6px;
-    box-shadow: inset 0 0 25px #111;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
     color: #ccc;
     height: 400px;
     left: 50%;
-    margin-left: -250px;
+    margin-left: -300px;
     margin-top: -200px;
     position: fixed;
     top: 50%;
     transition: all .3s ease;
     user-select: none;
-    width: 500px;
+    width: 600px;
     z-index: 32;
 }
 
@@ -779,79 +779,106 @@ html {
     color: #ddd;
     display: block;
     font-size: 1.25em;
-    margin: .75em 0 .25em 0;
+    margin: .5em 0 .25em 0;
     text-align: center;
 }
 
 #userlist {
-    padding: 0 1em;
+    margin: 0 .5em;
+    height: 255px;
+    overflow: scroll;
 }
 
 .user-entry {
-    color: #bbb;
+    color: #aaa;
     cursor: pointer;
-    line-height: 1.4em;
-    position: relative;
+    height: 30px;
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+    background: #222;
 }
 
-.user-entry:hover:not(.user-highlight), .user-entry:hover .user-edit:not(.user-highlight) {
-    background: #333;
+.user-entry:nth-child(2n) {
+    background: #181818;
 }
 
-.user-entry.user-highlight:hover, .user-entry:hover .user-edit.user-highlight {
-    background: #555;
-}
-
-.user-highlight {
-    background: #444;
+.user-entry:hover {
+    border-left: 2px solid #1af;
+    border-right: 2px solid #1af;
     color: #fff;
 }
 
-.user-edit {
-    position: relative;
-    font-size: .66em;
+.user-name, .user-pass {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #999;
+    width: 40%;
+    margin-top: 1px;
+    padding: 4px 4px;
+    height: 28px;
+    font-size: .8em;
+    transition: color .25s ease;
+    margin-left: .5em;
+    float: left;
 }
 
-.edit-hidden { opacity: 0 }
-.edit-shown  { opacity: 1 }
+.user-entry label {
+    margin-left: 1em;
+    margin-right: .5em;
+    font-size: .6em;
+    float: left;
+    position: relative;
+    top: 1px;
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
 
-.user-edit-password {
-    background: #151515;
+.user-entry label:after {
+    content: '';
+    opacity: 0;
+    position: absolute;
+    height: 100%;
+    left: 6px;
+    top: 6px;
+    font-size: 1.4em;
+    transition: opacity .25s ease;
+    color: #999;
+}
+
+.user-entry:hover .user-pass, .user-entry label:hover {
+    background: #111;
     border: 1px solid #444;
-    color: #eee;
+}
+
+.user-entry label:hover:after { color: #fff }
+.user-entry.changed label:hover:after, .user-entry.changed label:after, .user-entry.changed > .user-name, .user-entry.changed > .user-pass {
+    color: #1af;
+}
+
+.user-delete {
+    color: #999;
     float: right;
-    height: calc(1.4em - 3px);
-    line-height: 1.6em;
-    padding: 0 .25em;
+    clear: right;
     position: relative;
-    top: 2px;
-    width: 5em;
-}
-
-.user-edit-priv {
-    background: red;
-    display: block !important;
-    height:1em;
-    margin-top:-.5em;
-    position:absolute;
-    right: 8em;
-    top:50%;
-}
-.user-edit-password:before {
-    content: "#";
-    margin: 0 10px 0 0;
-    padding: 2px;
-}
-
-.user-delete, .user-edit {
-    float: right;
-    padding: 0 .25em;
+    top: 5px;
+    padding: 0 .5em;
 }
 
 .user-delete:hover {
-    color: #f22;
+    color: #f23;
 }
 
+#user-add {
+    cursor: pointer;
+    position: absolute;
+    bottom: 70px;
+    width: 100%;
+    text-align: center;
+}
+#user-add .icon { margin-right: .5em }
+#user-add:hover { color: #1af}
 /* ============================== Login Form =============================== */
 
 #center-box {
@@ -1006,7 +1033,7 @@ html {
     color: #fff;
 }
 
-#remember label {
+.remember-label {
     background: #000;
     border-radius: 3px;
     cursor: pointer;
@@ -1015,7 +1042,7 @@ html {
     width: 20px;
 }
 
-#remember label:after {
+.remember label:after {
     border-bottom: 3px solid #fff;
     border-left: 3px solid #fff;
     content: '';
@@ -1029,10 +1056,10 @@ html {
     width: 10px;
 }
 
-#remember label:hover { transition: all .25s ease; box-shadow: 0 0 0 2px #999 }
+.remember label:hover { transition: all .25s ease; box-shadow: 0 0 0 2px #999 }
 
-#check { display: none }
-#check:checked + label:after { opacity: 1 }
+input[type="checkbox"] { display: none }
+input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
     background: linear-gradient(#48c,#36a);
@@ -1085,13 +1112,13 @@ html {
     background: #000;
     height: 100%;
     position: absolute;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.5s ease;
     width: 100%;
     z-index: 31;
 }
 
-#click-catcher.out { opacity: 0; display: none  }
-#click-catcher.in  { opacity: .33; display: block }
+#click-catcher.out { opacity: 0   ; visibility: hidden }
+#click-catcher.in  { opacity: .75 ; visibility: visible }
 
 #noscript {
     background: #111;

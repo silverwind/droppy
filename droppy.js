@@ -434,23 +434,20 @@
 
                     break;
                 case "GET_USERS":
-                    // Only allow priviledged users to administer accounts
-                    if (!db.sessions[cookie].privileged) {
-                        return;
+                    if (!db.sessions[cookie].privileged) return;
+                    sendUsers(cookie);
+                    break;
+                case "UPDATE_USER":
+                    if (!db.sessions[cookie].privileged) return;
+                    if (msg.data.pass === "") {
+                        log.log(colorSocket(remoteIP, remotePort), " Deleted user: ", log.color.magenta, msg.data.name, log.color.reset);
+                        delUser(msg.data.name);
+                        sendUsers(cookie);
+                    } else {
+                        log.log(colorSocket(remoteIP, remotePort), " Added or updated user: ", log.color.magenta, msg.data.name, log.color.reset);
+                        addOrUpdateUser(msg.data.name, msg.data.pass, msg.data.priv);
+                        sendUsers(cookie);
                     }
-                    // Only send relevant data for the user list
-                    var userlist = {};
-                    for (var user in db.users) {
-                        if (db.users.hasOwnProperty(user)) {
-                            userlist[user] = {
-                                "privileged": db.users[user].privileged
-                            };
-                        }
-                    }
-                    send(clients[cookie].ws, JSON.stringify({
-                        type  : "USER_LIST",
-                        users : userlist
-                    }));
                     break;
                 case "GET_MIME":
                     send(clients[cookie].ws, JSON.stringify({
@@ -507,6 +504,20 @@
         send(clients[cookie].ws, JSON.stringify({
             "type" : "SHORTLINK",
             "link" : link
+        }));
+    }
+
+    function sendUsers(cookie) {
+        if (!clients[cookie] || !clients[cookie].ws) return;
+        var userlist = {};
+        for (var user in db.users) {
+            if (db.users.hasOwnProperty(user)) {
+                userlist[user] = db.users[user].privileged || false;
+            }
+        }
+        send(clients[cookie].ws, JSON.stringify({
+            type  : "USER_LIST",
+            users : userlist
         }));
     }
 
@@ -742,7 +753,7 @@
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
                 if (postData.username !== "" && postData.password !== "") {
-                    addUser(postData.username, postData.password, true);
+                    addOrUpdateUser(postData.username, postData.password, true);
                     createCookie(req, res, postData);
                     firstRun = false;
                     endReq(req, res, "OK");
@@ -1005,7 +1016,7 @@
             process.exit(0);
         } else if (option === "add" && args.length === 3) {
             readDB();
-            process.exit(addUser(args[1], args[2], true));
+            process.exit(addOrUpdateUser(args[1], args[2], true));
         } else if (option === "del" && args.length === 2) {
             readDB();
             process.exit(delUser(args[1]));
@@ -1070,6 +1081,8 @@
         var dbString = "";
         var doWrite = false;
 
+        parseConfig();
+
         try {
             dbString = String(fs.readFileSync(config.db));
             db = JSON.parse(dbString);
@@ -1081,9 +1094,10 @@
             if (!db.shortlinks) db.shortlinks = {};
         } catch (error) {
             if (error.code === "ENOENT" || /^\s*$/.test(dbString)) {
+                db = {users: {}, sessions: {}, shortlinks: {}};
+
                 // Recreate DB file in case it doesn't exist / is empty
                 log.simple(log.color.yellow, " ->> ", log.color.reset, "creating " + path.basename(config.db) + "...");
-                db = {users: {}, sessions: {}, shortlinks: {}};
                 doWrite = true;
             } else {
                 log.error("Error reading ", config.db, "\n", util.inspect(error));
@@ -1103,21 +1117,15 @@
 
     //-----------------------------------------------------------------------------
     // Add a user to the database
-    function addUser(user, password, privileged) {
-        var salt;
-        if (db.users[user]) {
-            log.simple(log.color.magenta, user, log.color.reset, " already exists!");
-            return 0;
-        } else {
-            salt = crypto.randomBytes(4).toString("hex");
-            db.users[user] = {
-                hash: getHash(password + salt + user) + "$" + salt,
-                privileged: privileged
-            };
-            writeDB();
-            if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " successfully added.");
-            return 1;
-        }
+    function addOrUpdateUser(user, password, privileged) {
+        var salt = crypto.randomBytes(4).toString("hex"), isNew = !db.users[user];
+        db.users[user] = {
+            hash: getHash(password + salt + user) + "$" + salt,
+            privileged: privileged
+        };
+        writeDB();
+        if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " successfully ", isNew ? "added." : "updated.");
+        return 1;
     }
     //-----------------------------------------------------------------------------
     // Remove a user from the database
@@ -1210,7 +1218,7 @@
     }
 
     //-----------------------------------------------------------------------------
-    function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
+    function writeDB() { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
     function addFilePath(p)    { return config.filesDir.substring(0, config.filesDir.length - 1) + p; }
