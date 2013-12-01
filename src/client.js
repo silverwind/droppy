@@ -179,7 +179,7 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/get/" +  msg.link);
+                window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/~/" +  msg.link);
                 break;
             case "USER_LIST":
                 log(msg.users);

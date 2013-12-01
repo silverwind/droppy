@@ -644,7 +644,6 @@
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url);
         var resourceName;
-
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/content\//.test(URI)) {
@@ -658,7 +657,7 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
-        } else if (/^\/get\//.test(URI)) {
+        } else if (/^\/get\//.test(URI) || /^\/\~\//.test(URI)) {
             handleFileRequest(req, res);
         } else if (/^\/res\//.test(URI)) {
             var fileName = path.basename(req.url);
@@ -835,12 +834,18 @@
 
     //-----------------------------------------------------------------------------
     function handleFileRequest(req, res) {
-        var URI = decodeURIComponent(req.url).substring(5, req.url.length); // Strip "/get/" off the URI
-        var directLink;
-        if (URI.length  === config.linkLength) // We got a n-character suffix after /get/
-            if (db.shortlinks[URI]) directLink = db.shortlinks[URI];
+        var URI = decodeURIComponent(req.url), directLink;
 
-        if (!getCookie(req.headers.cookie) && ! directLink) {
+        // Check for a shortlink
+        if (/^\/~\//.test(URI)) {
+            URI = URI.substring(3);
+            if (db.shortlinks[URI] && URI.length  === config.linkLength) directLink = db.shortlinks[URI];
+        } else {
+            // Strip "/get/" off the URI
+            URI = URI.substring(5);
+        }
+
+        if (!getCookie(req.headers.cookie) && !directLink) {
             res.statusCode = 301;
             res.setHeader("Location", "/");
             res.end();
@@ -854,7 +859,7 @@
             fs.stat(filepath, function (error, stats) {
                 if (!error && stats) {
                     res.statusCode = 200;
-                    res.setHeader("Content-Disposition", "attachment");
+                    res.setHeader("Content-Disposition", directLink ? ['attachment; filename="', path.basename(filepath), '"'].join("") : "attachment");
                     res.setHeader("Content-Type", mimeType);
                     res.setHeader("Content-Length", stats.size);
                     log.response(req, res);
