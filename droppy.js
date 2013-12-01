@@ -37,35 +37,37 @@
 "use strict";
 
 (function () {
-    var version  = require("./package.json").version,
-        helpers  = require("./lib/helpers.js"),
-        log      = require("./lib/log.js"),
-        ap       = require("autoprefixer"),
-        Busboy   = require("busboy"),
-        crypto   = require("crypto"),
-        fs       = require("graceful-fs"),
-        mime     = require("mime"),
-        path     = require("path"),
-        util     = require("util"),
-        Wss      = require("ws").Server,
-        wrench   = require("wrench"),
-        cache    = {},
-        clients  = {},
-        db       = {},
-        dirs     = {},
-        watchers = {},
-        cssCache = null,
-        config   = null,
-        firstRun = null,
-        isCLI    = (process.argv.length > 2);
+    var version    = require("./package.json").version,
+        configFile = "config.json",
+        helpers    = require("./lib/helpers.js"),
+        log        = require("./lib/log.js"),
+        ap         = require("autoprefixer"),
+        Busboy     = require("busboy"),
+        crypto     = require("crypto"),
+        fs         = require("graceful-fs"),
+        mime       = require("mime"),
+        path       = require("path"),
+        util       = require("util"),
+        Wss        = require("ws").Server,
+        wrench     = require("wrench"),
+        cache      = {},
+        clients    = {},
+        db         = {},
+        dirs       = {},
+        watchers   = {},
+        cssCache   = null,
+        config     = null,
+        firstRun   = null,
+        isCLI      = (process.argv.length > 2);
 
     // Argument handler
     if (isCLI) handleArguments();
 
-    readConfig();
+    log.simple(log.logo);
+
+    parseConfig();
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
-    log.simple(log.logo);
     log.simple(log.color.yellow, " ->> ", log.color.blue, "droppy ", log.color.reset,
                log.color.green, version, log.color.reset, " running on ", log.color.blue, "node ", log.color.reset,
                log.color.green, process.version.substring(1), log.color.reset
@@ -104,14 +106,14 @@
                 if (crypto.createHash("md5").update(fs.readFileSync(getSrcPath(file))).digest("base64") === db.resourceHashes[file])
                     matches.resource++;
                 else return;
-            } catch (e) { return; }
+            } catch (error) { return; }
         });
         compiledList.forEach(function (file) {
             try {
                 if (fs.statSync(getResPath(file)))
                     matches.compiled++;
                 else return;
-            } catch (e) { return; }
+            } catch (error) { return; }
         });
         if (matches.resource === resourceList.length &&
             matches.compiled === compiledList.length &&
@@ -994,7 +996,6 @@
         var args = process.argv.slice(2), option = args[0];
 
         if (option === "list" && args.length === 1) {
-            readConfig();
             readDB();
             var out = ["Active Users: "];
             Object.keys(db.users).forEach(function (user) {
@@ -1003,11 +1004,9 @@
             log.simple.apply(null, out.length > 1 ? out.slice(0, out.length - 2) : out);
             process.exit(0);
         } else if (option === "add" && args.length === 3) {
-            readConfig();
             readDB();
             process.exit(addUser(args[1], args[2], true));
         } else if (option === "del" && args.length === 2) {
-            readConfig();
             readDB();
             process.exit(delUser(args[1]));
         } else if (option === "version") {
@@ -1029,12 +1028,26 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Read and validate config.json
-    function readConfig() {
+    // config.json handling
+    function parseConfig() {
+        // Copy config.json.example to config.json if it doesn't exist
         try {
-            config = JSON.parse(fs.readFileSync("./config.json"));
-        } catch (e) {
-            log.error("Error reading config.json\n", util.inspect(e));
+            fs.statSync(configFile);
+        } catch (error) {
+            if (error.code === "ENOENT") {
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.cyan, configFile, log.color.reset, "...");
+                fs.writeFileSync(configFile, fs.readFileSync(configFile + ".example"));
+            } else {
+                log.error("Error reading ", configFile, ":\n", error);
+                process.exit(1);
+            }
+        }
+
+        // Try JSON.parse on our config file
+        try {
+            config = JSON.parse(fs.readFileSync(configFile));
+        } catch (error) {
+            log.error("Error parsing ", configFile, ":\n", error);
             process.exit(1);
         }
 
@@ -1066,14 +1079,14 @@
             if (!db.users) db.users = {};
             if (!db.sessions) db.sessions = {};
             if (!db.shortlinks) db.shortlinks = {};
-        } catch (e) {
-            if (e.code === "ENOENT" || /^\s*$/.test(dbString)) {
+        } catch (error) {
+            if (error.code === "ENOENT" || /^\s*$/.test(dbString)) {
                 // Recreate DB file in case it doesn't exist / is empty
                 log.simple(log.color.yellow, " ->> ", log.color.reset, "creating " + path.basename(config.db) + "...");
                 db = {users: {}, sessions: {}, shortlinks: {}};
                 doWrite = true;
             } else {
-                log.error("Error reading ", config.db, "\n", util.inspect(e));
+                log.error("Error reading ", config.db, "\n", util.inspect(error));
                 process.exit(1);
             }
         }
