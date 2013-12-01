@@ -657,7 +657,7 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
-        } else if (/^\/get\//.test(URI) || /^\/\~\//.test(URI)) {
+        } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
             handleFileRequest(req, res);
         } else if (/^\/res\//.test(URI)) {
             var fileName = path.basename(req.url);
@@ -834,16 +834,11 @@
 
     //-----------------------------------------------------------------------------
     function handleFileRequest(req, res) {
-        var URI = decodeURIComponent(req.url), directLink;
+        var URI = decodeURIComponent(req.url).substring(3), directLink;
 
         // Check for a shortlink
-        if (/^\/~\//.test(URI)) {
-            URI = URI.substring(3);
-            if (db.shortlinks[URI] && URI.length  === config.linkLength) directLink = db.shortlinks[URI];
-        } else {
-            // Strip "/get/" off the URI
-            URI = URI.substring(5);
-        }
+        if (/^\/\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
+            directLink = db.shortlinks[URI];
 
         if (!getCookie(req.headers.cookie) && !directLink) {
             res.statusCode = 301;

@@ -179,7 +179,7 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/~/" +  msg.link);
+                window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
             case "USER_LIST":
                 log(msg.users);
@@ -953,7 +953,7 @@
                 tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
                 if (type === "f" || type === "nf") { // Create a file row
-                    downloadURL = window.location.protocol + "//" + window.location.host + "/get" + id;
+                    downloadURL = "/~" + id;
                     audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
                     var spriteClass = getSpriteClass(getExt(file));
                     if (isUpload) file = decodeURIComponent(file);
