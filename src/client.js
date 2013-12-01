@@ -483,16 +483,14 @@
         $("#create-folder").register("click", function () {
             requestAnimation(function () {
                 createbox.attr("class", createbox.attr("class") !== "in" ? "in" : "out");
-                setTimeout(function () {
-                    if (createbox.attr("class") === "in") {
-                        toggleCatcher();
-                        activeFiles = [];
-                        $(".filelink, .folderlink").each(function () {
-                            activeFiles.push($(this).html().toLowerCase());
-                        });
-                        nameinput.focus();
-                    }
-                }, 300);
+                setTimeout(function () { nameinput.focus(); }, 400);
+                if (createbox.attr("class") === "in") {
+                    activeFiles = [];
+                    $(".filelink, .folderlink").each(function () {
+                        activeFiles.push($(this).html().toLowerCase());
+                    });
+                }
+                toggleCatcher();
             });
         });
 
@@ -562,6 +560,7 @@
             //TODO: UI
             var user = window.prompt("Username?");
             var pass = window.prompt("Password?");
+            if (!user || !pass) return;
             sendMessage("UPDATE_USER", {
                 name: user,
                 pass: pass,
@@ -812,13 +811,16 @@
             if (userList.hasOwnProperty(user)) {
                 entry = createElement("li", "user-entry");
                 entry.appendChild(createElement("span", "user-name", user));
+
                 temp = createElement("input", "user-pass");
                 temp.type = "password";
+                temp.setAttribute("title", "Set the user's password");
                 temp.onkeyup = function () {
                     this.parentNode.dataset.changed = "true";
                     $(this.parentNode).addClass("changed");
                 };
                 entry.appendChild(temp);
+
                 temp = createElement("input", "user-priv");
                 temp.type = "checkbox";
                 temp.id = "check-" + user;
@@ -828,11 +830,15 @@
                     $(this.parentNode).addClass("changed");
                 };
                 entry.appendChild(temp);
+
                 temp = createElement("label", "icon");
+                temp.setAttribute("title", "Privileded Users can create other users.");
                 temp.setAttribute("for", "check-" + user);
                 temp.checked = userList[user] ? "checked" : "";
                 entry.appendChild(temp);
+
                 temp = createElement("span", "user-delete icon", "");
+                temp.setAttribute("title", "Delete the user.");
                 temp.onclick = function () {
                     var children = this.parentNode.childNodes;
                     for (var i = 0, l = children.length; i < l; i++) {
@@ -843,6 +849,7 @@
                     }
                 };
                 entry.appendChild(temp);
+
                 document.getElementById("userlist").appendChild(entry);
             }
         }

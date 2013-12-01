@@ -492,10 +492,8 @@ html {
 /* ========================= Directory Name Input ========================== */
 
 #create-folder-box {
-    background: #222;
+    background: #181818;
     border-radius: 6px;
-    box-shadow: inset 0 0 25px #111;
-    color: #ccc;
     height: 120px;
     left: 50%;
     margin-left: -150px;
@@ -514,7 +512,7 @@ html {
 
 
 #create-folder-label {
-    color: #333;
+    color: #222;
     font-size: 125px;
     height: 100%;
     position: absolute;
@@ -524,24 +522,24 @@ html {
 }
 
 #create-folder-input {
-    background: #ddd;
+    background: #111;
     border-radius: 4px;
-    border: 2px transparent;
-    box-shadow: inset 1px 1px 5px 1px rgba(143, 143, 143, 0.8);
-    color: #222;
+    border: 2px solid #222;
+    color: #ccc;
     font-size: 1.2em;
     height: 40px;
     left: 50%;
     margin-left: -140px;
     margin-top: -20px;
-    padding-left: 10px;
+    padding: 5px 10px;
     position: absolute;
     top: 50%;
     transition: all .3s ease;
     width: 280px;
 }
 
-#create-folder-input.invalid { background: #f33; box-shadow: none; }
+#create-folder-input:focus   { border: 2px solid #666; color: #ccc; }
+#create-folder-input.invalid { border: 2px solid #f22; color: #f22; }
 
 #create-folder-info {
     color: #f22;
@@ -558,9 +556,9 @@ html {
 #create-folder-info.in { opacity: 1 }
 
 #create-folder-button {
-    background: #444;
     border-radius: 4px;
     bottom: 8px;
+    color: #999;
     cursor: pointer;
     padding: 2px 10px;
     position: absolute;
@@ -571,7 +569,7 @@ html {
 }
 
 #create-folder-button .icon { margin-right: 5px }
-#create-folder-button:hover { background: #35a; color: #fff }
+#create-folder-button:hover { color: #fff }
 #create-folder-button.invalid:hover { background: #f22 }
 
 /* =============================== Audio Panel =============================== */
@@ -664,9 +662,8 @@ html {
 /* =============================== About box =============================== */
 
 #about-box {
-    background: #222;
+    background: #181818;
     border-radius: 6px;
-    box-shadow: inset 0 0 25px #111;
     color: #bbb;
     height: 200px;
     left: 50%;
@@ -758,7 +755,6 @@ html {
 #config-box {
     background: #181818;
     border-radius: 6px;
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
     color: #ccc;
     height: 400px;
     left: 50%;
@@ -779,20 +775,14 @@ html {
     color: #ddd;
     display: block;
     font-size: 1.25em;
-    margin: .5em 0 .25em 0;
+    margin: .5em 0;
     text-align: center;
-}
-
-#userlist {
-    margin: 0 .5em;
-    height: 255px;
-    overflow: scroll;
 }
 
 .user-entry {
     color: #aaa;
     cursor: pointer;
-    height: 30px;
+    height: 36px;
     border-left: 2px solid transparent;
     border-right: 2px solid transparent;
     background: #222;
@@ -808,29 +798,33 @@ html {
     color: #fff;
 }
 
-.user-name, .user-pass {
+.user-pass {
     background: transparent;
     border: 1px solid transparent;
     color: #999;
-    width: 40%;
-    margin-top: 1px;
+    width: 38%;
+    margin-top: 3px;
     padding: 4px 4px;
-    height: 28px;
-    font-size: .8em;
+    height: 30px;
     transition: color .25s ease;
-    margin-left: .5em;
     float: left;
 }
 
+.user-name {
+    text-align: right;
+    padding-right: .5em;
+    width: 42%;
+    float: left;
+    line-height: 36px;
+}
+
 .user-entry label {
-    margin-left: 1em;
-    margin-right: .5em;
-    font-size: .6em;
+    margin-left: .5em;
     float: left;
     position: relative;
-    top: 1px;
-    width: 1.35rem;
-    height: 1.35rem;
+    top: 3px;
+    width: 30px;
+    height: 30px;
     border: 1px solid transparent;
     cursor: pointer;
 }
@@ -839,15 +833,13 @@ html {
     content: '';
     opacity: 0;
     position: absolute;
-    height: 100%;
-    left: 6px;
-    top: 6px;
-    font-size: 1.4em;
+    left: 5px;
+    top: 5px;
     transition: opacity .25s ease;
     color: #999;
 }
 
-.user-entry:hover .user-pass, .user-entry label:hover {
+.user-entry:hover .user-pass, .user-entry:hover label {
     background: #111;
     border: 1px solid #444;
 }
@@ -860,22 +852,17 @@ html {
 .user-delete {
     color: #999;
     float: right;
-    clear: right;
     position: relative;
-    top: 5px;
-    padding: 0 .5em;
+    margin: 0 .5em;
+    line-height: 36px;
 }
 
-.user-delete:hover {
-    color: #f23;
-}
+.user-delete:hover { color: #f23 }
 
 #user-add {
     cursor: pointer;
-    position: absolute;
-    bottom: 70px;
-    width: 100%;
     text-align: center;
+    padding-top: .5em;
 }
 #user-add .icon { margin-right: .5em }
 #user-add:hover { color: #1af}
@@ -1062,13 +1049,12 @@ input[type="checkbox"] { display: none }
 input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
-    background: linear-gradient(#48c,#36a);
+    background: #146;
     border-radius: 0 0 6px 6px;
     bottom: 0;
     color: #fff;
-    cursor:pointer;
-    font-size: 1.5em;
-    height: 60px;
+    cursor: pointer;
+    height: 40px;
     left: 50%;
     margin-left: -300px;
     position: absolute;
@@ -1077,11 +1063,10 @@ input[type="checkbox"]:checked + label:after { opacity: 1 }
 }
 
 .submit:active { transform: translateY(3px) }
-.submit:hover  { opacity: .9 }
+.submit:hover  { background: #257 }
 
 .submit.invalid {
-    background: linear-gradient(#f43, #d21);
-    border: 1px solid #f43;
+    background: #b31;
 }
 @media all and (max-width: 639px), all and (max-height: 399px) {
     .submit {
@@ -1094,13 +1079,13 @@ input[type="checkbox"]:checked + label:after { opacity: 1 }
 }
 
 .submit .icon {
-    font-size: 1.25em;
-    margin-right: 10px;
+    font-size: 1.2em;
+    margin-right: .5em;
 }
 
 .submit span {
     display: inline-block;
-    line-height: 60px;
+    line-height: 40px;
     vertical-align: middle;
 }
 
