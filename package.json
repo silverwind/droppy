@@ -1,8 +1,8 @@
 {
   "name": "droppy",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "Pure HTML5 file-server/cloud",
+  "description": "Pure HTML5 multi-user cloud storage",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": {
     "url": "https://github.com/silverwind/droppy/issues"
@@ -30,7 +30,8 @@
   },
   "keywords": [
     "html5",
-    "file-server",
+    "cloud",
+    "storage",
     "websocket"
   ],
   "repository": {
