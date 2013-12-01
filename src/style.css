@@ -293,8 +293,8 @@ html {
 #path li:first-child { padding-left: .5em }
 #path li { color: #bbb; transition: color .3s ease, left .5s ease; }
 
-#path li:nth-child(odd)     { background: #181818 }
-#path li:nth-child(odd) > .arrow  { fill: #181818 }
+#path li:nth-child(odd)     { background: #383838 }
+#path li:nth-child(odd) > .arrow  { fill: #383838 }
 #path li:nth-child(even)    { background: #282828 }
 #path li:nth-child(even) > .arrow { fill: #282828 }
 
