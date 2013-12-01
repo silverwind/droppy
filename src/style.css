@@ -64,7 +64,6 @@ html {
 #navigation {
     background-image: linear-gradient(#222, #111);
     clear: both;
-    color: #eee;
     position: fixed;
     text-align: center;
     transition: top .35s ease-in;
@@ -136,18 +135,17 @@ html {
 
 .button {
     background: #222;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #333 !important;
     border: none;
     color: #ddd;
     cursor: pointer;
     float: left;
-    padding: 0;
     user-select: none;
     width: 16.666%;
 }
 
 .button .icon {
-    padding-right: 5px;
+    padding-right: .5em;
 }
 
 @media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px; } }
@@ -155,12 +153,12 @@ html {
 @media all and (max-width:  750px) { .button-text { display: none } }
 @media all and (max-width:  639px) { .button {  font-size: .7em; line-height: 25px; height: 25px; } }
 
-#upload-file:hover   { color: #ae5; border-bottom: 2px solid #ae5; }
-#upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a; }
-#create-folder:hover { color: #29f; border-bottom: 2px solid #29f; }
-#about:hover         { color: #f71; border-bottom: 2px solid #f71; }
-#config:hover        { color: #ff5; border-bottom: 2px solid #ff5; }
-#logout:hover        { color: #e33; border-bottom: 2px solid #e33; }
+#upload-file:hover   { color: #ae5; border-bottom: 2px solid #ae5 !important; }
+#upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important; }
+#create-folder:hover { color: #29f; border-bottom: 2px solid #29f !important; }
+#about:hover         { color: #f71; border-bottom: 2px solid #f71 !important; }
+#config:hover        { color: #ff5; border-bottom: 2px solid #ff5 !important; }
+#logout:hover        { color: #e33; border-bottom: 2px solid #e33 !important; }
 
 /* ============================ Upload Progress ============================ */
 
@@ -187,7 +185,6 @@ html {
 @media all and (min-width: 1024px) { #upload-info.in       {opacity: 1; bottom: 0 } }
 @media all and (max-width: 1023px) { #upload-info.in       {opacity: 1; bottom: 0 } }
 @media all and (max-width:  639px) { #upload-info.in       {opacity: 1; bottom: 0 } }
-
 
 #upload-title {
     color: #ddd;
@@ -288,21 +285,23 @@ html {
 @media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px; padding: 0 .1em 0 1.2em } }
 
+.arrow { position: absolute }
+
 #path li.in  { left: 0    }
 #path li.out { left: -10% }
 #path li.placeholder { opacity: 0 }
 #path li:first-child { padding-left: .5em }
-#path li, .arrow { color: #ccc; transition: all .15s ease }
+#path li { color: #bbb; transition: color .3s ease, left .5s ease; }
 
-#path li:nth-child(odd)           { background: #333 }
-#path li:nth-child(odd) > .arrow  { fill:       #333 }
-#path li:nth-child(even)          { background: #444 }
-#path li:nth-child(even) > .arrow { fill:       #444 }
+#path li:nth-child(odd)     { background: #181818 }
+#path li:nth-child(odd) > .arrow  { fill: #181818 }
+#path li:nth-child(even)    { background: #282828 }
+#path li:nth-child(even) > .arrow { fill: #282828 }
 
-#path li:nth-child(odd):hover           { background: #136; color: #1af; }
-#path li:nth-child(odd):hover > .arrow  { fill:       #136 }
-#path li:nth-child(even):hover          { background: #513; color: #f1a; }
-#path li:nth-child(even):hover > .arrow { fill:       #513 }
+#path li:nth-child(odd):hover     { background: #512; color: #fff }
+#path li:nth-child(odd):hover > .arrow  { fill: #512 }
+#path li:nth-child(even):hover    { background: #246; color: #fff }
+#path li:nth-child(even):hover > .arrow { fill: #246 }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -319,10 +318,6 @@ html {
 #path li:nth-child(14) { z-index: 3 }
 #path li:nth-child(15) { z-index: 2 }
 #path li:nth-child(16) { z-index: 1 }
-
-.arrow {
-    position: absolute;
-}
 
 @media all and (min-width: 1024px) { .arrow { height: 35px; width: 35px;; right: -34.5px } }
 @media all and (max-width: 1023px) { .arrow { height: 30px; width: 30px;; right: -29.5px } }

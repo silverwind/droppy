@@ -1170,7 +1170,7 @@
             if (player.paused)
                 loadAndPlay();
              else
-                decodeURI(player.src) === source ? pause() : loadAndPlay();
+                (decodeURI(player.src).indexOf(source) > 0) ? pause() : loadAndPlay();
 
             function loadAndPlay() {
                 player.src = source;
