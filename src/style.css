@@ -23,15 +23,17 @@ body, div, header, input, label, li, nav, p, section, span, ul {
     padding: 0;
 }
 
-
 li { list-style: none }
-a  { text-decoration: none }
-
-:focus { outline: none }
+a  { text-decoration: none; background: transparent }
+:focus, a:active, a:hover { outline: none }
 :-moz-focusring { outline: none }
 ::-moz-focus-inner { border: none; padding: none; outline: none }
+input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0 }
 button, input { font-family: inherit; font-size: 100%; margin: none; line-height: normal; border: none }
 button, html input[type="button"] { cursor: pointer }
+button, html input[type="button"], input[type="reset"], input[type="submit"] { -webkit-appearance: button; cursor: pointer }
+button, input, select, textarea { font-family: inherit; font-size: 100%; margin: 0 }
+button, input { line-height: normal }
 
 input::-moz-placeholder                { color: #999 }
 input:-ms-input-placeholder            { color: #999 }
@@ -51,6 +53,7 @@ html {
     letter-spacing: -.5px;
     overflow: hidden;
     text-rendering: geometricPrecision;
+    -webkit-text-size-adjust: 100%;
 }
 
 /* pseudo-animation for use in setTransitionClass */

@@ -92,7 +92,7 @@
     function prepareContent() {
         var out = { css : "", js  : "" },
             resources = {
-                css  : ["normalize.css", "style.css", "sprites.css"],
+                css  : ["style.css", "sprites.css"],
                 js   : ["jquery.js", "client.js"],
                 html : ["base.html", "auth.html", "main.html"]
             },
@@ -778,7 +778,6 @@
         if (config.debug && resourceName === "style.css") {
             // Shortcut for CSS debugging when no Websocket is available
             cssCache = [
-                fs.readFileSync(getSrcPath("normalize.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
