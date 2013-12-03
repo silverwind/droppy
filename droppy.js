@@ -846,27 +846,36 @@
 
     //-----------------------------------------------------------------------------
     function handleFileRequest(req, res) {
-        var URI = decodeURIComponent(req.url).substring(3), directLink;
+        var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo;
 
         // Check for a shortlink
         if (/^\/\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
-            directLink = db.shortlinks[URI];
+            shortLink = db.shortlinks[URI];
 
-        if (!getCookie(req.headers.cookie) && !directLink) {
+        if (!getCookie(req.headers.cookie) && !shortLink) {
             res.statusCode = 301;
             res.setHeader("Location", "/");
             res.end();
             log.response(req, res);
             return;
         }
-        var filepath = directLink ? addFilePath(directLink) : addFilePath("/" + URI);
+        var filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
         if (filepath) {
             var mimeType = mime.lookup(filepath);
 
             fs.stat(filepath, function (error, stats) {
                 if (!error && stats) {
                     res.statusCode = 200;
-                    res.setHeader("Content-Disposition", directLink ? ['attachment; filename="', path.basename(filepath), '"'].join("") : "attachment");
+                    if (shortLink) {
+                        // IE 10/11 can't handle an UTF-8 Content-Dispotsition header, so we encode it
+                        if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+                            dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
+                        else
+                            dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
+                    } else {
+                        dispo = "attachment";
+                    }
+                    res.setHeader("Content-Disposition", dispo);
                     res.setHeader("Content-Type", mimeType);
                     res.setHeader("Content-Length", stats.size);
                     log.response(req, res);

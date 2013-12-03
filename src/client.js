@@ -179,6 +179,7 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
+                //TODO: UI
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
             case "USER_LIST":
