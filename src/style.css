@@ -84,7 +84,7 @@ html {
     overflow-y: auto;
     padding: .5em .25em 0 .5em;
     position: absolute;
-    transition: left .15s ease-in, max-height .25s ease;
+    transition: left .15s ease-in, max-height .5s ease;
     user-select: none;
     width: calc(100% - 1em);
     z-index: -1;
@@ -167,10 +167,9 @@ html {
 
 #upload-info {
     background: #222;
-    border-radius: 5px 5px 0 0;
+    border-radius: 3px 3px 0 0;
     bottom: -125px;
-    box-shadow: inset 0 0 25px #111;
-    color: #ccc;
+    color: #999;
     height: 120px;
     left: 50%;
     margin-left: -150px;
@@ -180,11 +179,12 @@ html {
     transition: all .3s ease;
     user-select: none;
     width: 300px;
+    z-index: 2;
 }
 
-@media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 35px } }
-@media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 30px } }
-@media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 25px } }
+@media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 33px } }
+@media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 28px } }
+@media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 23px } }
 @media all and (min-width: 1024px) { #upload-info.in       {opacity: 1; bottom: 0 } }
 @media all and (max-width: 1023px) { #upload-info.in       {opacity: 1; bottom: 0 } }
 @media all and (max-width:  639px) { #upload-info.in       {opacity: 1; bottom: 0 } }
@@ -218,7 +218,7 @@ html {
 }
 
 #upload-bar-inner {
-    background: linear-gradient(#24a,#35a);
+    background: linear-gradient(#24a,#46b);
     height: 100%;
     left: 0;
     position: absolute;
@@ -237,8 +237,6 @@ html {
 }
 
 #upload-cancel {
-    background: #444;
-    border-radius: 4px;
     bottom: 10px;
     cursor: pointer;
     font-size: .66em;
@@ -256,7 +254,6 @@ html {
 }
 
 #upload-cancel:hover {
-    background: #35a;
     color: #fff;
 }
 
@@ -291,7 +288,7 @@ html {
 .arrow { position: absolute }
 
 #path li.in  { left: 0    }
-#path li.out { left: -10% }
+#path li.out { left: -100px }
 #path li.placeholder { opacity: 0 }
 #path li:first-child { padding-left: .5em }
 #path li { color: #bbb; transition: color .3s ease, left .5s ease; }
@@ -374,10 +371,10 @@ html {
     position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 22em);
+    width: calc(100% - 18em);
 }
 
-@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 7em) } }
+@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 6.5em) } }
 
 .playing:after {
     animation: zoom .75s linear infinite;
@@ -578,7 +575,7 @@ html {
     bottom: 0;
     color: #ccc;
     position: absolute;
-    transition: bottom .25s ease;
+    transition: bottom .5s ease;
     width: 100%;
 }
 
@@ -721,6 +718,9 @@ html {
 #about-box a:hover {
     color: #29f;
 }
+#about-box a:nth-child(2n):hover {
+    color: #f1a;
+}
 
 #about-title {
     color: #fff;
@@ -766,7 +766,7 @@ html {
     z-index: 32;
 }
 
-#config-box.in  { transform: scale(1); opacity: 1; }
+#config-box.in  { transform: scale(1);  opacity: 1; }
 #config-box.out { transform: scale(.5); opacity: 0; visibility: hidden }
 
 #userlist-header {
