@@ -1361,7 +1361,6 @@
 
     function reloadCSS(css) {
         if (!droppy.debug) return;
-        log("Reloading CSS...");
         $('link[rel="stylesheet"]').remove();
 
         var i = 0;
