@@ -473,67 +473,69 @@
             $("#upload-folder").css("color", "#666").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
-        var info         = $("#create-folder-info"),
-            nameinput    = $("#create-folder-input"),
-            createbox    = $("#create-folder-box"),
-            createButton = $("#create-folder-button"),
-            indicators   = $("#create-folder-button, #create-folder-input"),
-            activeFiles;
+        var info         = $("#editbox-info"),
+            editInput    = $("#editbox-input"),
+            editbox      = $("#editbox"),
+            editSubmit   = $("#editbox-submit"),
+            indicators   = $("#editbox-submit, #editbox-input");
 
         // Show popup for folder creation
         $("#create-folder").register("click", function () {
-            requestAnimation(function () {
-                createbox.attr("class", createbox.attr("class") !== "in" ? "in" : "out");
-                setTimeout(function () { nameinput.focus(); }, 400);
-                if (createbox.attr("class") === "in") {
-                    activeFiles = [];
-                    $(".filelink, .folderlink").each(function () {
-                        activeFiles.push($(this).html().toLowerCase());
-                    });
-                }
-                toggleCatcher();
-            });
+            showEditBox("create-folder");
         });
 
-        // Handler for the input of the folder name
-        nameinput.register("keyup", function (event) {
-            if (event.keyCode === 27) { // Escape Key
-                createbox.attr("class", "out");
-                toggleCatcher();
-            }
-            var input = nameinput.val();
-            var valid = !/[\\*{}\/<>?|]/.test(input) && !/^(\.+)$/.test(input);
-            var folderExists;
-            for (var i = 0, len = activeFiles.length; i < len; i++)
-                if (activeFiles[i] === input.toLowerCase()) {
-                    folderExists = true;
-                    break;
-                }
-            if (input === "") {
-                createButton.off("click");
-                indicators.removeClass("invalid");
+        // Input validation preview, the server performs the same regex
+        editInput.register("input", function () {
+            var canSubmit, exists, valid, input = $(this).val();
+            valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
+            for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
+                if (droppy.activeFiles[i] === input.toLowerCase()) { exists = true; break; }
+            canSubmit = valid && !exists;
+            editbox.data("canSubmit", canSubmit ? "true" : "false");
+            if (canSubmit) {
+                indicators.removeClass();
                 info.removeClass();
-            } else if (!valid || folderExists) {
-                createButton.off("click");
-                indicators.addClass("invalid");
-                info.html(folderExists ? "Already exists!" : "Invalid characters!");
-                info.attr("class", "in");
+                editSubmit.register("click", submitEdit);
             } else {
-                createButton.register("click", createFolderAndHide);
-                if (event.keyCode === 13) // Return Key
-                    createFolderAndHide();
+                indicators.attr("class", input.length > 0 ? "invalid" : "");
+                if (exists) {
+                    info.html(exists ? "Already exists!" : "Invalid characters!");
+                    info.attr("class", "in");
+                }
+                editSubmit.off("click");
             }
         });
 
-        function createFolderAndHide() {
-            var folderName = (droppy.currentFolder === "/") ? "/" + nameinput.val() : droppy.currentFolder + "/" + nameinput.val();
-            sendMessage("CREATE_FOLDER", folderName);
-            createbox.attr("class", "out");
-            toggleCatcher();
+        // Key handlers for the modal edit box
+        editInput.register("keyup", function (event) {
+            if (event.keyCode === 27) { // Escape Key
+                cleanupAndHideEditbox();
+            }
+            if (event.keyCode === 13) { // Return Key
+                submitEdit();
+            }
+        });
 
-            // Clean up after creation
-            createButton.off("click");
-            nameinput.val("");
+        function submitEdit() {
+            if (editbox.data("canSubmit") !== "true") return;
+            if (editbox.data("type") === "create-folder") {
+                sendMessage("CREATE_FOLDER",
+                    droppy.currentFolder === "/" ? "/" + editInput.val() : droppy.currentFolder + "/" + editInput.val()
+                );
+            } else if (editbox.data("type") === "rename") {
+                sendMessage("RENAME", {
+                    "old": editInput.attr("placeholder"),
+                    "new": editInput.val()
+                });
+            }
+            cleanupAndHideEditbox();
+        }
+
+        function cleanupAndHideEditbox() {
+            editbox.attr("class", "out");
+            toggleCatcher();
+            editSubmit.off("click");
+            editInput.val("");
             indicators.removeClass("invalid");
             info.removeClass();
         }
@@ -547,7 +549,6 @@
                 toggleCatcher();
             });
         });
-
 
         $("#config").register("click", function () {
             requestAnimation(function () {
@@ -599,7 +600,7 @@
 
         function hideModals() {
             $("#click-catcher").attr("class", "out");
-            createbox.attr("class", "out");
+            editbox.attr("class", "out");
             aboutbox.attr("class", "out");
             configbox.attr("class", "out");
         }
@@ -790,21 +791,44 @@
                 }
             }
         }
-
-        // Toggle the full-screen click catching frame to exit modal dialogs
-        function toggleCatcher() {
-            if (aboutbox.attr("class") === "in"  ||
-                createbox.attr("class") === "in" ||
-                configbox.attr("class") === "in"
-            ) {
-                $("#click-catcher").attr("class", "in");
-            } else
-                $("#click-catcher").attr("class", "out");
-        }
     }
 // ============================================================================
 //  General helpers
 // ============================================================================
+    function showEditBox(type, prefill) {
+        var box = $("#editbox"), input = $("#editbox-input");
+
+        droppy.activeFiles = [];
+        $(".filelink, .folderlink").each(function () {
+            droppy.activeFiles.push($(this).html().toLowerCase());
+        });
+
+        box.data("type", type);
+        if (prefill) input.val(prefill);
+
+        if (type === "create-folder")
+            input.attr("placeholder", "Folder Name");
+        else if (type === "rename")
+            input.attr("placeholder", prefill);
+
+        requestAnimation(function () {
+            box.attr("class", box.attr("class") !== "in" ? "in" : "out");
+            toggleCatcher();
+            setTimeout(function () { input.focus(); }, 400);
+        });
+    }
+
+    // Toggle the full-screen click catching frame to exit modal dialogs
+    function toggleCatcher() {
+        if ($("#about-box").attr("class")  === "in" ||
+            $("#editbox").attr("class")    === "in" ||
+            $("#config-box").attr("class") === "in"
+        ) {
+            $("#click-catcher").attr("class", "in");
+        } else
+            $("#click-catcher").attr("class", "out");
+    }
+
     function populateUserList(userList) {
         var temp, entry;
         document.getElementById("userlist").innerHTML = "";
@@ -1023,6 +1047,7 @@
                             '<span class="' + spriteClass + '"></span>' +
                             '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="icon-delete icon"></span>' +
+                            '<span class="icon-rename icon"></span>' +
                             '<span class="icon-link icon"></span>' +
                             '<span class="data-info">' + size + '</span>' +
                             '<span class="data-mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
@@ -1036,6 +1061,7 @@
                             '<span class="sprite sprite-folder"></span>' +
                             '<span class="folderlink ' + tags + '">' + file + '</span>' +
                             '<span class="icon-delete icon"></span>' +
+                            '<span class="icon-rename icon"></span>' +
                         '</li>'
                     );
                 }
@@ -1111,6 +1137,13 @@
             if (droppy.socketWait) return;
             var destination = $(this).data("id");
             updateLocation(destination, true);
+        });
+
+        // Rename a file/folder
+        $(".icon-rename").register("click", function (event) {
+            if (droppy.socketWait) return;
+            showEditBox("rename", $(this).parent().find(".filelink, .folderlink").html());
+            event.stopPropagation();
         });
 
         // Request a shortlink
@@ -1210,6 +1243,7 @@
 
     function initVariables() {
         droppy.smallScreen = $(window).width() < 640;
+        droppy.activeFiles = [];
         droppy.currentData = null;
         droppy.currentFolder = null;
         droppy.hasLoggedOut = null;

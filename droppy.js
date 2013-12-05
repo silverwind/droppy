@@ -405,7 +405,7 @@
                     break;
                 case "CREATE_FOLDER":
                     var foldername = path.basename(msg.data);
-                    if (/[\\*{}\/<>?|]/.test(foldername) || /^(\.+)$/.test(foldername)) {
+                    if (/[\\\*\{\}\/\?\|<>"]/.test(foldername) || /^(\.+)$/.test(foldername)) {
                         log.log(colorSocket(remoteIP, remotePort), " Invalid directory creation request: " + foldername);
                         return;
                     }
@@ -418,8 +418,25 @@
                         });
                     });
                     break;
+                case "RENAME":
+                    var clientpath = clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/";
+                    var newname = clientpath + msg.data.new,
+                        oldname = clientpath + msg.data.old;
+                    if (/[\\\*\{\}\/\?\|<>"]/.test(msg.data.new) || /^(\.+)$/.test(msg.data.new)) {
+                        log.log(colorSocket(remoteIP, remotePort), " Invalid rename request: " + newname);
+                        return;
+                    }
+
+                    fs.rename(addFilePath(oldname), addFilePath(newname), function (error) {
+                        if (error) log.error(error);
+                        log.log(colorSocket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
+                        readDirectory(clients[cookie].directory, function () {
+                            sendFiles(cookie, "UPDATE_FILES");
+                        });
+                    });
+                    break;
                 case "SWITCH_FOLDER":
-                    if (!/^\//.test(msg.data) || /\.\./.test(msg.data)) return;
+                    if (!/^\//.test(msg.data) || /^(\.+)$/.test(msg.data)) return;
                     clients[cookie].directory = msg.data;
                     updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read

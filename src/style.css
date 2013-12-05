@@ -472,7 +472,7 @@ html {
     color: #25a;
 }
 
-.icon-delete, .icon-link, .icon-play {
+.icon-delete, .icon-link, .icon-play, .icon-rename {
     cursor: pointer;
     float: right;
     text-align: center;
@@ -480,13 +480,14 @@ html {
     width: 1.5em;
 }
 
-.icon-link         { padding-left: .25em }
-.icon-delete:hover { color: #f33; transform: scale(1.3) }
-.icon-link:hover   { color: #29f; transform: scale(1.3) }
+.icon-link,.icon-rename { padding-left: .25em }
+.icon-delete:hover { color: #f33 !important; transform: scale(1.3) }
+.icon-link:hover   { color: #29f !important; transform: scale(1.3) }
+.icon-rename:hover { color: #f1a !important; transform: scale(1.3) }
 .icon-play:hover   { transform: scale(1.3) }
 /* ========================= Directory Name Input ========================== */
 
-#create-folder-box {
+#editbox {
     background: #181818;
     border-radius: 6px;
     height: 120px;
@@ -502,11 +503,11 @@ html {
     z-index: 32;
 }
 
-#create-folder-box.in  { transform: scale(1); opacity: 1 }
-#create-folder-box.out { transform: scale(.5); opacity: 0; visibility: hidden }
+#editbox.in  { transform: scale(1); opacity: 1 }
+#editbox.out { transform: scale(.5); opacity: 0; visibility: hidden }
 
 
-#create-folder-label {
+#editbox-label {
     color: #222;
     font-size: 125px;
     height: 100%;
@@ -516,7 +517,7 @@ html {
     width: 1em;
 }
 
-#create-folder-input {
+#editbox-input {
     background: #111;
     border-radius: 4px;
     border: 2px solid #222;
@@ -526,17 +527,17 @@ html {
     left: 50%;
     margin-left: -140px;
     margin-top: -20px;
-    padding: 5px 10px;
+    padding: 0 10px;
     position: absolute;
     top: 50%;
     transition: all .3s ease;
     width: 280px;
 }
 
-#create-folder-input:focus   { border: 2px solid #666; color: #ccc; }
-#create-folder-input.invalid { border: 2px solid #f22; color: #f22; }
+#editbox-input:focus   { border: 2px solid #666; color: #ccc; }
+#editbox-input.invalid { border: 2px solid #f22; color: #f22; }
 
-#create-folder-info {
+#editbox-info {
     color: #f22;
     left: 50%;
     line-height: 40px;
@@ -548,9 +549,9 @@ html {
     width: 300px;
 }
 
-#create-folder-info.in { opacity: 1 }
+#editbox-info.in { opacity: 1 }
 
-#create-folder-button {
+#editbox-submit {
     border-radius: 4px;
     bottom: 8px;
     color: #999;
@@ -563,9 +564,9 @@ html {
     user-select: none;
 }
 
-#create-folder-button .icon { margin-right: 5px }
-#create-folder-button:hover { color: #fff }
-#create-folder-button.invalid:hover { background: #f22 }
+#editbox-submit .icon { margin-right: 5px }
+#editbox-submit:hover { color: #fff }
+#editbox-submit.invalid:hover { background: #f22 }
 
 /* =============================== Audio Panel =============================== */
 
@@ -1066,6 +1067,7 @@ input[type="checkbox"]:checked + label:after { opacity: 1 }
 .submit.invalid {
     background: #b31;
 }
+
 @media all and (max-width: 639px), all and (max-height: 399px) {
     .submit {
         border-radius: 0;
