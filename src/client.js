@@ -230,9 +230,12 @@
             // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
             try {
                 droppy.socket.close(1001);
-            } catch (error) {}
+            } catch (error) {
+                try {
+                    droppy.socket.close();
+                } catch (error) {}
+            }
         }
-
     });
 
 // ============================================================================
