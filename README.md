@@ -1,12 +1,13 @@
 #droppy
 Pure HTML5 multi-user cloud storage running on [node.js](http://nodejs.org/).
 
-![droppy](http://i.imgur.com/pnWbq98.png)
+![droppy](http://i.imgur.com/GSkvDhz.png)
 
 ###Features
 
 * Realtime updating of all connected clients via WebSockets.
 * Lightweight. Performs great, even on a Raspberry Pi.
+* Fully responsive design.
 * Drag-and-Drop uploads of multiple files in all browsers.
 * Recursive directory uploads in all supported browsers (WebKit-only as of now, Mozilla is [working on it](https://bugzilla.mozilla.org/show_bug.cgi?id=846931)).
 * Asynchronous uploads over XMLHTTPRequest2.
