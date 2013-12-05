@@ -806,10 +806,13 @@
         box.data("type", type);
         if (prefill) input.val(prefill);
 
-        if (type === "create-folder")
+        if (type === "create-folder") {
+            $("#editbox-name").html("Create");
             input.attr("placeholder", "Folder Name");
-        else if (type === "rename")
+        } else if (type === "rename") {
+            $("#editbox-name").html("Rename");
             input.attr("placeholder", prefill);
+        }
 
         requestAnimation(function () {
             box.attr("class", box.attr("class") !== "in" ? "in" : "out");
