@@ -522,7 +522,6 @@ html {
     border-radius: 4px;
     border: 2px solid #222;
     color: #ccc;
-    font-size: 1.2em;
     height: 40px;
     left: 50%;
     margin-left: -140px;
@@ -530,7 +529,7 @@ html {
     padding: 0 10px;
     position: absolute;
     top: 50%;
-    transition: all .3s ease;
+    transition: all .25s ease;
     width: 280px;
 }
 
@@ -545,7 +544,7 @@ html {
     opacity: 0;
     position: absolute;
     text-align: center;
-    transition: all .3s ease;
+    transition: all .25s ease;
     width: 300px;
 }
 

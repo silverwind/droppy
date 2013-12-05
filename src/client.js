@@ -796,7 +796,7 @@
 //  General helpers
 // ============================================================================
     function showEditBox(type, prefill) {
-        var box = $("#editbox"), input = $("#editbox-input");
+        var box = $("#editbox"), input = $("#editbox-input"), lastDot;
 
         droppy.activeFiles = [];
         $(".filelink, .folderlink").each(function () {
@@ -817,7 +817,13 @@
         requestAnimation(function () {
             box.attr("class", box.attr("class") !== "in" ? "in" : "out");
             toggleCatcher();
-            setTimeout(function () { input.focus(); }, 400);
+            setTimeout(function () {
+                input.focus();
+                if (type === "rename") {
+                    lastDot = input.val().lastIndexOf(".");
+                    if (lastDot > 0) input[0].setSelectionRange(0, lastDot);
+                }
+            }, 200);
         });
     }
 
