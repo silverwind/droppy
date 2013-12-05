@@ -331,8 +331,6 @@
         // Stop dragenter and dragover from killing our drop event
         $(document.documentElement).register("dragenter", function (event) { event.preventDefault(); });
         $(document.documentElement).register("dragover", function (event) { event.preventDefault(); });
-        // Catch the spacebar to avoid a scrolling bug in Firefox
-        $(document.documentElement).register("keydown", function (event) { if (event.keyCode === 32) event.preventDefault(); });
 
         // File drop handler
         $(document.documentElement).register("drop", function (event) {
