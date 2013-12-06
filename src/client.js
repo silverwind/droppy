@@ -233,7 +233,7 @@
             } catch (error) {
                 try {
                     droppy.socket.close();
-                } catch (error) {}
+                } catch (error) { log("Unable to close socket on unload: ", error); }
             }
         }
     });
