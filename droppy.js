@@ -1145,6 +1145,8 @@
     //-----------------------------------------------------------------------------
     // config.json handling
     function parseConfig() {
+        var doWrite;
+
         // Copy config.json.example to config.json if it doesn't exist
         try {
             fs.statSync(configFile);
@@ -1173,10 +1175,12 @@
 
         for (var i = 0, len = opts.length; i < len; i++) {
             if (config[opts[i]] === undefined) {
-                log.error("Error: Missing property in config.json:", opts[i]);
-                process.exit(1);
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "adding option ", log.color.cyan, opts[i], log.color.reset, " to config.json...");
+                config[opts[i]] = JSON.parse(fs.readFileSync("config.json.example"))[opts[i]];
+                doWrite = true;
             }
         }
+        doWrite && writeConfig();
     }
 
     //-----------------------------------------------------------------------------
@@ -1322,7 +1326,8 @@
     }
 
     //-----------------------------------------------------------------------------
-    function writeDB() { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
+    function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
+    function writeConfig()     { fs.writeFileSync(configFile, JSON.stringify(config, null, 4)); }
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
     function addFilePath(p)    { return config.filesDir.substring(0, config.filesDir.length - 1) + p; }
