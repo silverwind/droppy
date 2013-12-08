@@ -872,7 +872,7 @@
 
                 temp = createElement("input", "user-pass");
                 temp.type = "password";
-                temp.setAttribute("title", "Set the user's password");
+                temp.setAttribute("title", "The user's password");
                 temp.onkeyup = function () {
                     this.parentNode.dataset.changed = "true";
                     $(this.parentNode).addClass("changed");
@@ -890,13 +890,13 @@
                 entry.appendChild(temp);
 
                 temp = createElement("label", "icon");
-                temp.setAttribute("title", "Privileded Users can create other users.");
+                temp.setAttribute("title", "Can this user create more users?");
                 temp.setAttribute("for", "check-" + user);
                 temp.checked = userList[user] ? "checked" : "";
                 entry.appendChild(temp);
 
                 temp = createElement("span", "user-delete icon", "");
-                temp.setAttribute("title", "Delete the user.");
+                temp.setAttribute("title", "Delete");
                 temp.onclick = function () {
                     var children = this.parentNode.childNodes;
                     for (var i = 0, l = children.length; i < l; i++) {

@@ -857,11 +857,11 @@ html {
 }
 
 .user-entry label:after {
-    content: '';
+    content: '';
     opacity: 0;
     position: absolute;
-    left: 5px;
-    top: 5px;
+    left: 4px;
+    top: 3px;
     transition: opacity .25s ease;
     color: #999;
 }
