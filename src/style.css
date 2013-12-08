@@ -154,9 +154,9 @@ html {
 @media all and (max-width:  750px) { .button-text { display: none } }
 @media all and (max-width:  639px) { .button {  font-size: .7em; line-height: 25px; height: 25px; } }
 
-#upload-file:hover   { color: #ae5; border-bottom: 2px solid #ae5 !important; }
+#upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important; }
 #upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important; }
-#create-folder:hover { color: #29f; border-bottom: 2px solid #29f !important; }
+#create-folder:hover { color: #ae5; border-bottom: 2px solid #ae5 !important; }
 #about:hover         { color: #f71; border-bottom: 2px solid #f71 !important; }
 #config:hover        { color: #ff5; border-bottom: 2px solid #ff5 !important; }
 #logout:hover        { color: #e33; border-bottom: 2px solid #e33 !important; }

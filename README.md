@@ -75,7 +75,7 @@ Configuration is done through `config.json`, which is copied from `config.json.e
 - `db` Location of the user database file.
 - `filesDir` The directory which serves as the server's root.
 - `incomingDir` The directory for temporary files during uploads.
-- `incomingDir` The directory for temporary zip files.
+- `zipDir` The directory for temporary zip files.
 - `resDir` The directory which contains the compiled resources and images.
 - `srcDir` The directory which contains the html/js/css sources.
 
