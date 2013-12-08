@@ -182,6 +182,21 @@
                 //TODO: UI
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
+            case "ZIP_READY":
+                $(".inline-spin").each(function () {
+                    if (msg.path.replace(/\.zip$/, "") === $(this).parent().data("id").substring(1)) {
+                        var link = document.createElement("a");
+                        link.innerHTML = "";
+                        link.setAttribute("href", "/$$/" + msg.path);
+                        link.setAttribute("title", "Download Zip");
+                        link.setAttribute("class", "icon-zip icon");
+                        link.setAttribute("download", basename(msg.path));
+                        link.onclick = function (event) { event.stopPropagation(); };
+                        $(this).replaceWith(link);
+                        return;
+                    }
+                });
+                break;
             case "USER_LIST":
                 populateUserList(msg.users);
                 break;
@@ -912,6 +927,10 @@
         document.title = [prefix, suffix].join(" - ");
     }
 
+    function basename(str) {
+        return str.split("/").reverse()[0];
+    }
+
     function finishUpload(msg) {
         droppy.isUploading = false;
         updateLocation(droppy.currentFolder, false);
@@ -1056,9 +1075,9 @@
                         '<li class="data-row" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '"></span>' +
                             '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                            '<span class="icon-delete icon"></span>' +
-                            '<span class="icon-rename icon"></span>' +
-                            '<span class="icon-link icon"></span>' +
+                            '<span class="icon-delete icon" title="Delete"></span>' +
+                            '<span class="icon-rename icon" title="Rename"></span>' +
+                            '<span class="icon-link icon" title="Create Link"></span>' +
                             '<span class="data-info">' + size + '</span>' +
                             '<span class="data-mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             audio +
@@ -1070,8 +1089,9 @@
                         '<li class="data-row" data-type="folder" data-id="' + id + '">' +
                             '<span class="sprite sprite-folder"></span>' +
                             '<span class="folderlink ' + tags + '">' + file + '</span>' +
-                            '<span class="icon-delete icon"></span>' +
-                            '<span class="icon-rename icon"></span>' +
+                            '<span class="icon-delete icon" title="Delete"></span>' +
+                            '<span class="icon-rename icon" title="Rename"></span>' +
+                            '<span class="icon-zip icon" title="Create Zip"></span>' +
                         '</li>'
                     );
                 }
@@ -1153,6 +1173,13 @@
         $(".icon-rename").register("click", function (event) {
             if (droppy.socketWait) return;
             showEditBox("rename", $(this).parent().find(".filelink, .folderlink").html());
+            event.stopPropagation();
+        });
+        // Zip a folder
+        $(".icon-zip").register("click", function (event) {
+            if (droppy.socketWait) return;
+            $(this).html("").addClass("spin inline-spin");
+            sendMessage("REQUEST_ZIP", $(this).parent().data("id"));
             event.stopPropagation();
         });
 

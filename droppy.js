@@ -37,10 +37,12 @@
 "use strict";
 
 (function () {
-    var version    = require("./package.json").version,
-        configFile = "config.json",
+    var
+        // Libraries
         helpers    = require("./lib/helpers.js"),
         log        = require("./lib/log.js"),
+        // Modules
+        archiver   = require("archiver"),
         ap         = require("autoprefixer"),
         Busboy     = require("busboy"),
         crypto     = require("crypto"),
@@ -50,6 +52,10 @@
         util       = require("util"),
         Wss        = require("ws").Server,
         wrench     = require("wrench"),
+        zlib       = require("zlib"),
+        // Variables
+        version    = require("./package.json").version,
+        configFile = "config.json",
         cache      = {},
         clients    = {},
         db         = {},
@@ -196,7 +202,13 @@
                 process.exit(1);
             }
         }
+        // Clean up the temp dirs
+        wrench.rmdirSyncRecursive(config.incomingDir, true);
+        wrench.rmdirSyncRecursive(config.zipDir, true);
+
+        // Create the files and temp dirs
         fs.mkdir(config.filesDir, config.dirMode, onerror);
+        fs.mkdir(config.zipDir, config.dirMode, onerror);
         fs.mkdir(config.incomingDir, config.dirMode, onerror);
     }
 
@@ -371,6 +383,16 @@
                     // Send the shortlink to the client
                     sendLink(cookie, link);
                     writeDB();
+                    break;
+                case "REQUEST_ZIP":
+                    createZip(msg.data, function (zip) {
+                        log.log(colorSocket(remoteIP, remotePort), " Zip created: " + msg.data);
+                        send(clients[cookie].ws, JSON.stringify({
+                            type : "ZIP_READY",
+                            path :  path.relative(config.zipDir, zip.path).replace("\\", "/")
+                        }));
+                    });
+
                     break;
                 case "DELETE_FILE":
                     log.log(colorSocket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
@@ -658,7 +680,7 @@
 
             function runGzip() {
                 var currentFile = gzipFiles[0];
-                require("zlib").gzip(cache[currentFile].data, function (error, compressedData) {
+                zlib.gzip(cache[currentFile].data, function (error, compressedData) {
                     if (error) log.error(error);
                     cache[currentFile].gzipData = compressedData;
                     gzipFiles = gzipFiles.slice(1);
@@ -687,7 +709,7 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
-        } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
+        } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI) || /^\/\$\$\//.test(URI)) {
             handleFileRequest(req, res);
         } else if (/^\/res\//.test(URI)) {
             var fileName = path.basename(req.url);
@@ -863,12 +885,13 @@
 
     //-----------------------------------------------------------------------------
     function handleFileRequest(req, res) {
-        var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo;
+        var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo, filepath;
 
         // Check for a shortlink
         if (/^\/\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
             shortLink = db.shortlinks[URI];
 
+        // Validate the cookie for the remaining requests
         if (!getCookie(req.headers.cookie) && !shortLink) {
             res.statusCode = 301;
             res.setHeader("Location", "/");
@@ -876,7 +899,22 @@
             log.response(req, res);
             return;
         }
-        var filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
+
+        // Check for a zip link
+        if (/^\/\$\$\//.test(req.url)) {
+            var zippath = path.join(config.zipDir, req.url.substring(4));
+            if (fs.statSync(path.join(config.zipDir, req.url.substring(4)))) {
+                filepath = zippath;
+            } else {
+                res.statusCode = 404;
+                res.setHeader("Location", "/");
+                res.end();
+                log.error("Zip " + zippath + " not found!");
+            }
+        } else {
+            filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
+        }
+
         if (filepath) {
             var mimeType = mime.lookup(filepath);
 
@@ -1027,6 +1065,40 @@
     }
 
     //-----------------------------------------------------------------------------
+    // Create a zip file from a directory
+    // The callback recieves an object with the path and size of the file
+    function createZip(inputFolder, callback) {
+        var archive = archiver("zip"), output;
+        var zipPath = path.join(config.zipDir, inputFolder) + ".zip";
+        wrench.mkdirSyncRecursive(path.dirname(zipPath), config.dirMode);
+
+        output = fs.createWriteStream(zipPath);
+        output.on("close", function () {
+            fs.stat(zipPath, function (error, stats) {
+                callback({path: zipPath, size: stats.size});
+            });
+        });
+
+        archive.on("error", function (error) { log.error(error); });
+        archive.pipe(output);
+
+        helpers.walkDirectory(addFilePath(inputFolder), function (error, paths) {
+            var read = 0, toread = paths.length;
+            if (error) log.error(error);
+            while (paths.length) {
+                (function (currentPath) {
+                    fs.readFile(currentPath, function (err, data) {
+                        if (error) log.error(error);
+                        read++;
+                        archive.append(data, {name: removeFilePath(currentPath)});
+                        if (read === toread) archive.finalize(function (error) { if (error) log.error(error); });
+                    });
+                })(paths.pop());
+            }
+        });
+    }
+
+    //-----------------------------------------------------------------------------
     // Argument handler
     function handleArguments() {
         var args = process.argv.slice(2), option = args[0];
@@ -1089,7 +1161,7 @@
 
         var opts = [
             "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength",
-            "maxOpen", "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
+            "maxOpen", "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"
         ];
 
         for (var i = 0, len = opts.length; i < len; i++) {

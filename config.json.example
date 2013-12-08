@@ -13,7 +13,8 @@
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
     "filesDir"     : "./files/",
-    "incomingDir"  : "./incoming/",
+    "incomingDir"  : "./temp/incoming/",
+    "zipDir"       : "./temp/zip/",
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }

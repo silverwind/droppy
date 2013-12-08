@@ -9,6 +9,7 @@
   },
   "main": "droppy.js",
   "dependencies": {
+    "archiver": "~0.4.10",
     "autoprefixer": "~0.8.20131104",
     "clean-css": "~2.0.2",
     "graceful-fs": "~2.0.1",
@@ -23,6 +24,7 @@
     "src": "src",
     "res": "res",
     "lib": "lib",
+    "temp": "temp",
     "keys": "keys"
   },
   "engines": {

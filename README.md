@@ -5,9 +5,10 @@ Pure HTML5 multi-user cloud storage running on [node.js](http://nodejs.org/).
 
 ###Features
 
+* Fully responsive design.
 * Realtime updating of all connected clients via WebSockets.
 * Lightweight. Performs great, even on a Raspberry Pi.
-* Fully responsive design.
+* Zip downloads for folders.
 * Drag-and-Drop uploads of multiple files in all browsers.
 * Recursive directory uploads in all supported browsers (WebKit-only as of now, Mozilla is [working on it](https://bugzilla.mozilla.org/show_bug.cgi?id=846931)).
 * Asynchronous uploads over XMLHTTPRequest2.
@@ -50,7 +51,8 @@ Configuration is done through `config.json`, which is copied from `config.json.e
     "httpsCert"    : "./keys/cert.pem",
     "db"           : "./db.json",
     "filesDir"     : "./files/",
-    "incomingDir"  : "./incoming/",
+    "incomingDir"  : "./temp/incoming/",
+    "zipDir"       : "./temp/zip/",
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }
@@ -72,7 +74,8 @@ Configuration is done through `config.json`, which is copied from `config.json.e
 - `httpsCert` Path to your openSSL cert(s). Used in conjunction with `useHTTPS`.
 - `db` Location of the user database file.
 - `filesDir` The directory which serves as the server's root.
-- `incomingDir` The directory which serves as the server's root.
+- `incomingDir` The directory for temporary files during uploads.
+- `incomingDir` The directory for temporary zip files.
 - `resDir` The directory which contains the compiled resources and images.
 - `srcDir` The directory which contains the html/js/css sources.
 
