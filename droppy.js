@@ -382,6 +382,7 @@
                     writeDB();
                     break;
                 case "REQUEST_ZIP":
+                    log.log(colorSocket(remoteIP, remotePort), " Creating Zip of " + msg.data);
                     createZip(msg.data, function (zip) {
                         log.log(colorSocket(remoteIP, remotePort), " Zip created: " + msg.data);
                         send(clients[cookie].ws, JSON.stringify({
@@ -1065,7 +1066,7 @@
     // Create a zip file from a directory
     // The callback recieves an object with the path and size of the file
     function createZip(inputFolder, callback) {
-        var archive = archiver("zip"), output;
+        var archive = archiver.create("zip", {zlib: { windowBits: 14, memLevel: 7, level: 3 }}), output;
         var zipPath = path.join(config.zipDir, inputFolder) + ".zip";
         wrench.mkdirSyncRecursive(path.dirname(zipPath), config.dirMode);
 
