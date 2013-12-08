@@ -70,14 +70,14 @@
     if (isCLI) handleArguments();
 
     log.simple(log.logo);
-
-    parseConfig();
-    fs.MAX_OPEN = config.maxOpen;
-    log.useTimestamp = config.timestamps;
     log.simple(log.color.yellow, " ->> ", log.color.blue, "droppy ", log.color.reset,
                log.color.green, version, log.color.reset, " running on ", log.color.blue, "node ", log.color.reset,
                log.color.green, process.version.substring(1), log.color.reset
     );
+
+    parseConfig();
+    fs.MAX_OPEN = config.maxOpen;
+    log.useTimestamp = config.timestamps;
 
     // Read user/sessions from DB and check if its the first run
     readDB();
