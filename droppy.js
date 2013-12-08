@@ -202,14 +202,21 @@
                 process.exit(1);
             }
         }
-        // Clean up the temp dirs
-        wrench.rmdirSyncRecursive(config.incomingDir, true);
-        wrench.rmdirSyncRecursive(config.zipDir, true);
 
-        // Create the files and temp dirs
-        fs.mkdir(config.filesDir, config.dirMode, onerror);
-        fs.mkdir(config.zipDir, config.dirMode, onerror);
-        fs.mkdir(config.incomingDir, config.dirMode, onerror);
+        try {
+            // Clean up the temp dirs
+            wrench.rmdirSyncRecursive(config.incomingDir, true);
+            wrench.rmdirSyncRecursive(config.zipDir, true);
+
+            // Create the files and temp dirs
+            wrench.mkdirSyncRecursive(config.filesDir, config.dirMode);
+            wrench.mkdirSyncRecursive(config.zipDir, config.dirMode);
+            wrench.mkdirSyncRecursive(config.incomingDir, config.dirMode);
+        } catch (error) {
+            log.simple("Unable to create directories:");
+            log.error(error);
+            process.exit(1);
+        }
     }
 
     //-----------------------------------------------------------------------------
