@@ -900,15 +900,17 @@
 
         // Check for a zip link
         if (/^\/\$\$\//.test(req.url)) {
-            var zippath = path.join(config.zipDir, req.url.substring(4));
-            if (fs.statSync(path.join(config.zipDir, req.url.substring(4)))) {
+            var zippath = path.join(config.zipDir, decodeURIComponent(req.url.substring(4)));
+            try {
+                fs.statSync(zippath);
                 filepath = zippath;
-            } else {
+            } catch (error) {
                 res.statusCode = 404;
                 res.setHeader("Location", "/");
                 res.end();
-                log.error("Zip " + zippath + " not found!");
+                log.error("Zip " + zippath + " not found!\n", error);
             }
+
         } else {
             filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
         }
@@ -1066,7 +1068,7 @@
     // Create a zip file from a directory
     // The callback recieves an object with the path and size of the file
     function createZip(inputFolder, callback) {
-        var archive = archiver.create("zip", {zlib: { windowBits: 14, memLevel: 7, level: 3 }}), output;
+        var archive = archiver.create("zip", {zlib: { windowBits: 14, memLevel: 7, level: 1 }}), output;
         var zipPath = path.join(config.zipDir, inputFolder) + ".zip";
         wrench.mkdirSyncRecursive(path.dirname(zipPath), config.dirMode);
 
