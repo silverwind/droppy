@@ -369,10 +369,11 @@ html {
     position: absolute;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 18em);
 }
 
-@media all and (max-width: 639px) { .filelink, .folderlink { width: calc(100% - 6.5em) } }
+@media all and (min-width: 1024px) { .filelink, .folderlink { width: calc(100% - 20em) } }
+@media all and (max-width: 1023px) { .filelink, .folderlink { width: calc(100% - 20em) } }
+@media all and (max-width:  639px) { .filelink, .folderlink { width: calc(100% - 9em ) } }
 
 .playing:after {
     animation: zoom .75s linear infinite;
