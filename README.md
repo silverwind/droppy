@@ -19,15 +19,15 @@ Pure HTML5 multi-user cloud storage running on [node.js](http://nodejs.org/).
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
 ````bash
-npm install droppy && mv node_modules/droppy . && rm -rf node_modules
+npm install droppy && mv node_modules/droppy . && rm -rf node_modules && cd droppy
 ````
 Or get the latest development version through git:
 ````bash
-git clone git://github.com/silverwind/droppy.git
+git clone git://github.com/silverwind/droppy.git && cd droppy && npm install
 ````
 
 ##Running the server
-Inside `droppy`'s folder run:
+Inside droppy's folder run:
 ````bash
 node droppy
 ````
