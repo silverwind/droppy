@@ -192,22 +192,12 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Set up the directory for files
+    // Set up the directory
     function setupDirectories() {
-        function onerror(error) {
-            if (!error || error.code === "EEXIST") {
-                return true;
-            } else {
-                log.error(util.inspect(error));
-                process.exit(1);
-            }
-        }
-
+        // Clean up the temp dirs
+        wrench.rmdirSyncRecursive(config.incomingDir, true);
+        wrench.rmdirSyncRecursive(config.zipDir, true);
         try {
-            // Clean up the temp dirs
-            wrench.rmdirSyncRecursive(config.incomingDir, true);
-            wrench.rmdirSyncRecursive(config.zipDir, true);
-
             // Create the files and temp dirs
             wrench.mkdirSyncRecursive(config.filesDir, config.dirMode);
             wrench.mkdirSyncRecursive(config.zipDir, config.dirMode);
