@@ -136,23 +136,31 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
-    var queuedData, reopen;
+    var queuedData, reopen, retries = 3;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
 
         droppy.socket.onopen = function () {
+            log("WebSocket open.");
+            retries = 3; // reset retries on connection loss
             if (queuedData) {
                 sendMessage();
             } else
                 updateLocation(droppy.currentFolder || "/", false); // Request initial update
         };
 
+        // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
             if (droppy.hasLoggedOut || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
-                log("Websocket closed unexpectedly with code " + event.code + ". Reconnecting...");
-                openSocket();
+                if (retries > 0) {
+                    log("WebSocket closed " + event.code + ". Reconnecting " + retries + " more times.");
+                    openSocket();
+                    retries--;
+                } else {
+                    log("WebSocket closed " + event.code + ". Giving up on reconnects.");
+                }
             } else if (reopen) {
                 reopen = false;
                 openSocket();
@@ -217,7 +225,7 @@
                 droppy.socketWait = false;
             }, 1000);
 
-            log(document.domain + " <- " + msgType);
+            if (msgType) log(msgType + " -> " + document.domain);
 
             if (queuedData) {
                 droppy.socket.send(queuedData);
