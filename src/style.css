@@ -482,7 +482,7 @@ html {
     cursor: pointer;
     float: right;
     text-align: center;
-    transition: all .2s ease;
+    transition: transform .2s ease;
     width: 1.5em;
 }
 
@@ -516,6 +516,10 @@ html {
     width: 1em;
     right: .25em;
     top: .25em;
+}
+
+.inline-spin + .size-unit {
+    margin-right: .5em;
 }
 
 @keyframes spin {
