@@ -390,25 +390,34 @@ html {
   100% { transform: scale(1.2) }
 }
 
-.data-info {
-    color: #555;
+.size {
+    color: #111;
     float: right;
-    margin-right: .5em;
     text-align: right;
     white-space: nowrap;
-    width: 4em;
+    width: 3em;
 }
 
-@media all and (max-width: 639px) { .data-info { display: none; } }
+@media all and (max-width: 639px) { .size { display: none } }
 
-.data-mtime {
+.size-unit {
     color: #555;
     float: right;
-    margin-right: .5em;
+    margin-left: .25em;
+    text-align: left;
+    white-space: nowrap;
+    width: 2em;
+}
+
+@media all and (max-width: 639px) { .size-unit { display: none } }
+
+.mtime {
+    color: #111;
+    float: right;
     white-space: nowrap;
 }
 
-@media all and (max-width: 639px) { .data-mtime { display: none; } }
+@media all and (max-width: 639px) { .mtime { display: none } }
 /* ============================= Empty Folder ============================== */
 
 #empty {

@@ -798,10 +798,11 @@
                 var bytesSent  = event.loaded,
                     bytesTotal = event.total,
                     progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                    speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2) + "/s";
+                    speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2);
+
                 prog.css("width", progress);
                 updateTitle(progress);
-                uperc.html(progress + " - " + speed);
+                uperc.html(progress + " - " + speed.size + " " + speed.unit + "/sec");
 
                 // Calculate estimated time left
                 var elapsed = Date.now() - start;
@@ -1064,12 +1065,14 @@
 
     // Convert the received data into HTML
     function buildHTML(fileList, root, isUpload) {
-        var list = $("<ul></ul>"), downloadURL, type, size, mtime, id, tags, audio;
+        var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, tags, audio;
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
                 type = fileList[file].type;
-                size = convertToSI(fileList[file].size);
+                temp = convertToSI(fileList[file].size);
+                size = temp.size;
+                sizeUnit = temp.unit;
                 mtime = fileList[file].mtime;
                 id = (root === "/") ? "/" + file : root + "/" + file;
                 tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
@@ -1086,8 +1089,9 @@
                             '<span class="icon-delete icon" title="Delete"></span>' +
                             '<span class="icon-rename icon" title="Rename"></span>' +
                             '<span class="icon-link icon" title="Create Link"></span>' +
-                            '<span class="data-info">' + size + '</span>' +
-                            '<span class="data-mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
+                            '<span class="size-unit">' + sizeUnit + '</span>' +
+                            '<span class="size">' + size + '</span>' +
+                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             audio +
                         '</li>'
                     );
@@ -1100,8 +1104,9 @@
                             '<span class="icon-delete icon" title="Delete"></span>' +
                             '<span class="icon-rename icon" title="Rename"></span>' +
                             '<span class="icon-zip icon" title="Create Zip"></span>' +
-                            '<span class="data-info">' + size + '</span>' +
-                            '<span class="data-mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
+                            '<span class="size-unit">' + sizeUnit + '</span>' +
+                            '<span class="size">' + size + '</span>' +
+                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                         '</li>'
                     );
                 }
@@ -1309,10 +1314,17 @@
             bytes /= 1024;
             step++;
         }
-        if (!decimals)
-            return [(step === 0) ? bytes : Math.round(bytes), units[step]].join(" ");
-        else
-            return [(step === 0) ? bytes : (bytes).toFixed(decimals), units[step]].join(" ");
+        if (!decimals) {
+            return {
+                size: (step === 0) ? bytes : Math.round(bytes),
+                unit: units[step]
+            };
+        } else {
+            return {
+                size: (step === 0) ? bytes : (bytes).toFixed(decimals),
+                unit: units[step]
+            };
+        }
     }
 
     // Debug logging
@@ -1425,13 +1437,13 @@
     }
 
     setInterval(function () {
-        var dates = document.getElementsByClassName("data-mtime");
+        var dates = document.getElementsByClassName("mtime");
         for (var i = 0; i < dates.length; i++)
             if (dates[i].dataset.timestamp) {
                 var reltime = timeDifference(dates[i].dataset.timestamp);
                 if (reltime) dates[i].innerHTML = reltime;
             }
-    }, 1000);
+    }, 5000);
 
     function createElement(type, className, text) {
         var el = document.createElement(type);
