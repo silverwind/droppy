@@ -46,6 +46,7 @@ Configuration is done through `config.json`, which is copied from `config.json.e
     "dirMode"      : "755",
     "linkLength"   : 3,
     "maxOpen"      : 256,
+    "zipLevel"     : 1,
     "timestamps"   : true,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",
@@ -56,6 +57,7 @@ Configuration is done through `config.json`, which is copied from `config.json.e
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }
+
 ````
 ###General options
 - `debug` Skip resource minification and enable automatic CSS reloading when the source files change.
@@ -67,6 +69,7 @@ Configuration is done through `config.json`, which is copied from `config.json.e
 - `dirMode` The access mask with which directories are created.
 - `linkLength` The amount of characters in a shortlink.
 - `maxOpen` The maximum number of concurrently opened files. This option is primarily there for Windows servers.
+- `zipLevel` The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
 - `timestamps` Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
 ###Path options

@@ -8,6 +8,7 @@
     "dirMode"      : "755",
     "linkLength"   : 3,
     "maxOpen"      : 256,
+    "zipLevel"     : 1,
     "timestamps"   : true,
     "httpsKey"     : "./keys/key.pem",
     "httpsCert"    : "./keys/cert.pem",

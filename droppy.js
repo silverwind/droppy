@@ -823,7 +823,7 @@
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/css; charset=utf-8");
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
-            res.setHeader("Content-Length", Buffer.byteLength(cssCache, 'utf8'));
+            res.setHeader("Content-Length", Buffer.byteLength(cssCache, "utf8"));
             res.end(cssCache);
             log.response(req, res);
             return;
@@ -911,10 +911,7 @@
                 res.end();
                 log.error("Zip " + zippath + " not found!\n", error);
             }
-
-        } else {
-            filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
-        }
+        } else filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
 
         if (filepath) {
             var mimeType = mime.lookup(filepath);
@@ -1052,8 +1049,6 @@
                                 });
                             }
                         } else if (error) log.error(error);
-
-
                     });
                 })(files[i]);
             }
@@ -1089,7 +1084,7 @@
     // Create a zip file from a directory
     // The callback recieves an object with the path and size of the file
     function createZip(inputFolder, callback) {
-        var archive = archiver.create("zip", {zlib: { windowBits: 14, memLevel: 7, level: 1 }}), output;
+        var archive = archiver.create("zip", {zlib: { level: config.zipLevel }}), output;
         var zipPath = path.join(config.zipDir, inputFolder) + ".zip";
         wrench.mkdirSyncRecursive(path.dirname(zipPath), config.dirMode);
 
@@ -1183,8 +1178,8 @@
         }
 
         var opts = [
-            "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength",
-            "maxOpen", "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"
+            "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength", "maxOpen", "zipLevel",
+            "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"
         ];
 
         for (var i = 0, len = opts.length; i < len; i++) {
