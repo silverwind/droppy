@@ -279,7 +279,7 @@ html {
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px; padding: 0 .3em 0 1.6em } }
+@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px; padding: 0 .4em 0 1.6em } }
 @media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px; padding: 0 .1em 0 1.2em } }
 
@@ -458,7 +458,7 @@ html {
     left: .5em;
 }
 
-@media all and (min-width: 1024px) { .sprite { left: .8em; margin-top: 3px;  transform: scale(1)  } }
+@media all and (min-width: 1024px) { .sprite { left: .8em; margin-top: 5px;  transform: scale(1)  } }
 @media all and (max-width: 1023px) { .sprite { left: .7em; margin-top: 2px;  transform: scale(.9) } }
 @media all and (max-width:  639px) { .sprite { left: .6em; margin-top: 1px;  transform: scale(.8) } }
 
