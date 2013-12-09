@@ -43,6 +43,7 @@
         log        = require("./lib/log.js"),
         // Modules
         archiver   = require("archiver"),
+        async      = require("async"),
         ap         = require("autoprefixer"),
         Busboy     = require("busboy"),
         crypto     = require("crypto"),
@@ -1019,51 +1020,71 @@
     // Read the directory's content and store it in "dirs"
     function readDirectory(root, callback) {
         fs.readdir(addFilePath(root), function (error, files) {
+            var dirContents = {}, done = 0, last = files.length;
             if (error) log.error(error);
             if (!files) return;
-
-            var dirContents = {};
 
             if (files.length === 0) {
                 dirs[root] = dirContents;
                 callback();
             }
 
-            var lastFile = files.length;
-            var counter = 0;
-
-            for (var i = 0 ; i < lastFile; i++) {
-                var filename = files[i], type;
-                inspectFile(filename);
+            function checkDone() {
+                done++;
+                if (done === last) {
+                    dirs[root] = dirContents;
+                    callback();
+                }
             }
 
-            function inspectFile(filename) {
-                fs.stat(addFilePath(root) + "/" + filename, function (error, stats) {
-                    counter++;
-                    if (!error && stats) {
-                        if (stats.isFile())
-                            type = "f";
-                        if (stats.isDirectory())
-                            type = "d";
-                        if (type === "f" || type === "d")
-                            dirContents[filename] = {
-                                "type"  : type,
-                                "size"  : stats.size,
-                                "mtime" : stats.mtime.getTime() || 0
-                            };
-                    } else if (error) {
-                        log.error(error);
-                    }
-                    if (counter === lastFile) {
-                        // All stat callbacks have fired
-                        dirs[root] = dirContents;
-                        callback();
-                    }
-                });
+            for (var i = 0 ; i < last; i++) {
+                (function (entry) {
+                    fs.stat(addFilePath(root) + "/" + entry, function (error, stats) {
+                        if (!error && stats) {
+                            if (stats.isFile()) {
+                                dirContents[entry] = { type: "f", size: stats.size, mtime : stats.mtime.getTime() || 0 };
+                                checkDone();
+                            } else if (stats.isDirectory()) {
+                                du(addFilePath(root) + "/" + entry, function (error, size) {
+                                    if (error) log.error(error);
+                                    dirContents[entry] = { type: "d", size: size, mtime : stats.mtime.getTime() || 0 };
+                                    checkDone();
+                                });
+                            }
+                        } else if (error) log.error(error);
+
+
+                    });
+                })(files[i]);
             }
         });
     }
-
+    //-----------------------------------------------------------------------------
+    // Get a directory's size (the sum of all files inside it)
+    // TODO: caching of results
+    function du(dir, callback) {
+        fs.stat(dir, function (error, stat) {
+            if (error) return callback(error);
+            if (!stat) return callback(null, 0);
+            if (!stat.isDirectory()) return callback(null, stat.size);
+            fs.readdir(dir, function (error, list) {
+                if (error) return callback(error);
+                async.map(
+                    list.map(function (f) {
+                        return path.join(dir, f);
+                    }),
+                    function (f, callback) {
+                        return du(f, callback);
+                    },
+                    function (error, sizes) {
+                        callback(error, sizes && sizes.reduce(function (p, s) {
+                            return p + s;
+                        }, stat.size));
+                    }
+                );
+            });
+        });
+    }
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory
     // The callback recieves an object with the path and size of the file
@@ -1323,7 +1344,7 @@
     function writeConfig()     { fs.writeFileSync(configFile, JSON.stringify(config, null, 4)); }
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
-    function addFilePath(p)    { return config.filesDir.substring(0, config.filesDir.length - 1) + p; }
+    function addFilePath(p)    { return (config.filesDir + p).replace("//", "/"); }
     function removeFilePath(p) { return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), ""); }
     function colorSocket(ip, port) { return [log.color.cyan, ip, log.color.reset, ":", log.color.magenta, port, log.color.reset].join(""); }
     //-----------------------------------------------------------------------------

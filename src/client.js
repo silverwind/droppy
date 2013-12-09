@@ -1100,6 +1100,8 @@
                             '<span class="icon-delete icon" title="Delete"></span>' +
                             '<span class="icon-rename icon" title="Rename"></span>' +
                             '<span class="icon-zip icon" title="Create Zip"></span>' +
+                            '<span class="data-info">' + size + '</span>' +
+                            '<span class="data-mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                         '</li>'
                     );
                 }
