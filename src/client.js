@@ -1083,7 +1083,7 @@
                     var spriteClass = getSpriteClass(getExt(file));
                     if (isUpload) file = decodeURIComponent(file);
                     list.append(
-                        '<li class="data-row" data-type="file" data-id="' + id + '">' +
+                        '<li class="data-row' + (audio ? ' playable"' : '"') + ' data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '"></span>' +
                             '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="icon-delete icon" title="Delete"></span>' +

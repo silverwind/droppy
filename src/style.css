@@ -326,6 +326,7 @@ html {
     cursor: pointer;
     height: 1.5em;
     line-height: 1.5em;
+    padding-left: 1.75em;
 }
 
 .data-row, .data-row > .icon:not(.icon-play), .data-row > a {
@@ -371,9 +372,9 @@ html {
     white-space: nowrap;
 }
 
-@media all and (min-width: 1024px) { .filelink, .folderlink { width: calc(100% - 20em) } }
-@media all and (max-width: 1023px) { .filelink, .folderlink { width: calc(100% - 20em) } }
-@media all and (max-width:  639px) { .filelink, .folderlink { width: calc(100% - 9em ) } }
+@media all and (min-width: 1024px) { .filelink, .folderlink { width: calc(100% - 19em) } }
+@media all and (max-width: 1023px) { .filelink, .folderlink { width: calc(100% - 19em) } }
+@media all and (max-width:  639px) { .filelink, .folderlink { width: calc(100% - 7em ) } }
 
 .playing:after {
     animation: zoom .75s linear infinite;
@@ -453,32 +454,29 @@ html {
 .sprite {
     background-repeat: no-repeat;
     display: inline-block;
-    margin-left: .25em;
-    margin-right: .25em;
-    margin-top: -5px;
-    position: relative;
-    vertical-align: middle;
+    position: absolute;
+    left: .5em;
 }
 
-@media all and (min-width: 1024px) { .sprite { transform: scale(1)  } }
-@media all and (max-width: 1023px) { .sprite { transform: scale(.9) } }
-@media all and (max-width:  639px) { .sprite { transform: scale(.8) } }
+@media all and (min-width: 1024px) { .sprite { left: .8em; margin-top: 3px;  transform: scale(1)  } }
+@media all and (max-width: 1023px) { .sprite { left: .7em; margin-top: 2px;  transform: scale(.9) } }
+@media all and (max-width:  639px) { .sprite { left: .6em; margin-top: 1px;  transform: scale(.8) } }
 
-.icon-play {
+.data-row.playable:hover .sprite {
     display: none;
-    margin-right: .5em;
-    white-space: nowrap;
 }
 
-.data-row:hover .icon-play {
-    display: inline;
+.data-row.playable:hover .icon-play {
+    display: block;
+    position: absolute;
 }
 
-@media all and (max-width: 639px) { .icon-play { margin-right: 0; } }
+.icon-play { display: none }
+.icon-play.active { color: #25a }
 
-.icon-play.active {
-    color: #25a;
-}
+@media all and (min-width: 1024px) { .icon-play { left: .65em } }
+@media all and (max-width: 1023px) { .icon-play { left: .6em } }
+@media all and (max-width:  639px) { .icon-play { left: .6em } }
 
 .icon-delete, .icon-link, .icon-play, .icon-rename, .icon-zip {
     cursor: pointer;
