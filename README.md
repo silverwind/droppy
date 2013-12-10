@@ -1,17 +1,16 @@
 #droppy
 Pure HTML5 multi-user cloud storage running on [node.js](http://nodejs.org/).
 
-![droppy](http://i.imgur.com/GSkvDhz.png)
+![droppy](http://i.imgur.com/CHjNCOR.png)
 
 ###Features
 
-* Fully responsive design.
 * Realtime updating of all connected clients via WebSockets.
+* Fully responsive, mobile-ready CSS.
 * Lightweight. Performs great, even on a Raspberry Pi.
-* Zip downloads for folders.
-* Drag-and-Drop uploads of multiple files in all browsers.
+* Download folders in a single download as a zipped file.
+* Drag-and-Drop and asynchronous uploads of multiple files through XMLHTTPRequest2.
 * Recursive directory uploads in all supported browsers (WebKit-only as of now, Mozilla is [working on it](https://bugzilla.mozilla.org/show_bug.cgi?id=846931)).
-* Asynchronous uploads over XMLHTTPRequest2.
 * Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Support for shortened and easy shareable links for unauthenticted downloads.
 * Clean and almost dependency-free client-side JavaScript code (Just jQuery which I plan to remove).

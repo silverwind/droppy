@@ -1331,7 +1331,7 @@
 
     // Convert raw byte numbers to SI values
     function convertToSI(bytes, decimals) {
-        var step = 0, units = ["B", "KB", "MB", "GB", "TB"];
+        var step = 0, units = ["B", "KiB", "MiB", "GiB", "TiB"];
         while (bytes >= 1024) {
             bytes /= 1024;
             step++;
