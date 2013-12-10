@@ -504,7 +504,7 @@
 
         var info         = $("#editbox-info"),
             editInput    = $("#editbox-input"),
-            editbox      = $("#editbox"),
+            editbox      = $("#edit-box"),
             editSubmit   = $("#editbox-submit"),
             indicators   = $("#editbox-submit, #editbox-input");
 
@@ -622,17 +622,9 @@
             users.forEach(function (user) {
                 sendMessage("UPDATE_USER", user);
             });
-            hideModals();
-        });
-
-        $("#click-catcher").register("click", hideModals);
-
-        function hideModals() {
-            $("#click-catcher").attr("class", "out");
-            editbox.attr("class", "out");
-            aboutbox.attr("class", "out");
             configbox.attr("class", "out");
-        }
+            toggleCatcher();
+        });
 
         $("#logout").register("click", function () {
             droppy.socket && droppy.socket.close(4001);
@@ -704,6 +696,14 @@
             document.getElementById("audio-title").innerHTML = songname;
             controls.removeClass("out");
             $("#content, #newcontent").addClass("squeeze");
+        });
+
+        // Hide modals when clicking outside their box
+        $("#click-catcher").register("click", function () {
+            $("#config-box").attr("class", "out");
+            $("#edit-box").attr("class", "out");
+            $("#about-box").attr("class", "out");
+            toggleCatcher();
         });
 
         // ============================================================================
@@ -842,7 +842,7 @@
 //  General helpers
 // ============================================================================
     function showEditBox(type, prefill) {
-        var box = $("#editbox"), input = $("#editbox-input"), lastDot;
+        var box = $("#edit-box"), input = $("#editbox-input"), lastDot;
 
         droppy.activeFiles = [];
         $(".filelink, .folderlink").each(function () {
@@ -873,10 +873,10 @@
         });
     }
 
-    // Toggle the full-screen click catching frame to exit modal dialogs
+    // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
         if ($("#about-box").attr("class")  === "in" ||
-            $("#editbox").attr("class")    === "in" ||
+            $("#edit-box").attr("class")    === "in" ||
             $("#config-box").attr("class") === "in"
         ) {
             $("#click-catcher").attr("class", "in");

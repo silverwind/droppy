@@ -528,7 +528,7 @@ html {
 }
 /* ========================= Directory Name Input ========================== */
 
-#editbox {
+#edit-box {
     background: #181818;
     border-radius: 6px;
     height: 120px;
@@ -544,8 +544,8 @@ html {
     z-index: 32;
 }
 
-#editbox.in  { transform: scale(1); opacity: 1 }
-#editbox.out { transform: scale(.5); opacity: 0; visibility: hidden }
+#edit-box.in  { transform: scale(1); opacity: 1 }
+#edit-box.out { transform: scale(.5); opacity: 0; visibility: hidden }
 
 
 #editbox-label {
