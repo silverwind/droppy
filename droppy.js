@@ -494,6 +494,17 @@
                         mime : mime.lookup(msg.data)
                     }));
                     break;
+                case "ZERO_FILES":
+                    msg.data.forEach(function (file) {
+                        var p = addFilePath(clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/") + decodeURIComponent(file);
+                        wrench.mkdirSyncRecursive(path.dirname(p), config.dirMode);
+                        fs.writeFileSync(p, "", {mode: config.filesMode});
+                        log.log(colorSocket(remoteIP, remotePort), " Received: " + removeFilePath(p).substring(1));
+                    });
+                    readDirectory(clients[cookie].directory, function () {
+                        sendFiles(cookie, "UPLOAD_DONE", true);
+                    });
+                    break;
                 }
             });
 
@@ -519,20 +530,26 @@
     //-----------------------------------------------------------------------------
     // Send a WS event to the client containing an file list update
     var updateFuncs = {};
-    function sendFiles(cookie, eventType) {
+    function sendFiles(cookie, eventType, force) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
-        if (!updateFuncs[cookie]) {
-            updateFuncs[cookie] = helpers.throttle(function (cookie, eventType) {
-                var dir = clients[cookie].directory;
-                var data = JSON.stringify({
-                    type   : eventType,
-                    folder : dir,
-                    data   : dirs[dir]
-                });
-                send(clients[cookie].ws, data);
-            }, 250);
-        }
-        updateFuncs[cookie](cookie, eventType);
+
+        var func = function (cookie, eventType) {
+            var dir = clients[cookie].directory;
+            var data = JSON.stringify({
+                type   : eventType,
+                folder : dir,
+                data   : dirs[dir]
+            });
+            send(clients[cookie].ws, data);
+        };
+
+        if (!updateFuncs[cookie])
+            updateFuncs[cookie] = helpers.throttle(func, 250);
+
+        if (!force)
+            updateFuncs[cookie](cookie, eventType);
+        else
+            func(cookie, eventType);
     }
 
     //-----------------------------------------------------------------------------
@@ -1042,7 +1059,7 @@
                                     checkDone();
                                 });
                             }
-                        } else if (error) log.error(error);
+                        } else if (error) {log.error(error); log.simple("stat"); }
                     });
                 })(files[i]);
             }

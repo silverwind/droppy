@@ -177,7 +177,12 @@
                 updateData(msg.folder, msg.data);
                 break;
             case "UPLOAD_DONE":
-                finishUpload(msg);
+                if (droppy.zeroFiles.length) {
+                    sendMessage("ZERO_FILES", droppy.zeroFiles);
+                    droppy.zeroFiles = [];
+                } else {
+                    finishUpload(msg);
+                }
                 break;
             case "NEW_FOLDER":
                 if (droppy.isUploading) return;
@@ -704,10 +709,12 @@
         // ============================================================================
         //  Helper functions for the main page
         // ============================================================================
-        var numFiles = 0;
+        var numFiles, formLength;
         function upload(data, isArray) {
             var formData = new FormData();
+            droppy.zeroFiles = [];
             numFiles = 0;
+            formLength = 0;
             if (!data) return;
             if (isArray) { // We got a normal File array
                 if (data.length === 0) return;
@@ -719,12 +726,20 @@
                         type  : "nf",
                         mtime : Date.now()
                     };
-                    formData.append(filename, data[i], filename);
+                    // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
+                    // https://github.com/silverwind/droppy/issues/10
+                    if (data[i].size === 0) {
+                        droppy.zeroFiles.push(filename);
+                    } else {
+                        formLength++;
+                        formData.append(filename, data[i], filename);
+                    }
                 }
             } else { // We got an object for recursive folder uploads
                 var addedDirs = {};
                 for (var path in data) {
                     if (data.hasOwnProperty(path)) {
+                        formLength++;
                         formData.append(path, data[path], encodeURIComponent(path));
                         var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
                         switch (Object.prototype.toString.call(data[path])) {
@@ -773,8 +788,13 @@
 
             // And send the files
             droppy.isUploading = true;
-            xhr.open("POST", "/upload");
-            xhr.send(formData);
+
+            if (formLength) {
+                xhr.open("POST", "/upload");
+                xhr.send(formData);
+            } else if (droppy.zeroFiles.length) {
+                sendMessage("ZERO_FILES", droppy.zeroFiles);
+            }
         }
 
         var start, lastUpdate,
@@ -785,7 +805,8 @@
 
         function uploadDone() {
             prog.css("width", "100%");
-            finishUpload();
+            title.html("Processing...");
+            uperc.html("100%");
         }
 
         function uploadProgress(event) {
@@ -1304,7 +1325,8 @@
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
-        droppy.mimeTypes = {};
+        droppy.mimeTypes = {},
+        droppy.zeroFiles;
     }
 
     // Convert raw byte numbers to SI values
