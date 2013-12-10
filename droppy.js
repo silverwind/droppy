@@ -576,23 +576,13 @@
 
     //-----------------------------------------------------------------------------
     // Watch the directory for realtime changes and send them to the appropriate clients.
-    function createWatcher(folder) {
-        var watcher = fs.watch(folder, helpers.debounce(function () {
-            updateClients(folder);
-        }), config.readInterval);
-
-        watcher.on("error", function (error) {
-            log.error("Error trying to watch ", removeFilePath(folder), "\n", error);
-        });
-
-        watchers[removeFilePath(folder)] = watcher;
-
-        function updateClients(folder) {
+    function createWatcher(directory) {
+        var watcher = fs.watch(directory, helpers.debounce(function () {
             var clientsToUpdate = [];
             for (var client in clients) {
                 if (clients.hasOwnProperty(client)) {
                     var clientDir = clients[client].directory;
-                    if (clientDir === removeFilePath(folder)) {
+                    if (clientDir === removeFilePath(directory)) {
                         clientsToUpdate.push(client);
                         readDirectory(clientDir, function () {
                             sendFiles(clientsToUpdate.pop(), "UPDATE_FILES");
@@ -600,7 +590,11 @@
                     }
                 }
             }
-        }
+        }), config.readInterval);
+        watcher.on("error", function (error) {
+            log.error("Error trying to watch ", removeFilePath(directory), "\n", error);
+        });
+        watchers[removeFilePath(directory)] = watcher;
     }
 
     //-----------------------------------------------------------------------------
@@ -1064,13 +1058,7 @@
             if (!stat.isDirectory()) return callback(null, stat.size);
             fs.readdir(dir, function (error, list) {
                 if (error) return callback(error);
-                async.map(
-                    list.map(function (f) {
-                        return path.join(dir, f);
-                    }),
-                    function (f, callback) {
-                        return du(f, callback);
-                    },
+                async.map(list.map(function (f) { return path.join(dir, f); }), function (f, callback) { return du(f, callback); },
                     function (error, sizes) {
                         callback(error, sizes && sizes.reduce(function (p, s) {
                             return p + s;
@@ -1169,7 +1157,7 @@
             }
         }
 
-        // Try JSON.parse on our config file
+        // Parse it
         try {
             config = JSON.parse(fs.readFileSync(configFile));
         } catch (error) {
@@ -1177,6 +1165,7 @@
             process.exit(1);
         }
 
+        // Check if all options exist and add missing ones
         var opts = [
             "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength", "maxOpen", "zipLevel",
             "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"
@@ -1190,6 +1179,13 @@
             }
         }
         doWrite && writeConfig();
+
+        // Change relative paths to __dirname
+        ["httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"].forEach(function (p) {
+            if (config[p][0] === ".") {
+                config[p] = path.join(__dirname + config[p].substring(1));
+            }
+        });
     }
 
     //-----------------------------------------------------------------------------
@@ -1197,8 +1193,6 @@
     function readDB() {
         var dbString = "";
         var doWrite = false;
-
-        parseConfig();
 
         try {
             dbString = String(fs.readFileSync(config.db));
@@ -1331,18 +1325,22 @@
                     }
                 }
             }
-        }), 100);
+        }), config.readInterval);
     }
 
     //-----------------------------------------------------------------------------
+    // Various helper functions
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
     function writeConfig()     { fs.writeFileSync(configFile, JSON.stringify(config, null, 4)); }
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
-    function addFilePath(p)    { return (config.filesDir + p).replace("//", "/"); }
-    function removeFilePath(p) { return p.replace(config.filesDir.substring(0, config.filesDir.length - 1), ""); }
+    function addFilePath(p)    { return fixPath(config.filesDir + p); }
+    function removeFilePath(p) { return fixPath("/" + fixPath(p).replace(fixPath(config.filesDir), "")); } // This is intentionally not an inverse to the add function
+    function fixPath(p)        { return p.replace(/[\\|\/]+/g, "/"); }
     function colorSocket(ip, port) { return [log.color.cyan, ip, log.color.reset, ":", log.color.magenta, port, log.color.reset].join(""); }
+
     //-----------------------------------------------------------------------------
+    // Process signal and events
     process
         .on("SIGINT",  function () { shutdown("SIGINT");  })
         .on("SIGQUIT", function () { shutdown("SIGQUIT"); })
@@ -1366,7 +1364,7 @@
             }
         }
 
-        if (count > 0) log.log("Closed " + count + " active WebSockets");
-        process.exit();
+        if (count > 0) log.log("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
+        process.exit(0);
     }
 })();
