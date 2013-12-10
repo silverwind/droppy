@@ -151,7 +151,7 @@ html {
 
 @media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px; } }
 @media all and (max-width: 1023px) { .button { font-size: .8em; line-height: 30px; height: 30px; } }
-@media all and (max-width:  750px) { .button-text { display: none } }
+@media all and (max-width:  550px) { .button-text { display: none } }
 @media all and (max-width:  639px) { .button {  font-size: .7em; line-height: 25px; height: 25px; } }
 
 #upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important; }
