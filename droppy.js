@@ -372,7 +372,7 @@
                     writeDB();
                     break;
                 case "REQUEST_ZIP":
-                    log.log(colorSocket(remoteIP, remotePort), " Creating Zip of " + msg.data);
+                    log.log(colorSocket(remoteIP, remotePort), " Creating zip of " + msg.data);
                     createZip(msg.data, function (zip) {
                         log.log(colorSocket(remoteIP, remotePort), " Zip created: " + msg.data);
                         send(clients[cookie].ws, JSON.stringify({
@@ -1077,22 +1077,35 @@
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory
     // The callback recieves an object with the path and size of the file
-    function createZip(inputFolder, callback) {
-        var archive = archiver.create("zip", {zlib: { level: config.zipLevel }}), output;
-        var zipPath = path.join(config.zipDir, inputFolder) + ".zip";
+    // TODO: push zipping of a directory to all clients
+    var zipInProgress = [];
+    function createZip(dir, callback) {
+        var archive = archiver.create("zip", {zlib: { level: config.zipLevel }}), output,
+            zipPath = path.join(config.zipDir, dir) + ".zip";
+
+        // Don't start the same job twice
+        for (var i = 0, l = zipInProgress.length; i < l; i++) {
+            if (zipInProgress[i] === dir)
+                return;
+            else
+                zipInProgress.push(dir);
+        }
+
         wrench.mkdirSyncRecursive(path.dirname(zipPath), config.dirMode);
 
         output = fs.createWriteStream(zipPath);
         output.on("close", function () {
             fs.stat(zipPath, function (error, stats) {
                 callback({path: zipPath, size: stats.size});
+                zipInProgress.pop(dir);
             });
         });
 
+        archive.setMaxListeners(0);
         archive.on("error", function (error) { log.error(error); });
         archive.pipe(output);
 
-        helpers.walkDirectory(addFilePath(inputFolder), function (error, paths) {
+        helpers.walkDirectory(addFilePath(dir), function (error, paths) {
             var read = 0, toread = paths.length;
             if (error) log.error(error);
             while (paths.length) {
