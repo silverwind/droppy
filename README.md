@@ -31,6 +31,8 @@ Inside droppy's folder run:
 node droppy
 ````
 By default, the server will listen on [https](https://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
+####Systemd
+If you'd like to run droppy as a systemd service, there's a sample service file provided in `examples/droppy.service`
 
 ##Configuration
 Configuration is done through `config.json`, which is copied from `config.json.example` on the first run, with these contents:
