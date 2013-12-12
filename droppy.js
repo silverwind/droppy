@@ -1167,7 +1167,7 @@
             fs.statSync(configFile);
         } catch (error) {
             if (error.code === "ENOENT") {
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.cyan, configFile, log.color.reset, "...");
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.magenta, configFile, log.color.reset, "...");
                 fs.writeFileSync(configFile, fs.readFileSync(configFile + ".example"));
             } else {
                 log.error("Error reading ", configFile, ":\n", error);
@@ -1226,7 +1226,7 @@
                 db = {users: {}, sessions: {}, shortlinks: {}};
 
                 // Recreate DB file in case it doesn't exist / is empty
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating " + path.basename(config.db) + "...");
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.magenta, config.db, log.color.reset, "...");
                 doWrite = true;
             } else {
                 log.error("Error reading ", config.db, "\n", util.inspect(error));
