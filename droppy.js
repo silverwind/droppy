@@ -694,7 +694,6 @@
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url);
-        var resourceName;
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/content\//.test(URI)) {
@@ -711,11 +710,7 @@
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI) || /^\/\$\$\//.test(URI)) {
             handleFileRequest(req, res);
         } else if (/^\/res\//.test(URI)) {
-            var fileName = path.basename(req.url);
-            var dirName = path.dirname(req.url);
-            dirName = dirName.substring(5);
-            resourceName = (dirName === "") ? fileName : dirName + "/" + fileName;
-            handleResourceRequest(req, res, resourceName);
+            handleResourceRequest(req, res, req.url.substring(5));
         } else if (URI === "/favicon.ico") {
             handleResourceRequest(req, res, "favicon.ico");
         } else {
@@ -813,8 +808,9 @@
 
     //-----------------------------------------------------------------------------
     function handleResourceRequest(req, res, resourceName) {
+
+        // Shortcut for CSS debugging when no Websocket is available
         if (config.debug && resourceName === "style.css") {
-            // Shortcut for CSS debugging when no Websocket is available
             cssCache = [
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
@@ -838,8 +834,7 @@
             res.statusCode = 404;
             res.end();
         } else {
-            var ifNoneMatch = req.headers["if-none-match"] || "";
-            if (ifNoneMatch === cache[resourceName].etag) {
+            if ((req.headers["if-none-match"] || "") === cache[resourceName].etag) {
                 res.statusCode = 304;
                 res.end();
             } else {
@@ -946,8 +941,9 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var socket = colorSocket(req.socket.remoteAddress, req.socket.remotePort);
-        var cookie = getCookie(req.headers.cookie);
+        var socket = colorSocket(req.socket.remoteAddress, req.socket.remotePort),
+            cookie = getCookie(req.headers.cookie);
+
         log.log(socket, " Upload started");
 
         // TODO: Figure out a client's directory if we don't have it at this point
@@ -995,16 +991,16 @@
         req.pipe(busboy);
 
         function onFile(fieldname, file, filename, next) {
-            var destpath = filename ? decodeURIComponent(filename) : fieldname;
-            var dst = path.join(config.filesDir, clients[cookie].directory, destpath);
-            var tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
+            var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
+                dst = path.join(config.filesDir, clients[cookie].directory, dstRelative),
+                tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex")),
+                fstream = fs.createWriteStream(tmp);
 
-            files[destpath] = {
+            files[dstRelative] = {
                 src: tmp,
                 dst: decodeURIComponent(dst)
             };
 
-            var fstream = fs.createWriteStream(tmp);
             fstream.on("close", function () {
                 next();
             });
@@ -1148,12 +1144,15 @@
         }
 
         function printUsage(exitCode) {
-            log.simple("Usage: node droppy [list|add|del] {arguments}\n");
-            log.simple("Options:");
-            log.simple(" version\t\t\tPrint the version.");
-            log.simple(" list\t\t\t\tList active users.");
-            log.simple(" add <username> <password>\tCreate a new user.");
-            log.simple(" del <username>\t\t\tDelete a user.");
+            log.simple([
+                "Usage: node droppy [version|list|add|del] {arguments}",
+                "",
+                "Options:",
+                "  version                     Print the version.",
+                "  list                        List active users.",
+                "  add <username> <password>   Create a new user.",
+                "  del <username>              Delete a user.",
+            ].join("\n"));
             process.exit(exitCode);
         }
     }
