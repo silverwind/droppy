@@ -2,7 +2,7 @@
   "name": "droppy",
   "version": "0.7.3",
   "author": "silverwind <silv3rwind@gmail.com>",
-  "description": "Pure HTML5 multi-user cloud storage",
+  "description": "Pure HTML5 cloud storage on node",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": {
     "url": "https://github.com/silverwind/droppy/issues"
@@ -15,9 +15,9 @@
     "clean-css": "~2.0.2",
     "graceful-fs": "~2.0.1",
     "mime": "~1.2.11",
-    "busboy": "0.0.12",
+    "busboy": "0.0.13",
     "uglify-js": "~2.4.7",
-    "spdy": "~1.17.8",
+    "spdy": "~1.17.10",
     "wrench": "~1.5.4",
     "ws": "~0.4.31"
   },
