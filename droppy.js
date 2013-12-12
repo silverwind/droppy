@@ -1226,7 +1226,7 @@
                 db = {users: {}, sessions: {}, shortlinks: {}};
 
                 // Recreate DB file in case it doesn't exist / is empty
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.magenta, config.db, log.color.reset, "...");
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.magenta, path.basename(config.db), log.color.reset, "...");
                 doWrite = true;
             } else {
                 log.error("Error reading ", config.db, "\n", util.inspect(error));
