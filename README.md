@@ -1,4 +1,4 @@
-#droppy
+#droppy <a href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a>
 Pure HTML5 multi-user cloud storage running on [node.js](http://nodejs.org/).
 
 ![droppy](http://i.imgur.com/CHjNCOR.png)
