@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/bin/env node
 /* ----------------------------------------------------------------------------
                           droppy - file server on node
                       https://github.com/silverwind/droppy
