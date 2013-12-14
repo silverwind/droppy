@@ -1050,7 +1050,6 @@ html {
     margin-left: 10%;
     margin-top: 1em;
     text-align: left;
-    user-select: none;
 }
 
 #remember span {
@@ -1073,6 +1072,7 @@ html {
     height: 20px;
     position: absolute;
     width: 20px;
+    box-shadow: 0 0 0 2px #333;
 }
 
 #remember label:after {
@@ -1089,7 +1089,7 @@ html {
     width: 10px;
 }
 
-#remember label:hover { transition: all .25s ease; box-shadow: 0 0 0 2px #999 }
+#remember:focus label { transition: all .25s ease; box-shadow: 0 0 0 2px #999 }
 
 input[type="checkbox"] { display: none }
 #check:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
@@ -1109,7 +1109,8 @@ input[type="checkbox"] { display: none }
 }
 
 .submit:active { transform: translateY(3px) }
-.submit:hover  { background: #257 }
+.submit:hover, .submit:focus { background: #257 }
+
 
 .submit.invalid {
     background: #b31;
