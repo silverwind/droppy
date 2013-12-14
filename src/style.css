@@ -966,7 +966,7 @@ input:-webkit-autofill {
 #form {
     height: 200px;
     position: absolute;
-    top: calc(50% - 120px);
+    top: calc(50% - 110px);
     width: 100%;
 }
 
@@ -980,7 +980,7 @@ input:-webkit-autofill {
 
 #login-icon {
     display: table;
-    height: 290px;
+    height: 310px;
     left: 0;
     position: absolute;
     text-align: center;
@@ -991,9 +991,9 @@ input:-webkit-autofill {
 }
 
 #login-icon span {
-    color: #333;
+    color: #282828;
     display: table-cell;
-    font-size: 11em;
+    font-size: 12em;
     text-align: center;
     vertical-align: middle;
 }
@@ -1041,7 +1041,9 @@ input:-webkit-autofill {
     border: 2px solid #333;
     color: #ccc;
     padding: 10px;
-    transition: all .35s ease;
+    box-sizing: padding-box;
+    height: 2.25em;
+    transition: border .35s ease, color .35s ease;
     width: 80%;
 }
 
@@ -1093,13 +1095,12 @@ input:-webkit-autofill {
     position: absolute;
     top: 4px;
     transform: rotate(-45deg);
-    transition: all .25s ease;
+    transition: opacity .25s ease;
     width: 10px;
 }
 
-#remember:focus label, #remember:hover label { transition: all .25s ease; box-shadow: 0 0 0 2px #999 }
-
 input[type="checkbox"] { display: none }
+#remember:focus label, #remember:hover label { box-shadow: 0 0 0 2px #999; }
 #check:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
