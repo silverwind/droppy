@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 	<head>
 		<title>droppy</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1" >
@@ -18,10 +18,10 @@
 		</noscript>
 		<script>
 			window.addEventListener("load", function load() {
-				var node = document.createElement("script");
-				node.src = "/res/client.js";
+				var script = document.createElement("script");
+				script.src = "/res/client.js";
 				document.body.removeChild(document.body.getElementsByTagName("script")[0]);
-				document.body.appendChild(node);
+				document.body.appendChild(script);
 				window.removeEventListener("load", load, false);
 			}, false);
 		</script>
