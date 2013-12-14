@@ -117,10 +117,10 @@
                 box.removeClass("out");
                 finalize();
                 if (type === "firstrun") {
-                    $("#login-info").html("Hello! Choose your creditentials.");
+                    $("#login-info").text("Hello! Choose your creditentials.");
                     $("#login-info-box").attr("class", "info");
                 } else if (droppy.hasLoggedOut) {
-                    $("#login-info").html("Logged out!");
+                    $("#login-info").text("Logged out!");
                     $("#login-info-box").attr("class", "info");
                 }
             });
@@ -315,7 +315,7 @@
                         } else {
                             submit.addClass("invalid");
                             loginform.addClass("invalid");
-                            $("#login-info").html("Creditentials not acceptable.");
+                            $("#login-info").text("Creditentials not acceptable.");
                             $("#login-info-box").attr("class", "error");
                         }
                     }
@@ -341,7 +341,7 @@
                                 }, 500);
                             } else {
                                 $("#login-info-box").addClass("error");
-                                $("#login-info").html("Wrong login!");
+                                $("#login-info").text("Wrong login!");
                             }
                         }
                     }
@@ -528,7 +528,7 @@
             } else {
                 indicators.attr("class", input.length > 0 ? "invalid" : "");
                 if (exists) {
-                    info.html(exists ? "Already exists!" : "Invalid characters!");
+                    info.text(exists ? "Already exists!" : "Invalid characters!");
                     info.attr("class", "in");
                 }
                 editSubmit.off("click");
@@ -673,10 +673,10 @@
             localStorage.setItem("volume", volume);
             slider.attr("value", volume * 100);
 
-            if (player.volume === 0) volumeIcon.html("");
-            else if (player.volume <= 0.33) volumeIcon.html("");
-            else if (player.volume <= 0.67) volumeIcon.html("");
-            else volumeIcon.html("");
+            if (player.volume === 0) volumeIcon.text("");
+            else if (player.volume <= 0.33) volumeIcon.text("");
+            else if (player.volume <= 0.67) volumeIcon.text("");
+            else volumeIcon.text("");
         }
 
         slider.register("input", setVolume);
@@ -778,12 +778,12 @@
 
             // Init the UI
             $("#upload-cancel").register("click", function () { xhr.abort(); uploadDone(); });
-            title.html(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
+            title.text(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
             start = Date.now();
             updateTitle("0%");
-            uperc.html("0%");
+            uperc.text("0%");
             prog.css("width", "0%");
-            timeleft.html("");
+            timeleft.text("");
             $("#upload-info").addClass($("#audio-controls").hasClass("out") ? "in" : "in-space");
 
             // And send the files
@@ -805,8 +805,8 @@
 
         function uploadDone() {
             prog.css("width", "100%");
-            title.html("Processing...");
-            uperc.html("100%");
+            title.text("Processing...");
+            uperc.text("100%");
         }
 
         function uploadProgress(event) {
@@ -823,7 +823,7 @@
 
                 prog.css("width", progress);
                 updateTitle(progress);
-                uperc.html(progress + " - " + speed.size + " " + speed.unit + "/sec");
+                uperc.text(progress + " - " + speed.size + " " + speed.unit + "/sec");
 
                 // Calculate estimated time left
                 var elapsed = Date.now() - start;
@@ -831,9 +831,9 @@
                 var secs = (estimate - elapsed) / 1000;
 
                 if (secs > 60) {
-                    timeleft.html(Math.ceil(secs / 60) + " mins left");
+                    timeleft.text(Math.ceil(secs / 60) + " mins left");
                 } else {
-                    timeleft.html(Math.ceil(secs) + " secs left");
+                    timeleft.text(Math.ceil(secs) + " secs left");
                 }
             }
         }
@@ -846,17 +846,17 @@
 
         droppy.activeFiles = [];
         $(".filelink, .folderlink").each(function () {
-            droppy.activeFiles.push($(this).html().toLowerCase());
+            droppy.activeFiles.push($(this).text().toLowerCase());
         });
 
         box.data("type", type);
         if (prefill) input.val(prefill);
 
         if (type === "create-folder") {
-            $("#editbox-name").html("Create");
+            $("#editbox-name").text("Create");
             input.attr("placeholder", "Folder Name");
         } else if (type === "rename") {
-            $("#editbox-name").html("Rename");
+            $("#editbox-name").text("Rename");
             input.attr("placeholder", prefill);
         }
 
@@ -1208,13 +1208,13 @@
         // Rename a file/folder
         $(".icon-rename").register("click", function (event) {
             if (droppy.socketWait) return;
-            showEditBox("rename", $(this).parent().find(".filelink, .folderlink").html());
+            showEditBox("rename", $(this).parent().find(".filelink, .folderlink").text());
             event.stopPropagation();
         });
         // Zip a folder
         $(".icon-zip").register("click", function (event) {
             if (droppy.socketWait) return;
-            $(this).html("").addClass("spin inline-spin");
+            $(this).text("").addClass("spin inline-spin");
             sendMessage("REQUEST_ZIP", $(this).parent().data("id"));
             event.stopPropagation();
         });
