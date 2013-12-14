@@ -28,7 +28,7 @@
 (function () {
     var
         // Libraries
-        helpers    = require("./lib/helpers.js"),
+        utils      = require("./lib/utils.js"),
         log        = require("./lib/log.js"),
         // Modules
         archiver   = require("archiver"),
@@ -93,7 +93,7 @@
                 html : ["base.html", "auth.html", "main.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-            resourceList = helpers.flattenObj(resources),
+            resourceList = utils.flattenObj(resources),
             matches = { resource: 0, compiled: 0 };
 
         // Check if we to actually need to recompile resources
@@ -533,7 +533,7 @@
         };
 
         if (!updateFuncs[cookie])
-            updateFuncs[cookie] = helpers.throttle(func, 250);
+            updateFuncs[cookie] = utils.throttle(func, 250);
 
         if (!force)
             updateFuncs[cookie](cookie, eventType);
@@ -583,7 +583,7 @@
     //-----------------------------------------------------------------------------
     // Watch the directory for realtime changes and send them to the appropriate clients.
     function createWatcher(directory) {
-        var watcher = fs.watch(directory, helpers.debounce(function () {
+        var watcher = fs.watch(directory, utils.debounce(function () {
             var clientsToUpdate = [];
             for (var client in clients) {
                 if (clients.hasOwnProperty(client)) {
@@ -649,7 +649,7 @@
         var gzipFiles, relPath, fileName, fileData, fileTime;
         dir = dir.substring(0, dir.length - 1); // Strip trailing slash
 
-        helpers.walkDirectory(dir, function (error, results) {
+        utils.walkDirectory(dir, function (error, results) {
             if (error) log.error(error);
             gzipFiles = [];
             results.forEach(function (fullPath) {
@@ -1101,7 +1101,7 @@
         archive.on("error", function (error) { log.error(error); });
         archive.pipe(output);
 
-        helpers.walkDirectory(addFilePath(dir), function (error, paths) {
+        utils.walkDirectory(addFilePath(dir), function (error, paths) {
             var read = 0, toread = paths.length;
             if (error) log.error(error);
             while (paths.length) {
@@ -1144,15 +1144,7 @@
         }
 
         function printUsage(exitCode) {
-            log.simple([
-                "Usage: node droppy [version|list|add|del] {arguments}",
-                "",
-                "Options:",
-                "  version                     Print the version.",
-                "  list                        List active users.",
-                "  add <username> <password>   Create a new user.",
-                "  del <username>              Delete a user.",
-            ].join("\n"));
+            log.simple(log.usage);
             process.exit(exitCode);
         }
     }
@@ -1238,18 +1230,14 @@
         doWrite && writeDB();
     }
 
-    //-----------------------------------------------------------------------------
-    // Get a SHA256 hash of a string
-    function getHash(string) {
-        return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
-    }
+
 
     //-----------------------------------------------------------------------------
     // Add a user to the database
     function addOrUpdateUser(user, password, privileged) {
         var salt = crypto.randomBytes(4).toString("hex"), isNew = !db.users[user];
         db.users[user] = {
-            hash: getHash(password + salt + user) + "$" + salt,
+            hash: utils.getHash(password + salt + user) + "$" + salt,
             privileged: privileged
         };
         writeDB();
@@ -1276,7 +1264,7 @@
         var parts;
         if (db.users[user]) {
             parts = db.users[user].hash.split("$");
-            if (parts.length === 2 && parts[0] === getHash(pass + parts[1] + user))
+            if (parts.length === 2 && parts[0] === utils.getHash(pass + parts[1] + user))
                 return true;
         }
         return false;
@@ -1324,7 +1312,7 @@
     // Watch the CSS files and send updates to the client for live styling
     function watchCSS() {
         var cssfile = config.srcDir + "style.css";
-        fs.watch(cssfile, helpers.debounce(function () {
+        fs.watch(cssfile, utils.debounce(function () {
             cssCache = [
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
@@ -1350,11 +1338,14 @@
     // Various helper functions
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
     function writeConfig()     { fs.writeFileSync(configFile, JSON.stringify(config, null, 4)); }
+
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
-    function addFilePath(p)    { return fixPath(config.filesDir + p); }
-    function removeFilePath(p) { return fixPath("/" + fixPath(p).replace(fixPath(config.filesDir), "")); } // This is intentionally not an inverse to the add function
-    function fixPath(p)        { return p.replace(/[\\|\/]+/g, "/"); }
+
+    // removeFilePath is intentionally not an inverse to the add function
+    function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }
+    function removeFilePath(p) { return utils.fixPath("/" + utils.fixPath(p).replace(utils.fixPath(config.filesDir), "")); }
+
     function colorSocket(ip, port) { return [log.color.cyan, ip, log.color.reset, ":", log.color.magenta, port, log.color.reset].join(""); }
 
     //-----------------------------------------------------------------------------
