@@ -682,21 +682,41 @@
         slider.register("input", setVolume);
         setVolume();
 
-        // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
         function stop() {
             document.getElementById("audio-title").innerHTML = "";
             controls.addClass("out");
             $("#content, #newcontent").removeClass("squeeze");
+            if (droppy.audioUpdater) {
+                clearInterval(droppy.audioUpdater);
+                droppy.audioUpdater = null;
+            }
         }
+
+        function updateTextbyId(id, text) {
+            document.getElementById(id).textContent = text;
+        }
+
+        function updater() {
+            var cur = player.currentTime,
+                max = player.duration;
+            if (!cur || !max) return;
+            $("#seekbar-inner").css("width", (cur / max * 100)  + "%");
+            updateTextbyId("time-cur", secsToTime(cur));
+            updateTextbyId("time-max", secsToTime(max));
+        }
+
+        function playing() {
+            var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
+            updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
+            $("#content, #newcontent").addClass("squeeze");
+            controls.removeClass("out");
+            droppy.audioUpdater = setInterval(updater, 200);
+        }
+
+        // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
         player.addEventListener("pause", stop);
         player.addEventListener("ended", stop);
-        player.addEventListener("play", function () {
-            var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
-            var songname = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
-            document.getElementById("audio-title").innerHTML = songname;
-            controls.removeClass("out");
-            $("#content, #newcontent").addClass("squeeze");
-        });
+        player.addEventListener("playing", playing);
 
         // Hide modals when clicking outside their box
         $("#click-catcher").register("click", function () {
@@ -1271,16 +1291,6 @@
                 preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
             };
 
-            player.onplaying = function () {
-                barUpdate = setInterval(function () {
-                    var cur = player.currentTime,
-                        max = player.duration;
-                    $("#seekbar-inner").css("width", (cur / max * 100)  + "%");
-                    $("#time-cur").text(secsToTime(cur));
-                    $("#time-max").text(secsToTime(max));
-                }, 200);
-            };
-
             resetPlaybackUI();
             $(".icon-play").text(iconPlay);
             playButton.addClass("active");
@@ -1328,6 +1338,7 @@
     function initVariables() {
         droppy.smallScreen = $(window).width() < 640;
         droppy.activeFiles = [];
+        droppy.audioUpdater = null;
         droppy.currentData = null;
         droppy.currentFolder = null;
         droppy.hasLoggedOut = null;
