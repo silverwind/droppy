@@ -656,50 +656,65 @@ input:-webkit-autofill {
 @media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .7em} #audio-controls.out { bottom: -25px;} }
 
 #volume-icon {
-    color: #888;
+    color: #ccc;
     cursor: pointer;
     position: absolute;
+    left: 0;
+    bottom: 0;
     text-align: center;
     user-select: none;
-    width: 40px;
+    z-index: 3;
 }
 
-#volume-icon:hover {
-    color: #ccc;
-}
+#volume-icon:hover { color: #fff }
 
-@media all and (min-width: 1024px) { #volume-icon { width: 40px; } }
-@media all and (max-width: 1023px) { #volume-icon { width: 35px; } }
-@media all and (max-width:  639px) { #volume-icon { width: 30px; } }
+@media all and (min-width: 1024px) { #volume-icon { width: 35px; line-height: 35px } }
+@media all and (max-width: 1023px) { #volume-icon { width: 30px; line-height: 30px } }
+@media all and (max-width:  639px) { #volume-icon { width: 25px; line-height: 25px } }
 
-/* input[range]'s focusring is unremoveable in Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=932410 */
 #volume-slider {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
     background: #555;
-    border-radius: 0 12px 12px 0;
-    cursor: pointer;
+    height: 100%;
+    opacity: 0;
     padding: 0 16px;
     position: absolute;
-    transform: rotateZ(270deg);
-    transition: opacity .2s ease-in;
-    width: 200px;
+    transition: all .2s ease-in;
+    visibility: hidden;
+    z-index: 2;
 }
 
-@media all and (min-width: 1024px) { #volume-slider { left: -81px; bottom: 112px; height: 40px; box-shadow: inset 0px 0 0 19px #222;} }
-@media all and (max-width: 1023px) { #volume-slider { left: -83px; bottom: 110px; height: 35px; box-shadow: inset 0px 0 0 16px #222;} }
-@media all and (max-width:  639px) { #volume-slider { left: -85px; bottom: 108px; height: 30px; box-shadow: inset 0px 0 0 14px #222;} }
+@media all and (min-width: 1024px) { #volume-slider { margin-left: 24px; width: 200px; padding: 0 14px; height: 35px; box-shadow: inset 0 0 0 15px #222 } }
+@media all and (max-width: 1023px) { #volume-slider { margin-left: 18px; width: 180px; padding: 0 12px; height: 30px; box-shadow: inset 0 0 0 13px #222 } }
+@media all and (max-width:  639px) { #volume-slider { margin-left: 14px; width: 120px; padding: 0 10px; height: 25px; box-shadow: inset 0 0 0 11px #222 } }
 
-#volume-slider.out { opacity: 0; visibility: hidden; }
-#volume-slider.in  { opacity: 1 }
+#volume-level {
+    position: absolute;
+    background: #222;
+    z-index: 2;
+    color: #fff;
+    opacity: 0;
+    visibility: hidden;
+    transition: all .2s ease-in;
+}
+
+@media all and (min-width: 1024px) { #volume-level { line-height: 35px; left: 216px } }
+@media all and (max-width: 1023px) { #volume-level { line-height: 30px; left: 190px } }
+@media all and (max-width:  639px) { #volume-level { line-height: 25px; left: 128px; width: 200em} }
+
+#volume-slider.in, #volume-level.in {
+    opacity: 1;
+    visibility: visible;
+}
 
 #volume-slider::-moz-range-thumb {
     background: #ccc;
     border-radius: 1em;
     border: none;
     height: 40%;
-    width: 2em;
+    width: 1.5em;
 }
 
 #volume-slider::-moz-range-track {
@@ -715,17 +730,33 @@ input:-webkit-autofill {
     width: 2em;
 }
 
+@media all and (min-width: 1024px) { #volume-level { height: 35px } }
+@media all and (max-width: 1023px) { #volume-level { height: 30px } }
+@media all and (max-width:  639px) { #volume-level { height: 25px } }
+
 #audio-title {
-    margin-left: 2em;
-    margin-right: 2em;
     overflow: hidden;
     position: absolute;
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 7em);
+    bottom: 0;
+    left: 10em;
+    right: 10em;
     font-weight: 400;
     animation: flash 1s ease-out infinite;
+    z-index: 1;
+}
+
+@media all and (min-width: 1024px) { #audio-title { line-height: 35px } }
+@media all and (max-width: 1023px) { #audio-title { line-height: 30px } }
+@media all and (max-width:  639px) {
+    #audio-title {
+        line-height: 25px;
+        left: 2em;
+        right: 6em;
+        text-align: left;
+    }
 }
 
 @keyframes flash {
@@ -737,11 +768,11 @@ input:-webkit-autofill {
 #seekbar {
     position: absolute;
     width: 100%;
-    background: transparent;
     height: 2px;
     top: -1px;
     transition: all .2s ease;
-    cursor: pointer;
+    cursor: col-resize;
+    z-index: 4;
 }
 
 #audio-controls:hover #seekbar {
@@ -766,9 +797,15 @@ input:-webkit-autofill {
 }
 
 #time {
-    float: right;
-    margin-right: .5em
+    position: absolute;
+    right: .25em;
+    z-index: 3;
+    bottom: 0;
 }
+
+@media all and (min-width: 1024px) { #time { line-height: 35px } }
+@media all and (max-width: 1023px) { #time { line-height: 30px } }
+@media all and (max-width:  639px) { #time { line-height: 25px } }
 
 #time-cur, #time-max {
     color: #fff;
@@ -1225,21 +1262,21 @@ input[type="checkbox"] { display: none }
     width: 80px;
     text-align: center;
     padding: 2px 6px;
-    background: #222;
+    background: #333;
     border-radius: 4px;
     line-height: 1.25em;
-    transition: opacity .25s ease;
     z-index: 2;
 }
+
 #tooltip.in { visibility: visible; opacity: 1 }
 
 #tooltip:after {
     content: "";
     position: absolute;
-    width: 1em;
-    height: 1em;
-    background: #222;
-    bottom: -1px;
+    width: 10px;
+    height: 10px;
+    background: #333;
+    bottom: -2px;
     left: calc(50% - .5em);
     transform: rotate(45deg);
     z-index: -1;

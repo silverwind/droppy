@@ -651,12 +651,12 @@
             volumeIcon = $("#volume-icon"),
             controls   = $("#audio-controls"),
             seekbar    = $("#seekbar"),
+            level      = $("#volume-level"),
             player     = document.getElementById("audio-player");
 
         volumeIcon.register("click", function () {
-            requestAnimation(function () {
-                slider.attr("class", slider.attr("class") !== "in" ? "in" : "out");
-            });
+            slider.attr("class", slider.attr("class") === "" ? "in" : "");
+            level.attr("class", level.attr("class") === "" ? "in" : "");
         });
 
         seekbar.register("click", function (event) {
@@ -665,9 +665,10 @@
 
         var tooltip = $("#tooltip");
         seekbar.register("mousemove", debounce(function (event) {
+            if (!player.duration) return;
             var left = event.clientX;
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
-            tooltip.css("left", (left - $("#tooltip").width() / 2 - 6), + "px");
+            tooltip.css("left", (left - $("#tooltip").width() / 2 - 3), + "px");
             tooltip.attr("class", "in");
             updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
@@ -678,15 +679,25 @@
 
         function onWheel(event) {
             setVolume(event.wheelDelta || -event.detail);
+            slider.attr("class", "in");
+            level.attr("class", "in");
         }
 
         volumeIcon[0].addEventListener("mousewheel", onWheel, false);
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel, false);
+        slider[0].addEventListener("mousewheel", onWheel, false);
+        slider[0].addEventListener("DOMMouseScroll", onWheel, false);
 
         player.volume = localStorage.getItem("volume") || 0.2;
-        slider.attr("value", player.volume * 100);
+        slider.val(player.volume * 100);
 
+        var volumeTimeout;
         function setVolume(delta) {
+            clearTimeout(volumeTimeout);
+            volumeTimeout = setTimeout(function () {
+                slider.attr("class", "");
+                level.attr("class", "");
+            }, 2000);
             var volume = player.volume;
             if (typeof delta === "number") {
                 if (delta > 0) {
@@ -702,7 +713,8 @@
 
             player.volume = volume;
             localStorage.setItem("volume", volume);
-            slider.attr("value", volume * 100);
+            slider.val(volume * 100);
+            level.text(Math.round(volume * 100) + "%");
 
             if (player.volume === 0) volumeIcon.text("");
             else if (player.volume <= 0.33) volumeIcon.text("");
@@ -931,7 +943,7 @@
     // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
         if ($("#about-box").attr("class")  === "in" ||
-            $("#edit-box").attr("class")    === "in" ||
+            $("#edit-box").attr("class")   === "in" ||
             $("#config-box").attr("class") === "in"
         ) {
             $("#click-catcher").attr("class", "in");
