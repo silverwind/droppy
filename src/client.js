@@ -1288,45 +1288,15 @@
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
+
         $(".icon-play").register("click", function (event) {
             preparePlayback($(event.target));
         });
     }
 
-    function play(source, playButton) {
-        var player    = document.getElementById("audio-player"),
-            iconPlay  = "",
-            iconPause = "";
-
-        if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
-            window.alert("Sorry, your browser can't play this file.");
-            return;
-        }
-
-        $(".icon-play").text(iconPlay);
-
-        if (player.paused) {
-            if (decodeURI(player.src).indexOf(source) > 0) {
-                player.play();
-            } else {
-                player.src = source;
-                player.load();
-                player.play();
-            }
-            playButton.text(iconPause);
-            playButton.parent().find(".filelink").removeClass("paused").addClass("playing");
-        } else {
-            player.pause();
-            playButton.text(iconPlay);
-            playButton.parent().find(".filelink").removeClass("playing").addClass("paused");
-        }
-    }
-
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
-
-        var source = playButton.parent().find(".filelink").attr("href"),
-            ext    = getExt(source);
+        var source = playButton.parent().find(".filelink").attr("href"), ext = getExt(source);
 
         if (droppy.mimeTypes[ext]) {
             play(source, playButton);
@@ -1340,6 +1310,33 @@
                 set: function (v) { this.val = v; play(source, playButton); }
             });
         }
+    }
+
+    function play(source, playButton) {
+        var player = document.getElementById("audio-player"), iconPlay  = "", iconPause = "";
+
+        if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
+            window.alert("Sorry, your browser can't play this file.");
+            return;
+        }
+
+        $(".filelink").removeClass("playing").removeClass("paused");
+        $(".icon-play").text(iconPlay);
+
+        if (decodeURI(player.src).indexOf(source) > 0) {
+            player.paused ? player.play() : player.pause();
+        } else {
+            player.src = source;
+            player.load();
+            player.play();
+        }
+
+        if (player.paused) {
+            playButton.parent().find(".filelink").removeClass("playing").addClass("paused");
+        } else {
+            playButton.parent().find(".filelink").removeClass("paused").addClass("playing");
+        }
+        playButton.text(player.paused ? iconPlay : iconPause);
     }
 
     // Wrapper function for setting textContent on an id

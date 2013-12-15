@@ -644,7 +644,6 @@ input:-webkit-autofill {
 
 #audio-controls {
     background: #222;
-    border-top: 2px solid #444;
     bottom: 0;
     color: #aaa;
     position: absolute;
@@ -740,14 +739,14 @@ input:-webkit-autofill {
     width: 100%;
     background: transparent;
     height: 2px;
-    top: -2px;
+    top: -1px;
     transition: all .2s ease;
     cursor: pointer;
 }
 
 #audio-controls:hover #seekbar {
-    height: 10px;
-    top: -5px;
+    height: 6px;
+    top: -3px;
 }
 
 #seekbar-played {
