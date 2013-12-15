@@ -715,11 +715,22 @@
         slider.register("input", setVolume);
         setVolume();
 
+        var played = $("#seekbar-played"),
+            loaded = $("#seekbar-loaded"),
+            fullyLoaded;
+
         function updater() {
-            var cur = player.currentTime,
-                max = player.duration;
+            var cur  = player.currentTime,
+                max  = player.duration;
+
+            if (player.buffered && !fullyLoaded) {
+                var loadProgress = player.buffered.end(0) / max * 100;
+                loaded.css("width", loadProgress  + "%");
+                if (loadProgress === 100) fullyLoaded = true;
+            }
+
             if (!cur || !max) return;
-            $("#seekbar-inner").css("width", (cur / max * 100)  + "%");
+            played.css("width", (cur  / max * 100)  + "%");
             updateTextbyId("time-cur", secsToTime(cur));
             updateTextbyId("time-max", secsToTime(max));
         }
@@ -729,7 +740,8 @@
             updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
             $("#content, #newcontent").addClass("squeeze");
             controls.removeClass("out");
-            droppy.audioUpdater = setInterval(updater, 200);
+            fullyLoaded = false;
+            droppy.audioUpdater = setInterval(updater, 100);
         }
 
         function stop(event) {

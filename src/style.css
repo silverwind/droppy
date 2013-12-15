@@ -736,7 +736,7 @@ input:-webkit-autofill {
 #seekbar {
     position: absolute;
     width: 100%;
-    background: #555;
+    background: transparent;
     height: 2px;
     top: -2px;
     transition: all .2s ease;
@@ -748,11 +748,20 @@ input:-webkit-autofill {
     top: -5px;
 }
 
-#seekbar-inner {
+#seekbar-played {
     position: absolute;
     width: 0;
     background: #eee;
     height: 100%;
+    z-index: 2;
+}
+
+#seekbar-loaded {
+    position: absolute;
+    width: 0;
+    background: #555;
+    height: 100%;
+    z-index: 1;
 }
 
 #time {
