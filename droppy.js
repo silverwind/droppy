@@ -157,7 +157,13 @@
         // Set the client debug variable to mirror the server's
         out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
-        !config.debug && (out.js = require("uglify-js").minify(out.js, {fromString: true}).code);
+        !config.debug && (out.js = require("uglify-js").minify(out.js, {
+            fromString: true,
+            compress: {
+                unsafe: true,
+                screw_ie8: true
+            }
+        }).code);
 
         try {
             resources.html.forEach(function (file) {
