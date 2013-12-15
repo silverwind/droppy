@@ -635,7 +635,7 @@ input:-webkit-autofill {
     background: #222;
     border-top: 2px solid #444;
     bottom: 0;
-    color: #ccc;
+    color: #aaa;
     position: absolute;
     transition: bottom .5s ease;
     width: 100%;
@@ -706,16 +706,48 @@ input:-webkit-autofill {
 }
 
 #audio-title {
-    left: 2em;
-    margin: 0 auto;
+    margin-left: 2em;
+    margin-right: 2em;
     overflow: hidden;
     position: absolute;
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 2em);
+    width: calc(100% - 7em);
+    color: #eee;
+    font-weight: 400;
 }
 
+#seekbar {
+    position: absolute;
+    width: 100%;
+    background: #555;
+    height: 2px;
+    top: -2px;
+    transition: all .2s ease;
+    cursor: pointer;
+}
+
+#audio-controls:hover #seekbar {
+    height: 6px;
+    top: -4px;
+}
+
+#seekbar-inner {
+    position: absolute;
+    width: 0;
+    background: #eee;
+    height: 100%;
+}
+
+#time {
+    float: right;
+    margin-right: .5em
+}
+
+#time-cur, #time-max {
+    color: #fff;
+}
 /* =============================== About box =============================== */
 
 #about-box {

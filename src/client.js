@@ -1258,7 +1258,8 @@
         function play(source, playButton) {
             var player    = $("#audio-player").get(0),
                 iconPlay  = "",
-                iconPause = "";
+                iconPause = "",
+                barUpdate = null;
 
             if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
                 window.alert("Sorry, your browser can't play this file.");
@@ -1270,7 +1271,17 @@
                 preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
             };
 
-            resetClasses();
+            player.onplaying = function () {
+                barUpdate = setInterval(function () {
+                    var cur = player.currentTime,
+                        max = player.duration;
+                    $("#seekbar-inner").css("width", (cur / max * 100)  + "%");
+                    $("#time-cur").text(secsToTime(cur));
+                    $("#time-max").text(secsToTime(max));
+                }, 200);
+            };
+
+            resetPlaybackUI();
             $(".icon-play").text(iconPlay);
             playButton.addClass("active");
 
@@ -1290,10 +1301,10 @@
             function pause() {
                 player.pause();
                 playButton.text(iconPlay);
-                resetClasses();
+                resetPlaybackUI();
             }
 
-            function resetClasses() {
+            function resetPlaybackUI() {
                 $(".filelink").removeClass("playing");
                 $(".icon-play").removeClass("active");
                 $(".data-row").removeClass("playing-row");
@@ -1456,6 +1467,21 @@
             retval += (retval === 1) ? " year ago" : " years ago";
         }
         return retval;
+    }
+
+    function secsToTime(secs) {
+        var mins, hrs, time = "";
+        secs = parseInt(secs, 10);
+        hrs  = Math.floor(secs / 3600);
+        mins = Math.floor((secs - (hrs * 3600)) / 60);
+        secs = secs - (hrs * 3600) - (mins * 60);
+
+        hrs < 10  && (hrs  = "0" + hrs);
+        mins < 10 && (mins = "0" + mins);
+        secs < 10 && (secs = "0" + secs);
+
+        if (hrs !== "00") time = (hrs + ":");
+        return time + mins + ":" + secs;
     }
 
     setInterval(function () {
