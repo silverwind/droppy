@@ -1044,7 +1044,7 @@
                                     checkDone();
                                 });
                             }
-                        } else if (error) {log.error(error); log.simple("stat"); }
+                        } else if (error) {log.error(error); callback(); }
                     });
                 })(files[i]);
             }

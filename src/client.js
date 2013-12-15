@@ -662,6 +662,20 @@
             player.currentTime = player.duration * (event.clientX / screen.width);
         });
 
+        var tooltip = $("#tooltip");
+        seekbar.register("mousemove", debounce(function (event) {
+            var left = event.clientX;
+            tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
+            tooltip.css("left", (left - $("#tooltip").width() / 2 - 6), + "px");
+            tooltip.attr("class", "in");
+            updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / screen.width)));
+        }), 50);
+
+        seekbar.register("mouseleave", debounce(function () {
+            tooltip.attr("class", "");
+        }), 50);
+
+
         function onWheel(event) {
             setVolume(event.wheelDelta || -event.detail);
         }
@@ -1530,5 +1544,18 @@
 
         var style = $('<style type="text/css"></style>');
         style.text(css).appendTo($("head"));
+    }
+
+    function debounce(func, wait) {
+        var timeout, result;
+        return function () {
+            var context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function () {
+                timeout = null;
+                result = func.apply(context, args);
+            }, wait);
+            return result;
+        };
     }
 }(jQuery, window, document));

@@ -729,8 +729,8 @@ input:-webkit-autofill {
 }
 
 #audio-controls:hover #seekbar {
-    height: 6px;
-    top: -4px;
+    height: 10px;
+    top: -5px;
 }
 
 #seekbar-inner {
@@ -1189,6 +1189,36 @@ input[type="checkbox"] { display: none }
 
 #click-catcher.out { opacity: 0   ; visibility: hidden }
 #click-catcher.in  { opacity: .75 ; visibility: visible }
+
+#tooltip {
+    color: #eee;
+    position: fixed;
+    font-size: .75em;
+    font-weight: 400;
+    visibility: hidden;
+    opacity: 0;
+    width: 80px;
+    text-align: center;
+    padding: 2px 6px;
+    background: #222;
+    border-radius: 4px;
+    line-height: 1.25em;
+    transition: opacity .25s ease;
+    z-index: 2;
+}
+#tooltip.in { visibility: visible; opacity: 1 }
+
+#tooltip:after {
+    content: "";
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    background: #222;
+    bottom: -1px;
+    left: calc(50% - .5em);
+    transform: rotate(45deg);
+    z-index: -1;
+}
 
 #noscript {
     background: #111;
