@@ -2,7 +2,6 @@
 
 (function ($, window, document) {
     var droppy = {};
-    droppy.debug = null;  // live css reload and debug logging - this variable is set by the server
     initVariables();
 // ============================================================================
 //  Feature Detects
@@ -661,7 +660,7 @@
         });
 
         seekbar.register("click", function (event) {
-            player.currentTime = player.duration * (event.clientX / screen.width);
+            player.currentTime = player.duration * (event.clientX / window.innerWidth);
         });
 
         var tooltip = $("#tooltip");
@@ -670,13 +669,12 @@
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
             tooltip.css("left", (left - $("#tooltip").width() / 2 - 6), + "px");
             tooltip.attr("class", "in");
-            updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / screen.width)));
+            updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
 
         seekbar.register("mouseleave", debounce(function () {
             tooltip.attr("class", "");
         }), 50);
-
 
         function onWheel(event) {
             setVolume(event.wheelDelta || -event.detail);
@@ -1288,7 +1286,6 @@
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
-
         $(".icon-play").register("click", function (event) {
             preparePlayback($(event.target));
         });
@@ -1358,6 +1355,7 @@
     }
 
     function initVariables() {
+        droppy.debug = null;  // live css reload and debug logging - this variable is set by the server
         droppy.smallScreen = $(window).width() < 640;
         droppy.activeFiles = [];
         droppy.audioUpdater = null;
