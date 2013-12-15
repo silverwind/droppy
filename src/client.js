@@ -682,20 +682,6 @@
         slider.register("input", setVolume);
         setVolume();
 
-        function stop() {
-            document.getElementById("audio-title").innerHTML = "";
-            controls.addClass("out");
-            $("#content, #newcontent").removeClass("squeeze");
-            if (droppy.audioUpdater) {
-                clearInterval(droppy.audioUpdater);
-                droppy.audioUpdater = null;
-            }
-        }
-
-        function updateTextbyId(id, text) {
-            document.getElementById(id).textContent = text;
-        }
-
         function updater() {
             var cur = player.currentTime,
                 max = player.duration;
@@ -711,6 +697,20 @@
             $("#content, #newcontent").addClass("squeeze");
             controls.removeClass("out");
             droppy.audioUpdater = setInterval(updater, 200);
+        }
+
+        function stop(event) {
+            if (event.type === "ended") {
+                var next = $(".playing").parent().next();
+                preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
+            }
+            document.getElementById("audio-title").innerHTML = "";
+            controls.addClass("out");
+            $("#content, #newcontent").removeClass("squeeze");
+            if (droppy.audioUpdater) {
+                clearInterval(droppy.audioUpdater);
+                droppy.audioUpdater = null;
+            }
         }
 
         // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
@@ -1254,72 +1254,72 @@
         $(".icon-play").register("click", function (event) {
             preparePlayback($(event.target));
         });
+    }
 
-        function preparePlayback(playButton) {
-            if (droppy.socketWait) return;
+    function play(source, playButton) {
+        var player    = document.getElementById("audio-player"),
+            iconPlay  = "",
+            iconPause = "";
 
-            var source = playButton.parent().find(".filelink").attr("href"),
-                ext    = getExt(source);
-
-            if (droppy.mimeTypes[ext]) {
-                play(source, playButton);
-            } else {
-                // Request the mime type from the server if we don't know it yet
-                sendMessage("GET_MIME", ext);
-                // Wait for the server's respone
-                Object.defineProperty(droppy.mimeTypes, ext, {
-                    val: undefined,
-                    get: function () { return this.val; },
-                    set: function (v) { this.val = v; play(source, playButton); }
-                });
-            }
+        if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
+            window.alert("Sorry, your browser can't play this file.");
+            return;
         }
 
-        function play(source, playButton) {
-            var player    = $("#audio-player").get(0),
-                iconPlay  = "",
-                iconPause = "",
-                barUpdate = null;
+        resetPlaybackUI();
+        $(".icon-play").text(iconPlay);
+        playButton.addClass("active");
 
-            if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
-                window.alert("Sorry, your browser can't play this file.");
-                return;
-            }
+        if (player.paused)
+            loadAndPlay();
+         else
+            (decodeURI(player.src).indexOf(source) > 0) ? pause() : loadAndPlay();
 
-            player.onended = function () {
-                var next = $(".playing").parent().next();
-                preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
-            };
+        function loadAndPlay() {
+            player.src = source;
+            player.load();
+            player.play();
+            playButton.text(iconPause);
+            playButton.parent().addClass("playing-row");
+            playButton.parent().find(".filelink").addClass("playing");
+        }
 
+        function pause() {
+            player.pause();
+            playButton.text(iconPlay);
             resetPlaybackUI();
-            $(".icon-play").text(iconPlay);
-            playButton.addClass("active");
-
-            if (player.paused)
-                loadAndPlay();
-             else
-                (decodeURI(player.src).indexOf(source) > 0) ? pause() : loadAndPlay();
-
-            function loadAndPlay() {
-                player.src = source;
-                player.load();
-                player.play();
-                playButton.text(iconPause);
-                playButton.parent().addClass("playing-row");
-                playButton.parent().find(".filelink").addClass("playing");
-            }
-            function pause() {
-                player.pause();
-                playButton.text(iconPlay);
-                resetPlaybackUI();
-            }
-
-            function resetPlaybackUI() {
-                $(".filelink").removeClass("playing");
-                $(".icon-play").removeClass("active");
-                $(".data-row").removeClass("playing-row");
-            }
         }
+
+        function resetPlaybackUI() {
+            $(".filelink").removeClass("playing");
+            $(".icon-play").removeClass("active");
+            $(".data-row").removeClass("playing-row");
+        }
+    }
+
+    function preparePlayback(playButton) {
+        if (droppy.socketWait) return;
+
+        var source = playButton.parent().find(".filelink").attr("href"),
+            ext    = getExt(source);
+
+        if (droppy.mimeTypes[ext]) {
+            play(source, playButton);
+        } else {
+            // Request the mime type from the server if we don't know it yet
+            sendMessage("GET_MIME", ext);
+            // Wait for the server's respone
+            Object.defineProperty(droppy.mimeTypes, ext, {
+                val: undefined,
+                get: function () { return this.val; },
+                set: function (v) { this.val = v; play(source, playButton); }
+            });
+        }
+    }
+
+    // Wrapper function for setting textContent on an id
+    function updateTextbyId(id, text) {
+        document.getElementById(id).textContent = text;
     }
 
     // Extract the extension from a file name
