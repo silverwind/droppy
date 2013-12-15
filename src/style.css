@@ -355,21 +355,9 @@ input:-webkit-autofill {
     color: #333;
 }
 
-.data-row:not(.animating):not(.playing-row):hover {
+.data-row:not(.animating):hover {
     background: #fff;
     border-radius: 3px;
-}
-
-.playing-row {
-    animation: flash 1.5s linear infinite;
-    background: #b4d4f4;
-    border-radius: 3px;
-}
-
-@keyframes flash {
-  0%   { background: #bdf }
-  50%  { background: #acf }
-  100% { background: #bdf }
 }
 
 .tag-uploading:after {
@@ -729,8 +717,14 @@ input:-webkit-autofill {
     text-overflow: ellipsis;
     white-space: nowrap;
     width: calc(100% - 7em);
-    color: #eee;
     font-weight: 400;
+    animation: flash 1s ease-out infinite;
+}
+
+@keyframes flash {
+  0%   { color: #aaa }
+  50%  { color: #fff }
+  100% { color: #aaa }
 }
 
 #seekbar {

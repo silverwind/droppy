@@ -1317,7 +1317,6 @@
             player.load();
             player.play();
             playButton.text(iconPause);
-            playButton.parent().addClass("playing-row");
             playButton.parent().find(".filelink").addClass("playing");
         }
 
@@ -1330,7 +1329,6 @@
         function resetPlaybackUI() {
             $(".filelink").removeClass("playing");
             $(".icon-play").removeClass("active");
-            $(".data-row").removeClass("playing-row");
         }
     }
 
