@@ -634,14 +634,32 @@
             getPage();
         });
 
+        // Hide modals when clicking outside their box
+        $("#click-catcher").register("click", function () {
+            $("#config-box").attr("class", "out");
+            $("#edit-box").attr("class", "out");
+            $("#about-box").attr("class", "out");
+            toggleCatcher();
+        });
+
+        // ============================================================================
+        //  Audio functions / events
+        // ============================================================================
+
         var slider     = $("#volume-slider"),
             volumeIcon = $("#volume-icon"),
-            controls   = $("#audio-controls");
+            controls   = $("#audio-controls"),
+            seekbar    = $("#seekbar"),
+            player     = document.getElementById("audio-player");
 
         volumeIcon.register("click", function () {
             requestAnimation(function () {
                 slider.attr("class", slider.attr("class") !== "in" ? "in" : "out");
             });
+        });
+
+        seekbar.register("click", function (event) {
+            player.currentTime = player.duration * (event.clientX / screen.width);
         });
 
         function onWheel(event) {
@@ -651,7 +669,6 @@
         volumeIcon[0].addEventListener("mousewheel", onWheel, false);
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel, false);
 
-        var player = document.getElementById("audio-player");
         player.volume = localStorage.getItem("volume") || 0.2;
         slider.attr("value", player.volume * 100);
 
@@ -717,14 +734,6 @@
         player.addEventListener("pause", stop);
         player.addEventListener("ended", stop);
         player.addEventListener("playing", playing);
-
-        // Hide modals when clicking outside their box
-        $("#click-catcher").register("click", function () {
-            $("#config-box").attr("class", "out");
-            $("#edit-box").attr("class", "out");
-            $("#about-box").attr("class", "out");
-            toggleCatcher();
-        });
 
         // ============================================================================
         //  Helper functions for the main page
