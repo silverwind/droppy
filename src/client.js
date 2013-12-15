@@ -106,6 +106,9 @@
             initMainPage();
             requestAnimation(function () {
                 oldPage.attr("class", "out");
+                $("#navigation")[0].addEventListener('transitionend', function () {
+                    droppy.socketWait && showSpinner();
+                }, false);
                 $("#navigation").attr("class", "in");
                 finalize();
             });
@@ -132,7 +135,6 @@
             newPage.attr("id", "page");
         }
     }
-
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
@@ -986,6 +988,7 @@
         updatePath(folder);
         droppy.currentData = data;
         buildHTML(data, folder);
+        hideSpinner();
     }
 
     // Update the page title and trim a path to its basename
@@ -1028,13 +1031,11 @@
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
+                showSpinner();
                 // Find the direction in which we should animate
-                if (path.length > droppy.currentFolder.length)
-                    nav = "forward";
-                else if (path.length === droppy.currentFolder.length)
-                    nav = "same";
-                else
-                    nav = "back";
+                if (path.length > droppy.currentFolder.length) nav = "forward";
+                else if (path.length === droppy.currentFolder.length) nav = "same";
+                else nav = "back";
 
                 droppy.currentFolder = path;
                 sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", droppy.currentFolder);
@@ -1254,6 +1255,7 @@
             showEditBox("rename", $(this).parent().find(".filelink, .folderlink").text());
             event.stopPropagation();
         });
+
         // Zip a folder
         $(".icon-zip").register("click", function (event) {
             if (droppy.socketWait) return;
@@ -1367,10 +1369,10 @@
         droppy.hasLoggedOut = null;
         droppy.isAnimating = null;
         droppy.isUploading = null;
+        droppy.mimeTypes = {},
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
-        droppy.mimeTypes = {},
         droppy.zeroFiles;
     }
 
@@ -1544,6 +1546,14 @@
 
         var style = $('<style type="text/css"></style>');
         style.text(css).appendTo($("head"));
+    }
+
+    function showSpinner() {
+        if (!$("#spinner").length) $("#page").append('<div id="spinner" class="inline-spin"></div>');
+    }
+
+    function hideSpinner() {
+        $("#spinner").remove();
     }
 
     function debounce(func, wait) {

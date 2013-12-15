@@ -526,6 +526,20 @@ input:-webkit-autofill {
     top:  calc(50% - 100px);
 }
 
+#spinner {
+    position: fixed;
+    animation: spin .75s infinite linear;
+    border-bottom : 5px solid #1af;
+    border-left   : 5px solid #000;
+    border-right  : 5px solid #000;
+    border-top    : 5px solid #f1a;
+    border-radius: 100%;
+}
+
+@media all and (min-width: 1024px) { #spinner { top: 39px; right: 5px; height: 1.3em; width: 1.3em } }
+@media all and (max-width: 1023px) { #spinner { top: 33px; right: 4px; height: 1.1em; width: 1.1em } }
+@media all and (max-width:  639px) { #spinner { top: 28px; right: 3px; height: 0.9em; width: 0.9em } }
+
 .inline-spin {
     position: relative;
     animation: spin .5s infinite linear;
@@ -548,7 +562,8 @@ input:-webkit-autofill {
  from { transform: rotate(0deg)   }
  to   { transform: rotate(359deg) }
 }
-/* ========================= Directory Name Input ========================== */
+
+/* =============================== Edit Box ================================ */
 
 #edit-box {
     background: #181818;
