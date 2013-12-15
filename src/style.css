@@ -395,10 +395,19 @@ input:-webkit-autofill {
     position: absolute;
 }
 
+.paused:after {
+    animation: zoom .75s linear infinite;
+    color: #a25;
+    content: "";
+    font-family: "icons";
+    margin-left: .5em;
+    position: absolute;
+}
+
 @keyframes zoom {
-  0%   { transform: scale(1.2) }
+  0%   { transform: scale(1.3) }
   50%  { transform: scale(0.9) }
-  100% { transform: scale(1.2) }
+  100% { transform: scale(1.3) }
 }
 
 .size {
@@ -482,7 +491,6 @@ input:-webkit-autofill {
 }
 
 .icon-play { display: none }
-.icon-play.active { color: #25a }
 
 @media all and (min-width: 1024px) { .icon-play { left: .65em } }
 @media all and (max-width: 1023px) { .icon-play { left: .6em } }

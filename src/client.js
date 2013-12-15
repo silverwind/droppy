@@ -1303,32 +1303,22 @@
             return;
         }
 
-        resetPlaybackUI();
         $(".icon-play").text(iconPlay);
-        playButton.addClass("active");
 
-        if (player.paused)
-            loadAndPlay();
-         else
-            (decodeURI(player.src).indexOf(source) > 0) ? pause() : loadAndPlay();
-
-        function loadAndPlay() {
-            player.src = source;
-            player.load();
-            player.play();
+        if (player.paused) {
+            if (decodeURI(player.src).indexOf(source) > 0) {
+                player.play();
+            } else {
+                player.src = source;
+                player.load();
+                player.play();
+            }
             playButton.text(iconPause);
-            playButton.parent().find(".filelink").addClass("playing");
-        }
-
-        function pause() {
+            playButton.parent().find(".filelink").removeClass("paused").addClass("playing");
+        } else {
             player.pause();
             playButton.text(iconPlay);
-            resetPlaybackUI();
-        }
-
-        function resetPlaybackUI() {
-            $(".filelink").removeClass("playing");
-            $(".icon-play").removeClass("active");
+            playButton.parent().find(".filelink").removeClass("playing").addClass("paused");
         }
     }
 
