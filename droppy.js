@@ -957,6 +957,7 @@
         // (happens on server shutdown with the client staying on the page)
         if (!clients[cookie]) {
             res.statusCode = 500;
+            res.setHeader("Content-Type", "text/plain");
             res.end();
             log.response(req, res);
             return;
@@ -980,8 +981,6 @@
                             fs.rename(files[name].src, files[name].dst, function () {
                                 log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
                                 if (names.length === 0) {
-                                    res.writeHead(200, { "Connection": "close" });
-                                    res.end();
                                     readDirectory(clients[cookie].directory, function () {
                                         sendFiles(cookie, "UPLOAD_DONE");
                                     });
@@ -993,7 +992,13 @@
             });
         });
 
-        busboy.on("end", function () { done = true; });
+        busboy.on("end", function () {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/plain");
+            res.setHeader("Connection", "close");
+            res.end();
+            done = true;
+        });
         req.on("close", function () { !done && log.log(socket, " Upload cancelled"); });
         req.pipe(busboy);
 
