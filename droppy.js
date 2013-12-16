@@ -861,6 +861,7 @@
                 } else {
                     // All other content can be cached
                     res.setHeader("ETag", cache[resourceName].etag);
+                    res.setHeader("Cache-Control", "max-age=3600");
                 }
 
                 if (/.*(js|css|html|svg)$/.test(resourceName))
