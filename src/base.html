@@ -19,6 +19,7 @@
 			window.addEventListener("load", function load() {
 				var script = document.createElement("script");
 				script.src = "/res/client.js";
+				script.async = true;
 				document.body.removeChild(document.body.getElementsByTagName("script")[0]);
 				document.body.appendChild(script);
 				window.removeEventListener("load", load, false);
