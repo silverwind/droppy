@@ -315,10 +315,10 @@ input:-webkit-autofill {
 #path li:nth-child(even)    { background: #282828 }
 #path li:nth-child(even) > .arrow { fill: #282828 }
 
-#path li:nth-child(odd):hover     { background: #512; color: #fff }
-#path li:nth-child(odd):hover > .arrow  { fill: #512 }
-#path li:nth-child(even):hover    { background: #246; color: #fff }
-#path li:nth-child(even):hover > .arrow { fill: #246 }
+#path li:nth-child(odd):hover     { background: #612; color: #fff }
+#path li:nth-child(odd):hover > .arrow  { fill: #612 }
+#path li:nth-child(even):hover    { background: #248; color: #fff }
+#path li:nth-child(even):hover > .arrow { fill: #248 }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -1112,7 +1112,7 @@ input:-webkit-autofill {
     margin: 0 auto;
 }
 
-#login-info-box.info  { background: linear-gradient(#369,#48c); opacity: 1 }
+#login-info-box.info  { background: linear-gradient(#248,#369); opacity: 1 }
 #login-info-box.error { background: linear-gradient(#c44,#822); opacity: 1 }
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-info-box { border-radius: 0 } }
 
@@ -1189,7 +1189,7 @@ input[type="checkbox"] { display: none }
 #check:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
-    background: linear-gradient(#369,#246);
+    background: linear-gradient(#369,#248);
     border-radius: 0 0 6px 6px;
     bottom: 0;
     color: #fff;
