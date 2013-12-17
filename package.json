@@ -47,6 +47,7 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "grunt": "~0.4.2",
-    "grunt-bump": "0.0.13"
+    "grunt-bump": "~0.0.13",
+    "grunt-shell": "~0.6.1"
   }
 }
