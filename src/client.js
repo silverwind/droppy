@@ -145,9 +145,9 @@
         droppy.socket.onopen = function () {
             log("WebSocket open.");
             retries = 3; // reset retries on connection loss
-            if (queuedData) {
+            if (queuedData)
                 sendMessage();
-            } else
+            else
                 updateLocation(droppy.currentFolder || "/", false); // Request initial update
         };
 
@@ -1039,6 +1039,9 @@
 
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
+        // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
+        if (!droppy.socket) return;
+
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000)
                 updateLocation(decodeURIComponent(window.location.pathname), true, true);
@@ -1054,6 +1057,7 @@
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
                 showSpinner();
+
                 // Find the direction in which we should animate
                 if (path.length > droppy.currentFolder.length) nav = "forward";
                 else if (path.length === droppy.currentFolder.length) nav = "same";
