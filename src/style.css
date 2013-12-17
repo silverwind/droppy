@@ -379,9 +379,10 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
-@media all and (min-width: 1024px) { .filelink, .folderlink { width: calc(100% - 19em) } }
-@media all and (max-width: 1023px) { .filelink, .folderlink { width: calc(100% - 19em) } }
-@media all and (max-width:  639px) { .filelink, .folderlink { width: calc(100% - 7em ) } }
+@media all and (min-width: 1024px) { .filelink, .folderlink { width: calc(100% - 18em) } }
+@media all and (max-width: 1023px) { .filelink, .folderlink { width: calc(100% - 18em) } }
+@media all and (max-width:  639px) { .filelink, .folderlink { width: calc(100% - 11em ) } }
+@media all and (max-width:  320px) { .filelink, .folderlink { width: calc(100% - 6.5em ) } }
 
 .playing:after {
     animation: zoom .75s linear infinite;
@@ -415,7 +416,7 @@ input:-webkit-autofill {
     width: 2.5em;
 }
 
-@media all and (max-width: 639px) { .size { display: none } }
+@media all and (max-width: 320px) { .size { display: none } }
 
 .size-unit {
     color: #555;
@@ -426,7 +427,7 @@ input:-webkit-autofill {
     width: 1em;
 }
 
-@media all and (max-width: 639px) { .size-unit { display: none } }
+@media all and (max-width: 320px) { .size-unit { display: none } }
 
 .mtime {
     color: #111;
@@ -499,6 +500,10 @@ input:-webkit-autofill {
     text-align: center;
     transition: transform .2s ease;
     width: 1.5em;
+}
+
+@media all and (max-width: 320px) {
+    .icon-delete, .icon-link, .icon-play, .icon-rename, .icon-zip { width: 1.2em }
 }
 
 .icon-link,.icon-rename { padding-left: .25em }
