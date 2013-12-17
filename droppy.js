@@ -55,7 +55,6 @@
         config     = null,
         firstRun   = null,
         isCLI      = (process.argv.length > 2);
-
     // Argument handler
     if (isCLI) handleArguments();
 

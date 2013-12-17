@@ -15,15 +15,6 @@
 				<p>Please enable<br>JavaScript to<br>use droppy!</p>
 			</div>
 		</noscript>
-		<script>
-			window.addEventListener("load", function load() {
-				var script = document.createElement("script");
-				script.src = "/res/client.js";
-				script.async = true;
-				document.body.removeChild(document.body.getElementsByTagName("script")[0]);
-				document.body.appendChild(script);
-				window.removeEventListener("load", load, false);
-			}, false);
-		</script>
+		<script async src="/res/client.js"></script>
 	</body>
 </html>

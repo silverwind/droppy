@@ -412,7 +412,7 @@ input:-webkit-autofill {
     float: right;
     text-align: right;
     white-space: nowrap;
-    width: 3em;
+    width: 2.5em;
 }
 
 @media all and (max-width: 639px) { .size { display: none } }
@@ -420,10 +420,10 @@ input:-webkit-autofill {
 .size-unit {
     color: #555;
     float: right;
-    margin-left: .25em;
+    margin: 0 .25em;
     text-align: left;
     white-space: nowrap;
-    width: 2em;
+    width: 1em;
 }
 
 @media all and (max-width: 639px) { .size-unit { display: none } }
