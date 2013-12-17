@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "0.7.9",
+  "version": "0.7.10",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "Pure HTML5 cloud storage on node",
   "homepage": "https://github.com/silverwind/droppy",
@@ -44,5 +44,9 @@
   "bin": {
     "droppy": "./droppy.js"
   },
-  "license": "BSD-2-Clause"
+  "license": "BSD-2-Clause",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-bump": "0.0.13"
+  }
 }
