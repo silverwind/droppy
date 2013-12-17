@@ -1106,15 +1106,14 @@ input:-webkit-autofill {
     line-height: 30px;
     margin-top: 25px;
     color: #fff;
-    border: 2px solid transparent;
     border-radius: 6px 6px 0 0;
     opacity: 0;
     transition: all 0.25s ease;
     margin: 0 auto;
 }
 
-#login-info-box.info  { background: #146; opacity: 1 }
-#login-info-box.error { background: #b31; opacity: 1 }
+#login-info-box.info  { background: linear-gradient(#369,#48c); opacity: 1 }
+#login-info-box.error { background: linear-gradient(#c44,#822); opacity: 1 }
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-info-box { border-radius: 0 } }
 
 #login-info {
@@ -1190,7 +1189,7 @@ input[type="checkbox"] { display: none }
 #check:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
-    background: #146;
+    background: linear-gradient(#369,#246);
     border-radius: 0 0 6px 6px;
     bottom: 0;
     color: #fff;
@@ -1204,8 +1203,8 @@ input[type="checkbox"] { display: none }
 }
 
 .submit:active { transform: translateY(3px) }
-.submit:hover, .submit:focus { background: #257 }
-.submit.invalid { background: #b31 }
+.submit:hover, .submit:focus { background:linear-gradient(#48c,#369) }
+.submit.invalid { background: linear-gradient(#822,#c44) }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
     .submit {
