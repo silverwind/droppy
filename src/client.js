@@ -1529,6 +1529,7 @@
 
     setInterval(function () {
         var dates = document.getElementsByClassName("mtime");
+        if (!dates) return;
         for (var i = 0; i < dates.length; i++)
             if (dates[i].dataset.timestamp) {
                 var reltime = timeDifference(dates[i].dataset.timestamp);
