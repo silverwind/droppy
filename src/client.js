@@ -176,6 +176,7 @@
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
                 updateData(msg.folder, msg.data);
+                hideSpinner();
                 break;
             case "UPLOAD_DONE":
                 if (droppy.zeroFiles.length) {
@@ -186,11 +187,13 @@
                     updateLocation(droppy.currentFolder, false);
                     updateTitle(droppy.currentFolder, true);
                     $("#upload-info").removeClass("in").removeClass("in-space");
+                    hideSpinner();
                 }
                 break;
             case "NEW_FOLDER":
                 if (droppy.isUploading) return;
                 updateData(msg.folder, msg.data);
+                hideSpinner();
                 break;
             case "UPDATE_CSS":
                 reloadCSS(msg.css);
@@ -552,10 +555,12 @@
         function submitEdit() {
             if (editbox.data("canSubmit") !== "true") return;
             if (editbox.data("type") === "create-folder") {
+                showSpinner();
                 sendMessage("CREATE_FOLDER",
                     droppy.currentFolder === "/" ? "/" + editInput.val() : droppy.currentFolder + "/" + editInput.val()
                 );
             } else if (editbox.data("type") === "rename") {
+                showSpinner();
                 sendMessage("RENAME", {
                     "old": editInput.attr("placeholder"),
                     "new": editInput.val()
