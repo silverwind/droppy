@@ -182,7 +182,10 @@
                     sendMessage("ZERO_FILES", droppy.zeroFiles);
                     droppy.zeroFiles = [];
                 } else {
-                    finishUpload(msg);
+                    droppy.isUploading = false;
+                    updateLocation(droppy.currentFolder, false);
+                    updateTitle(droppy.currentFolder, true);
+                    $("#upload-info").removeClass("in").removeClass("in-space");
                 }
                 break;
             case "NEW_FOLDER":
@@ -479,10 +482,10 @@
 
         // File upload button
         $("#upload-file").register("click", function () {
-            // Remove the directory attributes so we get a file picker dialog
+            // Remove the directory attributes so we get a file picker dialog!
             if (droppy.detects.fileinputdirectory)
-                fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
-            fileInput.click();
+                $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
+            $("#file").click();
         });
 
         // Folder upload button - check if we support directory uploads
@@ -1029,14 +1032,6 @@
         return str.split("/").reverse()[0];
     }
 
-    function finishUpload(msg) {
-        droppy.isUploading = false;
-        updateLocation(droppy.currentFolder, false);
-        updateTitle(droppy.currentFolder, true);
-        msg && updateData(msg.folder, msg.data);
-        $("#upload-info").removeClass("in").removeClass("in-space");
-    }
-
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
@@ -1263,8 +1258,10 @@
 
     // Bind click events to the list elements
     function bindEvents() {
-        // Upload icon on empty page
+        // Upload button on empty page
         $("#upload-inline").register("click", function () {
+            if (droppy.detects.fileinputdirectory)
+                $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
             $("#file").click();
         });
 

@@ -397,9 +397,6 @@
                             if (stats.isFile()) {
                                 fs.unlink(msg.data, function (error) {
                                     if (error) log.error(error);
-                                    readDirectory(clients[cookie].directory, function () {
-                                        sendFiles(cookie, "UPDATE_FILES");
-                                    });
                                 });
                             } else if (stats.isDirectory()) {
                                 try {
@@ -410,10 +407,6 @@
                                     log.error("Error applying wrench.rmdirSyncRecursive");
                                     log.error(error);
                                 }
-
-                                readDirectory(clients[cookie].directory, function () {
-                                    sendFiles(cookie, "UPDATE_FILES");
-                                });
                             }
                         }
                     });
@@ -428,9 +421,6 @@
                     fs.mkdir(addFilePath(msg.data), config.dirMode, function (error) {
                         if (error) log.error(error);
                         log.log(colorSocket(remoteIP, remotePort), " Created: ", msg.data);
-                        readDirectory(clients[cookie].directory, function () {
-                            sendFiles(cookie, "UPDATE_FILES");
-                        });
                     });
                     break;
                 case "RENAME":
@@ -445,9 +435,6 @@
                     fs.rename(addFilePath(oldname), addFilePath(newname), function (error) {
                         if (error) log.error(error);
                         log.log(colorSocket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
-                        readDirectory(clients[cookie].directory, function () {
-                            sendFiles(cookie, "UPDATE_FILES");
-                        });
                     });
                     break;
                 case "SWITCH_FOLDER":
@@ -455,12 +442,9 @@
                     clients[cookie].directory = msg.data;
                     updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read
-                        var msg = ok ? "UPDATE_FILES" : "NEW_FOLDER";
-                        if (!ok) {
-                            clients[cookie].directory = "/";
-                        }
+                        if (!ok) clients[cookie].directory = "/";
                         readDirectory(clients[cookie].directory, function () {
-                            sendFiles(cookie, msg);
+                            sendFiles(cookie, "NEW_FOLDER");
                         });
                     });
 
@@ -495,9 +479,7 @@
                         fs.writeFileSync(p, "", {mode: config.filesMode});
                         log.log(colorSocket(remoteIP, remotePort), " Received: " + removeFilePath(p).substring(1));
                     });
-                    readDirectory(clients[cookie].directory, function () {
-                        sendFiles(cookie, "UPLOAD_DONE", true);
-                    });
+                    send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
                     break;
                 }
             });
@@ -860,7 +842,6 @@
                 } else {
                     // All other content can be cached
                     res.setHeader("ETag", cache[resourceName].etag);
-                    res.setHeader("Cache-Control", "max-age=3600");
                 }
 
                 if (/.*(js|css|html|svg)$/.test(resourceName))
@@ -979,11 +960,6 @@
                             wrench.mkdirSyncRecursive(path.dirname(files[name].dst), config.dirMode);
                             fs.rename(files[name].src, files[name].dst, function () {
                                 log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
-                                if (names.length === 0) {
-                                    readDirectory(clients[cookie].directory, function () {
-                                        sendFiles(cookie, "UPLOAD_DONE");
-                                    });
-                                }
                             });
                         })(names.pop());
                     }
@@ -997,6 +973,7 @@
             res.setHeader("Connection", "close");
             res.end();
             done = true;
+            send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
         });
         req.on("close", function () { !done && log.log(socket, " Upload cancelled"); });
         req.pipe(busboy);
