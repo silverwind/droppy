@@ -836,7 +836,7 @@ input:-webkit-autofill {
 #about-logo {
     cursor: default;
     float: left;
-    font-size: 8rem;
+    font-size: 8em;
     line-height: 200px;
     text-align: center;
     width: 130px;
@@ -878,21 +878,21 @@ input:-webkit-autofill {
 }
 
 #about-text {
-    font-size: .8rem;
-    line-height: 1.2rem;
+    font-size: .8em;
+    line-height: 1.2em;
 }
 
 #about-copy {
     bottom: 0;
-    font-size: .8rem;
-    margin-bottom: .5rem;
+    font-size: .8em;
+    margin-bottom: .5em;
     position: absolute;
     color: #fff;
 }
 
 #github {
     bottom: 0;
-    font-size: 1.5rem;
+    font-size: 1.5em;
     padding: 8px;
     position: absolute;
     right: 0;

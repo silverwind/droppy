@@ -1258,18 +1258,23 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Cookie helpers
+    // Cookie functions
+
+    var cookieName = "s", needToSave = false;
+
     function getCookie(cookie) {
         var session = "";
         if (cookie) {
             var cookies = cookie.split("; ");
             cookies.forEach(function (c) {
-                if (/^session.*/.test(c)) {
-                    session = c.substring(8);
+                if (new RegExp("^" + cookieName + ".*").test(c)) {
+                    session = c.substring(cookieName.length + 1);
                 }
             });
             for (var savedsession in db.sessions) {
                 if (savedsession === session) {
+                    db.sessions[session].lastSeen = Date.now();
+                    needToSave = true;
                     return session;
                 }
             }
@@ -1277,7 +1282,6 @@
         return false;
     }
 
-    //-----------------------------------------------------------------------------
     function createCookie(req, res, postData) {
         var sessionID = crypto.randomBytes(32).toString("base64");
         var priv = db.users[postData.username].privileged;
@@ -1285,15 +1289,22 @@
         if (postData.check === "on") {
             // Create a semi-permanent cookie
             var dateString = new Date(Date.now() + 31536000000).toUTCString();
-            res.setHeader("Set-Cookie", "session=" + sessionID + "; Expires=" + dateString);
+            res.setHeader("Set-Cookie", cookieName + "=" + sessionID + "; Expires=" + dateString);
         } else {
             // Create a single-session cookie
-            // TODO: Delete these session ids after a certain period of inactivity from the client
-            res.setHeader("Set-Cookie", "session=" + sessionID + ";");
+            res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";");
         }
-        db.sessions[sessionID] = {privileged : priv};
+        db.sessions[sessionID] = {privileged : priv, lastSeen : Date.now()};
         writeDB();
     }
+
+    // Try to write the DB periodically when a lastSeen date needs to be updated
+    setInterval(function () {
+        if (needToSave) {
+            needToSave = false;
+            writeDB();
+        }
+    }, 10000);
 
     //-----------------------------------------------------------------------------
     // Watch the CSS files and send updates to the client for live styling
