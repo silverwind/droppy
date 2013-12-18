@@ -82,6 +82,10 @@
         createListener();
     });
 
+    // Session checking timers
+    setInterval(cleanUpSessions, 60000);
+    setInterval(saveSessions, 10000);
+
     //-----------------------------------------------------------------------------
     // Read JS/CSS/HTML client resources, minify them, and write them to /res
     function prepareContent() {
@@ -1272,10 +1276,12 @@
                 }
             });
             for (var savedsession in db.sessions) {
-                if (savedsession === session) {
-                    db.sessions[session].lastSeen = Date.now();
-                    needToSave = true;
-                    return session;
+                if (db.sessions.hasOwnProperty(savedsession)) {
+                    if (savedsession === session) {
+                        db.sessions[session].lastSeen = Date.now();
+                        needToSave = true;
+                        return session;
+                    }
                 }
             }
         }
@@ -1298,13 +1304,25 @@
         writeDB();
     }
 
-    // Try to write the DB periodically when a lastSeen date needs to be updated
-    setInterval(function () {
+    // Check if we need to write the DB periodically to update lastSeen dates
+    function saveSessions() {
         if (needToSave) {
             needToSave = false;
             writeDB();
         }
-    }, 10000);
+    }
+
+    // Clean inactive sessions after 1 month of inactivity
+    function cleanUpSessions() {
+        for (var session in db.sessions) {
+            if (db.sessions.hasOwnProperty(session)) {
+                if (!db.sessions[session].lastSeen || (Date.now() - db.sessions[session].lastSeen >= 2678400000)) {
+                    delete db.sessions[session];
+                    needToSave = true;
+                }
+            }
+        }
+    }
 
     //-----------------------------------------------------------------------------
     // Watch the CSS files and send updates to the client for live styling
@@ -1370,6 +1388,10 @@
         }
 
         if (count > 0) log.log("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
+
+        cleanUpSessions();
+        saveSessions();
+
         process.exit(0);
     }
 })();
