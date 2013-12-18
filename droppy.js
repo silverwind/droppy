@@ -92,7 +92,7 @@
                 html : ["base.html", "auth.html", "main.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-            resourceList = utils.flattenObj(resources),
+            resourceList = utils.flatten(resources),
             matches = { resource: 0, compiled: 0 };
 
         // Check if we to actually need to recompile resources
