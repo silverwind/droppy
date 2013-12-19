@@ -304,7 +304,6 @@ input:-webkit-autofill {
 
 #path li.in  { left: 0    }
 #path li.out { left: -100px }
-#path li.placeholder { opacity: 0 }
 #path li:first-of-type { padding-left: .5em }
 #path li { color: #bbb; transition: color .3s ease, left .5s ease }
 
@@ -523,8 +522,8 @@ input:-webkit-autofill {
 }
 
 #spinner {
-    position: absolute;
-    right: 3px;
+    float: right;
+    margin-right: 3px;
     margin-top: 3px;
     animation: spin .75s infinite linear;
     border-bottom : 5px solid #1af;

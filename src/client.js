@@ -1090,7 +1090,6 @@
         } else {
             // Delay initial slide-in
             setTimeout(function () {
-                $(".placeholder").remove(); // Invisible placeholder so height:auto works during the initial animation
                 createPart(parts[0]);
                 for (i = 1, len = parts.length; i < len; i++) {
                     pathStr += "/" + parts[i];
