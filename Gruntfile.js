@@ -25,10 +25,16 @@ module.exports = function (grunt) {
             },
             publish: {
                 command: "npm publish"
+            },
+            update: {
+                command: "npm-check-updates -u"
             }
         }
     });
+
+    grunt.registerTask("update", "shell:update");
     grunt.registerTask("release", ["bump", "shell:push", "shell:publish"]);
+
     grunt.loadNpmTasks("grunt-bump");
     grunt.loadNpmTasks("grunt-shell");
 };

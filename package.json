@@ -12,11 +12,11 @@
     "archiver": "~0.4.10",
     "async": "~0.2.9",
     "autoprefixer": "~0.8.20131213",
-    "clean-css": "~2.0.2",
+    "clean-css": "~2.0.4",
     "graceful-fs": "~2.0.1",
     "mime": "~1.2.11",
     "busboy": "0.0.13",
-    "uglify-js": "~2.4.7",
+    "uglify-js": "~2.4.8",
     "spdy": "~1.17.10",
     "wrench": "~1.5.4",
     "ws": "~0.4.31"
