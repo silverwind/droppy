@@ -538,8 +538,8 @@ input:-webkit-autofill {
 }
 
 @media all and (min-width: 1024px) { #spinner { height: 29px; width: 29px; } }
-@media all and (max-width: 1023px) { #spinner { height: 24px; width: 24px; } }
-@media all and (max-width:  639px) { #spinner { height: 19px; width: 19px; } }
+@media all and (max-width: 1023px) { #spinner { height: 24px; width: 24px; border-width: 4px } }
+@media all and (max-width:  639px) { #spinner { height: 19px; width: 19px; border-width: 3px } }
 
 .inline-spin {
     position: relative;
