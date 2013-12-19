@@ -1539,16 +1539,15 @@
         while (document.styleSheets[i])
             document.styleSheets[i++].disabled = true;
 
-        var style = $('<style type="text/css"></style>');
-        style.text(css).appendTo($("head"));
+        $("<style></style>").text(css).appendTo($("head"));
     }
 
     function showSpinner() {
-        $("#spinner").attr("class", "");
+        document.getElementById("spinner").className = "";
     }
 
     function hideSpinner() {
-        $("#spinner").attr("class", "out");
+        document.getElementById("spinner").className = "out";
     }
 
     function debounce(func, wait) {

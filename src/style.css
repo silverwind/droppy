@@ -771,16 +771,10 @@ input:-webkit-autofill {
 #seekbar {
     position: absolute;
     width: 100%;
-    height: 2px;
-    top: -1px;
-    transition: all .2s ease;
-    cursor: col-resize;
-    z-index: 4;
-}
-
-#audio-controls:hover #seekbar {
     height: 6px;
-    top: -3px;
+    top: -4px;
+    transition: all .2s ease;
+    z-index: 4;
 }
 
 #seekbar-played {
@@ -1256,7 +1250,7 @@ input[type="checkbox"] { display: none }
     width: 80px;
     text-align: center;
     padding: 2px 6px;
-    background: #333;
+    background: #222;
     border-radius: 4px;
     line-height: 1.25em;
     z-index: 2;
@@ -1269,7 +1263,7 @@ input[type="checkbox"] { display: none }
     position: absolute;
     width: 10px;
     height: 10px;
-    background: #333;
+    background: #222;
     bottom: -2px;
     left: calc(50% - .5em);
     transform: rotate(45deg);
