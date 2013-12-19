@@ -143,7 +143,6 @@
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
 
         droppy.socket.onopen = function () {
-            log("WebSocket open.");
             retries = 3; // reset retries on connection loss
             if (queuedData)
                 sendMessage();
@@ -156,11 +155,8 @@
             if (droppy.hasLoggedOut || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
-                    log("WebSocket closed " + event.code + ". Reconnecting " + retries + " more times.");
                     openSocket();
                     retries--;
-                } else {
-                    log("WebSocket closed " + event.code + ". Giving up on reconnects.");
                 }
             } else if (reopen) {
                 reopen = false;
@@ -171,7 +167,6 @@
         droppy.socket.onmessage = function (event) {
             droppy.socketWait = false;
             var msg = JSON.parse(event.data);
-            log(document.domain + " -> " + msg.type);
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
@@ -237,8 +232,6 @@
                 droppy.socketWait = false;
             }, 1000);
 
-            if (msgType) log(msgType + " -> " + document.domain);
-
             if (queuedData) {
                 droppy.socket.send(queuedData);
                 queuedData = false;
@@ -268,7 +261,7 @@
             } catch (error) {
                 try {
                     droppy.socket.close();
-                } catch (error) { log("Unable to close socket on unload: ", error); }
+                } catch (error) {}
             }
         }
     });
@@ -439,11 +432,9 @@
             // as we can't send empty FormData.
             (function wait(timeout) {
                 if (timeout > 10000) {
-                    log("Timeout waiting for files to be read");
                     return;
                 } else {
                     if (cbCount > 0 && cbFired === cbCount) {
-                        log("Got " + cbFired + " files in " + dirCount + " directories.");
                         upload(obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
@@ -1404,14 +1395,6 @@
                 size: (step === 0) ? bytes : (bytes).toFixed(decimals),
                 unit: units[step]
             };
-        }
-    }
-
-    // Debug logging
-    function log() {
-        if (false && droppy.debug) {
-            var args = Array.prototype.slice.call(arguments);
-            console.log(args.join(" "));
         }
     }
 
