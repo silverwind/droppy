@@ -56,11 +56,11 @@ html {
 }
 
 ::selection {
-    background: #f1a;
+    background: #1af;
     color: #fff;
 }
 ::-moz-selection {
-    background: #f1a;
+    background: #1af;
     color: #fff;
 }
 
@@ -106,7 +106,6 @@ input:-webkit-autofill {
     padding: .5em .25em 0 .5em;
     position: absolute;
     transition: left .15s ease-in, max-height .5s ease;
-    user-select: none;
     width: calc(100% - 1em);
     z-index: -1;
 }
@@ -163,7 +162,6 @@ input:-webkit-autofill {
     color: #ddd;
     cursor: pointer;
     float: left;
-    user-select: none;
     width: 16.666%;
 }
 
@@ -196,7 +194,6 @@ input:-webkit-autofill {
     opacity: 0;
     position: absolute;
     transition: all .3s ease;
-    user-select: none;
     width: 300px;
     z-index: 2;
 }
@@ -285,7 +282,6 @@ input:-webkit-autofill {
    overflow-x: scroll;
    overflow-y: hidden;
    white-space: nowrap;
-   user-select: none;
    width: 100%;
    text-align: left;
 }
@@ -582,7 +578,6 @@ input:-webkit-autofill {
     text-align: left;
     top: 50%;
     transition: all .3s ease;
-    user-select: none;
     width: 300px;
     z-index: 32;
 }
@@ -643,7 +638,6 @@ input:-webkit-autofill {
     right: 10px;
     text-align: center;
     transition: all .25s ease;
-    user-select: none;
 }
 
 #editbox-submit .icon { margin-right: 5px }
@@ -672,7 +666,6 @@ input:-webkit-autofill {
     left: 0;
     bottom: 0;
     text-align: center;
-    user-select: none;
     z-index: 3;
 }
 
@@ -919,7 +912,6 @@ input:-webkit-autofill {
     position: fixed;
     top: 50%;
     transition: all .3s ease;
-    user-select: none;
     width: 600px;
     z-index: 32;
 }
@@ -1045,7 +1037,6 @@ input:-webkit-autofill {
     text-align: center;
     top: 50% ;
     transition: top .5s ease, box-shadow .15s ease;
-    user-select: none;
     width: 600px;
     z-index: 0;
 }
@@ -1094,7 +1085,6 @@ input:-webkit-autofill {
     position: absolute;
     text-align: center;
     top: 0;
-    user-select: none;
     width: 600px;
     z-index: -1;
 }
