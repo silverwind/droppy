@@ -21,7 +21,7 @@ module.exports = function (grunt) {
                 failOnError: true
             },
             push: {
-                command: "git push -u origin master --tags"
+                command: "git push -u -f --tags origin master"
             },
             publish: {
                 command: "npm publish"

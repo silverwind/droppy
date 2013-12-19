@@ -457,7 +457,6 @@
         $(window).register("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
-                droppy.smallScreen = $(window).width() < 640;
                 checkPathOverflow();
             }, 100);
         });
@@ -1135,21 +1134,22 @@
 
     // Check if the path indicator overflows and scroll it if neccessary
     function checkPathOverflow() {
-        var last = $("#path li:last-child");
-        if (!last.position()) return;
-        var margin = droppy.smallScreen ? 95 : 110;
-        var space = $(window).width();
-        var right = last.position().left + last.width();
+        var width = 60,
+            space = $(window).width(),
+            pathElements = document.querySelectorAll("#path li");
 
-        if ((right + margin) > space) {
-            var needed = right - space + margin;
+        for (var i = 0, l = pathElements.length; i < l; i++) {
+            width += pathElements[i].offsetWidth;
+        }
+
+        if (width > space) {
             requestAnimation(function () {
-                $("#path").animate({"left": -needed}, {duration: 200});
+                $("#path li").animate({"left": space - width}, {duration: 200});
             });
         } else {
             requestAnimation(function () {
-                if ($("#path").css("left") !== 0)
-                    $("#path").animate({"left": 0}, {duration: 200});
+                if ($("#path li").css("left") !== 0)
+                    $("#path li").animate({"left": 0}, {duration: 200});
             });
         }
     }
@@ -1247,7 +1247,6 @@
                 $(".data-row").addClass("animating");
                 $("#content").attr("class", (nav === "forward") ? "back" : "forward");
                 $("#newcontent").setTransitionClass("center");
-
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     droppy.isAnimating = false;
@@ -1374,7 +1373,6 @@
 
     function initVariables() {
         droppy.debug = null;  // live css reload and debug logging - this variable is set by the server
-        droppy.smallScreen = $(window).width() < 640;
         droppy.activeFiles = [];
         droppy.audioUpdater = null;
         droppy.currentData = null;
@@ -1411,7 +1409,7 @@
 
     // Debug logging
     function log() {
-        if (droppy.debug) {
+        if (false && droppy.debug) {
             var args = Array.prototype.slice.call(arguments);
             console.log(args.join(" "));
         }
@@ -1563,11 +1561,11 @@
     }
 
     function showSpinner() {
-        if (!$("#spinner").length) $("#page").append('<div id="spinner" class="inline-spin"></div>');
+        $("#spinner").attr("class", "");
     }
 
     function hideSpinner() {
-        $("#spinner").remove();
+        $("#spinner").attr("class", "out");
     }
 
     function debounce(func, wait) {

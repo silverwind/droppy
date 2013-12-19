@@ -282,10 +282,12 @@ input:-webkit-autofill {
 #path {
    background: linear-gradient(#111,#222);
    border-bottom: 2px solid #444;
-   overflow: hidden;
-   position: relative;
+   overflow-x: scroll;
+   overflow-y: hidden;
+   white-space: nowrap;
    user-select: none;
-   width: 1000%;
+   width: 100%;
+   text-align: left;
 }
 
 @media all and (min-width: 1024px) { #path { font-size: .9em } }
@@ -294,7 +296,7 @@ input:-webkit-autofill {
 
 #path li {
     cursor: pointer;
-    float: left;
+    display: inline-block;
     position: relative;
 }
 
@@ -307,8 +309,8 @@ input:-webkit-autofill {
 #path li.in  { left: 0    }
 #path li.out { left: -100px }
 #path li.placeholder { opacity: 0 }
-#path li:first-child { padding-left: .5em }
-#path li { color: #bbb; transition: color .3s ease, left .5s ease; }
+#path li:first-of-type { padding-left: .5em }
+#path li { color: #bbb; transition: color .3s ease, left .5s ease }
 
 #path li:nth-child(odd)     { background: #383838 }
 #path li:nth-child(odd) > .arrow  { fill: #383838 }
@@ -525,18 +527,24 @@ input:-webkit-autofill {
 }
 
 #spinner {
-    position: fixed;
+    position: absolute;
+    right: 3px;
+    margin-top: 3px;
     animation: spin .75s infinite linear;
     border-bottom : 5px solid #1af;
     border-left   : 5px solid #000;
     border-right  : 5px solid #000;
     border-top    : 5px solid #f1a;
     border-radius: 100%;
+    z-index: 32;
+}
+#spinner.out {
+    display: none;
 }
 
-@media all and (min-width: 1024px) { #spinner { top: 39px; right: 5px; height: 1.3em; width: 1.3em } }
-@media all and (max-width: 1023px) { #spinner { top: 33px; right: 4px; height: 1.1em; width: 1.1em } }
-@media all and (max-width:  639px) { #spinner { top: 28px; right: 3px; height: 0.9em; width: 0.9em } }
+@media all and (min-width: 1024px) { #spinner { height: 29px; width: 29px; } }
+@media all and (max-width: 1023px) { #spinner { height: 24px; width: 24px; } }
+@media all and (max-width:  639px) { #spinner { height: 19px; width: 19px; } }
 
 .inline-spin {
     position: relative;
