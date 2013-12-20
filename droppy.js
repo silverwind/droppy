@@ -82,10 +82,6 @@
         createListener();
     });
 
-    // Session checking timers
-    setInterval(cleanUpSessions, 60000);
-    setInterval(saveSessions, 10000);
-
     //-----------------------------------------------------------------------------
     // Read JS/CSS/HTML client resources, minify them, and write them to /res
     function prepareContent() {
@@ -1304,15 +1300,8 @@
         writeDB();
     }
 
-    // Check if we need to write the DB periodically to update lastSeen dates
-    function saveSessions() {
-        if (needToSave) {
-            needToSave = false;
-            writeDB();
-        }
-    }
-
-    // Clean inactive sessions after 1 month of inactivity
+    // Clean inactive sessions after 1 month of inactivity, and check their age hourly
+    setInterval(cleanUpSessions, 3600000);
     function cleanUpSessions() {
         for (var session in db.sessions) {
             if (db.sessions.hasOwnProperty(session)) {
@@ -1390,7 +1379,7 @@
         if (count > 0) log.log("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
         cleanUpSessions();
-        saveSessions();
+        writeDB();
 
         process.exit(0);
     }
