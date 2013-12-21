@@ -1223,16 +1223,18 @@
     }
 
     // Load generated list into view with an animation
-    function loadContent(list) {
+    function loadContent(html) {
         var emptyPage = '<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>';
+
+        $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Age</span><span class="header-size">Size</span></div>').prependTo(html);
 
         requestAnimation(function () {
             if (nav === "same") {
                 $("#content").attr("class", "center");
-                $("#content").html(list || emptyPage);
+                $("#content").html(html || emptyPage);
             } else {
                 $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
-                $("#newcontent").html(list || emptyPage);
+                $("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
                 $(".data-row").addClass("animating");
                 $("#content").attr("class", (nav === "forward") ? "back" : "forward");
