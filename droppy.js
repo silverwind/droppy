@@ -150,7 +150,7 @@
         });
 
         // Add CSS vendor prefixes
-        out.css = ap("last 2 versions").compile(out.css);
+        out.css = ap("last 2 versions").process(out.css).css;
         // Minify CSS
         out.css = new require("clean-css")({keepSpecialComments : 0, removeEmpty : true}).minify(out.css);
         // Set the client debug variable to mirror the server's

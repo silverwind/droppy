@@ -11,7 +11,7 @@
   "dependencies": {
     "archiver": "~0.4.10",
     "async": "~0.2.9",
-    "autoprefixer": "~0.8.20131213",
+    "autoprefixer": "~1.0.20131222",
     "clean-css": "~2.0.4",
     "graceful-fs": "~2.0.1",
     "mime": "~1.2.11",
