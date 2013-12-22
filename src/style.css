@@ -598,8 +598,8 @@ input:-webkit-autofill {
     z-index: 32;
 }
 
-#edit-box.in  { transform: scale(1); opacity: 1 }
-#edit-box.out { transform: scale(.5); opacity: 0; visibility: hidden }
+#edit-box.in  { transform: translateY(0); opacity: 1 }
+#edit-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 
 #editbox-label {
     color: #222;
@@ -841,8 +841,8 @@ input:-webkit-autofill {
     z-index: 32;
 }
 
-#about-box.in  { transform: scale(1); opacity: 1; }
-#about-box.out { transform: scale(.5); opacity: 0; visibility: hidden }
+#about-box.in  { transform: translateY(0); opacity: 1; }
+#about-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 @media all and (max-width: 639px), all and (max-height: 399px) { #about-box { width: 300px; margin-left: -150px } }
 
 #about-logo {
@@ -912,6 +912,7 @@ input:-webkit-autofill {
 
 /* =============================== Config box ============================== */
 
+/* TODO: Make responsive */
 #config-box {
     background: #181818;
     border-radius: 6px;
@@ -927,8 +928,8 @@ input:-webkit-autofill {
     z-index: 32;
 }
 
-#config-box.in  { transform: scale(1);  opacity: 1; }
-#config-box.out { transform: scale(.5); opacity: 0; visibility: hidden }
+#config-box.in  { transform: translateY(0);  opacity: 1; }
+#config-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 
 #userlist-header {
     color: #ddd;
@@ -1249,7 +1250,7 @@ input[type="checkbox"] { display: none }
     background: #000;
     height: 100%;
     position: absolute;
-    transition: all 0.5s ease;
+    transition: all 0.4s ease;
     width: 100%;
     z-index: 31;
 }
