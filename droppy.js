@@ -803,7 +803,7 @@
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
-            cssCache = ap("last 2 versions").compile(cssCache);
+            cssCache = ap("last 2 versions").process(cssCache).css;
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/css; charset=utf-8");
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
@@ -1322,7 +1322,7 @@
                 fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
                 fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
             ].join("\n");
-            cssCache = ap("last 2 versions").compile(cssCache);
+            cssCache = ap("last 2 versions").process(cssCache).css;
             for (var client in clients) {
                 if (clients.hasOwnProperty(client)) {
                     var data = JSON.stringify({

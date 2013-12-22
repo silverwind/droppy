@@ -156,9 +156,7 @@ input:-webkit-autofill {
 /* ============================= Header Buttons ============================ */
 
 .button {
-    background: #222;
     border-bottom: 2px solid #333 !important;
-    border: none;
     color: #ddd;
     cursor: pointer;
     float: left;
@@ -166,7 +164,7 @@ input:-webkit-autofill {
 }
 
 .button .icon {
-    padding-right: .5em;
+    padding-right: .25em;
 }
 
 @media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px; } }
@@ -198,12 +196,10 @@ input:-webkit-autofill {
     z-index: 2;
 }
 
+#upload-info.in {opacity: 1; bottom: 0 }
 @media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 33px } }
 @media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 28px } }
 @media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 23px } }
-@media all and (min-width: 1024px) { #upload-info.in       {opacity: 1; bottom: 0 } }
-@media all and (max-width: 1023px) { #upload-info.in       {opacity: 1; bottom: 0 } }
-@media all and (max-width:  639px) { #upload-info.in       {opacity: 1; bottom: 0 } }
 
 #upload-title {
     color: #ddd;
