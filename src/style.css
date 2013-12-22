@@ -395,6 +395,7 @@ input:-webkit-autofill {
     text-overflow: ellipsis;
     vertical-align: top;
     white-space: nowrap;
+    cursor: pointer;
     line-height: 1.5em;
     padding-left: .25em;
     flex: 1 1;
