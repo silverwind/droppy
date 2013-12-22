@@ -383,11 +383,11 @@ input:-webkit-autofill {
     content: "uploading";
     font-family: sans-serif;
     font-size: .6em;
-    height: 1.5em;
-    margin-left: 1em;
+    line-height: 1.5em;
+    margin-left: .5em;
     padding: 3px 5px;
     position: relative;
-    top: -2px;
+    top: -.3em;
 }
 
 .filelink, .folderlink {
@@ -482,7 +482,7 @@ input:-webkit-autofill {
 
 /* ================================= Icons ================================= */
 
-.icon { font-family: "icons" }
+.icon { font-family: "icons"; user-select: none; }
 
 .sprite {
     background-repeat: no-repeat;
