@@ -1167,13 +1167,13 @@
                         '<li class="data-row' + (audio ? ' playable"' : '"') + ' data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '"></span>' +
                             '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                            '<span class="icon-delete icon" title="Delete"></span>' +
-                            '<span class="icon-rename icon" title="Rename"></span>' +
-                            '<span class="icon-link icon" title="Create Link"></span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="size">' + size + '</span>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             audio +
+                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
+                            '<span class="size">' + size + '</span>' +
+                            '<span class="size-unit">' + sizeUnit + '</span>' +
+                            '<span class="icon-link icon" title="Create Link"></span>' +
+                            '<span class="icon-rename icon" title="Rename"></span>' +
+                            '<span class="icon-delete icon" title="Delete"></span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1182,12 +1182,12 @@
                         '<li class="data-row" data-type="folder" data-id="' + id + '">' +
                             '<span class="sprite sprite-folder"></span>' +
                             '<span class="folderlink ' + tags + '">' + file + '</span>' +
-                            '<span class="icon-delete icon" title="Delete"></span>' +
-                            '<span class="icon-rename icon" title="Rename"></span>' +
-                            '<span class="icon-zip icon" title="Create Zip"></span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="size">' + size + '</span>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
+                            '<span class="size">' + size + '</span>' +
+                            '<span class="size-unit">' + sizeUnit + '</span>' +
+                            '<span class="icon-zip icon" title="Create Zip"></span>' +
+                            '<span class="icon-rename icon" title="Rename"></span>' +
+                            '<span class="icon-delete icon" title="Delete"></span>' +
                         '</li>'
                     );
                 }
@@ -1226,7 +1226,7 @@
     function loadContent(html) {
         var emptyPage = '<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>';
 
-        $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Age</span><span class="header-size">Size</span></div>').prependTo(html);
+        $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Modified</span><span class="header-size">Size</span></div>').prependTo(html);
 
         requestAnimation(function () {
             if (nav === "same") {
