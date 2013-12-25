@@ -278,8 +278,7 @@ input:-webkit-autofill {
 #path {
    background: linear-gradient(#111,#222);
    border-bottom: 2px solid #444;
-   overflow-x: scroll;
-   overflow-y: hidden;
+   overflow: hidden;
    white-space: nowrap;
    width: 100%;
    text-align: left;
@@ -528,13 +527,14 @@ input:-webkit-autofill {
 
 #spinner {
     float: right;
-    margin-right: 3px;
-    margin-top: 3px;
     animation: spin .75s infinite linear;
-    border-bottom : 5px solid #1af;
-    border-left   : 5px solid #000;
-    border-right  : 5px solid #000;
-    border-top    : 5px solid #f1a;
+    border-bottom-color : #1af;
+    border-left-color   : #222;
+    border-right-color  : #222;
+    border-top-color    : #f1a;
+    margin-top: 3px;
+    margin-right: 3px;
+    border-style: solid;
     border-radius: 100%;
     z-index: 32;
 }
@@ -542,7 +542,7 @@ input:-webkit-autofill {
     display: none;
 }
 
-@media all and (min-width: 1024px) { #spinner { height: 29px; width: 29px; } }
+@media all and (min-width: 1024px) { #spinner { height: 29px; width: 29px; border-width: 4px } }
 @media all and (max-width: 1023px) { #spinner { height: 24px; width: 24px; border-width: 4px } }
 @media all and (max-width:  639px) { #spinner { height: 19px; width: 19px; border-width: 3px } }
 
