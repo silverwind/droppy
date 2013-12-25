@@ -1224,7 +1224,7 @@
 
     // Load generated list into view with an animation
     function loadContent(html) {
-        var emptyPage = '<div id="empty"><div id="empty-text">There appears to be<br>nothing here. Drop files<br>into this window or<br><span id="upload-inline"><span class="icon"></span> Add files</span></div></div>';
+        var emptyPage = '<div id="empty"><span class="icon"></span> Add files</div>';
 
         $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Modified</span><span class="header-size">Size</span></div>').prependTo(html);
 
@@ -1255,7 +1255,7 @@
     // Bind click events to the list elements
     function bindEvents() {
         // Upload button on empty page
-        $("#upload-inline").register("click", function () {
+        $("#empty").register("click", function () {
             if (droppy.detects.fileinputdirectory)
                 $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
             $("#file").click();

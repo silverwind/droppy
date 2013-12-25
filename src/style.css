@@ -155,22 +155,25 @@ input:-webkit-autofill {
 }
 /* ============================= Header Buttons ============================ */
 
+#buttons {
+    display: flex;
+    white-space: nowrap;
+}
+
 .button {
     border-bottom: 2px solid #333 !important;
     color: #ddd;
     cursor: pointer;
-    float: left;
-    width: 16.666%;
+    flex: 1 1;
 }
 
 .button .icon {
     padding-right: .25em;
 }
 
-@media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px; } }
-@media all and (max-width: 1023px) { .button { font-size: .8em; line-height: 30px; height: 30px; } }
-@media all and (max-width:  550px) { .button-text { display: none } }
-@media all and (max-width:  639px) { .button {  font-size: .7em; line-height: 25px; height: 25px; } }
+@media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px } }
+@media all and (max-width: 1023px) { .button { font-size: .75em; line-height: 30px; height: 30px } }
+@media all and (max-width:  639px) { .button { font-size: .8em; line-height: 25px; height: 25px } .button-text { display: none } }
 
 #upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important; }
 #upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important; }
@@ -452,31 +455,18 @@ input:-webkit-autofill {
 /* ============================= Empty Folder ============================== */
 
 #empty {
-    display: table;
-    height: 100%;
-    width: 100%;
-}
-
-#empty-text {
-    color: #222;
-    display: table-cell;
-    line-height: 1.5em;
+    padding: .25em .5em;
+    line-height: 1.3em;
+    border-radius: 4px;
     text-align: center;
-    vertical-align: middle;
-}
-
-#upload-inline {
-    background: #222;
-    border-radius: 6px;
-    color: #fff;
+    color: #222;
+    margin: 5% 30%;
+    transition: all .1s ease;
     cursor: pointer;
-    line-height: 2em;
-    padding: 5px 10px 5px;
-    transition: color .3s ease;
 }
 
-#upload-inline .icon { margin-right: 5px }
-#upload-inline:hover { background: #f27  }
+#empty .icon { margin-right: 5px }
+#empty:hover { background: #222; color: #fff }
 
 /* ================================= Icons ================================= */
 
