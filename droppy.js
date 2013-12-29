@@ -1043,10 +1043,10 @@
             if (!err && stats.isDirectory()) {
                 res.statusCode = 200;
                 res.setHeader("Content-Type", mime.lookup(type));
-                log.response(req, res);
+                res.setHeader("Transfer-Encoding", "chunked");
+                log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " Creating zip of /", req.url.substring(4));
 
                 archive = archiver.create(type, {zlib: { level: config.zipLevel }});
-                archive.setMaxListeners(0);
                 archive.on("error", function (error) { log.error(error); });
                 archive.pipe(res);
 
@@ -1057,13 +1057,13 @@
                         fs.readFile(currentPath, function (err, data) {
                             if (error) log.error(error);
                             archive.append(data, {name: removeFilePath(currentPath)});
-                            if (paths.length === 0) {
+                            if (paths.length) {
+                                read(paths.pop());
+                            } else {
                                 archive.finalize(function (error) {
                                     if (error) log.error(error);
                                     res.end();
                                 });
-                            } else {
-                                read(paths.pop());
                             }
                         });
                     })(paths.pop());
