@@ -22,7 +22,7 @@ npm install droppy && mv node_modules/droppy . && rm -rf node_modules && cd drop
 ````
 Or get the latest development version through git:
 ````bash
-git clone git://github.com/silverwind/droppy.git && cd droppy && npm install
+git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
 ````
 
 ##Running the server
