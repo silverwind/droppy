@@ -197,21 +197,6 @@
                 //TODO: UI
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
-            case "ZIP_READY":
-                $(".inline-spin").each(function () {
-                    if (msg.path.replace(/\.zip$/, "") === $(this).parent().data("id").substring(1)) {
-                        var link = document.createElement("a");
-                        link.innerHTML = "";
-                        link.setAttribute("href", "/$$/" + msg.path);
-                        link.setAttribute("title", "Download Zip");
-                        link.setAttribute("class", "icon-zip icon");
-                        link.setAttribute("download", basename(msg.path));
-                        link.onclick = function (event) { event.stopPropagation(); };
-                        $(this).replaceWith(link);
-                        return;
-                    }
-                });
-                break;
             case "USER_LIST":
                 populateUserList(msg.users);
                 break;
@@ -666,7 +651,7 @@
             if (!player.duration) return;
             var left = event.clientX;
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
-            tooltip.css("left", (left - $("#tooltip").width() / 2 - 3), + "px");
+            tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
             tooltip.attr("class", "in");
             updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
@@ -1185,7 +1170,7 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="icon-zip icon" title="Create Zip"></span>' +
+                            '<a class="icon-zip icon" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip"></a>' +
                             '<span class="icon-rename icon" title="Rename"></span>' +
                             '<span class="icon-delete icon" title="Delete"></span>' +
                         '</li>'
@@ -1278,8 +1263,6 @@
         // Zip a folder
         $(".icon-zip").register("click", function (event) {
             if (droppy.socketWait) return;
-            $(this).text("").addClass("spin inline-spin");
-            sendMessage("REQUEST_ZIP", $(this).parent().data("id"));
             event.stopPropagation();
         });
 

@@ -52,7 +52,6 @@ Configuration is done through `config.json`, which is copied from `config.json.e
     "db"           : "./db.json",
     "filesDir"     : "./files/",
     "incomingDir"  : "./temp/incoming/",
-    "zipDir"       : "./temp/zip/",
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }

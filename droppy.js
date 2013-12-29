@@ -189,13 +189,9 @@
     //-----------------------------------------------------------------------------
     // Set up the directory
     function setupDirectories() {
-        // Clean up the temp dirs
         wrench.rmdirSyncRecursive(config.incomingDir, true);
-        wrench.rmdirSyncRecursive(config.zipDir, true);
         try {
-            // Create the files and temp dirs
             wrench.mkdirSyncRecursive(config.filesDir, config.dirMode);
-            wrench.mkdirSyncRecursive(config.zipDir, config.dirMode);
             wrench.mkdirSyncRecursive(config.incomingDir, config.dirMode);
         } catch (error) {
             log.simple("Unable to create directories:");
@@ -375,17 +371,6 @@
                     // Send the shortlink to the client
                     sendLink(cookie, link);
                     writeDB();
-                    break;
-                case "REQUEST_ZIP":
-                    log.log(log.socket(remoteIP, remotePort), " Creating zip of " + msg.data);
-                    createZip(msg.data, function (zip) {
-                        log.log(log.socket(remoteIP, remotePort), " Zip created: " + msg.data);
-                        send(clients[cookie].ws, JSON.stringify({
-                            type : "ZIP_READY",
-                            path :  path.relative(config.zipDir, zip.path).replace("\\", "/")
-                        }));
-                    });
-
                     break;
                 case "DELETE_FILE":
                     log.log(log.socket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
@@ -697,6 +682,8 @@
             }
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI) || /^\/\$\$\//.test(URI)) {
             handleFileRequest(req, res);
+        } else if (/^\/~~\//.test(URI)) {
+            streamArchive(req, res, "zip");
         } else if (/^\/res\//.test(URI)) {
             handleResourceRequest(req, res, req.url.substring(5));
         } else if (URI === "/favicon.ico") {
@@ -882,19 +869,7 @@
             return;
         }
 
-        // Check for a zip link
-        if (/^\/\$\$\//.test(req.url)) {
-            var zippath = path.join(config.zipDir, decodeURIComponent(req.url.substring(4)));
-            try {
-                fs.statSync(zippath);
-                filepath = zippath;
-            } catch (error) {
-                res.statusCode = 404;
-                res.setHeader("Location", "/");
-                res.end();
-                log.error("Zip " + zippath + " not found!\n", error);
-            }
-        } else filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
+        filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
 
         if (filepath) {
             var mimeType = mime.lookup(filepath);
@@ -1060,48 +1035,44 @@
         });
     }
     //-----------------------------------------------------------------------------
-    // Create a zip file from a directory
-    // The callback recieves an object with the path and size of the file
+    // Create a zip file from a directory and stream it to a client
     // TODO: push zipping of a directory to all clients
-    var zipInProgress = [];
-    function createZip(dir, callback) {
-        var archive = archiver.create("zip", {zlib: { level: config.zipLevel }}), output,
-            zipPath = path.join(config.zipDir, dir) + ".zip";
+    function streamArchive(req, res, type) {
+        var path    = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
+        fs.stat(path, function (err, stats) {
+            if (!err && stats.isDirectory()) {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", mime.lookup(type));
+                log.response(req, res);
 
-        // Don't start the same job twice
-        for (var i = 0, l = zipInProgress.length; i < l; i++) {
-            if (zipInProgress[i] === dir)
-                return;
-            else
-                zipInProgress.push(dir);
-        }
+                archive = archiver.create(type, {zlib: { level: config.zipLevel }});
+                archive.setMaxListeners(0);
+                archive.on("error", function (error) { log.error(error); });
+                archive.pipe(res);
 
-        wrench.mkdirSyncRecursive(path.dirname(zipPath), config.dirMode);
-
-        output = fs.createWriteStream(zipPath);
-        output.on("close", function () {
-            fs.stat(zipPath, function (error, stats) {
-                callback({path: zipPath, size: stats.size});
-                zipInProgress.pop(dir);
-            });
-        });
-
-        archive.setMaxListeners(0);
-        archive.on("error", function (error) { log.error(error); });
-        archive.pipe(output);
-
-        utils.walkDirectory(addFilePath(dir), function (error, paths) {
-            var read = 0, toread = paths.length;
-            if (error) log.error(error);
-            while (paths.length) {
-                (function (currentPath) {
-                    fs.readFile(currentPath, function (err, data) {
-                        if (error) log.error(error);
-                        read++;
-                        archive.append(data, {name: removeFilePath(currentPath)});
-                        if (read === toread) archive.finalize(function (error) { if (error) log.error(error); });
-                    });
-                })(paths.pop());
+                utils.walkDirectory(path, function (error, paths) {
+                    var read = 0, toread = paths.length;
+                    if (error) log.error(error);
+                    while (paths.length) {
+                        (function (currentPath) {
+                            fs.readFile(currentPath, function (err, data) {
+                                if (error) log.error(error);
+                                read++;
+                                archive.append(data, {name: removeFilePath(currentPath)});
+                                if (read === toread) {
+                                    archive.finalize(function (error) {
+                                        if (error) log.error(error);
+                                        res.end();
+                                    });
+                                }
+                            });
+                        })(paths.pop());
+                    }
+                });
+            } else {
+                res.statusCode = 404;
+                res.end();
+                log.response(req, res);
             }
         });
     }
@@ -1167,7 +1138,7 @@
         // Check if all options exist and add missing ones
         var opts = [
             "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength", "maxOpen", "zipLevel",
-            "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"
+            "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
         ];
 
         for (var i = 0, len = opts.length; i < len; i++) {
@@ -1180,7 +1151,7 @@
         doWrite && writeConfig();
 
         // Change relative paths to __dirname
-        ["httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "zipDir", "resDir", "srcDir"].forEach(function (p) {
+        ["httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"].forEach(function (p) {
             if (config[p][0] === ".") {
                 config[p] = path.join(__dirname + config[p].substring(1));
             }

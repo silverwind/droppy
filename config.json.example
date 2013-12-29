@@ -15,7 +15,6 @@
     "db"           : "./db.json",
     "filesDir"     : "./files/",
     "incomingDir"  : "./temp/incoming/",
-    "zipDir"       : "./temp/zip/",
     "resDir"       : "./res/",
     "srcDir"       : "./src/"
 }
