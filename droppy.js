@@ -1051,23 +1051,23 @@
                 archive.pipe(res);
 
                 utils.walkDirectory(path, function (error, paths) {
-                    var read = 0, toread = paths.length;
                     if (error) log.error(error);
-                    while (paths.length) {
-                        (function (currentPath) {
-                            fs.readFile(currentPath, function (err, data) {
-                                if (error) log.error(error);
-                                read++;
-                                archive.append(data, {name: removeFilePath(currentPath)});
-                                if (read === toread) {
-                                    archive.finalize(function (error) {
-                                        if (error) log.error(error);
-                                        res.end();
-                                    });
-                                }
-                            });
-                        })(paths.pop());
-                    }
+
+                    (function read(currentPath) {
+                        fs.readFile(currentPath, function (err, data) {
+                            if (error) log.error(error);
+                            read++;
+                            archive.append(data, {name: removeFilePath(currentPath)});
+                            if (paths.length === 0) {
+                                archive.finalize(function (error) {
+                                    if (error) log.error(error);
+                                    res.end();
+                                });
+                            } else {
+                                read(paths.pop());
+                            }
+                        });
+                    })(paths.pop());
                 });
             } else {
                 res.statusCode = 404;
