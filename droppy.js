@@ -1056,7 +1056,6 @@
                     (function read(currentPath) {
                         fs.readFile(currentPath, function (err, data) {
                             if (error) log.error(error);
-                            read++;
                             archive.append(data, {name: removeFilePath(currentPath)});
                             if (paths.length === 0) {
                                 archive.finalize(function (error) {
