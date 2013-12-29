@@ -680,7 +680,7 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
-        } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI) || /^\/\$\$\//.test(URI)) {
+        } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
             handleFileRequest(req, res);
         } else if (/^\/~~\//.test(URI)) {
             streamArchive(req, res, "zip");
@@ -1038,7 +1038,7 @@
     // Create a zip file from a directory and stream it to a client
     // TODO: push zipping of a directory to all clients
     function streamArchive(req, res, type) {
-        var path    = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
+        var path = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
         fs.stat(path, function (err, stats) {
             if (!err && stats.isDirectory()) {
                 res.statusCode = 200;

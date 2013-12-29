@@ -507,7 +507,7 @@ input:-webkit-autofill {
 }
 
 .icon-link,.icon-rename { padding-left: .25em }
-.icon-delete:hover, .icon-link:hover, .icon-rename:hover, .icon-play:hover, .icon-zip:not(.inline-spin):hover { transform: scale(1.3) }
+.icon-delete:hover, .icon-link:hover, .icon-rename:hover, .icon-play:hover, .icon-zip:hover { transform: scale(1.3) }
 
 #loading {
     position: absolute;
@@ -544,24 +544,6 @@ input:-webkit-autofill {
 @media all and (min-width: 1024px) { #spinner { height: 29px; width: 29px; border-width: 4px } }
 @media all and (max-width: 1023px) { #spinner { height: 24px; width: 24px; border-width: 4px } }
 @media all and (max-width:  639px) { #spinner { height: 19px; width: 19px; border-width: 3px } }
-
-.inline-spin {
-    position: relative;
-    animation: spin .5s infinite linear;
-    border-bottom : 4px solid #1af;
-    border-left   : 4px solid #222;
-    border-right  : 4px solid #222;
-    border-top    : 4px solid #f1a;
-    border-radius: 100%;
-    height: 1em;
-    width: 1em;
-    right: .25em;
-    top: .25em;
-}
-
-.inline-spin + .size-unit {
-    margin-right: .5em;
-}
 
 @keyframes spin {
  from { transform: rotate(0deg)   }
