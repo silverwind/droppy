@@ -1090,7 +1090,7 @@ input:-webkit-autofill {
     line-height: 30px;
     margin-top: 25px;
     color: #fff;
-    border-radius: 6px 6px 0 0;
+    border-radius: 4px 4px 0 0;
     opacity: 0;
     transition: all 0.25s ease;
     margin: 0 auto;
@@ -1119,7 +1119,7 @@ input:-webkit-autofill {
     border-radius: 6px;
     border: 2px solid #333;
     color: #ccc;
-    padding: 10px;
+    padding: 0 10px;
     height: 45px;
     margin: 5px 0;
     transition: border .35s ease, color .35s ease;
@@ -1174,7 +1174,7 @@ input[type="checkbox"] { display: none }
 
 .submit {
     background: linear-gradient(#369,#248);
-    border-radius: 0 0 6px 6px;
+    border-radius: 0 0 4px 4px;
     bottom: 0;
     color: #fff;
     cursor: pointer;
