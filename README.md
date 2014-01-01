@@ -4,14 +4,13 @@ Pure HTML5 cloud storage running on [node.js](http://nodejs.org/).
 ![droppy](http://i.imgur.com/X08SGQd.png)
 
 ###Features
-
-* Realtime updating of all connected clients via WebSockets.
-* Fully responsive, mobile-ready CSS.
 * Lightweight. Performs great, even on a Raspberry Pi.
-* Download folders in a single download as a zipped file.
-* Drag-and-Drop and asynchronous uploads of multiple files through XMLHTTPRequest2.
-* Recursive directory uploads in all supported browsers (WebKit-only as of now, Mozilla is [working on it](https://bugzilla.mozilla.org/show_bug.cgi?id=846931)).
-* Playback of audio files via HTML5 `<audio>`, depending on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+* Realtime updating of all connected clients via WebSockets.
+* Asynchronous Drag-and-Drop uploading of files.
+* Fully responsive, mobile-ready CSS.
+* Recursive directory uploads in WebKit/Blink.
+* Download directories as ZIPs.
+* Playback of audio files via HTML5 `<audio>`, depending on [browser/platform format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Support for shortened and easy shareable links for unauthenticted downloads.
 * Clean and almost dependency-free client-side JavaScript code (Just jQuery which I plan to remove).
 
@@ -26,7 +25,7 @@ git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
 ````
 
 ##Running the server
-Inside droppy's folder run:
+Inside droppy's directory run:
 ````bash
 node droppy
 ````
