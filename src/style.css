@@ -367,7 +367,7 @@ input:-webkit-autofill {
 }
 
 .data-row, .data-row > .icon:not(.icon-play), .data-row > a {
-    color: #444;
+    color: #333;
 }
 
 .data-row:not(.animating):hover {

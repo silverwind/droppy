@@ -225,13 +225,20 @@
     //-----------------------------------------------------------------------------
     // Bind to listening port
     function createListener() {
-        var server, key, cert;
+        var server, key, cert, ca;
         if (!config.useHTTPS) {
             server = require("http").createServer(onRequest);
         } else {
             try {
-                key = fs.readFileSync(config.httpsKey);
-                cert = fs.readFileSync(config.httpsCert);
+                key = fs.readFileSync(config.tls.key);
+                cert = fs.readFileSync(config.tls.cert);
+                if (config.tls.ca.length) {
+                    if (Array.isArray(config.tls.ca))
+                        ca = config.tls.ca;
+                    else if (typeof config.tls.ca === "string")
+                        ca = [config.tls.ca];
+                    ca = ca.map(function read(file) { return fs.readFileSync(file); });
+                }
             } catch (error) {
                 log.error("Error reading SSL certificate or key.\n", util.inspect(error));
                 process.exit(1);
@@ -243,6 +250,7 @@
             var options = {
                 key              : key,
                 cert             : cert,
+                ca               : ca,
                 honorCipherOrder : true,
                 ciphers          : "AES128-GCM-SHA256:!RC4:!MD5:!aNULL:!NULL:!EDH:HIGH",
                 secureProtocol   : "SSLv23_server_method"
@@ -1130,48 +1138,60 @@
     //-----------------------------------------------------------------------------
     // config.json handling
     function parseConfig() {
-        var doWrite;
+        var doWrite,
+            defaults = ['{',
+            '    "debug"        : false,',
+            '    "useHTTPS"     : true,',
+            '    "useSPDY"      : false,',
+            '    "port"         : 443,',
+            '    "readInterval" : 50,',
+            '    "filesMode"    : "644",',
+            '    "dirMode"      : "755",',
+            '    "linkLength"   : 3,',
+            '    "maxOpen"      : 256,',
+            '    "zipLevel"     : 1,',
+            '    "timestamps"   : true,',
+            '    "db"           : "./db.json",',
+            '    "filesDir"     : "./files/",',
+            '    "incomingDir"  : "./temp/incoming/",',
+            '    "resDir"       : "./res/",',
+            '    "srcDir"       : "./src/",',
+            '    "tls" : {',
+            '        "key"      : "./keys/key.pem",',
+            '        "cert"     : "./keys/cert.pem",',
+            '        "ca"       : []',
+            '    }',
+            '}'].join("\n");
 
-        // Copy config.json.example to config.json if it doesn't exist
+        // Read & parse config.json, create it if necessary
         try {
             fs.statSync(configFile);
+            config = JSON.parse(fs.readFileSync(configFile));
         } catch (error) {
             if (error.code === "ENOENT") {
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.magenta, configFile, log.color.reset, "...");
-                fs.writeFileSync(configFile, fs.readFileSync(configFile + ".example"));
+                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ",
+                           log.color.magenta, configFile, log.color.reset, "...");
+                fs.writeFileSync(configFile, defaults);
             } else {
                 log.error("Error reading ", configFile, ":\n", error);
                 process.exit(1);
             }
         }
 
-        // Parse it
-        try {
-            config = JSON.parse(fs.readFileSync(configFile));
-        } catch (error) {
-            log.error("Error parsing ", configFile, ":\n", error);
-            process.exit(1);
-        }
-
-        // Check if all options exist and add missing ones
-        var opts = [
-            "debug", "useHTTPS", "useSPDY", "port", "readInterval", "filesMode", "dirMode", "linkLength", "maxOpen", "zipLevel",
-            "timestamps", "httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"
-        ];
-
-        for (var i = 0, len = opts.length; i < len; i++) {
-            if (config[opts[i]] === undefined) {
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "adding option ", log.color.cyan, opts[i], log.color.reset, " to config.json...");
-                config[opts[i]] = JSON.parse(fs.readFileSync("config.json.example"))[opts[i]];
-                doWrite = true;
-            }
-        }
-        doWrite && writeConfig();
+        // Add any missing options
+        defaults = JSON.parse(defaults);
+        config = utils.mergeDefaults(config, defaults);
+        writeConfig();
 
         // Change relative paths to __dirname
-        ["httpsKey", "httpsCert", "db", "filesDir", "incomingDir", "resDir", "srcDir"].forEach(function (p) {
-            if (config[p][0] === ".") {
-                config[p] = path.join(__dirname + config[p].substring(1));
+        ["db", "filesDir", "incomingDir", "resDir", "srcDir"].forEach(function (prop) {
+            if (config[prop][0] === ".") {
+                config[prop] = path.join(__dirname + config[prop].substring(1));
+            }
+        });
+        ["cert", "key", "ca"].forEach(function (prop) {
+            if (config.tls[prop][0] === ".") {
+                config.tls[prop] = path.join(__dirname + config.tls[prop].substring(1));
             }
         });
     }

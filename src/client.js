@@ -793,7 +793,7 @@
             numFiles = 0;
             formLength = 0;
             if (!data) return;
-            if (data.length !== undefined) { // We got an array of File API files
+            if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
                     var filename = encodeURIComponent(data[i].name);
