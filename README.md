@@ -59,31 +59,31 @@ Configuration is done through `config.json`, which is created on the first run, 
 }
 ````
 ###General options
-- `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
-- `useHTTPS`: Whether the server should use SSL/TLS encryption.
-- `useSPDY`: Enables the SPDYv3 protocol. Use in conjunction with `useHTTPS`.
-- `port`: The listening port.
-- `readInterval`: The minimum time gap in milliseconds in which updates to a directory are sent.
-- `filesMode`: The access mask with which files are created.
-- `dirMode`: The access mask with which directories are created.
-- `linkLength`: The amount of characters in a shortlink.
-- `maxOpen`: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
-- `zipLevel`: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
-- `timestamps`: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
+- **debug**: Skip resource minification and enable automatic CSS reloading when the source files change.
+- **useHTTPS**: Whether the server should use SSL/TLS encryption.
+- **useSPDY**: Enables the SPDYv3 protocol. Use in conjunction with **useHTTPS**.
+- **port**: The listening port.
+- **readInterval**: The minimum time gap in milliseconds in which updates to a directory are sent.
+- **filesMode**: The access mask with which files are created.
+- **dirMode**: The access mask with which directories are created.
+- **linkLength**: The amount of characters in a shortlink.
+- **maxOpen**: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
+- **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
+- **timestamps**: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
 ###Path options
-- `db`: Location of the user database file.
-- `tls`: See TLS options below.
-- `filesDir`: The directory which serves as the server's root.
-- `incomingDir`: The directory for temporary files during uploads.
-- `resDir`: The directory which contains the compiled resources and images.
-- `srcDir`: The directory which contains the html/js/css sources.
+- **db**: Location of the user database file.
+- **tls**: See TLS options below.
+- **filesDir**: The directory which serves as the server's root.
+- **incomingDir**: The directory for temporary files during uploads.
+- **resDir**: The directory which contains the compiled resources and images.
+- **srcDir**: The directory which contains the html/js/css sources.
 
 ###TLS options
-These files are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) and are used when `useHTTPS` is enabled.
-- `key`: Path to your private key.
-- `cert`: Path to your main certificate.
-- `ca`: Path to any intermediate or root certificates you'd like to provide. These are served in the order defined in this array (or string in case of a single cert).
+These files are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) and are used when **useHTTPS** is enabled.
+- **key**: Path to your private key.
+- **cert**: Path to your main certificate.
+- **ca**: Path to any intermediate or root certificates you'd like to provide. These are served in the order defined in this array (or string in case of a single cert).
 
 ##Supported Browsers
 - Firefox (last 2 versions)
