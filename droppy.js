@@ -979,19 +979,10 @@
         fs.readdir(addFilePath(root), function (error, files) {
             var dirContents = {}, done = 0, last = files.length;
             if (error) log.error(error);
-            if (!files) return;
 
-            if (files.length === 0) {
+            if (!files || files.length === 0) {
                 dirs[root] = dirContents;
                 callback();
-            }
-
-            function checkDone() {
-                done++;
-                if (done === last) {
-                    dirs[root] = dirContents;
-                    callback();
-                }
             }
 
             for (var i = 0 ; i < last; i++) {
@@ -1000,13 +991,13 @@
                         if (!error && stats) {
                             if (stats.isFile()) {
                                 dirContents[entry] = { type: "f", size: stats.size, mtime : stats.mtime.getTime() || 0 };
-                                checkDone();
                             } else if (stats.isDirectory()) {
-                                du(addFilePath(root) + "/" + entry, function (error, size) {
-                                    if (error) log.error(error);
-                                    dirContents[entry] = { type: "d", size: size, mtime : stats.mtime.getTime() || 0 };
-                                    checkDone();
-                                });
+                                dirContents[entry] = { type: "d", size: 0, mtime : stats.mtime.getTime() || 0 };
+                            }
+                            if (++done === last) {
+                                dirs[root] = dirContents;
+                                callback();
+                                generateDirSizes(root, dirContents);
                             }
                         } else if (error) {log.error(error); callback(); }
                     });
@@ -1014,12 +1005,40 @@
             }
         });
     }
+
+    function generateDirSizes(root, dirContents) {
+        var tmpDirs = [];
+
+        Object.keys(dirContents).forEach(function (dir) {
+            if (dirContents[dir].type === "d") tmpDirs.push(addFilePath(root + "/" + dir));
+        });
+
+        if (tmpDirs.length === 0) return;
+
+        async.map(tmpDirs, du, function (err, results) {
+            var sizeList = {};
+
+            for (var i = 0, l = results.length; i < l; i++)
+                sizeList[path.basename(tmpDirs[i])] = results[i];
+
+            for (var client in clients) {
+                if (clients.hasOwnProperty(client) && clients[client].directory === root) {
+                    send(clients[client].ws, JSON.stringify({
+                        type   : "UPDATE_SIZES",
+                        folder : root,
+                        data   : sizeList
+                    }));
+                }
+            }
+        });
+
+    }
     //-----------------------------------------------------------------------------
     // Get a directory's size (the sum of all files inside it)
     // TODO: caching of results
     function du(dir, callback) {
         fs.stat(dir, function (error, stat) {
-            if (error) return callback(error);
+            if (error) { return callback(error); }
             if (!stat) return callback(null, 0);
             if (!stat.isDirectory()) return callback(null, stat.size);
             fs.readdir(dir, function (error, list) {

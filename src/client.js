@@ -171,7 +171,34 @@
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
                 updateData(msg.folder, msg.data);
-                hideSpinner();
+                droppy.ready = false;
+                break;
+            case "UPDATE_SIZES":
+                var entries, liveName, interval = 250;
+                (function wait(timeout) {
+                    if (timeout > 4000) {
+                        return;
+                    } else if (!droppy.ready) {
+                        setTimeout(wait, interval, timeout + interval);
+                        return;
+                    } else {
+                        entries = $('.data-row[data-type="folder"]');
+                        if (entries.length) {
+                            entries.each(function () {
+                                liveName = $(this).data("id").substring(msg.folder.length);
+                                liveName = (liveName[0] === "/") ? liveName.substring(1) : liveName;
+                                if (msg.data[liveName]) {
+                                    var temp = convertToSI(msg.data[liveName]);
+                                    $(this).find(".size").text(temp.size > 0 ? temp.size : "");
+                                    $(this).find(".size-unit").text(temp.size > 0 ? temp.unit : "");
+                                }
+                            });
+                        } else {
+                            setTimeout(wait, interval, timeout + interval);
+                        }
+                    }
+                })(interval);
+
                 break;
             case "UPLOAD_DONE":
                 if (droppy.zeroFiles.length) {
@@ -372,7 +399,7 @@
             // Check if we support getAsEntry();
             if (!items || !fileItem[entryFunc]()) {
                 // No support, fallback to normal File API
-                upload(event.dataTransfer.files, true);
+                upload(event.dataTransfer.files);
                 return;
             }
 
@@ -453,7 +480,7 @@
                 }
                 upload(obj);
             } else if ($("#file").val()) {
-                upload($("#file").get(0).files, true);
+                upload($("#file").get(0).files);
             }
             $("#file").val(""); // Reset the input
         });
@@ -760,13 +787,13 @@
         //  Helper functions for the main page
         // ============================================================================
         var numFiles, formLength;
-        function upload(data, isArray) {
+        function upload(data) {
             var formData = new FormData();
             droppy.zeroFiles = [];
             numFiles = 0;
             formLength = 0;
             if (!data) return;
-            if (isArray) { // We got a normal File array
+            if (data.length !== undefined) { // We got an array of File API files
                 if (data.length === 0) return;
                 for (var i = 0, len = data.length; i < len; i++) {
                     var filename = encodeURIComponent(data[i].name);
@@ -1137,8 +1164,8 @@
             if (fileList.hasOwnProperty(file)) {
                 type = fileList[file].type;
                 temp = convertToSI(fileList[file].size);
-                size = temp.size;
-                sizeUnit = temp.unit;
+                size = temp.size > 0 ? temp.size : "";
+                sizeUnit = temp.size > 0 ? temp.unit : "";
                 mtime = fileList[file].mtime;
                 id = (root === "/") ? "/" + file : root + "/" + file;
                 tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
@@ -1281,6 +1308,9 @@
         $(".icon-play").register("click", function (event) {
             preparePlayback($(event.target));
         });
+
+        droppy.ready = true;
+        hideSpinner();
     }
 
     function preparePlayback(playButton) {
@@ -1356,6 +1386,7 @@
         droppy.isAnimating = null;
         droppy.isUploading = null;
         droppy.mimeTypes = {},
+        droppy.ready = null;
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
