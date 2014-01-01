@@ -507,8 +507,11 @@
                 fileInput.click();
             });
         } else {
-            // No directory upload support - disable the button (might be better to remove it completely)
-            $("#upload-folder").css("color", "#666").attr("title", "Sorry, your browser doesn't support directory uploading yet!");
+            // No directory upload support - disable the button
+            $("#upload-folder").addClass("disabled");
+            $("#upload-folder").register("click", function () {
+                window.alert("Sorry, your browser doesn't support directory uploading yet!");
+            });
         }
 
         var info         = $("#editbox-info"),
