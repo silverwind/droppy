@@ -740,7 +740,7 @@
 
         var played = $("#seekbar-played"),
             loaded = $("#seekbar-loaded"),
-            fullyLoaded;
+            fullyLoaded, isPlaying;
 
         function updater() {
             var cur  = player.currentTime,
@@ -760,6 +760,7 @@
 
         function playing() {
             var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
+            isPlaying = true;
             updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
             $("#content, #newcontent").addClass("squeeze");
             controls.removeClass("out");
@@ -773,12 +774,18 @@
                 preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
             }
             document.getElementById("audio-title").innerHTML = "";
-            controls.addClass("out");
-            $("#content, #newcontent").removeClass("squeeze");
             if (droppy.audioUpdater) {
                 clearInterval(droppy.audioUpdater);
                 droppy.audioUpdater = null;
             }
+            isPlaying = false;
+
+            setTimeout(function () {
+                if (!isPlaying) {
+                    controls.addClass("out");
+                    $("#content, #newcontent").removeClass("squeeze");
+                }
+            }, 500);
         }
 
         // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
@@ -1180,9 +1187,8 @@
                     if (isUpload) file = decodeURIComponent(file);
                     list.append(
                         '<li class="data-row' + (audio ? ' playable"' : '"') + ' data-type="file" data-id="' + id + '">' +
-                            '<span class="' + spriteClass + '"></span>' +
-                            '<a class="filelink ' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
-                            audio +
+                            '<span class="' + spriteClass + '">' + audio + '</span>' +
+                            '<a class="filelink' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1318,7 +1324,7 @@
 
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
-        var source = playButton.parent().find(".filelink").attr("href"), ext = getExt(source);
+        var source = playButton.parent().parent().find(".filelink").attr("href"), ext = getExt(source);
 
         if (droppy.mimeTypes[ext]) {
             play(source, playButton);
@@ -1354,9 +1360,9 @@
         }
 
         if (player.paused) {
-            playButton.parent().find(".filelink").removeClass("playing").addClass("paused");
+            playButton.parent().parent().find(".filelink").removeClass("playing").addClass("paused");
         } else {
-            playButton.parent().find(".filelink").removeClass("paused").addClass("playing");
+            playButton.parent().parent().find(".filelink").removeClass("paused").addClass("playing");
         }
         playButton.text(player.paused ? iconPlay : iconPause);
     }
