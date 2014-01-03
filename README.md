@@ -81,6 +81,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 
 ###TLS options
 These files are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) and are used when **useHTTPS** is enabled.
+
 - **key**: Path to your private key.
 - **cert**: Path to your main certificate.
 - **ca**: Path to any intermediate or root certificates you'd like to provide. These are served in the order defined in this array (or string in case of a single cert).
