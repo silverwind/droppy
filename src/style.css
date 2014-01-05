@@ -251,6 +251,7 @@ input:-webkit-autofill {
     line-height: 24px;
     position: absolute;
     text-align: center;
+    white-space: nowrap;
 }
 
 #upload-cancel {
@@ -263,6 +264,7 @@ input:-webkit-autofill {
     right: 15px;
     text-align: center;
     transition: all .25s ease-in-out;
+    white-space: nowrap;
 }
 
 #upload-cancel span.icon, #upload-time span.icon {
