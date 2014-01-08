@@ -1245,7 +1245,7 @@
 
     // Load generated list into view with an animation
     function loadContent(html) {
-        var emptyPage = '<div id="empty"><span class="icon"></span> Add files</div>';
+        var emptyPage = '<div id="empty"><div class="icon"></div><div class="text">Add files</div></div>';
 
         $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Modified</span><span class="header-size">Size</span></div>').prependTo(html);
 
