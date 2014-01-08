@@ -82,20 +82,16 @@
     $(getPage);
 
     function getPage() {
-        $.ajax({
-            // Append a few random characters to avoid any caching
-            url: "/!!/" + Math.random().toString(36).substr(2, 4),
-            success: function (data, textStatus, request) {
-                load(request.getResponseHeader("X-Page-Type"), data);
-            },
-            error: function () {
-                setTimeout(getPage, 500);
-            }
+        $.when(
+                $.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), // Append a few random characters to avoid any caching
+                $.ajax("/!/svg"))
+        .then(function (dataReq, svgReq) {
+            loadPage(dataReq[2].getResponseHeader("X-Page-Type"), dataReq[0]);
         });
     }
 
     // Switch the page content with an animation
-    function load(type, data) {
+    function loadPage(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"),
             oldPage = $("#page"),

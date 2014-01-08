@@ -30,6 +30,7 @@
         // Libraries
         utils      = require("./lib/utils.js"),
         log        = require("./lib/log.js"),
+        svg        = require("./lib/svg.js"),
         // Modules
         archiver   = require("archiver"),
         async      = require("async"),
@@ -95,6 +96,14 @@
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
             resourceList = utils.flatten(resources),
             matches = { resource: 0, compiled: 0 };
+
+        //Prepare SVG
+        try {
+            cache.svg = svg.process(config.srcDir + "svg/");
+        } catch (error) {
+            log.error("Error processing SVGs", error);
+            process.exit(1);
+        }
 
         // Check if we to actually need to recompile resources
         resourceList.forEach(function (file) {
@@ -165,6 +174,7 @@
             }
         }).code);
 
+        // Prepare HTML
         try {
             resources.html.forEach(function (file) {
                 var name = Object.keys(file)[0];
@@ -629,8 +639,9 @@
     // Read resources and store them in the cache object
     function cacheResources(dir, callback) {
         var gzipFiles, relPath, fileName, fileData, fileTime;
-        dir = dir.substring(0, dir.length - 1); // Strip trailing slash
+        cache.res = {};
 
+        dir = dir.substring(0, dir.length - 1); // Strip trailing slash
         utils.walkDirectory(dir, function (error, results) {
             if (error) log.error(error);
             gzipFiles = [];
@@ -645,10 +656,10 @@
                     log.error(error);
                 }
 
-                cache[relPath] = {};
-                cache[relPath].data = fileData;
-                cache[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
-                cache[relPath].mime = mime.lookup(fullPath);
+                cache.res[relPath] = {};
+                cache.res[relPath].data = fileData;
+                cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
+                cache.res[relPath].mime = mime.lookup(fullPath);
                 if (/.*(js|css|html|svg)$/.test(fileName)) {
                     gzipFiles.push(relPath);
                 }
@@ -661,9 +672,9 @@
 
             function runGzip() {
                 var currentFile = gzipFiles[0];
-                zlib.gzip(cache[currentFile].data, function (error, compressedData) {
+                zlib.gzip(cache.res[currentFile].data, function (error, compressedData) {
                     if (error) log.error(error);
-                    cache[currentFile].gzipData = compressedData;
+                    cache.res[currentFile].gzipData = compressedData;
                     gzipFiles = gzipFiles.slice(1);
                     if (gzipFiles.length > 0)
                         runGzip();
@@ -678,7 +689,7 @@
         var URI = decodeURIComponent(req.url);
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
-        } else if (/^\/!!\//.test(URI)) {
+        } else if (/^\/!\/content/.test(URI)) {
             if (firstRun) {
                 res.setHeader("X-Page-Type", "firstrun");
                 handleResourceRequest(req, res, "auth.html");
@@ -689,12 +700,19 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
+        } else if (/^\/!\/svg/.test(URI)) {
+            var json = JSON.stringify(cache.svg);
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.setHeader("Content-Length", json.length);
+            res.end(json);
+            log.response(req, res);
+        } else if (/^\/!\//.test(URI)) {
+            handleResourceRequest(req, res, req.url.substring(3));
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
             handleFileRequest(req, res);
         } else if (/^\/~~\//.test(URI)) {
             streamArchive(req, res, "zip");
-        } else if (/^\/\!\//.test(URI)) {
-            handleResourceRequest(req, res, req.url.substring(3));
         } else if (URI === "/favicon.ico") {
             handleResourceRequest(req, res, "favicon.ico");
         } else {
@@ -810,7 +828,7 @@
         }
 
         // Regular resource handling
-        if (cache[resourceName] === undefined) {
+        if (cache.res[resourceName] === undefined) {
             if (resourceName === "null") { // Serve an empty document for the dummy iframe
                 res.end();
                 return;
@@ -818,7 +836,7 @@
             res.statusCode = 404;
             res.end();
         } else {
-            if ((req.headers["if-none-match"] || "") === cache[resourceName].etag) {
+            if ((req.headers["if-none-match"] || "") === cache.res[resourceName].etag) {
                 res.statusCode = 304;
                 res.end();
             } else {
@@ -838,23 +856,23 @@
                     res.setHeader("Cache-Control", "max-age=7257600");
                 } else {
                     // All other content can be cached
-                    res.setHeader("ETag", cache[resourceName].etag);
+                    res.setHeader("ETag", cache.res[resourceName].etag);
                 }
 
                 if (/.*(js|css|html|svg)$/.test(resourceName))
-                    res.setHeader("Content-Type", cache[resourceName].mime + "; charset=utf-8");
+                    res.setHeader("Content-Type", cache.res[resourceName].mime + "; charset=utf-8");
                 else
-                    res.setHeader("Content-Type", cache[resourceName].mime);
+                    res.setHeader("Content-Type", cache.res[resourceName].mime);
 
                 var acceptEncoding = req.headers["accept-encoding"] || "";
-                if (/\bgzip\b/.test(acceptEncoding) && cache[resourceName].gzipData !== undefined) {
+                if (/\bgzip\b/.test(acceptEncoding) && cache.res[resourceName].gzipData !== undefined) {
                     res.setHeader("Content-Encoding", "gzip");
-                    res.setHeader("Content-Length", cache[resourceName].gzipData.length);
+                    res.setHeader("Content-Length", cache.res[resourceName].gzipData.length);
                     res.setHeader("Vary", "Accept-Encoding");
-                    res.end(cache[resourceName].gzipData);
+                    res.end(cache.res[resourceName].gzipData);
                 } else {
-                    res.setHeader("Content-Length", cache[resourceName].data.length);
-                    res.end(cache[resourceName].data);
+                    res.setHeader("Content-Length", cache.res[resourceName].data.length);
+                    res.end(cache.res[resourceName].data);
                 }
             }
         }
@@ -1139,8 +1157,8 @@
     //-----------------------------------------------------------------------------
     // config.json handling
     function parseConfig() {
-        var doWrite,
-            defaults = ['{',
+        var defaults =
+            ['{',
             '    "debug"        : false,',
             '    "useHTTPS"     : true,',
             '    "useSPDY"      : false,',
