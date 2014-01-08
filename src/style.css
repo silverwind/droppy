@@ -5,20 +5,20 @@
     font-family: "Open Sans";
     font-style: normal;
     font-weight: 300;
-    src: url("/res/OpenSans-Light.woff") format("woff");
+    src: url("/!/OpenSans-Light.woff") format("woff");
 }
 
 @font-face {
     font-family: "Open Sans";
     font-style: normal;
     font-weight: 400;
-    src: url("/res/OpenSans-Regular.woff") format("woff");
+    src: url("/!/OpenSans-Regular.woff") format("woff");
 }
 
 @font-face {
     font-family: "icons";
     font-weight: 400;
-    src: url("/res/icons.woff") format("woff");
+    src: url("/!/icons.woff") format("woff");
 }
 
 /* ============================ Resets and relatives ============================= */

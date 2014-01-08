@@ -55,6 +55,7 @@
         config     = null,
         firstRun   = null,
         isCLI      = (process.argv.length > 2);
+
     // Argument handler
     if (isCLI) handleArguments();
 
@@ -677,7 +678,7 @@
         var URI = decodeURIComponent(req.url);
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
-        } else if (/^\/content\//.test(URI)) {
+        } else if (/^\/!!\//.test(URI)) {
             if (firstRun) {
                 res.setHeader("X-Page-Type", "firstrun");
                 handleResourceRequest(req, res, "auth.html");
@@ -692,8 +693,8 @@
             handleFileRequest(req, res);
         } else if (/^\/~~\//.test(URI)) {
             streamArchive(req, res, "zip");
-        } else if (/^\/res\//.test(URI)) {
-            handleResourceRequest(req, res, req.url.substring(5));
+        } else if (/^\/\!\//.test(URI)) {
+            handleResourceRequest(req, res, req.url.substring(3));
         } else if (URI === "/favicon.ico") {
             handleResourceRequest(req, res, "favicon.ico");
         } else {

@@ -84,7 +84,7 @@
     function getPage() {
         $.ajax({
             // Append a few random characters to avoid any caching
-            url: "/content/" + Math.random().toString(36).substr(2, 4),
+            url: "/!!/" + Math.random().toString(36).substr(2, 4),
             success: function (data, textStatus, request) {
                 load(request.getResponseHeader("X-Page-Type"), data);
             },
