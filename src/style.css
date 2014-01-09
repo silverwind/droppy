@@ -152,23 +152,36 @@ input:-webkit-autofill {
     flex: 1 1;
 }
 
-.button .icon {
+.button svg {
+    position: relative;
     padding-right: .25em;
+    height: 17px;
+    top: 2px;
+    fill: #ccc;
 }
 
 @media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px } }
 @media all and (max-width: 1023px) { .button { font-size: .75em; line-height: 30px; height: 30px } }
 @media all and (max-width:  639px) { .button { font-size: .8em; line-height: 25px; height: 25px } .button-text { display: none } }
 
-#upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important }
-#upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important }
-#create-folder:hover { color: #ae5; border-bottom: 2px solid #ae5 !important }
-#about:hover         { color: #f71; border-bottom: 2px solid #f71 !important }
-#config:hover        { color: #ff5; border-bottom: 2px solid #ff5 !important }
-#logout:hover        { color: #e33; border-bottom: 2px solid #e33 !important }
+#upload-file:hover   { color: #29f;  border-bottom: 2px solid #29f !important }
+#upload-folder:hover { color: #f1a;  border-bottom: 2px solid #f1a !important }
+#create-folder:hover { color: #ae5;  border-bottom: 2px solid #ae5 !important }
+#about:hover         { color: #f71;  border-bottom: 2px solid #f71 !important }
+#config:hover        { color: #ff5;  border-bottom: 2px solid #ff5 !important }
+#logout:hover        { color: #e33;  border-bottom: 2px solid #e33 !important }
+
+#upload-file:hover svg   { fill: #29f }
+#upload-folder:hover svg { fill: #f1a }
+#create-folder:hover svg { fill: #ae5 }
+#about:hover svg         { fill: #f71 }
+#config:hover svg        { fill: #ff5 }
+#logout:hover svg        { fill: #e33 }
 
 #upload-folder.disabled { color: #666; cursor: not-allowed }
+#upload-folder.disabled svg { fill: #666 }
 #upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
+
 /* ============================ Upload Progress ============================ */
 
 #upload-info {

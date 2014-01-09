@@ -86,8 +86,26 @@
                 $.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), // Append a few random characters to avoid any caching
                 $.ajax("/!/svg"))
         .then(function (dataReq, svgReq) {
-            loadPage(dataReq[2].getResponseHeader("X-Page-Type"), dataReq[0]);
+            droppy.svg = JSON.parse(svgReq[0]);
+            loadPage(dataReq[2].getResponseHeader("X-Page-Type"), addSVG(dataReq[0]));
         });
+    }
+    // {"add-folder":{"data":"<svg>","info":{"width":"32","height":"32"}}}
+    function addSVG(html) {
+        var tmp;
+
+        Object.keys(droppy.svg).forEach(function (name) {
+            tmp = $("<div>" + droppy.svg[name] + "</div>");
+            tmp.find("svg").attr("class", "svg-loaded " + name);
+            droppy.svg[name] = tmp.html();
+        });
+
+        tmp = $("<div>" + html + "</div>");
+        tmp.find("svg").replaceWith(function () {
+            return $(droppy.svg[$(this).attr("class")]);
+        });
+
+        return tmp.html();
     }
 
     // Switch the page content with an animation
@@ -1395,6 +1413,7 @@
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
+        droppy.svg = {},
         droppy.zeroFiles;
     }
 
