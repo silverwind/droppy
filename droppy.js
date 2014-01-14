@@ -842,9 +842,12 @@
             } else {
                 res.statusCode = 200;
 
+                // Disallow framing except when debugging
+                !config.debug && res.setHeader("X-Frame-Options", "DENY");
+                // Enforce HSTS when using HTTPS
+                config.useHTTPS && res.setHeader("Strict-Transport-Security", "max-age=16070400; includeSubDomains");
+
                 if (req.url === "/") {
-                    // Disallow framing except when debugging
-                    !config.debug && res.setHeader("X-Frame-Options", "DENY");
                     // Set the IE10 compatibility mode
                     if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                         res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
