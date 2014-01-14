@@ -1101,11 +1101,9 @@
 
                 utils.walkDirectory(path, function (error, paths) {
                     if (error) log.error(error);
-
                     (function read(currentPath) {
-                        fs.readFile(currentPath, function (err, data) {
+                        archive.file(currentPath, {name: removeFilePath(currentPath)}, function (error) {
                             if (error) log.error(error);
-                            archive.append(data, {name: removeFilePath(currentPath)});
                             if (paths.length) {
                                 read(paths.pop());
                             } else {
@@ -1115,6 +1113,7 @@
                                 });
                             }
                         });
+
                     })(paths.pop());
                 });
             } else {
