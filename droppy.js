@@ -236,9 +236,9 @@
     //-----------------------------------------------------------------------------
     // Bind to listening port
     function createListener() {
-        var server, key, cert, ca;
+        var server, key, cert, ca, http = require("http");
         if (!config.useHTTPS) {
-            server = require("http").createServer(onRequest);
+            server = http.createServer(onRequest);
         } else {
             try {
                 key = fs.readFileSync(config.tls.key);
@@ -255,24 +255,37 @@
                 process.exit(1);
             }
 
+            var mod = config.useSPDY ? require("spdy").server : require("tls");
+
             // TLS options
-            // TODO: Add ECDHE cipers once node supports it (https://github.com/joyent/node/issues/4315)
-            // TODO: Use GCM instead of CBC ciphers, once node supports them.
+            // TODO: Harden the cipher suite
             var options = {
                 key              : key,
                 cert             : cert,
                 ca               : ca,
                 honorCipherOrder : true,
-                ciphers          : "AES128-GCM-SHA256:!RC4:!MD5:!aNULL:!NULL:!EDH:HIGH",
-                secureProtocol   : "SSLv23_server_method"
+                ciphers          : "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
+                secureProtocol   : "SSLv23_server_method",
+                NPNProtocols     : []
             };
 
-            if (config.useSPDY) {
-                options.windowSize = 1024 * 1024;
-                server = require("spdy").createServer(options, onRequest);
-            } else {
-                server = require("https").createServer(options, onRequest);
-            }
+            mod.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
+
+            // Protocol-specific options
+            config.useSPDY  && (options.windowSize = 1024 * 1024);
+
+            server = new mod.Server(options, http._connectionListener);
+            server.httpAllowHalfOpen = false;
+            server.timeout = 120000;
+
+            server.on("request", function (req, res) {
+                res.setHeader("Strict-Transport-Security", "max-age=31536000"); // Enforce HSTS
+                onRequest(req, res);
+            });
+
+            server.on("clientError", function (err, conn) {
+                conn.destroy();
+            });
 
             // TLS session resumption
             var sessions = {};
@@ -844,8 +857,6 @@
 
                 // Disallow framing except when debugging
                 !config.debug && res.setHeader("X-Frame-Options", "DENY");
-                // Enforce HSTS when using HTTPS
-                config.useHTTPS && res.setHeader("Strict-Transport-Security", "max-age=16070400; includeSubDomains");
 
                 if (req.url === "/") {
                     // Set the IE10 compatibility mode
