@@ -984,15 +984,18 @@
             });
         });
 
-        busboy.on("end", function () {
+        function end() {
+            !done && log.log(socket, " Upload cancelled");
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/plain");
             res.setHeader("Connection", "close");
             res.end();
             done = true;
             send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
-        });
-        req.on("close", function () { !done && log.log(socket, " Upload cancelled"); });
+        }
+
+        busboy.on("end", end);
+        req.on("close", end);
         req.pipe(busboy);
 
         function onFile(fieldname, file, filename, next) {

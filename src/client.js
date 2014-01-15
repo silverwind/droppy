@@ -878,7 +878,11 @@
             xhr.upload.addEventListener("error", uploadDone, false);
 
             // Init the UI
-            $("#upload-cancel").register("click", function () { xhr.abort(); uploadDone(); });
+            $("#upload-cancel").register("click", function () {
+                xhr.abort();
+                uploadCancel();
+            });
+
             title.text(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
             start = Date.now();
             updateTitle("0%");
@@ -910,6 +914,12 @@
             uperc.text("100%");
         }
 
+        function uploadCancel() {
+            prog.css("width", "0");
+            title.text("Aborting...");
+            uperc.text("");
+        }
+
         function uploadProgress(event) {
             if (!event.lengthComputable) return;
 
@@ -924,7 +934,7 @@
 
                 prog.css("width", progress);
                 updateTitle(progress);
-                uperc.text(progress + " - " + speed.size + " " + speed.unit + "/sec");
+                uperc.text(progress + " - " + speed.size + " " + speed.unit + "/s");
 
                 // Calculate estimated time left
                 var elapsed = Date.now() - start;
