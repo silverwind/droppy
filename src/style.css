@@ -127,9 +127,9 @@ input:-webkit-autofill {
 
 #content.out { opacity: 0 }
 
-@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 94px); font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 82px); font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 70px); font-size: .8em } }
+@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 82px); font-size:  1em } }
+@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 72px); font-size: .9em } }
+@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 62px); font-size: .8em } }
 @media all and (min-width: 1024px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 122px); } }
 @media all and (max-width: 1023px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 107px); } }
 @media all and (max-width:  639px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 92px); } }
@@ -163,8 +163,8 @@ input:-webkit-autofill {
 }
 
 @media all and (min-width: 1024px) { .button svg { height: 24px; width: 24px; top: 4px } }
-@media all and (max-width: 1023px) { .button svg { height: 20px; width: 20px; top: 3px} }
-@media all and (max-width:  639px) { .button svg { height: 16px; width: 16px; top: 2px; padding-right: 0 } }
+@media all and (max-width: 1023px) { .button svg { height: 20px; width: 20px; top: 3px } }
+@media all and (max-width:  639px) { .button svg { height: 16px; width: 16px; top: 0; padding-right: 0 } }
 
 
 
