@@ -4,15 +4,14 @@ Pure HTML5 cloud storage running on [node.js](http://nodejs.org/).
 ![droppy](http://i.imgur.com/X08SGQd.png)
 
 ###Features
-* Lightweight. Performs great, even on a Raspberry Pi.
 * Realtime updating of all connected clients via WebSockets.
+* Lightweight. Performs great, even on a Raspberry Pi.
 * Asynchronous Drag-and-Drop uploading of files.
 * Fully responsive, mobile-ready CSS.
 * Recursive directory uploads in WebKit/Blink.
 * Download directories as ZIPs.
 * Playback of audio files via HTML5 `<audio>`, depending on [browser/platform format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Support for shortened and easy shareable links for unauthenticted downloads.
-* Clean and almost dependency-free client-side JavaScript code (Just jQuery which I plan to remove).
 
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
@@ -29,16 +28,16 @@ Inside droppy's directory run:
 ````bash
 node droppy
 ````
-By default, the server will listen on [https](https://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
+By default, the server will listen on [http](http://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
 
 ##Configuration
 Configuration is done through `config.json`, which is created on the first run, with these contents:
 ````javascript
 {
     "debug"        : false,
-    "useHTTPS"     : true,
+    "useHTTPS"     : false,
     "useSPDY"      : false,
-    "port"         : 443,
+    "port"         : 80,
     "readInterval" : 50,
     "filesMode"    : "644",
     "dirMode"      : "755",
@@ -80,7 +79,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **srcDir**: The directory which contains the html/js/css sources.
 
 ###TLS options
-These files are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) and are used when **useHTTPS** is enabled.
+These files are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when **useHTTPS** is enabled.
 
 - **key**: Path to your private key.
 - **cert**: Path to your main certificate.

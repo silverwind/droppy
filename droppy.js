@@ -1176,9 +1176,9 @@
         var defaults =
             ['{',
             '    "debug"        : false,',
-            '    "useHTTPS"     : true,',
+            '    "useHTTPS"     : false,',
             '    "useSPDY"      : false,',
-            '    "port"         : 443,',
+            '    "port"         : 80,',
             '    "readInterval" : 50,',
             '    "filesMode"    : "644",',
             '    "dirMode"      : "755",',
