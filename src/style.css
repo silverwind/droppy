@@ -152,17 +152,21 @@ input:-webkit-autofill {
     flex: 1 1;
 }
 
-.button svg {
-    position: relative;
-    padding-right: .25em;
-    height: 17px;
-    top: 2px;
-    fill: #ccc;
-}
-
 @media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px } }
 @media all and (max-width: 1023px) { .button { font-size: .75em; line-height: 30px; height: 30px } }
 @media all and (max-width:  639px) { .button { font-size: .8em; line-height: 25px; height: 25px } .button-text { display: none } }
+
+.button svg {
+    padding-right: .25em;
+    fill: #ccc;
+    position: relative;
+}
+
+@media all and (min-width: 1024px) { .button svg { height: 24px; width: 24px; top: 4px } }
+@media all and (max-width: 1023px) { .button svg { height: 20px; width: 20px; top: 3px} }
+@media all and (max-width:  639px) { .button svg { height: 16px; width: 16px; top: 2px; padding-right: 0 } }
+
+
 
 #upload-file:hover   { color: #29f;  border-bottom: 2px solid #29f !important }
 #upload-folder:hover { color: #f1a;  border-bottom: 2px solid #f1a !important }
