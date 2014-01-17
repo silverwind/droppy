@@ -304,15 +304,15 @@
             if (config.debug) watchCSS();
             log.simple(log.color.yellow, " ->> ", log.color.reset, "listening on ",
                        log.color.cyan, server.address().address, log.color.reset, ":",
-                       log.color.magenta, server.address().port, log.color.reset
+                       log.color.blue, server.address().port, log.color.reset
             );
         });
 
         server.on("error", function (error) {
             if (error.code === "EADDRINUSE")
-                log.error("Failed to bind to port ", log.color.magenta, port, log.color.reset, ". Address already in use.\n");
+                log.error("Failed to bind to port ", log.color.blue, port, log.color.reset, ". Address already in use.\n");
             else if (error.code === "EACCES")
-                log.error("Failed to bind to port ", log.color.magenta, port, log.color.reset, ". Need permission to bind to ports < 1024.\n");
+                log.error("Failed to bind to port ", log.color.blue, port, log.color.reset, ". Need permission to bind to ports < 1024.\n");
             else
                 log.error("Error:", util.inspect(error));
             process.exit(1);
@@ -700,6 +700,7 @@
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url);
+        req.time = Date.now();
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/!\/content/.test(URI)) {
