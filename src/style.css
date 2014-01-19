@@ -145,6 +145,10 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
+@media all and (min-width: 1024px) { #buttons { line-height: 35px } }
+@media all and (max-width: 1023px) { #buttons { line-height: 30px } }
+@media all and (max-width:  639px) { #buttons { line-height: 25px } }
+
 .button {
     border-bottom: 2px solid #333 !important;
     color: #ddd;
@@ -152,28 +156,32 @@ input:-webkit-autofill {
     flex: 1 1;
 }
 
-@media all and (min-width: 1024px) { .button { font-size: .9em; line-height: 35px; height: 35px } }
-@media all and (max-width: 1023px) { .button { font-size: .75em; line-height: 30px; height: 30px } }
-@media all and (max-width:  639px) { .button { font-size: .8em; line-height: 25px; height: 25px } .button-text { display: none } }
-
-.button svg {
-    padding-right: .25em;
-    fill: #ccc;
-    position: relative;
+.button span {
+    vertical-align: middle;
+    transition: color .25s ease;
 }
 
-@media all and (min-width: 1024px) { .button svg { height: 24px; width: 24px; top: 4px } }
-@media all and (max-width: 1023px) { .button svg { height: 20px; width: 20px; top: 3px } }
-@media all and (max-width:  639px) { .button svg { height: 16px; width: 16px; top: 0; padding-right: 0 } }
+@media all and (max-width: 1023px) { .button { font-size: .8em } }
+@media all and (max-width:  639px) { .button-text { display: none } }
 
+.button svg {
+    margin-right: .25em;
+    fill: #ccc;
+    display: inline-block;
+    vertical-align: middle;
+    transition: fill .25s ease;
+}
 
+@media all and (min-width: 1024px) { .button svg { height: 25px } }
+@media all and (max-width: 1023px) { .button svg { height: 20px } }
+@media all and (max-width: 639px)  { .button svg { height: 15px; margin-right: 0 } }
 
-#upload-file:hover   { color: #29f;  border-bottom: 2px solid #29f !important }
-#upload-folder:hover { color: #f1a;  border-bottom: 2px solid #f1a !important }
-#create-folder:hover { color: #ae5;  border-bottom: 2px solid #ae5 !important }
-#about:hover         { color: #f71;  border-bottom: 2px solid #f71 !important }
-#config:hover        { color: #ff5;  border-bottom: 2px solid #ff5 !important }
-#logout:hover        { color: #e33;  border-bottom: 2px solid #e33 !important }
+#upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important }
+#upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important }
+#create-folder:hover { color: #ae5; border-bottom: 2px solid #ae5 !important }
+#about:hover         { color: #f71; border-bottom: 2px solid #f71 !important }
+#config:hover        { color: #ff5; border-bottom: 2px solid #ff5 !important }
+#logout:hover        { color: #e33; border-bottom: 2px solid #e33 !important }
 
 #upload-file:hover svg   { fill: #29f }
 #upload-folder:hover svg { fill: #f1a }
