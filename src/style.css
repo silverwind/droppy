@@ -15,12 +15,6 @@
     src: url("/!/OpenSans-Regular.woff") format("woff");
 }
 
-@font-face {
-    font-family: "icons";
-    font-weight: 400;
-    src: url("/!/icons.woff") format("woff");
-}
-
 /* ============================ Resets and relatives ============================= */
 
 body, div, header, input, label, li, nav, p, section, span, ul {
@@ -161,20 +155,20 @@ input:-webkit-autofill {
     transition: color .25s ease;
 }
 
-@media all and (max-width: 1023px) { .button { font-size: .8em } }
+@media all and (min-width: 1024px) { .button { font-size: .9em } }
+@media all and (max-width: 1023px) { .button { font-size: .7em } }
 @media all and (max-width:  639px) { .button-text { display: none } }
 
 .button svg {
-    margin-right: .25em;
     fill: #ccc;
     display: inline-block;
     vertical-align: middle;
     transition: fill .25s ease;
 }
 
-@media all and (min-width: 1024px) { .button svg { height: 25px } }
+@media all and (min-width: 1024px) { .button svg { height: 24px } }
 @media all and (max-width: 1023px) { .button svg { height: 20px } }
-@media all and (max-width: 639px)  { .button svg { height: 15px; margin-right: 0 } }
+@media all and (max-width: 639px)  { .button svg { height: 16px; margin-right: 0 } }
 
 #upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important }
 #upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important }
@@ -236,7 +230,7 @@ input:-webkit-autofill {
 }
 
 #upload-bar {
-    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .5);
+    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
     height: 26px;
     margin-left: 15px;
     position: absolute;
@@ -257,34 +251,46 @@ input:-webkit-autofill {
 #upload-time {
     bottom: 10px;
     font-size: .66em;
-    left: 15px;
-    line-height: 24px;
+    left: 10px;
+    line-height: 32px;
     position: absolute;
     text-align: center;
     white-space: nowrap;
+    font-weight: 400;
+}
+
+#upload-time svg.time {
+    fill: #aaa;
+    height: 1.6em;
+    display: inline-block;
+    vertical-align: middle;
+    transition: fill .2s ease;
 }
 
 #upload-cancel {
     bottom: 10px;
-    cursor: pointer;
     font-size: .66em;
-    line-height: 24px;
-    padding: 2px 10px;
-    position: absolute;
     right: 15px;
+    line-height: 32px;
+    position: absolute;
     text-align: center;
-    transition: all .25s ease-in-out;
+    transition: color .2s ease;
     white-space: nowrap;
+    font-weight: 400;
+    cursor: pointer;
+    color: #eee;
 }
 
-#upload-cancel span.icon, #upload-time span.icon {
-    margin-right: 5px;
+#upload-cancel svg.remove {
+    fill: #eee;
+    height: 1.3em;
+    display: inline-block;
+    vertical-align: middle;
+    transition: fill .2s ease;
 }
 
-#upload-cancel:hover {
-    color: #fff;
-}
-
+#upload-cancel:hover { color: #f44 }
+#upload-cancel:hover svg.remove { fill: #f44 }
 #file { display: none }
 
 /* ================================== Path ================================= */
@@ -314,10 +320,19 @@ input:-webkit-autofill {
 
 .arrow { position: absolute }
 
+#path .home {
+    fill: #ccc;
+    height: 1.1em;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
 #path li.in  { left: 0    }
 #path li.out { left: -100px }
 #path li:first-of-type { padding-left: .5em }
-#path li { color: #bbb; transition: color .3s ease, left .5s ease }
+#path li { color: #ccc; transition: color .3s ease, left .5s ease }
 
 #path li:nth-child(odd)     { background: #383838 }
 #path li:nth-child(odd) > .arrow  { fill: #383838 }
@@ -386,7 +401,7 @@ input:-webkit-autofill {
     color: #333;
 }
 
-.data-row:not(.animating):hover {
+.data-row:not(.animating):not(.playing):hover {
     background: #fff;
     border-radius: 3px;
 }
@@ -415,22 +430,12 @@ input:-webkit-autofill {
     flex: 1 1;
 }
 
-.playing:after {
-    animation: zoom .75s linear infinite;
-    color: #25a;
-    content: "";
-    font-family: "icons";
-    margin-left: .5em;
-    position: absolute;
+.playing, .playing a  {
+    background: #333;
+    color: #ddd;
 }
-
-.paused:after {
-    animation: zoom .75s linear infinite;
-    color: #a25;
-    content: "";
-    font-family: "icons";
-    margin-left: .5em;
-    position: absolute;
+.playing svg {
+    fill: #eee !important;
 }
 
 @keyframes zoom {
@@ -462,6 +467,20 @@ input:-webkit-autofill {
 }
 
 @media all and (max-width: 639px) { .mtime { display: none } }
+
+.data-row svg {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    fill: #222;
+    height: 1em;
+    transition: transform .2s ease;
+    width: 1.25em;
+}
+
+@media all and (max-width: 320px) { .data-row svg { width: 1.1em } }
+
+.data-row svg:hover { transform: scale(1.3) }
 /* ============================= Empty Folder ============================== */
 
 #empty {
@@ -472,14 +491,14 @@ input:-webkit-autofill {
     width: 100px;
 }
 
-#empty .icon {
-    font-size: 60px;
+#empty svg {
+    fill: #000;
     height: 60px;
+    width: 60px;
     transition: all .4s ease;
     opacity: .7;
     position: relative;
     bottom: -12px;
-    /*background: red;*/
 }
 
 #empty .text {
@@ -492,7 +511,7 @@ input:-webkit-autofill {
     transition: all .4s ease;
 }
 
-#empty:hover .icon { opacity: 1; bottom: 0; }
+#empty:hover svg { opacity: 1; bottom: 0; }
 #empty:hover .text { opacity: 1; top: 0; }
 /* ================================= Icons ================================= */
 
@@ -511,35 +530,16 @@ input:-webkit-autofill {
     background: none;
 }
 
-.data-row.playable:hover .icon-play {
+.data-row.playable:hover .icon-play svg {
     display: block;
 }
 
-.icon-play {
+.icon-play svg {
     display: none;
-    position: absolute;
     cursor: pointer;
-    width: 100%;
-    text-align: center;
+    height: 100%;
     transition: transform .2s ease;
 }
-
-@media all and (min-width: 1024px) { .icon-play { top: -3px } }
-@media all and (max-width: 1023px) { .icon-play { top: -1px } }
-@media all and (max-width:  639px) { .icon-play { top: 0    } }
-
-.icon-delete, .icon-link, .icon-rename, .icon-zip {
-    cursor: pointer;
-    text-align: center;
-    transition: transform .2s ease;
-    width: 1.25em;
-}
-
-@media all and (max-width: 320px) {
-    .icon-delete, .icon-link, .icon-rename, .icon-zip { width: 1.1em }
-}
-
-.icon-delete:hover, .icon-link:hover, .icon-rename:hover, .icon-play:hover, .icon-zip:hover { transform: scale(1.3) }
 
 #loading {
     position: absolute;
@@ -602,14 +602,10 @@ input:-webkit-autofill {
 #edit-box.in  { transform: translateY(0); opacity: 1 }
 #edit-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 
-#editbox-label {
-    color: #222;
-    font-size: 125px;
-    height: 100%;
-    position: absolute;
-    text-align: center;
-    top: -5px;
-    width: 1em;
+#edit-box .pencil {
+    fill: #333;
+    height: 120px;
+    width: 120px;
 }
 
 #editbox-input {
@@ -657,8 +653,9 @@ input:-webkit-autofill {
     transition: all .25s ease;
 }
 
-#editbox-submit .icon { margin-right: 5px }
+#editbox-submit .ok { fill: #999; display: inline-block; vertical-align: middle; height: 1em; transition: fill .25s ease; }
 #editbox-submit:hover { color: #fff }
+#editbox-submit:hover .ok { fill: #fff }
 #editbox-submit.invalid:hover { background: #f22 }
 
 /* =============================== Audio Panel =============================== */
@@ -676,28 +673,23 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .8em} #audio-controls.out { bottom: -35px;} }
 @media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .7em} #audio-controls.out { bottom: -30px;} }
 
-#volume-icon {
-    color: #ccc;
+#volume-icon svg {
     cursor: pointer;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    text-align: center;
+    display: inline-block;
+    fill: #ccc;
+    height: 80%;
+    margin-left: 2px;
+    vertical-align: middle;
     z-index: 3;
 }
 
-#volume-icon:hover { color: #fff }
-
-@media all and (min-width: 1024px) { #volume-icon { width: 35px; line-height: 35px } }
-@media all and (max-width: 1023px) { #volume-icon { width: 30px; line-height: 30px } }
-@media all and (max-width:  639px) { #volume-icon { width: 25px; line-height: 25px } }
+#volume-icon:hover svg { fill: #fff }
 
 #volume-slider {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
     background: #555;
-    height: 100%;
     opacity: 0;
     padding: 0 16px;
     position: absolute;
@@ -706,9 +698,9 @@ input:-webkit-autofill {
     z-index: 2;
 }
 
-@media all and (min-width: 1024px) { #volume-slider { margin-left: 24px; width: 200px; padding: 0 14px; height: 35px; box-shadow: inset 0 0 0 15px #222 } }
-@media all and (max-width: 1023px) { #volume-slider { margin-left: 18px; width: 180px; padding: 0 12px; height: 30px; box-shadow: inset 0 0 0 13px #222 } }
-@media all and (max-width:  639px) { #volume-slider { margin-left: 14px; width: 120px; padding: 0 10px; height: 25px; box-shadow: inset 0 0 0 11px #222 } }
+@media all and (min-width: 1024px) { #volume-slider { width: 175px; padding: 0 14px; height: 35px; box-shadow: inset 0 0 0 15px #222 } }
+@media all and (max-width: 1023px) { #volume-slider { width: 150px; padding: 0 12px; height: 30px; box-shadow: inset 0 0 0 13px #222 } }
+@media all and (max-width:  639px) { #volume-slider { width: 90px;  padding: 0 10px; height: 25px; box-shadow: inset 0 0 0 11px #222 } }
 
 #volume-level {
     position: absolute;
@@ -821,73 +813,56 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { #time { line-height: 30px } }
 @media all and (max-width:  639px) { #time { line-height: 25px } }
 
-#time-cur, #time-max {
-    color: #fff;
-}
+#time-cur, #time-max { color: #fff }
 
 /* =============================== About box =============================== */
 
 #about-box {
     background: #181818;
     border-radius: 6px;
-    color: #bbb;
+    color: #aaa;
     height: 200px;
     left: 50%;
-    margin-left: -250px;
+    margin-left: -150px;
     margin-top: -100px;
     position: fixed;
     top: 50%;
     transition: all .3s ease;
-    width: 500px;
+    width: 300px;
     z-index: 32;
 }
 
 #about-box.in  { transform: translateY(0); opacity: 1; }
 #about-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
-@media all and (max-width: 639px), all and (max-height: 399px) { #about-box { width: 300px; margin-left: -150px } }
 
-#about-logo {
-    cursor: default;
-    float: left;
-    font-size: 8em;
-    line-height: 200px;
-    text-align: center;
-    width: 130px;
+#about-box .droplet {
+    fill: #282828;
+    position: absolute;
+    left: 75px;
+    height: 100%;
+    width: 150px;
+    z-index: -1;
 }
-@media all and (max-width: 639px), all and (max-height: 399px) { #about-logo { display: none } }
 
 #about-content {
-    float: left;
-    height: 100%;
-    text-align: left;
-    width: 320px;
-    color: #aaa;
-}
-
-@media all and (max-width: 639px), all and (max-height: 399px) {
-    #about-content {
-        float: left;
-        margin-left: 10%;
-        width: 80%;
-    }
+    margin-left: 5%;
+    width: 90%;
 }
 
 #about-box a {
     color: #eee;
     transition: color .2s ease;
+    font-weight: 400;
 }
 
 #about-box a:hover {
-    color: #29f;
-}
-#about-box a:nth-child(2n):hover {
     color: #f1a;
 }
 
 #about-title {
     color: #fff;
-    font-size: 1.5em;
-    line-height: 1.75em;
+    font-size: 1.4em;
+    line-height: 1.8em;
 }
 
 #about-text {
@@ -898,18 +873,19 @@ input:-webkit-autofill {
 #about-copy {
     bottom: 0;
     font-size: .8em;
-    margin-bottom: .5em;
+    margin-bottom: 6px;
     position: absolute;
-    color: #fff;
+    color: #aaa;
 }
 
-#github {
+#about-box .github {
+    fill: #aaa;
     bottom: 0;
-    font-size: 1.5em;
-    padding: 8px;
+    padding: 6px;
     position: absolute;
     right: 0;
 }
+#about-box .github:hover { fill: #f1a }
 
 /* =============================== Config box ============================== */
 
@@ -989,15 +965,17 @@ input:-webkit-autofill {
     cursor: pointer;
 }
 
-.user-entry label:after {
-    content: '';
-    opacity: 0;
-    position: absolute;
-    left: 4px;
+.user-entry .key {
+    fill: #aaa;
+    height: 1em;
+    position: relative;
+    left: -2px;
     top: 3px;
-    transition: opacity .25s ease;
-    color: #999;
+    opacity: 0;
+    transition: opacity .2s ease;
 }
+
+.user-priv:checked + label .key { opacity: 1 }
 
 .user-entry:hover .user-pass, .user-entry:hover label {
     background: #111;
@@ -1005,28 +983,43 @@ input:-webkit-autofill {
 }
 
 .user-entry label:hover:after { color: #fff }
-.user-entry.changed label:hover:after, .user-entry.changed label:after, .user-entry.changed > .user-name, .user-entry.changed > .user-pass {
-    color: #1af;
-}
+.user-entry.changed > .user-name, .user-entry.changed > .user-pass { color: #1af }
+.user-entry.changed label .key { fill: #1af }
 
-.user-delete {
-    color: #999;
+.user-entry .trash {
+    fill: #999;
+    height: 24px;
     float: right;
-    position: relative;
-    margin: 0 .5em;
-    line-height: 36px;
+    display: inline-block;
+    vertical-align: center;
+    margin: 6px .5em;
     cursor: pointer;
 }
 
-.user-delete:hover { color: #f23 }
+.user-entry .trash:hover { fill: #f23 }
+
+#user-add .plus {
+    fill: #999;
+    display: inline-block;
+    vertical-align: middle;
+    height: 1em;
+    transition: fill .25s ease;
+}
 
 #user-add {
-    cursor: pointer;
     text-align: center;
-    padding-top: .5em;
+    cursor: pointer;
+    padding: .5em 0;
+    width: 10em;
+    margin: 0 auto;
 }
-#user-add .icon { margin-right: .5em }
-#user-add:hover { color: #1af}
+
+#user-add span {
+    transition: color .25s ease;
+    vertical-align: middle;
+}
+#user-add:hover { color: #fff }
+#user-add:hover .plus { fill: #fff }
 
 /* ============================== Login Form =============================== */
 
@@ -1048,17 +1041,16 @@ input:-webkit-autofill {
     opacity: 1;
     position: absolute;
     text-align: center;
-    top: 50% ;
-    transition: top .5s ease, box-shadow .15s ease;
+    top: 50%;
+    transition: top .5s ease, opacity .25s ease, box-shadow .15s ease;
     width: 600px;
     z-index: 0;
 }
 
 #center-box.invalid { box-shadow: 0 0 0 2px #f55 }
-#center-box.out { top: 60% ; opacity: 0 }
+#center-box.out { opacity: 0; top: 60% }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
-    #center-box.out { top: 60% ; opacity: 0 }
     #center-box {
         border-radius: 0;
         box-shadow: none;
@@ -1068,6 +1060,10 @@ input:-webkit-autofill {
         margin: 0;
         top: 0;
         width: 100%;
+    }
+    #center-box.out {
+        top: 60%;
+        opacity: 0
     }
 }
 
@@ -1091,40 +1087,29 @@ input:-webkit-autofill {
     width: 100%;
 }
 
-#login-icon {
-    display: table;
-    height: 310px;
-    left: 0;
-    position: absolute;
-    text-align: center;
-    top: 0;
-    width: 600px;
-    z-index: -1;
-}
-
-#login-icon span {
-    color: #282828;
-    display: table-cell;
-    font-size: 12em;
-    text-align: center;
-    vertical-align: middle;
+#center-box .droplet {
+    fill: #282828;
+    margin-top: 20px;
+    height: 250px;
+    width: 250px;
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
-    #login-icon {
-        height: calc(100% - 30px);
+    #center-box .droplet {
+        height: calc(100% - 60px);
         width: 100%;
     }
-    #login-icon span { font-size: 13em }
 }
 
 #login-info-box {
     line-height: 30px;
-    margin-top: 25px;
     color: #fff;
     border-radius: 4px 4px 0 0;
     opacity: 0;
     transition: all 0.25s ease;
+    position: absolute;
+    top: 0;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -1201,7 +1186,7 @@ input:-webkit-autofill {
 }
 
 input[type="checkbox"] { display: none }
-#remember:focus label, #remember:hover label { box-shadow: 0 0 0 2px #999; }
+#remember:focus label, #remember:hover label { box-shadow: 0 0 0 2px #999 }
 #check:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
@@ -1231,10 +1216,12 @@ input[type="checkbox"] { display: none }
         position: fixed;
     }
 }
-
-.submit .icon {
-    font-size: 1.2em;
-    margin-right: .5em;
+.submit .ok {
+    fill: #eee;
+    display: inline-block;
+    vertical-align: middle;
+    height: 1.5em;
+    margin-right: .25em;
 }
 
 .submit span {

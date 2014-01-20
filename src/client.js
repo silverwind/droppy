@@ -130,15 +130,17 @@
             requestAnimation(function () {
                 oldPage.attr("class", "out");
                 $("#navigation").addClass("out");
-                box.removeClass("out");
+                setTimeout(function () {
+                    box.removeClass("out");
+                    if (type === "firstrun") {
+                        $("#login-info").text("Hello! Choose your creditentials.");
+                        $("#login-info-box").attr("class", "info");
+                    } else if (droppy.hasLoggedOut) {
+                        $("#login-info").text("Logged out!");
+                        $("#login-info-box").attr("class", "info");
+                    }
+                }, 100);
                 finalize();
-                if (type === "firstrun") {
-                    $("#login-info").text("Hello! Choose your creditentials.");
-                    $("#login-info-box").attr("class", "info");
-                } else if (droppy.hasLoggedOut) {
-                    $("#login-info").text("Logged out!");
-                    $("#login-info-box").attr("class", "info");
-                }
             });
         }
 
@@ -715,7 +717,7 @@
         slider[0].addEventListener("mousewheel", onWheel, false);
         slider[0].addEventListener("DOMMouseScroll", onWheel, false);
 
-        player.volume = localStorage.getItem("volume") || 0.2;
+        player.volume = localStorage.getItem("volume") || 0.5;
         slider.val(player.volume * 100);
 
         var volumeTimeout;
@@ -743,10 +745,10 @@
             slider.val(volume * 100);
             level.text(Math.round(volume * 100) + "%");
 
-            if (player.volume === 0) volumeIcon.text("");
-            else if (player.volume <= 0.33) volumeIcon.text("");
-            else if (player.volume <= 0.67) volumeIcon.text("");
-            else volumeIcon.text("");
+            if (player.volume === 0) volumeIcon.html(droppy.svg["volume-mute"]);
+            else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
+            else if (player.volume <= 0.67) volumeIcon.html(droppy.svg["volume-medium"]);
+            else volumeIcon.html(droppy.svg["volume-high"]);
         }
 
         slider.register("input", setVolume);
@@ -784,7 +786,7 @@
 
         function stop(event) {
             if (event.type === "ended") {
-                var next = $(".playing").parent().next();
+                var next = $(".playing").next();
                 preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
             }
             document.getElementById("audio-title").innerHTML = "";
@@ -1022,13 +1024,14 @@
                 };
                 entry.appendChild(temp);
 
-                temp = createElement("label", "icon");
-                temp.setAttribute("title", "Can this user create more users?");
+                temp = createElement("label");
+                temp.setAttribute("title", "Priviledged");
                 temp.setAttribute("for", "check-" + user);
-                temp.checked = userList[user] ? "checked" : "";
+                temp.innerHTML = droppy.svg.key;
                 entry.appendChild(temp);
 
-                temp = createElement("span", "user-delete icon", "");
+                temp = createElement("span");
+                temp.innerHTML = droppy.svg.trash;
                 temp.setAttribute("title", "Delete");
                 temp.onclick = function () {
                     var children = this.parentNode.childNodes;
@@ -1112,9 +1115,9 @@
     // Update the path indicator
     function updatePath(path) {
         var parts = path.split("/");
-        var i = 0, len, home = "";
+        var i = 0, len;
 
-        parts[0] = '<span class="icon">' + home + '<span>';
+        parts[0] = droppy.svg.home;
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
         var pathStr = "";
         if (droppy.savedParts) {
@@ -1206,7 +1209,7 @@
 
                 if (type === "f" || type === "nf") { // Create a file row
                     downloadURL = "/~" + id;
-                    audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play icon"></span>' : "";
+                    audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play">' + droppy.svg.play + '</span>' : "";
                     var spriteClass = getSpriteClass(getExt(file));
                     if (isUpload) file = decodeURIComponent(file);
                     list.append(
@@ -1216,9 +1219,9 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="icon-link icon" title="Create Link"></span>' +
-                            '<span class="icon-rename icon" title="Rename"></span>' +
-                            '<span class="icon-delete icon" title="Delete"></span>' +
+                            droppy.svg.link +
+                            droppy.svg.pencil +
+                            droppy.svg.trash +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1230,9 +1233,9 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<a class="icon-zip icon" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip"></a>' +
-                            '<span class="icon-rename icon" title="Rename"></span>' +
-                            '<span class="icon-delete icon" title="Delete"></span>' +
+                            '<a title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a>' +
+                            droppy.svg.pencil +
+                            droppy.svg.trash +
                         '</li>'
                     );
                 }
@@ -1269,7 +1272,7 @@
 
     // Load generated list into view with an animation
     function loadContent(html) {
-        var emptyPage = '<div id="empty"><div class="icon"></div><div class="text">Add files</div></div>';
+        var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
         $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Modified</span><span class="header-size">Size</span></div>').prependTo(html);
 
@@ -1314,33 +1317,38 @@
         });
 
         // Rename a file/folder
-        $(".icon-rename").register("click", function (event) {
+        $(".data-row .pencil").register("click", function (event) {
             if (droppy.socketWait) return;
             showEditBox("rename", $(this).parent().find(".filelink, .folderlink").text());
             event.stopPropagation();
         });
 
         // Zip a folder
-        $(".icon-zip").register("click", function (event) {
+        $(".data-row .zip").register("click", function (event) {
             if (droppy.socketWait) return;
             event.stopPropagation();
         });
 
         // Request a shortlink
-        $(".icon-link").register("click", function () {
+        $(".data-row .link").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage("REQUEST_SHORTLINK", $(this).parent().data("id"));
         });
 
         // Delete a file/folder
-        $(".icon-delete").register("click", function () {
+        $(".data-row .trash").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
 
-        $(".icon-play").register("click", function (event) {
-            preparePlayback($(event.target));
+        $(".icon-play").register("click", function () {
+            preparePlayback($(this));
         });
+
+        // Add missing titles to the SVGs
+        $(".data-row .link").attr("title", "Create Shortink");
+        $(".data-row .pencil").attr("title", "Rename");
+        $(".data-row .trash").attr("title", "Delete");
 
         droppy.ready = true;
         hideSpinner();
@@ -1349,7 +1357,6 @@
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
         var source = playButton.parent().parent().find(".filelink").attr("href"), ext = getExt(source);
-
         if (droppy.mimeTypes[ext]) {
             play(source, playButton);
         } else {
@@ -1365,15 +1372,15 @@
     }
 
     function play(source, playButton) {
-        var player = document.getElementById("audio-player"), iconPlay  = "", iconPause = "";
+        var player = document.getElementById("audio-player");
 
         if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
             window.alert("Sorry, your browser can't play this file.");
             return;
         }
 
-        $(".filelink").removeClass("playing").removeClass("paused");
-        $(".icon-play").text(iconPlay);
+        $(".filelink").parent().removeClass("playing").removeClass("paused");
+        $(".icon-play").html(droppy.svg.play);
 
         if (decodeURI(player.src).indexOf(source) > 0) {
             player.paused ? player.play() : player.pause();
@@ -1384,11 +1391,11 @@
         }
 
         if (player.paused) {
-            playButton.parent().parent().find(".filelink").removeClass("playing").addClass("paused");
+            playButton.parent().parent().removeClass("playing").addClass("paused");
         } else {
-            playButton.parent().parent().find(".filelink").removeClass("paused").addClass("playing");
+            playButton.parent().parent().removeClass("paused").addClass("playing");
         }
-        playButton.text(player.paused ? iconPlay : iconPause);
+        playButton.html(player.paused ? droppy.svg.play : droppy.svg.pause);
     }
 
     // Wrapper function for setting textContent on an id

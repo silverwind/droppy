@@ -33,27 +33,27 @@
 <input type="file" name="file" id="file" multiple>
 <div id="click-catcher" class="out"></div>
 <div id="edit-box" class="out">
-	<label id="editbox-label" class="icon"></label>
+	<svg class="pencil"></svg>
 	<input type="text" id="editbox-input" />
 	<div id="editbox-info">Invalid characters!</div>
-	<div id="editbox-submit"><span class="icon"></span><span id="editbox-name"></span></div>
+	<div id="editbox-submit"><svg class="ok"></svg><span id="editbox-name"></span></div>
 </div>
 <div id="about-box" class="out">
-	<div id="about-logo" class="icon"></div>
+	<svg class="droplet"></svg>
 	<div id="about-content">
 		<p id="about-title">droppy {{version}}</p>
 		<p id="about-text">Powered by <a target="_blank" href="http://nodejs.org/">node.js</a>, <a target="_blank" href="http://jquery.com/">jQuery</a>, <a target="_blank" href="https://github.com/einaros/ws">ws</a>, <a target="_blank" href="https://github.com/mscdex/busboy">busboy</a>, <a target="_blank" href="https://github.com/ai/autoprefixer">autoprefixer</a>, <a target="_blank" href="https://github.com/mishoo/UglifyJS2">uglifyjs2</a>, <a target="_blank" href="https://github.com/GoalSmashers/clean-css">clean-css</a>, <a target="_blank" href="https://github.com/ctalkington/node-archiver">archiver</a> and the <a target="_blank" href="http://www.google.com/fonts/specimen/Open+Sans">Open Sans Font Family</a>.</p>
-		<p id="about-copy">© 2012 - 2014 silverwind</p>
+		<p id="about-copy">© 2012 - 2014 <a href="https://github.com/silverwind" target="_blank">silverwind</a>.</p>
 	</div>
-	<div id="github" class="icon" title="Visit droppy's github repository">
-		<a target="_blank" href="https://github.com/silverwind/droppy"></a>
-	</div>
+	<a title="Visit droppy's github repository" target="_blank" href="https://github.com/silverwind/droppy">
+		<svg class="github"></svg>
+	</a>
 </div>
 <div id="config-box" class="out">
 	<span id="userlist-header">Manage Accounts</span>
 	<ul id="userlist"></ul>
-	<div id="user-add"><span class="icon"></span>Add new User</div>
-	<button id="save-users" class="submit" tabindex="4"><span class="icon"></span>Save Users</button>
+	<div id="user-add"><svg class="plus"></svg><span>Add User<span></div>
+	<button id="save-users" class="submit" tabindex="4"><svg class="ok"></svg><span>Save Users<span></button>
 </div>
 <div id="upload-info" class="out">
 	<div id="upload-title"></div>
@@ -62,14 +62,17 @@
 		<div id="upload-bar-inner"></div>
 	</div>
 	<div id="upload-time">
-		<span class="icon"></span>
-		<span id="upload-time-left"></span>
+		<svg class="time"></svg>
+		<span id="upload-time-left">sometimes</span>
 	</div>
-	<div id="upload-cancel"><span class="icon"></span>Cancel Upload</div>
+	<div id="upload-cancel">
+		<svg class="remove"></svg>
+		<span>Cancel Upload<span>
+	</div>
 </div>
 <audio id="audio-player" preload="none"></audio>
 <div id="audio-controls" class="out">
-	<span id="volume-icon" class="icon" title"Scroll or Click to set the volume level"></span>
+	<span id="volume-icon" title="Scroll or click to modify the volume"><svg class="volume-medium"></svg></span>
 	<input id="volume-slider" class="out" type="range" min="0" max="100" step="1"></input>
 	<span id="volume-level"></span>
 	<span id="audio-title"></span>
