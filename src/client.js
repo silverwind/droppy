@@ -850,7 +850,8 @@
                             if (!addedDirs[name] && data.hasOwnProperty(path)) {
                                 droppy.currentData[name] = {
                                     size : 0,
-                                    type : "nd"
+                                    type : "nd",
+                                    mtime : Date.now()
                                 };
                                 addedDirs[name] = true;
                             }

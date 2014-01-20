@@ -934,7 +934,12 @@
                     log.response(req, res);
                     fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
                 } else {
-                    res.statusCode = 500;
+                    if (error.code === "ENOENT")
+                        res.statusCode = 404;
+                    else if (error.code === "EACCES")
+                        res.statusCode = 403;
+                    else
+                        res.statusCode = 500;
                     res.end();
                     log.response(req, res);
                     if (error)
@@ -967,6 +972,14 @@
             done = false,
             files = [];
 
+        function closeConnection() {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/plain");
+            res.setHeader("Connection", "close");
+            res.end();
+            send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
+        }
+
         busboy.on("file", function (fieldname, file, filename) {
             ++infiles;
             onFile(fieldname, file, filename, function () {
@@ -981,22 +994,18 @@
                             });
                         })(names.pop());
                     }
+                    closeConnection();
                 }
             });
         });
 
-        function end() {
-            !done && log.log(socket, " Upload cancelled");
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/plain");
-            res.setHeader("Connection", "close");
-            res.end();
+        busboy.on("end", function () {
             done = true;
-            send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
-        }
-
-        busboy.on("end", end);
-        req.on("close", end);
+        });
+        req.on("close", function () {
+            !done && log.log(socket, " Upload cancelled");
+            closeConnection();
+        });
         req.pipe(busboy);
 
         function onFile(fieldname, file, filename, next) {
