@@ -1215,6 +1215,7 @@
         }
 
         // Add any missing options
+        if (!config) config = {};
         defaults = JSON.parse(defaults);
         config = utils.mergeDefaults(config, defaults);
         writeConfig();
