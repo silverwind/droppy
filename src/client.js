@@ -1234,7 +1234,7 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<a title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a>' +
+                            '<a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a>' +
                             droppy.svg.pencil +
                             droppy.svg.trash +
                         '</li>'
