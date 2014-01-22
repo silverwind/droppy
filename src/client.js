@@ -1207,9 +1207,9 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            droppy.svg.link +
-                            droppy.svg.pencil +
-                            droppy.svg.trash +
+                            '<span class="shortlink">' + droppy.svg.link + '</span>' +
+                            '<span class="edit">' + droppy.svg.pencil + '</span>' +
+                            '<span class="delete">' + droppy.svg.trash + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1221,9 +1221,9 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a><span>' +
-                            droppy.svg.pencil +
-                            droppy.svg.trash +
+                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
+                            '<span class="edit">' + droppy.svg.pencil + '</span>' +
+                            '<span class="delete">' + droppy.svg.trash + '</span>' +
                         '</li>'
                     );
                 }
@@ -1305,7 +1305,7 @@
         });
 
         // Rename a file/folder
-        $(".data-row .pencil").register("click", function (event) {
+        $(".data-row .edit").register("click", function (event) {
             if (droppy.socketWait) return;
             showEditBox("rename", $(this).parent().find(".filelink, .folderlink").text());
             event.stopPropagation();
@@ -1318,13 +1318,13 @@
         });
 
         // Request a shortlink
-        $(".data-row .link").register("click", function () {
+        $(".data-row .shortlink").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage("REQUEST_SHORTLINK", $(this).parent().data("id"));
         });
 
         // Delete a file/folder
-        $(".data-row .trash").register("click", function () {
+        $(".data-row .delete").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage("DELETE_FILE", $(this).parent().data("id"));
         });
@@ -1334,9 +1334,9 @@
         });
 
         // Add missing titles to the SVGs
-        $(".data-row .link").attr("title", "Create Shortink");
-        $(".data-row .pencil").attr("title", "Rename");
-        $(".data-row .trash").attr("title", "Delete");
+        $(".data-row .shortlink").attr("title", "Create Shortink");
+        $(".data-row .edit").attr("title", "Rename");
+        $(".data-row .delete").attr("title", "Delete");
 
         droppy.ready = true;
         hideSpinner();
