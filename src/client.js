@@ -349,7 +349,6 @@
                     } else if (response.status === 401) {
                         submit.addClass("invalid");
                         loginform.addClass("invalid");
-                        $("#login-info-box").attr("class", "error");
                         $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
                         if (!firstrun) $("#pass").val("").focus();
                         if ($("#login-info-box").hasClass("error")) {
@@ -358,6 +357,7 @@
                                 $("#login-info").removeClass("shake");
                             }, 500);
                         }
+                        $("#login-info-box").attr("class", "error");
                     }
                 },
             });
@@ -997,7 +997,7 @@
                 temp.type = "password";
                 temp.setAttribute("title", "The user's password");
                 temp.onkeyup = function () {
-                    this.parentNode.setAttribute("data-index", "true");
+                    this.parentNode.setAttribute("data-changed", "true");
                     $(this.parentNode).addClass("changed");
                 };
                 entry.appendChild(temp);
@@ -1007,7 +1007,7 @@
                 temp.id = "check-" + user;
                 temp.checked = userList[user] ? "checked" : "";
                 temp.onchange = function () {
-                    this.parentNode.setAttribute("data-index", "true");
+                    this.parentNode.setAttribute("data-changed", "true");
                     $(this.parentNode).addClass("changed");
                 };
                 entry.appendChild(temp);
@@ -1562,7 +1562,7 @@
         var dates = document.getElementsByClassName("mtime");
         if (!dates) return;
         for (var i = 0; i < dates.length; i++) {
-            var timestamp = dates[i].getAttribute("timestamp");
+            var timestamp = dates[i].getAttribute("data-timestamp");
             if (timestamp) {
                 var reltime = timeDifference(timestamp);
                 if (reltime) dates[i].innerHTML = reltime;

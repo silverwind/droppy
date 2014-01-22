@@ -828,7 +828,7 @@
 
         function endReq(req, res, success) {
             res.statusCode = success ? 202 : 401;
-            res.setHeader("Content-Type", "text/plain;");
+            res.setHeader("Content-Type", "text/plain");
             res.setHeader("Content-Length", 0);
             res.end();
             log.response(req, res);
