@@ -1124,11 +1124,12 @@ input:-webkit-autofill {
     line-height: 40px;
     margin: 0 auto;
     position: relative;
+    display: block;
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) { #login-info { line-height: 32px } }
 
-#login-info.shake { animation: shake .5s ease }
+.shake { animation: shake .5s }
 @keyframes shake {
     10%, 30%, 50%, 70%, 90% {transform: translateX(-6px)}
     20%, 40%, 60%, 80% {transform: translateX(6px)}

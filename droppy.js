@@ -470,14 +470,20 @@
                     sendUsers(cookie);
                     break;
                 case "UPDATE_USER":
+                    var name = msg.data.name, pass = msg.data.pass, priv = msg.data.priv;
                     if (!db.sessions[cookie].privileged) return;
-                    if (msg.data.pass === "") {
-                        log.log(log.socket(remoteIP, remotePort), " Deleted user: ", log.color.magenta, msg.data.name, log.color.reset);
+                    if (pass === "") {
+                        if (!db.users[name]) return;
                         delUser(msg.data.name);
+                        log.log(log.socket(remoteIP, remotePort), " Deleted user: ", log.color.magenta, name, log.color.reset);
                         sendUsers(cookie);
                     } else {
-                        log.log(log.socket(remoteIP, remotePort), " Added or updated user: ", log.color.magenta, msg.data.name, log.color.reset);
-                        addOrUpdateUser(msg.data.name, msg.data.pass, msg.data.priv);
+                        var isNew = !db.users[name];
+                        addOrUpdateUser(name, pass, priv);
+                        if (isNew)
+                            log.log(log.socket(remoteIP, remotePort), " Added user: ", log.color.magenta, name, log.color.reset);
+                        else
+                            log.log(log.socket(remoteIP, remotePort), " Updated user: ", log.color.magenta, name, log.color.reset);
                         sendUsers(cookie);
                     }
                     break;
@@ -721,6 +727,11 @@
             res.setHeader("Content-Length", json.length);
             res.end(json);
             log.response(req, res);
+        } else if (/^\/!\/null/.test(URI)) {
+            res.statusCode = 200;
+            res.end();
+            log.response(req, res);
+            return;
         } else if (/^\/!\//.test(URI)) {
             handleResourceRequest(req, res, req.url.substring(3));
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
@@ -789,12 +800,12 @@
             req.on("end", function () {
                 var postData = require("querystring").parse(body);
                 if (isValidUser(postData.username, postData.password)) {
-                    log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                     createCookie(req, res, postData);
-                    endReq(req, res, "OK");
+                    endReq(req, res, true);
+                    log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                 } else {
+                    endReq(req, res, false);
                     log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "unauthorized");
-                    endReq(req, res, "NOK");
                 }
             });
         } else if (URI === "/adduser" && firstRun) {
@@ -805,19 +816,21 @@
                     addOrUpdateUser(postData.username, postData.password, true);
                     createCookie(req, res, postData);
                     firstRun = false;
-                    endReq(req, res, "OK");
+                    endReq(req, res, true);
                 } else {
-                    endReq(req, res, "NOK");
+                    endReq(req, res, false);
                 }
             });
+        } else {
+            res.statusCode = 404;
+            res.end();
         }
 
-        function endReq(req, res, response) {
-            var json = JSON.stringify(response);
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/html; charset=utf-8");
-            res.setHeader("Content-Length", json.length);
-            res.end(json);
+        function endReq(req, res, success) {
+            res.statusCode = success ? 202 : 401;
+            res.setHeader("Content-Type", "text/plain;");
+            res.setHeader("Content-Length", 0);
+            res.end();
             log.response(req, res);
         }
     }
@@ -843,10 +856,6 @@
 
         // Regular resource handling
         if (cache.res[resourceName] === undefined) {
-            if (resourceName === "null") { // Serve an empty document for the dummy iframe
-                res.end();
-                return;
-            }
             res.statusCode = 404;
             res.end();
         } else {
@@ -1124,6 +1133,7 @@
                 archive.pipe(res);
 
                 utils.walkDirectory(path, function (error, paths) {
+                    paths = paths.filter(function (s) { return s !== ""; });
                     if (error) log.error(error);
                     (function read(currentPath) {
                         archive.file(currentPath, {name: removeFilePath(currentPath)}, function (error) {

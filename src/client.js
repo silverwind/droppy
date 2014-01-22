@@ -82,13 +82,11 @@
     $(getPage);
 
     function getPage() {
-        $.when(
-                $.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), // Append a few random characters to avoid any caching
-                $.ajax("/!/svg"))
-        .then(function (dataReq, svgReq) {
-            droppy.svg = JSON.parse(svgReq[0]);
-            loadPage(dataReq[2].getResponseHeader("X-Page-Type"), addSVG(dataReq[0]));
-        });
+        $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg"))
+            .then(function (dataReq, svgReq) {
+                droppy.svg = JSON.parse(svgReq[0]);
+                loadPage(dataReq[2].getResponseHeader("X-Page-Type"), addSVG(dataReq[0]));
+            });
     }
     // {"add-folder":{"data":"<svg>","info":{"width":"32","height":"32"}}}
     function addSVG(html) {
@@ -150,6 +148,17 @@
             newPage.attr("id", "page");
         }
     }
+
+    function requestPage() {
+        // Ugly hack to let Chrome offer a password saving dialog
+        // http://code.google.com/p/chromium/issues/detail?id=43219
+        if (/Chrome/.test(navigator.userAgent)) {
+            window.location.reload(false);
+        } else {
+            getPage();
+        }
+    }
+
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
@@ -315,7 +324,7 @@
         // Return submits the form
         $(".login-input").register("keyup", function (event) {
             if (event.keyCode === 13) {
-                submitForm();
+                form.submit();
             }
         });
 
@@ -327,55 +336,32 @@
         });
 
         submit.register("click", function () { form.submit(); });
-        form.register("submit", submitForm);
-
-        function submitForm() {
-            if (firstrun) {
-                $.ajax({
-                    type: "POST",
-                    url: "/adduser",
-                    dataType: "json",
-                    data: form.serialize(),
-                    success: function (response) {
-                        if (response === "OK") {
-                            droppy.hasLoggedOut = false;
-                            getPage();
-                        } else {
-                            submit.addClass("invalid");
-                            loginform.addClass("invalid");
-                            $("#login-info").text("Creditentials not acceptable.");
-                            $("#login-info-box").attr("class", "error");
+        form.register("submit", function () {
+            $.ajax({
+                type: "POST",
+                url: (firstrun ? "/adduser" : "/login"),
+                dataType: "json",
+                data: form.serialize(),
+                complete: function (response) {
+                    if (response.status  === 202) {
+                        requestPage();
+                        droppy.hasLoggedOut = false;
+                    } else if (response.status === 401) {
+                        submit.addClass("invalid");
+                        loginform.addClass("invalid");
+                        $("#login-info-box").attr("class", "error");
+                        $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
+                        if (!firstrun) $("#pass").val("").focus();
+                        if ($("#login-info-box").hasClass("error")) {
+                            $("#login-info").addClass("shake");
+                            setTimeout(function () {
+                                $("#login-info").removeClass("shake");
+                            }, 500);
                         }
                     }
-                });
-            } else {
-                $.ajax({
-                    type: "POST",
-                    url: "/login",
-                    dataType: "json",
-                    data: form.serialize(),
-                    success: function (response) {
-                        if (response === "OK") {
-                            droppy.hasLoggedOut = false;
-                            getPage();
-                        } else {
-                            $("#pass").val("");
-                            submit.addClass("invalid");
-                            loginform.addClass("invalid");
-                            if ($("#login-info-box").hasClass("info") || $("#login-info-box").hasClass("error")) {
-                                $("#login-info").addClass("shake");
-                                setTimeout(function () {
-                                    $("#login-info").removeClass("shake");
-                                }, 500);
-                            } else {
-                                $("#login-info-box").addClass("error");
-                                $("#login-info").text("Wrong login!");
-                            }
-                        }
-                    }
-                });
-            }
-        }
+                },
+            });
+        });
     }
 // ============================================================================
 //  Main page
@@ -637,7 +623,7 @@
                 user = {};
                 isChanged = false;
                 for (var j = 0, k = entry.childNodes.length; j < k; j++) {
-                    if (entry.dataset.changed === "true") {
+                    if (entry.getAttribute("data-changed") === "true") {
                         if      (entry.childNodes[j].className === "user-name") user.name = entry.childNodes[j].innerHTML;
                         else if (entry.childNodes[j].className === "user-pass") user.pass = entry.childNodes[j].value;
                         else if (entry.childNodes[j].className === "user-priv") user.priv = entry.childNodes[j].checked;
@@ -661,7 +647,8 @@
             deleteCookie("session");
             initVariables(); // Reset vars to their init state
             droppy.hasLoggedOut = true;
-            getPage();
+            window.location.reload(false);
+            requestPage();
         });
 
         // Hide modals when clicking outside their box
@@ -1010,7 +997,7 @@
                 temp.type = "password";
                 temp.setAttribute("title", "The user's password");
                 temp.onkeyup = function () {
-                    this.parentNode.dataset.changed = "true";
+                    this.parentNode.setAttribute("data-index", "true");
                     $(this.parentNode).addClass("changed");
                 };
                 entry.appendChild(temp);
@@ -1020,7 +1007,7 @@
                 temp.id = "check-" + user;
                 temp.checked = userList[user] ? "checked" : "";
                 temp.onchange = function () {
-                    this.parentNode.dataset.changed = "true";
+                    this.parentNode.setAttribute("data-index", "true");
                     $(this.parentNode).addClass("changed");
                 };
                 entry.appendChild(temp);
@@ -1574,11 +1561,13 @@
     setInterval(function () {
         var dates = document.getElementsByClassName("mtime");
         if (!dates) return;
-        for (var i = 0; i < dates.length; i++)
-            if (dates[i].dataset.timestamp) {
-                var reltime = timeDifference(dates[i].dataset.timestamp);
+        for (var i = 0; i < dates.length; i++) {
+            var timestamp = dates[i].getAttribute("timestamp");
+            if (timestamp) {
+                var reltime = timeDifference(timestamp);
                 if (reltime) dates[i].innerHTML = reltime;
             }
+        }
     }, 5000);
 
     function createElement(type, className, text) {
