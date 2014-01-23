@@ -10,15 +10,15 @@
   "main": "droppy.js",
   "dependencies": {
     "archiver": "~0.5.1",
-    "async": "~0.2.9",
+    "async": "~0.2.10",
     "autoprefixer": "~1.0.20140117",
     "busboy": "0.0.14",
     "clean-css": "~2.0.7",
     "graceful-fs": "~2.0.1",
     "mime": "~1.2.11",
-    "spdy": "~1.17.23",
+    "spdy": "~1.19.0",
     "svgo": "~0.4.4",
-    "uglify-js": "~2.4.10",
+    "uglify-js": "~2.4.11",
     "wrench": "~1.5.6",
     "ws": "~0.4.31"
   },
@@ -51,6 +51,6 @@
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-bump": "~0.0.13",
-    "grunt-shell": "~0.6.3"
+    "grunt-shell": "~0.6.4"
   }
 }

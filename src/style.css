@@ -322,28 +322,27 @@ input:-webkit-autofill {
 .arrow { position: absolute }
 
 #path .home {
-    fill: #ccc;
-    height: 1.1em;
+    fill: #ddd;
+    height: 1em;
     display: inline-block;
     vertical-align: middle;
     position: relative;
-    top: -1px;
 }
 
-#path li.in  { left: 0    }
+#path li.in  { left: 0 }
 #path li.out { left: -100px }
 #path li:first-of-type { padding-left: .5em }
-#path li { color: #ccc; transition: color .3s ease, left .5s ease }
+#path li { color: #ddd; transition: color .3s ease, left .5s ease }
 
 #path li:nth-child(odd)     { background: #383838 }
 #path li:nth-child(odd) > .arrow  { fill: #383838 }
 #path li:nth-child(even)    { background: #282828 }
 #path li:nth-child(even) > .arrow { fill: #282828 }
 
-#path li:nth-child(odd):hover     { background: #612; color: #fff }
-#path li:nth-child(odd):hover > .arrow  { fill: #612 }
-#path li:nth-child(even):hover    { background: #248; color: #fff }
-#path li:nth-child(even):hover > .arrow { fill: #248 }
+#path li:nth-child(odd):hover     { background: #812; color: #fff }
+#path li:nth-child(odd):hover > .arrow  { fill: #812 }
+#path li:nth-child(even):hover    { background: #25a; color: #fff }
+#path li:nth-child(even):hover > .arrow { fill: #25a }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -368,9 +367,14 @@ input:-webkit-autofill {
 /* ========================= File/Folder Display =========================== */
 
 .header {
-    border-bottom: 1px dashed #bbb;
+    border-bottom: 1px solid #aaa;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), #ddd 100%);
     display: flex;
-    padding-bottom: .25em;
+}
+
+.header span {
+    position: relative;
+    top: -.125em;
 }
 
 .header-name {
@@ -380,17 +384,17 @@ input:-webkit-autofill {
 }
 
 .header-size {
-    flex: 0 0 3.25em;
-    margin-right: 4em;
+    flex: 0 0 3.5em;
+    margin-right: 4.5em;
     display: inline-block;
-    text-align: center;
+    text-align: right;
 }
 @media all and (max-width: 320px) { .header-size { display: none } }
 
 .header-mtime {
-    flex: 0 0 6.5em;
+    flex: 0 0 6em;
     display: inline-block;
-    text-align: center;
+    text-align: right;
 }
 @media all and (max-width: 639px) { .header-mtime { display: none } }
 
@@ -401,7 +405,8 @@ input:-webkit-autofill {
     line-height: 1.4em;
 }
 
-.data-row, .data-row > .icon:not(.icon-play), .data-row > a {
+
+.data-row, .data-row a {
     color: #333;
 }
 
@@ -435,7 +440,7 @@ input:-webkit-autofill {
     display: inline-block;
 }
 
-.playing, .playing a  {
+.playing, .playing a {
     background: #333;
     color: #ddd;
 }
@@ -478,8 +483,7 @@ input:-webkit-autofill {
 @media all and (max-width: 639px) { .mtime { display: none } }
 
 .data-row svg {
-    display: inline-block;
-    vertical-align: middle;
+    display: block;
     cursor: pointer;
     fill: #222;
     height: 1em;
@@ -880,10 +884,9 @@ input:-webkit-autofill {
 
 #about-copy {
     bottom: 0;
-    font-size: .8em;
+    font-size: .6em;
     margin-bottom: 6px;
     position: absolute;
-    color: #aaa;
 }
 
 #about-box .github {

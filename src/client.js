@@ -1522,8 +1522,7 @@
 
         if (elapsed < 0) elapsed = 0;
         if (elapsed < msPerMinute) {
-            retval = Math.round(elapsed / 1000);
-            retval += (retval === 1) ? " sec ago" : " secs ago";
+            retval = "just now";
         } else if (elapsed < msPerHour) {
             retval = Math.round(elapsed / msPerMinute);
             retval += (retval === 1) ? " min ago" : " mins ago";
