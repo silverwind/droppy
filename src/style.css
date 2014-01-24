@@ -405,6 +405,7 @@ input:-webkit-autofill {
     line-height: 1.4em;
 }
 
+@media all and (max-width: 639px) { .data-row { padding: 0 .1em } }
 
 .data-row, .data-row a {
     color: #333;
@@ -435,10 +436,11 @@ input:-webkit-autofill {
     vertical-align: top;
     white-space: nowrap;
     cursor: pointer;
-    padding-left: .25em;
+    padding: 0 .25em;
     flex: 1 1;
     display: inline-block;
 }
+@media all and (max-width: 639px) { .filelink, .folderlink { padding: 0 .125em } }
 
 .playing, .playing a {
     background: #333;
@@ -485,10 +487,14 @@ input:-webkit-autofill {
 .data-row svg {
     display: block;
     cursor: pointer;
-    fill: #222;
+    fill: #333;
     height: 1em;
     transition: transform .15s ease;
     width: 1.25em;
+}
+
+.data-row .shortlink, .data-row .edit, .data-row .delete, .data-row .zip {
+    display: block;
 }
 
 @media all and (max-width: 320px) { .data-row svg { width: 1.1em } }
@@ -535,8 +541,8 @@ input:-webkit-autofill {
 }
 
 @media all and (min-width: 1024px) { .sprite { transform: scale(.95) } }
-@media all and (max-width: 1023px) { .sprite { transform: scale(.85) } }
-@media all and (max-width:  639px) { .sprite { transform: scale(.75) } }
+@media all and (max-width: 1023px) { .sprite { transform: scale(.90) } }
+@media all and (max-width:  639px) { .sprite { transform: scale(.85) } }
 
 .data-row.playable:hover .sprite {
     background: none;
