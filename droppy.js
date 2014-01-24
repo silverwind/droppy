@@ -661,7 +661,7 @@
         cache.res = {};
 
         dir = dir.substring(0, dir.length - 1); // Strip trailing slash
-        utils.walkDirectory(dir, function (error, results) {
+        utils.walkDirectory(dir, false, function (error, results) {
             if (error) log.error(error);
             gzipFiles = [];
             results.forEach(function (fullPath) {
@@ -1120,11 +1120,17 @@
     // Create a zip file from a directory and stream it to a client
     // TODO: push zipping of a directory to all clients
     function streamArchive(req, res, type) {
-        var path = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
-        fs.stat(path, function (err, stats) {
+        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
+        fs.stat(zipPath, function (err, stats) {
             if (!err && stats.isDirectory()) {
                 res.statusCode = 200;
                 res.setHeader("Content-Type", mime.lookup(type));
+
+                if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+                    res.setHeader("Content-Disposition", 'attachment; filename="' + encodeURIComponent(path.basename(zipPath)) + '.zip"');
+                else
+                    res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(zipPath) + '.zip"');
+
                 res.setHeader("Transfer-Encoding", "chunked");
                 log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " Creating zip of /", req.url.substring(4));
 
@@ -1133,11 +1139,16 @@
                 archive.on("error", function (error) { log.error(error); });
                 archive.pipe(res);
 
-                utils.walkDirectory(path, function (error, paths) {
+                utils.walkDirectory(zipPath, true, function (error, paths) {
                     paths = paths.filter(function (s) { return s !== ""; });
                     if (error) log.error(error);
                     (function read(currentPath) {
-                        archive.file(currentPath, {name: removeFilePath(currentPath)}, function (error) {
+                        if (currentPath[currentPath.length - 1] !== "/")
+                            archive.file(currentPath, {name: removeFilePath(currentPath)}, next);
+                        else
+                            archive.append("", { name: removeFilePath(currentPath) }, next);
+
+                        function next(error) {
                             if (error) log.error(error);
                             if (paths.length) {
                                 read(paths.pop());
@@ -1147,10 +1158,11 @@
                                     res.end();
                                 });
                             }
-                        });
-
+                        }
                     })(paths.pop());
                 });
+
+
             } else {
                 res.statusCode = 404;
                 res.end();
