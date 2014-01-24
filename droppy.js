@@ -89,9 +89,9 @@
     function prepareContent() {
         var out = { css : "", js  : "" },
             resources = {
-                css  : ["style.css", "sprites.css"],
-                js   : ["jquery.js", "client.js"],
-                html : ["base.html", "auth.html", "main.html"]
+                css  : ["src/style.css", "src/sprites.css"],
+                js   : ["node_modules/jquery/dist/jquery.js", "src/client.js"],
+                html : ["src/base.html", "src/auth.html", "src/main.html"]
             },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
             resourceList = utils.flatten(resources),
@@ -108,7 +108,7 @@
         // Check if we to actually need to recompile resources
         resourceList.forEach(function (file) {
             try {
-                if (crypto.createHash("md5").update(fs.readFileSync(getSrcPath(file))).digest("base64") === db.resourceHashes[file])
+                if (crypto.createHash("md5").update(fs.readFileSync(file)).digest("base64") === db.resourceHashes[file])
                     matches.resource++;
                 else return;
             } catch (error) { return; }
@@ -133,7 +133,7 @@
                 resources[type].forEach(function (file, key, array) {
                     var data;
                     try {
-                        data = fs.readFileSync(getSrcPath(file)).toString("utf8");
+                        data = fs.readFileSync(file).toString("utf8");
                     } catch (error) {
                         log.error("Error reading " + file + ":\n", error);
                         process.exit(1);
@@ -179,7 +179,7 @@
             resources.html.forEach(function (file) {
                 var name = Object.keys(file)[0];
                 // Minify HTML by removing tabs, CRs and LFs
-                fs.writeFileSync(getResPath(name), file[name].replace(/[\t\r\n]/gm, "").replace("{{version}}", version));
+                fs.writeFileSync(getResPath(path.basename(name)), file[name].replace(/[\t\r\n]/gm, "").replace("{{version}}", version));
             });
             fs.writeFileSync(getResPath("client.js"), out.js);
             fs.writeFileSync(getResPath("style.css"), out.css);
@@ -191,7 +191,7 @@
         // Save the hashes of all compiled files
         resourceList.forEach(function (file) {
             if (!db.resourceHashes) db.resourceHashes = {};
-            db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(getSrcPath(file))).digest("base64");
+            db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(file)).digest("base64");
             db.resourceDebug = config.debug; // Save the state of the last resource compilation
         });
         writeDB();
