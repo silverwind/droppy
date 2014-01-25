@@ -1134,8 +1134,7 @@
                 res.setHeader("Transfer-Encoding", "chunked");
                 log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " Creating zip of /", req.url.substring(4));
 
-                archive = archiver.create(type, {zlib: { level: config.zipLevel }});
-                archive.catchEarlyExitAttached = true;
+                archive = archiver(type, {zlib: { level: config.zipLevel }, catchEarly: false});
                 archive.on("error", function (error) { log.error(error); });
                 archive.pipe(res);
 

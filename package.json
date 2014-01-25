@@ -9,7 +9,7 @@
   },
   "main": "droppy.js",
   "dependencies": {
-    "archiver": "~0.5.1",
+    "archiver": "~0.5.2",
     "async": "~0.2.10",
     "autoprefixer": "~1.0.20140117",
     "busboy": "0.0.14",
