@@ -177,7 +177,6 @@
 
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
-            console.log(event.code);
             if (droppy.hasLoggedOut || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
