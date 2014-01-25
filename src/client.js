@@ -162,7 +162,7 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
-    var queuedData, reopen, retries = 3;
+    var queuedData, retries = 3;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
@@ -177,14 +177,15 @@
 
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
+            console.log(event.code);
             if (droppy.hasLoggedOut || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
                     openSocket();
                     retries--;
                 }
-            } else if (reopen) {
-                reopen = false;
+            } else if (droppy.reopen) {
+                droppy.reopen = false;
                 openSocket();
             }
         };
@@ -280,7 +281,7 @@
 
             if (droppy.socket.readyState === 2) { // closing
                 // Socket is closing, queue a re-opening
-                reopen = true;
+                droppy.reopen = true;
             } else if (droppy.socket.readyState === 3) { // closed
                 // Socket is closed, we can re-open it right now
                 openSocket();
@@ -1311,10 +1312,17 @@
             event.stopPropagation();
         });
 
-        // Zip a folder
-        $(".data-row .zip").register("click", function (event) {
+        // Stop navigation when clicking on an <a>
+        $(".data-row .zip, .filelink").register("click", function (event) {
             if (droppy.socketWait) return;
             event.stopPropagation();
+
+            // Some browsers (like IE) think that clicking on an <a> is real navigation
+            // and will close the WebSocket in turn. We'll reconnect if neccessary.
+            droppy.reopen = true;
+            setTimeout(function () {
+                droppy.reopen = false;
+            }, 2000);
         });
 
         // Request a shortlink
@@ -1415,6 +1423,7 @@
         droppy.isUploading = null;
         droppy.mimeTypes = {},
         droppy.ready = null;
+        droppy.reopen = null;
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
