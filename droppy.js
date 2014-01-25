@@ -1149,14 +1149,10 @@
 
                         function next(error) {
                             if (error) log.error(error);
-                            if (paths.length) {
+                            if (paths.length)
                                 read(paths.pop());
-                            } else {
-                                archive.finalize(function (error) {
-                                    if (error) log.error(error);
-                                    res.end();
-                                });
-                            }
+                            else
+                                archive.finalize();
                         }
                     })(paths.pop());
                 });
