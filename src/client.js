@@ -1060,10 +1060,6 @@
         document.title = [prefix, suffix].join(" - ");
     }
 
-    function basename(str) {
-        return str.split("/").reverse()[0];
-    }
-
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.

@@ -28,9 +28,10 @@
 (function () {
     var
         // Libraries
-        utils      = require("./lib/utils.js"),
-        log        = require("./lib/log.js"),
-        svg        = require("./lib/svg.js"),
+        utils        = require("./lib/utils.js"),
+        log          = require("./lib/log.js"),
+        svg          = require("./lib/svg.js"),
+        configParser = require("./lib/configParser.js"),
         // Modules
         archiver   = require("archiver"),
         async      = require("async"),
@@ -46,15 +47,15 @@
         zlib       = require("zlib"),
         // Variables
         version    = require("./package.json").version,
-        configFile = "config.json",
+        config     = null,
         cache      = {},
         clients    = {},
         db         = {},
         dirs       = {},
         watchers   = {},
         cssCache   = null,
-        config     = null,
         firstRun   = null,
+        mode      = {file: "644", dir: "755"},
         isCLI      = (process.argv.length > 2);
 
     // Argument handler
@@ -66,7 +67,8 @@
                log.color.green, process.version.substring(1), log.color.reset
     );
 
-    parseConfig();
+    config = configParser(path.join(process.cwd(), "config.json"));
+
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
 
@@ -97,11 +99,11 @@
             resourceList = utils.flatten(resources),
             matches = { resource: 0, compiled: 0 };
 
-        //Prepare SVG
+        //Prepare SVGs
         try {
             cache.svg = svg.process(config.srcDir + "svg/");
         } catch (error) {
-            log.error("Error processing SVGs", error);
+            log.error("Error processing SVGs: ", error);
             process.exit(1);
         }
 
@@ -202,8 +204,8 @@
     function setupDirectories() {
         wrench.rmdirSyncRecursive(config.incomingDir, true);
         try {
-            wrench.mkdirSyncRecursive(config.filesDir, config.dirMode);
-            wrench.mkdirSyncRecursive(config.incomingDir, config.dirMode);
+            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
+            wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
         } catch (error) {
             log.simple("Unable to create directories:");
             log.error(error);
@@ -237,7 +239,7 @@
     // Bind to listening port
     function createListener() {
         var server, key, cert, ca, http = require("http");
-        if (!config.useHTTPS) {
+        if (!config.useTLS) {
             server = http.createServer(onRequest);
         } else {
             try {
@@ -310,16 +312,19 @@
 
         server.on("error", function (error) {
             if (error.code === "EADDRINUSE")
-                log.error("Failed to bind to port ", log.color.blue, port, log.color.reset, ". Address already in use.\n");
+                log.error("Failed to bind to ",
+                          log.color.cyan, config.listenHost, log.color.red, ":",
+                          log.color.blue, config.listenPort, log.color.red, ". Address already in use.\n");
             else if (error.code === "EACCES")
-                log.error("Failed to bind to port ", log.color.blue, port, log.color.reset, ". Need permission to bind to ports < 1024.\n");
+                log.error("Failed to bind to ",
+                          log.color.cyan, config.listenHost, log.color.red, ":",
+                          log.color.blue, config.listenPort, log.color.red, ". Need permission to bind to ports < 1024.\n");
             else
-                log.error("Error:", util.inspect(error));
+                log.error("Error: ", util.inspect(error));
             process.exit(1);
         });
 
-        var port = (process.env.NODE_ENV === "production") ? process.env.PORT : config.port;
-        server.listen(port);
+        server.listen(config.listenPort, config.listenHost);
     }
 
     //-----------------------------------------------------------------------------
@@ -435,7 +440,7 @@
                         return;
                     }
 
-                    fs.mkdir(addFilePath(msg.data), config.dirMode, function (error) {
+                    fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
                         log.log(log.socket(remoteIP, remotePort), " Created: ", msg.data);
                     });
@@ -497,8 +502,8 @@
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
                         var p = addFilePath(clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/") + decodeURIComponent(file);
-                        wrench.mkdirSyncRecursive(path.dirname(p), config.dirMode);
-                        fs.writeFileSync(p, "", {mode: config.filesMode});
+                        wrench.mkdirSyncRecursive(path.dirname(p), mode.dir);
+                        fs.writeFileSync(p, "", {mode: mode.file});
                         log.log(log.socket(remoteIP, remotePort), " Received: " + removeFilePath(p).substring(1));
                     });
                     send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
@@ -997,7 +1002,7 @@
                     var names = Object.keys(files);
                     while (names.length > 0) {
                         (function (name) {
-                            wrench.mkdirSyncRecursive(path.dirname(files[name].dst), config.dirMode);
+                            wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                             fs.rename(files[name].src, files[name].dst, function () {
                                 log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
                             });
@@ -1021,7 +1026,7 @@
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
                 dst = path.join(config.filesDir, clients[cookie].directory, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex")),
-                fstream = fs.createWriteStream(tmp);
+                fstream = fs.createWriteStream(tmp, { mode: mode.file});
 
             files[dstRelative] = {
                 src: tmp,
@@ -1199,68 +1204,6 @@
     }
 
     //-----------------------------------------------------------------------------
-    // config.json handling
-    function parseConfig() {
-        var defaults =
-            ['{',
-            '    "debug"        : false,',
-            '    "useHTTPS"     : false,',
-            '    "useSPDY"      : false,',
-            '    "port"         : 80,',
-            '    "readInterval" : 50,',
-            '    "filesMode"    : "644",',
-            '    "dirMode"      : "755",',
-            '    "linkLength"   : 3,',
-            '    "maxOpen"      : 256,',
-            '    "zipLevel"     : 1,',
-            '    "timestamps"   : true,',
-            '    "db"           : "./db.json",',
-            '    "filesDir"     : "./files/",',
-            '    "incomingDir"  : "./temp/incoming/",',
-            '    "resDir"       : "./res/",',
-            '    "srcDir"       : "./src/",',
-            '    "tls" : {',
-            '        "key"      : "./keys/key.pem",',
-            '        "cert"     : "./keys/cert.pem",',
-            '        "ca"       : []',
-            '    }',
-            '}'].join("\n");
-
-        // Read & parse config.json, create it if necessary
-        try {
-            fs.statSync(configFile);
-            config = JSON.parse(fs.readFileSync(configFile));
-        } catch (error) {
-            if (error.code === "ENOENT") {
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ",
-                           log.color.magenta, configFile, log.color.reset, "...");
-                fs.writeFileSync(configFile, defaults);
-            } else {
-                log.error("Error reading ", configFile, ":\n", error);
-                process.exit(1);
-            }
-        }
-
-        // Add any missing options
-        if (!config) config = {};
-        defaults = JSON.parse(defaults);
-        config = utils.mergeDefaults(config, defaults);
-        writeConfig();
-
-        // Change relative paths to __dirname
-        ["db", "filesDir", "incomingDir", "resDir", "srcDir"].forEach(function (prop) {
-            if (config[prop][0] === ".") {
-                config[prop] = path.join(__dirname + config[prop].substring(1));
-            }
-        });
-        ["cert", "key", "ca"].forEach(function (prop) {
-            if (config.tls[prop][0] === ".") {
-                config.tls[prop] = path.join(__dirname + config.tls[prop].substring(1));
-            }
-        });
-    }
-
-    //-----------------------------------------------------------------------------
     // Read and validate the user database
     function readDB() {
         var dbString = "";
@@ -1415,7 +1358,6 @@
     //-----------------------------------------------------------------------------
     // Various helper functions
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
-    function writeConfig()     { fs.writeFileSync(configFile, JSON.stringify(config, null, 4)); }
 
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }

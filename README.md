@@ -31,16 +31,15 @@ node droppy
 By default, the server will listen on [http](http://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
 
 ##Configuration
-Configuration is done through `config.json`, which is created on the first run, with these contents:
+Configuration is done through `config.json`, which is created on the first run, with these defaults:
 ````javascript
 {
     "debug"        : false,
-    "useHTTPS"     : false,
+    "useTLS"       : false,
     "useSPDY"      : false,
-    "port"         : 80,
+    "listenHost"   : "0.0.0.0",
+    "listenPort"   : 80,
     "readInterval" : 50,
-    "filesMode"    : "644",
-    "dirMode"      : "755",
     "linkLength"   : 3,
     "maxOpen"      : 256,
     "zipLevel"     : 1,
@@ -59,12 +58,11 @@ Configuration is done through `config.json`, which is created on the first run, 
 ````
 ###General options
 - **debug**: Skip resource minification and enable automatic CSS reloading when the source files change.
-- **useHTTPS**: Whether the server should use SSL/TLS encryption.
+- **useTLS**: Whether the server should use SSL/TLS encryption.
 - **useSPDY**: Enables the SPDYv3 protocol. Use in conjunction with **useHTTPS**.
-- **port**: The listening port.
+- **listenHost**: The port to listen on.
+- **listenPort**: The host to listen on.
 - **readInterval**: The minimum time gap in milliseconds in which updates to a directory are sent.
-- **filesMode**: The access mask with which files are created.
-- **dirMode**: The access mask with which directories are created.
 - **linkLength**: The amount of characters in a shortlink.
 - **maxOpen**: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
@@ -72,18 +70,18 @@ Configuration is done through `config.json`, which is created on the first run, 
 
 ###Path options
 - **db**: Location of the user database file.
-- **tls**: See TLS options below.
 - **filesDir**: The directory which serves as the server's root.
 - **incomingDir**: The directory for temporary files during uploads.
 - **resDir**: The directory which contains the compiled resources and images.
 - **srcDir**: The directory which contains the html/js/css sources.
+- **tls**: See TLS options below.
 
 ###TLS options
-These files are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when **useHTTPS** is enabled.
+These are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when **useTLS** is enabled.
 
 - **key**: Path to your private key.
-- **cert**: Path to your main certificate.
-- **ca**: Path to any intermediate or root certificates you'd like to provide. These are served in the order defined in this array (or string in case of a single cert).
+- **cert**: Path to your certificate.
+- **ca**: Paths to any intermediate certificates.
 
 ##Supported Browsers
 - Firefox (last 2 versions)
