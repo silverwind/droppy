@@ -491,13 +491,6 @@
                         sendUsers(cookie);
                     }
                     break;
-                case "GET_MIME":
-                    send(clients[cookie].ws, JSON.stringify({
-                        type : "MIME_TYPE",
-                        req  : msg.data,
-                        mime : mime.lookup(msg.data)
-                    }));
-                    break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
                         var p = addFilePath(clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/") + decodeURIComponent(file);
@@ -1057,9 +1050,18 @@
                     fs.stat(addFilePath(root) + "/" + entry, function (error, stats) {
                         if (!error && stats) {
                             if (stats.isFile()) {
-                                dirContents[entry] = { type: "f", size: stats.size, mtime : stats.mtime.getTime() || 0 };
+                                dirContents[entry] = {
+                                    type: "f",
+                                    size: stats.size,
+                                    mtime: stats.mtime.getTime() || 0,
+                                    mime: mime.lookup(entry)
+                                };
                             } else if (stats.isDirectory()) {
-                                dirContents[entry] = { type: "d", size: 0, mtime : stats.mtime.getTime() || 0 };
+                                dirContents[entry] = {
+                                    type: "d",
+                                    size: 0,
+                                    mtime: stats.mtime.getTime() || 0
+                                };
                             }
                             if (++done === last) {
                                 dirs[root] = dirContents;

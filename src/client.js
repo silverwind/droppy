@@ -252,9 +252,6 @@
             case "USER_LIST":
                 populateUserList(msg.users);
                 break;
-            case "MIME_TYPE":
-                droppy.mimeTypes[getExt(msg.req)] = msg.mime;
-                break;
             }
         };
     }
@@ -1187,16 +1184,17 @@
             if (fileList.hasOwnProperty(file)) {
                 type = fileList[file].type;
                 temp = convertToSI(fileList[file].size);
-                size = temp.size > 0 ? temp.size : "";
-                sizeUnit = temp.size > 0 ? temp.unit : "";
+                size = temp.size > 0 ? temp.size : "0";
+                sizeUnit = temp.size > 0 ? temp.unit : "b";
                 mtime = fileList[file].mtime;
                 id = (root === "/") ? "/" + file : root + "/" + file;
                 tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
 
                 if (type === "f" || type === "nf") { // Create a file row
+                    var ext = getExt(file), spriteClass = getSpriteClass(ext);
                     downloadURL = "/~" + id;
                     audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play">' + droppy.svg.play + '</span>' : "";
-                    var spriteClass = getSpriteClass(getExt(file));
+                    if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[file].mime;
                     if (isUpload) file = decodeURIComponent(file);
                     list.append(
                         '<li class="data-row' + (audio ? ' playable"' : '"') + ' data-type="file" data-id="' + id + '">' +
@@ -1349,25 +1347,14 @@
 
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
-        var source = playButton.parent().parent().find(".filelink").attr("href"), ext = getExt(source);
-        if (droppy.mimeTypes[ext]) {
-            play(source, playButton);
-        } else {
-            // Request the mime type from the server if we don't know it yet
-            sendMessage("GET_MIME", ext);
-            // Wait for the server's respone
-            Object.defineProperty(droppy.mimeTypes, ext, {
-                val: undefined,
-                get: function () { return this.val; },
-                set: function (v) { this.val = v; play(source, playButton); }
-            });
-        }
+        var source = playButton.parent().parent().find(".filelink").attr("href");
+        play(source, playButton);
     }
 
     function play(source, playButton) {
         var player = document.getElementById("audio-player");
 
-        if (!player.canPlayType(droppy.mimeTypes[getExt(source)])) {
+        if (!player.canPlayType(droppy.mediaTypes[getExt(source)])) {
             window.alert("Sorry, your browser can't play this file.");
             return;
         }
@@ -1419,7 +1406,7 @@
         droppy.isAnimating = null;
         droppy.isPlaying = null;
         droppy.isUploading = null;
-        droppy.mimeTypes = {},
+        droppy.mediaTypes = {};
         droppy.ready = null;
         droppy.reopen = null;
         droppy.savedParts = null;
