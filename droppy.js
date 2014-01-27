@@ -324,7 +324,7 @@
             process.exit(1);
         });
 
-        server.listen(config.listenPort, config.listenHost);
+        server.listen(config.listenPort, (process.env.NODE_ENV === "production") ? process.env.PORT : config.listenPort);
     }
 
     //-----------------------------------------------------------------------------
@@ -359,7 +359,6 @@
 
             if (!cookie) {
                 ws.close(4000);
-
                 log.log(log.socket(remoteIP, remotePort), " Unauthorized WebSocket connection closed.");
                 return;
             } else {
