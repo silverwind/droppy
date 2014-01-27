@@ -743,7 +743,7 @@
 
         var played = $("#seekbar-played"),
             loaded = $("#seekbar-loaded"),
-            fullyLoaded, isPlaying;
+            fullyLoaded;
 
         function updater() {
             var cur  = player.currentTime,
@@ -763,7 +763,8 @@
 
         function playing() {
             var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
-            isPlaying = true;
+            droppy.isPlaying = true;
+            updateTitle(droppy.currentFolder, true);
             updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
             $("#content, #newcontent").addClass("squeeze");
             controls.removeClass("out");
@@ -781,10 +782,10 @@
                 clearInterval(droppy.audioUpdater);
                 droppy.audioUpdater = null;
             }
-            isPlaying = false;
-
+            droppy.isPlaying = false;
+            updateTitle(droppy.currentFolder, true);
             setTimeout(function () {
-                if (!isPlaying) {
+                if (!droppy.isPlaying) {
                     controls.addClass("out");
                     $("#content, #newcontent").removeClass("squeeze");
                 }
@@ -1057,6 +1058,7 @@
         } else {
             prefix = text;
         }
+        if (droppy.isPlaying) prefix = "\u266B " + prefix; // Unicode audio note to indicate playback in a tab
         document.title = [prefix, suffix].join(" - ");
     }
 
@@ -1415,6 +1417,7 @@
         droppy.currentFolder = null;
         droppy.hasLoggedOut = null;
         droppy.isAnimating = null;
+        droppy.isPlaying = null;
         droppy.isUploading = null;
         droppy.mimeTypes = {},
         droppy.ready = null;
