@@ -1178,28 +1178,33 @@
 
     // Convert the received data into HTML
     function buildHTML(fileList, root, isUpload) {
-        var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, tags, audio;
+        var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon;
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
+                svgIcon = "", classes = "";
                 type = fileList[file].type;
                 temp = convertToSI(fileList[file].size);
                 size = temp.size > 0 ? temp.size : "0";
                 sizeUnit = temp.size > 0 ? temp.unit : "b";
                 mtime = fileList[file].mtime;
                 id = (root === "/") ? "/" + file : root + "/" + file;
-                tags = (type === "nf" || type === "nd") ? " tag-uploading" : "";
-
+                if (type === "nf" || type === "nd") {
+                    svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
+                    classes += " uploading";
+                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/.test(file)) {
+                    svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
+                    classes += " playable";
+                }
                 if (type === "f" || type === "nf") { // Create a file row
                     var ext = getExt(file), spriteClass = getSpriteClass(ext);
                     downloadURL = "/~" + id;
-                    audio = /^.+\.(mp3|ogg|wav|wave|webm)$/.test(file) ? '<span class="icon-play">' + droppy.svg.play + '</span>' : "";
                     if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[file].mime;
                     if (isUpload) file = decodeURIComponent(file);
                     list.append(
-                        '<li class="data-row' + (audio ? ' playable"' : '"') + ' data-type="file" data-id="' + id + '">' +
-                            '<span class="' + spriteClass + '">' + audio + '</span>' +
-                            '<a class="filelink' + tags + '" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                        '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
+                            '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
+                            '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1211,9 +1216,9 @@
                 } else if (type === "d" || type === "nd") {  // Create a folder row
                     if (isUpload) file = decodeURIComponent(file);
                     list.append(
-                        '<li class="data-row" data-type="folder" data-id="' + id + '">' +
-                            '<span class="sprite sprite-folder"></span>' +
-                            '<span class="folderlink ' + tags + '">' + file + '</span>' +
+                        '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
+                            '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
+                            '<span class="folderlink">' + file + '</span>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
