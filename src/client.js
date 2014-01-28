@@ -469,10 +469,12 @@
                 var files = event.target.files;
                 var obj = {};
                 for (var i = 0; i < files.length; i++) {
-                    var path = files[i].webkitRelativePath;
+                    var path = files[i].webkitRelativePath, name = files[i].name;
                     if (path) {
-                        obj[path.substring(0, path.indexOf(files[i].name) - 1)] = {};
-                        obj[path] = files[i];
+                        if (name === ".")
+                            obj[path] = {};
+                        else
+                            obj[path] = files[i];
                     } else {
                         obj[files[i].name] = files[i];
                     }
