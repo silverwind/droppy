@@ -231,7 +231,6 @@
                     droppy.zeroFiles = [];
                 } else {
                     droppy.isUploading = false;
-                    updateLocation(droppy.currentFolder, false);
                     updateTitle(droppy.currentFolder, true);
                     $("#upload-info").removeClass("in").removeClass("in-space");
                     hideSpinner();

@@ -539,7 +539,7 @@
         };
 
         if (!updateFuncs[cookie])
-            updateFuncs[cookie] = utils.throttle(func, 250);
+            updateFuncs[cookie] = utils.throttle(func, 250, { leading: true, trailing: false });
 
         if (!force)
             updateFuncs[cookie](cookie, eventType);
@@ -589,26 +589,26 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Watch the directory for realtime changes and send them to the appropriate clients.
+    // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
-        var watcher = fs.watch(directory, utils.debounce(function () {
+        var relativeDir = removeFilePath(directory);
+        var watcher = fs.watch(directory, utils.throttle(function () {
             var clientsToUpdate = [];
             for (var client in clients) {
                 if (clients.hasOwnProperty(client)) {
-                    var clientDir = clients[client].directory;
-                    if (clientDir === removeFilePath(directory)) {
+                    if (clients[client].directory === relativeDir) {
                         clientsToUpdate.push(client);
-                        readDirectory(clientDir, function () {
-                            sendFiles(clientsToUpdate.pop(), "UPDATE_FILES");
-                        });
                     }
                 }
             }
-        }), config.readInterval);
+            readDirectory(relativeDir, function () {
+                sendFiles(clientsToUpdate.pop(), "UPDATE_FILES");
+            });
+        }, config.readInterval));
         watcher.on("error", function (error) {
-            log.error("Error trying to watch ", removeFilePath(directory), "\n", error);
+            log.error("Error trying to watch ", relativeDir, "\n", error);
         });
-        watchers[removeFilePath(directory)] = watcher;
+        watchers[relativeDir] = watcher;
     }
 
     //-----------------------------------------------------------------------------
@@ -972,7 +972,7 @@
             return;
         }
 
-        var busboy = new Busboy({ headers: req.headers }),
+        var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
             infiles = 0,
             outfiles = 0,
             done = false,
@@ -1004,7 +1004,6 @@
                 }
             });
         });
-
         busboy.on("end", function () {
             done = true;
         });

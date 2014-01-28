@@ -28,7 +28,7 @@ Inside droppy's directory run:
 ````bash
 node droppy
 ````
-By default, the server will listen on [http](http://localhost/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
+By default, the server will listen on [port 8989](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
 
 ##Configuration
 Configuration is done through `config.json`, which is created on the first run, with these defaults:
@@ -38,8 +38,8 @@ Configuration is done through `config.json`, which is created on the first run, 
     "useTLS"       : false,
     "useSPDY"      : false,
     "listenHost"   : "0.0.0.0",
-    "listenPort"   : 80,
-    "readInterval" : 50,
+    "listenPort"   : 8989,
+    "readInterval" : 250,
     "linkLength"   : 3,
     "maxOpen"      : 256,
     "zipLevel"     : 1,
@@ -62,7 +62,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **useSPDY**: Enables the SPDYv3 protocol. Use in conjunction with **useHTTPS**.
 - **listenHost**: The port to listen on.
 - **listenPort**: The host to listen on.
-- **readInterval**: The minimum time gap in milliseconds in which updates to a directory are sent.
+- **readInterval**: The minimum time gap in milliseconds in which updates to a single directory are sent.
 - **linkLength**: The amount of characters in a shortlink.
 - **maxOpen**: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
