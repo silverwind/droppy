@@ -51,11 +51,11 @@ html {
 }
 
 ::selection {
-    background: #1af;
+    background: #18f;
     color: #fff;
 }
 ::-moz-selection {
-    background: #1af;
+    background: #18f;
     color: #fff;
 }
 
@@ -424,7 +424,8 @@ input:-webkit-autofill {
 .data-row.uploading .up-arrow {
     display: inline-block;
     height: 100%;
-    fill: #1af;
+    height: 100%;
+    fill: #18f;
     animation: jump .8s infinite;
 }
 @keyframes jump {
@@ -564,7 +565,7 @@ input:-webkit-autofill {
 #loading {
     position: absolute;
     animation: spin 1s infinite linear;
-    border-bottom : 5px solid #1af;
+    border-bottom : 5px solid #18f;
     border-left   : 5px solid #000;
     border-right  : 5px solid #000;
     border-top    : 5px solid #f1a;
@@ -579,7 +580,7 @@ input:-webkit-autofill {
 #spinner {
     float: right;
     animation: spin .75s infinite linear;
-    border-bottom-color : #1af;
+    border-bottom-color : #18f;
     border-left-color   : #222;
     border-right-color  : #222;
     border-top-color    : #f1a;
@@ -948,8 +949,8 @@ input:-webkit-autofill {
 }
 
 .user-entry:hover {
-    border-left: 2px solid #1af;
-    border-right: 2px solid #1af;
+    border-left: 2px solid #18f;
+    border-right: 2px solid #18f;
     color: #fff;
 }
 
@@ -1002,8 +1003,8 @@ input:-webkit-autofill {
 }
 
 .user-entry label:hover:after { color: #fff }
-.user-entry.changed > .user-name, .user-entry.changed > .user-pass { color: #1af }
-.user-entry.changed label .key { fill: #1af }
+.user-entry.changed > .user-name, .user-entry.changed > .user-pass { color: #18f }
+.user-entry.changed label .key { fill: #18f }
 
 .user-entry .trash {
     fill: #999;
