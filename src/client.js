@@ -1234,26 +1234,18 @@
 
         $(list).children("li").sort(function (a, b) {
             var type = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
-            var extension = getExt($(a).children(".filelink").text().toUpperCase())
-                                 .localeCompare(getExt($(b).children(".filelink").text().toUpperCase()));
             var text = $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
             if (type < 0)
                 return -1;
             else if (type > 0)
                 return 1;
             else {
-                if (extension < 0)
+                if (text < 0)
                     return -1;
-                else if (extension > 0)
+                else if (text > 0)
                     return 1;
-                else {
-                    if (text < 0)
-                        return -1;
-                    else if (text > 0)
-                        return 1;
-                    else
-                        return 0;
-                }
+                else
+                    return 0;
             }
         }).appendTo(list);
 

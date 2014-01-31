@@ -376,6 +376,7 @@ input:-webkit-autofill {
 .header span {
     position: relative;
     top: -.125em;
+    cursor: default;
 }
 
 .header-name {
