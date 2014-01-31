@@ -421,16 +421,18 @@ input:-webkit-autofill {
     background: none;
 }
 
-.data-row.uploading .up-arrow {
+.data-row.uploading .icon-uploading svg {
     display: inline-block;
-    height: 100%;
-    height: 100%;
-    fill: #18f;
+    height: 24px;
+    width: 24px;
     animation: jump .8s infinite;
 }
+
+.data-row.uploading .icon-uploading svg { fill: #18f }
+
 @keyframes jump {
- 0%,100%  { transform: translateY(-3px) }
- 50%      { transform: translateY(3px) }
+   0%,100%  { transform: translateY(-3px) }
+   50%      { transform: translateY(3px) }
 }
 
 .filelink, .folderlink {
