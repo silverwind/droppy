@@ -1190,7 +1190,7 @@
                 sizeUnit = temp.size > 0 ? temp.unit : "b";
                 mtime = fileList[file].mtime;
                 id = (root === "/") ? "/" + file : root + "/" + file;
-                if (type === "nf" || type === "nd" || type === "d") {
+                if (type === "nf" || type === "nd") {
                     svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
                     classes += " uploading";
                 } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/.test(file)) {
