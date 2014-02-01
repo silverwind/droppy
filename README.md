@@ -83,7 +83,7 @@ These are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls
 
 - **key**: Path to your private key.
 - **cert**: Path to your certificate.
-- **ca**: Paths to any intermediate certificates.
+- **ca**: Path(s) to any intermediate certificates.
 
 ##Supported Browsers
 - Firefox (last 2 versions)

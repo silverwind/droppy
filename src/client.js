@@ -1142,7 +1142,7 @@
             });
 
             $("#path").append(li);
-            li.append('<svg class="arrow" viewBox="0 0 100 100"><polyline points="0,0 0,100 60,50"/></svg>');
+            li.append(droppy.svg.arrow);
         }
 
         function finalize() {
@@ -1256,7 +1256,12 @@
     function loadContent(html) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
-        $('<div class="header"><span class="header-name">Name</span><span class="header-mtime">Modified</span><span class="header-size">Size</span></div>').prependTo(html);
+        $('<div class="header">' +
+            '<span id="header-name" class="down">Name' + droppy.svg.arrow + '</span>' +
+            '<span id="header-mtime" class="up">Modified' + droppy.svg.arrow + '</span>' +
+            '<span id="header-size" class="up">Size' + droppy.svg.arrow + '</span>' +
+            '<span id="header-spacer"></span>' +
+        '</div>').prependTo(html);
 
         requestAnimation(function () {
             if (nav === "same") {
@@ -1332,6 +1337,15 @@
 
         $(".icon-play").register("click", function () {
             preparePlayback($(this));
+        });
+
+        var sorting = {col: "header-name", dir: "down" };
+        $("#header-name, #header-mtime, #header-size").register("click", function () {
+            var self = $(this);
+            sorting.col = self.attr("id");
+            sorting.dir = self.hasClass("down") ? "up" : "down";
+            self.attr("class", sorting.dir);
+            self.addClass("active").siblings().removeClass("active");
         });
 
         // Add missing titles to the SVGs
