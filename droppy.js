@@ -281,7 +281,8 @@
             server.timeout = 120000;
 
             server.on("request", function (req, res) {
-                res.setHeader("Strict-Transport-Security", "max-age=31536000"); // Enforce HSTS
+                if (config.useHSTS)
+                    res.setHeader("Strict-Transport-Security", "max-age=31536000"); // Enforce HSTS
                 onRequest(req, res);
             });
 
