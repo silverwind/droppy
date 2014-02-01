@@ -60,7 +60,8 @@ Configuration is done through `config.json`, which is created on the first run, 
 ###General options
 - **debug**: Skip resource minification and enable automatic CSS reloading when the source files change.
 - **useTLS**: Whether the server should use SSL/TLS encryption.
-- **useSPDY**: Enables the SPDYv3 protocol. Use in conjunction with **useHTTPS**.
+- **useSPDY**: Enables the SPDYv3 protocol. Depends on **useTLS**.
+- **useHSTS**: Enables the [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header with 1 year caching time. Depends on **useTLS**.
 - **listenHost**: The port to listen on.
 - **listenPort**: The host to listen on.
 - **readInterval**: The minimum time gap in milliseconds in which updates to a single directory are sent.
