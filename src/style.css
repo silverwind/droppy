@@ -402,7 +402,7 @@ input:-webkit-autofill {
     top: .125em;
 }
 
-.header .active { color: #000; border-bottom: 2px solid #f1a;}
+.header .active { color: #000; border-bottom: 2px solid #f1a }
 .header .active .arrow { fill: #000 }
 
 #header-name {

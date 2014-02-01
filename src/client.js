@@ -1142,7 +1142,7 @@
             });
 
             $("#path").append(li);
-            li.append(droppy.svg.arrow);
+            li.append(droppy.svg.triangle);
         }
 
         function finalize() {
@@ -1257,9 +1257,9 @@
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
         $('<div class="header">' +
-            '<span id="header-name" class="down">Name' + droppy.svg.arrow + '</span>' +
-            '<span id="header-mtime" class="up">Modified' + droppy.svg.arrow + '</span>' +
-            '<span id="header-size" class="up">Size' + droppy.svg.arrow + '</span>' +
+            '<span id="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
+            '<span id="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
+            '<span id="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
             '<span id="header-spacer"></span>' +
         '</div>').prependTo(html);
 
@@ -1339,7 +1339,7 @@
             preparePlayback($(this));
         });
 
-        var sorting = {col: "header-name", dir: "down" };
+        var sorting = {col: "header-name", dir: "down"};
         $("#header-name, #header-mtime, #header-size").register("click", function () {
             var self = $(this);
             sorting.col = self.attr("id");
