@@ -320,7 +320,7 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px; padding: 0 .1em 0 1.2em } }
 
-.arrow { position: absolute }
+.triangle { position: absolute }
 
 #path .home {
     fill: #ddd;
@@ -335,15 +335,15 @@ input:-webkit-autofill {
 #path li:first-of-type { padding-left: .5em }
 #path li { color: #ddd; transition: color .3s ease, left .5s ease }
 
-#path li:nth-child(odd)     { background: #383838 }
-#path li:nth-child(odd) > .arrow  { fill: #383838 }
-#path li:nth-child(even)    { background: #282828 }
-#path li:nth-child(even) > .arrow { fill: #282828 }
+#path li:nth-child(odd)        { background: #383838 }
+#path li:nth-child(odd) > .triangle  { fill: #383838 }
+#path li:nth-child(even)       { background: #282828 }
+#path li:nth-child(even) > .triangle { fill: #282828 }
 
-#path li:nth-child(odd):hover     { background: #812; color: #fff }
-#path li:nth-child(odd):hover > .arrow  { fill: #812 }
-#path li:nth-child(even):hover    { background: #25a; color: #fff }
-#path li:nth-child(even):hover > .arrow { fill: #25a }
+#path li:nth-child(odd):hover        { background: #812; color: #fff }
+#path li:nth-child(odd):hover > .triangle  { fill: #812 }
+#path li:nth-child(even):hover       { background: #25a; color: #fff }
+#path li:nth-child(even):hover > .triangle { fill: #25a }
 
 #path li:nth-child(1)  { z-index: 15 }
 #path li:nth-child(2)  { z-index: 14 }
@@ -361,9 +361,9 @@ input:-webkit-autofill {
 #path li:nth-child(15) { z-index: 2 }
 #path li:nth-child(16) { z-index: 1 }
 
-@media all and (min-width: 1024px) { .arrow { height: 35px; width: 35px;; right: -34.5px } }
-@media all and (max-width: 1023px) { .arrow { height: 30px; width: 30px;; right: -29.5px } }
-@media all and (max-width:  639px) { .arrow { height: 25px; width: 25px;; right: -24.5px } }
+@media all and (min-width: 1024px) { .triangle { height: 35px; width: 35px;; right: -34.5px } }
+@media all and (max-width: 1023px) { .triangle { height: 30px; width: 30px;; right: -29.5px } }
+@media all and (max-width:  639px) { .triangle { height: 25px; width: 25px;; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
 
@@ -381,7 +381,7 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
-.header .arrow {
+.header .triangle {
     display: inline-block;
     position: relative;
     height: .5em;
@@ -392,18 +392,18 @@ input:-webkit-autofill {
     fill: #333;
 }
 
-.header .down .arrow {
+.header .down .triangle {
     transform: rotate(90deg);
     top: .375em;
 }
 
-.header .up .arrow {
+.header .up .triangle {
     transform: rotate(270deg);
     top: .125em;
 }
 
 .header .active { color: #000; border-bottom: 2px solid #f1a }
-.header .active .arrow { fill: #000 }
+.header .active .triangle { fill: #000 }
 
 #header-name {
     flex: 1 1;
