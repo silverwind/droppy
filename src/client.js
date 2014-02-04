@@ -1256,11 +1256,11 @@
     function loadContent(html) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
-        $('<div class="header">' +
-            '<span id="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
-            '<span id="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
-            '<span id="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
-            '<span id="header-spacer"></span>' +
+        $('<div class="file-header">' +
+            '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
+            '<span class="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
+            '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
+            '<span class="header-spacer"></span>' +
         '</div>').prependTo(html);
 
         requestAnimation(function () {
@@ -1339,15 +1339,20 @@
             preparePlayback($(this));
         });
 
-        var sorting = {col: "header-name", dir: "down"};
-        $("#header-name, #header-mtime, #header-size").register("click", function () {
+        var sorting = {col: "name", dir: "down"};
+        $(".header-name, .header-mtime, .header-size").register("click", function () {
             var self = $(this);
-            sorting.col = self.attr("id");
+            var classes = self.attr("class").split(" ");
+            for (var i = 0, len = classes.length; i < len; i++) {
+                if (classes[i].indexOf("header") >= 0) {
+                    sorting.col = classes[i].substring("7");
+                    break;
+                }
+            }
             sorting.dir = self.hasClass("down") ? "up" : "down";
-            self.attr("class", sorting.dir);
-            self.addClass("active").siblings().removeClass("active");
+            self.attr("class", "header-" + sorting.col + " " + sorting.dir + " active");
+            self.siblings().removeClass("active up down");
         });
-
         // Add missing titles to the SVGs
         $(".data-row .shortlink").attr("title", "Create Shortink");
         $(".data-row .edit").attr("title", "Rename");

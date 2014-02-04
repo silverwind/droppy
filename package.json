@@ -11,8 +11,8 @@
   "dependencies": {
     "archiver": "~0.5.2",
     "async": "~0.2.10",
-    "autoprefixer": "~1.0.20140130",
-    "busboy": "0.0.14",
+    "autoprefixer": "~1.0.20140203",
+    "busboy": "0.0.15",
     "clean-css": "~2.0.7",
     "graceful-fs": "~2.0.1",
     "jquery": "~2.1.0",

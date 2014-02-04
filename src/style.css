@@ -367,21 +367,21 @@ input:-webkit-autofill {
 
 /* ========================= File/Folder Display =========================== */
 
-.header {
+.file-header {
     display: flex;
     color: #333;
 }
 
-.header span {
+.file-header span {
     border-bottom: 2px solid #aaa;
-    background: linear-gradient(to bottom, rgba(255,255,255,0), #ccc 100%);
+    background: linear-gradient(rgba(255,255,255,0), #ccc);
     position: relative;
     top: -.125em;
     cursor: pointer;
     white-space: nowrap;
 }
 
-.header .triangle {
+.file-header .triangle {
     display: inline-block;
     position: relative;
     height: .5em;
@@ -392,43 +392,46 @@ input:-webkit-autofill {
     fill: #333;
 }
 
-.header .down .triangle {
+.file-header .down .triangle {
     transform: rotate(90deg);
     top: .375em;
 }
 
-.header .up .triangle {
+.file-header .up .triangle {
     transform: rotate(270deg);
     top: .125em;
 }
 
-.header .active { color: #000; border-bottom: 2px solid #f1a }
-.header .active .triangle { fill: #000 }
+.file-header .active { color: #000; border-bottom: 2px solid #f1a }
+.file-header .active .triangle { fill: #000 }
 
-#header-name {
+.header-name {
     flex: 1 1;
     display: inline-block;
     padding-left: .3em;
 }
 
-#header-mtime {
-    flex: 0 0 6em;
+.header-mtime {
+    flex: 0 0 7em;
     display: inline-block;
     text-align: right;
 }
-@media all and (max-width: 639px) { #header-mtime { display: none } }
+@media all and (max-width: 639px) { .header-mtime { display: none } }
 
-#header-size {
-    flex: 0 0 3.25em;
+.header-size {
+    flex: 0 0 3.75em;
     display: inline-block;
     text-align: right;
 }
-@media all and (max-width: 320px) { #header-size { display: none } }
+@media all and (max-width: 320px) { .header-size { display: none } }
 
-#header-spacer {
-    flex: 0 0 4.125em;
+.header-spacer {
+    flex: 0 0 4em;
     display: inline-block;
 }
+
+@media all and (max-width: 639px) { .header-spacer { flex: 0 0 3.85em } }
+@media all and (max-width: 320px) { .header-spacer { flex: 0 0 3.4em } }
 
 .data-row {
     display: flex;
@@ -503,7 +506,7 @@ input:-webkit-autofill {
 @media all and (max-width: 320px) { .size { display: none } }
 
 .size-unit {
-    margin: 0 .25em;
+    margin: 0 .125em;
     text-align: left;
     flex: 0 0 1em;
     display: inline-block;
