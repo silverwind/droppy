@@ -106,7 +106,7 @@ input:-webkit-autofill {
     overflow-y: auto;
     padding-top: .25em;
     position: fixed;
-    transition: left .15s ease-in, max-height .5s ease;
+    transition: left .15s ease-in, max-height .2s ease;
     width: calc(100% - 10px);
     z-index: -1;
 }
@@ -402,8 +402,7 @@ input:-webkit-autofill {
     top: .125em;
 }
 
-.file-header .active { color: #000; border-bottom: 2px solid #f1a }
-.file-header .active .triangle { fill: #000 }
+.file-header .active { border-bottom: 2px solid #f1a }
 
 .header-name {
     flex: 1 1;
@@ -722,7 +721,7 @@ input:-webkit-autofill {
     bottom: 0;
     color: #aaa;
     position: fixed;
-    transition: bottom .5s ease;
+    transition: bottom .2s ease;
     width: 100%;
 }
 

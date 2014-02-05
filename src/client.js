@@ -1339,19 +1339,9 @@
             preparePlayback($(this));
         });
 
-        var sorting = {col: "name", dir: "down"};
         $(".header-name, .header-mtime, .header-size").register("click", function () {
-            var self = $(this);
-            var classes = self.attr("class").split(" ");
-            for (var i = 0, len = classes.length; i < len; i++) {
-                if (classes[i].indexOf("header") >= 0) {
-                    sorting.col = classes[i].substring("7");
-                    break;
-                }
-            }
-            sorting.dir = self.hasClass("down") ? "up" : "down";
-            self.attr("class", "header-" + sorting.col + " " + sorting.dir + " active");
-            self.siblings().removeClass("active up down");
+            sortByHeader($(this));
+
         });
         // Add missing titles to the SVGs
         $(".data-row .shortlink").attr("title", "Create Shortink");
@@ -1360,6 +1350,19 @@
 
         droppy.ready = true;
         hideSpinner();
+    }
+
+    function sortByHeader(header) {
+        var classes = header.attr("class").split(" ");
+        for (var i = 0, len = classes.length; i < len; i++) {
+            if (classes[i].indexOf("header") >= 0) {
+                droppy.sorting.col = classes[i].substring("7");
+                break;
+            }
+        }
+        droppy.sorting.dir = header.hasClass("down") ? "up" : "down";
+        header.attr("class", "header-" + droppy.sorting.col + " " + droppy.sorting.dir + " active");
+        header.siblings().removeClass("active up down");
     }
 
     function preparePlayback(playButton) {
@@ -1414,11 +1417,11 @@
     }
 
     function initVariables() {
-        droppy.debug = null;  // live css reload and debug logging - this variable is set by the server
         droppy.activeFiles = [];
         droppy.audioUpdater = null;
         droppy.currentData = null;
         droppy.currentFolder = null;
+        droppy.debug = null;
         droppy.hasLoggedOut = null;
         droppy.isAnimating = null;
         droppy.isPlaying = null;
@@ -1429,8 +1432,9 @@
         droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
-        droppy.svg = {},
-        droppy.zeroFiles;
+        droppy.sorting = {col: "name", dir: "down"};
+        droppy.svg = {};
+        droppy.zeroFiles = null;
     }
 
     // Convert raw byte numbers to SI values
