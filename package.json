@@ -13,7 +13,7 @@
     "async": "~0.2.10",
     "autoprefixer": "~1.0.20140203",
     "busboy": "0.0.15",
-    "clean-css": "~2.0.7",
+    "clean-css": "~2.0.8",
     "graceful-fs": "~2.0.1",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",
