@@ -212,6 +212,7 @@
                             entries.each(function () {
                                 liveName = $(this).data("id").substring(msg.folder.length);
                                 liveName = (liveName[0] === "/") ? liveName.substring(1) : liveName;
+                                $(this).find(".size").attr("data-size", msg.data[liveName] || 0);
                                 if (msg.data[liveName]) {
                                     var temp = convertToSI(msg.data[liveName]);
                                     $(this).find(".size").text(temp.size > 0 ? temp.size : "");
@@ -1207,7 +1208,7 @@
                             '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
                             '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size">' + size + '</span>' +
+                            '<span class="size" data-size="' + (fileList[file].size || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink">' + droppy.svg.link + '</span>' +
                             '<span class="edit">' + droppy.svg.pencil + '</span>' +
@@ -1232,23 +1233,7 @@
             }
         }
 
-        $(list).children("li").sort(function (a, b) {
-            var type = $(b).data("type").toUpperCase().localeCompare($(a).data("type").toUpperCase());
-            var text = $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
-            if (type < 0)
-                return -1;
-            else if (type > 0)
-                return 1;
-            else {
-                if (text < 0)
-                    return -1;
-                else if (text > 0)
-                    return 1;
-                else
-                    return 0;
-            }
-        }).appendTo(list);
-
+        $(list).children("li").sort(sortFunc).appendTo(list);
         loadContent($(list).children("li").length > 0 ? list : false);
     }
 
@@ -1363,6 +1348,31 @@
         droppy.sorting.dir = header.hasClass("down") ? "up" : "down";
         header.attr("class", "header-" + droppy.sorting.col + " " + droppy.sorting.dir + " active");
         header.siblings().removeClass("active up down");
+        $("#content ul").children("li").sort(sortFunc).appendTo($("#content ul"));
+    }
+
+    function sortFunc(a, b) {
+        function compare(a, b) {
+            if (typeof a === "number" && typeof b === "number") {
+                return b - a;
+            } else {
+                return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
+            }
+        }
+        if (droppy.sorting.dir !== "down") {
+            var temp = a;
+            a = b;
+            b = temp;
+        }
+        if (droppy.sorting.col === "name") {
+            var type = compare($(b).data("type"), $(a).data("type")),
+                text = compare($(a).find(".filelink, .folderlink").text(), $(b).find(".filelink, .folderlink").text().toUpperCase());
+            return (type !== 0) ? type : text;
+        } else if (droppy.sorting.col === "mtime") {
+            return compare($(a).find(".mtime").data("timestamp"), $(b).find(".mtime").data("timestamp"));
+        } else if (droppy.sorting.col === "size") {
+            return compare($(a).find(".size").data("size"), $(b).find(".size").data("size"));
+        }
     }
 
     function preparePlayback(playButton) {
