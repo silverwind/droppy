@@ -587,13 +587,14 @@ input:-webkit-autofill {
 }
 
 .data-row.playable:hover .icon-play svg {
-    display: block;
+    display: inline-block;
 }
 
 .icon-play svg {
     display: none;
     cursor: pointer;
     height: 100%;
+    width: 100%;
     transition: transform .2s ease;
 }
 
