@@ -974,10 +974,41 @@
         }
 
         var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
-            infiles = 0,
-            outfiles = 0,
             done = false,
             files = [];
+
+        busboy.on("file", function (fieldname, file, filename) {
+            var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
+                dst = path.join(config.filesDir, clients[cookie].directory, dstRelative),
+                tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
+
+            files[dstRelative] = {
+                src: tmp,
+                dst: decodeURIComponent(dst)
+            };
+            file.pipe(fs.createWriteStream(tmp, { mode: mode.file}));
+        });
+
+        busboy.on("end", function () {
+            done = true;
+            var names = Object.keys(files);
+            while (names.length > 0) {
+                (function (name) {
+                    wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
+                    fs.rename(files[name].src, files[name].dst, function () {
+                        log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
+                    });
+                })(names.pop());
+            }
+            closeConnection();
+        });
+
+        req.on("close", function () {
+            !done && log.log(socket, " Upload cancelled");
+            closeConnection();
+        });
+
+        req.pipe(busboy);
 
         function closeConnection() {
             res.statusCode = 200;
@@ -986,53 +1017,7 @@
             res.end();
             send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
         }
-
-        busboy.on("file", function (fieldname, file, filename) {
-            ++infiles;
-            onFile(fieldname, file, filename, function () {
-                ++outfiles;
-                if (done && infiles === outfiles) {
-                    var names = Object.keys(files);
-                    while (names.length > 0) {
-                        (function (name) {
-                            wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
-                            fs.rename(files[name].src, files[name].dst, function () {
-                                log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
-                            });
-                        })(names.pop());
-                    }
-                    closeConnection();
-                }
-            });
-        });
-        busboy.on("end", function () {
-            done = true;
-        });
-        req.on("close", function () {
-            !done && log.log(socket, " Upload cancelled");
-            closeConnection();
-        });
-        req.pipe(busboy);
-
-        function onFile(fieldname, file, filename, next) {
-            var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-                dst = path.join(config.filesDir, clients[cookie].directory, dstRelative),
-                tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex")),
-                fstream = fs.createWriteStream(tmp, { mode: mode.file});
-
-            files[dstRelative] = {
-                src: tmp,
-                dst: decodeURIComponent(dst)
-            };
-
-            fstream.on("close", function () {
-                next();
-            });
-
-            file.pipe(fstream);
-        }
     }
-
     //-----------------------------------------------------------------------------
     // Read a directory's content
     function readDirectory(root, callback) {
@@ -1102,6 +1087,7 @@
         });
 
     }
+
     //-----------------------------------------------------------------------------
     // Get a directory's size (the sum of all files inside it)
     // TODO: caching of results
@@ -1122,6 +1108,7 @@
             });
         });
     }
+
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory and stream it to a client
     // TODO: push zipping of a directory to all clients
@@ -1162,8 +1149,6 @@
                         }
                     })(paths.pop());
                 });
-
-
             } else {
                 res.statusCode = 404;
                 res.end();
