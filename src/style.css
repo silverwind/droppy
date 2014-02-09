@@ -50,16 +50,9 @@ html {
     -webkit-backface-visibility: hidden;
 }
 
-::selection {
-    background: #18f;
-    color: #fff;
-}
-::-moz-selection {
-    background: #18f;
-    color: #fff;
-}
-
-::-webkit-scrollbar             { width: 4px; }
+::selection { background: #f1a; color: #fff }
+::-moz-selection { background: #f1a; color: #fff }
+::-webkit-scrollbar             { width: 4px }
 ::-webkit-scrollbar-track       { background: transparent}
 ::-webkit-scrollbar-thumb       { background: #666 }
 ::-webkit-scrollbar-thumb:hover { background: #333 }
@@ -87,7 +80,6 @@ input:-webkit-autofill {
 
 #navigation {
     background-image: linear-gradient(#222, #111);
-    clear: both;
     position: fixed;
     z-index: 1;
     text-align: center;
@@ -189,112 +181,6 @@ input:-webkit-autofill {
 #upload-folder.disabled svg { fill: #666 }
 #upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
 
-/* ============================ Upload Progress ============================ */
-
-#upload-info {
-    background: #222;
-    border-radius: 3px 3px 0 0;
-    bottom: -125px;
-    color: #999;
-    height: 120px;
-    left: 50%;
-    margin-left: -150px;
-    opacity: 0;
-    position: absolute;
-    transition: all .3s ease;
-    width: 300px;
-    z-index: 2;
-}
-
-#upload-info.in {opacity: 1; bottom: 0 }
-@media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 33px } }
-@media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 28px } }
-@media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 23px } }
-
-#upload-title {
-    color: #eee;
-    line-height: 1.75em;
-    margin-left: 15px;
-    position: absolute;
-    width: 100%;
-}
-
-#upload-percentage {
-    color: #eee;
-    font-size: .8em;
-    line-height: 26px;
-    position: absolute;
-    text-align: center;
-    top: 45px;
-    width: 100%;
-    z-index: 1;
-}
-
-#upload-bar {
-    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
-    height: 26px;
-    margin-left: 15px;
-    position: absolute;
-    top: 45px;
-    width: 270px;
-}
-
-#upload-bar-inner {
-    background: linear-gradient(#24a,#46b);
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    transition: all .2s ease;
-    width: 0;
-}
-
-#upload-time {
-    color: #eee;
-    bottom: 10px;
-    font-size: .66em;
-    left: 10px;
-    line-height: 32px;
-    position: absolute;
-    text-align: center;
-    white-space: nowrap;
-    font-weight: 400;
-}
-
-#upload-time svg.time {
-    fill: #eee;
-    height: 1.6em;
-    display: inline-block;
-    vertical-align: middle;
-    transition: fill .2s ease;
-}
-
-#upload-cancel {
-    bottom: 10px;
-    font-size: .66em;
-    right: 15px;
-    line-height: 32px;
-    position: absolute;
-    text-align: center;
-    transition: color .2s ease;
-    white-space: nowrap;
-    font-weight: 400;
-    cursor: pointer;
-    color: #eee;
-}
-
-#upload-cancel svg.remove {
-    fill: #eee;
-    height: 1.3em;
-    display: inline-block;
-    vertical-align: middle;
-    transition: fill .2s ease;
-}
-
-#upload-cancel:hover { color: #f44 }
-#upload-cancel:hover svg.remove { fill: #f44 }
-#file { display: none }
-
 /* ================================== Path ================================= */
 
 #path {
@@ -314,11 +200,12 @@ input:-webkit-autofill {
     cursor: pointer;
     display: inline-block;
     position: relative;
+    height: 100%;
 }
 
-@media all and (min-width: 1024px) { #path li { line-height: 35px; height: 35px; padding: 0 .4em 0 1.6em } }
-@media all and (max-width: 1023px) { #path li { line-height: 30px; height: 30px; padding: 0 .2em 0 1.4em } }
-@media all and (max-width:  639px) { #path li { line-height: 25px; height: 25px; padding: 0 .1em 0 1.2em } }
+@media all and (min-width: 1024px) { #path li { line-height: 35px; padding: 0 .4em 0 1.6em } }
+@media all and (max-width: 1023px) { #path li { line-height: 30px; padding: 0 .2em 0 1.4em } }
+@media all and (max-width:  639px) { #path li { line-height: 25px; padding: 0 .1em 0 1.2em } }
 
 .triangle { position: absolute }
 
@@ -361,9 +248,9 @@ input:-webkit-autofill {
 #path li:nth-child(15) { z-index: 2 }
 #path li:nth-child(16) { z-index: 1 }
 
-@media all and (min-width: 1024px) { .triangle { height: 35px; width: 35px;; right: -34.5px } }
-@media all and (max-width: 1023px) { .triangle { height: 30px; width: 30px;; right: -29.5px } }
-@media all and (max-width:  639px) { .triangle { height: 25px; width: 25px;; right: -24.5px } }
+@media all and (min-width: 1024px) { .triangle { height: 35px; width: 35px; right: -34.5px } }
+@media all and (max-width: 1023px) { .triangle { height: 30px; width: 30px; right: -29.5px } }
+@media all and (max-width:  639px) { .triangle { height: 25px; width: 25px; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
 
@@ -447,7 +334,6 @@ input:-webkit-autofill {
 
 .data-row:not(.animating):not(.playing):hover {
     background: #fff;
-    border-radius: 3px;
 }
 
 .data-row.uploading .sprite {
@@ -461,7 +347,7 @@ input:-webkit-autofill {
     animation: jump .8s infinite;
 }
 
-.data-row.uploading .icon-uploading svg { fill: #18f }
+.data-row.uploading .icon-uploading svg { fill: #777 }
 
 @keyframes jump {
    0%,100%  { transform: translateY(-3px) }
@@ -538,6 +424,7 @@ input:-webkit-autofill {
 @media all and (max-width: 320px) { .data-row svg { width: 1.1em } }
 
 .data-row svg:not(.up-arrow):hover { transform: scale(1.3) }
+
 /* ============================= Empty Folder ============================== */
 
 #empty {
@@ -570,6 +457,7 @@ input:-webkit-autofill {
 
 #empty:hover svg { opacity: 1; bottom: 0; }
 #empty:hover .text { opacity: 1; top: 0; }
+
 /* ================================= Icons ================================= */
 
 .sprite {
@@ -714,6 +602,112 @@ input:-webkit-autofill {
 #editbox-submit:hover { color: #fff }
 #editbox-submit:hover .ok { fill: #fff }
 #editbox-submit.invalid:hover { background: #f22 }
+
+/* ============================ Upload Progress ============================ */
+
+#upload-info {
+    background: #222;
+    border-radius: 3px 3px 0 0;
+    bottom: -125px;
+    color: #999;
+    height: 120px;
+    left: 50%;
+    margin-left: -150px;
+    opacity: 0;
+    position: absolute;
+    transition: all .3s ease;
+    width: 300px;
+    z-index: 2;
+}
+
+#upload-info.in {opacity: 1; bottom: 0 }
+@media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 33px } }
+@media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 28px } }
+@media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 23px } }
+
+#upload-title {
+    color: #eee;
+    line-height: 1.75em;
+    margin-left: 15px;
+    position: absolute;
+    width: 100%;
+}
+
+#upload-percentage {
+    color: #eee;
+    font-size: .8em;
+    line-height: 26px;
+    position: absolute;
+    text-align: center;
+    top: 45px;
+    width: 100%;
+    z-index: 1;
+}
+
+#upload-bar {
+    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
+    height: 26px;
+    margin-left: 15px;
+    position: absolute;
+    top: 45px;
+    width: 270px;
+}
+
+#upload-bar-inner {
+    background: linear-gradient(#24a,#46b);
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transition: all .2s ease;
+    width: 0;
+}
+
+#upload-time {
+    color: #eee;
+    bottom: 10px;
+    font-size: .66em;
+    left: 10px;
+    line-height: 32px;
+    position: absolute;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 400;
+}
+
+#upload-time svg.time {
+    fill: #eee;
+    height: 1.6em;
+    display: inline-block;
+    vertical-align: middle;
+    transition: fill .2s ease;
+}
+
+#upload-cancel {
+    bottom: 10px;
+    font-size: .66em;
+    right: 15px;
+    line-height: 32px;
+    position: absolute;
+    text-align: center;
+    transition: color .2s ease;
+    white-space: nowrap;
+    font-weight: 400;
+    cursor: pointer;
+    color: #eee;
+}
+
+#upload-cancel svg.remove {
+    fill: #eee;
+    height: 1.3em;
+    display: inline-block;
+    vertical-align: middle;
+    transition: fill .2s ease;
+}
+
+#upload-cancel:hover { color: #f44 }
+#upload-cancel:hover svg.remove { fill: #f44 }
+#file { display: none }
 
 /* =============================== Audio Panel =============================== */
 

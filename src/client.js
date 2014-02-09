@@ -908,6 +908,7 @@
             prog.css("width", "0");
             title.text("Aborting...");
             uperc.text("");
+            $(".uploading").remove();
         }
 
         function uploadProgress(event) {
@@ -1180,13 +1181,14 @@
 
     // Convert the received data into HTML
     function buildHTML(fileList, root, isUpload) {
-        var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon;
+        var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes;
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
                 svgIcon = "", classes = "";
                 type = fileList[file].type;
-                temp = convertToSI(fileList[file].size);
+                bytes = fileList[file].size;
+                temp = convertToSI(bytes);
                 size = temp.size > 0 ? temp.size : "0";
                 sizeUnit = temp.size > 0 ? temp.unit : "b";
                 mtime = fileList[file].mtime;
@@ -1208,7 +1210,7 @@
                             '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
                             '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (fileList[file].size || 0) + '">' + size + '</span>' +
+                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink">' + droppy.svg.link + '</span>' +
                             '<span class="edit">' + droppy.svg.pencil + '</span>' +
