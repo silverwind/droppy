@@ -354,8 +354,8 @@
     // WebSocket functions
     function setupSocket(server) {
         new Wss({server : server}).on("connection", function (ws) {
-            var remoteIP   = ws._socket.remoteAddress;
-            var remotePort = ws._socket.remotePort;
+            var remoteIP   = ws.upgradeReq.headers["x-real-ip"]   || ws._socket.remoteAddress;
+            var remotePort = ws.upgradeReq.headers["x-real-port"] || ws._socket.remotePort;
             var cookie     = getCookie(ws.upgradeReq.headers.cookie);
 
             if (!cookie) {
