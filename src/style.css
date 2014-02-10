@@ -57,12 +57,12 @@ html {
 ::-webkit-scrollbar-thumb       { background: #666 }
 ::-webkit-scrollbar-thumb:hover { background: #333 }
 
-input::-moz-placeholder                { color: #999 }
-input:-ms-input-placeholder            { color: #999 }
-input::-webkit-input-placeholder       { color: #999 }
-input:hover::-moz-placeholder          { color: #fff }
-input:hover:-ms-input-placeholder      { color: #fff }
-input:hover::-webkit-input-placeholder { color: #fff }
+input::-moz-placeholder                { color: #555; opacity: 1 }
+input:-ms-input-placeholder            { color: #555 }
+input::-webkit-input-placeholder       { color: #555 }
+input:hover::-moz-placeholder          { color: #888; opacity: 1 }
+input:hover:-ms-input-placeholder      { color: #888 }
+input:hover::-webkit-input-placeholder { color: #888 }
 input:-webkit-autofill {
   background-color: #221 !important;
   background-image: none !important;
