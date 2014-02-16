@@ -434,7 +434,7 @@
                     });
                     break;
                 case "CLIPBOARD":
-                    log.log(log.socket(remoteIP, remotePort), msg.data.type + ": " + msg.data.from + " to " + msg.data.to);
+                    log.log(log.socket(remoteIP, remotePort), " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
                     checkWatchedDirs();
