@@ -324,6 +324,7 @@ input:-webkit-autofill {
     padding: 0 .25em;
     align-items: center;
     line-height: 1.4em;
+    position: relative;
 }
 
 @media all and (max-width: 639px) { .data-row { padding: 0 .1em } }
@@ -602,6 +603,29 @@ input:-webkit-autofill {
 #editbox-submit:hover { color: #fff }
 #editbox-submit:hover .ok { fill: #fff }
 #editbox-submit.invalid:hover { background: #f22 }
+
+/* ============================ Entry Menu ============================ */
+
+#entry-menu {
+    position: absolute;
+    z-index: 32;
+    right: 5px;
+    padding-top: 1.4em;
+}
+
+#entry-menu.out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#entry-menu>div {
+    background: #eee;
+}
+
+#entry-menu>div:hover {
+    background: #fff;
+    cursor: pointer;
+}
 
 /* ============================ Upload Progress ============================ */
 
