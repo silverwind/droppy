@@ -370,14 +370,35 @@
         // Open the WebSocket
         openSocket();
 
-        // Stop dragenter and dragover from killing our drop event
-        $(document.documentElement).register("dragenter", function (event) { event.preventDefault(); });
-        $(document.documentElement).register("dragover", function (event) { event.preventDefault(); });
+        var endTimer, isHovering;
+        function endDrag() {
+            $("#drop-preview").attr("class", "out");
+            isHovering = false;
+        }
 
-        // File drop handler
+        // Drop handlers
+        function enter(event) {
+            event.preventDefault(); // Stop dragenter and dragover from killing our drop event
+            clearTimeout(endTimer);
+            if (!isHovering) {
+                $("#drop-preview").attr("class", "in");
+                isHovering = true;
+            }
+        }
+
+        function leave() {
+            clearTimeout(endTimer);
+            endTimer = setTimeout(endDrag, 100);
+        }
+
+        $(document.documentElement).register("dragenter", enter);
+        $(document.documentElement).register("dragover", enter);
+        $(document.documentElement).register("dragleave", leave);
+        $(document.documentElement).register("dragend", leave);
         $(document.documentElement).register("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
+            endDrag();
 
             var items = event.dataTransfer.items,
                 fileItem = null,
