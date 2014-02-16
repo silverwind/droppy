@@ -312,12 +312,12 @@ input:-webkit-autofill {
 @media all and (max-width: 320px) { .header-size { display: none } }
 
 .header-spacer {
-    flex: 0 0 4em;
+    flex: 0 0 2.667em;
     display: inline-block;
 }
 
-@media all and (max-width: 639px) { .header-spacer { flex: 0 0 3.85em } }
-@media all and (max-width: 320px) { .header-spacer { flex: 0 0 3.4em } }
+@media all and (max-width: 639px) { .header-spacer { flex: 0 0 2.567em } }
+@media all and (max-width: 320px) { .header-spacer { flex: 0 0 2.267em } }
 
 .data-row {
     display: flex;
