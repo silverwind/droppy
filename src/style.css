@@ -609,7 +609,6 @@ input:-webkit-autofill {
     position: absolute;
     z-index: 32;
     right: 5px;
-    padding: 5px;
     padding-top: 1.4em;
 }
 
@@ -620,7 +619,6 @@ input:-webkit-autofill {
 
 #entry-menu>div {
     background: #eee;
-    padding: 5px;
 }
 
 #entry-menu>div:hover {
