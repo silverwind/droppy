@@ -324,7 +324,6 @@ input:-webkit-autofill {
     padding: 0 .25em;
     align-items: center;
     line-height: 1.4em;
-    position: relative;
 }
 
 @media all and (max-width: 639px) { .data-row { padding: 0 .1em } }

@@ -515,8 +515,6 @@
             });
         }
 
-        $('')
-
         var info         = $("#editbox-info"),
             editInput    = $("#editbox-input"),
             editbox      = $("#edit-box"),
@@ -1217,7 +1215,7 @@
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="options">' + droppy.svg.cog + '</span>' +
+                            '<span class="menu">' + droppy.svg.cog + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1292,9 +1290,13 @@
             updateLocation(destination, true);
         });
 
-        $(".data-row .options").register("click", function (event) {
+        $(".data-row .menu").register("click", function (event) {
             var entry = $(this).parent();
-            $("#entry-menu").attr("class","in").css({top:entry.offset().top+"px"}).data("target",entry);
+
+            $("#entry-menu").attr("class","in")
+                .css({top:entry.offset().top+"px"})
+                .data("target",entry);
+
             toggleCatcher();
             $("#click-catcher").one("mousemove", function() {
                 $("#entry-menu").attr("class", "out");
