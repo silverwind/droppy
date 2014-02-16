@@ -1214,7 +1214,7 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink">' + droppy.svg.link + '</span>' +
+                            '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
                             '<span class="menu">' + droppy.svg.cog + '</span>' +
                         '</li>'
                     );
@@ -1346,7 +1346,6 @@
 
         });
         // Add missing titles to the SVGs
-        $("#entry-menu .shortlink").attr("title", "Create Shortink");
         $("#entry-menu .edit").attr("title", "Rename");
         $("#entry-menu .delete").attr("title", "Delete");
 
