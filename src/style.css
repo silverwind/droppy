@@ -50,7 +50,7 @@ html {
     -webkit-backface-visibility: hidden;
 }
 
-::selection { background: #f1a; color: #fff }
+::selection      { background: #f1a; color: #fff }
 ::-moz-selection { background: #f1a; color: #fff }
 ::-webkit-scrollbar             { width: 4px }
 ::-webkit-scrollbar-track       { background: transparent}
@@ -1307,6 +1307,27 @@ input[type="checkbox"] { display: none }
 @media all and (max-width: 639px), all and (max-height: 399px) { .submit span { line-height: 32px } }
 
 /* ============================= Misc Elements ============================= */
+
+#drop-preview {
+    position: fixed;
+    background: #000;
+    transition: opacity 0.5s ease;
+    left: 0; right: 0; top: 0; bottom: 0;
+    z-index: 2;
+}
+
+#drop-preview.out { opacity: 0 ; visibility: hidden }
+#drop-preview.in  { opacity: .75 ; visibility: visible }
+
+
+#drop-preview svg {
+    position: absolute;
+    left: 25%;
+    top: 25%;
+    height: 50%;
+    width: 50%;
+    fill: #aaa;
+}
 
 #click-catcher {
     background: #000;
