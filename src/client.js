@@ -1228,7 +1228,7 @@
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="options">' + droppy.svg.cog + '</span>' +
+                            '<span class="menu">' + droppy.svg.cog + '</span>' +
                         '</li>'
                     );
                 }
