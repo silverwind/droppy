@@ -989,7 +989,7 @@
             file.pipe(fs.createWriteStream(tmp, { mode: mode.file}));
         });
 
-        busboy.on("end", function () {
+        busboy.on("finish", function () {
             done = true;
             var names = Object.keys(files);
             while (names.length > 0) {
@@ -1127,7 +1127,7 @@
                 res.setHeader("Transfer-Encoding", "chunked");
                 log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " Creating zip of /", req.url.substring(4));
 
-                archive = archiver(type, {zlib: { level: config.zipLevel }, catchEarly: false});
+                archive = archiver(type, {zlib: { level: config.zipLevel }});
                 archive.on("error", function (error) { log.error(error); });
                 archive.pipe(res);
 
