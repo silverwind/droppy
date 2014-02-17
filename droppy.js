@@ -433,6 +433,42 @@
                         }
                     });
                     break;
+                case "CLIPBOARD":
+                    log.log(log.socket(remoteIP, remotePort), " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
+                    msg.data.from = addFilePath(msg.data.from);
+                    msg.data.to = addFilePath(msg.data.to);
+                    checkWatchedDirs();
+                    fs.stat(msg.data.from, function (error, stats) {
+                        if (stats && !error) {
+                            if (stats.isFile()) {
+                                copyFile(msg.data.from, msg.data.to, function (error) {
+                                    if (error) {
+                                        log.error("Error copying single file from \""+msg.data.from+"\" to \""+msg.data.from+"\"");
+                                        log.error(error);
+                                    } else {
+                                        if(msg.data.type === "cut") {
+                                            fs.unlink(msg.data.from, function (error) {
+                                                if (error) log.error(error);
+                                            });
+                                        }
+                                    }
+                                })
+                            } else if (stats.isDirectory()) {
+                                wrench.copyDirSyncRecursive(msg.data.from, msg.data.to);
+                                if(msg.data.type === "cut") {
+                                    try {
+                                        wrench.rmdirSyncRecursive(msg.data.from);
+                                    } catch (error) {
+                                        // Specifically log this error as it possibly has to do with
+                                        // wrench not using graceful-fs
+                                        log.error("Error applying wrench.rmdirSyncRecursive");
+                                        log.error(error);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    break;
                 case "CREATE_FOLDER":
                     var foldername = path.basename(msg.data);
                     if (/[\\\*\{\}\/\?\|<>"]/.test(foldername) || /^(\.+)$/.test(foldername)) {
@@ -587,6 +623,33 @@
                 setTimeout(queue, 50, ws, data, time + 50);
             }
         })(ws, data, 0);
+    }
+
+    //-----------------------------------------------------------------------------
+    // Copy a file from one location to another quickly
+    // snippet from: http://stackoverflow.com/a/14387791/2096729
+    function copyFile(source, target, cb) {
+        var cbCalled = false;
+
+        var rd = fs.createReadStream(source);
+        rd.on("error", function(err) {
+          done(err);
+        });
+        var wr = fs.createWriteStream(target);
+        wr.on("error", function(err) {
+            done(err);
+        });
+        wr.on("close", function(ex) {
+            done();
+        });
+        rd.pipe(wr);
+
+        function done(err) {
+            if (!cbCalled) {
+                cb(err);
+                cbCalled = true;
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------

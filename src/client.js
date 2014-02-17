@@ -1236,7 +1236,7 @@
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="menu">' + droppy.svg.cog + '</span>' +
+                            '<span class="menu">' + droppy.svg.wrench + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1249,7 +1249,7 @@
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="menu">' + droppy.svg.cog + '</span>' +
+                            '<span class="menu">' + droppy.svg.wrench + '</span>' +
                         '</li>'
                     );
                 }
@@ -1318,6 +1318,12 @@
                 .css({top:entry.offset().top+"px"})
                 .data("target",entry);
 
+            if(droppy.clipboard && entry.attr("data-type") === "folder"){
+                $("#entry-menu .paste").show();
+            } else {
+                $("#entry-menu .paste").hide();
+            }
+
             toggleCatcher();
             $("#click-catcher").one("mousemove", function() {
                 $("#entry-menu").attr("class", "out");
@@ -1330,6 +1336,43 @@
         $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
             showEditBox("rename", $(this).parent("#entry-menu").data("target").find(".filelink, .folderlink").text());
+            $("#click-catcher").trigger("click");
+            event.stopPropagation();
+        });
+
+        // Cut a file/folder
+        $("#entry-menu .cut").register("click", function (event) {
+            var entry = $(this).parent("#entry-menu").data("target");
+            droppy.clipboard = ["cut", entry.data("id"), entry.find(".filelink, .folderlink").text()]
+            $("#click-catcher").trigger("click");
+            event.stopPropagation();
+        });
+
+        // Copy a file/folder
+        $("#entry-menu .copy").register("click", function (event) {
+            var entry = $(this).parent("#entry-menu").data("target");
+            droppy.clipboard = ["copy", entry.data("id"), entry.find(".filelink, .folderlink").text()]
+            $("#click-catcher").trigger("click");
+            event.stopPropagation();
+        });
+
+        // Paste a file/folder into a folder
+        $("#entry-menu .paste").register("click", function (event) {
+            if (droppy.socketWait) return;
+            var entry = $(this).parent("#entry-menu").data("target");
+            if(droppy.clipboard){
+                showSpinner();
+                sendMessage("CLIPBOARD", {
+                    "type": droppy.clipboard[0],
+                    "from": droppy.clipboard[1],
+                    "to": entry.data("id") + '/' + droppy.clipboard[2]
+                });
+            } else {
+                throw "Clipboard was empty!"
+            }
+
+            droppy.clipboard = null;
+            $("#click-catcher").trigger("click");
             event.stopPropagation();
         });
 
