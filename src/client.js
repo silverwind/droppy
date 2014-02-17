@@ -1236,7 +1236,7 @@
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="menu">' + droppy.svg.wrench + '</span>' +
+                            '<span class="menu" title="Actions">' + droppy.svg.ellipsis + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1249,7 +1249,7 @@
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="menu">' + droppy.svg.wrench + '</span>' +
+                            '<span class="menu" title="Actions">' + droppy.svg.ellipsis + '</span>' +
                         '</li>'
                     );
                 }
