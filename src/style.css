@@ -312,12 +312,12 @@ input:-webkit-autofill {
 @media all and (max-width: 320px) { .header-size { display: none } }
 
 .header-spacer {
-    flex: 0 0 4em;
+    flex: 0 0 2.667em;
     display: inline-block;
 }
 
-@media all and (max-width: 639px) { .header-spacer { flex: 0 0 3.85em } }
-@media all and (max-width: 320px) { .header-spacer { flex: 0 0 3.4em } }
+@media all and (max-width: 639px) { .header-spacer { flex: 0 0 2.567em } }
+@media all and (max-width: 320px) { .header-spacer { flex: 0 0 2.267em } }
 
 .data-row {
     display: flex;
@@ -602,6 +602,31 @@ input:-webkit-autofill {
 #editbox-submit:hover { color: #fff }
 #editbox-submit:hover .ok { fill: #fff }
 #editbox-submit.invalid:hover { background: #f22 }
+
+/* ============================ Entry Menu ============================ */
+
+#entry-menu {
+    position: absolute;
+    z-index: 32;
+    right: 5px;
+    padding: 5px;
+    padding-top: 1.4em;
+}
+
+#entry-menu.out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#entry-menu>div {
+    background: #eee;
+    padding: 5px;
+}
+
+#entry-menu>div:hover {
+    background: #fff;
+    cursor: pointer;
+}
 
 /* ============================ Upload Progress ============================ */
 

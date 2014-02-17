@@ -676,6 +676,7 @@
             $("#config-box").attr("class", "out");
             $("#edit-box").attr("class", "out");
             $("#about-box").attr("class", "out");
+            $("#entry-menu").attr("class", "out");
             toggleCatcher();
         });
 
@@ -1000,7 +1001,8 @@
     function toggleCatcher() {
         if ($("#about-box").attr("class")  === "in" ||
             $("#edit-box").attr("class")   === "in" ||
-            $("#config-box").attr("class") === "in"
+            $("#config-box").attr("class")   === "in" ||
+            $("#entry-menu").attr("class") === "in"
         ) {
             $("#click-catcher").attr("class", "in");
         } else
@@ -1233,9 +1235,8 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="edit">' + droppy.svg.pencil + '</span>' +
-                            '<span class="delete">' + droppy.svg.trash + '</span>' +
+                            '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
+                            '<span class="menu">' + droppy.svg.cog + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1248,8 +1249,7 @@
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="edit">' + droppy.svg.pencil + '</span>' +
-                            '<span class="delete">' + droppy.svg.trash + '</span>' +
+                            '<span class="menu">' + droppy.svg.cog + '</span>' +
                         '</li>'
                     );
                 }
@@ -1311,10 +1311,25 @@
             updateLocation(destination, true);
         });
 
+        $(".data-row .menu").register("click", function (event) {
+            var entry = $(this).parent();
+
+            $("#entry-menu").attr("class","in")
+                .css({top:entry.offset().top+"px"})
+                .data("target",entry);
+
+            toggleCatcher();
+            $("#click-catcher").one("mousemove", function() {
+                $("#entry-menu").attr("class", "out");
+                toggleCatcher();
+            });
+            event.stopPropagation();
+        });
+
         // Rename a file/folder
-        $(".data-row .edit").register("click", function (event) {
+        $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
-            showEditBox("rename", $(this).parent().find(".filelink, .folderlink").text());
+            showEditBox("rename", $(this).parent("#entry-menu").data("target").find(".filelink, .folderlink").text());
             event.stopPropagation();
         });
 
@@ -1334,13 +1349,13 @@
         // Request a shortlink
         $(".data-row .shortlink").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage("REQUEST_SHORTLINK", $(this).parent().data("id"));
+            sendMessage("REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
         });
 
         // Delete a file/folder
-        $(".data-row .delete").register("click", function () {
+        $("#entry-menu .delete").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage("DELETE_FILE", $(this).parent().data("id"));
+            sendMessage("DELETE_FILE", $(this).parent("#entry-menu").data("target").data("id"));
         });
 
         $(".icon-play").register("click", function () {
@@ -1352,9 +1367,8 @@
 
         });
         // Add missing titles to the SVGs
-        $(".data-row .shortlink").attr("title", "Create Shortink");
-        $(".data-row .edit").attr("title", "Rename");
-        $(".data-row .delete").attr("title", "Delete");
+        $("#entry-menu .edit").attr("title", "Rename");
+        $("#entry-menu .delete").attr("title", "Delete");
 
         droppy.ready = true;
         hideSpinner();
