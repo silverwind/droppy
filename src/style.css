@@ -647,7 +647,7 @@ input:-webkit-autofill {
     left: 50%;
     margin-left: -150px;
     opacity: 0;
-    position: absolute;
+    position: fixed;
     transition: all .3s ease;
     width: 300px;
     z-index: 2;
