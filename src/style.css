@@ -76,31 +76,46 @@ input:-webkit-autofill {
 }
 
 /* ============================ Main Page Layout =========================== */
+#flex-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 #page.out { opacity: 0 }
 
 #navigation {
     background-image: linear-gradient(#222, #111);
-    position: fixed;
     z-index: 1;
     text-align: center;
-    transition: top .35s ease-in;
-    width: 100%;
+    transition: all .2s ease-in;
+    order: 1;
+    flex: 0 0;
 }
 
-#navigation.in  { top: 0     }
-#navigation.out { top: -75px }
+#navigation.in  { flex-basis: auto }
+#navigation.out { flex-basis: 0 }
+
+#content-container {
+    flex: 1 1;
+    order: 2;
+    z-index: 0;
+    transition: all .2s ease;
+    overflow-y: auto;
+    position: relative;
+}
 
 /* TODO: Increase FPS on this transition */
 #content, #newcontent {
     background: #eee;
-    border-radius: 3px;
-    margin: 5px;
-    overflow-y: auto;
+    position: absolute;
     padding-top: .25em;
-    position: fixed;
-    transition: left .15s ease-in, max-height .2s ease;
-    width: calc(100% - 10px);
-    z-index: -1;
+    transition: left .2s ease-in;
+    width: 100%;
 }
 
 /* bottom padding fix for Firefox/IE */
@@ -113,12 +128,9 @@ input:-webkit-autofill {
 
 #content.out { opacity: 0 }
 
-@media all and (min-width: 1024px) { #content, #newcontent { top: 72px; max-height: calc(100% - 82px); font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { top: 62px; max-height: calc(100% - 72px); font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { top: 52px; max-height: calc(100% - 62px); font-size: .8em } }
-@media all and (min-width: 1024px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 122px); } }
-@media all and (max-width: 1023px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 107px); } }
-@media all and (max-width:  639px) { #content.squeeze, #newcontent.squeeze { max-height: calc(100% - 92px); } }
+@media all and (min-width: 1024px) { #content, #newcontent { font-size:  1em } }
+@media all and (max-width: 1023px) { #content, #newcontent { font-size: .9em } }
+@media all and (max-width:  639px) { #content, #newcontent { font-size: .8em } }
 
 #content.center,  #newcontent.center  { left: 0     }
 #content.back,    #newcontent.back    { left: -100% }
@@ -317,7 +329,6 @@ input:-webkit-autofill {
 }
 
 @media all and (max-width: 639px) { .header-spacer { flex: 0 0 2.567em } }
-@media all and (max-width: 320px) { .header-spacer { flex: 0 0 2.267em } }
 
 .data-row {
     display: flex;
@@ -639,31 +650,25 @@ input:-webkit-autofill {
 /* ============================ Upload Progress ============================ */
 
 #upload-info {
-    background: #222;
+    background: linear-gradient(#111,#222);
     border-radius: 3px 3px 0 0;
-    bottom: -125px;
     color: #999;
-    height: 120px;
-    left: 50%;
-    margin-left: -150px;
-    opacity: 0;
-    position: fixed;
-    transition: all .3s ease;
-    width: 300px;
+    flex: 0 0 120px;
+    order: 4;
+    position: relative;
+    overflow: hidden;
+    transition: all .2s ease;
+    width: 100%;
     z-index: 2;
 }
-
-#upload-info.in {opacity: 1; bottom: 0 }
-@media all and (min-width: 1024px) { #upload-info.in-space {opacity: 1; bottom: 33px } }
-@media all and (max-width: 1023px) { #upload-info.in-space {opacity: 1; bottom: 28px } }
-@media all and (max-width:  639px) { #upload-info.in-space {opacity: 1; bottom: 23px } }
+#upload-info.in  { flex-basis: 120px }
+#upload-info.out { flex-basis: 0 }
 
 #upload-title {
     color: #eee;
-    line-height: 1.75em;
-    margin-left: 15px;
-    position: absolute;
+    line-height: 2em;
     width: 100%;
+    text-align: center;
 }
 
 #upload-percentage {
@@ -680,10 +685,10 @@ input:-webkit-autofill {
 #upload-bar {
     box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
     height: 26px;
-    margin-left: 15px;
+    margin-left: 10%;
     position: absolute;
     top: 45px;
-    width: 270px;
+    width: 80%;
 }
 
 #upload-bar-inner {
@@ -698,10 +703,10 @@ input:-webkit-autofill {
 
 #upload-time {
     color: #eee;
-    bottom: 10px;
+    bottom: 0;
     font-size: .66em;
-    left: 10px;
-    line-height: 32px;
+    left: 10%;
+    line-height: 3.5em;
     position: absolute;
     text-align: center;
     white-space: nowrap;
@@ -717,10 +722,10 @@ input:-webkit-autofill {
 }
 
 #upload-cancel {
-    bottom: 10px;
+    bottom: 0;
     font-size: .66em;
-    right: 15px;
-    line-height: 32px;
+    right: 10%;
+    line-height: 3.5em;
     position: absolute;
     text-align: center;
     transition: color .2s ease;
@@ -745,24 +750,30 @@ input:-webkit-autofill {
 /* =============================== Audio Panel =============================== */
 
 #audio-controls {
-    background: #222;
-    bottom: 0;
+    background: linear-gradient(#111,#222);
     color: #aaa;
-    position: fixed;
-    transition: bottom .2s ease;
+    flex: 0 0;
+    order: 5;
+    overflow: hidden;
+    position: relative;
+    transition: all .2s ease;
     width: 100%;
 }
 
-@media all and (min-width: 1024px) { #audio-controls { height: 35px; line-height: 33px; font-size: .9em} #audio-controls.out { bottom: -40px;} }
-@media all and (max-width: 1023px) { #audio-controls { height: 30px; line-height: 28px; font-size: .8em} #audio-controls.out { bottom: -35px;} }
-@media all and (max-width:  639px) { #audio-controls { height: 25px; line-height: 23px; font-size: .7em} #audio-controls.out { bottom: -30px;} }
+#audio-controls.in  { flex-basis: 2em }
+#audio-controls.out { flex-basis: 0 }
+
+@media all and (min-width: 1024px) { #audio-controls { font-size: .9em} }
+@media all and (max-width: 1023px) { #audio-controls { font-size: .8em} }
+@media all and (max-width:  639px) { #audio-controls { font-size: .7em} }
 
 #volume-icon svg {
     cursor: pointer;
     display: inline-block;
     fill: #ccc;
-    height: 80%;
-    margin-left: 2px;
+    height: 2em;
+    width: 1.5em;
+    margin: 0 3px;
     vertical-align: middle;
     z-index: 3;
 }
@@ -773,32 +784,33 @@ input:-webkit-autofill {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
-    background: #555;
+    background: linear-gradient(transparent 45%,#aaa 46%, #aaa 54%,transparent 55%);
     opacity: 0;
-    padding: 0 16px;
     position: absolute;
     transition: all .2s ease-in;
     visibility: hidden;
+    height: 100%;
     z-index: 2;
 }
 
-@media all and (min-width: 1024px) { #volume-slider { width: 175px; padding: 0 14px; height: 35px; box-shadow: inset 0 0 0 15px #222 } }
-@media all and (max-width: 1023px) { #volume-slider { width: 150px; padding: 0 12px; height: 30px; box-shadow: inset 0 0 0 13px #222 } }
-@media all and (max-width:  639px) { #volume-slider { width: 90px;  padding: 0 10px; height: 25px; box-shadow: inset 0 0 0 11px #222 } }
+@media all and (min-width: 1024px) { #volume-slider { width: 175px } }
+@media all and (max-width: 1023px) { #volume-slider { width: 150px } }
+@media all and (max-width:  639px) { #volume-slider { width: 90px  } }
 
 #volume-level {
     position: absolute;
-    background: #222;
+    background: linear-gradient(#111,#222);
     z-index: 2;
     color: #fff;
     opacity: 0;
+    line-height: 2em;
     visibility: hidden;
     transition: all .2s ease-in;
 }
 
-@media all and (min-width: 1024px) { #volume-level { line-height: 35px; left: 216px } }
-@media all and (max-width: 1023px) { #volume-level { line-height: 30px; left: 190px } }
-@media all and (max-width:  639px) { #volume-level { line-height: 25px; left: 128px; width: 200em} }
+@media all and (min-width: 1024px) { #volume-level { left: 216px } }
+@media all and (max-width: 1023px) { #volume-level { left: 190px } }
+@media all and (max-width:  639px) { #volume-level { left: 128px } }
 
 #volume-slider.in, #volume-level.in {
     opacity: 1;
@@ -806,11 +818,10 @@ input:-webkit-autofill {
 }
 
 #volume-slider::-moz-range-thumb {
-    background: #ccc;
-    border-radius: 1em;
+    background: linear-gradient(#aaa,#fff);
+    border-radius: 4px;
     border: none;
-    height: 40%;
-    width: 1.5em;
+    width: 1em;
 }
 
 #volume-slider::-moz-range-track {
@@ -826,29 +837,22 @@ input:-webkit-autofill {
     width: 2em;
 }
 
-@media all and (min-width: 1024px) { #volume-level { height: 35px } }
-@media all and (max-width: 1023px) { #volume-level { height: 30px } }
-@media all and (max-width:  639px) { #volume-level { height: 25px } }
-
 #audio-title {
     overflow: hidden;
     position: absolute;
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    bottom: 0;
     left: 10em;
     right: 10em;
     font-weight: 400;
+    line-height: 2em;
     animation: flash 1s ease-out infinite;
     z-index: 1;
 }
 
-@media all and (min-width: 1024px) { #audio-title { line-height: 35px } }
-@media all and (max-width: 1023px) { #audio-title { line-height: 30px } }
 @media all and (max-width:  639px) {
     #audio-title {
-        line-height: 25px;
         left: 2em;
         right: 6em;
         text-align: left;
@@ -856,19 +860,20 @@ input:-webkit-autofill {
 }
 
 @keyframes flash {
-  0%   { color: #aaa }
+  0%   { color: #ccc }
   50%  { color: #fff }
-  100% { color: #aaa }
+  100% { color: #ccc }
 }
 
 #seekbar {
     position: absolute;
     width: 100%;
-    height: 6px;
-    top: -4px;
+    height: 2px;
+    bottom: 0;
     transition: all .2s ease;
     z-index: 4;
 }
+#seekbar:hover { height: 6px;}
 
 #seekbar-played {
     position: absolute;
@@ -890,14 +895,12 @@ input:-webkit-autofill {
     position: absolute;
     right: .25em;
     z-index: 3;
-    bottom: 0;
+    top: 0;
+    height: 100%;
+    line-height: 2em
 }
 
-@media all and (min-width: 1024px) { #time { line-height: 35px } }
-@media all and (max-width: 1023px) { #time { line-height: 30px } }
-@media all and (max-width:  639px) { #time { line-height: 25px } }
-
-#time-cur, #time-max { color: #fff }
+#time-cur, #time-max { color: #eee }
 
 /* =============================== About box =============================== */
 
@@ -1340,21 +1343,24 @@ input[type="checkbox"] { display: none }
 }
 
 #paste {
-    position: fixed;
-    background: #333;
-    padding: .25em;
+    flex: 0 0 auto;
+    order: 3;
+    background-image: linear-gradient(#111,#222);
+    line-height: 1.5em;
+    overflow: hidden;
     z-index: 32;
     width: 100%;
     text-align: center;
     bottom: 0;
     color: #eee;
     cursor: pointer;
-    font-weight: 400;
     opacity: 1;
     transition: all .2s ease;
 }
-#paste:hover {color: #ae5}
-#paste.out { visibility: hidden; opacity: 0}
+
+#paste:hover {color: #ae5 }
+#paste.in  { flex-basis: 1.5em }
+#paste.out { flex-basis: 0 }
 
 #paste svg {
     height: 1em;

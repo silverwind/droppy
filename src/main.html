@@ -1,35 +1,66 @@
-<nav id="navigation" class="out">
-	<ul id="buttons">
-		<li id="upload-file" class="button" title="Upload files into the current directory">
-			<svg class="upload-file"></svg>
-			<span class="button-text">Add files</span>
-		</li>
-		<li id="upload-folder" class="button" title="Upload a folder into the current directory">
-			<svg class="upload-folder"></svg>
-			<span class="button-text">Add folder</span>
-		</li>
-		<li id="create-folder" class="button" title="Create a new folder">
-			<svg class="create-folder"></svg>
-			<span class="button-text">New Folder</span>
-		</li>
-		<li id="config" class="button" title="Manage droppy's users">
-			<svg class="cog"></svg>
-			<span class="button-text">Manage</span>
-		</li>
-		<li id="about" class="button" title="About droppy">
-			<svg class="droplet"></svg>
-			<span class="button-text">About</span>
-		</li>
-		<li id="logout" class="button" title="Sign out of droppy">
-			<svg class="signout"></svg>
-			<span class="button-text">Sign out</span>
-		</li>
-	</ul>
-	<ul id="path">
-		<div id="spinner" class="inline-spin"></div>
-	</ul>
-</nav>
-<section id="content" class="out"></section>
+<div id="flex-container">
+	<section id="navigation" class="out">
+		<ul id="buttons">
+			<li id="upload-file" class="button" title="Upload files into the current directory">
+				<svg class="upload-file"></svg>
+				<span class="button-text">Add files</span>
+			</li>
+			<li id="upload-folder" class="button" title="Upload a folder into the current directory">
+				<svg class="upload-folder"></svg>
+				<span class="button-text">Add folder</span>
+			</li>
+			<li id="create-folder" class="button" title="Create a new folder">
+				<svg class="create-folder"></svg>
+				<span class="button-text">New Folder</span>
+			</li>
+			<li id="config" class="button" title="Manage droppy's users">
+				<svg class="cog"></svg>
+				<span class="button-text">Manage</span>
+			</li>
+			<li id="about" class="button" title="About droppy">
+				<svg class="droplet"></svg>
+				<span class="button-text">About</span>
+			</li>
+			<li id="logout" class="button" title="Sign out of droppy">
+				<svg class="signout"></svg>
+				<span class="button-text">Sign out</span>
+			</li>
+		</ul>
+		<ul id="path">
+			<div id="spinner" class="inline-spin"></div>
+		</ul>
+	</section>
+	<section id="content-container">
+		<div id="content" class="out"></div>
+	</section>
+	<section id="paste" class="out">
+		<svg class="paste"></svg>
+		<span>Paste Here</span>
+	</section>
+	<section id="upload-info" class="out">
+		<div id="upload-title"></div>
+		<div id="upload-percentage"></div>
+		<div id="upload-bar">
+			<div id="upload-bar-inner"></div>
+		</div>
+		<div id="upload-time">
+			<svg class="time"></svg>
+			<span id="upload-time-left">sometimes</span>
+		</div>
+		<div id="upload-cancel">
+			<svg class="remove"></svg>
+			<span>Cancel Upload<span>
+		</div>
+	</section>
+	<section id="audio-controls" class="out">
+		<span id="volume-icon" title="Scroll or click to modify the volume"><svg class="volume-medium"></svg></span>
+		<input id="volume-slider" class="out" type="range" min="0" max="100" step="1"></input>
+		<span id="volume-level"></span>
+		<span id="audio-title"></span>
+		<div id="seekbar"><div id="seekbar-played"></div><div id="seekbar-loaded"></div></div>
+		<div id="time"><span id="time-cur"></span><span> / </span><span id="time-max"></span></div>
+	</section>
+</div>
 <input type="file" name="file" id="file" multiple>
 <div id="click-catcher" class="out"></div>
 <div id="entry-menu" class="out">
@@ -38,7 +69,6 @@
 	<div class="cut"><svg class="scissors"></svg>Cut</div>
 	<div class="copy"><svg class="copy"></svg>Copy</div>
 </div>
-<div id="paste" class="out"><svg class="paste"></svg>Paste Here</div>
 <div id="drop-preview" class="out">
 	<svg class="up-arrow"></svg>
 </div>
@@ -65,28 +95,5 @@
 	<div id="user-add"><svg class="plus"></svg><span>Add User<span></div>
 	<button id="save-users" class="submit" tabindex="4"><svg class="ok"></svg><span>Save Users<span></button>
 </div>
-<div id="upload-info" class="out">
-	<div id="upload-title"></div>
-	<div id="upload-percentage"></div>
-	<div id="upload-bar">
-		<div id="upload-bar-inner"></div>
-	</div>
-	<div id="upload-time">
-		<svg class="time"></svg>
-		<span id="upload-time-left">sometimes</span>
-	</div>
-	<div id="upload-cancel">
-		<svg class="remove"></svg>
-		<span>Cancel Upload<span>
-	</div>
-</div>
 <audio id="audio-player" preload="none"></audio>
-<div id="audio-controls" class="out">
-	<span id="volume-icon" title="Scroll or click to modify the volume"><svg class="volume-medium"></svg></span>
-	<input id="volume-slider" class="out" type="range" min="0" max="100" step="1"></input>
-	<span id="volume-level"></span>
-	<span id="audio-title"></span>
-	<div id="seekbar"><div id="seekbar-played"></div><div id="seekbar-loaded"></div></div>
-	<div id="time"><span id="time-cur"></span><span> / </span><span id="time-max"></span></div>
-</div>
 <div id="tooltip"></div>

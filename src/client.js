@@ -233,7 +233,7 @@
                 } else {
                     droppy.isUploading = false;
                     updateTitle(droppy.currentFolder, true);
-                    $("#upload-info").removeClass("in").removeClass("in-space");
+                    $("#upload-info").attr("class", "out");
                     hideSpinner();
                 }
                 break;
@@ -787,8 +787,7 @@
             droppy.isPlaying = true;
             updateTitle(droppy.currentFolder, true);
             updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
-            $("#content, #newcontent").addClass("squeeze");
-            controls.removeClass("out");
+            controls.attr("class", "in");
             fullyLoaded = false;
             droppy.audioUpdater = setInterval(updater, 100);
         }
@@ -807,8 +806,7 @@
             updateTitle(droppy.currentFolder, true);
             setTimeout(function () {
                 if (!droppy.isPlaying) {
-                    controls.addClass("out");
-                    $("#content, #newcontent").removeClass("squeeze");
+                    controls.attr("class", "out");
                 }
             }, 500);
         }
@@ -901,7 +899,7 @@
             uperc.text("0%");
             prog.css("width", "0%");
             timeleft.text("");
-            $("#upload-info").addClass($("#audio-controls").hasClass("out") ? "in" : "in-space");
+            $("#upload-info").attr("class", "in");
 
             // And send the files
             droppy.isUploading = true;
@@ -1236,7 +1234,7 @@
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="menu" title="Actions">' + droppy.svg.ellipsis + '</span>' +
+                            '<span class="menu" title="Actions">' + droppy.svg.menu + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1249,7 +1247,7 @@
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="menu" title="Actions">' + droppy.svg.ellipsis + '</span>' +
+                            '<span class="menu" title="Actions">' + droppy.svg.menu + '</span>' +
                         '</li>'
                     );
                 }
@@ -1276,7 +1274,7 @@
                 $("#content").attr("class", "center");
                 $("#content").html(html || emptyPage);
             } else {
-                $("#page").append($("<section id='newcontent' class='" + nav + "'></section>"));
+                $("#content-container").append($("<div id='newcontent' class='" + nav + "'></div>"));
                 $("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
                 $(".data-row").addClass("animating");
@@ -1290,6 +1288,7 @@
                     $(".data-row").removeClass("animating");
                 }, 200);
             }
+
             bindEvents();
             nav = "same";
         });
@@ -1312,9 +1311,11 @@
         });
 
         $(".data-row .menu").register("click", function (event) {
-            var entry = $(this).parent();
+            var entry = $(this).parent().parent();
+            console.log(entry);
 
-            $("#entry-menu").attr("class", "in")
+            $("#entry-menu")
+                .attr("class", "in")
                 .css({top: entry.offset().top + "px"})
                 .data("target", entry);
 
