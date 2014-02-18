@@ -1085,13 +1085,14 @@
     // Read a directory's content
     function readDirectory(root, callback) {
         fs.readdir(addFilePath(root), function (error, files) {
-            var dirContents = {}, done = 0, last = files.length;
+            var dirContents = {}, done = 0, last;
             if (error) log.error(error);
 
             if (!files || files.length === 0) {
                 dirs[root] = dirContents;
                 callback();
             }
+            last = files.length;
 
             for (var i = 0 ; i < last; i++) {
                 (function (entry) {
