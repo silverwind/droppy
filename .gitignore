@@ -1,0 +1,8 @@
+node_modules/
+files/
+temp/
+media/
+res/
+db.json
+config.json
+droppy*.tgz
