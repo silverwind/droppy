@@ -11,10 +11,10 @@
   "dependencies": {
     "archiver": "~0.6.1",
     "async": "~0.2.10",
-    "autoprefixer": "~1.0.20140213",
+    "autoprefixer": "~1.1.20140218",
     "busboy": "0.1.0",
     "clean-css": "~2.1.0",
-    "graceful-fs": "~2.0.1",
+    "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",
     "spdy": "~1.19.2",
