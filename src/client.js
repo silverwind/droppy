@@ -995,6 +995,39 @@
         });
     }
 
+    function rename(entry) {
+        $("#click-catcher").trigger("mousemove");
+        var link = entry.find(".folderlink, .filelink");
+        link.hide();
+        link.after($('<input class="inline-namer" value="'+link.text()+'" placeholder="'+link.text()+'"/>'));
+
+        link.next().register("keyup", function (event) {
+            var canSubmit, exists, valid, input = $(this).val();
+            valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
+            for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
+                if (droppy.activeFiles[i] === input.toLowerCase()) { exists = true; break; }
+            canSubmit = valid && !exists;
+            //TODO: Indicate if the name is valid or already exists (could do this after you click enter)
+
+            // Return key
+            if (event.keyCode === 13) {
+                if (canSubmit) {
+                    console.log("Change folder name from:"+link.text()+" -> "+input);
+                    showSpinner();
+                    sendMessage("RENAME", {
+                        "old": $(this).attr("placeholder"),
+                        "new": input
+                    });
+                    $(this).remove();
+                    link.show();
+                } else {
+                    console.log("Can't change folder name from:"+link.text()+" -> "+input);
+                    // box shake head no
+                }
+            }
+        }).select();
+    }
+
     // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
         if ($("#about-box").attr("class")  === "in" ||
@@ -1329,8 +1362,10 @@
         // Rename a file/folder
         $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
-            showEditBox("rename", $(this).parent("#entry-menu").data("target").find(".filelink, .folderlink").text());
-            $("#click-catcher").trigger("click");
+            var entry = $(this).parent("#entry-menu").data("target");
+            rename(entry);
+            //showEditBox("rename", $(this).parent("#entry-menu").data("target").find(".filelink, .folderlink").text());
+            //$("#click-catcher").trigger("click");
             event.stopPropagation();
         });
 
