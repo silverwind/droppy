@@ -1312,7 +1312,6 @@
 
         $(".data-row .menu").register("click", function (event) {
             var entry = $(this).parent().parent();
-            console.log(entry);
 
             $("#entry-menu")
                 .attr("class", "in")
