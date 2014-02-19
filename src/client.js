@@ -1011,21 +1011,21 @@
             valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
             for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
                 if (droppy.activeFiles[i] === input.toLowerCase()) { exists = true; break; }
-            console.log(droppy.activeFiles);
             canSubmit = valid && !exists;
             //TODO: Indicate if the name is valid or already exists (could do this after you click enter)
 
             // Return key
             if (event.keyCode === 13) {
-                if (canSubmit) {
+                if (link.text() === input) {
+                    $(this).trigger("focusout");
+                } else if (canSubmit) {
                     console.log("Change folder name from:"+link.text()+" -> "+input);
                     showSpinner();
                     sendMessage("RENAME", {
                         "old": $(this).attr("placeholder"),
                         "new": input
                     });
-                    $(this).remove();
-                    link.show();
+                    $(this).trigger("focusout");
                 } else {
                     console.log("Can't change folder name from:"+link.text()+" -> "+input);
                     // box shake head no
