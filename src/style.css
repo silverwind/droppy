@@ -102,7 +102,7 @@ input:-webkit-autofill {
 
 #content-container {
     flex: 1 1;
-    order: 2;
+    order: 3;
     z-index: 0;
     transition: all .2s ease;
     overflow-y: auto;
@@ -1346,7 +1346,7 @@ input[type="checkbox"] { display: none }
 
 #paste {
     flex: 0 0 auto;
-    order: 3;
+    order: 2;
     background-image: linear-gradient(#111,#222);
     line-height: 1.5em;
     overflow: hidden;
@@ -1359,6 +1359,10 @@ input[type="checkbox"] { display: none }
     opacity: 1;
     transition: all .2s ease;
 }
+
+@media all and (min-width: 1024px) { #paste { font-size:  1em } }
+@media all and (max-width: 1023px) { #paste { font-size: .9em } }
+@media all and (max-width:  639px) { #paste { font-size: .8em } }
 
 #paste:hover {color: #ae5 }
 #paste.in  { flex-basis: 1.5em }
