@@ -996,6 +996,11 @@
     }
 
     function entryRename(entry) {
+        droppy.activeFiles = [];
+        $(".filelink, .folderlink").each(function () {
+            droppy.activeFiles.push($(this).text().toLowerCase());
+        });
+
         $("#click-catcher").trigger("mousemove");
         var link = entry.find(".folderlink, .filelink");
         link.hide();
