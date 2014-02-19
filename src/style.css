@@ -29,7 +29,7 @@ body, div, header, input, label, li, nav, p, section, span, ul {
 li { list-style: none }
 a  { text-decoration: none; background: transparent }
 :focus, a:active, a:hover { outline: none }
-:-moz-focusring { outline: none }
+::-moz-focus-outer { border: none }
 ::-moz-focus-inner { border: none; padding: none; outline: none }
 input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0 }
 button, input { font-family: inherit; font-size: 100%; margin: none; line-height: normal; border: none }
