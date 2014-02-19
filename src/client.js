@@ -995,7 +995,7 @@
         });
     }
 
-    function rename(entry) {
+    function entryRename(entry) {
         $("#click-catcher").trigger("mousemove");
         var link = entry.find(".folderlink, .filelink");
         link.hide();
@@ -1006,6 +1006,7 @@
             valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
             for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
                 if (droppy.activeFiles[i] === input.toLowerCase()) { exists = true; break; }
+            console.log(droppy.activeFiles);
             canSubmit = valid && !exists;
             //TODO: Indicate if the name is valid or already exists (could do this after you click enter)
 
@@ -1025,6 +1026,9 @@
                     // box shake head no
                 }
             }
+        }).register("focusout", function () {
+            $(this).remove();
+            link.show();
         }).select();
     }
 
@@ -1267,7 +1271,7 @@
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1280,7 +1284,7 @@
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
                         '</li>'
                     );
                 }
@@ -1343,9 +1347,8 @@
             updateLocation(destination, true);
         });
 
-        $(".data-row .menu").register("click", function (event) {
-            var entry = $(this).parent().parent();
-
+        $(".data-row .entry-menu").register("click", function (event) {
+            var entry = $(this).parent("li.data-row");
             $("#entry-menu")
                 .attr("class", "in")
                 .css({top: entry.offset().top + "px"})
@@ -1363,7 +1366,7 @@
         $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $(this).parent("#entry-menu").data("target");
-            rename(entry);
+            entryRename(entry);
             //showEditBox("rename", $(this).parent("#entry-menu").data("target").find(".filelink, .folderlink").text());
             //$("#click-catcher").trigger("click");
             event.stopPropagation();
