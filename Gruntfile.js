@@ -28,14 +28,17 @@ module.exports = function (grunt) {
             },
             update: {
                 command: "npm-check-updates -u"
+            },
+            modules: {
+                command: "rm -rf node_modules && npm install"
             }
         }
     });
 
-    grunt.registerTask("update", "shell:update");
+    grunt.registerTask("update",  ["shell:update", "shell:modules"]);
     grunt.registerTask("release", ["bump", "shell:push", "shell:publish"]);
-    grunt.registerTask("minor", ["bump:minor", "shell:push", "shell:publish"]);
-    grunt.registerTask("major", ["bump:major", "shell:push", "shell:publish"]);
+    grunt.registerTask("minor",   ["bump:minor", "shell:push", "shell:publish"]);
+    grunt.registerTask("major",   ["bump:major", "shell:push", "shell:publish"]);
 
     grunt.loadNpmTasks("grunt-bump");
     grunt.loadNpmTasks("grunt-shell");
