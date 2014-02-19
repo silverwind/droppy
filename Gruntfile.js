@@ -34,6 +34,8 @@ module.exports = function (grunt) {
 
     grunt.registerTask("update", "shell:update");
     grunt.registerTask("release", ["bump", "shell:push", "shell:publish"]);
+    grunt.registerTask("minor", ["bump:minor", "shell:push", "shell:publish"]);
+    grunt.registerTask("major", ["bump:major", "shell:push", "shell:publish"]);
 
     grunt.loadNpmTasks("grunt-bump");
     grunt.loadNpmTasks("grunt-shell");
