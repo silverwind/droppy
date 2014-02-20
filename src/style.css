@@ -428,7 +428,7 @@ input:-webkit-autofill {
     width: 1.25em;
 }
 
-.data-row .shortlink, .data-row .edit, .data-row .delete, .data-row .zip {
+.data-row .shortlink, .data-row .edit, .data-row .delete, .data-row .zip, .data-row span {
     display: block;
 }
 
