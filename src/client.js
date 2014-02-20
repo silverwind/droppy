@@ -700,18 +700,16 @@
             player.currentTime = player.duration * (event.clientX / window.innerWidth);
         });
 
-        var tooltip = $("#tooltip");
         seekbar.register("mousemove", debounce(function (event) {
             if (!player.duration) return;
-            var left = event.clientX;
-            tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
-            tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
-            tooltip.attr("class", "in");
-            updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / window.innerWidth)));
+            var bottom = $(window).height() - seekbar[0].getBoundingClientRect().top + 8,
+                left = event.clientX - (tooltip.width() / 2 - 3),
+                text = secsToTime(player.duration * (event.clientX / window.innerWidth));
+            showTooltip(bottom, left, text);
         }), 50);
 
         seekbar.register("mouseleave", debounce(function () {
-            tooltip.attr("class", "");
+            hideTooltip();
         }), 50);
 
         function onWheel(event) {
@@ -1004,7 +1002,7 @@
         $("#click-catcher").trigger("mousemove");
         var link = entry.find(".folderlink, .filelink");
         link.hide();
-        link.after($('<input class="inline-namer" value="'+link.text()+'" placeholder="'+link.text()+'"/>'));
+        link.after($('<input class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>'));
 
         link.next().register("keyup", function (event) {
             var canSubmit, exists, valid, input = $(this).val();
@@ -1019,7 +1017,7 @@
                 if (link.text() === input) {
                     $(this).trigger("focusout");
                 } else if (canSubmit) {
-                    console.log("Change folder name from:"+link.text()+" -> "+input);
+                    console.log("Change folder name from:" + link.text() + " -> " + input);
                     showSpinner();
                     sendMessage("RENAME", {
                         "old": $(this).attr("placeholder"),
@@ -1027,7 +1025,7 @@
                     });
                     $(this).trigger("focusout");
                 } else {
-                    console.log("Can't change folder name from:"+link.text()+" -> "+input);
+                    console.log("Can't change folder name from:" + link.text() + " -> " + input);
                     // box shake head no
                 }
             }
@@ -1372,8 +1370,6 @@
             if (droppy.socketWait) return;
             var entry = $(this).parent("#entry-menu").data("target");
             entryRename(entry);
-            //showEditBox("rename", $(this).parent("#entry-menu").data("target").find(".filelink, .folderlink").text());
-            //$("#click-catcher").trigger("click");
             event.stopPropagation();
         });
 
@@ -1492,6 +1488,19 @@
         } else if (droppy.sorting.col === "size") {
             return compare($(a).find(".size").data("size"), $(b).find(".size").data("size"));
         }
+    }
+
+    var tooltip = $("#tooltip");
+    function showTooltip(bottom, left, text) {
+        tooltip
+            .css("bottom", bottom + "px")
+            .css("left", left + "px")
+            .attr("class", "in")
+            .text(text);
+    }
+
+    function hideTooltip() {
+        tooltip.attr("class", "");
     }
 
     function preparePlayback(playButton) {
