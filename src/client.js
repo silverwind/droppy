@@ -1395,12 +1395,14 @@
         $("#paste").register("click", function (event) {
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
-                showSpinner();
-                sendMessage("CLIPBOARD", {
-                    "type": droppy.clipboard[0],
-                    "from": droppy.clipboard[1],
-                    "to": droppy.currentFolder + '/' + droppy.clipboard[2]
-                });
+                if(droppy.clipboard[1] !== droppy.currentFolder + '/' + droppy.clipboard[2]) {
+                    showSpinner();
+                    sendMessage("CLIPBOARD", {
+                        "type": droppy.clipboard[0],
+                        "from": droppy.clipboard[1],
+                        "to": droppy.currentFolder + '/' + droppy.clipboard[2]
+                    });
+                }
             } else {
                 throw "Clipboard was empty!";
             }
