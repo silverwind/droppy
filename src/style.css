@@ -487,6 +487,7 @@ input:-webkit-autofill {
 
 .data-row.playable:hover .icon-play svg {
     display: inline-block;
+    position: absolute;
 }
 
 .icon-play svg {
