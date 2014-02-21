@@ -1385,6 +1385,7 @@
     // Watch the CSS files for debugging
     function watchCSS() {
         resources.css.forEach(function (file) {
+            console.log(path.join(__dirname, file));
             fs.watch(path.join(__dirname, file), utils.debounce(updateCSS), config.readInterval);
         });
     }
