@@ -650,6 +650,13 @@ input:-webkit-autofill {
     margin: 0 .25em;
     fill: #333;
 }
+
+#entry-menu .open {
+    display: none;
+}
+#entry-menu.type-html .open {
+    display: block;
+}
 /* ============================ Upload Progress ============================ */
 
 #upload-info {

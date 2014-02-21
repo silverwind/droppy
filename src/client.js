@@ -1351,11 +1351,16 @@
         });
 
         $(".data-row .entry-menu").register("click", function (event) {
-            var entry = $(this).parent("li.data-row");
+            var entry = $(this).parent("li.data-row"),
+                type = entry.find(".sprite").attr("class");
+            if(type = type.match(/sprite\-(\w+)/))
+                type = type[1]
+
             $("#entry-menu")
                 .attr("class", "in")
                 .css({top: entry.offset().top + "px"})
-                .data("target", entry);
+                .data("target", entry)
+                .addClass("type-" + type);
 
             toggleCatcher();
             $("#click-catcher").one("mousemove", function () {
@@ -1389,6 +1394,17 @@
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
             event.stopPropagation();
+        });
+
+        // Open a file/folder in browser
+        $("#entry-menu .open").register("click", function (event) {
+            var entry = $(this).parent("#entry-menu").data("target"),
+                url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
+                win = window.open(url, "_blank");
+
+            $("#click-catcher").trigger("click");
+            event.stopPropagation();
+            win.focus();
         });
 
         // Paste a file/folder into a folder

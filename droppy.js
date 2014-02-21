@@ -799,7 +799,9 @@
         } else if (/^\/!\//.test(URI)) {
             handleResourceRequest(req, res, req.url.substring(3));
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
-            handleFileRequest(req, res);
+            handleFileRequest(req, res, true);
+        } else if (/^\/_\//.test(URI) || /^\/\$\//.test(URI)) {
+            handleFileRequest(req, res, false);
         } else if (/^\/~~\//.test(URI)) {
             streamArchive(req, res, "zip");
         } else if (URI === "/favicon.ico") {
@@ -963,7 +965,7 @@
     }
 
     //-----------------------------------------------------------------------------
-    function handleFileRequest(req, res) {
+    function handleFileRequest(req, res, download) {
         var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo, filepath;
 
         // Check for a shortlink
@@ -996,7 +998,8 @@
                     } else {
                         dispo = "attachment";
                     }
-                    res.setHeader("Content-Disposition", dispo);
+                    if(download === true)
+                        res.setHeader("Content-Disposition", dispo);
                     res.setHeader("Content-Type", mimeType);
                     res.setHeader("Content-Length", stats.size);
                     log.response(req, res);
