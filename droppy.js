@@ -56,7 +56,13 @@
         cssCache   = null,
         firstRun   = null,
         mode      = {file: "644", dir: "755"},
-        isCLI      = (process.argv.length > 2);
+        isCLI      = (process.argv.length > 2),
+        // Resources
+        resources = {
+            css  : ["src/style.css", "src/sprites.css"],
+            js   : ["node_modules/jquery/dist/jquery.js", "src/client.js"],
+            html : ["src/base.html", "src/auth.html", "src/main.html"]
+        };
 
     // Argument handler
     if (isCLI) handleArguments();
@@ -90,11 +96,6 @@
     // Read JS/CSS/HTML client resources, minify them, and write them to /res
     function prepareContent() {
         var out = { css : "", js  : "" },
-            resources = {
-                css  : ["src/style.css", "src/sprites.css"],
-                js   : ["node_modules/jquery/dist/jquery.js", "src/client.js"],
-                html : ["src/base.html", "src/auth.html", "src/main.html"]
-            },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
             resourceList = utils.flatten(resources),
             matches = { resource: 0, compiled: 0 };
@@ -1381,20 +1382,21 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Watch the main CSS file for debugging
+    // Watch the CSS files for debugging
     function watchCSS() {
-        var cssfile = config.srcDir + "style.css";
-        fs.watch(cssfile, utils.debounce(updateCSS), config.readInterval);
+        resources.css.forEach(function (file) {
+            fs.watch(path.join(__dirname, file), utils.debounce(updateCSS), config.readInterval);
+        });
     }
 
     //-----------------------------------------------------------------------------
     // Update the debug CSS cache and send it to the client(s)
     function updateCSS() {
-        cssCache = [
-            fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
-            fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
-        ].join("\n");
-        cssCache = ap("last 2 versions").process(cssCache).css;
+        var temp = "";
+        resources.css.forEach(function (file) {
+            temp += fs.readFileSync(file).toString("utf8") + "\n";
+        });
+        cssCache = ap("last 2 versions").process(temp).css;
         for (var client in clients) {
             if (clients.hasOwnProperty(client)) {
                 var data = JSON.stringify({
