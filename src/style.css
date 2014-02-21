@@ -656,12 +656,12 @@ input:-webkit-autofill {
 #entry-menu .open {
     display: none;
 }
-#entry-menu.type-audio .play,
-#entry-menu.type-video .play,
-#entry-menu.type-png .view,
-#entry-menu.type-jpg .view,
-#entry-menu.type-gif .view,
-#entry-menu.type-html .view {
+#entry-menu.type-audio>div>.play,
+#entry-menu.type-video>div>.play,
+#entry-menu.type-png>div>.view,
+#entry-menu.type-jpg>div>.view,
+#entry-menu.type-gif>div>.view,
+#entry-menu.type-html>div>.view {
     display: block;
 }
 /* ============================ Upload Progress ============================ */
