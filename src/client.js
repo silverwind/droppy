@@ -1377,8 +1377,6 @@
         $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target");
-            console.log(window.ff = $(this));
-            console.log(entry);
             entryRename(entry);
             event.stopPropagation();
         });
@@ -1407,7 +1405,7 @@
                 url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
                 type, win;
             if (type = $("#entry-menu").attr("class").match(/type\-(\w+)/)) {
-                switch (type[0]) {
+                switch (type[1]) {
                 case "html":
                 case "jpg":
                 case "png":
