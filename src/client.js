@@ -700,16 +700,18 @@
             player.currentTime = player.duration * (event.clientX / window.innerWidth);
         });
 
+        var tooltip = $("#tooltip");
         seekbar.register("mousemove", debounce(function (event) {
             if (!player.duration) return;
-            var bottom = $(window).height() - seekbar[0].getBoundingClientRect().top + 8,
-                left = event.clientX - (tooltip.width() / 2 - 3),
-                text = secsToTime(player.duration * (event.clientX / window.innerWidth));
-            showTooltip(bottom, left, text);
+            var left = event.clientX;
+            tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
+            tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
+            tooltip.attr("class", "in");
+            updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
 
         seekbar.register("mouseleave", debounce(function () {
-            hideTooltip();
+            tooltip.removeAttr("class");
         }), 50);
 
         function onWheel(event) {
@@ -1507,19 +1509,6 @@
         } else if (droppy.sorting.col === "size") {
             return compare($(a).find(".size").data("size"), $(b).find(".size").data("size"));
         }
-    }
-
-    var tooltip = $("#tooltip");
-    function showTooltip(bottom, left, text) {
-        tooltip
-            .css("bottom", bottom + "px")
-            .css("left", left + "px")
-            .attr("class", "in")
-            .text(text);
-    }
-
-    function hideTooltip() {
-        tooltip.attr("class", "");
     }
 
     function preparePlayback(playButton) {
