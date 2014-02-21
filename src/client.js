@@ -689,7 +689,7 @@
             controls   = $("#audio-controls"),
             seekbar    = $("#seekbar"),
             level      = $("#volume-level"),
-            player     = document.getElementById("audio-player");
+            player     = $("#audio-player")[0];
 
         volumeIcon.register("click", function () {
             slider.attr("class", slider.attr("class") === "" ? "in" : "");

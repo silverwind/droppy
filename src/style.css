@@ -621,11 +621,15 @@ input:-webkit-autofill {
 
 #entry-menu {
     position: absolute;
-    background: #eee;
     color: #333;
     z-index: 32;
     right: 5px;
+}
+
+#entry-menu>.radius-wrap {
+    background: #eee;
     border-radius: 4px;
+    overflow: hidden;
 }
 
 #entry-menu.out {
@@ -633,16 +637,14 @@ input:-webkit-autofill {
     visibility: hidden;
 }
 
-#entry-menu>div {
+#entry-menu>.radius-wrap>div {
     padding: .25em;
 }
 
-#entry-menu>div:hover {
+#entry-menu>.radius-wrap>div:hover {
     background: #fff;
     cursor: pointer;
 }
-#entry-menu>div:first-child:hover { border-radius: 4px 4px 0 0 }
-#entry-menu>div:last-child:hover  { border-radius: 0 0 4px 4px }
 
 #entry-menu svg {
     height: 1em;
@@ -654,11 +656,12 @@ input:-webkit-autofill {
 #entry-menu .open {
     display: none;
 }
-#entry-menu.type-png>.open,
-#entry-menu.type-jpg>.open,
-#entry-menu.type-gif>.open,
-#entry-menu.type-audio>.open,
-#entry-menu.type-html>.open {
+#entry-menu.type-audio .play,
+#entry-menu.type-video .play,
+#entry-menu.type-png .view,
+#entry-menu.type-jpg .view,
+#entry-menu.type-gif .view,
+#entry-menu.type-html .view {
     display: block;
 }
 /* ============================ Upload Progress ============================ */
