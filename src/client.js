@@ -1353,7 +1353,7 @@
         $(".data-row .entry-menu").register("click", function (event) {
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class");
-            if (type === type.match(/sprite\-(\w+)/))
+            if (type = type.match(/sprite\-(\w+)/))
                 type = type[1];
 
             $("#entry-menu")
@@ -1402,7 +1402,7 @@
             var entry = $("#entry-menu").data("target"),
                 url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
                 type, win;
-            if (type === /type\-(\w+)/.test($("#entry-menu").attr("class"))) {
+            if (type = $("#entry-menu").attr("class").match(/type\-(\w+)/)) {
                 switch (type[1]) {
                 case "html":
                 case "jpg":
