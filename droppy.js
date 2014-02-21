@@ -256,7 +256,7 @@
                     ca = ca.map(function read(file) { return fs.readFileSync(file); });
                 }
             } catch (error) {
-                log.error("Error reading SSL certificate or key.\n", util.inspect(error));
+                log.error("Couldn't read required TLS keys or certificates. See `tls` section of config.json.\n\n", util.inspect(error));
                 process.exit(1);
             }
 
@@ -285,7 +285,7 @@
 
             server.on("request", function (req, res) {
                 if (config.useHSTS)
-                    res.setHeader("Strict-Transport-Security", "max-age=31536000"); // Enforce HSTS
+                    res.setHeader("Strict-Transport-Security", "max-age=31536000");
                 onRequest(req, res);
             });
 
@@ -415,24 +415,15 @@
                 case "DELETE_FILE":
                     log.log(log.socket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
                     msg.data = addFilePath(msg.data);
-
                     fs.stat(msg.data, function (error, stats) {
-                        if (stats && !error) {
-                            if (stats.isFile()) {
-                                fs.unlink(msg.data, function (error) {
-                                    if (error) log.error(error);
-                                    checkWatchedDirs();
-                                });
-                            } else if (stats.isDirectory()) {
-                                try {
-                                    wrench.rmdirSyncRecursive(msg.data);
-                                } catch (error) {
-                                    // Specifically log this error as it possibly has to do with
-                                    // wrench not using graceful-fs
-                                    log.error("Error applying wrench.rmdirSyncRecursive");
-                                    log.error(error);
-                                }
-                            }
+                        if (error) {
+                            log.error("Error deleting " + msg.data);
+                            log.error(error);
+                        } else if (stats) {
+                            if (stats.isFile())
+                                deleteFile(msg.data);
+                            else if (stats.isDirectory())
+                                deleteDirectory(msg.data);
                         }
                     });
                     break;
@@ -449,24 +440,14 @@
                                         log.error(error);
                                     } else {
                                         if (msg.data.type === "cut") {
-                                            fs.unlink(msg.data.from, function (error) {
-                                                if (error) log.error(error);
-                                                checkWatchedDirs();
-                                            });
+                                            deleteFile(msg.data.from);
                                         }
                                     }
                                 });
                             } else if (stats.isDirectory()) {
                                 wrench.copyDirSyncRecursive(msg.data.from, msg.data.to);
                                 if (msg.data.type === "cut") {
-                                    try {
-                                        wrench.rmdirSyncRecursive(msg.data.from);
-                                    } catch (error) {
-                                        // Specifically log this error as it possibly has to do with
-                                        // wrench not using graceful-fs
-                                        log.error("Error applying wrench.rmdirSyncRecursive");
-                                        log.error(error);
-                                    }
+                                    deleteDirectory(msg.data.from);
                                 }
                             }
                         }
@@ -654,6 +635,30 @@
             }
         }
     }
+
+    //-----------------------------------------------------------------------------
+    // Delete a file
+    function deleteFile(file) {
+        fs.unlink(file, function (error) {
+            if (error) log.error(error);
+        });
+    }
+
+    //-----------------------------------------------------------------------------
+    // Delete a directory recursively
+    function deleteDirectory(directory) {
+        try {
+            wrench.rmdirSyncRecursive(directory);
+            checkWatchedDirs();
+        } catch (error) {
+            // Specifically log this error as it possibly has to do with
+            // wrench not using graceful-fs
+            log.error("Error applying wrench.rmdirSyncRecursive");
+            log.error(error);
+        }
+    }
+
+
 
     //-----------------------------------------------------------------------------
     // Watch the directory for changes and send them to the appropriate clients.
