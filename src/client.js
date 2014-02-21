@@ -375,8 +375,6 @@
             $("#drop-preview").attr("class", "out");
             isHovering = false;
         }
-
-        // Drop handlers
         function enter(event) {
             event.preventDefault(); // Stop dragenter and dragover from killing our drop event
             clearTimeout(endTimer);
@@ -385,12 +383,12 @@
                 isHovering = true;
             }
         }
-
         function leave() {
             clearTimeout(endTimer);
             endTimer = setTimeout(endDrag, 100);
         }
 
+        // Drag and Drop handlers
         $(document.documentElement).register("dragenter", enter);
         $(document.documentElement).register("dragover", enter);
         $(document.documentElement).register("dragleave", leave);
@@ -1355,8 +1353,8 @@
         $(".data-row .entry-menu").register("click", function (event) {
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class");
-            if(type = type.match(/sprite\-(\w+)/))
-                type = type[1]
+            if (type === type.match(/sprite\-(\w+)/))
+                type = type[1];
 
             $("#entry-menu")
                 .attr("class", "in")
@@ -1404,7 +1402,7 @@
             var entry = $("#entry-menu").data("target"),
                 url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
                 type, win;
-            if (type = $("#entry-menu").attr("class").match(/type\-(\w+)/)) {
+            if (type === /type\-(\w+)/.test($("#entry-menu").attr("class"))) {
                 switch (type[1]) {
                 case "html":
                 case "jpg":
@@ -1420,14 +1418,14 @@
 
             $("#click-catcher").trigger("click");
             event.stopPropagation();
-            if(win) win.focus();
+            if (win) win.focus();
         });
 
         // Paste a file/folder into a folder
         $("#paste").register("click", function (event) {
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
-                if(droppy.clipboard[1] !== droppy.currentFolder + '/' + droppy.clipboard[2]) {
+                if (droppy.clipboard[1] !== droppy.currentFolder + '/' + droppy.clipboard[2]) {
                     showSpinner();
                     sendMessage("CLIPBOARD", {
                         "type": droppy.clipboard[0],

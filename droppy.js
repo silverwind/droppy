@@ -658,8 +658,6 @@
         }
     }
 
-
-
     //-----------------------------------------------------------------------------
     // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
