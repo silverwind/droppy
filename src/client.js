@@ -1037,10 +1037,10 @@
 
     // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
-        if ($("#about-box").attr("class")  === "in" ||
-            $("#edit-box").attr("class")   === "in" ||
-            $("#config-box").attr("class")   === "in" ||
-            $("#entry-menu").attr("class") === "in"
+        if ($("#about-box").hasClass("in") ||
+            $("#edit-box").hasClass("in") ||
+            $("#config-box").hasClass("in") ||
+            $("#entry-menu").hasClass("in")
         ) {
             $("#click-catcher").attr("class", "in");
         } else
@@ -1363,6 +1363,7 @@
                 .addClass("type-" + type);
 
             toggleCatcher();
+
             $("#click-catcher").one("mousemove", function () {
                 $("#entry-menu").attr("class", "out");
                 toggleCatcher();
