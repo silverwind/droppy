@@ -1353,15 +1353,15 @@
         $(".data-row .entry-menu").register("click", function (event) {
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class");
-            if (type = type.match(/sprite\-(\w+)/))
-                type = type[1];
+
+            type = type.match(/sprite\-(\w+)/);
+            if (type) type = type[1];
 
             $("#entry-menu")
                 .attr("class", "in")
                 .css({top: entry.offset().top + "px"})
                 .data("target", entry)
                 .addClass("type-" + type);
-
             toggleCatcher();
 
             $("#click-catcher").one("mousemove", function () {
@@ -1401,8 +1401,9 @@
         $("#entry-menu .open").register("click", function (event) {
             var entry = $("#entry-menu").data("target"),
                 url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
-                type, win;
-            if (type = $("#entry-menu").attr("class").match(/type\-(\w+)/)) {
+                type = $("#entry-menu").attr("class").match(/type\-(\w+)/),
+                win;
+            if (type) {
                 switch (type[1]) {
                 case "html":
                 case "jpg":
