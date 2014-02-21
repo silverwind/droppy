@@ -134,9 +134,10 @@
         }
 
         // Read resources
+        var resourceData = {};
         for (var type in resources) {
             if (resources.hasOwnProperty(type)) {
-                resources[type].forEach(function (file, key, array) {
+                resourceData[type] = resources[type].map(function read(file) {
                     var data;
                     try {
                         data = fs.readFileSync(file).toString("utf8");
@@ -144,21 +145,17 @@
                         log.error("Error reading " + file + ":\n", error);
                         process.exit(1);
                     }
-                    if (type === "html") {
-                        array[key] = {};
-                        array[key][file] = data;
-                    } else
-                        array[key] = data;
+                    return data;
                 });
             }
         }
 
         // Concatenate CSS and JS
         log.simple(log.color.yellow, " ->> ", log.color.reset, "minifying resources...");
-        resources.css.forEach(function (data) {
+        resourceData.css.forEach(function (data) {
             out.css += data + "\n";
         });
-        resources.js.forEach(function (data) {
+        resourceData.js.forEach(function (data) {
             // Append a semicolon to each javascript file to make sure it's
             // properly terminated. The minifier afterwards will take care of
             // any double-semicolons and whitespace.
@@ -182,10 +179,12 @@
 
         // Prepare HTML
         try {
-            resources.html.forEach(function (file) {
-                var name = Object.keys(file)[0];
+            var index = 0;
+            resourceData.html.forEach(function (data) {
+                var name = path.basename(resources.html[index]);
                 // Minify HTML by removing tabs, CRs and LFs
-                fs.writeFileSync(getResPath(path.basename(name)), file[name].replace(/[\t\r\n]/gm, "").replace("{{version}}", version));
+                fs.writeFileSync(getResPath(path.basename(name)), data.replace(/[\t\r\n]/gm, "").replace("{{version}}", version));
+                index++;
             });
             fs.writeFileSync(getResPath("client.js"), out.js);
             fs.writeFileSync(getResPath("style.css"), out.css);
