@@ -141,6 +141,7 @@ input:-webkit-autofill {
 #buttons {
     display: flex;
     white-space: nowrap;
+    user-select: none;
 }
 
 @media all and (min-width: 1024px) { #buttons { line-height: 35px } }
@@ -269,6 +270,7 @@ input:-webkit-autofill {
 .file-header {
     display: flex;
     color: #333;
+    user-select: none;
 }
 
 .file-header span {
