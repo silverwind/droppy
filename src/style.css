@@ -654,7 +654,11 @@ input:-webkit-autofill {
 #entry-menu .open {
     display: none;
 }
-#entry-menu.type-html .open {
+#entry-menu.type-png>.open,
+#entry-menu.type-jpg>.open,
+#entry-menu.type-gif>.open,
+#entry-menu.type-audio>.open,
+#entry-menu.type-html>.open {
     display: block;
 }
 /* ============================ Upload Progress ============================ */
