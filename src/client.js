@@ -1259,7 +1259,7 @@
                 if (type === "nf" || type === "nd") {
                     svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
                     classes += " uploading";
-                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/.test(file)) {
+                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(file)) {
                     svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
                     classes += " playable";
                 }
@@ -1376,14 +1376,14 @@
         // Rename a file/folder
         $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
-            var entry = $(this).parent("#entry-menu").data("target");
+            var entry = $("#entry-menu").data("target");
             entryRename(entry);
             event.stopPropagation();
         });
 
         // Cut a file/folder
         $("#entry-menu .cut").register("click", function (event) {
-            var entry = $(this).parent("#entry-menu").data("target");
+            var entry = $("#entry-menu").data("target");
             droppy.clipboard = ["cut", entry.data("id"), entry.find(".filelink, .folderlink").text()];
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
@@ -1392,7 +1392,7 @@
 
         // Copy a file/folder
         $("#entry-menu .copy").register("click", function (event) {
-            var entry = $(this).parent("#entry-menu").data("target");
+            var entry = $("#entry-menu").data("target");
             droppy.clipboard = ["copy", entry.data("id"), entry.find(".filelink, .folderlink").text()];
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
@@ -1401,13 +1401,26 @@
 
         // Open a file/folder in browser
         $("#entry-menu .open").register("click", function (event) {
-            var entry = $(this).parent("#entry-menu").data("target"),
+            var entry = $("#entry-menu").data("target"),
                 url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
-                win = window.open(url, "_blank");
+                type, win;
+            if (type = $("#entry-menu").attr("class").match(/type\-(\w+)/)) {
+                switch (type[1]) {
+                case "html":
+                case "jpg":
+                case "png":
+                case "gif":
+                    win = window.open(url, "_blank");
+                    break;
+                case "audio":
+                    play(url);
+                    break;
+                }
+            }
 
             $("#click-catcher").trigger("click");
             event.stopPropagation();
-            win.focus();
+            if(win) win.focus();
         });
 
         // Paste a file/folder into a folder
@@ -1454,7 +1467,7 @@
         // Delete a file/folder
         $("#entry-menu .delete").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage("DELETE_FILE", $(this).parent("#entry-menu").data("target").data("id"));
+            sendMessage("DELETE_FILE", $("#entry-menu").data("target").data("id"));
         });
 
         $(".icon-play").register("click", function () {
@@ -1535,13 +1548,14 @@
             player.load();
             player.play();
         }
-
-        if (player.paused) {
-            playButton.parent().parent().removeClass("playing").addClass("paused");
-        } else {
-            playButton.parent().parent().removeClass("paused").addClass("playing");
+        if (playButton) {
+            if (player.paused) {
+                playButton.parent().parent().removeClass("playing").addClass("paused");
+            } else {
+                playButton.parent().parent().removeClass("paused").addClass("playing");
+            }
+            playButton.html(player.paused ? droppy.svg.play : droppy.svg.pause);
         }
-        playButton.html(player.paused ? droppy.svg.play : droppy.svg.pause);
     }
 
     // Wrapper function for setting textContent on an id
