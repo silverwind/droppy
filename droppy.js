@@ -107,6 +107,9 @@
             process.exit(1);
         }
 
+        // Intialize the CSS cache when debugging
+        if (config.debug) updateCSS();
+
         // Check if we to actually need to recompile resources
         resourceList.forEach(function (file) {
             try {
@@ -903,11 +906,6 @@
 
         // Shortcut for CSS debugging when no Websocket is available
         if (config.debug && resourceName === "style.css") {
-            cssCache = [
-                fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
-                fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
-            ].join("\n");
-            cssCache = ap("last 2 versions").process(cssCache).css;
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/css; charset=utf-8");
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
@@ -1383,29 +1381,33 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Watch the CSS files and send updates to the client for live styling
+    // Watch the main CSS file for debugging
     function watchCSS() {
         var cssfile = config.srcDir + "style.css";
-        fs.watch(cssfile, utils.debounce(function () {
-            cssCache = [
-                fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
-                fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
-            ].join("\n");
-            cssCache = ap("last 2 versions").process(cssCache).css;
-            for (var client in clients) {
-                if (clients.hasOwnProperty(client)) {
-                    var data = JSON.stringify({
-                        "type"  : "UPDATE_CSS",
-                        "css"   : cssCache
+        fs.watch(cssfile, utils.debounce(updateCSS), config.readInterval);
+    }
+
+    //-----------------------------------------------------------------------------
+    // Update the debug CSS cache and send it to the client(s)
+    function updateCSS() {
+        cssCache = [
+            fs.readFileSync(getSrcPath("style.css")).toString("utf8"),
+            fs.readFileSync(getSrcPath("sprites.css")).toString("utf8")
+        ].join("\n");
+        cssCache = ap("last 2 versions").process(cssCache).css;
+        for (var client in clients) {
+            if (clients.hasOwnProperty(client)) {
+                var data = JSON.stringify({
+                    "type"  : "UPDATE_CSS",
+                    "css"   : cssCache
+                });
+                if (clients[client].ws && clients[client].ws.readyState === 1) {
+                    clients[client].ws.send(data, function (error) {
+                        if (error) log.error(error);
                     });
-                    if (clients[client].ws && clients[client].ws.readyState === 1) {
-                        clients[client].ws.send(data, function (error) {
-                            if (error) log.error(error);
-                        });
-                    }
                 }
             }
-        }), config.readInterval);
+        }
     }
 
     //-----------------------------------------------------------------------------
