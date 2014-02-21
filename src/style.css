@@ -488,12 +488,12 @@ input:-webkit-autofill {
 }
 
 .data-row.playable:hover .icon-play svg {
-    display: inline-block;
+    visibility: visible;
     position: absolute;
 }
 
 .icon-play svg {
-    display: none;
+    visibility: hidden;
     cursor: pointer;
     height: 100%;
     width: 100%;
