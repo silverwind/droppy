@@ -165,7 +165,7 @@
         // Add CSS vendor prefixes
         out.css = ap("last 2 versions").process(out.css).css;
         // Minify CSS
-        out.css = new require("clean-css")({keepSpecialComments : 0, removeEmpty : true}).minify(out.css);
+        out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
         // Set the client debug variable to mirror the server's
         out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
