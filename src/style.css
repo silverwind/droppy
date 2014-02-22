@@ -341,11 +341,14 @@ input:-webkit-autofill {
 
 @media all and (max-width: 639px) { .data-row { padding: 0 .1em } }
 
+.data-row.editing { background: #fff }
+.data-row.editing.invalid { background: #fdd }
+
 .data-row, .data-row a {
     color: #333;
 }
 
-.data-row:not(.animating):not(.playing):hover {
+.data-row:not(.animating):not(.playing):not(.editing):hover {
     background: #fff;
 }
 
@@ -379,7 +382,9 @@ input:-webkit-autofill {
     flex: 1 1;
     display: inline-block;
 }
-@media all and (max-width: 639px) { .filelink, .folderlink { padding: 0 .125em } }
+@media all and (max-width: 639px) { .filelink, .folderlink, #inline-namer { padding: 0 .125em } }
+
+#inline-namer { background: transparent }
 
 .playing, .playing a {
     background: #333;

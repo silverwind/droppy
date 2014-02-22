@@ -980,16 +980,20 @@
         // Populate active files list
         droppy.activeFiles = [];
         $(".filelink, .folderlink").each(function () {
+            $(this).removeClass("editing invalid");
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
 
-        // Hide menu, click-catcher and the original link
+        // Hide menu, click-catcher and the original link, stop any previus edits
         $("#click-catcher").trigger("mousemove");
         var link = entry.find(".folderlink, .filelink");
         link.hide();
-        //TODO: Add a submit button
+
+        // Add inline elements
         link.after($('<input id="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>'));
         namer = $("#inline-namer");
+
+        entry.addClass("editing");
 
         link.next().register("input", function () {
             inputText = namer.val();
@@ -999,34 +1003,39 @@
                 if (droppy.activeFiles[i] === inputText.toLowerCase()) { exists = true; break; }
             canSubmit = valid && !exists;
             // TODO: Better indicator of what's wrong
-            namer.css("background", canSubmit ? "#fff" : "#c44");
+            if (!canSubmit)
+                entry.addClass("invalid");
+            else
+                entry.removeClass("invalid");
         }).register("keyup", function (event) {
             event.keyCode === 27 && stopEdit(); // Escape Key
-            event.keyCode === 13 && submitEdit(namer.attr("placeholder"), namer.val()); // Return Key
+            event.keyCode === 13 && submitEdit(); // Return Key
         }).register("focusout", function () {
-            namer.remove();
-            link.show();
+            submitEdit(true);
         }).select();
 
-        function submitEdit(oldVal, newVal) {
-            console.log("SUBMIT ", oldVal, newVal);
+        function submitEdit(skipInvalid) {
+            var oldVal = namer.attr("placeholder"),
+                newVal = namer.val();
             if (canSubmit) {
                 if (oldVal !== newVal) {
                     showSpinner();
                     sendMessage("RENAME", { "old": oldVal, "new": newVal });
                 }
                 stopEdit();
-            } else {
+            } else if (exists && !skipInvalid) {
                 namer.addClass("shake");
                 setTimeout(function () {
                     namer.removeClass("shake");
                 }, 500);
+            } else {
+                stopEdit();
             }
         }
-
         function stopEdit() {
-            namer.remove();
-            link.show();
+            $("#inline-namer, #inline-submit").remove();
+            $(".filelink").show();
+            entry.removeClass("editing invalid");
         }
     }
 
