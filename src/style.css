@@ -374,7 +374,7 @@ input:-webkit-autofill {
     white-space: nowrap;
     cursor: pointer;
 }
-.filelink, .folderlink, .inline-namer {
+.filelink, .folderlink, #inline-namer {
     padding: 0 .25em;
     flex: 1 1;
     display: inline-block;

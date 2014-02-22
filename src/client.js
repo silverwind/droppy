@@ -542,7 +542,7 @@
 
         // Show popup for folder creation
         $("#create-folder").register("click", function () {
-            showEditBox("create-folder");
+            showEditBox();
         });
 
         // Input validation preview, the server performs the same regex
@@ -579,18 +579,10 @@
 
         function submitEdit() {
             if (editbox.data("canSubmit") !== "true") return;
-            if (editbox.data("type") === "create-folder") {
-                showSpinner();
-                sendMessage("CREATE_FOLDER",
-                    droppy.currentFolder === "/" ? "/" + editInput.val() : droppy.currentFolder + "/" + editInput.val()
-                );
-            } else if (editbox.data("type") === "rename") {
-                showSpinner();
-                sendMessage("RENAME", {
-                    "old": editInput.attr("placeholder"),
-                    "new": editInput.val()
-                });
-            }
+            showSpinner();
+            sendMessage("CREATE_FOLDER",
+                droppy.currentFolder === "/" ? "/" + editInput.val() : droppy.currentFolder + "/" + editInput.val()
+            );
             cleanupAndHideEditbox();
         }
 
@@ -961,78 +953,81 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
-    function showEditBox(type, prefill) {
-        var box = $("#edit-box"), input = $("#editbox-input"), lastDot;
+
+    function showEditBox() {
+        var box   = $("#edit-box"),
+            input = $("#editbox-input");
 
         droppy.activeFiles = [];
         $(".filelink, .folderlink").each(function () {
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
 
-        box.data("type", type);
-        if (prefill) input.val(prefill);
-
-        if (type === "create-folder") {
-            $("#editbox-name").text("Create");
-            input.attr("placeholder", "Folder Name");
-        } else if (type === "rename") {
-            $("#editbox-name").text("Rename");
-            input.attr("placeholder", prefill);
-        }
+        ("#editbox-name").text("Create");
+        input.attr("placeholder", "Name");
 
         requestAnimation(function () {
             box.attr("class", box.attr("class") !== "in" ? "in" : "out");
             toggleCatcher();
             setTimeout(function () {
                 input.focus();
-                if (type === "rename") {
-                    lastDot = input.val().lastIndexOf(".");
-                    if (lastDot > 0) input[0].setSelectionRange(0, lastDot);
-                }
             }, 200);
         });
     }
 
     function entryRename(entry) {
+        var namer, canSubmit, exists, valid, inputText;
+        // Populate active files list
         droppy.activeFiles = [];
         $(".filelink, .folderlink").each(function () {
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
 
+        // Hide menu, click-catcher and the original link
         $("#click-catcher").trigger("mousemove");
         var link = entry.find(".folderlink, .filelink");
         link.hide();
-        link.after($('<input class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>'));
+        //TODO: Add a submit button
+        link.after($('<input id="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>'));
+        namer = $("#inline-namer");
 
-        link.next().register("keyup", function (event) {
-            var canSubmit, exists, valid, input = $(this).val();
-            valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
+        link.next().register("input", function () {
+            inputText = namer.val();
+            valid = !/[\\\*\{\}\/\?\|<>"]/.test(inputText);
+            exists = false;
             for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
-                if (droppy.activeFiles[i] === input.toLowerCase()) { exists = true; break; }
+                if (droppy.activeFiles[i] === inputText.toLowerCase()) { exists = true; break; }
             canSubmit = valid && !exists;
-            //TODO: Indicate if the name is valid or already exists (could do this after you click enter)
-
-            // Return key
-            if (event.keyCode === 13) {
-                if (link.text() === input) {
-                    $(this).trigger("focusout");
-                } else if (canSubmit) {
-                    console.log("Change folder name from:" + link.text() + " -> " + input);
-                    showSpinner();
-                    sendMessage("RENAME", {
-                        "old": $(this).attr("placeholder"),
-                        "new": input
-                    });
-                    $(this).trigger("focusout");
-                } else {
-                    console.log("Can't change folder name from:" + link.text() + " -> " + input);
-                    // box shake head no
-                }
-            }
+            // TODO: Better indicator of what's wrong
+            namer.css("background", canSubmit ? "#fff" : "#c44");
+        }).register("keyup", function (event) {
+            event.keyCode === 27 && stopEdit(); // Escape Key
+            event.keyCode === 13 && submitEdit(namer.attr("placeholder"), namer.val()); // Return Key
         }).register("focusout", function () {
-            $(this).remove();
+            namer.remove();
             link.show();
         }).select();
+
+        function submitEdit(oldVal, newVal) {
+            console.log("SUBMIT ", oldVal, newVal);
+            if (canSubmit) {
+                if (oldVal !== newVal) {
+                    showSpinner();
+                    sendMessage("RENAME", { "old": oldVal, "new": newVal });
+                }
+                stopEdit();
+            } else {
+                namer.addClass("shake");
+                setTimeout(function () {
+                    namer.removeClass("shake");
+                }, 500);
+            }
+        }
+
+        function stopEdit() {
+            namer.remove();
+            link.show();
+        }
     }
 
     // Toggle the full-screen click catching frame if any modals are shown
