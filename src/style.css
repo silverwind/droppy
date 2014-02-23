@@ -559,6 +559,7 @@ input:-webkit-autofill {
     color: #333;
     z-index: 32;
     right: 5px;
+    box-shadow: 0 0 30px #000;
 }
 
 #entry-menu>.radius-wrap {
@@ -584,8 +585,13 @@ input:-webkit-autofill {
 #entry-menu svg {
     height: 1em;
     width: 1em;
-    margin: 0 .25em;
+    margin-right: .25em;
     fill: #333;
+}
+
+#entry-menu div > span {
+    display: inline-block;
+    vertical-align: top;
 }
 
 #entry-menu .open {
@@ -608,43 +614,38 @@ input:-webkit-autofill {
 /* ============================ Document Previewer ============================ */
 .document {
     position: fixed;
-    bottom: .25em;
-    left: .5em;
-    right: .5em;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: #181818;
-    padding: 1em;
-    border-radius: 6px;
+    padding: .5em;
     transition: all .5s ease;
 }
-@media all and (min-width: 1024px) {
-    .document.in  { opacity: 1; top: 4em;   bottom: .25em;   }
-    .document.out { opacity: 0; top: 5em;   bottom: -0.75em; }
-}
-@media all and (max-width: 1023px) {
-    .document.in  { opacity: 1; top: 3.5em; bottom: .25em;   }
-    .document.out { opacity: 0; top: 4.5em; bottom: -0.75em; }
-}
-@media all and (max-width:  639px) {
-    .document { padding: .5em; }
-    .document.in  { opacity: 1; top: 3em;   bottom: .25em;   }
-    .document.out { opacity: 0; top: 4em;   bottom: -0.75em; }
+
+@media all and (min-width: 1024px) { .document { top: 74px; } .document.out { top: 94px } }
+@media all and (max-width: 1023px) { .document { top: 64px; } .document.out { top: 64px } }
+@media all and (max-width:  639px) { .document { top: 54px; } .document.out { top: 54px } }
+
+.document.in  { opacity: 1; bottom: 0    }
+.document.out { opacity: 0; bottom: -20px }
+
+.document>.sidebar {
+    z-index: 1;
+    position: absolute;
+    top: 1em;
+    width: 2.5em;
+    bottom: 1em;
+    right: .75em;
 }
 
-.document svg {
-    fill: #ccc;
+.document .sidebar svg {
+    fill: #555;
     height: 1em;
     width: 1em;
-    margin-left: 1em;
+    margin-left: .75em;
     transition: all .2s ease;
 }
 
-.document>.sidebar {
-    position: absolute;
-    top: 1em;
-    width: 3em;
-    bottom: 1em;
-    right: 0;
-}
 .document>.sidebar span {
     display: block;
     text-align: center;
@@ -656,8 +657,8 @@ input:-webkit-autofill {
 
 .document .exit:hover svg { fill: #e33 }
 .document .exit:hover span { color: #e33; opacity: 1 }
-.document .save:hover svg { fill: #ae5 }
-.document .save:hover span { color: #ae5; opacity: 1 }
+.document .save:hover svg { fill: #5a0 }
+.document .save:hover span { color: #5a0; opacity: 1 }
 .document .save:hover, .document .exit:hover { cursor: pointer }
 
 .document.readonly .save { display: none }
@@ -665,19 +666,19 @@ input:-webkit-autofill {
 .document .text-editor {
     position: relative;
     height: 100%;
-    box-shadow:  0 0 0 2px #444;
+    box-shadow:  0 0 0 2px #333;
+    background: #eee;
     border-radius: 6px;
     overflow-y: auto;
+    width: 100%;
 }
-@media all and (min-width: 640px) { .document .text-editor { width: calc(100% - 2em); } }
-@media all and (max-width: 639px) { .document .text-editor { width: calc(100% - 2.5em); } }
 
 .document .text-editor>pre {
     margin: 0;
     font-size: .6em;
-    background: #282828;
+    background: #fff;
     padding: .5em 1em;
-    color: #eee;
+    color: #333;
     overflow: auto;
 }
 
