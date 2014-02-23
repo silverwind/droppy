@@ -594,13 +594,15 @@ input:-webkit-autofill {
     vertical-align: top;
 }
 
-#entry-menu .open {
+#entry-menu .open, #entry-menu .edit {
     display: none;
 }
 #entry-menu.type-js>div>.edit,
 #entry-menu.type-text>div>.edit,
 #entry-menu.type-html>div>.edit,
 #entry-menu.type-css>div>.edit,
+#entry-menu.type-bin>div>.edit,
+#entry-menu.type-json>div>.edit,
 #entry-menu.type-markdown>div>.edit,
 #entry-menu.type-audio>div>.play,
 #entry-menu.type-video>div>.play,
@@ -630,15 +632,17 @@ input:-webkit-autofill {
 .document.out { opacity: 0; bottom: -20px }
 
 .document>.sidebar {
-    z-index: 1;
     position: absolute;
     top: 1em;
     width: 2.5em;
     bottom: 1em;
     right: .75em;
 }
-
-.document .sidebar svg {
+.document>.sidebar>div {
+    position: relative;
+    z-index: 5;
+}
+.document>.sidebar svg {
     fill: #555;
     height: 1em;
     width: 1em;
