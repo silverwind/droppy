@@ -59,8 +59,9 @@
         isCLI      = (process.argv.length > 2),
         // Resources
         resources = {
-            css  : ["src/style.css", "src/sprites.css"],
-            js   : ["node_modules/jquery/dist/jquery.js", "src/client.js"],
+            css  : ["lib/CodeMirror/lib/codemirror.css", "src/style.css", "src/sprites.css"],
+            js   : ["node_modules/jquery/dist/jquery.js", "src/client.js",
+                    "lib/CodeMirror/lib/codemirror.js", "lib/CodeMirror/addon/runmode/runmode.js"],
             html : ["src/base.html", "src/auth.html", "src/main.html"]
         };
 
@@ -417,13 +418,33 @@
                     msg.data = addFilePath(msg.data);
                     fs.stat(msg.data, function (error, stats) {
                         if (error) {
-                            log.error("Error deleting " + msg.data);
+                            log.error("Error getting stats to delete " + msg.data);
                             log.error(error);
                         } else if (stats) {
                             if (stats.isFile())
                                 deleteFile(msg.data);
                             else if (stats.isDirectory())
                                 deleteDirectory(msg.data);
+                        }
+                    });
+                    break;
+                case "SAVE_FILE":
+                    log.log(log.socket(remoteIP, remotePort), " Saving: " + msg.data.to.substring(1));
+                    msg.data.to = addFilePath(msg.data.to);
+                    fs.stat(msg.data.to, function (error, stats) {
+                        if (error) {
+                            log.error("Error getting stats to save " + msg.data.to);
+                            log.error(error);
+                        } else if (stats) {
+                            if (stats.isFile()) {
+                                // TODO: Check if user has permission
+                                fs.writeFile(msg.data.to, msg.data.value, function (error) {
+                                    if (error) {
+                                        log.error("Error writing " + msg.data.to);
+                                        log.error(error);
+                                    }
+                                });
+                            }
                         }
                     });
                     break;

@@ -638,14 +638,14 @@ input:-webkit-autofill {
     transition: all .2s ease;
 }
 
-.document .sidebar {
+.document>.sidebar {
     position: absolute;
     top: 1em;
     width: 3em;
     bottom: 1em;
     right: 0;
 }
-.document span {
+.document>.sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
@@ -660,7 +660,7 @@ input:-webkit-autofill {
 .document .save:hover span { color: #ae5; opacity: 1 }
 .document .save:hover, .document .exit:hover { cursor: pointer }
 
-.document .save { display: none } /* Remove this line to show the save button */
+.document.readonly .save { display: none }
 /* ============================ Text Editor ============================ */
 .document .text-editor {
     position: relative;
@@ -679,6 +679,18 @@ input:-webkit-autofill {
     padding: .5em 1em;
     color: #eee;
     overflow: auto;
+}
+
+.CodeMirror {
+  position:absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100% !important;
+}
+.CodeMirror .CodeMirror-gutters {
+  height: 100% !important;
 }
 
 /* ============================ Upload Progress ============================ */
