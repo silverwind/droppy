@@ -1368,68 +1368,8 @@
         $("#entry-menu .edit").register("click", function (event) {
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents("#content-container"),
-                url = entry.find(".file-link").attr("href"),
-                id = entry.data("id");
-                editing = true, // Check if not readonly
-                editor = null,
-                doc = $(
-                    '<div class="document out' + (editing ? ' editing' : ' readonly') + '">' +
-                        '<div class="title">' + entry.find(".file-link").text() + '</div>' +
-                        '<div class="sidebar">' +
-                            '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
-                            '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
-                        '</div>' +
-                        '<div class="text-editor">' +
-                            (editing ? '<textarea></textarea>' : '<pre></pre>') +
-                        '</div>' +
-                    '</div>'
-                );
-            view.append(doc);
-
-            $.ajax(url, {
-                dataType: "text",
-                success : function (data) {
-                    // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
-                    // $.getScript()
-                    
-                    if (editing) {
-                        editor = doc.find(".text-editor textarea");
-                        editor.val(data);
-                        editor = CodeMirror.fromTextArea(editor[0]);
-                    } else {
-                        // Use run mode here
-                        doc.find(".text-editor pre").text(data);
-                    }
-                    setTimeout(function () {
-                        doc.removeClass("out").addClass("in");
-                    }, 50);
-                    doc.find(".exit").register("click", function () {
-                        doc.removeClass("in").addClass("out");
-                        setTimeout(function () {
-                            doc.remove();
-                        }, 500);
-                    });
-                    doc.find(".save").register("click", function () {
-                        showSpinner();
-                        doc.removeClass("dirty");
-                        sendMessage("SAVE_FILE", {
-                            "to": id,
-                            "value": editor.getValue()
-                        });
-                    });
-                    editor.on("change", function () {
-                        doc.addClass("dirty");
-                    });
-                },
-                error : function () {
-                    doc.removeClass("in").addClass("out");
-                    setTimeout(function () {
-                        doc.remove();
-                    }, 500);
-                }
-            });
-
+                view = entry.parents(".view"); // #content-container
+            editFile(view, entry.data("id"));
         });
 
         // Paste a file/folder into a folder
@@ -1539,7 +1479,68 @@
         var source = playButton.parent().parent().find(".file-link").attr("href");
         play(source, playButton);
     }
+    function editFile(view, entryId) {
+        var url = "/_" + entryId,
+            filename = entryId.match(/\/(.+$)/)[1],
+            editing = true, // Check if not readonly
+            editor = null,
+            doc = $(
+                '<div class="document out' + (editing ? ' editing' : ' readonly') + '">' +
+                    '<div class="title">' + filename + '</div>' +
+                    '<div class="sidebar">' +
+                        '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
+                        '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
+                    '</div>' +
+                    '<div class="text-editor">' +
+                        (editing ? '<textarea></textarea>' : '<pre></pre>') +
+                    '</div>' +
+                '</div>'
+            );
+        view.append(doc);
 
+        $.ajax(url, {
+            dataType: "text",
+            success : function (data) {
+                // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
+                // $.getScript()
+                
+                if (editing) {
+                    editor = doc.find(".text-editor textarea");
+                    editor.val(data);
+                    editor = CodeMirror.fromTextArea(editor[0]);
+                } else {
+                    // Use run mode here
+                    doc.find(".text-editor pre").text(data);
+                }
+                setTimeout(function () {
+                    doc.removeClass("out").addClass("in");
+                }, 50);
+                doc.find(".exit").register("click", function () {
+                    doc.removeClass("in").addClass("out");
+                    setTimeout(function () {
+                        doc.remove();
+                    }, 500);
+                });
+                doc.find(".save").register("click", function () {
+                    showSpinner();
+                    doc.removeClass("dirty");
+                    sendMessage("SAVE_FILE", {
+                        "to": entryId,
+                        "value": editor.getValue()
+                    });
+                });
+                editor.on("change", function () {
+                    doc.addClass("dirty");
+                });
+            },
+            error : function () {
+                doc.removeClass("in").addClass("out");
+                setTimeout(function () {
+                    doc.remove();
+                }, 500);
+            }
+        });
+    }
     function play(source, playButton) {
         var player = document.getElementById("audio-player");
 
