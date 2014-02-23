@@ -250,7 +250,7 @@
                     droppy.zeroFiles = [];
                 } else {
                     droppy.isUploading = false;
-                    updateTitle(getView()[0].currentFolder, true);
+                    updateTitle(getView(vId)[0].currentFolder, true);
                     $("#upload-info").attr("class", "out");
                     hideSpinner();
                 }
@@ -435,7 +435,7 @@
             // Check if we support getAsEntry();
             if (!items || !fileItem[entryFunc]()) {
                 // No support, fallback to normal File API
-                upload(event.dataTransfer.files);
+                upload(getView(), event.dataTransfer.files);
                 return;
             }
 
@@ -483,7 +483,7 @@
                     return;
                 } else {
                     if (cbCount > 0 && cbFired === cbCount) {
-                        upload(obj);
+                        upload(getView(), obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
                     }
@@ -516,9 +516,9 @@
                         obj[files[i].name] = files[i];
                     }
                 }
-                upload(obj);
+                upload(getView(), obj);
             } else if ($("#file").val()) {
-                upload($("#file").get(0).files);
+                upload(getView(), $("#file").get(0).files);
             }
             $("#file").val(""); // Reset the input
         });
@@ -819,7 +819,7 @@
                         switch (Object.prototype.toString.call(data[path])) {
                         case "[object Object]":
                             if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                                getView()[0].currentData[name] = {
+                                view[0].currentData[name] = {
                                     size : 0,
                                     type : "nd",
                                     mtime : Date.now()
@@ -830,7 +830,7 @@
                         case "[object File]":
                             numFiles++;
                             if (!addedDirs[name]) {
-                                getView()[0].currentData[name] = {
+                                view[0].currentData[name] = {
                                     size  : data[path].size,
                                     type  : "nf",
                                     mtime : Date.now()
@@ -843,7 +843,7 @@
             }
 
             // Load the new files into view, tagged
-            buildHTML(view, getView()[0].currentData, getView()[0].currentFolder, true);
+            buildHTML(view, view[0].currentData, view[0].currentFolder, true);
 
             // Create the XHR2 and bind the progress events
             var xhr = new XMLHttpRequest();

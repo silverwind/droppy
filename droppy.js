@@ -383,8 +383,7 @@
                 return;
             } else {
                 log.log(log.socket(remoteIP, remotePort), " WebSocket ", "connected");
-                clients[cookie] = clients[cookie] || { v: [{}], ws: ws };
-                if (clients[cookie].ws === null) clients[cookie].ws = ws;
+                clients[cookie] = { v: [{}], ws: ws };
                 client = clients[cookie];
             }
             // BEFORE HERE
@@ -867,8 +866,7 @@
                     if (URI.charAt(URI.length - 1) === "/")
                         URI = URI.substring(0, URI.length - 1);
 
-                    clients[cookie] = { ws:null, v:[{}] };
-                    clients[cookie].v[0].directory = URI;
+                    // Establish clients[cookie] on websocket connection only
                     updateWatchers(URI);
                 } else {
                     res.statusCode = 301;
