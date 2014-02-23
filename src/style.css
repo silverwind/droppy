@@ -1378,7 +1378,7 @@ input[type="checkbox"] { display: none }
 }
 
 #paste {
-    flex: 0 0 10em;
+    flex: 0 0;
     order: 2;
     overflow: hidden;
     z-index: 32;
