@@ -534,66 +534,22 @@
             });
         }
 
-        var info         = $("#editbox-info"),
-            editInput    = $("#editbox-input"),
-            editbox      = $("#edit-box"),
-            editSubmit   = $("#editbox-submit"),
-            indicators   = $("#editbox-submit, #editbox-input");
-
-        // Show popup for folder creation
         $("#create-folder").register("click", function () {
-            showEditBox();
-        });
-
-        // Input validation preview, the server performs the same regex
-        editInput.register("input", function () {
-            var canSubmit, exists, valid, input = $(this).val();
-            valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
-            for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
-                if (droppy.activeFiles[i] === input.toLowerCase()) { exists = true; break; }
-            canSubmit = valid && !exists;
-            editbox.data("canSubmit", canSubmit ? "true" : "false");
-            if (canSubmit) {
-                indicators.removeClass();
-                info.removeClass();
-                editSubmit.register("click", submitEdit);
-            } else {
-                indicators.attr("class", input.length > 0 ? "invalid" : "");
-                if (exists) {
-                    info.text(exists ? "Already exists!" : "Invalid characters!");
-                    info.attr("class", "in");
+            var dummyFolder = $('<li class="data-row new-folder" data-type="folder">' +
+                                    '<span class="sprite sprite-folder"></span>' +
+                                    '<span class="folderlink">New Folder</span>' +
+                                '</li>');
+            dummyFolder.appendTo("#content ul");
+            entryRename(dummyFolder, function (success, oldVal, newVal) {
+                if (success) {
+                    showSpinner();
+                    sendMessage("CREATE_FOLDER",
+                        droppy.currentFolder === "/" ? "/" + newVal : droppy.currentFolder + "/" + newVal
+                    );
                 }
-                editSubmit.off("click");
-            }
+                dummyFolder.remove();
+            });
         });
-
-        // Key handlers for the modal edit box
-        editInput.register("keyup", function (event) {
-            if (event.keyCode === 27) { // Escape Key
-                cleanupAndHideEditbox();
-            }
-            if (event.keyCode === 13) { // Return Key
-                submitEdit();
-            }
-        });
-
-        function submitEdit() {
-            if (editbox.data("canSubmit") !== "true") return;
-            showSpinner();
-            sendMessage("CREATE_FOLDER",
-                droppy.currentFolder === "/" ? "/" + editInput.val() : droppy.currentFolder + "/" + editInput.val()
-            );
-            cleanupAndHideEditbox();
-        }
-
-        function cleanupAndHideEditbox() {
-            editbox.attr("class", "out");
-            toggleCatcher();
-            editSubmit.off("click");
-            editInput.val("");
-            indicators.removeClass("invalid");
-            info.removeClass();
-        }
 
         var aboutbox  = $("#about-box"),
             configbox = $("#config-box");
@@ -664,7 +620,6 @@
         // Hide modals when clicking outside their box
         $("#click-catcher").register("click", function () {
             $("#config-box").attr("class", "out");
-            $("#edit-box").attr("class", "out");
             $("#about-box").attr("class", "out");
             $("#entry-menu").attr("class", "out");
             toggleCatcher();
@@ -953,29 +908,7 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
-
-    function showEditBox() {
-        var box   = $("#edit-box"),
-            input = $("#editbox-input");
-
-        droppy.activeFiles = [];
-        $(".filelink, .folderlink").each(function () {
-            droppy.activeFiles.push($(this).text().toLowerCase());
-        });
-
-        ("#editbox-name").text("Create");
-        input.attr("placeholder", "Name");
-
-        requestAnimation(function () {
-            box.attr("class", box.attr("class") !== "in" ? "in" : "out");
-            toggleCatcher();
-            setTimeout(function () {
-                input.focus();
-            }, 200);
-        });
-    }
-
-    function entryRename(entry) {
+    function entryRename(entry, callback) {
         var namer, canSubmit, exists, valid, inputText;
         // Populate active files list
         droppy.activeFiles = [];
@@ -1009,18 +942,18 @@
                 entry.removeClass("invalid");
         }).register("keyup", function (event) {
             event.keyCode === 27 && stopEdit(); // Escape Key
-            event.keyCode === 13 && submitEdit(); // Return Key
+            event.keyCode === 13 && submitEdit(false, callback); // Return Key
         }).register("focusout", function () {
-            submitEdit(true);
+            submitEdit(true, callback);
         }).select();
 
-        function submitEdit(skipInvalid) {
+        function submitEdit(skipInvalid, callback) {
             var oldVal = namer.attr("placeholder"),
-                newVal = namer.val();
+                newVal = namer.val(),
+                success;
             if (canSubmit) {
                 if (oldVal !== newVal) {
-                    showSpinner();
-                    sendMessage("RENAME", { "old": oldVal, "new": newVal });
+                    success = true;
                 }
                 stopEdit();
             } else if (exists && !skipInvalid) {
@@ -1029,8 +962,10 @@
                     namer.removeClass("shake");
                 }, 500);
             } else {
+                success = false;
                 stopEdit();
             }
+            if (typeof success === "boolean" && typeof callback === "function") callback(success, oldVal, newVal);
         }
         function stopEdit() {
             $("#inline-namer, #inline-submit").remove();
@@ -1042,7 +977,6 @@
     // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
         if ($("#about-box").hasClass("in") ||
-            $("#edit-box").hasClass("in") ||
             $("#config-box").hasClass("in") ||
             $("#entry-menu").hasClass("in")
         ) {
@@ -1379,7 +1313,12 @@
         $("#entry-menu .edit").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target");
-            entryRename(entry);
+            entryRename(entry, function (success, oldVal, newVal) {
+                if (success) {
+                    showSpinner();
+                    sendMessage("RENAME", { "old": oldVal, "new": newVal });
+                }
+            });
             event.stopPropagation();
         });
 
