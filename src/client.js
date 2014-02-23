@@ -1379,13 +1379,14 @@
 
             view.find(".document").remove();
             view.append(doc);
-            $.ajax(url, { 
+            $.ajax(url, {
+                dataType: "text",
                 complete : function (data) {
                     doc.find(".text-editor pre").text(data.responseText);
                     doc.show();
                     doc.find(".exit").register("click", function () {
-                        doc.remove()
-                    })
+                        doc.remove();
+                    });
                 }
             });
 
