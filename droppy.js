@@ -454,7 +454,7 @@
                     });
                     break;
                 case "CREATE_FOLDER":
-                    if (!isPathSane(msg.data)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
+                    if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
                     fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
                         log.log(log.socket(remoteIP, remotePort), " Created: ", msg.data);
@@ -505,7 +505,7 @@
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
-                        if (!isPathSane(file)) return log.log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + foldername);
+                        if (!isPathSane(file)) return log.log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + file);
                         var p = addFilePath(clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/") + decodeURIComponent(file);
                         wrench.mkdirSyncRecursive(path.dirname(p), mode.dir);
                         fs.writeFileSync(p, "", {mode: mode.file});
@@ -1415,9 +1415,13 @@
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
 
     function isPathSane(name, isPath) {
-        if (/[\/\\]\.\./.test(name)) return false;                     // Navigating down the tree (prefix)
-        if (/\.\.[\/\\]/.test(name)) return false;                     // Navigating down the tree (postfix)
-        if (/[\\\*\{\}\/\?\|<>"]/.test(name) && !isPath) return false; // Invalid characters
+        if (/[\/\\]\.\./.test(name)) return false;              // Navigating down the tree (prefix)
+        if (/\.\.[\/\\]/.test(name)) return false;              // Navigating down the tree (postfix)
+        if (isPath) {
+            if (/[\*\{\}\?\|<>"]/.test(name)) return false;     // Invalid characters
+        } else {
+            if (/[\\\*\{\}\/\?\|<>"]/.test(name)) return false; // Invalid characters
+        }
         return true;
     }
     // removeFilePath is intentionally not an inverse to the add function
