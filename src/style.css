@@ -618,8 +618,8 @@ input:-webkit-autofill {
     width: 2em;
     height: 2em;
     border-radius: 1em;
-    top: -1em;
-    right: -1em;
+    top: -10px;
+    right: -10px;
     background: red;
     z-index: 1;
 }
