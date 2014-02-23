@@ -535,11 +535,17 @@
         }
 
         $("#create-folder").register("click", function () {
-            var dummyFolder = $('<li class="data-row new-folder" data-type="folder">' +
-                                    '<span class="sprite sprite-folder-open"></span>' +
-                                    '<span class="folder-link entry-link"></span>' +
-                                '</li>');
-            dummyFolder.appendTo("#content ul");
+            var dummyFolder,
+                html = '<li class="data-row new-folder" data-type="folder">' +
+                            '<span class="sprite sprite-folder-open"></span>' +
+                            '<span class="folder-link entry-link"></span>' +
+                        '</li>';
+
+            if ($("#empty").length > 0)
+                $("#content").html("<ul>" + getHeaderHTML() + html + "</ul>");
+            else
+                $(html).appendTo("#content ul");
+            dummyFolder = $(".data-row.new-folder");
             entryRename(dummyFolder, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
@@ -1239,12 +1245,7 @@
     function loadContent(html) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
-        $('<div class="file-header">' +
-            '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
-            '<span class="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
-            '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
-            '<span class="header-spacer"></span>' +
-        '</div>').prependTo(html);
+        $(getHeaderHTML()).prependTo(html);
 
         requestAnimation(function () {
             if (nav === "same") {
@@ -1666,6 +1667,15 @@
         "xml":      ["xml"],
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
+
+    function getHeaderHTML() {
+        return '<div class="file-header">' +
+                    '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
+                    '<span class="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
+                    '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
+                    '<span class="header-spacer"></span>' +
+                '</div>';
+    }
 
     function timeDifference(previous) {
         var msPerMinute = 60 * 1000,
