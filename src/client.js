@@ -1365,12 +1365,16 @@
 
         // Edit a file/folder in a text editor
         $("#entry-menu .edit").register("click", function (event) {
+            $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
                 view = entry.parents("#content-container"),
                 url = entry.find(".file-link").attr("href"),
                 doc = $(
                     '<div class="document" style="display:none">' +
-                        '<div class="exit"></div>' +
+                        '<div class="sidebar">' +
+                            '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
+                            '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
+                        '</div>' +
                         '<div class="text-editor">' +
                             '<pre></pre>' +
                         '</div>' +

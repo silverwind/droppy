@@ -606,40 +606,65 @@ input:-webkit-autofill {
 /* ============================ Document Previewer ============================ */
 .document {
     position: absolute;
-    top:    10px;
-    bottom: 10px;
-    left:   10px;
-    right:  10px;
-    background: #dbdbdb;
+    top:    .25em;
+    bottom: .25em;
+    left:   .25em;
+    right:  .25em;
+    background: #181818;
+    padding: 1em;
+    border-radius: 6px;
 }
 
-.document .exit {
+#center-box.out { opacity: 0; top: 60% }
+
+.document svg {
+    fill: #ccc;
+    height: 1em;
+    width: 1em;
+    margin-left: 1em;
+    transition: all .2s ease;
+}
+
+.document .sidebar {
     position: absolute;
-    width: 2em;
-    height: 2em;
-    border-radius: 1em;
-    top: -10px;
-    right: -10px;
-    background: red;
-    z-index: 1;
+    top: 1em;
+    width: 3em;
+    bottom: 1em;
+    right: 0;
 }
-.document .exit:hover {
-    cursor: pointer;
+.document span {
+    display: block;
+    text-align: center;
+    opacity: 0;
+    transition: all .2s ease;
+    margin-bottom: .25em;
+    font-size: .8em;
 }
+
+.document .exit:hover svg { fill: #e33 }
+.document .exit:hover span { color: #e33; opacity: 1 }
+
+.document .save:hover svg { fill: #ae5 }
+.document .save:hover span { color: #ae5; opacity: 1 }
+
+.document .save:hover, .document .exit:hover { cursor: pointer }
 
 /* ============================ Text Editor ============================ */
 .document .text-editor {
     position: relative;
-    margin: 0 4em;
+    margin: 0 2em;
     overflow: auto;
-    height:100%;
-    width: calc(100% - 8em);
+    height: 100%;
+    width: calc(100% - 4em);
 }
 
 .document .text-editor>pre {
     margin: 0;
-    background: white;
-    font-size: 1em;
+    font-size: .6em;
+    background: #333;
+    box-shadow: 0 0 1px #555;
+    padding: .5em;
+    color: #eee;
 }
 
 /* ============================ Upload Progress ============================ */
