@@ -1378,15 +1378,12 @@ input[type="checkbox"] { display: none }
 }
 
 #paste {
-    flex: 0 0 auto;
+    flex: 0 0 10em;
     order: 2;
-    background-image: linear-gradient(#111,#222);
-    line-height: 1.5em;
     overflow: hidden;
     z-index: 32;
-    width: 100%;
+    line-height: 1.5em;
     text-align: center;
-    bottom: 0;
     color: #eee;
     cursor: pointer;
     opacity: 1;
@@ -1397,8 +1394,8 @@ input[type="checkbox"] { display: none }
 @media all and (max-width: 1023px) { #paste { font-size: .9em } }
 @media all and (max-width:  639px) { #paste { font-size: .8em } }
 
-#paste:hover {color: #ae5 }
-#paste.in  { flex-basis: 1.5em }
+#paste:hover {color: #f71 }
+#paste.in  { flex-basis: 1.25em }
 #paste.out { flex-basis: 0 }
 
 #paste svg {
@@ -1406,8 +1403,9 @@ input[type="checkbox"] { display: none }
     width: 1em;
     fill: #eee;
     margin-right: .25em;
+    transition: all .2s ease;
 }
-#paste:hover svg {fill: #ae5}
+#paste:hover svg {fill: #f71}
 
 #click-catcher {
     background: #000;
