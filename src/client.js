@@ -537,9 +537,9 @@
         $("#create-folder").register("click", function () {
             var dummyFolder, wasEmpty,
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
-                            '<span class="sprite sprite-folder-open"></span>' +
-                            '<span class="folder-link entry-link"></span>' +
-                        '</li>';
+                                '<span class="sprite sprite-folder-open"></span>' +
+                                '<span class="folder-link entry-link"></span>' +
+                            '</li>';
 
             if ($("#empty").length > 0) {
                 $("#content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
