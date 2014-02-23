@@ -537,7 +537,7 @@
         $("#create-folder").register("click", function () {
             var dummyFolder = $('<li class="data-row new-folder" data-type="folder">' +
                                     '<span class="sprite sprite-folder"></span>' +
-                                    '<span class="folderlink">New Folder</span>' +
+                                    '<span class="folder-link entry-link"></span>' +
                                 '</li>');
             dummyFolder.appendTo("#content ul");
             entryRename(dummyFolder, function (success, oldVal, newVal) {
@@ -912,19 +912,18 @@
         var namer, canSubmit, exists, valid, inputText;
         // Populate active files list
         droppy.activeFiles = [];
-        $(".filelink, .folderlink").each(function () {
+        $(".entry-link").each(function () {
             $(this).removeClass("editing invalid");
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
 
         // Hide menu, click-catcher and the original link, stop any previus edits
         $("#click-catcher").trigger("mousemove");
-        var link = entry.find(".folderlink, .filelink");
-        link.hide();
+        var link = entry.find(".entry-link");
 
         // Add inline elements
-        link.after($('<input id="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>'));
-        namer = $("#inline-namer");
+        namer = $('<input id="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>');
+        link.after(namer);
 
         entry.addClass("editing");
 
@@ -934,7 +933,7 @@
             exists = false;
             for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
                 if (droppy.activeFiles[i] === inputText.toLowerCase()) { exists = true; break; }
-            canSubmit = valid && !exists;
+            canSubmit = valid && (!exists || inputText === namer.attr("placeholder"));
             // TODO: Better indicator of what's wrong
             if (!canSubmit)
                 entry.addClass("invalid");
@@ -969,7 +968,6 @@
         }
         function stopEdit() {
             $("#inline-namer, #inline-submit").remove();
-            $(".filelink").show();
             entry.removeClass("editing invalid");
         }
     }
@@ -1207,7 +1205,7 @@
                     list.append(
                         '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="filelink" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                            '<a class="file-link entry-link" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1220,7 +1218,7 @@
                     list.append(
                         '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
                             '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
-                            '<span class="folderlink">' + file + '</span>' +
+                            '<span class="folder-link entry-link">' + file + '</span>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1325,7 +1323,7 @@
         // Cut a file/folder
         $("#entry-menu .cut").register("click", function (event) {
             var entry = $("#entry-menu").data("target");
-            droppy.clipboard = ["cut", entry.data("id"), entry.find(".filelink, .folderlink").text()];
+            droppy.clipboard = ["cut", entry.data("id"), entry.find(".entry-link").text()];
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
             event.stopPropagation();
@@ -1334,7 +1332,7 @@
         // Copy a file/folder
         $("#entry-menu .copy").register("click", function (event) {
             var entry = $("#entry-menu").data("target");
-            droppy.clipboard = ["copy", entry.data("id"), entry.find(".filelink, .folderlink").text()];
+            droppy.clipboard = ["copy", entry.data("id"), entry.find(".entry-link").text()];
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
             event.stopPropagation();
@@ -1343,7 +1341,7 @@
         // Open a file/folder in browser
         $("#entry-menu .open").register("click", function (event) {
             var entry = $("#entry-menu").data("target"),
-                url = entry.find(".filelink").attr("href").replace(/^\/~\//, "/_/"),
+                url = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
                 type = $("#entry-menu").attr("class").match(/type\-(\w+)/),
                 win;
             if (type) {
@@ -1388,7 +1386,7 @@
         });
 
         // Stop navigation when clicking on an <a>
-        $(".data-row .zip, .filelink").register("click", function (event) {
+        $(".data-row .zip, .entry-link.file").register("click", function (event) {
             if (droppy.socketWait) return;
             event.stopPropagation();
 
@@ -1457,7 +1455,7 @@
         }
         if (droppy.sorting.col === "name") {
             var type = compare($(b).data("type"), $(a).data("type")),
-                text = compare($(a).find(".filelink, .folderlink").text(), $(b).find(".filelink, .folderlink").text().toUpperCase());
+                text = compare($(a).find(".entry-link").text(), $(b).find(".entry-link").text().toUpperCase());
             return (type !== 0) ? type : text;
         } else if (droppy.sorting.col === "mtime") {
             return compare($(a).find(".mtime").data("timestamp"), $(b).find(".mtime").data("timestamp"));
@@ -1468,7 +1466,7 @@
 
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
-        var source = playButton.parent().parent().find(".filelink").attr("href");
+        var source = playButton.parent().parent().find(".file-link").attr("href");
         play(source, playButton);
     }
 
@@ -1480,7 +1478,7 @@
             return;
         }
 
-        $(".filelink").parent().removeClass("playing").removeClass("paused");
+        $(".file-link").parent().removeClass("playing").removeClass("paused");
         $(".icon-play").html(droppy.svg.play);
 
         if (decodeURI(player.src).indexOf(source) > 0) {

@@ -344,6 +344,8 @@ input:-webkit-autofill {
 .data-row.editing { background: #fff }
 .data-row.editing.invalid { background: #fdd }
 
+.data-row.editing .entry-link { display: none; }
+
 .data-row, .data-row a {
     color: #333;
 }
@@ -370,19 +372,19 @@ input:-webkit-autofill {
    50%      { transform: translateY(3px) }
 }
 
-.filelink, .folderlink {
+.entry-link {
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: top;
     white-space: nowrap;
     cursor: pointer;
 }
-.filelink, .folderlink, #inline-namer {
+.entry-link, #inline-namer {
     padding: 0 .25em;
     flex: 1 1;
     display: inline-block;
 }
-@media all and (max-width: 639px) { .filelink, .folderlink, #inline-namer { padding: 0 .125em } }
+@media all and (max-width: 639px) { .entry-link, #inline-namer { padding: 0 .125em } }
 
 #inline-namer { background: transparent }
 
