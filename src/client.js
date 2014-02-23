@@ -536,7 +536,7 @@
 
         $("#create-folder").register("click", function () {
             var dummyFolder = $('<li class="data-row new-folder" data-type="folder">' +
-                                    '<span class="sprite sprite-folder"></span>' +
+                                    '<span class="sprite sprite-folder-open"></span>' +
                                     '<span class="folder-link entry-link"></span>' +
                                 '</li>');
             dummyFolder.appendTo("#content ul");
@@ -968,6 +968,7 @@
         }
         function stopEdit() {
             $("#inline-namer, #inline-submit").remove();
+            $(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
         }
     }
