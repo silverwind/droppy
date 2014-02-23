@@ -1,6 +1,6 @@
 "use strict";
 
-(function ($, window, document) {
+(window.dr = function ($, window, document) {
     var droppy = {};
     initVariables();
 // ============================================================================
@@ -76,6 +76,23 @@
                window.webkitRequestAnimationFrame ||
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
+
+// ============================================================================
+//  View handling
+// ============================================================================
+    function getView(id) {
+        if(!droppy.views) updateViews();
+        if (id && droppy.views[id]) return $(droppy.views[id])
+        else return $(droppy.views[0]);
+    }
+
+    function updateViews() {
+        droppy.views = $(".view");
+        droppy.views.each( function(index, elem) {
+            elem.vId = index;
+        });
+    }
+
 // ============================================================================
 //  Page loading functions
 // ============================================================================
@@ -172,7 +189,7 @@
             if (queuedData)
                 sendMessage();
             else
-                updateLocation(droppy.currentFolder || "/", false); // Request initial update
+                updateLocation(getView(0), getView(0)[0].currentFolder || "/", false); // Request initial update
         };
 
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
@@ -191,11 +208,12 @@
 
         droppy.socket.onmessage = function (event) {
             droppy.socketWait = false;
-            var msg = JSON.parse(event.data);
+            var msg = JSON.parse(event.data),
+                vId = msg.viewId;
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
-                updateData(msg.folder, msg.data);
+                updateData(getView(vId), msg.folder, msg.data);
                 droppy.ready = false;
                 break;
             case "UPDATE_SIZES":
@@ -228,18 +246,18 @@
                 break;
             case "UPLOAD_DONE":
                 if (droppy.zeroFiles.length) {
-                    sendMessage("ZERO_FILES", droppy.zeroFiles);
+                    sendMessage(vId, "ZERO_FILES", droppy.zeroFiles);
                     droppy.zeroFiles = [];
                 } else {
                     droppy.isUploading = false;
-                    updateTitle(droppy.currentFolder, true);
+                    updateTitle(getView()[0].currentFolder, true);
                     $("#upload-info").attr("class", "out");
                     hideSpinner();
                 }
                 break;
             case "NEW_FOLDER":
                 if (droppy.isUploading) return;
-                updateData(msg.folder, msg.data);
+                updateData(getView(vId), msg.folder, msg.data);
                 hideSpinner();
                 break;
             case "UPDATE_CSS":
@@ -256,7 +274,7 @@
         };
     }
 
-    function sendMessage(msgType, msgData) {
+    function sendMessage(vId, msgType, msgData) {
         if (droppy.socket.readyState === 1) { // open
             // Lock the UI while we wait for a socket response
             droppy.socketWait = true;
@@ -270,7 +288,7 @@
                 droppy.socket.send(queuedData);
                 queuedData = false;
             } else
-                droppy.socket.send(JSON.stringify({type: msgType, data: msgData}));
+                droppy.socket.send(JSON.stringify({type: msgType, vId: vId, data: msgData}));
         } else {
             // We can't send right now, so queue up the last added message to be sent later
             queuedData = JSON.stringify({type: msgType, data: msgData});
@@ -365,7 +383,7 @@
 // ============================================================================
     function initMainPage() {
         // Initialize the current folder, in case the user navigated to it through the URL.
-        droppy.currentFolder = decodeURIComponent(window.location.pathname);
+        getView()[0].currentFolder = decodeURIComponent(window.location.pathname);
 
         // Open the WebSocket
         openSocket();
@@ -540,11 +558,12 @@
                                     '<span class="folder-link entry-link"></span>' +
                                 '</li>');
             dummyFolder.appendTo("#content ul");
+            var view = dummyFolder.parents(".view");
             entryRename(dummyFolder, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
-                    sendMessage("CREATE_FOLDER",
-                        droppy.currentFolder === "/" ? "/" + newVal : droppy.currentFolder + "/" + newVal
+                    sendMessage(0, "CREATE_FOLDER",
+                        view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal
                     );
                 }
                 dummyFolder.remove();
@@ -564,7 +583,7 @@
         $("#config").register("click", function () {
             requestAnimation(function () {
                 configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
-                sendMessage("GET_USERS");
+                sendMessage(null, "GET_USERS");
                 toggleCatcher();
             });
         });
@@ -574,7 +593,7 @@
             var user = window.prompt("Username?");
             var pass = window.prompt("Password?");
             if (!user || !pass) return;
-            sendMessage("UPDATE_USER", {
+            sendMessage(null, "UPDATE_USER", {
                 name: user,
                 pass: pass,
                 priv: true
@@ -602,7 +621,7 @@
             }
 
             users.forEach(function (user) {
-                sendMessage("UPDATE_USER", user);
+                sendMessage(null, "UPDATE_USER", user);
             });
             configbox.attr("class", "out");
             toggleCatcher();
@@ -730,7 +749,7 @@
         function playing() {
             var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
             droppy.isPlaying = true;
-            updateTitle(droppy.currentFolder, true);
+            updateTitle(getView()[0].currentFolder, true);
             updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
             controls.attr("class", "in");
             fullyLoaded = false;
@@ -748,7 +767,7 @@
                 droppy.audioUpdater = null;
             }
             droppy.isPlaying = false;
-            updateTitle(droppy.currentFolder, true);
+            updateTitle(getView()[0].currentFolder, true);
             setTimeout(function () {
                 if (!droppy.isPlaying) {
                     controls.attr("class", "out");
@@ -765,7 +784,7 @@
         //  Helper functions for the main page
         // ============================================================================
         var numFiles, formLength;
-        function upload(data) {
+        function upload(view, data) {
             var formData = new FormData();
             droppy.zeroFiles = [];
             numFiles = 0;
@@ -776,7 +795,7 @@
                 for (var i = 0, len = data.length; i < len; i++) {
                     var filename = encodeURIComponent(data[i].name);
                     numFiles++;
-                    droppy.currentData[filename] = {
+                    getView()[0].currentData[filename] = {
                         size  : data[i].size,
                         type  : "nf",
                         mtime : Date.now()
@@ -800,7 +819,7 @@
                         switch (Object.prototype.toString.call(data[path])) {
                         case "[object Object]":
                             if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                                droppy.currentData[name] = {
+                                getView()[0].currentData[name] = {
                                     size : 0,
                                     type : "nd",
                                     mtime : Date.now()
@@ -811,7 +830,7 @@
                         case "[object File]":
                             numFiles++;
                             if (!addedDirs[name]) {
-                                droppy.currentData[name] = {
+                                getView()[0].currentData[name] = {
                                     size  : data[path].size,
                                     type  : "nf",
                                     mtime : Date.now()
@@ -824,7 +843,7 @@
             }
 
             // Load the new files into view, tagged
-            buildHTML(droppy.currentData, droppy.currentFolder, true);
+            buildHTML(view, getView()[0].currentData, getView()[0].currentFolder, true);
 
             // Create the XHR2 and bind the progress events
             var xhr = new XMLHttpRequest();
@@ -853,7 +872,7 @@
                 xhr.open("POST", "/upload");
                 xhr.send(formData);
             } else if (droppy.zeroFiles.length) {
-                sendMessage("ZERO_FILES", droppy.zeroFiles);
+                sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
             }
         }
 
@@ -1024,7 +1043,7 @@
                     var children = this.parentNode.childNodes;
                     for (var i = 0, l = children.length; i < l; i++) {
                         if (children[i].className === "user-name") {
-                            sendMessage("UPDATE_USER", { name: children[i].innerHTML, pass: ""});
+                            sendMessage(null, "UPDATE_USER", { name: children[i].innerHTML, pass: ""});
                             break;
                         }
                     }
@@ -1036,14 +1055,17 @@
         }
     }
     // Update data as received from the server
-    function updateData(folder, data) {
-        if (folder !== droppy.currentFolder)
-            updateLocation(folder);
+    function updateData(view, folder, data) {
+        if (folder !== view[0].currentFolder)
+            updateLocation(view, folder);
 
-        updateTitle(folder, true);
-        updatePath(folder);
-        droppy.currentData = data;
-        buildHTML(data, folder);
+        if (view[0].vId === 0) {
+            updateTitle(folder, true);
+            updatePath(view, folder);
+        }
+
+        view[0].currentData = data;
+        buildHTML(view, data, folder);
         hideSpinner();
     }
 
@@ -1064,10 +1086,10 @@
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
-
+        var view = $(".view:first");
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000)
-                updateLocation(decodeURIComponent(window.location.pathname), true, true);
+                updateLocation(view, decodeURIComponent(window.location.pathname), true, true);
             else
                 setTimeout(queue, 50, time + 50);
         })(0);
@@ -1075,29 +1097,31 @@
 
     // Update our current location and change the URL to it
     var nav;
-    function updateLocation(path, doSwitch, skipPush) {
+    function updateLocation(view, path, doSwitch, skipPush) {
+        // Close any open documents if switching directories
+        closeDoc(view);
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
                 showSpinner();
 
                 // Find the direction in which we should animate
-                if (path.length > droppy.currentFolder.length) nav = "forward";
-                else if (path.length === droppy.currentFolder.length) nav = "same";
+                if (path.length > view[0].currentFolder.length) nav = "forward";
+                else if (path.length === view[0].currentFolder.length) nav = "same";
                 else nav = "back";
 
-                droppy.currentFolder = path;
-                sendMessage(doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", droppy.currentFolder);
+                view[0].currentFolder = path;
+                sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", view[0].currentFolder);
 
                 // Skip the push if we're already navigating through history
-                if (!skipPush) window.history.pushState(null, null, droppy.currentFolder);
+                if (!skipPush) window.history.pushState(null, null, view[0].currentFolder);
             } else
                 setTimeout(queue, 50, time + 50);
         })(0);
     }
 
     // Update the path indicator
-    function updatePath(path) {
+    function updatePath(view, path) {
         var parts = path.split("/");
         var i = 0, len;
 
@@ -1138,7 +1162,7 @@
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path || "/");
             li.click(function () {
-                updateLocation($(this).data("destination"), true);
+                updateLocation(view, $(this).data("destination"), true);
             });
 
             $("#path").append(li);
@@ -1178,7 +1202,7 @@
     }
 
     // Convert the received data into HTML
-    function buildHTML(fileList, root, isUpload) {
+    function buildHTML(view, fileList, root, isUpload) {
         var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes;
 
         for (var file in fileList) {
@@ -1232,11 +1256,11 @@
         }
 
         $(list).children("li").sort(sortFunc).appendTo(list);
-        loadContent($(list).children("li").length > 0 ? list : false);
+        loadContent(view, $(list).children("li").length > 0 ? list : false);
     }
 
     // Load generated list into view with an animation
-    function loadContent(html) {
+    function loadContent(view, html) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
         $('<div class="file-header">' +
@@ -1248,46 +1272,47 @@
 
         requestAnimation(function () {
             if (nav === "same") {
-                $("#content").attr("class", "center");
-                $("#content").html(html || emptyPage);
+                view.find("#content").attr("class", "center");
+                view.find("#content").html(html || emptyPage);
             } else {
-                $("#content-container").append($("<div id='newcontent' class='" + nav + "'></div>"));
-                $("#newcontent").html(html || emptyPage);
+                view.append($("<div id='newcontent' class='" + nav + "'></div>"));
+                view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
-                $(".data-row").addClass("animating");
-                $("#content").attr("class", (nav === "forward") ? "back" : "forward");
-                $("#newcontent").setTransitionClass("center");
+                view.find(".data-row").addClass("animating");
+                view.find("#content").attr("class", (nav === "forward") ? "back" : "forward");
+                view.find("#newcontent").setTransitionClass("center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     droppy.isAnimating = false;
-                    $("#content").remove();
-                    $("#newcontent").attr("id", "content");
-                    $(".data-row").removeClass("animating");
+                    view.find("#content").remove();
+                    view.find("#newcontent").attr("id", "content");
+                    view.find(".data-row").removeClass("animating");
                 }, 200);
             }
 
-            bindEvents();
+            bindEvents(view);
             nav = "same";
         });
     }
 
     // Bind click events to the list elements
-    function bindEvents() {
+    function bindEvents(view) {
         // Upload button on empty page
-        $("#empty").register("click", function () {
+        view.find("#empty").register("click", function () {
             if (droppy.detects.fileinputdirectory)
                 $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
             $("#file").click();
         });
 
         // Switch into a folder
-        $(".data-row[data-type='folder']").register("click", function () {
+        view.find(".data-row[data-type='folder']").register("click", function () {
             if (droppy.socketWait) return;
-            var destination = $(this).data("id");
-            updateLocation(destination, true);
+            var destination = $(this).data("id"),
+                view = $(this).parents(".view");
+            updateLocation(view, destination, true);
         });
 
-        $(".data-row .entry-menu").register("click", function (event) {
+        view.find(".data-row .entry-menu").register("click", function (event) {
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class");
 
@@ -1315,7 +1340,7 @@
             entryRename(entry, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
-                    sendMessage("RENAME", { "old": oldVal, "new": newVal });
+                    sendMessage(null, "RENAME", { "old": oldVal, "new": newVal });
                 }
             });
             event.stopPropagation();
@@ -1376,12 +1401,12 @@
         $("#paste").register("click", function (event) {
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
-                if (droppy.clipboard[1] !== droppy.currentFolder + '/' + droppy.clipboard[2]) {
+                if (droppy.clipboard[1] !== getView()[0].currentFolder + '/' + droppy.clipboard[2]) {
                     showSpinner();
-                    sendMessage("CLIPBOARD", {
+                    sendMessage(null, "CLIPBOARD", {
                         "type": droppy.clipboard[0],
                         "from": droppy.clipboard[1],
-                        "to": droppy.currentFolder + '/' + droppy.clipboard[2]
+                        "to": getView()[0].currentFolder + '/' + droppy.clipboard[2]
                     });
                 }
             } else {
@@ -1410,13 +1435,13 @@
         // Request a shortlink
         $(".data-row .shortlink").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage("REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
+            sendMessage(null, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
         });
 
         // Delete a file/folder
         $("#entry-menu .delete").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage("DELETE_FILE", $("#entry-menu").data("target").data("id"));
+            sendMessage(null, "DELETE_FILE", $("#entry-menu").data("target").data("id"));
             $("#click-catcher").trigger("click");
         });
 
@@ -1479,6 +1504,15 @@
         var source = playButton.parent().parent().find(".file-link").attr("href");
         play(source, playButton);
     }
+
+    function closeDoc(view) {
+        var doc = view.find(".document")
+        doc.removeClass("in").addClass("out");
+        setTimeout(function () {
+            doc.remove();
+        }, 500);
+    }
+
     function editFile(view, entryId) {
         var url = "/_" + entryId,
             filename = entryId.match(/\/(.+$)/)[1],
@@ -1503,11 +1537,32 @@
             success : function (data) {
                 // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
                 // $.getScript()
-                
+                var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
+                    mode = (function () {
+                        // If extension is different than modetype
+                        switch(ext){
+                        case "coffee":
+                        case "litcoffee":
+                            return "coffeescript"
+                        case "js":
+                        case "json":
+                            return "javascript"
+                        case "html":
+                            return "htmlmixed"
+                        case "md":
+                            return "markdown"
+                        default:
+                            return ext;
+                        }
+                    })();
                 if (editing) {
                     editor = doc.find(".text-editor textarea");
                     editor.val(data);
-                    editor = CodeMirror.fromTextArea(editor[0]);
+                    editor = CodeMirror.fromTextArea(editor[0], {
+                        styleSelectedText: true,
+                        showCursorWhenSelecting: true,
+                        mode: mode
+                    });
                 } else {
                     // Use run mode here
                     doc.find(".text-editor pre").text(data);
@@ -1516,15 +1571,12 @@
                     doc.removeClass("out").addClass("in");
                 }, 50);
                 doc.find(".exit").register("click", function () {
-                    doc.removeClass("in").addClass("out");
-                    setTimeout(function () {
-                        doc.remove();
-                    }, 500);
+                    closeDoc(view);
                 });
                 doc.find(".save").register("click", function () {
                     showSpinner();
                     doc.removeClass("dirty");
-                    sendMessage("SAVE_FILE", {
+                    sendMessage(null, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
                     });
@@ -1590,8 +1642,6 @@
     function initVariables() {
         droppy.activeFiles = [];
         droppy.audioUpdater = null;
-        droppy.currentData = null;
-        droppy.currentFolder = null;
         droppy.debug = null;
         droppy.hasLoggedOut = null;
         droppy.isAnimating = null;

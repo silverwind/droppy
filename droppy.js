@@ -58,12 +58,26 @@
         mode      = {file: "644", dir: "755"},
         isCLI      = (process.argv.length > 2),
         // Resources
+        cmPath = "lib/CodeMirror/",
         resources = {
-            css  : ["lib/CodeMirror/lib/codemirror.css", "src/style.css", "src/sprites.css"],
-            js   : ["node_modules/jquery/dist/jquery.js", "src/client.js",
-                    "lib/CodeMirror/lib/codemirror.js", "lib/CodeMirror/addon/runmode/runmode.js"],
+            css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
+            js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
             html : ["src/base.html", "src/auth.html", "src/main.html"]
         };
+
+        // Add CodeMirror source paths
+        // Addons
+        ["selection/active-line.js", "selection/mark-selection.js"]
+        .forEach(function (relPath) {
+            resources.js.push(cmPath + "addon/" + relPath);
+        });
+        // Modes
+        ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js",
+            "htmlmixed/htmlmixed.js", "htmlembedded/htmlembedded.js", "jade/jade.js",
+            "markdown/markdown.js", "php/php.js"]
+        .forEach(function (relPath) {
+            resources.js.push(cmPath + "mode/" + relPath);
+        });
 
     // Argument handler
     if (isCLI) handleArguments();
@@ -358,9 +372,10 @@
     // WebSocket functions
     function setupSocket(server) {
         new Wss({server : server}).on("connection", function (ws) {
-            var remoteIP   = ws.upgradeReq.headers["x-real-ip"]   || ws._socket.remoteAddress;
-            var remotePort = ws.upgradeReq.headers["x-real-port"] || ws._socket.remotePort;
-            var cookie     = getCookie(ws.upgradeReq.headers.cookie);
+            var remoteIP   = ws.upgradeReq.headers["x-real-ip"]   || ws._socket.remoteAddress,
+                remotePort = ws.upgradeReq.headers["x-real-port"] || ws._socket.remotePort,
+                cookie     = getCookie(ws.upgradeReq.headers.cookie),
+                client;
 
             if (!cookie) {
                 ws.close(4000);
@@ -368,24 +383,23 @@
                 return;
             } else {
                 log.log(log.socket(remoteIP, remotePort), " WebSocket ", "connected");
-                if (!clients[cookie]) {
-                    clients[cookie] = {};
-                    clients[cookie].ws = ws;
-                }
+                clients[cookie] = clients[cookie] || { v: [{}], ws: ws };
+                if (clients[cookie].ws === null) clients[cookie].ws = ws;
+                client = clients[cookie];
             }
-
+            // BEFORE HERE
             ws.on("message", function (message) {
-                var msg = JSON.parse(message);
+                var msg = JSON.parse(message),
+                    vId = msg.vId;
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
-                    clients[cookie] = {
-                        directory: msg.data,
-                        ws: ws
+                    client.v[vId] = {
+                        directory: msg.data
                     };
-                    readDirectory(clients[cookie].directory, function () {
-                        sendFiles(cookie, "UPDATE_FILES");
+                    readDirectory(client.v[vId].directory, function () {
+                        sendFiles(cookie, vId, "UPDATE_FILES");
                     });
-                    updateWatchers(clients[cookie].directory);
+                    updateWatchers(client.v[vId].directory);
                     break;
                 case "REQUEST_SHORTLINK":
                     // Check if we already have a link for that file
@@ -487,7 +501,7 @@
                     });
                     break;
                 case "RENAME":
-                    var clientpath = clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/";
+                    var clientpath = client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/";
                     var newname = clientpath + msg.data.new,
                         oldname = clientpath + msg.data.old;
                     if (/[\\\*\{\}\/\?\|<>"]/.test(msg.data.new) || /^(\.+)$/.test(msg.data.new)) {
@@ -502,12 +516,12 @@
                     break;
                 case "SWITCH_FOLDER":
                     if (!/^\//.test(msg.data) || /^(\.+)$/.test(msg.data)) return;
-                    clients[cookie].directory = msg.data;
+                    client.v[vId].directory = msg.data;
                     updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read
-                        if (!ok) clients[cookie].directory = "/";
-                        readDirectory(clients[cookie].directory, function () {
-                            sendFiles(cookie, ok ? "UPDATE_FILES" : "NEW_FOLDER");
+                        if (!ok) client.v[vId].directory = "/";
+                        readDirectory(client.v[vId].directory, function () {
+                            sendFiles(cookie, vId, ok ? "UPDATE_FILES" : "NEW_FOLDER");
                         });
                     });
                     break;
@@ -535,12 +549,12 @@
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
-                        var p = addFilePath(clients[cookie].directory === "/" ? "/" : clients[cookie].directory + "/") + decodeURIComponent(file);
+                        var p = addFilePath(client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/") + decodeURIComponent(file);
                         wrench.mkdirSyncRecursive(path.dirname(p), mode.dir);
                         fs.writeFileSync(p, "", {mode: mode.file});
                         log.log(log.socket(remoteIP, remotePort), " Received: " + removeFilePath(p).substring(1));
                     });
-                    send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
+                    send(client.ws, JSON.stringify({ type : "UPLOAD_DONE" }));
                     break;
                 }
             });
@@ -567,11 +581,11 @@
     //-----------------------------------------------------------------------------
     // Send a WS event to the client containing an file list update
     var updateFuncs = {};
-    function sendFiles(cookie, eventType, force) {
+    function sendFiles(cookie, vId, eventType, force) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
 
         var func = function (cookie, eventType) {
-            var dir = clients[cookie].directory;
+            var dir = clients[cookie].v[vId].directory; // TODO more than one view
             var data = JSON.stringify({
                 type   : eventType,
                 folder : dir,
@@ -685,15 +699,17 @@
         var relativeDir = removeFilePath(directory);
         var watcher = fs.watch(directory, utils.throttle(function () {
             var clientsToUpdate = [];
-            for (var client in clients) {
-                if (clients.hasOwnProperty(client)) {
-                    if (clients[client].directory === relativeDir) {
-                        clientsToUpdate.push(client);
+            for (var cookie in clients) {
+                var client = clients[cookie];
+                for (var vId = client.v.length - 1; vId >= 0; vId--) {
+                    if (client.v[vId].directory === relativeDir) {
+                        clientsToUpdate.push({cookie:cookie, vId:vId});
                     }
-                }
+                };
             }
             readDirectory(relativeDir, function () {
-                sendFiles(clientsToUpdate.pop(), "UPDATE_FILES");
+                var cv = clientsToUpdate.pop();
+                sendFiles(cv.cookie, cv.vId, "UPDATE_FILES");
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
@@ -728,9 +744,12 @@
     // Check if we need the other active watchers
     function checkWatchedDirs() {
         var neededDirs = {};
-        for (var client in clients) {
-            if (clients.hasOwnProperty(client)) {
-                neededDirs[clients[client].directory] = true;
+        for (var cookie in clients) {
+            if (clients.hasOwnProperty(cookie)) {
+                var client = clients[cookie];
+                for (var vId = client.v.length - 1; vId >= 0; vId--) {
+                    neededDirs[client.v[vId].directory] = true;
+                };
             }
         }
 
@@ -848,8 +867,8 @@
                     if (URI.charAt(URI.length - 1) === "/")
                         URI = URI.substring(0, URI.length - 1);
 
-                    if (!clients[cookie]) clients[cookie] = {};
-                    clients[cookie].directory = URI;
+                    clients[cookie] = { ws:null, v:[{}] };
+                    clients[cookie].v[0].directory = URI;
                     updateWatchers(URI);
                 } else {
                     res.statusCode = 301;
@@ -1068,7 +1087,7 @@
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-                dst = path.join(config.filesDir, clients[cookie].directory, dstRelative),
+                dst = path.join(config.filesDir, clients[cookie].v[0].directory, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
             files[dstRelative] = {
@@ -1085,7 +1104,7 @@
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                     fs.rename(files[name].src, files[name].dst, function () {
-                        log.log(socket, " Received: " + clients[cookie].directory.substring(1) + "/" + name);
+                        log.log(socket, " Received: " + clients[cookie].v[0].directory.substring(1) + "/" + name);
                     });
                 })(names.pop());
             }
@@ -1165,9 +1184,9 @@
             for (var i = 0, l = results.length; i < l; i++)
                 sizeList[path.basename(tmpDirs[i])] = results[i];
 
-            for (var client in clients) {
-                if (clients.hasOwnProperty(client) && clients[client].directory === root) {
-                    send(clients[client].ws, JSON.stringify({
+            for (var cookie in clients) {
+                if (clients.hasOwnProperty(cookie) && clients[cookie].v[0].directory === root) {
+                    send(clients[cookie].ws, JSON.stringify({
                         type   : "UPDATE_SIZES",
                         folder : root,
                         data   : sizeList
@@ -1421,14 +1440,14 @@
             temp += fs.readFileSync(file).toString("utf8") + "\n";
         });
         cssCache = ap("last 2 versions").process(temp).css;
-        for (var client in clients) {
-            if (clients.hasOwnProperty(client)) {
+        for (var cookie in clients) {
+            if (clients.hasOwnProperty(cookie)) {
                 var data = JSON.stringify({
                     "type"  : "UPDATE_CSS",
                     "css"   : cssCache
                 });
-                if (clients[client].ws && clients[client].ws.readyState === 1) {
-                    clients[client].ws.send(data, function (error) {
+                if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
+                    clients[cookie].ws.send(data, function (error) {
                         if (error) log.error(error);
                     });
                 }

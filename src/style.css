@@ -615,7 +615,9 @@ input:-webkit-autofill {
 
 /* ============================ Document Previewer ============================ */
 .document {
-    position: fixed;
+    position: absolute;
+    z-index: 1;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -623,10 +625,6 @@ input:-webkit-autofill {
     padding: .5em;
     transition: all .5s ease;
 }
-
-@media all and (min-width: 1024px) { .document { top: 74px; } .document.out { top: 94px } }
-@media all and (max-width: 1023px) { .document { top: 64px; } .document.out { top: 64px } }
-@media all and (max-width:  639px) { .document { top: 54px; } .document.out { top: 54px } }
 
 .document.in  { opacity: 1; bottom: 0    }
 .document.out { opacity: 0; bottom: -20px }
