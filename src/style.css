@@ -111,11 +111,13 @@ input:-webkit-autofill {
 
 /* TODO: Increase FPS on this transition */
 #content, #newcontent {
+    margin: .25em;
+    width: calc(100% - .5em);
+    border-radius: 4px;
     background: #eee;
     position: absolute;
     padding-top: .25em;
     transition: left .2s ease-in;
-    width: 100%;
 }
 
 /* bottom padding fix for Firefox/IE */
@@ -323,7 +325,7 @@ input:-webkit-autofill {
     display: inline-block;
     text-align: right;
 }
-@media all and (max-width: 320px) { .header-size { display: none } }
+@media all and (max-width: 319px) { .header-size { display: none } }
 
 .header-spacer {
     flex: 0 0 2.667em;
@@ -410,7 +412,7 @@ input:-webkit-autofill {
     display: inline-block;
 }
 
-@media all and (max-width: 320px) { .size { display: none } }
+@media all and (max-width: 319px) { .data-row .size { display: none } }
 
 .size-unit {
     margin: 0 .125em;
@@ -419,7 +421,7 @@ input:-webkit-autofill {
     display: inline-block;
 }
 
-@media all and (max-width: 320px) { .size-unit { display: none } }
+@media all and (max-width: 319px) { .data-row .size-unit { display: none } }
 
 .mtime {
     white-space: nowrap;
@@ -428,7 +430,7 @@ input:-webkit-autofill {
     display: inline-block;
 }
 
-@media all and (max-width: 639px) { .mtime { display: none } }
+@media all and (max-width: 639px) { .data-row  .mtime { display: none } }
 
 .data-row svg {
     display: block;
@@ -443,7 +445,7 @@ input:-webkit-autofill {
     display: block;
 }
 
-@media all and (max-width: 320px) { .data-row svg { width: 1.1em } }
+@media all and (max-width: 319px) { .data-row svg { width: 1.1em } }
 
 .data-row svg:not(.up-arrow):hover { transform: scale(1.3) }
 
