@@ -1309,7 +1309,7 @@
         });
 
         // Rename a file/folder
-        $("#entry-menu .edit").register("click", function (event) {
+        $("#entry-menu .rename").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target");
             entryRename(entry, function (success, oldVal, newVal) {
@@ -1362,6 +1362,45 @@
             $("#click-catcher").trigger("click");
             event.stopPropagation();
             if (win) win.focus();
+        });
+
+        // Edit a file/folder in a text editor
+        $("#entry-menu .edit").register("click", function (event) {
+            $("#click-catcher").trigger("click");
+            var entry = $("#entry-menu").data("target"),
+                view = entry.parents("#content-container"),
+                url = entry.find(".file-link").attr("href"),
+                doc = $(
+                    '<div class="document out">' +
+                        '<div class="sidebar">' +
+                            '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
+                            '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
+                        '</div>' +
+                        '<div class="text-editor">' +
+                            '<pre></pre>' +
+                        '</div>' +
+                    '</div>'
+                );
+
+            view.find(".document").remove();
+            view.append(doc);
+
+            $.ajax(url, {
+                dataType: "text",
+                complete : function (data) {
+                    doc.find(".text-editor pre").text(data.responseText);
+                    setTimeout(function () {
+                        doc.removeClass("out").addClass("in");
+                    }, 50);
+                    doc.find(".exit").register("click", function () {
+                        doc.removeClass("in").addClass("out");
+                        setTimeout(function () {
+                            doc.remove();
+                        }, 500);
+                    });
+                }
+            });
+
         });
 
         // Paste a file/folder into a folder
@@ -1421,7 +1460,7 @@
 
         });
         // Add missing titles to the SVGs
-        $("#entry-menu .edit").attr("title", "Rename");
+        $("#entry-menu .rename").attr("title", "Rename");
         $("#entry-menu .delete").attr("title", "Delete");
 
         droppy.ready = true;
