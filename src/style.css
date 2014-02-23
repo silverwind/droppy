@@ -605,17 +605,28 @@ input:-webkit-autofill {
 
 /* ============================ Document Previewer ============================ */
 .document {
-    position: absolute;
+    position: fixed;
     bottom: .25em;
-    left:   .25em;
-    right:  .25em;
+    left: .5em;
+    right: .5em;
     background: #181818;
     padding: 1em;
     border-radius: 6px;
     transition: all .5s ease;
 }
-.document.in  { opacity: 1; top: .25em; bottom: .25em; }
-.document.out { opacity: 0; top: 3em; bottom: -2.75em; }
+@media all and (min-width: 1024px) {
+    .document.in  { opacity: 1; top: 4em;   bottom: .25em;   }
+    .document.out { opacity: 0; top: 5em;   bottom: -0.75em; }
+}
+@media all and (max-width: 1023px) {
+    .document.in  { opacity: 1; top: 3.5em; bottom: .25em;   }
+    .document.out { opacity: 0; top: 4.5em; bottom: -0.75em; }
+}
+@media all and (max-width:  639px) {
+    .document { padding: .5em; }
+    .document.in  { opacity: 1; top: 3em;   bottom: .25em;   }
+    .document.out { opacity: 0; top: 4em;   bottom: -0.75em; }
+}
 
 .document svg {
     fill: #ccc;
@@ -651,13 +662,13 @@ input:-webkit-autofill {
 /* ============================ Text Editor ============================ */
 .document .text-editor {
     position: relative;
-    margin: 0 2em;
     height: 100%;
-    width: calc(100% - 4em);
     box-shadow:  0 0 0 2px #444;
     border-radius: 6px;
     overflow-y: auto;
 }
+@media all and (min-width: 640px) { .document .text-editor { width: calc(100% - 2em); } }
+@media all and (max-width: 639px) { .document .text-editor { width: calc(100% - 2.5em); } }
 
 .document .text-editor>pre {
     margin: 0;
