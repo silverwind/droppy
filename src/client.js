@@ -1408,6 +1408,7 @@
         $("#entry-menu .delete").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage("DELETE_FILE", $("#entry-menu").data("target").data("id"));
+            $("#click-catcher").trigger("click");
         });
 
         $(".icon-play").register("click", function () {
