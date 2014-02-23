@@ -93,4 +93,24 @@ These are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls
 In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
 
 ##Systemd
-If you'd like to run droppy as a systemd service, there's a sample service file provided in `examples/droppy.service`
+If you'd like to run droppy as a systemd service, you can use this sample service file:
+
+````ini
+# systemd service file for droppy
+# replace /path/to/droppy with your actual path and User/Group with the intended user to run as
+[Unit]
+Description=droppy
+After=network.target
+
+[Service]
+ExecStart=/bin/env node /path/to/droppy/droppy.js
+WorkingDirectory=/path/to/droppy/
+Restart=always
+StandardOutput=syslog
+User=http
+Group=http
+SyslogIdentifier=droppy
+
+[Install]
+WantedBy=multi-user.target
+````
