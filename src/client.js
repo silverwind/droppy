@@ -1308,7 +1308,7 @@
         });
 
         // Rename a file/folder
-        $("#entry-menu .edit").register("click", function (event) {
+        $("#entry-menu .rename").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target");
             entryRename(entry, function (success, oldVal, newVal) {
@@ -1361,6 +1361,34 @@
             $("#click-catcher").trigger("click");
             event.stopPropagation();
             if (win) win.focus();
+        });
+
+        // Edit a file/folder in a text editor
+        $("#entry-menu .edit").register("click", function (event) {
+            var entry = $("#entry-menu").data("target"),
+                view = entry.parents("#content-container"),
+                url = entry.find(".file-link").attr("href"),
+                doc = $(
+                    '<div class="document" style="display:none">' +
+                        '<div class="exit"></div>' +
+                        '<div class="text-editor">' +
+                            '<pre></pre>' +
+                        '</div>' +
+                    '</div>'
+                );
+
+            view.find(".document").remove();
+            view.append(doc);
+            $.ajax(url, { 
+                complete : function (data) {
+                    doc.find(".text-editor pre").text(data.responseText);
+                    doc.show();
+                    doc.find(".exit").register("click", function () {
+                        doc.remove()
+                    })
+                }
+            });
+
         });
 
         // Paste a file/folder into a folder
@@ -1420,7 +1448,7 @@
 
         });
         // Add missing titles to the SVGs
-        $("#entry-menu .edit").attr("title", "Rename");
+        $("#entry-menu .rename").attr("title", "Rename");
         $("#entry-menu .delete").attr("title", "Delete");
 
         droppy.ready = true;

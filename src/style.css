@@ -589,6 +589,11 @@ input:-webkit-autofill {
 #entry-menu .open {
     display: none;
 }
+#entry-menu.type-js>div>.edit,
+#entry-menu.type-text>div>.edit,
+#entry-menu.type-html>div>.edit,
+#entry-menu.type-css>div>.edit,
+#entry-menu.type-markdown>div>.edit,
 #entry-menu.type-audio>div>.play,
 #entry-menu.type-video>div>.play,
 #entry-menu.type-png>div>.view,
@@ -597,6 +602,46 @@ input:-webkit-autofill {
 #entry-menu.type-html>div>.view {
     display: block;
 }
+
+/* ============================ Document Previewer ============================ */
+.document {
+    position: absolute;
+    top:    10px;
+    bottom: 10px;
+    left:   10px;
+    right:  10px;
+    background: #dbdbdb;
+}
+
+.document .exit {
+    position: absolute;
+    width: 2em;
+    height: 2em;
+    border-radius: 1em;
+    top: -1em;
+    right: -1em;
+    background: red;
+    z-index: 1;
+}
+.document .exit:hover {
+    cursor: pointer;
+}
+
+/* ============================ Text Editor ============================ */
+.document .text-editor {
+    position: relative;
+    margin: 0 4em;
+    overflow: auto;
+    height:100%;
+    width: calc(100% - 8em);
+}
+
+.document .text-editor>pre {
+    margin: 0;
+    background: white;
+    font-size: 1em;
+}
+
 /* ============================ Upload Progress ============================ */
 
 #upload-info {
