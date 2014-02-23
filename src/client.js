@@ -535,18 +535,20 @@
         }
 
         $("#create-folder").register("click", function () {
-            var dummyFolder,
-                html = '<li class="data-row new-folder" data-type="folder">' +
+            var dummyFolder, wasEmpty,
+                dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
                             '<span class="sprite sprite-folder-open"></span>' +
                             '<span class="folder-link entry-link"></span>' +
                         '</li>';
 
-            if ($("#empty").length > 0)
-                $("#content").html("<ul>" + getHeaderHTML() + html + "</ul>");
-            else
-                $(html).appendTo("#content ul");
+            if ($("#empty").length > 0) {
+                $("#content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+                wasEmpty = true;
+            } else {
+                $(dummyHtml).appendTo("#content ul");
+            }
             dummyFolder = $(".data-row.new-folder");
-            entryRename(dummyFolder, function (success, oldVal, newVal) {
+            entryRename(dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
                     sendMessage("CREATE_FOLDER",
@@ -914,7 +916,7 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
-    function entryRename(entry, callback) {
+    function entryRename(entry, wasEmpty, callback) {
         var namer, canSubmit, exists, valid, inputText;
         // Populate active files list
         droppy.activeFiles = [];
@@ -976,6 +978,7 @@
             $("#inline-namer, #inline-submit").remove();
             $(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
+            if (wasEmpty) loadContent();
         }
     }
 
@@ -1313,7 +1316,7 @@
         $("#entry-menu .rename").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target");
-            entryRename(entry, function (success, oldVal, newVal) {
+            entryRename(entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
                     sendMessage("RENAME", { "old": oldVal, "new": newVal });
