@@ -1375,6 +1375,7 @@
                 editor = null,
                 doc = $(
                     '<div class="document out' + (editing ? ' editing' : ' readonly') + '">' +
+                        '<div class="title">' + entry.find(".file-link").text() + '</div>' +
                         '<div class="sidebar">' +
                             '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                             '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
@@ -1384,8 +1385,6 @@
                         '</div>' +
                     '</div>'
                 );
-
-            view.find(".document").remove();
             view.append(doc);
 
             $.ajax(url, {
@@ -1413,11 +1412,21 @@
                     });
                     doc.find(".save").register("click", function () {
                         showSpinner();
+                        doc.removeClass("dirty");
                         sendMessage("SAVE_FILE", {
                             "to": id,
                             "value": editor.getValue()
-                        })
+                        });
                     });
+                    editor.on("change", function () {
+                        doc.addClass("dirty");
+                    });
+                },
+                error : function () {
+                    doc.removeClass("in").addClass("out");
+                    setTimeout(function () {
+                        doc.remove();
+                    }, 500);
                 }
             });
 

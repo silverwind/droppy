@@ -633,7 +633,7 @@ input:-webkit-autofill {
 
 .document>.sidebar {
     position: absolute;
-    top: 1em;
+    top: 3em;
     width: 2.5em;
     bottom: 1em;
     right: .75em;
@@ -666,10 +666,23 @@ input:-webkit-autofill {
 .document .save:hover, .document .exit:hover { cursor: pointer }
 
 .document.readonly .save { display: none }
+
 /* ============================ Text Editor ============================ */
+.document .title {
+    transition: all .4s ease;
+    padding: .25em;
+    width:100%;
+    color: #bada55;
+}
+.document.dirty .title {
+    color: white;
+}
+.document.dirty .title:after {
+    content: "*";
+}
 .document .text-editor {
     position: relative;
-    height: 100%;
+    height: calc(100% - 1.5em);
     box-shadow:  0 0 0 2px #333;
     background: #eee;
     border-radius: 6px;
@@ -686,16 +699,17 @@ input:-webkit-autofill {
     overflow: auto;
 }
 
-.CodeMirror {
-  position:absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100% !important;
+.document .text-editor .CodeMirror {
+    font-size: .6em;
+    position:absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100% !important;
 }
-.CodeMirror .CodeMirror-gutters {
-  height: 100% !important;
+.document .text-editor .CodeMirror .CodeMirror-gutters {
+    height: 100% !important;
 }
 
 /* ============================ Upload Progress ============================ */
