@@ -1370,7 +1370,7 @@
                 view = entry.parents("#content-container"),
                 url = entry.find(".file-link").attr("href"),
                 doc = $(
-                    '<div class="document" style="display:none">' +
+                    '<div class="document out">' +
                         '<div class="sidebar">' +
                             '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                             '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
@@ -1383,13 +1383,19 @@
 
             view.find(".document").remove();
             view.append(doc);
+
             $.ajax(url, {
                 dataType: "text",
                 complete : function (data) {
                     doc.find(".text-editor pre").text(data.responseText);
-                    doc.show();
+                    setTimeout(function () {
+                        doc.removeClass("out").addClass("in");
+                    }, 50);
                     doc.find(".exit").register("click", function () {
-                        doc.remove();
+                        doc.removeClass("in").addClass("out");
+                        setTimeout(function () {
+                            doc.remove();
+                        }, 500);
                     });
                 }
             });
