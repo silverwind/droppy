@@ -1,6 +1,6 @@
 "use strict";
 
-(window.dr = function ($, window, document) {
+(function ($, window, document) {
     var droppy = {};
     initVariables();
 // ============================================================================
