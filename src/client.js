@@ -1095,7 +1095,7 @@
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
-        var view = $(".view:first");
+        var view = getView();
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000)
                 updateLocation(view, decodeURIComponent(window.location.pathname), true, true);

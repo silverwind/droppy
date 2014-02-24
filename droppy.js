@@ -386,7 +386,6 @@
                 clients[cookie] = { v: [{}], ws: ws };
                 client = clients[cookie];
             }
-            // BEFORE HERE
             ws.on("message", function (message) {
                 var msg = JSON.parse(message),
                     vId = msg.vId;
