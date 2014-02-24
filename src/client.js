@@ -553,13 +553,21 @@
         }
 
         $("#create-folder").register("click", function () {
-            var dummyFolder = $('<li class="data-row new-folder" data-type="folder">' +
-                                    '<span class="sprite sprite-folder-open"></span>' +
-                                    '<span class="folder-link entry-link"></span>' +
-                                '</li>');
-            dummyFolder.appendTo("#content ul");
+            var dummyFolder, wasEmpty,
+                dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
+                                '<span class="sprite sprite-folder-open"></span>' +
+                                '<span class="folder-link entry-link"></span>' +
+                            '</li>';
+
+            if ($("#empty").length > 0) {
+                $("#content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+                wasEmpty = true;
+            } else {
+                $(dummyHtml).appendTo("#content ul");
+            }
+            dummyFolder = $(".data-row.new-folder");
             var view = dummyFolder.parents(".view");
-            entryRename(dummyFolder, function (success, oldVal, newVal) {
+            entryRename(dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
                     sendMessage(0, "CREATE_FOLDER",
@@ -927,7 +935,7 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
-    function entryRename(entry, callback) {
+    function entryRename(entry, wasEmpty, callback) {
         var namer, canSubmit, exists, valid, inputText;
         // Populate active files list
         droppy.activeFiles = [];
@@ -989,6 +997,7 @@
             $("#inline-namer, #inline-submit").remove();
             $(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
+            if (wasEmpty) loadContent();
         }
     }
 
@@ -1263,12 +1272,7 @@
     function loadContent(view, html) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
-        $('<div class="file-header">' +
-            '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
-            '<span class="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
-            '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
-            '<span class="header-spacer"></span>' +
-        '</div>').prependTo(html);
+        $(getHeaderHTML()).prependTo(html);
 
         requestAnimation(function () {
             if (nav === "same") {
@@ -1336,11 +1340,12 @@
         // Rename a file/folder
         $("#entry-menu .rename").register("click", function (event) {
             if (droppy.socketWait) return;
-            var entry = $("#entry-menu").data("target");
-            entryRename(entry, function (success, oldVal, newVal) {
+            var entry = $("#entry-menu").data("target"),
+                vId = entry.parents(".view")[0].vId;
+            entryRename(entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
-                    sendMessage(null, "RENAME", { "old": oldVal, "new": newVal });
+                    sendMessage(vId, "RENAME", { "old": oldVal, "new": newVal });
                 }
             });
             event.stopPropagation();
@@ -1746,6 +1751,15 @@
         "xml":      ["xml"],
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
+
+    function getHeaderHTML() {
+        return '<div class="file-header">' +
+                    '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
+                    '<span class="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
+                    '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
+                    '<span class="header-spacer"></span>' +
+                '</div>';
+    }
 
     function timeDifference(previous) {
         var msPerMinute = 60 * 1000,
