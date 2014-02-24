@@ -15,6 +15,8 @@ lib/CodeMirror/test/
 
 lib/CodeMirror/addon/*
 !lib/CodeMirror/addon/selection/
+!lib/CodeMirror/addon/search/
+!lib/CodeMirror/addon/edit/
 
 lib/CodeMirror/keymap/*
 !lib/CodeMirror/keymap/sublime.js

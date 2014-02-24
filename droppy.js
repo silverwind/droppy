@@ -67,7 +67,7 @@
 
         // Add CodeMirror source paths
         // Addons
-        ["selection/active-line.js", "selection/mark-selection.js"]
+        ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"]
         .forEach(function (relPath) {
             resources.js.push(cmPath + "addon/" + relPath);
         });
@@ -78,6 +78,8 @@
         .forEach(function (relPath) {
             resources.js.push(cmPath + "mode/" + relPath);
         });
+        // Keymap
+        resources.js.push(cmPath + "keymap/sublime.js");
 
     // Argument handler
     if (isCLI) handleArguments();

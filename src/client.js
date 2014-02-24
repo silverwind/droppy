@@ -1566,6 +1566,7 @@
                     editor = CodeMirror.fromTextArea(editor[0], {
                         styleSelectedText: true,
                         showCursorWhenSelecting: true,
+                        keyMap: "sublime",
                         mode: mode
                     });
                 } else {
