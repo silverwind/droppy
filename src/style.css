@@ -594,13 +594,15 @@ input:-webkit-autofill {
     vertical-align: top;
 }
 
-#entry-menu .open {
+#entry-menu .open, #entry-menu .edit {
     display: none;
 }
 #entry-menu.type-js>div>.edit,
 #entry-menu.type-text>div>.edit,
 #entry-menu.type-html>div>.edit,
 #entry-menu.type-css>div>.edit,
+#entry-menu.type-bin>div>.edit,
+#entry-menu.type-json>div>.edit,
 #entry-menu.type-markdown>div>.edit,
 #entry-menu.type-audio>div>.play,
 #entry-menu.type-video>div>.play,
@@ -613,7 +615,9 @@ input:-webkit-autofill {
 
 /* ============================ Document Previewer ============================ */
 .document {
-    position: fixed;
+    position: absolute;
+    z-index: 1;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -622,23 +626,21 @@ input:-webkit-autofill {
     transition: all .5s ease;
 }
 
-@media all and (min-width: 1024px) { .document { top: 74px; } .document.out { top: 94px } }
-@media all and (max-width: 1023px) { .document { top: 64px; } .document.out { top: 64px } }
-@media all and (max-width:  639px) { .document { top: 54px; } .document.out { top: 54px } }
-
 .document.in  { opacity: 1; bottom: 0    }
 .document.out { opacity: 0; bottom: -20px }
 
-.document .sidebar {
-    z-index: 1;
+.document>.sidebar {
     position: absolute;
-    top: 1em;
+    top: 3em;
     width: 2.5em;
     bottom: 1em;
     right: .75em;
 }
-
-.document .sidebar svg {
+.document>.sidebar>div {
+    position: relative;
+    z-index: 5;
+}
+.document>.sidebar svg {
     fill: #555;
     height: 1em;
     width: 1em;
@@ -646,7 +648,7 @@ input:-webkit-autofill {
     transition: all .2s ease;
 }
 
-.document span {
+.document>.sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
@@ -661,11 +663,24 @@ input:-webkit-autofill {
 .document .save:hover span { color: #5a0; opacity: 1 }
 .document .save:hover, .document .exit:hover { cursor: pointer }
 
-.document .save { display: none } /*Remove this line to show the save button */
+.document.readonly .save { display: none }
+
 /* ============================ Text Editor ============================ */
+.document .title {
+    transition: all .4s ease;
+    padding: .25em;
+    width:100%;
+    color: #bada55;
+}
+.document.dirty .title {
+    color: white;
+}
+.document.dirty .title:after {
+    content: "*";
+}
 .document .text-editor {
     position: relative;
-    height: 100%;
+    height: calc(100% - 1.5em);
     box-shadow:  0 0 0 2px #333;
     background: #eee;
     border-radius: 6px;
@@ -680,6 +695,19 @@ input:-webkit-autofill {
     padding: .5em 1em;
     color: #333;
     overflow: auto;
+}
+
+.document .text-editor .CodeMirror {
+    font-size: .6em;
+    position:absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100% !important;
+}
+.document .text-editor .CodeMirror .CodeMirror-gutters {
+    height: 100% !important;
 }
 
 /* ============================ Upload Progress ============================ */
