@@ -73,7 +73,7 @@
         });
         // Modes
         ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js",
-            "htmlmixed/htmlmixed.js", "htmlembedded/htmlembedded.js", "jade/jade.js",
+            "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
             "markdown/markdown.js", "php/php.js"]
         .forEach(function (relPath) {
             resources.js.push(cmPath + "mode/" + relPath);

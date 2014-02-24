@@ -1550,8 +1550,9 @@
                         case "litcoffee":
                             return "coffeescript"
                         case "js":
-                        case "json":
                             return "javascript"
+                        case "json":
+                            return { name:"javascript", json : true };
                         case "html":
                             return "htmlmixed"
                         case "md":
