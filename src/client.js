@@ -940,7 +940,7 @@
         var namer, canSubmit, exists, valid, inputText;
         // Populate active files list
         droppy.activeFiles = [];
-        view.children(".entry-link").each(function () {
+        view.find(".entry-link").each(function () {
             $(this).removeClass("editing invalid");
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
