@@ -1412,7 +1412,7 @@ input[type="checkbox"] { display: none }
     z-index: 32;
     line-height: 1.5em;
     text-align: center;
-    color: #eee;
+    color: #aaa;
     cursor: pointer;
     opacity: 1;
     transition: all .2s ease;
@@ -1422,9 +1422,12 @@ input[type="checkbox"] { display: none }
 @media all and (max-width: 1023px) { #paste { font-size: .9em } }
 @media all and (max-width:  639px) { #paste { font-size: .8em } }
 
-#paste:hover {color: #f71 }
+#paste:hover {color: #c71 }
+#paste:hover svg {fill: #c71 }
 #paste.in  { flex-basis: 1.25em }
 #paste.out { flex-basis: 0 }
+#paste .filename { color: #fff }
+#paste:hover .filename {color: #fa4 }
 
 #paste svg {
     height: 1em;
@@ -1433,7 +1436,7 @@ input[type="checkbox"] { display: none }
     margin-right: .25em;
     transition: all .2s ease;
 }
-#paste:hover svg {fill: #f71}
+
 
 #click-catcher {
     background: #000;

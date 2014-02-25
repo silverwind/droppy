@@ -1353,21 +1353,14 @@
             });
         });
 
-        // Cut a file/folder
-        $("#entry-menu .cut").register("click", function (event) {
+        // Copy/cut a file/folder
+        $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
             event.stopPropagation();
-            var entry = $("#entry-menu").data("target");
-            droppy.clipboard = { type: "cut", from: entry.data("id") };
+            var entry = $("#entry-menu").data("target"),
+                from  = entry.data("id");
+            droppy.clipboard = { type: $(this).attr("class"), from: from };
             $("#click-catcher").trigger("click");
-            $("#paste").attr("class", "in");
-        });
-
-        // Copy a file/folder
-        $("#entry-menu .copy").register("click", function (event) {
-            event.stopPropagation();
-            var entry = $("#entry-menu").data("target");
-            droppy.clipboard = { type: "copy", from: entry.data("id") };
-            $("#click-catcher").trigger("click");
+            $("#paste .filename").text(basename(from));
             $("#paste").attr("class", "in");
         });
 
