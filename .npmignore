@@ -8,15 +8,3 @@ res/*.html
 db.json
 config.json
 droppy*.tgz
-
-lib/CodeMirror/doc/
-lib/CodeMirror/demo/
-lib/CodeMirror/test/
-
-lib/CodeMirror/addon/*
-!lib/CodeMirror/addon/selection/
-!lib/CodeMirror/addon/search/
-!lib/CodeMirror/addon/edit/
-
-lib/CodeMirror/keymap/*
-!lib/CodeMirror/keymap/sublime.js

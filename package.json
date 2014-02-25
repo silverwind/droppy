@@ -14,6 +14,7 @@
     "autoprefixer": "~1.1.20140222",
     "busboy": "0.1.1",
     "clean-css": "~2.1.1",
+    "codemirror": "marijnh/CodeMirror.git#v4",
     "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",

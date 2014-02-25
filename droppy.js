@@ -58,7 +58,7 @@
         mode      = {file: "644", dir: "755"},
         isCLI      = (process.argv.length > 2),
         // Resources
-        cmPath = "lib/CodeMirror/",
+        cmPath = "node_modules/CodeMirror/",
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
