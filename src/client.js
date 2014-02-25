@@ -567,7 +567,7 @@
             }
             dummyFolder = $(".data-row.new-folder");
             var view = dummyFolder.parents(".view");
-            entryRename(dummyFolder, wasEmpty, function (success, oldVal, newVal) {
+            entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
                     sendMessage(0, "CREATE_FOLDER",
@@ -935,11 +935,11 @@
 // ============================================================================
 //  General helpers
 // ============================================================================
-    function entryRename(entry, wasEmpty, callback) {
+    function entryRename(view, entry, wasEmpty, callback) {
         var namer, canSubmit, exists, valid, inputText;
         // Populate active files list
         droppy.activeFiles = [];
-        $(".entry-link").each(function () {
+        view.children(".entry-link").each(function () {
             $(this).removeClass("editing invalid");
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
@@ -997,7 +997,7 @@
             $("#inline-namer, #inline-submit").remove();
             $(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) loadContent();
+            if (wasEmpty) loadContent(view);
         }
     }
 
@@ -1341,8 +1341,9 @@
         $("#entry-menu .rename").register("click", function (event) {
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target"),
-                vId = entry.parents(".view")[0].vId;
-            entryRename(entry, false, function (success, oldVal, newVal) {
+                view = entry.parents(".view"); // #content-container
+                vId = view[0].vId;
+            entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
                     sendMessage(vId, "RENAME", { "old": oldVal, "new": newVal });
