@@ -466,27 +466,15 @@
                     if (!isPathSane(msg.data.to, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard destination: " + msg.data.to);
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
-                    fs.stat(msg.data.from, function (error, stats) {
-                        if (stats && !error) {
-                            if (stats.isFile()) {
-                                copyFile(msg.data.from, msg.data.to, function (error) {
-                                    if (error) {
-                                        log.error("Error copying single file from \"" + msg.data.from + "\" to \"" + msg.data.to + "\"");
-                                        log.error(error);
-                                    } else {
-                                        if (msg.data.type === "cut") {
-                                            deleteFile(msg.data.from);
-                                        }
-                                    }
-                                });
-                            } else if (stats.isDirectory()) {
-                                wrench.copyDirSyncRecursive(msg.data.from, msg.data.to);
-                                if (msg.data.type === "cut") {
-                                    deleteDirectory(msg.data.from);
-                                }
-                            }
-                        }
-                    });
+
+                    //In case source and destination are the same, append a number to the file/foldername
+                    if (msg.data.from === msg.data.to) {
+                        utils.getNewPath(msg.data.to, 2, function (name) {
+                            doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
+                        });
+                    } else {
+                        doClipboard(msg.data.type, msg.data.from, msg.data.to);
+                    }
                     break;
                 case "CREATE_FOLDER":
                     if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
@@ -635,7 +623,31 @@
             }
         })(ws, data, 0);
     }
-
+    //-----------------------------------------------------------------------------
+    // Perform clipboard operation, copy/paste or cut/paste
+    function doClipboard(type, from, to) {
+        fs.stat(from, function (error, stats) {
+            if (stats && !error) {
+                if (stats.isFile()) {
+                    copyFile(from, to, function (error) {
+                        if (error) {
+                            log.error("Error copying single file from \"" + from + "\" to \"" + to + "\"");
+                            log.error(error);
+                        } else {
+                            if (type === "cut") {
+                                deleteFile(from);
+                            }
+                        }
+                    });
+                } else if (stats.isDirectory()) {
+                    wrench.copyDirSyncRecursive(from, to);
+                    if (type === "cut") {
+                        deleteDirectory(from);
+                    }
+                }
+            }
+        });
+    }
     //-----------------------------------------------------------------------------
     // Copy a file from one location to another quickly
     // snippet from: http://stackoverflow.com/a/14387791/2096729
@@ -1463,6 +1475,7 @@
         }
         return true;
     }
+
     // removeFilePath is intentionally not an inverse to the add function
     function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }
     function removeFilePath(p) { return utils.fixPath("/" + utils.fixPath(p).replace(utils.fixPath(config.filesDir), "")); }
