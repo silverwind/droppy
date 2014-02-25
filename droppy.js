@@ -65,21 +65,21 @@
             html : ["src/base.html", "src/auth.html", "src/main.html"]
         };
 
-        // Add CodeMirror source paths
-        // Addons
-        ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"]
+    // Add CodeMirror source paths
+    // Addons
+    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"]
         .forEach(function (relPath) {
             resources.js.push(cmPath + "addon/" + relPath);
         });
-        // Modes
-        ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js",
+    // Modes
+    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js",
             "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
             "markdown/markdown.js", "php/php.js"]
         .forEach(function (relPath) {
             resources.js.push(cmPath + "mode/" + relPath);
         });
-        // Keymap
-        resources.js.push(cmPath + "keymap/sublime.js");
+    // Keymap
+    resources.js.push(cmPath + "keymap/sublime.js");
 
     // Argument handler
     if (isCLI) handleArguments();
@@ -393,7 +393,7 @@
                     vId = msg.vId;
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
-                    if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
+                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
                     client.v[vId] = {
                         directory: msg.data
                     };
@@ -403,7 +403,7 @@
                     updateWatchers(client.v[vId].directory);
                     break;
                 case "REQUEST_SHORTLINK":
-                    if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
+                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
                     // Check if we already have a link for that file
                     for (var link in db.shortlinks) {
                         if (db.shortlinks[link] === msg.data) {
@@ -426,7 +426,7 @@
                     break;
                 case "DELETE_FILE":
                     log.log(log.socket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
-                    if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid file deletion request: " + msg.data);
+                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
                     fs.stat(msg.data, function (error, stats) {
                         if (error) {
@@ -462,8 +462,8 @@
                     break;
                 case "CLIPBOARD":
                     log.log(log.socket(remoteIP, remotePort), " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
-                    if (!isPathSane(msg.data.from, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard source: " + msg.data.from);
-                    if (!isPathSane(msg.data.to, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard destination: " + msg.data.to);
+                    if (!utils.isPathSane(msg.data.from, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard source: " + msg.data.from);
+                    if (!utils.isPathSane(msg.data.to, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard destination: " + msg.data.to);
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
 
@@ -477,7 +477,7 @@
                     }
                     break;
                 case "CREATE_FOLDER":
-                    if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
+                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
                     fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
                         log.log(log.socket(remoteIP, remotePort), " Created: ", msg.data);
@@ -487,14 +487,14 @@
                     var clientpath = client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/";
                     var newname = clientpath + msg.data.new,
                         oldname = clientpath + msg.data.old;
-                    if (!isPathSane(msg.data.new)) return log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + newname);
+                    if (!utils.isPathSane(msg.data.new)) return log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + newname);
                     fs.rename(addFilePath(oldname), addFilePath(newname), function (error) {
                         if (error) log.error(error);
                         log.log(log.socket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
                     });
                     break;
                 case "SWITCH_FOLDER":
-                    if (!isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory switch request: " + msg.data);
+                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory switch request: " + msg.data);
                     client.v[vId].directory = msg.data;
                     updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read
@@ -528,7 +528,7 @@
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
-                        if (!isPathSane(file)) return log.log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + file);
+                        if (!utils.isPathSane(file)) return log.log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + file);
                         var p = addFilePath(client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/") + decodeURIComponent(file);
                         wrench.mkdirSyncRecursive(path.dirname(p), mode.dir);
                         fs.writeFileSync(p, "", {mode: mode.file});
@@ -704,12 +704,14 @@
         var watcher = fs.watch(directory, utils.throttle(function () {
             var clientsToUpdate = [];
             for (var cookie in clients) {
-                var client = clients[cookie];
-                for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    if (client.v[vId].directory === relativeDir) {
-                        clientsToUpdate.push({cookie:cookie, vId:vId});
+                if (clients.hasOwnProperty(cookie)) {
+                    var client = clients[cookie];
+                    for (var vId = client.v.length - 1; vId >= 0; vId--) {
+                        if (client.v[vId].directory === relativeDir) {
+                            clientsToUpdate.push({cookie: cookie, vId: vId});
+                        }
                     }
-                };
+                }
             }
             readDirectory(relativeDir, function () {
                 var cv = clientsToUpdate.pop();
@@ -753,10 +755,9 @@
                 var client = clients[cookie];
                 for (var vId = client.v.length - 1; vId >= 0; vId--) {
                     neededDirs[client.v[vId].directory] = true;
-                };
+                }
             }
         }
-
         for (var directory in watchers) {
             if (!neededDirs[directory]) {
                 watchers[directory].close();
@@ -1464,17 +1465,6 @@
 
     function getResPath(name)  { return path.join(config.resDir, name); }
     function getSrcPath(name)  { return path.join(config.srcDir, name); }
-
-    function isPathSane(name, isPath) {
-        if (/[\/\\]\.\./.test(name)) return false;              // Navigating down the tree (prefix)
-        if (/\.\.[\/\\]/.test(name)) return false;              // Navigating down the tree (postfix)
-        if (isPath) {
-            if (/[\*\{\}\?\|<>"]/.test(name)) return false;     // Invalid characters
-        } else {
-            if (/[\\\*\{\}\/\?\|<>"]/.test(name)) return false; // Invalid characters
-        }
-        return true;
-    }
 
     // removeFilePath is intentionally not an inverse to the add function
     function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }

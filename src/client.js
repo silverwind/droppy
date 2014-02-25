@@ -1,3 +1,4 @@
+/*global CodeMirror */
 "use strict";
 
 (function ($, window, document) {
@@ -81,14 +82,14 @@
 //  View handling
 // ============================================================================
     function getView(id) {
-        if(!droppy.views) updateViews();
-        if (id && droppy.views[id]) return $(droppy.views[id])
+        if (!droppy.views) updateViews();
+        if (id && droppy.views[id]) return $(droppy.views[id]);
         else return $(droppy.views[0]);
     }
 
     function updateViews() {
         droppy.views = $(".view");
-        droppy.views.each( function(index, elem) {
+        droppy.views.each(function (index, elem) {
             elem.vId = index;
         });
     }
@@ -1508,7 +1509,7 @@
     }
 
     function closeDoc(view) {
-        var doc = view.find(".document")
+        var doc = view.find(".document");
         doc.removeClass("in").addClass("out");
         setTimeout(function () {
             doc.remove();
@@ -1542,18 +1543,18 @@
                 var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
                     mode = (function () {
                         // If extension is different than modetype
-                        switch(ext){
+                        switch (ext) {
                         case "coffee":
                         case "litcoffee":
-                            return "coffeescript"
+                            return "coffeescript";
                         case "js":
-                            return "javascript"
+                            return "javascript";
                         case "json":
-                            return { name:"javascript", json : true };
+                            return { name: "javascript", json : true };
                         case "html":
-                            return "htmlmixed"
+                            return "htmlmixed";
                         case "md":
-                            return "markdown"
+                            return "markdown";
                         default:
                             return ext;
                         }
