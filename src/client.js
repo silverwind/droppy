@@ -1317,6 +1317,7 @@
         });
 
         view.find(".data-row .entry-menu").register("click", function (event) {
+            event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class");
 
@@ -1334,14 +1335,14 @@
                 $("#entry-menu").attr("class", "out");
                 toggleCatcher();
             });
-            event.stopPropagation();
         });
 
         // Rename a file/folder
         $("#entry-menu .rename").register("click", function (event) {
+            event.stopPropagation();
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"); // #content-container
+                view = entry.parents(".view"), // #content-container
                 vId = view[0].vId;
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
@@ -1349,29 +1350,29 @@
                     sendMessage(vId, "RENAME", { "old": oldVal, "new": newVal });
                 }
             });
-            event.stopPropagation();
         });
 
         // Cut a file/folder
         $("#entry-menu .cut").register("click", function (event) {
+            event.stopPropagation();
             var entry = $("#entry-menu").data("target");
-            droppy.clipboard = ["cut", entry.data("id"), entry.find(".entry-link").text()];
+            droppy.clipboard = { type: "cut", from: entry.data("id") };
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
-            event.stopPropagation();
         });
 
         // Copy a file/folder
         $("#entry-menu .copy").register("click", function (event) {
+            event.stopPropagation();
             var entry = $("#entry-menu").data("target");
-            droppy.clipboard = ["copy", entry.data("id"), entry.find(".entry-link").text()];
+            droppy.clipboard = { type: "copy", from: entry.data("id") };
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "in");
-            event.stopPropagation();
         });
 
         // Open a file/folder in browser
         $("#entry-menu .open").register("click", function (event) {
+            event.stopPropagation();
             var entry = $("#entry-menu").data("target"),
                 url = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
                 type = $("#entry-menu").attr("class").match(/type\-(\w+)/),
@@ -1389,14 +1390,13 @@
                     break;
                 }
             }
-
             $("#click-catcher").trigger("click");
-            event.stopPropagation();
             if (win) win.focus();
         });
 
         // Edit a file/folder in a text editor
         $("#entry-menu .edit").register("click", function (event) {
+            event.stopPropagation();
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
                 view = entry.parents(".view"); // #content-container
@@ -1405,16 +1405,13 @@
 
         // Paste a file/folder into a folder
         $("#paste").register("click", function (event) {
+            event.stopPropagation();
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
-                if (droppy.clipboard[1] !== getView()[0].currentFolder + '/' + droppy.clipboard[2]) {
-                    showSpinner();
-                    sendMessage(null, "CLIPBOARD", {
-                        "type": droppy.clipboard[0],
-                        "from": droppy.clipboard[1],
-                        "to": getView()[0].currentFolder + '/' + droppy.clipboard[2]
-                    });
-                }
+                var sep = getView()[0].currentFolder === "/" ? "" : "/";
+                showSpinner();
+                droppy.clipboard.to = getView()[0].currentFolder + sep + basename(droppy.clipboard.from);
+                sendMessage(null, "CLIPBOARD", droppy.clipboard);
             } else {
                 throw "Clipboard was empty!";
             }
@@ -1422,13 +1419,12 @@
             droppy.clipboard = null;
             $("#click-catcher").trigger("click");
             $("#paste").attr("class", "out");
-            event.stopPropagation();
         });
 
         // Stop navigation when clicking on an <a>
         $(".data-row .zip, .entry-link.file").register("click", function (event) {
-            if (droppy.socketWait) return;
             event.stopPropagation();
+            if (droppy.socketWait) return;
 
             // Some browsers (like IE) think that clicking on an <a> is real navigation
             // and will close the WebSocket in turn. We'll reconnect if neccessary.
@@ -1859,5 +1855,16 @@
             }, wait);
             return result;
         };
+    }
+
+    function basename(path) {
+        return path.replace(/.*\//, "");
+    }
+
+    function dirname(path) {
+        if (path === "/")
+            return "/";
+        else
+            return path.replace(/\/[^\/]*$/, "");
     }
 }(jQuery, window, document));

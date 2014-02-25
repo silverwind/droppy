@@ -471,7 +471,7 @@
                             if (stats.isFile()) {
                                 copyFile(msg.data.from, msg.data.to, function (error) {
                                     if (error) {
-                                        log.error("Error copying single file from \"" + msg.data.from + "\" to \"" + msg.data.from + "\"");
+                                        log.error("Error copying single file from \"" + msg.data.from + "\" to \"" + msg.data.to + "\"");
                                         log.error(error);
                                     } else {
                                         if (msg.data.type === "cut") {
