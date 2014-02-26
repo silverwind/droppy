@@ -631,15 +631,20 @@ input:-webkit-autofill {
 
 .document>.sidebar {
     position: absolute;
-    top: 3em;
+    top: 2.5em;
     width: 2.5em;
     bottom: 1em;
-    right: .75em;
+    right: 1.25em;
 }
-.document>.sidebar>div {
+.document > .sidebar > div {
     position: relative;
     z-index: 5;
+    padding: .25em 0;
+    border-radius: 4px;
+    margin-bottom: .25em;
+    transition: all .2s ease;
 }
+
 .document>.sidebar svg {
     fill: #555;
     height: 1em;
@@ -653,15 +658,15 @@ input:-webkit-autofill {
     text-align: center;
     opacity: 0;
     transition: all .2s ease;
-    margin-bottom: .25em;
     font-size: .8em;
+    font-weight: 400;
 }
 
+.document > .sidebar > div:hover { background: #222; cursor: pointer }
 .document .exit:hover svg { fill: #e33 }
 .document .exit:hover span { color: #e33; opacity: 1 }
 .document .save:hover svg { fill: #5a0 }
 .document .save:hover span { color: #5a0; opacity: 1 }
-.document .save:hover, .document .exit:hover { cursor: pointer }
 
 .document.readonly .save { display: none }
 
