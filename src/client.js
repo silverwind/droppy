@@ -1108,17 +1108,20 @@
     // Update our current location and change the URL to it
     var nav;
     function updateLocation(view, path, doSwitch, skipPush) {
-        // Close any open documents if switching directories
-        closeDoc(view);
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
                 showSpinner();
 
                 // Find the direction in which we should animate
-                if (path.length > view[0].currentFolder.length) nav = "forward";
-                else if (path.length === view[0].currentFolder.length) nav = "same";
-                else nav = "back";
+                if (view.find(".document").length > 0) {
+                    nav = "back";
+                } else {
+                    if (path.length > view[0].currentFolder.length) nav = "forward";
+                    else if (path.length === view[0].currentFolder.length) nav = "same";
+                    else nav = "back";
+                }
+
 
                 view[0].currentFolder = path;
                 sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", view[0].currentFolder);
@@ -1173,6 +1176,8 @@
             li.data("destination", path || "/");
             li.click(function () {
                 updateLocation(view, $(this).data("destination"), true);
+                // Close any open documents if switching directories
+                closeDoc(view);
             });
 
             $("#path").append(li);
@@ -1270,13 +1275,17 @@
     }
 
     // Load generated list into view with an animation
-    function loadContent(view, html) {
+    function loadContent(view, html, isEditor) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
-        $(getHeaderHTML()).prependTo(html);
+        if (!isEditor)
+            $(getHeaderHTML()).prependTo(html);
+        else {
+            nav = "forward";
+        }
 
         requestAnimation(function () {
-            if (nav === "same") {
+            if (nav === "same" && !isEditor) {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
@@ -1285,7 +1294,7 @@
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");
                 view.find("#content").attr("class", (nav === "forward") ? "back" : "forward");
-                view.find("#newcontent").setTransitionClass("center");
+                view.find("#newcontent").setTransitionClass(isEditor ? "editor center" : "center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     droppy.isAnimating = false;
@@ -1503,11 +1512,7 @@
     }
 
     function closeDoc(view) {
-        var doc = view.find(".document");
-        doc.removeClass("in").addClass("out");
-        setTimeout(function () {
-            doc.remove();
-        }, 500);
+        updateLocation(view, view[0].currentFolder, false, true);
     }
 
     function editFile(view, entryId) {
@@ -1527,7 +1532,7 @@
                     '</div>' +
                 '</div>'
             );
-        view.append(doc);
+        loadContent(view, doc, true);
 
         $.ajax(url, {
             dataType: "text",
@@ -1585,10 +1590,7 @@
                 });
             },
             error : function () {
-                doc.removeClass("in").addClass("out");
-                setTimeout(function () {
-                    doc.remove();
-                }, 500);
+                closeDoc(view);
             }
         });
     }

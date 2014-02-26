@@ -128,6 +128,10 @@ input:-webkit-autofill {
     height: .25em;
 }
 
+#content.editor, #newcontent.editor {
+    height: calc(100% - .5em);
+}
+
 #content.out { opacity: 0 }
 
 @media all and (min-width: 1024px) { #content, #newcontent { font-size:  1em } }
@@ -614,19 +618,9 @@ input:-webkit-autofill {
 
 /* ============================ Document Previewer ============================ */
 .document {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #181818;
     padding: .5em;
-    transition: all .5s ease;
+    position: relative;
 }
-
-.document.in  { opacity: 1; bottom: 0    }
-.document.out { opacity: 0; bottom: -20px }
 
 .document>.sidebar {
     position: absolute;
@@ -641,7 +635,6 @@ input:-webkit-autofill {
     padding: .25em 0;
     border-radius: 4px;
     margin-bottom: .25em;
-    transition: all .2s ease;
 }
 
 .document>.sidebar svg {
@@ -649,19 +642,17 @@ input:-webkit-autofill {
     height: 1em;
     width: 1em;
     margin-left: .75em;
-    transition: all .2s ease;
 }
 
 .document>.sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
-    transition: all .2s ease;
     font-size: .8em;
     font-weight: 400;
 }
 
-.document > .sidebar > div:hover { background: #222; cursor: pointer }
+.document > .sidebar > div:hover { background: #333; cursor: pointer }
 .document .exit:hover svg { fill: #e33 }
 .document .exit:hover span { color: #e33; opacity: 1 }
 .document .save:hover svg { fill: #5a0 }
@@ -672,46 +663,31 @@ input:-webkit-autofill {
 /* ============================ Text Editor ============================ */
 .document .title {
     transition: all .4s ease;
-    padding: .25em;
-    width:100%;
-    color: #bada55;
+    width: 100%;
+    color: #555;
+    font-weight: 400;
 }
 .document.dirty .title {
-    color: white;
+    color: #f71;
 }
 .document.dirty .title:after {
     content: "*";
 }
 .document .text-editor {
-    position: relative;
-    height: calc(100% - 1.5em);
-    box-shadow:  0 0 0 2px #333;
-    background: #eee;
-    border-radius: 6px;
-    overflow-y: auto;
-    width: 100%;
+    box-shadow:  0 0 0 1px #aaa;
+    border-radius: 2px;
 }
 
 .document .text-editor>pre {
     margin: 0;
-    font-size: .6em;
+    font-size: .65em;
     background: #fff;
     padding: .5em 1em;
     color: #333;
-    overflow: auto;
 }
 
 .document .text-editor .CodeMirror {
-    font-size: .6em;
-    position:absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100% !important;
-}
-.document .text-editor .CodeMirror .CodeMirror-gutters {
-    height: 100% !important;
+    font-size: .65em;
 }
 
 /* ============================ Upload Progress ============================ */
