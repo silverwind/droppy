@@ -558,7 +558,6 @@ input:-webkit-autofill {
     position: absolute;
     color: #333;
     z-index: 32;
-    right: 5px;
     box-shadow: 0 0 30px #000;
 }
 

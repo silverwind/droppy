@@ -1320,14 +1320,15 @@
         view.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
-                type = entry.find(".sprite").attr("class");
+                type = entry.find(".sprite").attr("class"),
+                button = $(this);
 
             type = type.match(/sprite\-(\w+)/);
             if (type) type = type[1];
 
             $("#entry-menu")
                 .attr("class", "in")
-                .css({top: entry.offset().top + "px"})
+                .css({top: entry.offset().top + "px", left: (button.offset().left + button.width() - $("#entry-menu").width()) + "px" })
                 .data("target", entry)
                 .addClass("type-" + type);
             toggleCatcher();
