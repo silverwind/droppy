@@ -852,7 +852,7 @@
             }
 
             // Load the new files into view, tagged
-            buildHTML(view, view[0].currentData, view[0].currentFolder, true);
+            buildEntryList(view, view[0].currentData, view[0].currentFolder, true);
 
             // Create the XHR2 and bind the progress events
             var xhr = new XMLHttpRequest();
@@ -1075,7 +1075,7 @@
         }
 
         view[0].currentData = data;
-        buildHTML(view, data, folder);
+        buildEntryList(view, data, folder);
         hideSpinner();
     }
 
@@ -1212,7 +1212,7 @@
     }
 
     // Convert the received data into HTML
-    function buildHTML(view, fileList, root, isUpload) {
+    function buildEntryList(view, fileList, root, isUpload) {
         var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes;
 
         for (var file in fileList) {
@@ -1265,8 +1265,8 @@
             }
         }
 
-        $(list).children("li").sort(sortFunc).appendTo(list);
-        loadContent(view, $(list).children("li").length > 0 ? list : false);
+        list.children("li").sort(sortFunc).appendTo(list);
+        loadContent(view, list.children("li").length > 0 ? list : false);
     }
 
     // Load generated list into view with an animation
