@@ -79,7 +79,7 @@
             resources.js.push(cmPath + "mode/" + relPath);
         });
     // Keymap
-    resources.js.push(cmPath + "keymap/sublime.js");
+    // resources.js.push(cmPath + "keymap/sublime.js");
 
     // Argument handler
     if (isCLI) handleArguments();
