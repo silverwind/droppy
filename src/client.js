@@ -36,37 +36,54 @@
         return this.off(events).on(events, callback);
     };
 
+    // Class swapping helper
+    $.fn.replaceClass = function (match, replacement) {
+        var newClass = this[0].className.replace(match, replacement);
+        if (newClass !== this[0].className) this[0].className = newClass;
+        else this.addClass(replacement)
+        return this;
+    }
+
     // Set a new class on an element, and make sure it is ready to be transitioned.
-    $.fn.setTransitionClass = function (newclass) {
+    $.fn.setTransitionClass = function (oldclass, newclass) {
+        if (typeof newclass === "undefined") {
+            newclass = oldclass;
+            oldclass = null;
+        }
         if (droppy.detects.animation) {
             // Add a pseudo-animation to the element. When the "animationstart" event
             // is fired on the element, we know it is ready to be transitioned.
             this.css("animation", "nodeInserted 0.001s");
 
-            // Set the new class as a data attribute.
+            // Set the new and oldclass as data attributes.
+            if (oldclass) this.data("oldclass", oldclass);
             this.data("newclass", newclass);
         } else {
             // If we don't support animations, fallback to a simple timeout
             setTimeout(function () {
-                this.attr("class", newclass);
+                if (oldclass) this.replaceClass(oldclass, newclass);
+                else this.addClass(newClass);
             }, 30);
         }
         return this;
     };
-
     if (droppy.detects.animation) {
+        function animStart(event) {
+            if (event.animationName === "nodeInserted") {
+                var target = $(event.target),
+                    newClass = target.data("newclass"),
+                    oldClass = target.data("oldclass");
+                // Clean up our data attribute and remove the animation
+                target.removeData("newclass").css("animation", "");
+
+                // Set transition classes
+                if (oldClass) target.removeData("oldclass").replaceClass(oldClass, newClass);
+                else target.addClass(newClass);
+            }
+        }
         // Listen for the animation event for our pseudo-animation
         ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"].forEach(function (eventName) {
-            document.addEventListener(eventName, function (event) {
-                if (event.animationName === "nodeInserted") {
-                    var target = $(event.target);
-                    var newClass = target.data("newclass");
-                    // Clean up our data attribute and remove the animation
-                    target.removeData("newclass").css("animation", "");
-                    // Set the transition class
-                    target.attr("class", newClass);
-                }
-            }, false);
+            document.addEventListener(eventName, animStart, false);
         });
     }
 
@@ -134,26 +151,26 @@
             droppy.hasLoggedOut = false;
             initMainPage();
             requestAnimation(function () {
-                oldPage.attr("class", "out");
+                oldPage.replaceClass("in", "out");
                 $("#navigation")[0].addEventListener('transitionend', function () {
                     droppy.socketWait && showSpinner();
                 }, false);
-                $("#navigation").attr("class", "in");
+                $("#navigation").replaceClass("out", "in");
                 finalize();
             });
         } else if (type === "auth" || type === "firstrun") {
             initAuthPage(type === "firstrun");
             requestAnimation(function () {
-                oldPage.attr("class", "out");
+                oldPage.replaceClass("in", "out");
                 $("#navigation").addClass("out");
                 setTimeout(function () {
                     box.removeClass("out");
                     if (type === "firstrun") {
                         $("#login-info").text("Hello! Choose your creditentials.");
-                        $("#login-info-box").attr("class", "info");
+                        $("#login-info-box").addClass("info");
                     } else if (droppy.hasLoggedOut) {
                         $("#login-info").text("Logged out!");
-                        $("#login-info-box").attr("class", "info");
+                        $("#login-info-box").addClass("info");
                     }
                 }, 100);
                 finalize();
@@ -391,14 +408,14 @@
 
         var endTimer, isHovering;
         function endDrag() {
-            $("#drop-preview").attr("class", "out");
+            $("#drop-preview").replaceClass("in", "out");
             isHovering = false;
         }
         function enter(event) {
             event.preventDefault(); // Stop dragenter and dragover from killing our drop event
             clearTimeout(endTimer);
             if (!isHovering) {
-                $("#drop-preview").attr("class", "in");
+                $("#drop-preview").replaceClass("out", "in");
                 isHovering = true;
             }
         }
@@ -1180,7 +1197,7 @@
         }
 
         function finalize() {
-            $("#path li.out").setTransitionClass("in");
+            $("#path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
                 $("#path li.in").removeClass();
@@ -1201,7 +1218,9 @@
 
         if (width > space) {
             requestAnimation(function () {
-                $("#path li").animate({"left": space - width}, {duration: 200});
+                if(droppy.detects.animation)
+                    $("#path li").css({"left": space - width + "px"});
+                else $("#path li").animate({"left": space - width}, {duration: 200});
             });
         } else {
             requestAnimation(function () {
@@ -1283,9 +1302,10 @@
                 view.append($("<div id='newcontent' class='" + nav + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
+                navRegex = /(forward|back|center)/
                 view.find(".data-row").addClass("animating");
-                view.find("#content").attr("class", (nav === "forward") ? "back" : "forward");
-                view.find("#newcontent").setTransitionClass("center");
+                view.find("#content").replaceClass(navRegex, (nav === "forward") ? "back" : "forward");
+                view.find("#newcontent").setTransitionClass(navRegex, "center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
                     droppy.isAnimating = false;
