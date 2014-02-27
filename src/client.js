@@ -68,7 +68,6 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-
         var classes = this[0].className.split(' '), classMatch,
             hasClass = false;
         classes = classes.filter(function (className) {
@@ -158,28 +157,10 @@
     $(getPage);
 
     function getPage() {
-        $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg"))
-            .then(function (dataReq, svgReq) {
-                droppy.svg = JSON.parse(svgReq[0]);
-                loadPage(dataReq[2].getResponseHeader("X-Page-Type"), addSVG(dataReq[0]));
-            });
-    }
-    // {"add-folder":{"data":"<svg>","info":{"width":"32","height":"32"}}}
-    function addSVG(html) {
-        var tmp;
-
-        Object.keys(droppy.svg).forEach(function (name) {
-            tmp = $("<div>" + droppy.svg[name] + "</div>");
-            tmp.find("svg").attr("class", "svg-loaded " + name);
-            droppy.svg[name] = tmp.html();
+        $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
+            droppy.svg = JSON.parse(svgReq[0]);
+            loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
         });
-
-        tmp = $("<div>" + html + "</div>");
-        tmp.find("svg").replaceWith(function () {
-            return $(droppy.svg[$(this).attr("class")]);
-        });
-
-        return tmp.html();
     }
 
     // Switch the page content with an animation
@@ -1740,6 +1721,23 @@
                 unit: units[step]
             };
         }
+    }
+
+    // SVG preprocessing
+    function prepareSVG(html) {
+        var tmp;
+        // Populate droppy.svg
+        Object.keys(droppy.svg).forEach(function (name) {
+            tmp = $("<div>" + droppy.svg[name] + "</div>");
+            tmp.find("svg").attr("class", name);
+            droppy.svg[name] = tmp.html();
+        });
+        // Replace <svg>'s in the html source with the full svg data
+        tmp = $("<div>" + html + "</div>");
+        tmp.find("svg").replaceWith(function () {
+            return $(droppy.svg[$(this).attr("class")]);
+        });
+        return tmp.html();
     }
 
     // Find the corrects class for an icon sprite
