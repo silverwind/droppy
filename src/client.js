@@ -207,6 +207,9 @@
     }
 
     function requestPage() {
+        // This page reload on login/logout should be removed at some point in the future, it's here for these reasons:
+        //  - Chrome won't offer password saving without a reload on login
+        //  - There's a bug with the view not getting properly re-initialized after a logout/login, this works around it
         window.location.reload(false);
     }
 
