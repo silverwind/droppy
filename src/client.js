@@ -173,17 +173,13 @@
             initMainPage();
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
-                $("#navigation")[0].addEventListener('transitionend', function () {
-                    droppy.socketWait && showSpinner();
-                }, false);
-                $("#navigation").replaceClass("out", "in");
+                droppy.socketWait && showSpinner();
                 finalize();
             });
         } else if (type === "auth" || type === "firstrun") {
             initAuthPage(type === "firstrun");
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
-                $("#navigation").addClass("out");
                 setTimeout(function () {
                     box.removeClass("out");
                     if (type === "firstrun") {
@@ -592,7 +588,7 @@
         }
 
         $("#create-folder").register("click", function () {
-            var dummyFolder, wasEmpty,
+            var dummyFolder, wasEmpty, view,
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
                                 '<span class="sprite sprite-folder-open"></span>' +
                                 '<span class="folder-link entry-link"></span>' +
@@ -605,7 +601,8 @@
                 $(dummyHtml).appendTo("#content ul");
             }
             dummyFolder = $(".data-row.new-folder");
-            var view = dummyFolder.parents(".view");
+            view = dummyFolder.parents(".view");
+            view.scrollTop(dummyFolder.offset().top);
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
