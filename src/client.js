@@ -154,14 +154,13 @@
 // ============================================================================
 //  Page loading functions
 // ============================================================================
-    $(getPage);
-
-    function getPage() {
+    // Load both the content for the site and svg data, and continue loading once both requests finish
+    $(function () {
         $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
             droppy.svg = JSON.parse(svgReq[0]);
             loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
         });
-    }
+    });
 
     // Switch the page content with an animation
     function loadPage(type, data) {
@@ -208,13 +207,7 @@
     }
 
     function requestPage() {
-        // Ugly hack to let Chrome offer a password saving dialog
-        // http://code.google.com/p/chromium/issues/detail?id=43219
-        if (/Chrome/.test(navigator.userAgent)) {
-            window.location.reload(false);
-        } else {
-            getPage();
-        }
+        window.location.reload(false);
     }
 
 // ============================================================================
