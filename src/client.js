@@ -1147,7 +1147,7 @@
                 showSpinner();
 
                 // Find the direction in which we should animate
-                if (view.find(".document").length > 0) {
+                if (view.attr("data-type") === "document") {
                     droppy.animDirection = "back";
                 } else {
                     if (path.length > view[0].currentFolder.length) droppy.animDirection = "forward";
@@ -1575,6 +1575,7 @@
 
         view[0].viewType = "document";
         loadContent(view, doc);
+        showSpinner();
 
         $.ajax(url, {
             dataType: "text",
@@ -1601,6 +1602,7 @@
                         }
                     })();
                 if (editing) {
+                    doc.find(".text-editor pre").hide();
                     editor = doc.find(".text-editor textarea");
                     editor.val(data);
                     editor = CodeMirror.fromTextArea(editor[0], {
@@ -1615,6 +1617,7 @@
                     // Use run mode here
                     doc.find(".text-editor pre").text(data);
                 }
+                hideSpinner();
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                 });

@@ -673,7 +673,7 @@ input:-webkit-autofill {
 .document .text-editor .CodeMirror {
     border-radius: 4px;
     font-size: .65em;
-    font-family: "Consolas", "Monaco", monospace;
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
     line-height: 1.3em;
     height: 100%;
     position: absolute;
