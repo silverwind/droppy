@@ -130,6 +130,7 @@ input:-webkit-autofill {
 
 #content.editor, #newcontent.editor {
     height: calc(100% - .5em);
+    position: relative;
 }
 
 #content.out { opacity: 0 }
@@ -619,7 +620,8 @@ input:-webkit-autofill {
 /* ============================ Document Previewer ============================ */
 .document {
     padding: .5em;
-    position: relative;
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
 }
 
 .document>.sidebar {
@@ -653,10 +655,12 @@ input:-webkit-autofill {
 }
 
 .document > .sidebar > div:hover { background: #333; cursor: pointer }
-.document .exit:hover svg { fill: #e33 }
-.document .exit:hover span { color: #e33; opacity: 1 }
-.document .save:hover svg { fill: #5a0 }
-.document .save:hover span { color: #5a0; opacity: 1 }
+.document .exit:hover svg    { fill: #f33 }
+.document .exit:hover span  { color: #f33; opacity: 1 }
+.document .save:hover svg    { fill: #5f0 }
+.document .save:hover span  { color: #5f0; opacity: 1 }
+.document .light:hover svg   { fill: #ff5 }
+.document .light:hover span { color: #ff5; opacity: 1 }
 
 .document.readonly .save { display: none }
 
@@ -673,9 +677,9 @@ input:-webkit-autofill {
 .document.dirty .title:after {
     content: "*";
 }
+
 .document .text-editor {
-    box-shadow:  0 0 0 1px #aaa;
-    border-radius: 2px;
+
 }
 
 .document .text-editor>pre {
@@ -687,7 +691,13 @@ input:-webkit-autofill {
 }
 
 .document .text-editor .CodeMirror {
+    border-radius: 4px;
     font-size: .65em;
+    font-family: "Consolas", "Monaco", monospace;
+    line-height: 1.4em;
+    position: relative;
+    bottom: 0;
+    top: 0;
 }
 
 /* ============================ Upload Progress ============================ */

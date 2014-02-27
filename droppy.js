@@ -67,19 +67,20 @@
 
     // Add CodeMirror source paths
     // Addons
-    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"]
-        .forEach(function (relPath) {
-            resources.js.push(cmPath + "addon/" + relPath);
-        });
+    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
+        resources.js.push(cmPath + "addon/" + relPath);
+    });
     // Modes
-    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js",
-            "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
-            "markdown/markdown.js", "php/php.js"]
-        .forEach(function (relPath) {
-            resources.js.push(cmPath + "mode/" + relPath);
-        });
-    // Keymap
+    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
+     "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
+        resources.js.push(cmPath + "mode/" + relPath);
+    });
+    // Keymaps
     // resources.js.push(cmPath + "keymap/sublime.js");
+    // Themes
+    ["base16-light.css", "base16-dark.css"].forEach(function (relPath) {
+        resources.css.push(cmPath + "theme/" + relPath);
+    });
 
     // Argument handler
     if (isCLI) handleArguments();

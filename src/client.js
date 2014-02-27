@@ -1526,6 +1526,7 @@
                     '<div class="sidebar">' +
                         '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                         '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
+                        '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
                     '</div>' +
                     '<div class="text-editor">' +
                         (editing ? '<textarea></textarea>' : '<pre></pre>') +
@@ -1564,6 +1565,8 @@
                     editor = CodeMirror.fromTextArea(editor[0], {
                         styleSelectedText: true,
                         showCursorWhenSelecting: true,
+                        theme: "base16-dark",
+                        lineNumbers: true,
                         // keyMap: "sublime",
                         mode: mode
                     });
@@ -1571,9 +1574,6 @@
                     // Use run mode here
                     doc.find(".text-editor pre").text(data);
                 }
-                setTimeout(function () {
-                    doc.removeClass("out").addClass("in");
-                }, 50);
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                 });
@@ -1584,6 +1584,13 @@
                         "to": entryId,
                         "value": editor.getValue()
                     });
+                });
+                doc.find(".light").register("click", function () {
+                    var cm = $(".CodeMirror");
+                    if (cm.hasClass("cm-s-base16-dark"))
+                        cm.removeClass("cm-s-base16-dark").addClass("cm-s-base16-light");
+                    else
+                        cm.removeClass("cm-s-base16-light").addClass("cm-s-base16-dark");
                 });
                 editor.on("change", function () {
                     doc.addClass("dirty");
