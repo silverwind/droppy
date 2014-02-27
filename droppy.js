@@ -443,6 +443,7 @@
                     break;
                 case "SAVE_FILE":
                     log.log(log.socket(remoteIP, remotePort), " Saving: " + msg.data.to.substring(1));
+                    if (!utils.isPathSane(msg.data.to, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
                     fs.stat(msg.data.to, function (error, stats) {
                         if (error) {

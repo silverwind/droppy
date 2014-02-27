@@ -675,7 +675,6 @@ input:-webkit-autofill {
 .document .text-editor>pre {
     margin: 0;
     font-size: .65em;
-    background: #fff;
     padding: .5em 1em;
     color: #333;
 }

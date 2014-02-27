@@ -606,7 +606,7 @@
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
-                    sendMessage(0, "CREATE_FOLDER",
+                    sendMessage(null , "CREATE_FOLDER",
                         view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal
                     );
                 }
@@ -1302,19 +1302,25 @@
             }
         }
         list.children("li").sort(sortFunc).appendTo(list);
-        loadContent(view, list.children("li").length > 0 ? list : false);
+        loadContent(view, list.children("li").length > 0 ? list : null);
     }
 
     // Load generated list into view with an animation
-    function loadContent(view, html, isEditor) {
-        var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
-        if (!isEditor)
-            $(getHeaderHTML()).prependTo(html);
-        else {
+    function loadContent(view, html) {
+        var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>',
+            type = view[0].viewType;
+
+        switch (type) {
+        case "document":
             droppy.animDirection = "forward";
+            break;
+        case "directory":
+            $(getHeaderHTML()).prependTo(html);
+            break;
         }
+
         requestAnimation(function () {
-            if (droppy.animDirection === "same" && !isEditor) {
+            if (droppy.animDirection === "same" && type !== "document") {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
@@ -1563,7 +1569,9 @@
                     '</div>' +
                 '</div>'
             );
-        loadContent(view, doc, true);
+
+        view[0].viewType = "document";
+        loadContent(view, doc);
 
         $.ajax(url, {
             dataType: "text",
