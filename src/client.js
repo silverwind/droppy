@@ -1537,6 +1537,8 @@
     }
 
     function closeDoc(view) {
+        view[0].viewType = "directory";
+        // updateView(view);
         updateLocation(view, view[0].currentFolder, false, true);
     }
 
@@ -1611,11 +1613,8 @@
                     });
                 });
                 doc.find(".light").register("click", function () {
-                    var cm = $(".CodeMirror");
-                    if (cm.hasClass("cm-s-base16-dark"))
-                        cm.removeClass("cm-s-base16-dark").addClass("cm-s-base16-light");
-                    else
-                        cm.removeClass("cm-s-base16-light").addClass("cm-s-base16-dark");
+                    if (editor.options.theme === "base16-dark") editor.setOption("theme", "base16-light");
+                    else editor.setOption("theme", "base16-dark");
                 });
                 editor.on("change", function () {
                     doc.addClass("dirty");
