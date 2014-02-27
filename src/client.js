@@ -1123,19 +1123,20 @@
     });
 
     // Update our current location and change the URL to it
-    var nav;
     function updateLocation(view, path, doSwitch, skipPush) {
-        // Close any open documents if switching directories
-        closeDoc(view);
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
                 showSpinner();
 
                 // Find the direction in which we should animate
-                if (path.length > view[0].currentFolder.length) nav = "forward";
-                else if (path.length === view[0].currentFolder.length) nav = "same";
-                else nav = "back";
+                if (view.find(".document").length > 0) {
+                    droppy.animDirection = "back";
+                } else {
+                    if (path.length > view[0].currentFolder.length) droppy.animDirection = "forward";
+                    else if (path.length === view[0].currentFolder.length) droppy.animDirection = "same";
+                    else droppy.animDirection = "back";
+                }
 
                 view[0].currentFolder = path;
                 sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", view[0].currentFolder);
@@ -1289,22 +1290,26 @@
     }
 
     // Load generated list into view with an animation
-    function loadContent(view, html) {
+    function loadContent(view, html, isEditor) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
 
-        $(getHeaderHTML()).prependTo(html);
+        if (!isEditor)
+            $(getHeaderHTML()).prependTo(html);
+        else {
+            droppy.animDirection = "forward";
+        }
 
         requestAnimation(function () {
-            if (nav === "same") {
+            if (droppy.animDirection === "same" && !isEditor) {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
-                view.append($("<div id='newcontent' class='" + nav + "'></div>"));
+                view.append($("<div id='newcontent' class='" + droppy.animDirection + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
-                navRegex = /(forward|back|center)/
+                var navRegex = /(forward|back|center)/;
                 view.find(".data-row").addClass("animating");
-                view.find("#content").replaceClass(navRegex, (nav === "forward") ? "back" : "forward");
+                view.find("#content").replaceClass(navRegex, (droppy.animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
@@ -1316,7 +1321,6 @@
             }
 
             bindEvents(view);
-            nav = "same";
         });
     }
 
@@ -1340,14 +1344,15 @@
         view.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
-                type = entry.find(".sprite").attr("class");
+                type = entry.find(".sprite").attr("class"),
+                button = $(this);
 
             type = type.match(/sprite\-(\w+)/);
             if (type) type = type[1];
 
             $("#entry-menu")
                 .attr("class", "in")
-                .css({top: entry.offset().top + "px"})
+                .css({top: entry.offset().top + "px", left: (button.offset().left + button.width() - $("#entry-menu").width()) + "px" })
                 .data("target", entry)
                 .addClass("type-" + type);
             toggleCatcher();
@@ -1522,11 +1527,7 @@
     }
 
     function closeDoc(view) {
-        var doc = view.find(".document");
-        doc.removeClass("in").addClass("out");
-        setTimeout(function () {
-            doc.remove();
-        }, 500);
+        updateLocation(view, view[0].currentFolder, false, true);
     }
 
     function editFile(view, entryId) {
@@ -1540,13 +1541,14 @@
                     '<div class="sidebar">' +
                         '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                         '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
+                        '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
                     '</div>' +
                     '<div class="text-editor">' +
                         (editing ? '<textarea></textarea>' : '<pre></pre>') +
                     '</div>' +
                 '</div>'
             );
-        view.append(doc);
+        loadContent(view, doc, true);
 
         $.ajax(url, {
             dataType: "text",
@@ -1578,6 +1580,8 @@
                     editor = CodeMirror.fromTextArea(editor[0], {
                         styleSelectedText: true,
                         showCursorWhenSelecting: true,
+                        theme: "base16-dark",
+                        lineNumbers: true,
                         // keyMap: "sublime",
                         mode: mode
                     });
@@ -1585,9 +1589,6 @@
                     // Use run mode here
                     doc.find(".text-editor pre").text(data);
                 }
-                setTimeout(function () {
-                    doc.removeClass("out").addClass("in");
-                }, 50);
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                 });
@@ -1599,15 +1600,19 @@
                         "value": editor.getValue()
                     });
                 });
+                doc.find(".light").register("click", function () {
+                    var cm = $(".CodeMirror");
+                    if (cm.hasClass("cm-s-base16-dark"))
+                        cm.removeClass("cm-s-base16-dark").addClass("cm-s-base16-light");
+                    else
+                        cm.removeClass("cm-s-base16-light").addClass("cm-s-base16-dark");
+                });
                 editor.on("change", function () {
                     doc.addClass("dirty");
                 });
             },
             error : function () {
-                doc.removeClass("in").addClass("out");
-                setTimeout(function () {
-                    doc.remove();
-                }, 500);
+                closeDoc(view);
             }
         });
     }
@@ -1659,6 +1664,7 @@
 
     function initVariables() {
         droppy.activeFiles = [];
+        droppy.animDirection = null;
         droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.hasLoggedOut = null;

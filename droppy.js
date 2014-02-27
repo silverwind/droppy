@@ -58,7 +58,7 @@
         mode      = {file: "644", dir: "755"},
         isCLI      = (process.argv.length > 2),
         // Resources
-        cmPath = "node_modules/CodeMirror/",
+        cmPath = "node_modules/codemirror/",
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
@@ -67,19 +67,20 @@
 
     // Add CodeMirror source paths
     // Addons
-    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"]
-        .forEach(function (relPath) {
-            resources.js.push(cmPath + "addon/" + relPath);
-        });
+    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
+        resources.js.push(cmPath + "addon/" + relPath);
+    });
     // Modes
-    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js",
-            "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
-            "markdown/markdown.js", "php/php.js"]
-        .forEach(function (relPath) {
-            resources.js.push(cmPath + "mode/" + relPath);
-        });
-    // Keymap
+    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
+     "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
+        resources.js.push(cmPath + "mode/" + relPath);
+    });
+    // Keymaps
     // resources.js.push(cmPath + "keymap/sublime.js");
+    // Themes
+    ["base16-light.css", "base16-dark.css"].forEach(function (relPath) {
+        resources.css.push(cmPath + "theme/" + relPath);
+    });
 
     // Argument handler
     if (isCLI) handleArguments();

@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "author": "silverwind <silv3rwind@gmail.com>",
   "description": "A personal cloud storage solution with a speedy HTML5 interface.",
   "homepage": "https://github.com/silverwind/droppy",
@@ -11,10 +11,10 @@
   "dependencies": {
     "archiver": "~0.6.1",
     "async": "~0.2.10",
-    "autoprefixer": "~1.1.20140222",
-    "busboy": "0.2.1",
-    "clean-css": "~2.1.1",
-    "codemirror": "3.x.x",
+    "autoprefixer": "~1.1.20140226",
+    "busboy": "0.2.2",
+    "clean-css": "~2.1.3",
+    "codemirror": "~3.22.0",
     "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",
