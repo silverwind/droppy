@@ -1545,6 +1545,8 @@
     }
 
     function closeDoc(view) {
+        view[0].viewType = "directory";
+        // updateView(view);
         updateLocation(view, view[0].currentFolder, false, true);
     }
 
@@ -1619,13 +1621,11 @@
                     });
                 });
                 doc.find(".light").register("click", function () {
-                    var cm = $(".CodeMirror"),
-                        theme = droppy.get("theme");
-                    if (theme === "base16-dark") {
-                        cm.removeClass("cm-s-base16-dark").addClass("cm-s-base16-light");
+                    if (droppy.get("theme") === "base16-dark") {
+                        editor.setOption("theme", "base16-light");
                         droppy.set("theme", "base16-light");
                     } else {
-                        cm.removeClass("cm-s-base16-light").addClass("cm-s-base16-dark");
+                        editor.setOption("theme", "base16-dark");
                         droppy.set("theme", "base16-dark");
                     }
                 });
