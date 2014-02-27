@@ -155,13 +155,14 @@
 //  Page loading functions
 // ============================================================================
     // Load both the content for the site and svg data, and continue loading once both requests finish
-    $(function () {
+    $(getPage);
+
+    function getPage() {
         $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
             droppy.svg = JSON.parse(svgReq[0]);
             loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
         });
-    });
-
+    }
     // Switch the page content with an animation
     function loadPage(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
@@ -169,7 +170,6 @@
             oldPage = $("#page"),
             box     = $("#center-box");
         if (type === "main") {
-            droppy.set("hasLoggedOut", true);
             initMainPage();
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
@@ -206,11 +206,14 @@
         }
     }
 
-    function requestPage() {
-        // This page reload on login/logout should be removed at some point in the future, it's here for these reasons:
-        //  - Chrome won't offer password saving without a reload on login
+    function requestPage(reload) {
+        // This page reload on login should be removed at some point in the future, it's here for these reasons:
+        //  - Chrome won't offer password saving without it
         //  - There's a bug with the view not getting properly re-initialized after a logout/login, this works around it
-        window.location.reload(false);
+        if (reload)
+            window.location.reload(false);
+        else
+            getPage();
     }
 
 // ============================================================================
@@ -396,8 +399,7 @@
                 data: form.serialize(),
                 complete: function (response) {
                     if (response.status  === 202) {
-                        requestPage();
-                        droppy.set("hasLoggedOut", false);
+                        requestPage(true);
                     } else if (response.status === 401) {
                         submit.addClass("invalid");
                         loginform.addClass("invalid");
