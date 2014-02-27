@@ -1302,6 +1302,7 @@
             }
         }
         list.children("li").sort(sortFunc).appendTo(list);
+        view[0].viewType = "directory";
         loadContent(view, list.children("li").length > 0 ? list : null);
     }
 
