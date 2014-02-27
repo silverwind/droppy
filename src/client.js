@@ -606,7 +606,7 @@
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
-                    sendMessage(null , "CREATE_FOLDER",
+                    sendMessage(null, "CREATE_FOLDER",
                         view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal
                     );
                 }
@@ -1319,16 +1319,18 @@
             $(getHeaderHTML()).prependTo(html);
             break;
         }
+        // Set the viewtype as data attribute to help with styling
+        view.attr("data-type", type);
 
         requestAnimation(function () {
             if (droppy.animDirection === "same" && type !== "document") {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
+                var navRegex = /(forward|back|center)/;
                 view.append($("<div id='newcontent' class='" + droppy.animDirection + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
-                var navRegex = /(forward|back|center)/;
                 view.find(".data-row").addClass("animating");
                 view.find("#content").replaceClass(navRegex, (droppy.animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
@@ -1558,7 +1560,7 @@
             editing = true, // Check if not readonly
             editor = null,
             doc = $(
-                '<div class="document out' + (editing ? ' editing' : ' readonly') + '">' +
+                '<div class="document' + (editing ? ' editing' : ' readonly') + '">' +
                     '<div class="title">' + filename + '</div>' +
                     '<div class="sidebar">' +
                         '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
@@ -1625,7 +1627,7 @@
                     });
                 });
                 doc.find(".light").register("click", function () {
-                    if (droppy.get("theme") === "base16-dark") {
+                    if (editor.options.theme === "base16-dark") {
                         editor.setOption("theme", "base16-light");
                         droppy.set("theme", "base16-light");
                     } else {

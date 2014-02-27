@@ -112,24 +112,8 @@ input:-webkit-autofill {
     border-radius: 4px;
     background: #eee;
     position: absolute;
-    padding-top: .25em;
     transition: left .2s ease-in;
 }
-
-/* bottom padding fix for Firefox/IE */
-#content:after, #newcontent:after {
-    bottom: 0;
-    content: "";
-    display: block;
-    height: .25em;
-}
-
-#content.editor, #newcontent.editor {
-    height: calc(100% - .5em);
-    position: relative;
-}
-
-#content.out { opacity: 0 }
 
 @media all and (min-width: 1024px) { #content, #newcontent { font-size:  1em } }
 @media all and (max-width: 1023px) { #content, #newcontent { font-size: .9em } }
@@ -280,7 +264,6 @@ input:-webkit-autofill {
     border-bottom: 2px solid #aaa;
     background: linear-gradient(rgba(255,255,255,0), #ccc);
     position: relative;
-    top: -.125em;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -355,6 +338,10 @@ input:-webkit-autofill {
 
 .data-row:not(.animating):not(.playing):not(.editing):hover {
     background: #fff;
+}
+
+.data-row:not(.animating):not(.playing):not(.editing):last-of-type:hover {
+    border-radius: 0 0 4px 4px;
 }
 
 .data-row.uploading .sprite {
@@ -561,6 +548,9 @@ input:-webkit-autofill {
     z-index: 32;
     box-shadow: 0 0 30px #000;
 }
+@media all and (min-width: 1024px) { #entry-menu { font-size: .9em } }
+@media all and (max-width: 1023px) { #entry-menu { font-size: .8em } }
+@media all and (max-width:  639px) { #entry-menu { font-size: .7em } }
 
 #entry-menu>.radius-wrap {
     background: #eee;
@@ -614,16 +604,16 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
-.document {
-    padding: .5em;
+.view[data-type="document"] #content, .view[data-type="document"] #newcontent {
+    height: calc(100% - 0.5em);
 }
 
-.document>.sidebar {
+.document > .sidebar {
     position: absolute;
-    top: 2.5em;
+    top: .5em;
     width: 2.5em;
     bottom: 1em;
-    right: 1.25em;
+    right: .75em;
 }
 .document > .sidebar > div {
     position: relative;
@@ -633,14 +623,14 @@ input:-webkit-autofill {
     margin-bottom: .25em;
 }
 
-.document>.sidebar svg {
+.document > .sidebar svg {
     fill: #555;
     height: 1em;
     width: 1em;
     margin-left: .75em;
 }
 
-.document>.sidebar span {
+.document > .sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
@@ -660,17 +650,18 @@ input:-webkit-autofill {
 
 /* ============================ Text Editor ============================ */
 .document .title {
-    transition: all .4s ease;
+    position: absolute;
+    top: .25em;
     width: 100%;
+    text-align: center;
+    pointer-events: none;
+    z-index: 2;
+    transition: all .4s ease;
     color: #555;
     font-weight: 400;
 }
-.document.dirty .title {
-    color: #f71;
-}
-.document.dirty .title:after {
-    content: "*";
-}
+.document.dirty .title { color: #f71 }
+.document.dirty .title:after { content: "*" }
 
 .document .text-editor>pre {
     margin: 0;
@@ -683,7 +674,10 @@ input:-webkit-autofill {
     border-radius: 4px;
     font-size: .65em;
     font-family: "Consolas", "Monaco", monospace;
-    line-height: 1.4em;
+    line-height: 1.3em;
+    height: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 /* ============================ Upload Progress ============================ */
