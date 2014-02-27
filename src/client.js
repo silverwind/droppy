@@ -1106,7 +1106,6 @@
     });
 
     // Update our current location and change the URL to it
-    var nav;
     function updateLocation(view, path, doSwitch, skipPush) {
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
@@ -1115,13 +1114,12 @@
 
                 // Find the direction in which we should animate
                 if (view.find(".document").length > 0) {
-                    nav = "back";
+                    droppy.animDirection = "back";
                 } else {
-                    if (path.length > view[0].currentFolder.length) nav = "forward";
-                    else if (path.length === view[0].currentFolder.length) nav = "same";
-                    else nav = "back";
+                    if (path.length > view[0].currentFolder.length) droppy.animDirection = "forward";
+                    else if (path.length === view[0].currentFolder.length) droppy.animDirection = "same";
+                    else droppy.animDirection = "back";
                 }
-
 
                 view[0].currentFolder = path;
                 sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", view[0].currentFolder);
@@ -1176,8 +1174,6 @@
             li.data("destination", path || "/");
             li.click(function () {
                 updateLocation(view, $(this).data("destination"), true);
-                // Close any open documents if switching directories
-                closeDoc(view);
             });
 
             $("#path").append(li);
@@ -1281,19 +1277,19 @@
         if (!isEditor)
             $(getHeaderHTML()).prependTo(html);
         else {
-            nav = "forward";
+            droppy.animDirection = "forward";
         }
 
         requestAnimation(function () {
-            if (nav === "same" && !isEditor) {
+            if (droppy.animDirection === "same" && !isEditor) {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
-                view.append($("<div id='newcontent' class='" + nav + "'></div>"));
+                view.append($("<div id='newcontent' class='" + droppy.animDirection + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");
-                view.find("#content").attr("class", (nav === "forward") ? "back" : "forward");
+                view.find("#content").attr("class", (droppy.animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(isEditor ? "editor center" : "center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
@@ -1305,7 +1301,6 @@
             }
 
             bindEvents(view);
-            nav = "same";
         });
     }
 
@@ -1649,6 +1644,7 @@
 
     function initVariables() {
         droppy.activeFiles = [];
+        droppy.animDirection = null;
         droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.hasLoggedOut = null;

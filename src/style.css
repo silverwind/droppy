@@ -620,8 +620,6 @@ input:-webkit-autofill {
 /* ============================ Document Previewer ============================ */
 .document {
     padding: .5em;
-    position: absolute;
-    top: 0; bottom: 0; left: 0; right: 0;
 }
 
 .document>.sidebar {
@@ -678,10 +676,6 @@ input:-webkit-autofill {
     content: "*";
 }
 
-.document .text-editor {
-
-}
-
 .document .text-editor>pre {
     margin: 0;
     font-size: .65em;
@@ -695,9 +689,6 @@ input:-webkit-autofill {
     font-size: .65em;
     font-family: "Consolas", "Monaco", monospace;
     line-height: 1.4em;
-    position: relative;
-    bottom: 0;
-    top: 0;
 }
 
 /* ============================ Upload Progress ============================ */
