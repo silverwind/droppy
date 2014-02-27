@@ -38,9 +38,19 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-        var newClass = this[0].className.replace(match, replacement);
-        if (newClass !== this[0].className) this[0].className = newClass;
-        else this.addClass(replacement)
+        var classes = this[0].className.split(' '), classMatch,
+            hasClass = false;
+        classes = classes.filter(function (className) {
+            if (className === match) return false;
+            if (className === replacement) hasClass = true;
+
+            classMatch = className.match(match);
+            // filter out if the entire capture matches the entire className
+            if (classMatch) return classMatch[0] !== className;
+            else return true;
+        })
+        if (!hasClass) classes.push(replacement);
+        this[0].className = classes.join(' ');
         return this;
     }
 
