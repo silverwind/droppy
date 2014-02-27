@@ -26,6 +26,36 @@
         })()
     };
 // ============================================================================
+//  localStorage wrapper functions
+// ============================================================================
+    $(function () {
+        var prefs, defaults = { volume : 0.5, theme: "base16-dark", hasLoggedOut : false }, doSave;
+
+        // Load prefs and set missing ones to their default
+        prefs = JSON.parse(localStorage.getItem("prefs")) || {};
+        for (var pref in defaults) {
+            if (defaults.hasOwnProperty(pref)) {
+                if (!prefs[pref]) {
+                    doSave = true;
+                    prefs[pref] = defaults[pref];
+                }
+            }
+        }
+        doSave && localStorage.setItem("prefs", JSON.stringify(prefs));
+
+        // Get a variable from localStorage
+        droppy.get = function (pref) {
+            prefs = JSON.parse(localStorage.getItem("prefs"));
+            return prefs[pref];
+        };
+
+        // Save a variable to localStorage
+        droppy.set = function (pref, value) {
+            prefs[pref] = value;
+            localStorage.setItem("prefs", JSON.stringify(prefs));
+        };
+    });
+// ============================================================================
 //  Set up a few more things
 // ============================================================================
     // Add the dataTransfer property to the "drop" event.
@@ -40,9 +70,9 @@
     $.fn.replaceClass = function (match, replacement) {
         var newClass = this[0].className.replace(match, replacement);
         if (newClass !== this[0].className) this[0].className = newClass;
-        else this.addClass(replacement)
+        else this.addClass(replacement);
         return this;
-    }
+    };
 
     // Set a new class on an element, and make sure it is ready to be transitioned.
     $.fn.setTransitionClass = function (oldclass, newclass) {
@@ -62,13 +92,13 @@
             // If we don't support animations, fallback to a simple timeout
             setTimeout(function () {
                 if (oldclass) this.replaceClass(oldclass, newclass);
-                else this.addClass(newClass);
+                else this.addClass(newclass);
             }, 30);
         }
         return this;
     };
     if (droppy.detects.animation) {
-        function animStart(event) {
+        var animStart = function (event) {
             if (event.animationName === "nodeInserted") {
                 var target = $(event.target),
                     newClass = target.data("newclass"),
@@ -80,7 +110,7 @@
                 if (oldClass) target.removeData("oldclass").replaceClass(oldClass, newClass);
                 else target.addClass(newClass);
             }
-        }
+        };
         // Listen for the animation event for our pseudo-animation
         ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"].forEach(function (eventName) {
             document.addEventListener(eventName, animStart, false);
@@ -148,7 +178,7 @@
             oldPage = $("#page"),
             box     = $("#center-box");
         if (type === "main") {
-            droppy.hasLoggedOut = false;
+            droppy.set("hasLoggedOut", true);
             initMainPage();
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
@@ -168,9 +198,10 @@
                     if (type === "firstrun") {
                         $("#login-info").text("Hello! Choose your creditentials.");
                         $("#login-info-box").addClass("info");
-                    } else if (droppy.hasLoggedOut) {
+                    } else if (droppy.get("hasLoggedOut")) {
                         $("#login-info").text("Logged out!");
                         $("#login-info-box").addClass("info");
+                        droppy.set("hasLoggedOut", false);
                     }
                 }, 100);
                 finalize();
@@ -212,7 +243,7 @@
 
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
-            if (droppy.hasLoggedOut || event.code === 4000) return;
+            if (droppy.get("hasLoggedOut") || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
                     openSocket();
@@ -378,7 +409,7 @@
                 complete: function (response) {
                     if (response.status  === 202) {
                         requestPage();
-                        droppy.hasLoggedOut = false;
+                        droppy.set("hasLoggedOut", false);
                     } else if (response.status === 401) {
                         submit.addClass("invalid");
                         loginform.addClass("invalid");
@@ -657,8 +688,7 @@
             droppy.socket && droppy.socket.close(4001);
             deleteCookie("session");
             initVariables(); // Reset vars to their init state
-            droppy.hasLoggedOut = true;
-            window.location.reload(false);
+            droppy.set("hasLoggedOut", true);
             requestPage();
         });
 
@@ -715,7 +745,7 @@
         slider[0].addEventListener("mousewheel", onWheel, false);
         slider[0].addEventListener("DOMMouseScroll", onWheel, false);
 
-        player.volume = localStorage.getItem("volume") || 0.5;
+        player.volume = droppy.get("volume");
         slider.val(player.volume * 100);
 
         var volumeTimeout;
@@ -739,7 +769,7 @@
             }
 
             player.volume = volume;
-            localStorage.setItem("volume", volume);
+            droppy.set("volume", volume);
             slider.val(volume * 100);
             level.text(Math.round(volume * 100) + "%");
 
@@ -1219,9 +1249,10 @@
 
         if (width > space) {
             requestAnimation(function () {
-                if(droppy.detects.animation)
+                if (droppy.detects.animation)
                     $("#path li").css({"left": space - width + "px"});
-                else $("#path li").animate({"left": space - width}, {duration: 200});
+                else
+                    $("#path li").animate({"left": space - width}, {duration: 200});
             });
         } else {
             requestAnimation(function () {
@@ -1234,7 +1265,6 @@
     // Convert the received data into HTML
     function buildEntryList(view, fileList, root, isUpload) {
         var list = $("<ul></ul>"), downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes;
-
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
                 svgIcon = "", classes = "";
@@ -1284,7 +1314,6 @@
                 }
             }
         }
-
         list.children("li").sort(sortFunc).appendTo(list);
         loadContent(view, list.children("li").length > 0 ? list : false);
     }
@@ -1292,13 +1321,11 @@
     // Load generated list into view with an animation
     function loadContent(view, html, isEditor) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>';
-
         if (!isEditor)
             $(getHeaderHTML()).prependTo(html);
         else {
             droppy.animDirection = "forward";
         }
-
         requestAnimation(function () {
             if (droppy.animDirection === "same" && !isEditor) {
                 view.find("#content").attr("class", "center");
@@ -1319,7 +1346,6 @@
                     view.find(".data-row").removeClass("animating");
                 }, 200);
             }
-
             bindEvents(view);
         });
     }
@@ -1580,7 +1606,7 @@
                     editor = CodeMirror.fromTextArea(editor[0], {
                         styleSelectedText: true,
                         showCursorWhenSelecting: true,
-                        theme: "base16-dark",
+                        theme: droppy.get("theme"),
                         lineNumbers: true,
                         // keyMap: "sublime",
                         mode: mode
@@ -1601,11 +1627,15 @@
                     });
                 });
                 doc.find(".light").register("click", function () {
-                    var cm = $(".CodeMirror");
-                    if (cm.hasClass("cm-s-base16-dark"))
+                    var cm = $(".CodeMirror"),
+                        theme = droppy.get("theme");
+                    if (theme === "base16-dark") {
                         cm.removeClass("cm-s-base16-dark").addClass("cm-s-base16-light");
-                    else
+                        droppy.set("theme", "base16-light");
+                    } else {
                         cm.removeClass("cm-s-base16-light").addClass("cm-s-base16-dark");
+                        droppy.set("theme", "base16-dark");
+                    }
                 });
                 editor.on("change", function () {
                     doc.addClass("dirty");
@@ -1667,7 +1697,6 @@
         droppy.animDirection = null;
         droppy.audioUpdater = null;
         droppy.debug = null;
-        droppy.hasLoggedOut = null;
         droppy.isAnimating = null;
         droppy.isPlaying = null;
         droppy.isUploading = null;
