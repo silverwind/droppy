@@ -110,10 +110,10 @@ input:-webkit-autofill {
     margin: .25em;
     width: calc(100% - .5em);
     border-radius: 4px;
-    background: #eee;
     position: absolute;
     transition: left .2s ease-in;
 }
+.view:not(.document) #content, .view:not(.document) #newcontent { background: #eee }
 
 @media all and (min-width: 1024px) { #content, #newcontent { font-size:  1em } }
 @media all and (max-width: 1023px) { #content, #newcontent { font-size: .9em } }
@@ -646,6 +646,8 @@ input:-webkit-autofill {
 .doc > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
 .doc > .sidebar > .light:hover svg   { fill: #ff5 }
 .doc > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
+.doc > .sidebar > .opts:hover svg   { fill: #c4c }
+.doc > .sidebar > .opts:hover span { color: #c4c; opacity: 1 }
 .doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
@@ -656,6 +658,29 @@ input:-webkit-autofill {
 .editor-filename.saved { color: #7f1 !important}
 .editor-filename.save-failed  { color: #f44 !important }
 .editor-filename.dirty:after { content: "*" }
+
+.opts-container {
+    position: absolute;
+    right: 4em;
+    top: 8.5em;
+    height: 2.5em;
+    z-index: 3;
+    text-align: center;
+    background: #333;
+    padding: .5em;
+    border-radius: 6px;
+    transition: all .2s ease;
+    opacity: 0;
+}
+.opts-container.in { opacity: 1}
+
+.opts-container select {
+    width: 5em;
+    height: 1.75em;
+    margin: 0 .25em;
+    font-size: .65em;
+    text-align: center;
+}
 
 .doc > .text-editor > .CodeMirror {
     border-radius: 4px;
