@@ -1377,7 +1377,6 @@
                 bindDirectoryViewEvents(view);
                 break;
             }
-            bindEvents(view);
             view[0].animDirection = "same";
         });
     }
