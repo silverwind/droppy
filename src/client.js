@@ -1584,10 +1584,10 @@
     function editFile(view, entryId) {
         var url = "/_" + entryId,
             filename = entryId.match(/\/(.+$)/)[1],
-            editing = true, // Check if not readonly
+            readOnly = false, // Check if not readonly
             editor = null,
             doc = $(
-            '<div class="doc' + (editing ? ' editing' : ' readonly') + '">' +
+            '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
                 '<div class="sidebar">' +
                     '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                     '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
@@ -1645,24 +1645,20 @@
                             return ext;
                         }
                     })();
-                if (editing) {
-                    doc.find(".text-editor pre").hide();
-                    editor = doc.find(".text-editor textarea");
-                    editor.val(data);
-                    editor = CodeMirror.fromTextArea(editor[0], {
-                        styleSelectedText: true,
-                        showCursorWhenSelecting: true,
-                        theme: droppy.get("theme"),
-                        indentWithTabs: droppy.get("indentWithTabs"),
-                        indentUnit: droppy.get("indentUnit"),
-                        lineWrapping: droppy.get("lineWrapping"),
-                        lineNumbers: true,
-                        // keyMap: "sublime",
-                        mode: mode
-                    });
-                } else {
-                    // Set editor to read-only
-                }
+                editor = doc.find(".text-editor textarea");
+                editor.val(data);
+                editor = CodeMirror.fromTextArea(editor[0], {
+                    styleSelectedText: true,
+                    readOnly: readOnly,
+                    showCursorWhenSelecting: true,
+                    theme: droppy.get("theme"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    indentUnit: droppy.get("indentUnit"),
+                    lineWrapping: droppy.get("lineWrapping"),
+                    lineNumbers: true,
+                    // keyMap: "sublime",
+                    mode: mode
+                });
                 hideSpinner();
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
