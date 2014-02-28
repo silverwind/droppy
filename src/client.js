@@ -285,9 +285,8 @@
                 break;
             case "SAVE_STATUS":
                 hideSpinner();
-                var doc = getView(msg.vId).find(".doc");
-                doc.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
-                setTimeout(function () { doc.removeClass("saved save-failed"); }, 1000);
+                $(".editor-filename").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
+                setTimeout(function () { $(".editor-filename").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
             }
         };
@@ -1161,12 +1160,12 @@
                 showSpinner();
 
                 // Find the direction in which we should animate
-                if (view.attr("data-type") === "document") {
-                    droppy.animDirection = "back";
+                if (view.find(".doc").length) {
+                    view[0].animDirection = "back";
                 } else {
-                    if (path.length > view[0].currentFolder.length) droppy.animDirection = "forward";
-                    else if (path.length === view[0].currentFolder.length) droppy.animDirection = "same";
-                    else droppy.animDirection = "back";
+                    if (path.length > view[0].currentFolder.length) view[0].animDirection = "forward";
+                    else if (path.length === view[0].currentFolder.length) view[0].animDirection = "same";
+                    else view[0].animDirection = "back";
                 }
 
                 view[0].currentFolder = path;
@@ -1180,7 +1179,7 @@
     }
 
     // Update the path indicator
-    function updatePath(view, path) {
+    function updatePath(view, path, filename) {
         var parts = path.split("/");
         var i = 0, len;
 
@@ -1229,10 +1228,14 @@
         }
 
         function finalize() {
+            // Add filename when in editor view
+            if (filename) {
+                $("#path").append($("<li class='out editor-filename'>" + filename + "</li>"));
+            }
             $("#path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
-                $("#path li.in").removeClass();
+                $("#path li.in").removeClass("in");
                 checkPathOverflow();
             }, 200);
         }
@@ -1327,7 +1330,7 @@
             typeRegex = /(document|directory|media)/;
         switch (type) {
         case "document":
-            droppy.animDirection = "forward";
+            view[0].animDirection = "forward";
             break;
         case "directory":
             $(getHeaderHTML()).prependTo(html);
@@ -1337,15 +1340,15 @@
         view.replaceClass(typeRegex, type);
 
         requestAnimation(function () {
-            if (droppy.animDirection === "same" && type !== "document") {
+            if (view[0].animDirection === "same" && type !== "document") {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
-                view.append($("<div id='newcontent' class='" + droppy.animDirection + "'></div>"));
+                view.append($("<div id='newcontent' class='" + view[0].animDirection + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");
-                view.find("#content").replaceClass(navRegex, (droppy.animDirection === "forward") ? "back" : "forward");
+                view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
@@ -1566,6 +1569,7 @@
 
     function closeDoc(view) {
         view.attr("data-type", "directory");
+        $(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
         updateLocation(view, view[0].currentFolder, false, true);
     }
 
@@ -1576,20 +1580,21 @@
             editor = null,
             doc = $(
                 '<div class="doc' + (editing ? ' editing' : ' readonly') + '">' +
-                    '<div class="title">' + filename + '</div>' +
                     '<div class="sidebar">' +
                         '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                         '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
                         '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
                     '</div>' +
                     '<div class="text-editor">' +
-                        (editing ? '<textarea></textarea>' : '<pre></pre>') +
+                        '<textarea></textarea>' +
                     '</div>' +
                 '</div>'
             );
 
         view.attr("data-type", "document");
         loadContent(view, doc);
+
+        updatePath(view, view[0].currentFolder, filename.substring(view[0].currentFolder.length));
         showSpinner();
 
         $.ajax(url, {
@@ -1629,8 +1634,7 @@
                         mode: mode
                     });
                 } else {
-                    // Use run mode here
-                    doc.find(".text-editor pre").text(data);
+                    // Set editor to read-only
                 }
                 hideSpinner();
                 doc.find(".exit").register("click", function () {
@@ -1653,7 +1657,7 @@
                     }
                 });
                 editor.on("change", function () {
-                    doc.removeClass("saved save-failed").addClass("dirty");
+                    $(".editor-filename").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
                 });
             },
             error : function () {
@@ -1709,7 +1713,6 @@
 
     function initVariables() {
         droppy.activeFiles = [];
-        droppy.animDirection = null;
         droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.isAnimating = null;
