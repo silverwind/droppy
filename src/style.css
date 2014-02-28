@@ -608,6 +608,8 @@ input:-webkit-autofill {
     height: calc(100% - 0.5em);
 }
 
+.doc textarea { visibility: none }
+
 .doc > .sidebar {
     position: absolute;
     top: .5em;
