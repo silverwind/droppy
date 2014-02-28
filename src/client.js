@@ -1370,8 +1370,8 @@
                 }, 200);
             }
             bindEvents(view);
+            view[0].animDirection = "same";
         });
-        view[0].animDirection = "same";
     }
 
     // Bind click events to the list elements
