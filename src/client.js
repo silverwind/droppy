@@ -1160,12 +1160,12 @@
                 showSpinner();
 
                 // Find the direction in which we should animate
-                if (view.attr("data-type") === "document") {
-                    droppy.animDirection = "back";
+                if (view.find(".doc").length) {
+                    view[0].animDirection = "back";
                 } else {
-                    if (path.length > view[0].currentFolder.length) droppy.animDirection = "forward";
-                    else if (path.length === view[0].currentFolder.length) droppy.animDirection = "same";
-                    else droppy.animDirection = "back";
+                    if (path.length > view[0].currentFolder.length) view[0].animDirection = "forward";
+                    else if (path.length === view[0].currentFolder.length) view[0].animDirection = "same";
+                    else view[0].animDirection = "back";
                 }
 
                 view[0].currentFolder = path;
@@ -1326,7 +1326,7 @@
             typeRegex = /(document|directory|media)/;
         switch (type) {
         case "document":
-            droppy.animDirection = "forward";
+            view[0].animDirection = "forward";
             break;
         case "directory":
             $(getHeaderHTML()).prependTo(html);
@@ -1336,15 +1336,15 @@
         view.replaceClass(typeRegex, type);
 
         requestAnimation(function () {
-            if (droppy.animDirection === "same" && type !== "document") {
+            if (view[0].animDirection === "same" && type !== "document") {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
-                view.append($("<div id='newcontent' class='" + droppy.animDirection + "'></div>"));
+                view.append($("<div id='newcontent' class='" + view[0].animDirection + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");
-                view.find("#content").replaceClass(navRegex, (droppy.animDirection === "forward") ? "back" : "forward");
+                view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
                 // Switch classes once the transition has finished
                 setTimeout(function () {
@@ -1705,7 +1705,6 @@
 
     function initVariables() {
         droppy.activeFiles = [];
-        droppy.animDirection = null;
         droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.isAnimating = null;
