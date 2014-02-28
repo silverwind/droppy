@@ -257,7 +257,11 @@
             switch (msg.type) {
             case "UPDATE_FILES":
                 // Ignore update if we're uploading or the view is not viewing a directory
-                if (droppy.isUploading || getView(vId).attr("data-type") !== "directory") return;
+                if ((droppy.isUploading || getView(vId).attr("data-type") !== "directory") && !getView(vId)[0].switchRequest) return;
+                if (getView(vId)[0].switchRequest) {
+                    getView(vId)[0].switchRequest = false;
+                    $(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
+                }
                 showSpinner();
                 updateData(getView(vId), msg.folder, msg.data);
                 droppy.ready = false;
@@ -1225,6 +1229,7 @@
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path || "/");
             li.click(function () {
+                view[0].switchRequest = true; // This needs to be set so we can switch out of a editor view
                 updateLocation(view, $(this).data("destination"), true);
             });
 
