@@ -256,7 +256,7 @@
             var msg = JSON.parse(event.data),
                 vId = msg.vId;
             switch (msg.type) {
-            case "UPDATE_FILES":
+            case "UPDATE_DIRECTORY":
                 // Ignore update if we're uploading or the view is not viewing a directory
                 if ((droppy.isUploading || getView(vId).attr("data-type") !== "directory") && !getView(vId)[0].switchRequest) return;
                 if (getView(vId)[0].switchRequest) {
@@ -268,8 +268,8 @@
                 droppy.ready = false;
                 break;
             case "UPDATE_SIZES":
-                droppy.views.each(function () {
-                    if ($(this)[0].currentFolder === msg.folder) updateSizes($(this)[0], msg.data);
+                droppy.views.each(function (index, viewElement) {
+                    if (viewElement.currentFolder === msg.folder) updateSizes($(viewElement), msg.data);
                 });
                 break;
             case "UPLOAD_DONE":
@@ -1101,10 +1101,10 @@
                 setTimeout(wait, interval, timeout + interval);
                 return;
             } else {
-                entries = $(view).find('.data-row[data-type="folder"]');
+                entries = view.find('.data-row[data-type="folder"]');
                 if (entries.length) {
                     entries.each(function () {
-                        liveName = $(this).data("id").substring(view.currentFolder.length);
+                        liveName = $(this).data("id").substring(view[0].currentFolder.length);
                         liveName = (liveName[0] === "/") ? liveName.substring(1) : liveName;
                         $(this).find(".size").attr("data-size", sizeData[liveName] || 0);
                         if (sizeData[liveName]) {

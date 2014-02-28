@@ -400,7 +400,7 @@
                         directory: msg.data
                     };
                     readDirectory(client.v[vId].directory, function () {
-                        sendFiles(cookie, vId, "UPDATE_FILES");
+                        sendFiles(cookie, vId, "UPDATE_DIRECTORY");
                     });
                     updateWatchers(client.v[vId].directory);
                     break;
@@ -506,7 +506,7 @@
                         // Send client back to root in case the requested directory can't be read
                         if (!ok) client.v[vId].directory = "/";
                         readDirectory(client.v[vId].directory, function () {
-                            sendFiles(cookie, vId, "UPDATE_FILES");
+                            sendFiles(cookie, vId, "UPDATE_DIRECTORY");
                         });
                     });
                     break;
@@ -733,7 +733,7 @@
             }
             readDirectory(relativeDir, function () {
                 var cv = clientsToUpdate.pop();
-                sendFiles(cv.cookie, cv.vId, "UPDATE_FILES");
+                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY");
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
@@ -884,13 +884,11 @@
 
             // Check if client is going to a folder directly
             fs.stat(path.join(config.filesDir, URI), function (error, stats) {
-                if (!error && stats.isDirectory()) {
+                if (!error) {
                     handleResourceRequest(req, res, "base.html");
                     // Strip trailing slash
                     if (URI.charAt(URI.length - 1) === "/")
                         URI = URI.substring(0, URI.length - 1);
-
-                    // Establish clients[cookie] on websocket connection only
                     updateWatchers(URI);
                 } else {
                     res.statusCode = 301;
