@@ -249,6 +249,7 @@
             switch (msg.type) {
             case "UPDATE_FILES":
                 if (droppy.isUploading) return;
+                showSpinner();
                 updateData(getView(vId), msg.folder, msg.data);
                 droppy.ready = false;
                 break;
@@ -290,11 +291,6 @@
                     $("#upload-info").attr("class", "out");
                     hideSpinner();
                 }
-                break;
-            case "NEW_FOLDER":
-                if (droppy.isUploading) return;
-                updateData(getView(vId), msg.folder, msg.data);
-                hideSpinner();
                 break;
             case "UPDATE_CSS":
                 reloadCSS(msg.css);

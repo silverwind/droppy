@@ -502,7 +502,7 @@
                         // Send client back to root in case the requested directory can't be read
                         if (!ok) client.v[vId].directory = "/";
                         readDirectory(client.v[vId].directory, function () {
-                            sendFiles(cookie, vId, ok ? "UPDATE_FILES" : "NEW_FOLDER");
+                            sendFiles(cookie, vId, "UPDATE_FILES");
                         });
                     });
                     break;
