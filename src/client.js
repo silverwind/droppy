@@ -171,6 +171,7 @@
             box     = $("#center-box");
         if (type === "main") {
             initMainPage();
+            initEntryMenu();
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
                 droppy.socketWait && showSpinner();
@@ -1354,12 +1355,12 @@
                     view.find(".data-row").removeClass("animating");
                 }, 200);
             }
-            bindEvents(view);
+            bindViewEvents(view);
         });
     }
 
     // Bind click events to the list elements
-    function bindEvents(view) {
+    function bindViewEvents(view) {
         // Upload button on empty page
         view.find("#empty").register("click", function () {
             if (droppy.detects.fileinputdirectory)
@@ -1397,6 +1398,57 @@
             });
         });
 
+        // Paste a file/folder into a folder
+        view.find("#paste").register("click", function (event) {
+            event.stopPropagation();
+            if (droppy.socketWait) return;
+            if (droppy.clipboard) {
+                var sep = getView()[0].currentFolder === "/" ? "" : "/";
+                showSpinner();
+                droppy.clipboard.to = getView()[0].currentFolder + sep + basename(droppy.clipboard.from);
+                sendMessage(null, "CLIPBOARD", droppy.clipboard);
+            } else {
+                throw "Clipboard was empty!";
+            }
+
+            droppy.clipboard = null;
+            $("#click-catcher").trigger("click");
+            $(this.target).replaceClass("in", "out");
+        });
+
+
+        // Stop navigation when clicking on an <a>
+        view.find(".data-row .zip, .entry-link.file").register("click", function (event) {
+            event.stopPropagation();
+            if (droppy.socketWait) return;
+
+            // Some browsers (like IE) think that clicking on an <a> is real navigation
+            // and will close the WebSocket in turn. We'll reconnect if neccessary.
+            droppy.reopen = true;
+            setTimeout(function () {
+                droppy.reopen = false;
+            }, 2000);
+        });
+
+        // Request a shortlink
+        view.find(".data-row .shortlink").register("click", function () {
+            if (droppy.socketWait) return;
+            sendMessage(null, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
+        });
+
+        view.find(".icon-play").register("click", function () {
+            preparePlayback($(this));
+        });
+
+        view.find(".header-name, .header-mtime, .header-size").register("click", function () {
+            sortByHeader($(this));
+
+        });
+
+        droppy.ready = true;
+        hideSpinner();
+    }
+    function initEntryMenu() {
         // Rename a file/folder
         $("#entry-menu .rename").register("click", function (event) {
             event.stopPropagation();
@@ -1456,43 +1508,6 @@
             editFile(view, entry.data("id"));
         });
 
-        // Paste a file/folder into a folder
-        $("#paste").register("click", function (event) {
-            event.stopPropagation();
-            if (droppy.socketWait) return;
-            if (droppy.clipboard) {
-                var sep = getView()[0].currentFolder === "/" ? "" : "/";
-                showSpinner();
-                droppy.clipboard.to = getView()[0].currentFolder + sep + basename(droppy.clipboard.from);
-                sendMessage(null, "CLIPBOARD", droppy.clipboard);
-            } else {
-                throw "Clipboard was empty!";
-            }
-
-            droppy.clipboard = null;
-            $("#click-catcher").trigger("click");
-            $("#paste").attr("class", "out");
-        });
-
-        // Stop navigation when clicking on an <a>
-        $(".data-row .zip, .entry-link.file").register("click", function (event) {
-            event.stopPropagation();
-            if (droppy.socketWait) return;
-
-            // Some browsers (like IE) think that clicking on an <a> is real navigation
-            // and will close the WebSocket in turn. We'll reconnect if neccessary.
-            droppy.reopen = true;
-            setTimeout(function () {
-                droppy.reopen = false;
-            }, 2000);
-        });
-
-        // Request a shortlink
-        $(".data-row .shortlink").register("click", function () {
-            if (droppy.socketWait) return;
-            sendMessage(null, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
-        });
-
         // Delete a file/folder
         $("#entry-menu .delete").register("click", function () {
             if (droppy.socketWait) return;
@@ -1500,20 +1515,9 @@
             $("#click-catcher").trigger("click");
         });
 
-        $(".icon-play").register("click", function () {
-            preparePlayback($(this));
-        });
-
-        $(".header-name, .header-mtime, .header-size").register("click", function () {
-            sortByHeader($(this));
-
-        });
         // Add missing titles to the SVGs
         $("#entry-menu .rename").attr("title", "Rename");
         $("#entry-menu .delete").attr("title", "Delete");
-
-        droppy.ready = true;
-        hideSpinner();
     }
 
     function sortByHeader(header) {
