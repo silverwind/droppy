@@ -565,6 +565,7 @@ input:-webkit-autofill {
 
 #entry-menu>.radius-wrap>div {
     padding: .25em;
+    white-space: nowrap;
 }
 
 #entry-menu>.radius-wrap>div:hover {
