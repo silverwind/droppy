@@ -1435,7 +1435,7 @@
 
             droppy.clipboard = null;
             $("#click-catcher").trigger("click");
-            $(this.target).replaceClass("in", "out");
+            $(this).replaceClass("in", "out");
         });
 
 
