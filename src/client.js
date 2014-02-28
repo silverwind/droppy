@@ -1673,7 +1673,7 @@
                 });
                 doc.find(".light").register("click", function () {
                     if (editor.options.theme === "base16-dark") {
-                        editor.setOption("theme", "base16-light");
+                        editor.setOption("theme", "xq-light");
                     } else {
                         editor.setOption("theme", "base16-dark");
                     }

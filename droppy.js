@@ -78,7 +78,7 @@
     // Keymaps
     // resources.js.push(cmPath + "keymap/sublime.js");
     // Themes
-    ["base16-light.css", "base16-dark.css"].forEach(function (relPath) {
+    ["xq-light.css", "base16-dark.css"].forEach(function (relPath) {
         resources.css.push(cmPath + "theme/" + relPath);
     });
 
