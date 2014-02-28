@@ -392,6 +392,7 @@
             ws.on("message", function (message) {
                 var msg = JSON.parse(message),
                     vId = msg.vId;
+
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
@@ -456,6 +457,9 @@
                                     if (error) {
                                         log.error("Error writing " + msg.data.to);
                                         log.error(error);
+                                        sendSaveStatus(cookie, vId, 1); // Save failed
+                                    } else {
+                                        sendSaveStatus(cookie, vId, 0); // Save successful
                                     }
                                 });
                             }
@@ -469,7 +473,7 @@
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
 
-                    //In case source and destination are the same, append a number to the file/foldername
+                    // In case source and destination are the same, append a number to the file/foldername
                     if (msg.data.from === msg.data.to) {
                         utils.getNewPath(msg.data.to, 2, function (name) {
                             doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
@@ -561,7 +565,7 @@
     }
 
     //-----------------------------------------------------------------------------
-    // Send a WS event to the client containing an file list update
+    // Send a file list update
     var updateFuncs = {};
     function sendFiles(cookie, vId, eventType, force) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
@@ -569,6 +573,7 @@
         var func = function (cookie, eventType) {
             var dir = clients[cookie].v[vId].directory; // TODO more than one view
             var data = JSON.stringify({
+                vId    : vId,
                 type   : eventType,
                 folder : dir,
                 data   : dirs[dir]
@@ -590,8 +595,8 @@
     function sendLink(cookie, link) {
         if (!clients[cookie] || !clients[cookie].ws) return;
         send(clients[cookie].ws, JSON.stringify({
-            "type" : "SHORTLINK",
-            "link" : link
+            type : "SHORTLINK",
+            link : link
         }));
     }
 
@@ -608,6 +613,17 @@
         send(clients[cookie].ws, JSON.stringify({
             type  : "USER_LIST",
             users : userlist
+        }));
+    }
+
+    //-----------------------------------------------------------------------------
+    // Send status of a file save
+    function sendSaveStatus(cookie, vId, status) {
+        if (!clients[cookie] || !clients[cookie].ws) return;
+        send(clients[cookie].ws, JSON.stringify({
+            type   : "SAVE_STATUS",
+            vId    : vId,
+            status : status
         }));
     }
 

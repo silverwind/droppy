@@ -224,8 +224,10 @@
             retries = 3; // reset retries on connection loss
             if (queuedData)
                 sendMessage();
-            else
+            else {
+                getView(0).attr("data-type", "directory");
                 updateLocation(getView(0), getView(0)[0].currentFolder || "/", false); // Request initial update
+            }
         };
 
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
@@ -245,10 +247,10 @@
         droppy.socket.onmessage = function (event) {
             droppy.socketWait = false;
             var msg = JSON.parse(event.data),
-                vId = msg.viewId;
+                vId = msg.vId;
             switch (msg.type) {
             case "UPDATE_FILES":
-                if (droppy.isUploading) return;
+                if (droppy.isUploading || getView(vId).attr("data-type") !== "directory") return; // Ignore update if the view is not viewing a directory
                 showSpinner();
                 updateData(getView(vId), msg.folder, msg.data);
                 droppy.ready = false;
@@ -301,6 +303,12 @@
                 break;
             case "USER_LIST":
                 populateUserList(msg.users);
+                break;
+            case "SAVE_STATUS":
+                hideSpinner();
+                var doc = getView(msg.vId).find(".doc");
+                doc.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
+                setTimeout(function () { doc.removeClass("saved save-failed"); }, 1000);
                 break;
             }
         };
@@ -1105,6 +1113,7 @@
         }
 
         view[0].currentData = data;
+        view.attr("data-type", "directory");
         buildEntryList(view, data, folder);
         hideSpinner();
     }
@@ -1298,15 +1307,15 @@
             }
         }
         list.children("li").sort(sortFunc).appendTo(list);
-        view[0].viewType = "directory";
         loadContent(view, list.children("li").length > 0 ? list : null);
     }
 
     // Load generated list into view with an animation
     function loadContent(view, html) {
         var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>',
-            type = view[0].viewType;
-
+            type = view.attr("data-type"),
+            navRegex = /(forward|back|center)/,
+            typeRegex = /(document|directory|media)/;
         switch (type) {
         case "document":
             droppy.animDirection = "forward";
@@ -1315,15 +1324,14 @@
             $(getHeaderHTML()).prependTo(html);
             break;
         }
-        // Set the viewtype as data attribute to help with styling
-        view.attr("data-type", type);
+        // Set the view type as a class for styling purpose
+        view.replaceClass(typeRegex, type);
 
         requestAnimation(function () {
             if (droppy.animDirection === "same" && type !== "document") {
                 view.find("#content").attr("class", "center");
                 view.find("#content").html(html || emptyPage);
             } else {
-                var navRegex = /(forward|back|center)/;
                 view.append($("<div id='newcontent' class='" + droppy.animDirection + "'></div>"));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
@@ -1545,8 +1553,7 @@
     }
 
     function closeDoc(view) {
-        view[0].viewType = "directory";
-        // updateView(view);
+        view.attr("data-type", "directory");
         updateLocation(view, view[0].currentFolder, false, true);
     }
 
@@ -1556,7 +1563,7 @@
             editing = true, // Check if not readonly
             editor = null,
             doc = $(
-                '<div class="document' + (editing ? ' editing' : ' readonly') + '">' +
+                '<div class="doc' + (editing ? ' editing' : ' readonly') + '">' +
                     '<div class="title">' + filename + '</div>' +
                     '<div class="sidebar">' +
                         '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
@@ -1569,7 +1576,7 @@
                 '</div>'
             );
 
-        view[0].viewType = "document";
+        view.attr("data-type", "document");
         loadContent(view, doc);
         showSpinner();
 
@@ -1619,8 +1626,7 @@
                 });
                 doc.find(".save").register("click", function () {
                     showSpinner();
-                    doc.removeClass("dirty");
-                    sendMessage(null, "SAVE_FILE", {
+                    sendMessage(view[0].vId, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
                     });
@@ -1635,7 +1641,7 @@
                     }
                 });
                 editor.on("change", function () {
-                    doc.addClass("dirty");
+                    doc.removeClass("saved save-failed").addClass("dirty");
                 });
             },
             error : function () {

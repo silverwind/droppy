@@ -604,18 +604,19 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
-.view[data-type="document"] #content, .view[data-type="document"] #newcontent {
+.view.document #content, .view.document #newcontent {
     height: calc(100% - 0.5em);
 }
 
-.document > .sidebar {
+.doc > .sidebar {
     position: absolute;
     top: .5em;
     width: 2.5em;
     bottom: 1em;
     right: .75em;
+    user-select: none;
 }
-.document > .sidebar > div {
+.doc > .sidebar > div {
     position: relative;
     z-index: 5;
     padding: .25em 0;
@@ -623,14 +624,14 @@ input:-webkit-autofill {
     margin-bottom: .25em;
 }
 
-.document > .sidebar svg {
+.doc > .sidebar svg {
     fill: #555;
     height: 1em;
     width: 1em;
     margin-left: .75em;
 }
 
-.document > .sidebar span {
+.doc > .sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
@@ -638,18 +639,17 @@ input:-webkit-autofill {
     font-weight: 400;
 }
 
-.document > .sidebar > div:hover { background: #333; cursor: pointer }
-.document .exit:hover svg    { fill: #f33 }
-.document .exit:hover span  { color: #f33; opacity: 1 }
-.document .save:hover svg    { fill: #5f0 }
-.document .save:hover span  { color: #5f0; opacity: 1 }
-.document .light:hover svg   { fill: #ff5 }
-.document .light:hover span { color: #ff5; opacity: 1 }
-
-.document.readonly .save { display: none }
+.doc > .sidebar > div:hover { background: #333; cursor: pointer }
+.doc > .sidebar > .exit:hover svg    { fill: #f33 }
+.doc > .sidebar > .exit:hover span  { color: #f33; opacity: 1 }
+.doc > .sidebar > .save:hover svg    { fill: #5f0 }
+.doc > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
+.doc > .sidebar > .light:hover svg   { fill: #ff5 }
+.doc > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
+.doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
-.document .title {
+.doc > .title {
     position: absolute;
     top: .25em;
     width: 100%;
@@ -660,17 +660,19 @@ input:-webkit-autofill {
     color: #555;
     font-weight: 400;
 }
-.document.dirty .title { color: #f71 }
-.document.dirty .title:after { content: "*" }
+.doc.dirty > .title { color: #f71 }
+.doc.saved > .title { color: #7f1 }
+.doc.save-failed > .title { color: #f44 }
+.doc.dirty > .title:after { content: "*" }
 
-.document .text-editor>pre {
+.doc > .text-editor > pre {
     margin: 0;
     font-size: .65em;
     padding: .5em 1em;
     color: #333;
 }
 
-.document .text-editor .CodeMirror {
+.doc > .text-editor > .CodeMirror {
     border-radius: 4px;
     font-size: .65em;
     font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
