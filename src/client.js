@@ -1358,12 +1358,18 @@
                     view.find(".data-row").removeClass("animating");
                 }, 200);
             }
-            bindViewEvents(view);
+            switch (type) {
+            case "document":
+                break;
+            case "directory":
+                bindDirectoryViewEvents(view);
+                break;
+            }
         });
     }
 
     // Bind click events to the list elements
-    function bindViewEvents(view) {
+    function bindDirectoryViewEvents(view) {
         // Upload button on empty page
         view.find("#empty").register("click", function () {
             if (droppy.detects.fileinputdirectory)
@@ -1402,7 +1408,7 @@
         });
 
         // Paste a file/folder into a folder
-        view.find("#paste").register("click", function (event) {
+        $("#paste").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
