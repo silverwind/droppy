@@ -675,7 +675,7 @@ input:-webkit-autofill {
 .opts-container.in { opacity: 1}
 
 .opts-container select {
-    width: 5em;
+    width: 7em;
     height: 1.75em;
     margin: 0 .25em;
     font-size: .65em;
