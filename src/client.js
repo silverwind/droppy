@@ -29,8 +29,14 @@
 //  localStorage wrapper functions
 // ============================================================================
     $(function () {
-        var prefs, defaults = { volume : 0.5, theme: "base16-dark", hasLoggedOut : false }, doSave;
-
+        var prefs, doSave, defaults = {
+            volume : 0.5,
+            theme: "base16-dark",
+            indentWithTabs : false,
+            indentUnit : 4,
+            lineWrapping: false,
+            hasLoggedOut : false
+        };
         // Load prefs and set missing ones to their default
         prefs = JSON.parse(localStorage.getItem("prefs")) || {};
         for (var pref in defaults) {
@@ -252,7 +258,11 @@
             switch (msg.type) {
             case "UPDATE_FILES":
                 // Ignore update if we're uploading or the view is not viewing a directory
-                if (droppy.isUploading || getView(vId).attr("data-type") !== "directory") return;
+                if ((droppy.isUploading || getView(vId).attr("data-type") !== "directory") && !getView(vId)[0].switchRequest) return;
+                if (getView(vId)[0].switchRequest) {
+                    getView(vId)[0].switchRequest = false;
+                    $(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
+                }
                 showSpinner();
                 updateData(getView(vId), msg.folder, msg.data);
                 droppy.ready = false;
@@ -1220,6 +1230,7 @@
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path || "/");
             li.click(function () {
+                view[0].switchRequest = true; // This needs to be set so we can switch out of a editor view
                 updateLocation(view, $(this).data("destination"), true);
             });
 
@@ -1230,7 +1241,8 @@
         function finalize() {
             // Add filename when in editor view
             if (filename) {
-                $("#path").append($("<li class='out editor-filename'>" + filename + "</li>"));
+                $("#path").append($("<li class='out editor-filename'>" + filename + droppy.svg.triangle + "</li>"));
+
             }
             $("#path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
@@ -1585,24 +1597,40 @@
             editing = true, // Check if not readonly
             editor = null,
             doc = $(
-                '<div class="doc' + (editing ? ' editing' : ' readonly') + '">' +
-                    '<div class="sidebar">' +
-                        '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
-                        '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
-                        '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
-                    '</div>' +
-                    '<div class="text-editor">' +
-                        '<textarea></textarea>' +
-                    '</div>' +
-                '</div>'
-            );
+            '<div class="doc' + (editing ? ' editing' : ' readonly') + '">' +
+                '<div class="sidebar">' +
+                    '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
+                    '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
+                    '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
+                    '<div class="opts">' + droppy.svg.cog + '<span>Opts</span></div>' +
+                '</div>' +
+                '<div class="text-editor">' +
+                    '<textarea></textarea>' +
+                '</div>' +
+            '</div>'
+            ), opts = $(
+            '<div class="opts-container">' +
+                '<select class="indentmode">' +
+                  '<option value="spaces">Spaces</option> ' +
+                  '<option value="tabs">Tabs</option>' +
+                '</select>' +
+                '<select class="indentunit">' +
+                  '<option value="2">2</option> ' +
+                  '<option value="4">4</option>' +
+                  '<option value="8">8</option>' +
+                '</select>' +
+                '<select class="wrap">' +
+                  '<option value="nowrap">No Wrap</option> ' +
+                  '<option value="wrap">Wrap</option>' +
+                '</select>' +
+            '</div>');
 
         view.attr("data-type", "document");
-        loadContent(view, doc);
-
         updatePath(view, view[0].currentFolder, filename.substring(view[0].currentFolder.length));
-        showSpinner();
+        loadContent(view, doc);
+        doc.append(opts);
 
+        showSpinner();
         $.ajax(url, {
             dataType: "text",
             success : function (data) {
@@ -1635,6 +1663,9 @@
                         styleSelectedText: true,
                         showCursorWhenSelecting: true,
                         theme: droppy.get("theme"),
+                        indentWithTabs: droppy.get("indentWithTabs"),
+                        indentUnit: droppy.get("indentUnit"),
+                        lineWrapping: droppy.get("lineWrapping"),
                         lineNumbers: true,
                         // keyMap: "sublime",
                         mode: mode
@@ -1656,11 +1687,35 @@
                 doc.find(".light").register("click", function () {
                     if (editor.options.theme === "base16-dark") {
                         editor.setOption("theme", "base16-light");
-                        droppy.set("theme", "base16-light");
                     } else {
                         editor.setOption("theme", "base16-dark");
-                        droppy.set("theme", "base16-dark");
                     }
+                    saveEditorOptions(editor);
+                });
+                doc.find(".opts").register("click", function () {
+                    var container =  $(".opts-container");
+                    if (!container.hasClass("in"))
+                        container.addClass("in");
+                    else
+                        container.removeClass("in");
+                });
+                doc.find(".indentmode").register("change", function (event) {
+                    if ($(event.target).val() === "tabs")
+                        editor.setOption("indentWithTabs", true);
+                    else
+                        editor.setOption("indentWithTabs", false);
+                    saveEditorOptions(editor);
+                });
+                doc.find(".indentunit").register("change", function (event) {
+                    editor.setOption("indentUnit", Number($(event.target).val()));
+                    saveEditorOptions(editor);
+                });
+                doc.find(".wrap").register("change", function (event) {
+                    if ($(event.target).val() === "wrap")
+                        editor.setOption("lineWrapping", true);
+                    else
+                        editor.setOption("lineWrapping", false);
+                    saveEditorOptions(editor);
                 });
                 editor.on("change", function () {
                     $(".editor-filename").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
@@ -1671,6 +1726,13 @@
             }
         });
     }
+
+    function saveEditorOptions(editor) {
+        ["theme", "indentWithTabs", "indentUnit", "lineWrapping"].forEach(function (option) {
+            droppy.set(option, editor.getOption(option));
+        });
+    }
+
     function play(source, playButton) {
         var player = document.getElementById("audio-player");
 
