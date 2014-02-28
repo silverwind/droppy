@@ -250,38 +250,16 @@
                 vId = msg.vId;
             switch (msg.type) {
             case "UPDATE_FILES":
-                if (droppy.isUploading || getView(vId).attr("data-type") !== "directory") return; // Ignore update if the view is not viewing a directory
+                // Ignore update if we're uploading or the view is not viewing a directory
+                if (droppy.isUploading || getView(vId).attr("data-type") !== "directory") return;
                 showSpinner();
                 updateData(getView(vId), msg.folder, msg.data);
                 droppy.ready = false;
                 break;
             case "UPDATE_SIZES":
-                var entries, liveName, interval = 250;
-                (function wait(timeout) {
-                    if (timeout > 4000) {
-                        return;
-                    } else if (!droppy.ready) {
-                        setTimeout(wait, interval, timeout + interval);
-                        return;
-                    } else {
-                        entries = $('.data-row[data-type="folder"]');
-                        if (entries.length) {
-                            entries.each(function () {
-                                liveName = $(this).data("id").substring(msg.folder.length);
-                                liveName = (liveName[0] === "/") ? liveName.substring(1) : liveName;
-                                $(this).find(".size").attr("data-size", msg.data[liveName] || 0);
-                                if (msg.data[liveName]) {
-                                    var temp = convertToSI(msg.data[liveName]);
-                                    $(this).find(".size").text(temp.size > 0 ? temp.size : "");
-                                    $(this).find(".size-unit").text(temp.size > 0 ? temp.unit : "");
-                                }
-                            });
-                        } else {
-                            setTimeout(wait, interval, timeout + interval);
-                        }
-                    }
-                })(interval);
-
+                droppy.views.each(function () {
+                    if ($(this)[0].currentFolder === msg.folder) updateSizes($(this)[0], msg.data);
+                });
                 break;
             case "UPLOAD_DONE":
                 if (droppy.zeroFiles.length) {
@@ -1102,6 +1080,36 @@
             }
         }
     }
+
+    // Update directory size information
+    function updateSizes(view, sizeData) {
+        var entries, liveName, interval = 250;
+        (function wait(timeout) {
+            if (timeout > 4000) {
+                return;
+            } else if (!droppy.ready) {
+                setTimeout(wait, interval, timeout + interval);
+                return;
+            } else {
+                entries = $(view).find('.data-row[data-type="folder"]');
+                if (entries.length) {
+                    entries.each(function () {
+                        liveName = $(this).data("id").substring(view.currentFolder.length);
+                        liveName = (liveName[0] === "/") ? liveName.substring(1) : liveName;
+                        $(this).find(".size").attr("data-size", sizeData[liveName] || 0);
+                        if (sizeData[liveName]) {
+                            var temp = convertToSI(sizeData[liveName]);
+                            $(this).find(".size").text(temp.size > 0 ? temp.size : "");
+                            $(this).find(".size-unit").text(temp.size > 0 ? temp.unit : "");
+                        }
+                    });
+                } else {
+                    setTimeout(wait, interval, timeout + interval);
+                }
+            }
+        })(interval);
+    }
+
     // Update data as received from the server
     function updateData(view, folder, data) {
         if (folder !== view[0].currentFolder)
