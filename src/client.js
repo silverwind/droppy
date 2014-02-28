@@ -29,8 +29,14 @@
 //  localStorage wrapper functions
 // ============================================================================
     $(function () {
-        var prefs, defaults = { volume : 0.5, theme: "base16-dark", hasLoggedOut : false }, doSave;
-
+        var prefs, doSave, defaults = {
+            volume : 0.5,
+            theme: "base16-dark",
+            indentWithTabs : false,
+            indentUnit : 4,
+            lineWrapping: false,
+            hasLoggedOut : false
+        };
         // Load prefs and set missing ones to their default
         prefs = JSON.parse(localStorage.getItem("prefs")) || {};
         for (var pref in defaults) {
@@ -1589,16 +1595,16 @@
             '</div>'
             ), opts = $(
             '<div class="opts-container">' +
-                '<select name="indentmode">' +
+                '<select class="indentmode">' +
                   '<option value="spaces">Spaces</option> ' +
                   '<option value="tabs">Tabs</option>' +
                 '</select>' +
-                '<select name="indentwith">' +
+                '<select class="indentunit">' +
                   '<option value="2">2</option> ' +
                   '<option value="4">4</option>' +
                   '<option value="8">8</option>' +
                 '</select>' +
-                '<select name="wrap">' +
+                '<select class="wrap">' +
                   '<option value="nowrap">No Wrap</option> ' +
                   '<option value="wrap">Wrap</option>' +
                 '</select>' +
@@ -1642,6 +1648,9 @@
                         styleSelectedText: true,
                         showCursorWhenSelecting: true,
                         theme: droppy.get("theme"),
+                        indentWithTabs: droppy.get("indentWithTabs"),
+                        indentUnit: droppy.get("indentUnit"),
+                        lineWrapping: droppy.get("lineWrapping"),
                         lineNumbers: true,
                         // keyMap: "sublime",
                         mode: mode
@@ -1663,11 +1672,10 @@
                 doc.find(".light").register("click", function () {
                     if (editor.options.theme === "base16-dark") {
                         editor.setOption("theme", "base16-light");
-                        droppy.set("theme", "base16-light");
                     } else {
                         editor.setOption("theme", "base16-dark");
-                        droppy.set("theme", "base16-dark");
                     }
+                    saveEditorOptions(editor);
                 });
                 doc.find(".opts").register("click", function () {
                     var container =  $(".opts-container");
@@ -1675,6 +1683,24 @@
                         container.addClass("in");
                     else
                         container.removeClass("in");
+                });
+                doc.find(".indentmode").register("change", function (event) {
+                    if ($(event.target).val() === "tabs")
+                        editor.setOption("indentWithTabs", true);
+                    else
+                        editor.setOption("indentWithTabs", false);
+                    saveEditorOptions(editor);
+                });
+                doc.find(".indentunit").register("change", function (event) {
+                    editor.setOption("indentUnit", Number($(event.target).val()));
+                    saveEditorOptions(editor);
+                });
+                doc.find(".wrap").register("change", function (event) {
+                    if ($(event.target).val() === "wrap")
+                        editor.setOption("lineWrapping", true);
+                    else
+                        editor.setOption("lineWrapping", false);
+                    saveEditorOptions(editor);
                 });
                 editor.on("change", function () {
                     $(".editor-filename").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
@@ -1685,6 +1711,13 @@
             }
         });
     }
+
+    function saveEditorOptions(editor) {
+        ["theme", "indentWithTabs", "indentUnit", "lineWrapping"].forEach(function (option) {
+            droppy.set(option, editor.getOption(option));
+        });
+    }
+
     function play(source, playButton) {
         var player = document.getElementById("audio-player");
 
