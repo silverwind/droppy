@@ -649,28 +649,13 @@ input:-webkit-autofill {
 .doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
-.doc > .title {
-    position: absolute;
-    top: .25em;
-    width: 100%;
-    text-align: center;
-    pointer-events: none;
-    z-index: 2;
+.editor-filename {
     transition: all .4s ease;
-    color: #555;
-    font-weight: 400;
 }
-.doc.dirty > .title { color: #f71 }
-.doc.saved > .title { color: #7f1 }
-.doc.save-failed > .title { color: #f44 }
-.doc.dirty > .title:after { content: "*" }
-
-.doc > .text-editor > pre {
-    margin: 0;
-    font-size: .65em;
-    padding: .5em 1em;
-    color: #333;
-}
+.editor-filename.dirty { color: #f71 !important}
+.editor-filename.saved { color: #7f1 !important}
+.editor-filename.save-failed  { color: #f44 !important }
+.editor-filename.dirty:after { content: "*" }
 
 .doc > .text-editor > .CodeMirror {
     border-radius: 4px;

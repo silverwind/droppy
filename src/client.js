@@ -284,9 +284,8 @@
                 break;
             case "SAVE_STATUS":
                 hideSpinner();
-                var doc = getView(msg.vId).find(".doc");
-                doc.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
-                setTimeout(function () { doc.removeClass("saved save-failed"); }, 1000);
+                $(".editor-filename").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
+                setTimeout(function () { $(".editor-filename").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
             }
         };
@@ -1179,7 +1178,7 @@
     }
 
     // Update the path indicator
-    function updatePath(view, path) {
+    function updatePath(view, path, filename) {
         var parts = path.split("/");
         var i = 0, len;
 
@@ -1228,10 +1227,14 @@
         }
 
         function finalize() {
+            // Add filename when in editor view
+            if (filename) {
+                $("#path").append($("<li class='out editor-filename'>" + filename + "</li>"));
+            }
             $("#path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
-                $("#path li.in").removeClass();
+                $("#path li.in").removeClass("in");
                 checkPathOverflow();
             }, 200);
         }
@@ -1562,6 +1565,7 @@
 
     function closeDoc(view) {
         view.attr("data-type", "directory");
+        $(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
         updateLocation(view, view[0].currentFolder, false, true);
     }
 
@@ -1572,20 +1576,21 @@
             editor = null,
             doc = $(
                 '<div class="doc' + (editing ? ' editing' : ' readonly') + '">' +
-                    '<div class="title">' + filename + '</div>' +
                     '<div class="sidebar">' +
                         '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
                         '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
                         '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
                     '</div>' +
                     '<div class="text-editor">' +
-                        (editing ? '<textarea></textarea>' : '<pre></pre>') +
+                        '<textarea></textarea>' +
                     '</div>' +
                 '</div>'
             );
 
         view.attr("data-type", "document");
         loadContent(view, doc);
+
+        updatePath(view, view[0].currentFolder, filename.substring(view[0].currentFolder.length));
         showSpinner();
 
         $.ajax(url, {
@@ -1625,8 +1630,7 @@
                         mode: mode
                     });
                 } else {
-                    // Use run mode here
-                    doc.find(".text-editor pre").text(data);
+                    // Set editor to read-only
                 }
                 hideSpinner();
                 doc.find(".exit").register("click", function () {
@@ -1649,7 +1653,7 @@
                     }
                 });
                 editor.on("change", function () {
-                    doc.removeClass("saved save-failed").addClass("dirty");
+                    $(".editor-filename").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
                 });
             },
             error : function () {
