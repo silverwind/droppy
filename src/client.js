@@ -222,13 +222,13 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
-    var queuedData, retries = 3, initial = true;
+    var queuedData, retries = 5, retryTimeout = 4000, initial = true;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
 
         droppy.socket.onopen = function () {
-            retries = 3; // reset retries on connection loss
+            retries = 5; // reset retries on connection loss
             if (queuedData)
                 sendMessage();
             else {
@@ -245,9 +245,12 @@
             if (droppy.get("hasLoggedOut") || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
+                    // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
                     // TODO: Indicate connection drop in the UI, especially on close code 1006
-                    openSocket();
-                    retries--;
+                    setTimeout(function () {
+                        openSocket();
+                        retries--;
+                    }, retryTimeout);
                 }
             } else if (droppy.reopen) {
                 droppy.reopen = false;
