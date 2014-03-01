@@ -41,6 +41,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "listenHost"   : "0.0.0.0",
     "listenPort"   : 8989,
     "readInterval" : 250,
+    "keepAlive"    : 20000,
     "linkLength"   : 3,
     "maxOpen"      : 256,
     "zipLevel"     : 1,
@@ -65,6 +66,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **listenHost**: The port to listen on.
 - **listenPort**: The host to listen on.
 - **readInterval**: The minimum time gap in milliseconds in which updates to a single directory are sent.
+- **keepAlive**: The interval in milliseconds in which the server sends keepalive message over the websocket. This obviously adds some overhead, but may be needed to keep clients connected when proxies are involved. Set to **0** to disable keepalive messages.
 - **linkLength**: The amount of characters in a shortlink.
 - **maxOpen**: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).

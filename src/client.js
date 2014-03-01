@@ -251,7 +251,12 @@
         };
 
         droppy.socket.onmessage = function (event) {
-            droppy.socketWait = false;
+            console.log(event);
+            if (event.data === "ping") // respond to server keepAlive
+                return droppy.socket.send("pong");
+            else
+                droppy.socketWait = false;
+
             var msg = JSON.parse(event.data),
                 vId = msg.vId;
             switch (msg.type) {

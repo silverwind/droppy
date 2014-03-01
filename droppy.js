@@ -46,19 +46,19 @@
         wrench     = require("wrench"),
         zlib       = require("zlib"),
         // Variables
-        version    = require("./package.json").version,
-        config     = null,
-        cache      = {},
-        clients    = {},
-        db         = {},
-        dirs       = {},
-        watchers   = {},
-        cssCache   = null,
-        firstRun   = null,
-        mode      = {file: "644", dir: "755"},
-        isCLI      = (process.argv.length > 2),
+        version  = require("./package.json").version,
+        config   = null,
+        cache    = {},
+        clients  = {},
+        db       = {},
+        dirs     = {},
+        watchers = {},
+        cssCache = null,
+        firstRun = null,
+        mode     = {file: "644", dir: "755"},
+        isCLI    = (process.argv.length > 2),
         // Resources
-        cmPath = "node_modules/codemirror/",
+        cmPath    = "node_modules/codemirror/",
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
@@ -374,7 +374,15 @@
     //-----------------------------------------------------------------------------
     // WebSocket functions
     function setupSocket(server) {
-        new Wss({server : server}).on("connection", function (ws) {
+        var wss = new Wss({server : server});
+        if (config.keepAlive > 0) {
+            setInterval(function () {
+                for (var client in wss.clients)
+                    if (wss.clients.hasOwnProperty(client))
+                        wss.clients[client].send("ping");
+            }, config.keepAlive);
+        }
+        wss.on("connection", function (ws) {
             var remoteIP   = ws.upgradeReq.headers["x-real-ip"]   || ws._socket.remoteAddress,
                 remotePort = ws.upgradeReq.headers["x-real-port"] || ws._socket.remotePort,
                 cookie     = getCookie(ws.upgradeReq.headers.cookie),
@@ -390,6 +398,7 @@
                 client = clients[cookie];
             }
             ws.on("message", function (message) {
+                if (message === "pong") return;
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
@@ -933,6 +942,7 @@
                 if (isValidUser(postData.username, postData.password)) {
                     createCookie(req, res, postData);
                     endReq(req, res, true);
+
                     log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                 } else {
                     endReq(req, res, false);
