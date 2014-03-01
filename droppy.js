@@ -397,13 +397,25 @@
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
                     
-                    client.v[vId] = {
-                        directory: msg.data
-                    };
-                    updateDirectory(client.v[vId].directory, function () {
-                        sendFiles(cookie, vId, "UPDATE_DIRECTORY");
+                    readPath(msg.data, function (error, info) {
+                        if (error) {
+                            return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data)
+                        } else if (info.type === "f") {
+                            client.v[vId].file = path.basename(msg.data);
+                            info["folder"] = path.dirname(msg.data);
+                            info["file"] = path.basename(msg.data);
+                            info["isFile"] = true;
+                            info["vId"] = vId;
+                            info["type"] = "UPDATE_BE_FILE";
+                            send(client.ws, JSON.stringify(info))
+                        } else {
+                            client.v[vId].directory = msg.data;
+                            updateDirectory(client.v[vId].directory, function () {
+                                sendFiles(cookie, vId, "UPDATE_DIRECTORY");
+                            });
+                            updateWatchers(client.v[vId].directory);
+                        }
                     });
-                    updateWatchers(client.v[vId].directory);
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
@@ -500,7 +512,7 @@
                         log.log(log.socket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
                     });
                     break;
-                case "SWITCH_FOLDER":
+                /*case "SWITCH_FOLDER":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory switch request: " + msg.data);
                     client.v[vId].directory = msg.data;
                     updateWatchers(msg.data, function (ok) {
@@ -510,7 +522,7 @@
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY");
                         });
                     });
-                    break;
+                    break;*/
                 case "GET_USERS":
                     if (!db.sessions[cookie].privileged) return;
                     sendUsers(cookie);

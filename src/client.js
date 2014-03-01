@@ -233,7 +233,7 @@
                 sendMessage();
             else {
                 getView(0).attr("data-type", "directory");
-                updateLocation(getView(0), getView(0)[0].currentFolder || "/", false); // Request initial update
+                updateLocation(getView(0), getView(0)[0].currentFolder || "/"); // Request initial update
             }
         };
 
@@ -261,10 +261,17 @@
                 if ((droppy.isUploading || getView(vId).attr("data-type") !== "directory") && !getView(vId)[0].switchRequest) return;
                 if (getView(vId)[0].switchRequest) {
                     getView(vId)[0].switchRequest = false;
-                    $(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
+                    //$(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
                 }
                 showSpinner();
                 updateData(getView(vId), msg.folder, msg.data);
+                droppy.ready = false;
+                break;
+            case "UPDATE_BE_FILE":
+                getView(vId)[0].currentFolder = msg.folder
+                getView(vId)[0].currentFile = msg.file;
+                openFile(getView(vId))
+                showSpinner();
                 droppy.ready = false;
                 break;
             case "UPDATE_SIZES":
@@ -1156,7 +1163,7 @@
         var view = getView();
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000)
-                updateLocation(view, decodeURIComponent(window.location.pathname), true, true);
+                updateLocation(view, decodeURIComponent(window.location.pathname), true);
             else
                 setTimeout(queue, 50, time + 50);
         })(0);
@@ -1167,38 +1174,36 @@
     }
 
     // Update our current location and change the URL to it
-    function updateLocation(view, path, doSwitch, skipPush) {
+    function updateLocation(view, path, skipPush) {
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
             if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
                 showSpinner();
 
+                var viewLoc = getViewLocation(view);
                 // Find the direction in which we should animate
-                if (view.find(".doc").length) {
-                    view[0].animDirection = "back";
-                } else {
-                    if (path.length > view[0].currentFolder.length) view[0].animDirection = "forward";
-                    else if (path.length === view[0].currentFolder.length) view[0].animDirection = "same";
-                    else view[0].animDirection = "back";
-                }
-
-                view[0].currentFolder = path;
-                sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", getViewLocation(view));
+                if (path.length > viewLoc.length) view[0].animDirection = "forward";
+                else if (path.length === viewLoc.length) view[0].animDirection = "same";
+                else view[0].animDirection = "back";
+                sendMessage(view[0].vId, "REQUEST_UPDATE", path);
 
                 // Skip the push if we're already navigating through history
-                if (!skipPush) window.history.pushState(null, null, getViewLocation(view));
+                if (!skipPush) window.history.pushState(null, null, path);
             } else
                 setTimeout(queue, 50, time + 50);
         })(0);
     }
 
     // Update the path indicator
-    function updatePath(view, path, filename) {
-        var parts = path.split("/");
-        var i = 0, len;
+    function updatePath(view, folder, filename) {
+        var parts = folder.split("/"),
+            i = 0, len;
+
 
         parts[0] = droppy.svg.home;
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
+        if (typeof filename === "string")
+            parts.push(filename);
         var pathStr = "";
         if (droppy.savedParts) {
             i = 1; // Skip the first element as it's always the same
@@ -1235,7 +1240,7 @@
             li.data("destination", path || "/");
             li.click(function () {
                 view[0].switchRequest = true; // This needs to be set so we can switch out of a editor view
-                updateLocation(view, $(this).data("destination"), true);
+                updateLocation(view, $(this).data("destination"));
             });
 
             $("#path").append(li);
@@ -1244,10 +1249,9 @@
 
         function finalize() {
             // Add filename when in editor view
-            if (filename) {
-                $("#path").append($("<li class='out editor-filename'>" + filename + droppy.svg.triangle + "</li>"));
-
-            }
+            //if (filename) {
+            //    $("#path").append($("<li class='out editor-filename'>" + filename + droppy.svg.triangle + "</li>"));
+            //}
             $("#path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
@@ -1399,7 +1403,7 @@
             if (droppy.socketWait) return;
             var destination = $(this).data("id"),
                 view = $(this).parents(".view");
-            updateLocation(view, destination, true);
+            updateLocation(view, destination);
         });
 
         view.find(".data-row .entry-menu").register("click", function (event) {
@@ -1531,7 +1535,8 @@
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
                 view = entry.parents(".view"); // #content-container
-            editFile(view, entry.data("id"));
+            view[0].currentFile = entry.find(".file-link").text();
+            editFile(view);
         });
 
         // Delete a file/folder
@@ -1591,14 +1596,34 @@
     }
 
     function closeDoc(view) {
-        view.attr("data-type", "directory");
-        $(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
-        updateLocation(view, view[0].currentFolder, false, true);
+        updateLocation(view, view[0].currentFolder, true);
     }
+    function openFile(view) {
+        // Determine filetype and how to open it
+        var file = view[0].currentFile,
+            folder = view[0].currentFolder,
+            fileext = file.match(/[^\/\.]+$/).toLowerCase;
+        /*TODO:
+        switch(fileext) {
+            view[0].dataType = "document" | "video" | "audio" | "image"
+        }
+        switch(view[0].dataType) {
+            case "video":
+                openVideo(folder, file);
+                break;
+            ...
+        }
+        */
+        updatePath(view, folder, file);
+        editFile(view);
+    }
+    function openVideo(view) {
 
-    function editFile(view, entryId) {
-        var url = "/_" + entryId,
-            filename = entryId.match(/\/(.+$)/)[1],
+    }
+    function editFile(view) {
+        view.attr("data-type", "document");
+        var filename = view[0].currentFile,
+            url = "/_" + view[0].currentFolder + "/" + filename,
             readOnly = false, // Check if not readonly
             editor = null,
             doc = $(
@@ -1629,9 +1654,6 @@
                   '<option value="wrap">Wrap</option>' +
                 '</select>' +
             '</div>');
-
-        view.attr("data-type", "document");
-        updatePath(view, view[0].currentFolder, filename.substring(view[0].currentFolder.length));
         loadContent(view, doc);
         doc.append(opts);
 
