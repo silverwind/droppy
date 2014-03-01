@@ -421,8 +421,8 @@
 // ============================================================================
     function initMainPage() {
         // Initialize the current folder, in case the user navigated to it through the URL.
-        var pathName = decodeURIComponent(window.location.pathname),        // "/folder/file.ext"
-            lastPart = pathName.substring(pathName.lastIndexOf("/"));   // "/file.ext"
+        var pathName = decodeURIComponent(window.location.pathname),   // "/folder/file.ext"
+            lastPart = pathName.substring(pathName.lastIndexOf("/"));  // "/file.ext"
 
         // Guess if we're navigating directly to a file. This won't work on extensionless files
         // TODO: Only allow navigating to viewable/editable files
