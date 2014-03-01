@@ -1162,6 +1162,10 @@
         })(0);
     });
 
+    function getViewLocation(view) {
+        return view[0].currentFolder + (view[0].currentFile ? "/" + view[0].currentFile : "");
+    }
+
     // Update our current location and change the URL to it
     function updateLocation(view, path, doSwitch, skipPush) {
         // Queue the folder switching if we are mid-animation or waiting for the server
@@ -1179,10 +1183,10 @@
                 }
 
                 view[0].currentFolder = path;
-                sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", view[0].currentFolder);
+                sendMessage(view[0].vId, doSwitch ? "SWITCH_FOLDER" : "REQUEST_UPDATE", getViewLocation(view));
 
                 // Skip the push if we're already navigating through history
-                if (!skipPush) window.history.pushState(null, null, view[0].currentFolder);
+                if (!skipPush) window.history.pushState(null, null, getViewLocation(view));
             } else
                 setTimeout(queue, 50, time + 50);
         })(0);

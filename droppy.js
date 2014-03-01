@@ -396,10 +396,11 @@
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
+                    
                     client.v[vId] = {
                         directory: msg.data
                     };
-                    readDirectory(client.v[vId].directory, function () {
+                    updateDirectory(client.v[vId].directory, function () {
                         sendFiles(cookie, vId, "UPDATE_DIRECTORY");
                     });
                     updateWatchers(client.v[vId].directory);
@@ -505,7 +506,7 @@
                     updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read
                         if (!ok) client.v[vId].directory = "/";
-                        readDirectory(client.v[vId].directory, function () {
+                        updateDirectory(client.v[vId].directory, function () {
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY");
                         });
                     });
@@ -571,7 +572,7 @@
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
 
         var func = function (cookie, eventType) {
-            var dir = clients[cookie].v[vId].directory; // TODO more than one view
+            var dir = clients[cookie].v[vId].directory;
             var data = JSON.stringify({
                 vId    : vId,
                 type   : eventType,
@@ -731,7 +732,7 @@
                     }
                 }
             }
-            readDirectory(relativeDir, function () {
+            updateDirectory(relativeDir, function () {
                 var cv = clientsToUpdate.pop();
                 sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY");
             });
@@ -882,14 +883,10 @@
                 return;
             }
 
-            // Check if client is going to a folder directly
+            // Check if client is going to a path directly
             fs.stat(path.join(config.filesDir, URI), function (error, stats) {
                 if (!error) {
                     handleResourceRequest(req, res, "base.html");
-                    // Strip trailing slash
-                    if (URI.charAt(URI.length - 1) === "/")
-                        URI = URI.substring(0, URI.length - 1);
-                    updateWatchers(URI);
                 } else {
                     res.statusCode = 301;
                     res.setHeader("Location", "/");
@@ -1146,9 +1143,35 @@
             send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
         }
     }
+
     //-----------------------------------------------------------------------------
-    // Read a directory's content
-    function readDirectory(root, callback) {
+    // Read a path, return type and info
+    // @callback : function (error, info)
+    function readPath(root, callback) {
+        fs.stat(addFilePath(root), function (error, stats) {
+            if (error) {
+                callback(error);
+            } else if (stats.isFile()) {
+                callback(null, {
+                    type: "f",
+                    size: stats.size,
+                    mtime: stats.mtime.getTime() || 0,
+                    mime: mime.lookup(path.basename(root))
+                });
+            } else if (stats.isDirectory()) {
+                callback(null, {
+                    type: "d",
+                    size: 0,
+                    mtime: stats.mtime.getTime() || 0
+                });
+            } else {
+                callback(new Error("Path neither directory or file!"));
+            }
+        })
+    }
+    //-----------------------------------------------------------------------------
+    // Update a directory's content
+    function updateDirectory(root, callback) {
         fs.readdir(addFilePath(root), function (error, files) {
             var dirContents = {}, done = 0, last;
             if (error) log.error(error);
@@ -1161,28 +1184,17 @@
 
             for (var i = 0 ; i < last; i++) {
                 (function (entry) {
-                    fs.stat(addFilePath(root) + "/" + entry, function (error, stats) {
-                        if (!error && stats) {
-                            if (stats.isFile()) {
-                                dirContents[entry] = {
-                                    type: "f",
-                                    size: stats.size,
-                                    mtime: stats.mtime.getTime() || 0,
-                                    mime: mime.lookup(entry)
-                                };
-                            } else if (stats.isDirectory()) {
-                                dirContents[entry] = {
-                                    type: "d",
-                                    size: 0,
-                                    mtime: stats.mtime.getTime() || 0
-                                };
-                            }
+                    readPath(root + "/" + entry, function (error, info) {
+                        if (error) {
+                            log.error(error); callback();
+                        } else {
+                            dirContents[entry] = info;
                             if (++done === last) {
                                 dirs[root] = dirContents;
                                 callback();
                                 generateDirSizes(root, dirContents);
                             }
-                        } else if (error) {log.error(error); callback(); }
+                        }
                     });
                 })(files[i]);
             }
