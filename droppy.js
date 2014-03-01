@@ -882,8 +882,7 @@
         } else if (URI === "/favicon.ico") {
             handleResourceRequest(req, res, "favicon.ico");
         } else {
-            var cookie = getCookie(req.headers.cookie);
-            if (!cookie) {
+            if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 301;
                 res.setHeader("Location", "/");
                 res.end();
@@ -891,9 +890,16 @@
                 return;
             }
 
-            // Check if client is going to a folder directly
+            // Check if client is going to a file/folder directly
             fs.stat(path.join(config.filesDir, URI), function (error, stats) {
-                if (!error && stats.isDirectory()) {
+                if (error) {
+                    log.error(error);
+                    res.statusCode = 301;
+                    res.setHeader("Location", "/");
+                    res.end();
+                    log.response(req, res);
+
+                } else if (stats.isDirectory()) { // Direct navigation to folder
                     handleResourceRequest(req, res, "base.html");
                     // Strip trailing slash
                     if (URI.charAt(URI.length - 1) === "/")
@@ -901,11 +907,10 @@
 
                     // Establish clients[cookie] on websocket connection only
                     updateWatchers(URI);
-                } else {
-                    res.statusCode = 301;
-                    res.setHeader("Location", "/");
-                    res.end();
-                    log.response(req, res);
+                } else if (stats.isFile()) { // Direct navigation to file
+                    handleResourceRequest(req, res, "base.html");
+                    URI = URI.substring(0, URI.lastIndexOf("/"));
+                    updateWatchers(URI);
                 }
             });
         }
