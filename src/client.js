@@ -222,7 +222,7 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
-    var queuedData, retries = 3;
+    var queuedData, retries = 3, initial = true;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
@@ -232,8 +232,11 @@
             if (queuedData)
                 sendMessage();
             else {
-                getView(0).attr("data-type", "directory");
-                updateLocation(getView(0), getView(0)[0].currentFolder || "/", false); // Request initial update
+                if (initial) {
+                    getView(0).attr("data-type", "directory");
+                    updateLocation(getView(0), getView(0)[0].currentFolder || "/", false); // Request initial update
+                }
+                initial = false;
             }
         };
 
@@ -242,6 +245,7 @@
             if (droppy.get("hasLoggedOut") || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
+                    // TODO: Indicate connection drop in the UI, especially on close code 1006
                     openSocket();
                     retries--;
                 }
