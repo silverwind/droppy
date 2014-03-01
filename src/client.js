@@ -252,7 +252,6 @@
         };
 
         droppy.socket.onmessage = function (event) {
-            console.log(event);
             if (event.data === "ping") // respond to server keepAlive
                 return droppy.socket.send("pong");
             else
@@ -324,7 +323,7 @@
                 droppy.socket.send(JSON.stringify({type: msgType, vId: vId, data: msgData}));
         } else {
             // We can't send right now, so queue up the last added message to be sent later
-            queuedData = JSON.stringify({type: msgType, data: msgData});
+            queuedData = JSON.stringify({type: msgType, vId: vId, data: msgData});
 
             if (droppy.socket.readyState === 2) { // closing
                 // Socket is closing, queue a re-opening
