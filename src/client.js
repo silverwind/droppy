@@ -222,13 +222,13 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
-    var queuedData, retries = 3;
+    var queuedData, retries = 5, retryTimeout = 4000;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
 
         droppy.socket.onopen = function () {
-            retries = 3; // reset retries on connection loss
+            retries = 5; // reset retries on connection loss
             if (queuedData)
                 sendMessage();
             else {
@@ -241,8 +241,12 @@
             if (droppy.get("hasLoggedOut") || event.code === 4000) return;
             if (event.code >= 1002 && event.code < 3999) {
                 if (retries > 0) {
-                    openSocket();
-                    retries--;
+                    // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
+                    // TODO: Indicate connection drop in the UI, especially on close code 1006
+                    setTimeout(function () {
+                        openSocket();
+                        retries--;
+                    }, retryTimeout);
                 }
             } else if (droppy.reopen) {
                 droppy.reopen = false;
@@ -251,7 +255,11 @@
         };
 
         droppy.socket.onmessage = function (event) {
-            droppy.socketWait = false;
+            if (event.data === "ping") // respond to server keepAlive
+                return droppy.socket.send("pong");
+            else
+                droppy.socketWait = false;
+
             var msg = JSON.parse(event.data),
                 vId = msg.vId;
             switch (msg.type) {
@@ -293,9 +301,7 @@
                 openFile(view);
                 break;
             case "UPDATE_SIZES":
-                droppy.views.each(function (index, viewElement) {
-                    if (viewElement.currentFolder === msg.folder) updateSizes($(viewElement), msg.data);
-                });
+                updateSizes(getView(vId), msg.data);
                 break;
             case "UPLOAD_DONE":
                 if (droppy.zeroFiles.length) {
@@ -344,7 +350,7 @@
                 droppy.socket.send(JSON.stringify({type: msgType, vId: vId, data: msgData}));
         } else {
             // We can't send right now, so queue up the last added message to be sent later
-            queuedData = JSON.stringify({type: msgType, data: msgData});
+            queuedData = JSON.stringify({type: msgType, vId: vId, data: msgData});
 
             if (droppy.socket.readyState === 2) { // closing
                 // Socket is closing, queue a re-opening
@@ -1126,8 +1132,7 @@
                 entries = view.find('.data-row[data-type="folder"]');
                 if (entries.length) {
                     entries.each(function () {
-                        liveName = $(this).data("id").substring(view[0].currentFolder.length);
-                        liveName = (liveName[0] === "/") ? liveName.substring(1) : liveName;
+                        liveName = $(this).find(".folder-link").text();
                         $(this).find(".size").attr("data-size", sizeData[liveName] || 0);
                         if (sizeData[liveName]) {
                             var temp = convertToSI(sizeData[liveName]);
@@ -1185,13 +1190,7 @@
                 sendMessage(view[0].vId, "REQUEST_UPDATE", destination);
 
                 // Skip the push if we're already navigating through history
-                if (!skipPush) 
-                    try {
-                        window.history.pushState(null, null, destination);
-                    } catch (err) {
-                        console.error(err);
-                        console.log(destination);
-                    }
+                if (!skipPush) window.history.pushState(null, null, destination);
             } else
                 setTimeout(queue, 50, time + 50);
         })(0);
@@ -1240,6 +1239,7 @@
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path || "/");
             li.click(function () {
+                if ($(this).is(":last-child")) return;
                 view[0].switchRequest = true; // This needs to be set so we can switch out of a editor view
                 updateLocation(view, $(this).data("destination"));
             });

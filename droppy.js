@@ -46,19 +46,19 @@
         wrench     = require("wrench"),
         zlib       = require("zlib"),
         // Variables
-        version    = require("./package.json").version,
-        config     = null,
-        cache      = {},
-        clients    = {},
-        db         = {},
-        dirs       = {},
-        watchers   = {},
-        cssCache   = null,
-        firstRun   = null,
-        mode      = {file: "644", dir: "755"},
-        isCLI      = (process.argv.length > 2),
+        version  = require("./package.json").version,
+        config   = null,
+        cache    = {},
+        clients  = {},
+        db       = {},
+        dirs     = {},
+        watchers = {},
+        cssCache = null,
+        firstRun = null,
+        mode     = {file: "644", dir: "755"},
+        isCLI    = (process.argv.length > 2),
         // Resources
-        cmPath = "node_modules/codemirror/",
+        cmPath    = "node_modules/codemirror/",
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
@@ -374,7 +374,15 @@
     //-----------------------------------------------------------------------------
     // WebSocket functions
     function setupSocket(server) {
-        new Wss({server : server}).on("connection", function (ws) {
+        var wss = new Wss({server : server});
+        if (config.keepAlive > 0) {
+            setInterval(function () {
+                for (var client in wss.clients)
+                    if (wss.clients.hasOwnProperty(client))
+                        wss.clients[client].send("ping");
+            }, config.keepAlive);
+        }
+        wss.on("connection", function (ws) {
             var remoteIP   = ws.upgradeReq.headers["x-real-ip"]   || ws._socket.remoteAddress,
                 remotePort = ws.upgradeReq.headers["x-real-port"] || ws._socket.remotePort,
                 cookie     = getCookie(ws.upgradeReq.headers.cookie),
@@ -390,6 +398,7 @@
                 client = clients[cookie];
             }
             ws.on("message", function (message) {
+                if (message === "pong") return;
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
@@ -402,6 +411,7 @@
                             return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data)
                         } else if (info.type === "f") {
                             client.v[vId].file = path.basename(msg.data);
+                            client.v[vId].directory = path.dirname(msg.data);
                             info["folder"] = path.dirname(msg.data);
                             info["file"] = path.basename(msg.data);
                             info["isFile"] = true;
@@ -409,6 +419,7 @@
                             info["type"] = "UPDATE_BE_FILE";
                             send(client.ws, JSON.stringify(info))
                         } else {
+                            client.v[vId].file = null;
                             client.v[vId].directory = msg.data;
                             updateDirectory(client.v[vId].directory, function () {
                                 sendFiles(cookie, vId, "UPDATE_DIRECTORY");
@@ -738,7 +749,8 @@
                 if (clients.hasOwnProperty(cookie)) {
                     var client = clients[cookie];
                     for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                        if (client.v[vId].directory === relativeDir) {
+                        if (client.v[vId].directory === relativeDir
+                            && client.v[vId].file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
                     }
@@ -785,7 +797,8 @@
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
                 for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    neededDirs[client.v[vId].directory] = true;
+                    if (client.v[vId].file === null)
+                        neededDirs[client.v[vId].directory] = true;
                 }
             }
         }
@@ -886,8 +899,7 @@
         } else if (URI === "/favicon.ico") {
             handleResourceRequest(req, res, "favicon.ico");
         } else {
-            var cookie = getCookie(req.headers.cookie);
-            if (!cookie) {
+            if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 301;
                 res.setHeader("Location", "/");
                 res.end();
@@ -940,6 +952,7 @@
                 if (isValidUser(postData.username, postData.password)) {
                     createCookie(req, res, postData);
                     endReq(req, res, true);
+
                     log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                 } else {
                     endReq(req, res, false);
@@ -1229,13 +1242,15 @@
                 sizeList[path.basename(tmpDirs[i])] = results[i];
 
             for (var cookie in clients) {
-                if (clients.hasOwnProperty(cookie) && clients[cookie].v[0].directory === root) {
-                    send(clients[cookie].ws, JSON.stringify({
-                        type   : "UPDATE_SIZES",
-                        folder : root,
-                        data   : sizeList
-                    }));
-                }
+                var client = clients[cookie];
+                for (var vId = client.v.length - 1; vId >= 0; vId--)
+                    if (client.v[vId].file === null && client.v[0].directory === root)
+                        send(clients[cookie].ws, JSON.stringify({
+                            type   : "UPDATE_SIZES",
+                            folder : root,
+                            data   : sizeList,
+                            vId    : vId
+                        }));
             }
         });
 
