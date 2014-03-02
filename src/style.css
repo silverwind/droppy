@@ -116,12 +116,13 @@ input:-webkit-autofill {
     flex-direction: column;
     display: flex;
 }
+.view.directory .content .empty,
 .view.directory .content ul { 
     background: #eee;
     border-radius: 4px;
-    overflow: auto;
     order: 2;
 }
+.view.directory .content ul { overflow: auto; }
 
 @media all and (min-width: 1024px) { .content { font-size:  1em } }
 @media all and (max-width: 1023px) { .content { font-size: .9em } }
@@ -503,16 +504,15 @@ input:-webkit-autofill {
 
 /* ============================= Empty Folder ============================== */
 
-#empty {
+.empty {
     text-align: center;
     cursor: pointer;
     overflow: hidden;
-    margin: 1em auto;
-    width: 100px;
+    padding: 2em 0;
     order: 2;
 }
 
-#empty svg {
+.empty svg {
     fill: #000;
     height: 60px;
     width: 60px;
@@ -522,7 +522,7 @@ input:-webkit-autofill {
     bottom: -12px;
 }
 
-#empty .text {
+.empty .text {
     font-weight: 400;
     font-size: 20px;
     line-height: 20px;
@@ -532,8 +532,8 @@ input:-webkit-autofill {
     transition: all .4s ease;
 }
 
-#empty:hover svg { opacity: 1; bottom: 0; }
-#empty:hover .text { opacity: 1; top: 0; }
+.empty:hover svg { opacity: 1; bottom: 0; }
+.empty:hover .text { opacity: 1; top: 0; }
 
 /* ================================= Icons ================================= */
 
