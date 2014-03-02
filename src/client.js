@@ -326,8 +326,9 @@
                 break;
             case "SAVE_STATUS":
                 hideSpinner();
-                $("#path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
-                setTimeout(function () { $("#path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
+                var view = getView(vId);
+                view.find("#path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
+                setTimeout(function () { view.find("#path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
             }
         };
@@ -1212,7 +1213,7 @@
                 if (!parts[i] && !droppy.savedParts[i]) break;
                 if (parts[i] !== droppy.savedParts[i]) {
                     if (droppy.savedParts[i] && !parts[i]) {
-                        $("#path li").slice(i).remove();
+                        view.find("#path li").slice(i).remove();
                         break;
                     }
                     else if (parts[i] && !droppy.savedParts[i])
@@ -1244,15 +1245,15 @@
                 updateLocation(view, $(this).data("destination"));
             });
 
-            $("#path").append(li); // TODO view-path
+            view.find("#path").append(li);
             li.append(droppy.svg.triangle);
         }
 
         function finalize() {
-            $("#path li.out").setTransitionClass("out", "in"); // TODO view-path
+            view.find("#path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
                 // Remove the class after the transition and keep the list scrolled to the last element
-                $("#path li.in").removeClass("in"); // TODO view-path
+                view.find("#path li.in").removeClass("in");
                 checkPathOverflow(view);
             }, 200);
         }
@@ -1262,7 +1263,7 @@
     function checkPathOverflow(view) {
         var width = 60,
             space = $(window).width(),
-            pathElements = document.querySelectorAll("#path li"); // TODO view-path
+            pathElements = view.find("#path li");
 
         for (var i = 0, l = pathElements.length; i < l; i++) {
             width += pathElements[i].offsetWidth;
@@ -1271,14 +1272,14 @@
         if (width > space) {
             requestAnimation(function () {
                 if (droppy.detects.animation)
-                    $("#path li").css({"left": space - width + "px"});
+                    view.find("#path li").css({"left": space - width + "px"});
                 else
-                    $("#path li").animate({"left": space - width}, {duration: 200});
+                    view.find("#path li").animate({"left": space - width}, {duration: 200});
             });
         } else {
             requestAnimation(function () {
-                if ($("#path li").css("left") !== 0)
-                    $("#path li").animate({"left": 0}, {duration: 200});
+                if (view.find("#path li").css("left") !== 0)
+                    view.find("#path li").animate({"left": 0}, {duration: 200});
             });
         }
     }
@@ -1740,7 +1741,7 @@
                     saveEditorOptions(editor);
                 });
                 editor.on("change", function () {
-                    $("#path li:last-child").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
+                    view.find("#path li:last-child").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
                 });
             },
             error : function () {
