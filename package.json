@@ -11,9 +11,9 @@
   "dependencies": {
     "archiver": "~0.6.1",
     "async": "~0.2.10",
-    "autoprefixer": "~1.1.20140226",
-    "busboy": "0.2.2",
-    "clean-css": "~2.1.3",
+    "autoprefixer": "~1.1.20140302",
+    "busboy": "0.2.3",
+    "clean-css": "~2.1.4",
     "codemirror": "~3.22.0",
     "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
@@ -21,7 +21,7 @@
     "spdy": "~1.19.3",
     "svgo": "~0.4.4",
     "uglify-js": "~2.4.12",
-    "wrench": "~1.5.7",
+    "wrench": "~1.5.8",
     "ws": "~0.4.31"
   },
   "directories": {
