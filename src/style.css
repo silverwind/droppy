@@ -96,33 +96,6 @@ input:-webkit-autofill {
     flex: 0 0 auto;
 }
 
-#content-container {
-    flex: 1 1;
-    order: 3;
-    z-index: 0;
-    transition: all .2s ease;
-    overflow-y: auto;
-    position: relative;
-}
-
-/* TODO: Increase FPS on this transition */
-#content, #newcontent {
-    margin: .25em;
-    width: calc(100% - .5em);
-    border-radius: 4px;
-    position: absolute;
-    transition: left .2s ease-in;
-}
-.view:not(.document) #content, .view:not(.document) #newcontent { background: #eee }
-
-@media all and (min-width: 1024px) { #content, #newcontent { font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { font-size: .8em } }
-
-#content.center,  #newcontent.center  { left: 0     }
-#content.back,    #newcontent.back    { left: -100% }
-#content.forward, #newcontent.forward { left: 100%  }
-
 /* ============================= Header Buttons ============================ */
 
 #buttons {
@@ -181,6 +154,48 @@ input:-webkit-autofill {
 #upload-folder.disabled svg { fill: #666 }
 #upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
 
+#content-container {
+    flex: 1 1;
+    order: 2;
+    z-index: 0;
+    transition: all .2s ease;
+    overflow-y: auto;
+}
+
+/* ================================== View ================================= */
+.view {
+    position: relative;
+}
+
+.content {
+    width: calc(100% - .5em);
+    margin: .25em;
+    transition: left .2s ease-in;
+    position: absolute;
+}
+
+@media all and (min-width: 1024px) { .content { top: 37px; font-size:  1em } }
+@media all and (max-width: 1023px) { .content { top: 32px; font-size: .9em } }
+@media all and (max-width:  639px) { .content { top: 27px; font-size: .8em } }
+
+.content.center  { left: 0     }
+.content.back    { left: -100% }
+.content.forward { left: 100%  }
+
+.view.directory {
+    display: flex;
+    flex-direction: column;
+}
+.view.directory .content .empty,
+.view.directory .content ul {
+    background: #eee;
+    border-radius: 4px;
+}
+.view.directory .content ul { overflow: auto; }
+
+.view.document, .view.document .content {
+    height: calc(100% - 1.125em);
+}
 /* ================================== Path ================================= */
 
 #path {
@@ -190,6 +205,7 @@ input:-webkit-autofill {
    white-space: nowrap;
    width: 100%;
    text-align: left;
+   position: absolute;
 }
 
 @media all and (min-width: 1024px) { #path { height: 37px; font-size: .9em } }
@@ -253,6 +269,48 @@ input:-webkit-autofill {
 @media all and (max-width:  639px) { .triangle { height: 25px; width: 25px; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
+
+#paste {
+    z-index: 32;
+    line-height: 1.5em;
+    width: 10em;
+    margin: 0 auto;
+    text-align: center;
+    color: #bbb;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+#paste.in  { margin-bottom: .25em; }
+#paste.out { height: 0; overflow: hidden; }
+
+@media all and (min-width: 1024px) { #paste { font-size:  1em } }
+@media all and (max-width: 1023px) { #paste { font-size: .9em } }
+@media all and (max-width:  639px) { #paste { font-size: .8em } }
+
+#paste:hover {color: #fff }
+#paste:hover svg {fill: #1af }
+
+#paste .filename { color: #fff }
+#paste:hover .filename {color: #1af }
+
+#paste svg {
+    height: 1em;
+    width: 1em;
+    fill: #eee;
+    margin-right: .25em;
+    transition: all .2s ease;
+}
+
+#click-catcher {
+    background: #000;
+    position: fixed;
+    left: 0; right: 0; top: 0; bottom: 0;
+    transition: opacity 0.5s ease;
+    z-index: 31;
+}
+
+#click-catcher.out { opacity: 0   ; visibility: hidden }
+#click-catcher.in  { opacity: .75 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -439,25 +497,25 @@ input:-webkit-autofill {
 
 /* ============================= Empty Folder ============================== */
 
-#empty {
+.empty {
     text-align: center;
     cursor: pointer;
     overflow: hidden;
-    margin: 1em auto;
-    width: 100px;
+    padding: 2em 0;
+    order: 2;
 }
 
-#empty svg {
+.empty svg {
     fill: #000;
     height: 60px;
-    width: 60px;
+    width: 66px;
     transition: all .4s ease;
     opacity: .7;
     position: relative;
     bottom: -12px;
 }
 
-#empty .text {
+.empty .text {
     font-weight: 400;
     font-size: 20px;
     line-height: 20px;
@@ -467,8 +525,8 @@ input:-webkit-autofill {
     transition: all .4s ease;
 }
 
-#empty:hover svg { opacity: 1; bottom: 0; }
-#empty:hover .text { opacity: 1; top: 0; }
+.empty:hover svg { opacity: 1; bottom: 0; }
+.empty:hover .text { opacity: 1; top: 0; }
 
 /* ================================= Icons ================================= */
 
@@ -605,11 +663,7 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
-.view.document #content, .view.document #newcontent {
-    height: calc(100% - 0.5em);
-}
-
-.doc textarea { visibility: none }
+.doc textarea { visibility: hidden }
 
 .doc > .sidebar {
     position: absolute;
@@ -702,7 +756,7 @@ input:-webkit-autofill {
     border-radius: 3px 3px 0 0;
     color: #999;
     flex: 0 0 120px;
-    order: 4;
+    order: 3;
     position: relative;
     overflow: hidden;
     transition: all .2s ease;
@@ -801,7 +855,7 @@ input:-webkit-autofill {
     background: linear-gradient(#111,#222);
     color: #aaa;
     flex: 0 0;
-    order: 5;
+    order: 4;
     overflow: hidden;
     position: relative;
     transition: all .2s ease;
@@ -1389,49 +1443,6 @@ input[type="checkbox"] { display: none }
     width: 50%;
     fill: #aaa;
 }
-
-#paste {
-    flex: 0 0;
-    order: 2;
-    overflow: hidden;
-    z-index: 32;
-    line-height: 1.5em;
-    text-align: center;
-    color: #aaa;
-    cursor: pointer;
-    transition: all .2s ease;
-}
-
-@media all and (min-width: 1024px) { #paste { font-size:  1em } }
-@media all and (max-width: 1023px) { #paste { font-size: .9em } }
-@media all and (max-width:  639px) { #paste { font-size: .8em } }
-
-#paste:hover {color: #c71 }
-#paste:hover svg {fill: #c71 }
-#paste.in  { flex-basis: 1.25em }
-#paste.out { flex-basis: 0 }
-#paste .filename { color: #fff }
-#paste:hover .filename {color: #fa4 }
-
-#paste svg {
-    height: 1em;
-    width: 1em;
-    fill: #eee;
-    margin-right: .25em;
-    transition: all .2s ease;
-}
-
-
-#click-catcher {
-    background: #000;
-    position: fixed;
-    left: 0; right: 0; top: 0; bottom: 0;
-    transition: opacity 0.5s ease;
-    z-index: 31;
-}
-
-#click-catcher.out { opacity: 0   ; visibility: hidden }
-#click-catcher.in  { opacity: .75 ; visibility: visible }
 
 #tooltip {
     color: #eee;
