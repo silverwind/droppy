@@ -408,7 +408,7 @@
 
                     readPath(msg.data, function (error, info) {
                         if (error) {
-                            return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data)
+                            return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data);
                         } else if (info.type === "f") {
                             client.v[vId].file = path.basename(msg.data);
                             client.v[vId].directory = path.dirname(msg.data);
@@ -417,7 +417,7 @@
                             info["isFile"] = true;
                             info["vId"] = vId;
                             info["type"] = "UPDATE_BE_FILE";
-                            send(client.ws, JSON.stringify(info))
+                            send(client.ws, JSON.stringify(info));
                         } else {
                             client.v[vId].file = null;
                             client.v[vId].directory = msg.data;
@@ -907,10 +907,11 @@
             }
 
             // Check if client is going to a path directly
-            fs.stat(path.join(config.filesDir, URI), function (error, stats) {
+            fs.stat(path.join(config.filesDir, URI), function (error) {
                 if (!error) {
                     handleResourceRequest(req, res, "base.html");
                 } else {
+                    log.error(error);
                     res.statusCode = 301;
                     res.setHeader("Location", "/");
                     res.end();
@@ -929,7 +930,7 @@
         for (var i = q.length - 1; i >= 0; i--) {
             var kv = q[i].split("=");
             req.query[kv[0]] = kv[1];
-        };
+        }
         console.log(req.query);
         if (/\/upload/.test(URI)) {
             if (!getCookie(req.headers.cookie)) {
@@ -1199,7 +1200,7 @@
             } else {
                 callback(new Error("Path neither directory or file!"));
             }
-        })
+        });
     }
     //-----------------------------------------------------------------------------
     // Update a directory's content
@@ -1218,7 +1219,8 @@
                 (function (entry) {
                     readPath(root + "/" + entry, function (error, info) {
                         if (error) {
-                            log.error(error); callback();
+                            log.error(error);
+                            callback();
                         } else {
                             dirContents[entry] = info;
                             if (++done === last) {
@@ -1249,18 +1251,21 @@
                 sizeList[path.basename(tmpDirs[i])] = results[i];
 
             for (var cookie in clients) {
-                var client = clients[cookie];
-                for (var vId = client.v.length - 1; vId >= 0; vId--)
-                    if (client.v[vId].file === null && client.v[0].directory === root)
-                        send(clients[cookie].ws, JSON.stringify({
-                            type   : "UPDATE_SIZES",
-                            folder : root,
-                            data   : sizeList,
-                            vId    : vId
-                        }));
+                if (clients.hasOwnProperty(cookie)) {
+                    var client = clients[cookie];
+                    for (var vId = client.v.length - 1; vId >= 0; vId--) {
+                        if (client.v[vId].file === null && client.v[0].directory === root) {
+                            send(clients[cookie].ws, JSON.stringify({
+                                type   : "UPDATE_SIZES",
+                                folder : root,
+                                data   : sizeList,
+                                vId    : vId
+                            }));
+                        }
+                    }
+                }
             }
         });
-
     }
 
     //-----------------------------------------------------------------------------

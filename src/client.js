@@ -265,10 +265,11 @@
                 droppy.socketWait = false;
 
             var msg = JSON.parse(event.data),
-                vId = msg.vId;
+                vId = msg.vId,
+                view;
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
-                var view = getView(vId);
+                view = getView(vId);
                 // Ignore update if we're uploading or the view is not viewing a directory
                 if ((droppy.isUploading) && !view[0].switchRequest) return;
                 if (view[0].switchRequest) {
@@ -294,8 +295,8 @@
                 droppy.ready = false;
                 break;
             case "UPDATE_BE_FILE":
-                var view = getView(vId),
-                    path = fixRootPath((msg.folder + "/" + msg.file));
+                var path = fixRootPath((msg.folder + "/" + msg.file));
+                view = getView(vId);
                 updatePath(view, path);
 
                 view[0].currentFolder = msg.folder;
@@ -330,7 +331,7 @@
                 break;
             case "SAVE_STATUS":
                 hideSpinner();
-                var view = getView(vId);
+                view = getView(vId);
                 view.find("#path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
                 setTimeout(function () { view.find("#path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
