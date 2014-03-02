@@ -1469,7 +1469,7 @@
             event.stopPropagation();
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"), // #content-container
+                view = entry.parents(".view"), // #view-container
                 vId = view[0].vId;
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
@@ -1520,7 +1520,7 @@
             event.stopPropagation();
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"); // #content-container
+                view = entry.parents(".view"); // #view-container
             updateLocation(view, fixRootPath(view[0].currentFolder + "/" + entry.find(".file-link").text()));
         });
 

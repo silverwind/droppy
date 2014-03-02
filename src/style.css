@@ -154,7 +154,7 @@ input:-webkit-autofill {
 #upload-folder.disabled svg { fill: #666 }
 #upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
 
-#content-container {
+#view-container {
     flex: 1 1;
     order: 2;
     z-index: 0;
