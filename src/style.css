@@ -109,12 +109,19 @@ input:-webkit-autofill {
 .content {
     margin: .25em;
     width: calc(100% - .5em);
-    border-radius: 4px;
     position: absolute;
-    overflow: auto;
     transition: left .2s ease-in;
 }
-.view.directory .content { background: #eee }
+.view.directory .content {
+    flex-direction: column;
+    display: flex;
+}
+.view.directory .content ul { 
+    background: #eee;
+    border-radius: 4px;
+    overflow: auto;
+    order: 2;
+}
 
 @media all and (min-width: 1024px) { .content { font-size:  1em } }
 @media all and (max-width: 1023px) { .content { font-size: .9em } }
@@ -182,6 +189,17 @@ input:-webkit-autofill {
 #upload-folder.disabled svg { fill: #666 }
 #upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
 
+/* ================================== View ================================= */
+
+.view {
+    display: flex;
+    flex-direction: column;
+}
+.content {
+    flex: 1 1;
+    order: 3;
+}
+
 /* ================================== Path ================================= */
 
 #path {
@@ -191,6 +209,8 @@ input:-webkit-autofill {
    white-space: nowrap;
    width: 100%;
    text-align: left;
+   order: 1;
+   flex: 0 0 auto;
 }
 
 @media all and (min-width: 1024px) { #path { height: 37px; font-size: .9em } }
@@ -254,6 +274,49 @@ input:-webkit-autofill {
 @media all and (max-width:  639px) { .triangle { height: 25px; width: 25px; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
+
+#paste {
+    flex: 0 0;
+    order: 1;
+    overflow: hidden;
+    z-index: 32;
+    line-height: 1.5em;
+    text-align: center;
+    color: #aaa;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+@media all and (min-width: 1024px) { #paste { font-size:  1em } }
+@media all and (max-width: 1023px) { #paste { font-size: .9em } }
+@media all and (max-width:  639px) { #paste { font-size: .8em } }
+
+#paste:hover {color: #c71 }
+#paste:hover svg {fill: #c71 }
+#paste.in  { flex-basis: 1.25em }
+#paste.out { flex-basis: 0 }
+#paste .filename { color: #fff }
+#paste:hover .filename {color: #fa4 }
+
+#paste svg {
+    height: 1em;
+    width: 1em;
+    fill: #eee;
+    margin-right: .25em;
+    transition: all .2s ease;
+}
+
+
+#click-catcher {
+    background: #000;
+    position: fixed;
+    left: 0; right: 0; top: 0; bottom: 0;
+    transition: opacity 0.5s ease;
+    z-index: 31;
+}
+
+#click-catcher.out { opacity: 0   ; visibility: hidden }
+#click-catcher.in  { opacity: .75 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -446,6 +509,7 @@ input:-webkit-autofill {
     overflow: hidden;
     margin: 1em auto;
     width: 100px;
+    order: 2;
 }
 
 #empty svg {
@@ -608,6 +672,7 @@ input:-webkit-autofill {
 /* ============================ Document Previewer ============================ */
 .view.document .content {
     /*height: calc(100% - 0.5em - 37px);*/
+
 }
 
 @media all and (min-width: 1024px) { .view .content { height: calc(100% - 0.5em - 37px) } }
@@ -1394,49 +1459,6 @@ input[type="checkbox"] { display: none }
     width: 50%;
     fill: #aaa;
 }
-
-#paste {
-    flex: 0 0;
-    order: 2;
-    overflow: hidden;
-    z-index: 32;
-    line-height: 1.5em;
-    text-align: center;
-    color: #aaa;
-    cursor: pointer;
-    transition: all .2s ease;
-}
-
-@media all and (min-width: 1024px) { #paste { font-size:  1em } }
-@media all and (max-width: 1023px) { #paste { font-size: .9em } }
-@media all and (max-width:  639px) { #paste { font-size: .8em } }
-
-#paste:hover {color: #c71 }
-#paste:hover svg {fill: #c71 }
-#paste.in  { flex-basis: 1.25em }
-#paste.out { flex-basis: 0 }
-#paste .filename { color: #fff }
-#paste:hover .filename {color: #fa4 }
-
-#paste svg {
-    height: 1em;
-    width: 1em;
-    fill: #eee;
-    margin-right: .25em;
-    transition: all .2s ease;
-}
-
-
-#click-catcher {
-    background: #000;
-    position: fixed;
-    left: 0; right: 0; top: 0; bottom: 0;
-    transition: opacity 0.5s ease;
-    z-index: 31;
-}
-
-#click-catcher.out { opacity: 0   ; visibility: hidden }
-#click-catcher.in  { opacity: .75 ; visibility: visible }
 
 #tooltip {
     color: #eee;

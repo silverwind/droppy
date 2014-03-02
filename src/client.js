@@ -157,6 +157,10 @@
         });
     }
 
+    function contentWrap(view) {
+        return $('<div id="newcontent" class="content ' + view[0].animDirection + '"></div>')
+    }
+
 // ============================================================================
 //  Page loading functions
 // ============================================================================
@@ -1341,74 +1345,28 @@
             }
         }
         list.children("li").sort(sortFunc).appendTo(list);
-        loadContent(view, list.children("li").length > 0 ? list : null);
-    }
+        var content = contentWrap(view).html(
+                    '<div id="paste" class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' +
+                        '<svg class="paste"></svg>' +
+                        '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
+                    '</div>');
+        if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
+        else content.append('<div id="empty" class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
 
-    // Load generated list into view with an animation
-    function loadContent(view, html) {
-        var emptyPage = '<div id="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>',
-            type = view.attr("data-type"),
-            navRegex = /(forward|back|center)/,
-            typeRegex = /(document|directory|media)/;
-        switch (type) {
-        case "document":
-            view[0].animDirection = "forward";
-            break;
-        case "directory":
-            $(getHeaderHTML()).prependTo(html);
-            break;
-        }
-        // Set the view type as a class for styling purpose
-        view.replaceClass(typeRegex, type);
-
-        requestAnimation(function () {
-            if (view[0].animDirection === "same" && type !== "document") {
-                view.find("#content").attr("class", "center content");
-                view.find("#content").html(html || emptyPage);
-            } else {
-                view.append($('<div id="newcontent" class="' + view[0].animDirection + ' content"></div>'));
-                view.find("#newcontent").html(html || emptyPage);
-                droppy.isAnimating = true;
-                view.find(".data-row").addClass("animating");
-                view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
-                view.find("#newcontent").setTransitionClass(navRegex, "center");
-                // Switch classes once the transition has finished
-                setTimeout(function () {
-                    droppy.isAnimating = false;
-                    view.find("#content").remove();
-                    view.find("#newcontent").attr("id", "content");
-                    view.find(".data-row").removeClass("animating");
-                }, 200);
-            }
-            switch (type) {
-            case "document":
-                break;
-            case "directory":
-                bindDirectoryViewEvents(view);
-                break;
-            }
-            view[0].animDirection = "same";
-        });
-    }
-
-    // Bind click events to the list elements
-    function bindDirectoryViewEvents(view) {
+        loadContent(view, content);
         // Upload button on empty page
-        view.find("#empty").register("click", function () {
+        content.find(".empty").register("click", function () {
             if (droppy.detects.fileinputdirectory)
                 $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
             $("#file").click();
         });
-
         // Switch into a folder
-        view.find(".data-row[data-type='folder']").register("click", function () {
+        content.find(".data-row[data-type='folder']").register("click", function () {
             if (droppy.socketWait) return;
-            var destination = $(this).data("id"),
-                view = $(this).parents(".view");
+            var destination = $(this).data("id");
             updateLocation(view, destination);
         });
-
-        view.find(".data-row .entry-menu").register("click", function (event) {
+        content.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class"),
@@ -1429,15 +1387,13 @@
                 toggleCatcher();
             });
         });
-
         // Paste a file/folder into a folder
-        $("#paste").register("click", function (event) {
+        content.find(".paste-button").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
-                var sep = getView()[0].currentFolder === "/" ? "" : "/";
                 showSpinner();
-                droppy.clipboard.to = getView()[0].currentFolder + sep + basename(droppy.clipboard.from);
+                droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
                 sendMessage(null, "CLIPBOARD", droppy.clipboard);
             } else {
                 throw "Clipboard was empty!";
@@ -1447,10 +1403,8 @@
             $("#click-catcher").trigger("click");
             $(this).replaceClass("in", "out");
         });
-
-
         // Stop navigation when clicking on an <a>
-        view.find(".data-row .zip, .entry-link.file").register("click", function (event) {
+        content.find(".data-row .zip, .entry-link.file").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
 
@@ -1461,25 +1415,53 @@
                 droppy.reopen = false;
             }, 2000);
         });
-
         // Request a shortlink
-        view.find(".data-row .shortlink").register("click", function () {
+        content.find(".data-row .shortlink").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage(null, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
         });
-
-        view.find(".icon-play").register("click", function () {
+        content.find(".icon-play").register("click", function () {
             preparePlayback($(this));
         });
-
-        view.find(".header-name, .header-mtime, .header-size").register("click", function () {
+        content.find(".header-name, .header-mtime, .header-size").register("click", function () {
             sortByHeader($(this));
-
         });
-
         droppy.ready = true;
         hideSpinner();
     }
+
+    // Load generated list into view with an animation
+    function loadContent(view, content) {
+        var type = view.attr("data-type"),
+            navRegex = /(forward|back|center)/,
+            typeRegex = /(document|directory|media)/;
+
+        // Set the view type as a class for styling purpose
+        view.replaceClass(typeRegex, type);
+
+        requestAnimation(function () {
+            if (view[0].animDirection === "same" && type !== "document") {
+                view.find("#content").attr("class", "center content");
+                view.find("#content").before(content);
+            } else {
+                view.append(content);
+                droppy.isAnimating = true;
+                view.find(".data-row").addClass("animating");
+                view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
+                view.find("#newcontent").setTransitionClass(navRegex, "center");
+                // Switch classes once the transition has finished
+            }
+            setTimeout(function () {
+                droppy.isAnimating = false;
+                view.find("#content").remove();
+                view.find("#newcontent").attr("id", "content");
+                //view.find("#content").setTransitionClass(navRegex, "center");
+                view.find(".data-row").removeClass("animating");
+            }, 200);
+            view[0].animDirection = "same";
+        });
+    }
+
     function initEntryMenu() {
         // Rename a file/folder
         $("#entry-menu .rename").register("click", function (event) {
@@ -1500,11 +1482,12 @@
         $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
             event.stopPropagation();
             var entry = $("#entry-menu").data("target"),
+                view = entry.parents(".view"),
                 from  = entry.data("id");
             droppy.clipboard = { type: $(this).attr("class"), from: from };
             $("#click-catcher").trigger("click");
-            $("#paste .filename").text(basename(from));
-            $("#paste").attr("class", "in");
+            view.find("#paste .filename").text(basename(from));
+            view.find("#paste").replaceClass("out", "in");
         });
 
         // Open a file/folder in browser
@@ -1655,7 +1638,8 @@
                   '<option value="wrap">Wrap</option>' +
                 '</select>' +
             '</div>');
-        loadContent(view, doc);
+        view[0].animDirection = "forward";
+        loadContent(view, contentWrap(view).append(doc));
         doc.append(opts);
 
         showSpinner();
@@ -2034,7 +2018,7 @@
     }
 
     function basename(path) {
-        return path.replace(/.*\//, "");
+        return path.replace(/^.*\//, "");
     }
 
     function dirname(path) {
