@@ -111,6 +111,7 @@ input:-webkit-autofill {
     width: calc(100% - .5em);
     border-radius: 4px;
     position: absolute;
+    overflow: auto;
     transition: left .2s ease-in;
 }
 .view:not(.document) #content, .view:not(.document) #newcontent { background: #eee }
@@ -606,8 +607,12 @@ input:-webkit-autofill {
 
 /* ============================ Document Previewer ============================ */
 .view.document #content, .view.document #newcontent {
-    height: calc(100% - 0.5em);
+    /*height: calc(100% - 0.5em - 37px);*/
 }
+
+@media all and (min-width: 1024px) { .view #content, .view #newcontent { height: calc(100% - 0.5em - 37px) } }
+@media all and (max-width: 1023px) { .view #content, .view #newcontent { height: calc(100% - 0.5em - 32px) } }
+@media all and (max-width:  639px) { .view #content, .view #newcontent { height: calc(100% - 0.5em - 27px) } }
 
 .doc textarea { visibility: none }
 

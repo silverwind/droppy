@@ -552,7 +552,8 @@
         $(window).register("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
-                checkPathOverflow();
+                for (var vId = droppy.views.length - 1; vId >= 0; vId--)
+                    checkPathOverflow(getView([vId]));
             }, 100);
         });
 
@@ -1262,7 +1263,7 @@
     // Check if the path indicator overflows and scroll it if neccessary
     function checkPathOverflow(view) {
         var width = 60,
-            space = $(window).width(),
+            space = view.width(),
             pathElements = view.find("#path li");
 
         for (var i = 0, l = pathElements.length; i < l; i++) {
