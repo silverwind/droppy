@@ -158,7 +158,7 @@
     }
 
     function contentWrap(view) {
-        return $('<div id="newcontent" class="content ' + view[0].animDirection + '"></div>')
+        return $('<div id="newcontent" class="content ' + view[0].animDirection + '"></div>');
     }
 
 // ============================================================================
@@ -1520,7 +1520,7 @@
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
                 view = entry.parents(".view"); // #content-container
-            updateLocation(view, fixRootPath( view[0].currentFolder + "/" + entry.find(".file-link").text() ));
+            updateLocation(view, fixRootPath(view[0].currentFolder + "/" + entry.find(".file-link").text()));
         });
 
         // Delete a file/folder

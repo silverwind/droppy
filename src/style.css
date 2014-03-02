@@ -96,42 +96,6 @@ input:-webkit-autofill {
     flex: 0 0 auto;
 }
 
-#content-container {
-    flex: 1 1;
-    order: 3;
-    z-index: 0;
-    transition: all .2s ease;
-    overflow-y: auto;
-    position: relative;
-}
-
-/* TODO: Increase FPS on this transition */
-.content {
-    margin: .25em;
-    width: calc(100% - .5em);
-    position: absolute;
-    transition: left .2s ease-in;
-}
-.view.directory .content {
-    flex-direction: column;
-    display: flex;
-}
-.view.directory .content .empty,
-.view.directory .content ul { 
-    background: #eee;
-    border-radius: 4px;
-    order: 2;
-}
-.view.directory .content ul { overflow: auto; }
-
-@media all and (min-width: 1024px) { .content { font-size:  1em } }
-@media all and (max-width: 1023px) { .content { font-size: .9em } }
-@media all and (max-width:  639px) { .content { font-size: .8em } }
-
-.content.center  { left: 0     }
-.content.back    { left: -100% }
-.content.forward { left: 100%  }
-
 /* ============================= Header Buttons ============================ */
 
 #buttons {
@@ -190,17 +154,48 @@ input:-webkit-autofill {
 #upload-folder.disabled svg { fill: #666 }
 #upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
 
-/* ================================== View ================================= */
+#content-container {
+    flex: 1 1;
+    order: 2;
+    z-index: 0;
+    transition: all .2s ease;
+    overflow-y: auto;
+}
 
+/* ================================== View ================================= */
 .view {
+    position: relative;
+}
+
+.content {
+    width: calc(100% - .5em);
+    margin: .25em;
+    transition: left .2s ease-in;
+    position: absolute;
+}
+
+@media all and (min-width: 1024px) { .content { top: 37px; font-size:  1em } }
+@media all and (max-width: 1023px) { .content { top: 32px; font-size: .9em } }
+@media all and (max-width:  639px) { .content { top: 27px; font-size: .8em } }
+
+.content.center  { left: 0     }
+.content.back    { left: -100% }
+.content.forward { left: 100%  }
+
+.view.directory {
     display: flex;
     flex-direction: column;
 }
-.content {
-    flex: 1 1;
-    order: 3;
+.view.directory .content .empty,
+.view.directory .content ul {
+    background: #eee;
+    border-radius: 4px;
 }
+.view.directory .content ul { overflow: auto; }
 
+.view.document, .view.document .content {
+    height: calc(100% - 1.125em);
+}
 /* ================================== Path ================================= */
 
 #path {
@@ -210,8 +205,7 @@ input:-webkit-autofill {
    white-space: nowrap;
    width: 100%;
    text-align: left;
-   order: 1;
-   flex: 0 0 auto;
+   position: absolute;
 }
 
 @media all and (min-width: 1024px) { #path { height: 37px; font-size: .9em } }
@@ -277,27 +271,27 @@ input:-webkit-autofill {
 /* ========================= File/Folder Display =========================== */
 
 #paste {
-    flex: 0 0;
-    order: 1;
-    overflow: hidden;
     z-index: 32;
     line-height: 1.5em;
+    width: 10em;
+    margin: 0 auto;
     text-align: center;
-    color: #aaa;
+    color: #bbb;
     cursor: pointer;
     transition: all .2s ease;
 }
+#paste.in  { margin-bottom: .25em; }
+#paste.out { height: 0; overflow: hidden; }
 
 @media all and (min-width: 1024px) { #paste { font-size:  1em } }
 @media all and (max-width: 1023px) { #paste { font-size: .9em } }
 @media all and (max-width:  639px) { #paste { font-size: .8em } }
 
-#paste:hover {color: #c71 }
-#paste:hover svg {fill: #c71 }
-#paste.in  { flex-basis: 1.25em }
-#paste.out { flex-basis: 0 }
+#paste:hover {color: #fff }
+#paste:hover svg {fill: #1af }
+
 #paste .filename { color: #fff }
-#paste:hover .filename {color: #fa4 }
+#paste:hover .filename {color: #1af }
 
 #paste svg {
     height: 1em;
@@ -306,7 +300,6 @@ input:-webkit-autofill {
     margin-right: .25em;
     transition: all .2s ease;
 }
-
 
 #click-catcher {
     background: #000;
@@ -515,7 +508,7 @@ input:-webkit-autofill {
 .empty svg {
     fill: #000;
     height: 60px;
-    width: 60px;
+    width: 66px;
     transition: all .4s ease;
     opacity: .7;
     position: relative;
@@ -670,16 +663,7 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
-.view.document .content {
-    /*height: calc(100% - 0.5em - 37px);*/
-
-}
-
-@media all and (min-width: 1024px) { .view .content { height: calc(100% - 0.5em - 37px) } }
-@media all and (max-width: 1023px) { .view .content { height: calc(100% - 0.5em - 32px) } }
-@media all and (max-width:  639px) { .view .content { height: calc(100% - 0.5em - 27px) } }
-
-.doc textarea { visibility: none }
+.doc textarea { visibility: hidden }
 
 .doc > .sidebar {
     position: absolute;
@@ -772,7 +756,7 @@ input:-webkit-autofill {
     border-radius: 3px 3px 0 0;
     color: #999;
     flex: 0 0 120px;
-    order: 4;
+    order: 3;
     position: relative;
     overflow: hidden;
     transition: all .2s ease;
@@ -871,7 +855,7 @@ input:-webkit-autofill {
     background: linear-gradient(#111,#222);
     color: #aaa;
     flex: 0 0;
-    order: 5;
+    order: 4;
     overflow: hidden;
     position: relative;
     transition: all .2s ease;
