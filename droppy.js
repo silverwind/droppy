@@ -923,8 +923,15 @@
     //-----------------------------------------------------------------------------
     var blocked = [];
     function handlePOST(req, res) {
-        var URI = decodeURIComponent(req.url), body = "";
-        if (URI === "/upload") {
+        var URI = decodeURIComponent(req.url), body = "",
+            q = req.url.match(/\?([^\?]*)$/)[1].split("&");
+        req.query = {};
+        for (var i = q.length - 1; i >= 0; i--) {
+            var kv = q[i].split("=");
+            req.query[kv[0]] = kv[1];
+        };
+        console.log(req.query);
+        if (/\/upload/.test(URI)) {
             if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 401;
                 res.end();
@@ -1108,12 +1115,12 @@
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
         var socket = log.socket(req.socket.remoteAddress, req.socket.remotePort),
-            cookie = getCookie(req.headers.cookie);
+            cookie = getCookie(req.headers.cookie),
+            uploadTo = req.query.folder;
 
         log.log(socket, " Upload started");
 
-        // TODO: Figure out a client's directory if we don't have it at this point
-        // (happens on server shutdown with the client staying on the page)
+        // FEATURE: Check permissions
         if (!clients[cookie]) {
             res.statusCode = 500;
             res.setHeader("Content-Type", "text/plain");
@@ -1122,13 +1129,14 @@
             return;
         }
 
+
         var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
             done = false,
             files = [];
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-                dst = path.join(config.filesDir, clients[cookie].v[0].directory, dstRelative),
+                dst = path.join(config.filesDir, uploadTo, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
             files[dstRelative] = {
@@ -1145,7 +1153,7 @@
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                     fs.rename(files[name].src, files[name].dst, function () {
-                        log.log(socket, " Received: " + clients[cookie].v[0].directory.substring(1) + "/" + name);
+                        log.log(socket, " Received: " + uploadTo.substring(1) + "/" + name);
                     });
                 })(names.pop());
             }
@@ -1164,7 +1172,7 @@
             res.setHeader("Content-Type", "text/plain");
             res.setHeader("Connection", "close");
             res.end();
-            send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
+            send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : req.query.vId }));
         }
     }
 
