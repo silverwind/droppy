@@ -82,7 +82,7 @@
 
             classMatch = className.match(match);
             // filter out if the entire capture matches the entire className
-            if (classMatch) return classMatch[0] !== className;
+            if (classMatch) return classMatch[0] !== className || classMatch[0] === replacement;
             else return true;
         });
         if (!hasClass) classes.push(replacement);
@@ -1363,10 +1363,10 @@
 
         requestAnimation(function () {
             if (view[0].animDirection === "same" && type !== "document") {
-                view.find("#content").attr("class", "center");
+                view.find("#content").attr("class", "center content");
                 view.find("#content").html(html || emptyPage);
             } else {
-                view.append($("<div id='newcontent' class='" + view[0].animDirection + "'></div>"));
+                view.append($('<div id="newcontent" class="' + view[0].animDirection + ' content"></div>'));
                 view.find("#newcontent").html(html || emptyPage);
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");

@@ -106,7 +106,7 @@ input:-webkit-autofill {
 }
 
 /* TODO: Increase FPS on this transition */
-#content, #newcontent {
+.content {
     margin: .25em;
     width: calc(100% - .5em);
     border-radius: 4px;
@@ -114,15 +114,15 @@ input:-webkit-autofill {
     overflow: auto;
     transition: left .2s ease-in;
 }
-.view:not(.document) #content, .view:not(.document) #newcontent { background: #eee }
+.view.directory .content { background: #eee }
 
-@media all and (min-width: 1024px) { #content, #newcontent { font-size:  1em } }
-@media all and (max-width: 1023px) { #content, #newcontent { font-size: .9em } }
-@media all and (max-width:  639px) { #content, #newcontent { font-size: .8em } }
+@media all and (min-width: 1024px) { .content { font-size:  1em } }
+@media all and (max-width: 1023px) { .content { font-size: .9em } }
+@media all and (max-width:  639px) { .content { font-size: .8em } }
 
-#content.center,  #newcontent.center  { left: 0     }
-#content.back,    #newcontent.back    { left: -100% }
-#content.forward, #newcontent.forward { left: 100%  }
+.content.center  { left: 0     }
+.content.back    { left: -100% }
+.content.forward { left: 100%  }
 
 /* ============================= Header Buttons ============================ */
 
@@ -606,13 +606,13 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
-.view.document #content, .view.document #newcontent {
+.view.document .content {
     /*height: calc(100% - 0.5em - 37px);*/
 }
 
-@media all and (min-width: 1024px) { .view #content, .view #newcontent { height: calc(100% - 0.5em - 37px) } }
-@media all and (max-width: 1023px) { .view #content, .view #newcontent { height: calc(100% - 0.5em - 32px) } }
-@media all and (max-width:  639px) { .view #content, .view #newcontent { height: calc(100% - 0.5em - 27px) } }
+@media all and (min-width: 1024px) { .view .content { height: calc(100% - 0.5em - 37px) } }
+@media all and (max-width: 1023px) { .view .content { height: calc(100% - 0.5em - 32px) } }
+@media all and (max-width:  639px) { .view .content { height: calc(100% - 0.5em - 27px) } }
 
 .doc textarea { visibility: none }
 
