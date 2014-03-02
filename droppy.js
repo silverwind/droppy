@@ -405,7 +405,7 @@
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
-                    
+
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data)
@@ -749,8 +749,7 @@
                 if (clients.hasOwnProperty(cookie)) {
                     var client = clients[cookie];
                     for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                        if (client.v[vId].directory === relativeDir
-                            && client.v[vId].file === null) {
+                        if (client.v[vId].directory === relativeDir && client.v[vId].file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
                     }
