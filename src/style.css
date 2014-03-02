@@ -654,13 +654,13 @@ input:-webkit-autofill {
 .doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
-.editor-filename {
-    transition: all .4s ease;
+#path>li:last-child {
+    transition: color .4s ease, left .4s ease;
 }
-.editor-filename.dirty { color: #f71 !important}
-.editor-filename.saved { color: #7f1 !important}
-.editor-filename.save-failed  { color: #f44 !important }
-.editor-filename.dirty:after { content: "*" }
+#path li.dirty { color: #f71 !important}
+#path li.saved { color: #7f1 !important}
+#path li.save-failed  { color: #f44 !important }
+#path li.dirty:after { content: "*" }
 
 .opts-container {
     position: absolute;

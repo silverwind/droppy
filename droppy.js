@@ -405,13 +405,28 @@
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
-                    client.v[vId] = {
-                        directory: msg.data
-                    };
-                    readDirectory(client.v[vId].directory, function () {
-                        sendFiles(cookie, vId, "UPDATE_FILES");
+                    
+                    readPath(msg.data, function (error, info) {
+                        if (error) {
+                            return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data)
+                        } else if (info.type === "f") {
+                            client.v[vId].file = path.basename(msg.data);
+                            client.v[vId].directory = path.dirname(msg.data);
+                            info["folder"] = path.dirname(msg.data);
+                            info["file"] = path.basename(msg.data);
+                            info["isFile"] = true;
+                            info["vId"] = vId;
+                            info["type"] = "UPDATE_BE_FILE";
+                            send(client.ws, JSON.stringify(info))
+                        } else {
+                            client.v[vId].file = null;
+                            client.v[vId].directory = msg.data;
+                            updateDirectory(client.v[vId].directory, function () {
+                                sendFiles(cookie, vId, "UPDATE_DIRECTORY");
+                            });
+                            updateWatchers(client.v[vId].directory);
+                        }
                     });
-                    updateWatchers(client.v[vId].directory);
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
@@ -508,17 +523,17 @@
                         log.log(log.socket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
                     });
                     break;
-                case "SWITCH_FOLDER":
+                /*case "SWITCH_FOLDER":
                     if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory switch request: " + msg.data);
                     client.v[vId].directory = msg.data;
                     updateWatchers(msg.data, function (ok) {
                         // Send client back to root in case the requested directory can't be read
                         if (!ok) client.v[vId].directory = "/";
-                        readDirectory(client.v[vId].directory, function () {
-                            sendFiles(cookie, vId, "UPDATE_FILES");
+                        updateDirectory(client.v[vId].directory, function () {
+                            sendFiles(cookie, vId, "UPDATE_DIRECTORY");
                         });
                     });
-                    break;
+                    break;*/
                 case "GET_USERS":
                     if (!db.sessions[cookie].privileged) return;
                     sendUsers(cookie);
@@ -580,7 +595,7 @@
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
 
         var func = function (cookie, eventType) {
-            var dir = clients[cookie].v[vId].directory; // TODO more than one view
+            var dir = clients[cookie].v[vId].directory;
             var data = JSON.stringify({
                 vId    : vId,
                 type   : eventType,
@@ -734,15 +749,16 @@
                 if (clients.hasOwnProperty(cookie)) {
                     var client = clients[cookie];
                     for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                        if (client.v[vId].directory === relativeDir) {
+                        if (client.v[vId].directory === relativeDir
+                            && client.v[vId].file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
                     }
                 }
             }
-            readDirectory(relativeDir, function () {
+            updateDirectory(relativeDir, function () {
                 var cv = clientsToUpdate.pop();
-                sendFiles(cv.cookie, cv.vId, "UPDATE_FILES");
+                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY");
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
@@ -781,7 +797,8 @@
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
                 for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    neededDirs[client.v[vId].directory] = true;
+                    if (client.v[vId].file === null)
+                        neededDirs[client.v[vId].directory] = true;
                 }
             }
         }
@@ -890,27 +907,15 @@
                 return;
             }
 
-            // Check if client is going to a file/folder directly
+            // Check if client is going to a path directly
             fs.stat(path.join(config.filesDir, URI), function (error, stats) {
-                if (error) {
-                    log.error(error);
+                if (!error) {
+                    handleResourceRequest(req, res, "base.html");
+                } else {
                     res.statusCode = 301;
                     res.setHeader("Location", "/");
                     res.end();
                     log.response(req, res);
-
-                } else if (stats.isDirectory()) { // Direct navigation to folder
-                    handleResourceRequest(req, res, "base.html");
-                    // Strip trailing slash
-                    if (URI.charAt(URI.length - 1) === "/")
-                        URI = URI.substring(0, URI.length - 1);
-
-                    // Establish clients[cookie] on websocket connection only
-                    updateWatchers(URI);
-                } else if (stats.isFile()) { // Direct navigation to file
-                    handleResourceRequest(req, res, "base.html");
-                    URI = URI.substring(0, URI.lastIndexOf("/"));
-                    updateWatchers(URI);
                 }
             });
         }
@@ -1163,9 +1168,35 @@
             send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE" }));
         }
     }
+
     //-----------------------------------------------------------------------------
-    // Read a directory's content
-    function readDirectory(root, callback) {
+    // Read a path, return type and info
+    // @callback : function (error, info)
+    function readPath(root, callback) {
+        fs.stat(addFilePath(root), function (error, stats) {
+            if (error) {
+                callback(error);
+            } else if (stats.isFile()) {
+                callback(null, {
+                    type: "f",
+                    size: stats.size,
+                    mtime: stats.mtime.getTime() || 0,
+                    mime: mime.lookup(path.basename(root))
+                });
+            } else if (stats.isDirectory()) {
+                callback(null, {
+                    type: "d",
+                    size: 0,
+                    mtime: stats.mtime.getTime() || 0
+                });
+            } else {
+                callback(new Error("Path neither directory or file!"));
+            }
+        })
+    }
+    //-----------------------------------------------------------------------------
+    // Update a directory's content
+    function updateDirectory(root, callback) {
         fs.readdir(addFilePath(root), function (error, files) {
             var dirContents = {}, done = 0, last;
             if (error) log.error(error);
@@ -1178,28 +1209,17 @@
 
             for (var i = 0 ; i < last; i++) {
                 (function (entry) {
-                    fs.stat(addFilePath(root) + "/" + entry, function (error, stats) {
-                        if (!error && stats) {
-                            if (stats.isFile()) {
-                                dirContents[entry] = {
-                                    type: "f",
-                                    size: stats.size,
-                                    mtime: stats.mtime.getTime() || 0,
-                                    mime: mime.lookup(entry)
-                                };
-                            } else if (stats.isDirectory()) {
-                                dirContents[entry] = {
-                                    type: "d",
-                                    size: 0,
-                                    mtime: stats.mtime.getTime() || 0
-                                };
-                            }
+                    readPath(root + "/" + entry, function (error, info) {
+                        if (error) {
+                            log.error(error); callback();
+                        } else {
+                            dirContents[entry] = info;
                             if (++done === last) {
                                 dirs[root] = dirContents;
                                 callback();
                                 generateDirSizes(root, dirContents);
                             }
-                        } else if (error) {log.error(error); callback(); }
+                        }
                     });
                 })(files[i]);
             }
@@ -1222,13 +1242,15 @@
                 sizeList[path.basename(tmpDirs[i])] = results[i];
 
             for (var cookie in clients) {
-                if (clients.hasOwnProperty(cookie) && clients[cookie].v[0].directory === root) {
-                    send(clients[cookie].ws, JSON.stringify({
-                        type   : "UPDATE_SIZES",
-                        folder : root,
-                        data   : sizeList
-                    }));
-                }
+                var client = clients[cookie];
+                for (var vId = client.v.length - 1; vId >= 0; vId--)
+                    if (client.v[vId].file === null && client.v[0].directory === root)
+                        send(clients[cookie].ws, JSON.stringify({
+                            type   : "UPDATE_SIZES",
+                            folder : root,
+                            data   : sizeList,
+                            vId    : vId
+                        }));
             }
         });
 
