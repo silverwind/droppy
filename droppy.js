@@ -41,6 +41,7 @@
         fs         = require("graceful-fs"),
         mime       = require("mime"),
         path       = require("path"),
+        qs         = require("querystring"),
         util       = require("util"),
         Wss        = require("ws").Server,
         wrench     = require("wrench"),
@@ -187,13 +188,14 @@
         // Set the client debug variable to mirror the server's
         out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
-        !config.debug && (out.js = require("uglify-js").minify(out.js, {
-            fromString: true,
-            compress: {
-                unsafe: true,
-                screw_ie8: true
-            }
-        }).code);
+        if (!config.debug)
+            out.js = require("uglify-js").minify(out.js, {
+                fromString: true,
+                compress: {
+                    unsafe: true,
+                    screw_ie8: true
+                }
+            }).code;
 
         // Prepare HTML
         try {
@@ -295,7 +297,7 @@
             mod.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
 
             // Protocol-specific options
-            config.useSPDY  && (options.windowSize = 1024 * 1024);
+            if (config.useSPDY) options.windowSize = 1024 * 1024;
 
             server = new mod.Server(options, http._connectionListener);
             server.httpAllowHalfOpen = false;
@@ -412,11 +414,11 @@
                         } else if (info.type === "f") {
                             client.v[vId].file = path.basename(msg.data);
                             client.v[vId].directory = path.dirname(msg.data);
-                            info["folder"] = path.dirname(msg.data);
-                            info["file"] = path.basename(msg.data);
-                            info["isFile"] = true;
-                            info["vId"] = vId;
-                            info["type"] = "UPDATE_BE_FILE";
+                            info.folder = path.dirname(msg.data);
+                            info.file = path.basename(msg.data);
+                            info.isFile = true;
+                            info.vId = vId;
+                            info.type = "UPDATE_BE_FILE";
                             send(client.ws, JSON.stringify(info));
                         } else {
                             client.v[vId].file = null;
@@ -757,7 +759,7 @@
             }
             updateDirectory(relativeDir, function () {
                 var cv = clientsToUpdate.pop();
-                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY");
+                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY"); //TODO: This line can still throw "TypeError: Cannot read property 'cookie' of undefined"
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
@@ -775,16 +777,16 @@
                 if (error || !stats) {
                     // Requested Directory can't be read
                     checkWatchedDirs();
-                    callback && callback(false);
+                    if (callback) callback(false);
                 } else {
                     // Directory is okay to be read
                     createWatcher(newDir);
                     checkWatchedDirs();
-                    callback && callback(true);
+                    if (callback) callback(true);
                 }
             });
         } else {
-            callback && callback(true);
+            if (callback) callback(true);
         }
     }
 
@@ -924,15 +926,8 @@
     //-----------------------------------------------------------------------------
     var blocked = [];
     function handlePOST(req, res) {
-        var URI = decodeURIComponent(req.url), body = "",
-            q = req.url.match(/\?([^\?]*)$/)[1].split("&");
-        req.query = {};
-        for (var i = q.length - 1; i >= 0; i--) {
-            var kv = q[i].split("=");
-            req.query[kv[0]] = kv[1];
-        }
-        console.log(req.query);
-        if (/\/upload/.test(URI)) {
+        var URI = decodeURIComponent(req.url), body = "";
+        if (/^\/upload/.test(URI)) {
             if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 401;
                 res.end();
@@ -955,7 +950,7 @@
 
             req.on("data", function (data) { body += data; });
             req.on("end", function () {
-                var postData = require("querystring").parse(body);
+                var postData = qs.parse(body);
                 if (isValidUser(postData.username, postData.password)) {
                     createCookie(req, res, postData);
                     endReq(req, res, true);
@@ -1019,7 +1014,7 @@
                 res.statusCode = 200;
 
                 // Disallow framing except when debugging
-                !config.debug && res.setHeader("X-Frame-Options", "DENY");
+                if (!config.debug) res.setHeader("X-Frame-Options", "DENY");
 
                 if (req.url === "/") {
                     // Set the IE10 compatibility mode
@@ -1116,9 +1111,9 @@
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
         var socket = log.socket(req.socket.remoteAddress, req.socket.remotePort),
-            cookie = getCookie(req.headers.cookie),
-            uploadTo = req.query.folder;
+            cookie = getCookie(req.headers.cookie);
 
+        req.query = qs.parse(req.url.substring("/upload?".length));
         log.log(socket, " Upload started");
 
         // FEATURE: Check permissions
@@ -1130,14 +1125,13 @@
             return;
         }
 
-
         var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
             done = false,
             files = [];
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-                dst = path.join(config.filesDir, uploadTo, dstRelative),
+                dst = path.join(config.filesDir, req.query.to, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
             files[dstRelative] = {
@@ -1154,7 +1148,7 @@
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                     fs.rename(files[name].src, files[name].dst, function () {
-                        log.log(socket, " Received: " + uploadTo.substring(1) + "/" + name);
+                        log.log(socket, " Received: " + req.query.to.substring(1) + "/" + name);
                     });
                 })(names.pop());
             }
@@ -1162,7 +1156,7 @@
         });
 
         req.on("close", function () {
-            !done && log.log(socket, " Upload cancelled");
+            if (!done) log.log(socket, " Upload cancelled");
             closeConnection();
         });
 
@@ -1398,7 +1392,7 @@
         }
 
         // Write a new DB if necessary
-        doWrite && writeDB();
+        if (doWrite) writeDB();
     }
 
     //-----------------------------------------------------------------------------
