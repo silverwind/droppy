@@ -1616,32 +1616,35 @@
             editor = null,
             doc = $(
             '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                '<div class="sidebar">' +
-                    '<div class="exit">' + droppy.svg.remove + '<span>Close</span></div>' +
-                    '<div class="save">' + droppy.svg.disk + '<span>Save</span></div>' +
-                    '<div class="light">' + droppy.svg.bulb + '<span>Color</span></div>' +
-                    '<div class="opts">' + droppy.svg.cog + '<span>Opts</span></div>' +
-                '</div>' +
+                '<ul class="sidebar">' +
+                    '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
+                    '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
+                    '<li class="light">' + droppy.svg.bulb + '<span>Color</span></li>' +
+                    '<li class="opts">' + droppy.svg.cog + '<span>Opts</span>' +
+                        '<div class="opts-container">' +
+                            '<label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>' +
+                            '<select class="indentmode">' +
+                              '<option value="spaces">Spaces</option> ' +
+                              '<option value="tabs">Tabs</option>' +
+                            '</select>' +
+                            '<select class="indentunit">' +
+                              '<option value="2">2</option> ' +
+                              '<option value="4">4</option>' +
+                              '<option value="8">8</option>' +
+                            '</select>' +
+                            '<select class="wrap">' +
+                              '<option value="nowrap">No Wrap</option> ' +
+                              '<option value="wrap">Wrap</option>' +
+                            '</select>' +
+                        '</div>' +
+                    '</li>' +
+                '</ul>' +
                 '<div class="text-editor">' +
                     '<textarea></textarea>' +
                 '</div>' +
             '</div>'
             ), opts = $(
-            '<div class="opts-container">' +
-                '<select class="indentmode">' +
-                  '<option value="spaces">Spaces</option> ' +
-                  '<option value="tabs">Tabs</option>' +
-                '</select>' +
-                '<select class="indentunit">' +
-                  '<option value="2">2</option> ' +
-                  '<option value="4">4</option>' +
-                  '<option value="8">8</option>' +
-                '</select>' +
-                '<select class="wrap">' +
-                  '<option value="nowrap">No Wrap</option> ' +
-                  '<option value="wrap">Wrap</option>' +
-                '</select>' +
-            '</div>');
+            );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
         doc.append(opts);
@@ -1704,12 +1707,16 @@
                     }
                     saveEditorOptions(editor);
                 });
-                doc.find(".opts").register("click", function () {
-                    var container =  $(".opts-container");
-                    if (!container.hasClass("in"))
-                        container.addClass("in");
-                    else
-                        container.removeClass("in");
+                doc.find(".opts").register("click", function (event) {
+                    var opts = $(".opts");
+                    if (opts.hasClass("active")) {
+                        opts.removeClass("active");
+                    } else {
+                        opts.addClass("active");
+                    }
+                });
+                doc.find(".opts-container").register("click", function (event) {
+                    event.stopPropagation();
                 });
                 doc.find(".indentmode").register("change", function (event) {
                     if ($(event.target).val() === "tabs")

@@ -758,7 +758,7 @@
             }
             updateDirectory(relativeDir, function () {
                 var cv = clientsToUpdate.pop();
-                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY");
+                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY"); //TODO: This line can still throw "TypeError: Cannot read property 'cookie' of undefined"
             });
         }, config.readInterval));
         watcher.on("error", function (error) {

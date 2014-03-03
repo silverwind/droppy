@@ -685,7 +685,7 @@ input:-webkit-autofill {
     right: .75em;
     user-select: none;
 }
-.doc > .sidebar > div {
+.doc > .sidebar > li {
     position: relative;
     z-index: 5;
     padding: .25em 0;
@@ -708,15 +708,15 @@ input:-webkit-autofill {
     font-weight: 400;
 }
 
-.doc > .sidebar > div:hover { background: #333; cursor: pointer }
+.doc > .sidebar > li:hover, .opts.active { background: #333; cursor: pointer }
 .doc > .sidebar > .exit:hover svg    { fill: #f33 }
 .doc > .sidebar > .exit:hover span  { color: #f33; opacity: 1 }
 .doc > .sidebar > .save:hover svg    { fill: #5f0 }
 .doc > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
 .doc > .sidebar > .light:hover svg   { fill: #ff5 }
 .doc > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
-.doc > .sidebar > .opts:hover svg   { fill: #c4c }
-.doc > .sidebar > .opts:hover span { color: #c4c; opacity: 1 }
+.doc > .sidebar > .opts:hover svg, .opts.active svg   { fill: #c4c }
+.doc > .sidebar > .opts:hover span, .opts.active span { color: #c4c; opacity: 1 }
 .doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
@@ -725,30 +725,39 @@ input:-webkit-autofill {
 }
 #path li.dirty { color: #f71 !important}
 #path li.saved { color: #7f1 !important}
-#path li.save-failed  { color: #f44 !important }
+#path li.save-failed { color: #f44 !important }
 #path li.dirty:after { content: "*" }
 
 .opts-container {
     position: absolute;
-    right: 4em;
-    top: 8.5em;
-    height: 2.5em;
-    z-index: 3;
+    top: 0;
+    border-radius: 4px 0 0 4px;
+    right: 2.42rem; /* Hack: magic number */
+    height: 2.42rem; /* Hack: magic number */
     text-align: center;
     background: #333;
-    padding: .5em;
-    border-radius: 6px;
     transition: all .2s ease;
+    width: 14rem;
+    visibility: visible;
     opacity: 0;
 }
-.opts-container.in { opacity: 1}
+.opts.active { border-radius:  0 4px 4px 0 !important}
+.opts.active .opts-container { opacity: 1 }
 
 .opts-container select {
-    width: 7em;
-    height: 1.75em;
-    margin: 0 .25em;
-    font-size: .65em;
+    width: 4rem;
+    height: 1.6em;
+    margin: 0 .25rem;
+    font-size: .6em;
     text-align: center;
+}
+
+.opts-container label {
+    color: #fff;
+    font-size: .6em;
+    width: 4rem;
+    margin: 0 .25rem;
+    display: inline-block;
 }
 
 .doc > .text-editor > .CodeMirror {
