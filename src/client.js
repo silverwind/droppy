@@ -1643,7 +1643,6 @@
                     '<textarea></textarea>' +
                 '</div>' +
             '</div>'
-            ), opts = $(
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
@@ -1707,7 +1706,7 @@
                     }
                     saveEditorOptions(editor);
                 });
-                doc.find(".opts").register("click", function (event) {
+                doc.find(".opts").register("click", function () {
                     var opts = $(".opts");
                     if (opts.hasClass("active")) {
                         opts.removeClass("active");
