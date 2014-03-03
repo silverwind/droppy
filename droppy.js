@@ -188,13 +188,14 @@
         // Set the client debug variable to mirror the server's
         out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
-        !config.debug && (out.js = require("uglify-js").minify(out.js, {
-            fromString: true,
-            compress: {
-                unsafe: true,
-                screw_ie8: true
-            }
-        }).code);
+        if (!config.debug)
+            out.js = require("uglify-js").minify(out.js, {
+                fromString: true,
+                compress: {
+                    unsafe: true,
+                    screw_ie8: true
+                }
+            }).code;
 
         // Prepare HTML
         try {
@@ -296,7 +297,7 @@
             mod.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
 
             // Protocol-specific options
-            config.useSPDY  && (options.windowSize = 1024 * 1024);
+            if (config.useSPDY) options.windowSize = 1024 * 1024;
 
             server = new mod.Server(options, http._connectionListener);
             server.httpAllowHalfOpen = false;
@@ -413,11 +414,11 @@
                         } else if (info.type === "f") {
                             client.v[vId].file = path.basename(msg.data);
                             client.v[vId].directory = path.dirname(msg.data);
-                            info["folder"] = path.dirname(msg.data);
-                            info["file"] = path.basename(msg.data);
-                            info["isFile"] = true;
-                            info["vId"] = vId;
-                            info["type"] = "UPDATE_BE_FILE";
+                            info.folder = path.dirname(msg.data);
+                            info.file = path.basename(msg.data);
+                            info.isFile = true;
+                            info.vId = vId;
+                            info.type = "UPDATE_BE_FILE";
                             send(client.ws, JSON.stringify(info));
                         } else {
                             client.v[vId].file = null;
@@ -776,16 +777,16 @@
                 if (error || !stats) {
                     // Requested Directory can't be read
                     checkWatchedDirs();
-                    callback && callback(false);
+                    if (callback) callback(false);
                 } else {
                     // Directory is okay to be read
                     createWatcher(newDir);
                     checkWatchedDirs();
-                    callback && callback(true);
+                    if (callback) callback(true);
                 }
             });
         } else {
-            callback && callback(true);
+            if (callback) callback(true);
         }
     }
 
@@ -1013,7 +1014,7 @@
                 res.statusCode = 200;
 
                 // Disallow framing except when debugging
-                !config.debug && res.setHeader("X-Frame-Options", "DENY");
+                if (!config.debug) res.setHeader("X-Frame-Options", "DENY");
 
                 if (req.url === "/") {
                     // Set the IE10 compatibility mode
@@ -1155,7 +1156,7 @@
         });
 
         req.on("close", function () {
-            !done && log.log(socket, " Upload cancelled");
+            if (!done) log.log(socket, " Upload cancelled");
             closeConnection();
         });
 
@@ -1391,7 +1392,7 @@
         }
 
         // Write a new DB if necessary
-        doWrite && writeDB();
+        if (doWrite) writeDB();
     }
 
     //-----------------------------------------------------------------------------
