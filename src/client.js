@@ -939,7 +939,10 @@
             droppy.isUploading = true;
 
             if (formLength) {
-                xhr.open("POST", "/upload?vId=" + view[0].vId + "&folder=" + encodeURIComponent(view[0].currentFolder));
+                xhr.open("POST", "/upload?" + $.param({
+                    vId : view[0].vId,
+                    to  : encodeURIComponent(view[0].currentFolder)
+                }));
                 xhr.send(formData);
             } else if (droppy.zeroFiles.length) {
                 sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);

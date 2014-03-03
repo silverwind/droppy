@@ -41,6 +41,7 @@
         fs         = require("graceful-fs"),
         mime       = require("mime"),
         path       = require("path"),
+        qs         = require("querystring"),
         util       = require("util"),
         Wss        = require("ws").Server,
         wrench     = require("wrench"),
@@ -924,15 +925,8 @@
     //-----------------------------------------------------------------------------
     var blocked = [];
     function handlePOST(req, res) {
-        var URI = decodeURIComponent(req.url), body = "",
-            q = req.url.match(/\?([^\?]*)$/)[1].split("&");
-        req.query = {};
-        for (var i = q.length - 1; i >= 0; i--) {
-            var kv = q[i].split("=");
-            req.query[kv[0]] = kv[1];
-        }
-        console.log(req.query);
-        if (/\/upload/.test(URI)) {
+        var URI = decodeURIComponent(req.url), body = "";
+        if (/^\/upload/.test(URI)) {
             if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 401;
                 res.end();
@@ -955,7 +949,7 @@
 
             req.on("data", function (data) { body += data; });
             req.on("end", function () {
-                var postData = require("querystring").parse(body);
+                var postData = qs.parse(body);
                 if (isValidUser(postData.username, postData.password)) {
                     createCookie(req, res, postData);
                     endReq(req, res, true);
@@ -1116,9 +1110,9 @@
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
         var socket = log.socket(req.socket.remoteAddress, req.socket.remotePort),
-            cookie = getCookie(req.headers.cookie),
-            uploadTo = req.query.folder;
+            cookie = getCookie(req.headers.cookie);
 
+        req.query = qs.parse(req.url.substring("/upload?".length));
         log.log(socket, " Upload started");
 
         // FEATURE: Check permissions
@@ -1130,14 +1124,13 @@
             return;
         }
 
-
         var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
             done = false,
             files = [];
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-                dst = path.join(config.filesDir, uploadTo, dstRelative),
+                dst = path.join(config.filesDir, req.query.to, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
             files[dstRelative] = {
@@ -1154,7 +1147,7 @@
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                     fs.rename(files[name].src, files[name].dst, function () {
-                        log.log(socket, " Received: " + uploadTo.substring(1) + "/" + name);
+                        log.log(socket, " Received: " + req.query.to.substring(1) + "/" + name);
                     });
                 })(names.pop());
             }
