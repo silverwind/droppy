@@ -158,34 +158,31 @@ input:-webkit-autofill {
     flex: 1 1;
     order: 2;
     z-index: 0;
-    transition: all .2s ease;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: row;
 }
 
 /* ================================== View ================================= */
 .view {
-    position: relative;
+    flex-direction: column;
+    flex: 1;
+    display: flex;
 }
 
 .content {
-    width: calc(100% - .5em);
+    /*width: calc(100% - .5em);*/
+    flex: 1 1;
+    order: 2;
     margin: .25em;
     transition: left .2s ease-in;
-    position: absolute;
+    position: relative;
+    overflow-y: auto;
 }
-
-@media all and (min-width: 1024px) { .content { top: 37px; font-size:  1em } }
-@media all and (max-width: 1023px) { .content { top: 32px; font-size: .9em } }
-@media all and (max-width:  639px) { .content { top: 27px; font-size: .8em } }
 
 .content.center  { left: 0     }
 .content.back    { left: -100% }
 .content.forward { left: 100%  }
 
-.view.directory {
-    display: flex;
-    flex-direction: column;
-}
 .view.directory .content .empty,
 .view.directory .content ul {
     background: #eee;
@@ -193,9 +190,6 @@ input:-webkit-autofill {
 }
 .view.directory .content ul { overflow: auto; }
 
-.view.document, .view.document .content {
-    height: calc(100% - 1.125em);
-}
 /* ================================== Path ================================= */
 
 #path {
@@ -205,7 +199,7 @@ input:-webkit-autofill {
    white-space: nowrap;
    width: 100%;
    text-align: left;
-   position: absolute;
+   flex: 0 0 auto;
 }
 
 @media all and (min-width: 1024px) { #path { height: 37px; font-size: .9em } }
