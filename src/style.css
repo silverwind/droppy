@@ -164,8 +164,18 @@ input:-webkit-autofill {
 
 /* ================================== View ================================= */
 .view {
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    left:0;
+    right:0;
 }
+
+@media all and (min-width: 1024px) { .view { top: 39px } }
+@media all and (max-width: 1023px) { .view { top: 34px } }
+@media all and (max-width:  639px) { .view { top: 27px } }
+
+.view.left  { left:0; right:50%; }
+.view.right { left:50%; right:0; }
 
 .content {
     width: calc(100% - .5em);
@@ -195,7 +205,9 @@ input:-webkit-autofill {
 
 .view.document, .view.document .content {
     height: calc(100% - 1.125em);
+
 }
+
 /* ================================== Path ================================= */
 
 #path {
