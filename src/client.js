@@ -277,10 +277,12 @@
                 }
                 showSpinner();
 
-                if (msg.folder !== getViewLocation(view)) {
+                if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
+                    view[0].loaded === true; // Ensure to update path on the first load
                     if (view[0].vId === 0)
                         updateTitle(msg.folder, true);
                     updatePath(view, msg.folder);
+
                 }
 
                 view[0].currentFile = null;
@@ -1203,7 +1205,7 @@
                 var viewLoc = getViewLocation(view);
                 // Find the direction in which we should animate
                 if (destination.length > viewLoc.length) view[0].animDirection = "forward";
-                else if (destination.length === viewLoc.length) view[0].animDirection = "same";
+                else if (destination.length === viewLoc.length) view[0].animDirection = "center";
                 else view[0].animDirection = "back";
                 sendMessage(view[0].vId, "REQUEST_UPDATE", destination);
 
@@ -1309,7 +1311,7 @@
             downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes;
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
-                svgIcon = ""; classes = "";
+                svgIcon = "", classes = "";
                 type = fileList[file].type;
                 bytes = fileList[file].size;
                 temp = convertToSI(bytes);
@@ -1395,7 +1397,7 @@
 
             var menuMaxTop = $(document).height() - $("#entry-menu").height(),
                 menuTop = entry.offset().top;
-            if(menuTop > menuMaxTop) menuTop = menuMaxTop;
+            if (menuTop > menuMaxTop) menuTop = menuMaxTop;
             $("#entry-menu").css("top", menuTop + "px");
             toggleCatcher();
 
@@ -1453,28 +1455,29 @@
             navRegex = /(forward|back|center)/;
 
         requestAnimation(function () {
-            if (view[0].animDirection === "same" && type !== "document") {
+            if (view[0].animDirection === "center" && type !== "document") {
                 view.find("#content").replaceClass(navRegex, "center");
                 view.find("#content").before(content);
                 view.find("#newcontent").addClass(type);
+                finish();
             } else {
                 view.append(content);
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");
+                console.log(view.find("#content").attr("class"));
                 view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
-                // Add view type class for styling purposes
-                view.find("#newcontent").addClass(type);
-                // Switch classes once the transition has finished
+                view.find("#newcontent").addClass(type); // Add view type class for styling purposes
+                view.find("#newcontent").one("transitionend webkitTransitionEnd msTransitionEnd", finish);
             }
-            setTimeout(function () {
+            view[0].animDirection = "center";
+
+            function finish() {
                 droppy.isAnimating = false;
                 view.find("#content").remove();
                 view.find("#newcontent").attr("id", "content");
-                //view.find("#content").setTransitionClass(navRegex, "center");
                 view.find(".data-row").removeClass("animating");
-            }, 200);
-            view[0].animDirection = "same";
+            }
         });
     }
 
@@ -1759,7 +1762,7 @@
                         editor.setOption("lineWrapping", false);
                     saveEditorOptions(editor);
                 });
-                setTimeout(function() {
+                setTimeout(function () {
                     editor.setOption("readOnly", readOnly);
                     editor.setValue(data);
                     editor.clearHistory();
