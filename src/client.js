@@ -1468,7 +1468,10 @@
                 view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
                 view.find("#newcontent").addClass(type); // Add view type class for styling purposes
-                view.find("#newcontent").one("transitionend webkitTransitionEnd msTransitionEnd", finish);
+                view.find("#newcontent").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                    if ($(event.originalEvent.target).attr("id") === "newcontent")
+                        finish();
+                });
             }
             view[0].animDirection = "center";
 
