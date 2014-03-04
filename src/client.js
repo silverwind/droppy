@@ -1619,8 +1619,11 @@
     function openImage(view) {
         view.attr("data-type", "image");
         var filename = view[0].currentFile,
-            entryId = fixRootPath(view[0].currentFolder + "/" + filename),
-            url = "/_" + entryId,
+            entryId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
+            i = entryId.length - 1;
+        for (;i >= 0; i--)
+            entryId[i] = encodeURIComponent(entryId[i]);
+        var url = "/_" + entryId.join("/"),
             previewer = $(
             '<div class="previewer image">' +
                 '<div class="media-container">' +
