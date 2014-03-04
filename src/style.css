@@ -179,12 +179,12 @@ input:-webkit-autofill {
 .view.right { left:50%; right:0; }
 
 .content {
-    width: calc(100% - .5em);
-    margin: .25em;
+    width: calc(100%);
+    padding: .25em;
     transition: left .2s ease-in;
     position: absolute;
     bottom: 0;
-    overflow: auto;
+    overflow-y: auto;
 }
 
 @media all and (min-width: 1024px) { .content { top: 37px; font-size:  1em } }
@@ -201,7 +201,6 @@ input:-webkit-autofill {
     border-radius: 4px;
 }
 .view .directory.content ul {
-    overflow: auto;
     display: flex;
     flex-direction: column;
 }
