@@ -234,7 +234,6 @@
             if (queuedData)
                 sendMessage();
             else {
-                if (!getView()[0].currentFolder) getView()[0].currentFolder = "/";
                 updateLocation(getView(), getView()[0].currentFolder || decodeURIComponent(window.location.pathname), true); // Request initial update
             }
         };
@@ -1193,7 +1192,10 @@
     }
 
     function getViewLocation(view) {
-        return fixRootPath(view[0].currentFolder + (view[0].currentFile ? "/" + view[0].currentFile : ""));
+        if (view[0].currentFolder === undefined)
+            return ""; // return an empty string so animDirection gets always set to 'forward' on launch
+        else
+            return fixRootPath(view[0].currentFolder + (view[0].currentFile ? "/" + view[0].currentFile : ""));
     }
 
     // Update our current location and change the URL to it
