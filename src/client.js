@@ -1513,18 +1513,18 @@
             var entry = $("#entry-menu").data("target"),
                 url = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
                 type = $("#entry-menu").attr("class").match(/type\-(\w+)/),
+                view = entry.parents(".view"),
                 win;
             if (type) {
                 switch (type[1]) {
                 case "html":
-                case "jpg":
-                case "png":
-                case "gif":
                     win = window.open(url, "_blank");
                     break;
                 case "audio":
                     play(url);
                     break;
+                default:
+                    updateLocation(view, fixRootPath(view[0].currentFolder + "/" + entry.find(".file-link").text()));
                 }
             }
             $("#click-catcher").trigger("click");
@@ -1536,7 +1536,7 @@
             event.stopPropagation();
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"); // #view-container
+                view = entry.parents(".view");
             updateLocation(view, fixRootPath(view[0].currentFolder + "/" + entry.find(".file-link").text()));
         });
 
@@ -1602,25 +1602,34 @@
     }
     function openFile(view) {
         // Determine filetype and how to open it
-        //var path = getViewLocation(view),
-        //    fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        /*TODO:
-        switch(fileext) {
-            view[0].dataType = "document" | "video" | "audio" | "image"
-        }
-        switch(view[0].dataType) {
-            case "video":
-                openVideo(folder, file);
-                break;
-            ...
-        }
-        */
+        var path = getViewLocation(view),
+            fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
         updatePath(view);
-        openDoc(view);
+        switch(fileext) {
+            case "jpg":
+            case "gif":
+            case "png":
+                openImage(view);
+                break;
+            default:
+                openDoc(view);
+        }
     }
-    // function openVideo(view) {
-
-    // }
+    function openImage(view) {
+        view.attr("data-type", "image");
+        var filename = view[0].currentFile,
+            entryId = fixRootPath(view[0].currentFolder + "/" + filename),
+            url = "/_" + entryId,
+            previewer = $(
+            '<div class="previewer image">' +
+                '<div class="media-container">' +
+                    '<img src=' + url + '></img>' +
+                '</div>' +
+            '</div>'
+            );
+        view[0].animDirection = "forward";
+        loadContent(view, contentWrap(view).append(previewer));
+    }
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
