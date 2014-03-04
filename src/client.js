@@ -1685,11 +1685,9 @@
                             return ext;
                         }
                     })();
-                editor = doc.find(".text-editor textarea");
-                editor.val(data);
-                editor = CodeMirror.fromTextArea(editor[0], {
+                editor = CodeMirror.fromTextArea(doc.find(".text-editor textarea")[0], {
                     styleSelectedText: true,
-                    readOnly: readOnly,
+                    readOnly: true,
                     showCursorWhenSelecting: true,
                     theme: droppy.get("theme"),
                     indentWithTabs: droppy.get("indentWithTabs"),
@@ -1699,7 +1697,6 @@
                     // keyMap: "sublime",
                     mode: mode
                 });
-                hideSpinner();
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                 });
@@ -1729,27 +1726,34 @@
                 doc.find(".opts-container").register("click", function (event) {
                     event.stopPropagation();
                 });
-                doc.find(".indentmode").register("change", function (event) {
-                    if ($(event.target).val() === "tabs")
+                doc.find(".indentmode").register("change", function () {
+                    if ($(this).val() === "tabs")
                         editor.setOption("indentWithTabs", true);
                     else
                         editor.setOption("indentWithTabs", false);
                     saveEditorOptions(editor);
                 });
-                doc.find(".indentunit").register("change", function (event) {
-                    editor.setOption("indentUnit", Number($(event.target).val()));
+                doc.find(".indentunit").register("change", function () {
+                    editor.setOption("indentUnit", Number($(this).val()));
                     saveEditorOptions(editor);
                 });
-                doc.find(".wrap").register("change", function (event) {
-                    if ($(event.target).val() === "wrap")
+                doc.find(".wrap").register("change", function () {
+                    if ($(this).val() === "wrap")
                         editor.setOption("lineWrapping", true);
                     else
                         editor.setOption("lineWrapping", false);
                     saveEditorOptions(editor);
                 });
                 editor.on("change", function () {
-                    view.find("#path li:last-child").removeClass("saved save-failed").addClass("dirty"); // TODO: Change to be view-relative
+                    view.find("#path li:last-child").removeClass("saved save-failed").addClass("dirty");
                 });
+                setTimeout(function() {
+                    editor.setOption("readOnly", readOnly);
+                    editor.setValue(data);
+                    editor.clearHistory();
+                    editor.refresh();
+                    hideSpinner();
+                }, 200);
             },
             error : function () {
                 closeDoc(view);
