@@ -690,9 +690,14 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
+.doc, .doc > .text-editor {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
 .doc > .text-editor > textarea { visibility: hidden }
 
-.doc > .sidebar {
+.content.document > .sidebar {
     position: absolute;
     top: .5em;
     width: 2.5em;
@@ -700,7 +705,7 @@ input:-webkit-autofill {
     right: .75em;
     user-select: none;
 }
-.doc > .sidebar > li {
+.content.document > .sidebar > li {
     position: relative;
     z-index: 5;
     padding: .25em 0;
@@ -708,14 +713,14 @@ input:-webkit-autofill {
     margin-bottom: .25em;
 }
 
-.doc > .sidebar svg {
+.content.document > .sidebar svg {
     fill: #555;
     height: 1em;
     width: 1em;
     margin-left: .75em;
 }
 
-.doc > .sidebar span {
+.content.document > .sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
@@ -723,18 +728,28 @@ input:-webkit-autofill {
     font-weight: 400;
 }
 
-.doc > .sidebar > li:hover, .opts.active { background: #333; cursor: pointer }
-.doc > .sidebar > .exit:hover svg    { fill: #f33 }
-.doc > .sidebar > .exit:hover span  { color: #f33; opacity: 1 }
-.doc > .sidebar > .save:hover svg    { fill: #5f0 }
-.doc > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
-.doc > .sidebar > .light:hover svg   { fill: #ff5 }
-.doc > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
-.doc > .sidebar > .opts:hover svg, .opts.active svg   { fill: #c4c }
-.doc > .sidebar > .opts:hover span, .opts.active span { color: #c4c; opacity: 1 }
+.content.document > .sidebar > li:hover, .opts.active { background: #333; cursor: pointer }
+.content.document > .sidebar > .exit:hover svg    { fill: #f33 }
+.content.document > .sidebar > .exit:hover span  { color: #f33; opacity: 1 }
+.content.document > .sidebar > .save:hover svg    { fill: #5f0 }
+.content.document > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
+.content.document > .sidebar > .light:hover svg   { fill: #ff5 }
+.content.document > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
+.content.document > .sidebar > .opts:hover svg, .opts.active svg   { fill: #c4c }
+.content.document > .sidebar > .opts:hover span, .opts.active span { color: #c4c; opacity: 1 }
 .doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
+
+.doc > .text-editor > .CodeMirror {
+    border-radius: 4px;
+    font-size: .65em;
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+    line-height: 1.3em;
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
 #path>li:last-child {
     transition: color .4s ease, left .4s ease;
 }
@@ -773,16 +788,6 @@ input:-webkit-autofill {
     width: 4rem;
     margin: 0 .25rem;
     display: inline-block;
-}
-
-.doc > .text-editor > .CodeMirror {
-    border-radius: 4px;
-    font-size: .65em;
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
-    line-height: 1.3em;
-    height: 100%;
-    width: 100%;
-    position: relative;
 }
 
 /* ============================ Upload Progress ============================ */

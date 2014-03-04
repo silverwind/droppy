@@ -1640,30 +1640,30 @@
             readOnly = false, // Check if not readonly
             editor = null,
             doc = $(
+            '<ul class="sidebar">' +
+                '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
+                '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
+                '<li class="light">' + droppy.svg.bulb + '<span>Color</span></li>' +
+                '<li class="opts">' + droppy.svg.cog + '<span>Opts</span>' +
+                    '<div class="opts-container">' +
+                        '<label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>' +
+                        '<select class="indentmode">' +
+                          '<option value="spaces">Spaces</option> ' +
+                          '<option value="tabs">Tabs</option>' +
+                        '</select>' +
+                        '<select class="indentunit">' +
+                          '<option value="2">2</option> ' +
+                          '<option value="4">4</option>' +
+                          '<option value="8">8</option>' +
+                        '</select>' +
+                        '<select class="wrap">' +
+                          '<option value="nowrap">No Wrap</option> ' +
+                          '<option value="wrap">Wrap</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</li>' +
+            '</ul>' +
             '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                '<ul class="sidebar">' +
-                    '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
-                    '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
-                    '<li class="light">' + droppy.svg.bulb + '<span>Color</span></li>' +
-                    '<li class="opts">' + droppy.svg.cog + '<span>Opts</span>' +
-                        '<div class="opts-container">' +
-                            '<label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>' +
-                            '<select class="indentmode">' +
-                              '<option value="spaces">Spaces</option> ' +
-                              '<option value="tabs">Tabs</option>' +
-                            '</select>' +
-                            '<select class="indentunit">' +
-                              '<option value="2">2</option> ' +
-                              '<option value="4">4</option>' +
-                              '<option value="8">8</option>' +
-                            '</select>' +
-                            '<select class="wrap">' +
-                              '<option value="nowrap">No Wrap</option> ' +
-                              '<option value="wrap">Wrap</option>' +
-                            '</select>' +
-                        '</div>' +
-                    '</li>' +
-                '</ul>' +
                 '<div class="text-editor">' +
                     '<textarea></textarea>' +
                 '</div>' +
