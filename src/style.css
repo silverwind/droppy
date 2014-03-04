@@ -681,7 +681,7 @@ input:-webkit-autofill {
 }
 
 /* ============================ Document Previewer ============================ */
-.doc textarea { visibility: hidden }
+.doc > .text-editor > textarea { visibility: hidden }
 
 .doc > .sidebar {
     position: absolute;

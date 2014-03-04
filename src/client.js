@@ -1744,14 +1744,14 @@
                         editor.setOption("lineWrapping", false);
                     saveEditorOptions(editor);
                 });
-                editor.on("change", function () {
-                    view.find("#path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                });
                 setTimeout(function() {
                     editor.setOption("readOnly", readOnly);
                     editor.setValue(data);
                     editor.clearHistory();
                     editor.refresh();
+                    editor.on("change", function () {
+                        view.find("#path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                    });
                     hideSpinner();
                 }, 200);
             },
