@@ -1456,8 +1456,9 @@
 
         requestAnimation(function () {
             if (view[0].animDirection === "same" && type !== "document") {
-                view.find("#content").attr("class", "center content");
+                view.find("#content").replaceClass(navRegex, "center");
                 view.find("#content").before(content);
+                view.find("#newcontent").addClass(type);
             } else {
                 view.append(content);
                 droppy.isAnimating = true;
