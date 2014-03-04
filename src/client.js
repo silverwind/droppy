@@ -1438,7 +1438,7 @@
             preparePlayback($(this));
         });
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
-            sortByHeader($(this));
+            sortByHeader(view, $(this));
         });
         droppy.ready = true;
         hideSpinner();
@@ -1549,18 +1549,15 @@
         $("#entry-menu .delete").attr("title", "Delete");
     }
 
-    function sortByHeader(header) {
-        var classes = header.attr("class").split(" ");
-        for (var i = 0, len = classes.length; i < len; i++) {
-            if (classes[i].indexOf("header") >= 0) {
-                droppy.sorting.col = classes[i].substring("7");
-                break;
-            }
-        }
-        droppy.sorting.dir = header.hasClass("down") ? "up" : "down";
-        header.attr("class", "header-" + droppy.sorting.col + " " + droppy.sorting.dir + " active");
+    function sortByHeader(view, header) {
+        droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
+        droppy.sorting.asc = header.hasClass("down");
+        header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        $("#content ul").children("li").sort(sortFunc).appendTo($("#content ul"));
+        var sortedEntries = view.find("#content ul li").sort(sortFunc);
+        for (var index = sortedEntries.length - 1; index >= 0; index--) {
+            $(sortedEntries[index]).css("order", index);
+        }
     }
 
     function sortFunc(a, b) {
@@ -1568,10 +1565,14 @@
             if (typeof a === "number" && typeof b === "number") {
                 return b - a;
             } else {
-                return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
+                try {
+                    return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
+                } catch (undefError) {
+                    return -1;
+                }
             }
         }
-        if (droppy.sorting.dir !== "down") {
+        if (droppy.sorting.asc) {
             var temp = a;
             a = b;
             b = temp;
