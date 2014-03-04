@@ -1676,6 +1676,9 @@
                             return { name: "javascript", json : true };
                         case "html":
                             return "htmlmixed";
+                        case "ai":
+                        case "svg":
+                            return "xml";
                         case "md":
                             return "markdown";
                         default:
@@ -1716,7 +1719,7 @@
                     saveEditorOptions(editor);
                 });
                 doc.find(".opts").register("click", function () {
-                    var opts = $(".opts");
+                    var opts = $(this);
                     if (opts.hasClass("active")) {
                         opts.removeClass("active");
                     } else {
