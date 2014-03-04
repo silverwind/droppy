@@ -178,8 +178,7 @@
     function loadPage(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
         var newPage = $("#newpage"),
-            oldPage = $("#page"),
-            box     = $("#center-box");
+            oldPage = $("#page");
         if (type === "main") {
             initMainPage();
             initEntryMenu();
@@ -192,17 +191,15 @@
             initAuthPage(type === "firstrun");
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
-                setTimeout(function () {
-                    box.removeClass("out");
-                    if (type === "firstrun") {
-                        $("#login-info").text("Hello! Choose your creditentials.");
-                        $("#login-info-box").addClass("info");
-                    } else if (droppy.get("hasLoggedOut")) {
-                        $("#login-info").text("Logged out!");
-                        $("#login-info-box").addClass("info");
-                        droppy.set("hasLoggedOut", false);
-                    }
-                }, 100);
+                $("#center-box").removeClass("out");
+                if (type === "firstrun") {
+                    $("#login-info").text("Hello! Choose your creditentials.");
+                    $("#login-info-box").addClass("info");
+                } else if (droppy.get("hasLoggedOut")) {
+                    $("#login-info").text("Logged out!");
+                    $("#login-info-box").addClass("info");
+                    droppy.set("hasLoggedOut", false);
+                }
                 finalize();
             });
         }
@@ -237,6 +234,7 @@
             if (queuedData)
                 sendMessage();
             else {
+                if (!getView()[0].currentFolder) getView()[0].currentFolder = "/";
                 updateLocation(getView(), getView()[0].currentFolder || decodeURIComponent(window.location.pathname), true); // Request initial update
             }
         };
