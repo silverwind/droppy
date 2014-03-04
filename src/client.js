@@ -1534,7 +1534,10 @@
         header.siblings().removeClass("active up down");
         var sortedEntries = view.find("#content ul li").sort(sortFunc);
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            $(sortedEntries[index]).css("order", index);
+            $(sortedEntries[index]).css({
+                "order": String(index),
+                "-ms-flex-order": String(index),
+            });
         }
     }
 
