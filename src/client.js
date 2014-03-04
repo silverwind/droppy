@@ -1452,11 +1452,7 @@
     // Load generated list into view with an animation
     function loadContent(view, content) {
         var type = view.attr("data-type"),
-            navRegex = /(forward|back|center)/,
-            typeRegex = /(document|directory|media)/;
-
-        // Set the view type as a class for styling purpose
-        view.replaceClass(typeRegex, type);
+            navRegex = /(forward|back|center)/;
 
         requestAnimation(function () {
             if (view[0].animDirection === "same" && type !== "document") {
@@ -1468,6 +1464,8 @@
                 view.find(".data-row").addClass("animating");
                 view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
+                // Add view type class for styling purposes
+                view.find("#newcontent").addClass(type);
                 // Switch classes once the transition has finished
             }
             setTimeout(function () {
