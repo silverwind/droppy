@@ -52,7 +52,8 @@ html {
 
 ::selection      { background: #f1a; color: #fff }
 ::-moz-selection { background: #f1a; color: #fff }
-::-webkit-scrollbar             { width: 4px }
+::-webkit-scrollbar:vertical    { width: 4px }
+::-webkit-scrollbar:horizontal  { height: 4px }
 ::-webkit-scrollbar-track       { background: transparent}
 ::-webkit-scrollbar-thumb       { background: #666 }
 ::-webkit-scrollbar-thumb:hover { background: #333 }
