@@ -715,9 +715,9 @@
 
         // Hide modals when clicking outside their box
         $("#click-catcher").register("click", function () {
-            $("#config-box").attr("class", "out");
-            $("#about-box").attr("class", "out");
-            $("#entry-menu").attr("class", "out");
+            $("#config-box").replaceClass("in", "out");
+            $("#about-box").replaceClass("in", "out");
+            $("#entry-menu").replaceClass("in", "out");
             toggleCatcher();
         });
 
@@ -1391,9 +1391,14 @@
 
             $("#entry-menu")
                 .attr("class", "in")
-                .css({top: entry.offset().top + "px", left: (button.offset().left + button.width() - $("#entry-menu").width()) + "px" })
+                .css("left", (button.offset().left + button.width() - $("#entry-menu").width()) + "px")
                 .data("target", entry)
                 .addClass("type-" + type);
+
+            var menuMaxTop = $(document).height() - $("#entry-menu").height(),
+                menuTop = entry.offset().top;
+            if(menuTop > menuMaxTop) menuTop = menuMaxTop;
+            $("#entry-menu").css("top", menuTop + "px");
             toggleCatcher();
 
             $("#click-catcher").one("mousemove", function () {
