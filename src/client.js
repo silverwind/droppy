@@ -1629,6 +1629,7 @@
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
+        hideSpinner();
     }
     function openDoc(view) {
         view.attr("data-type", "document");
