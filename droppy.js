@@ -423,8 +423,8 @@
                         } else {
                             client.v[vId].file = null;
                             client.v[vId].directory = msg.data;
-                            updateDirectory(client.v[vId].directory, function () {
-                                sendFiles(cookie, vId, "UPDATE_DIRECTORY");
+                            updateDirectory(client.v[vId].directory, function (force) {
+                                sendFiles(cookie, vId, "UPDATE_DIRECTORY", force);
                             });
                             updateWatchers(client.v[vId].directory);
                         }
@@ -525,17 +525,6 @@
                         log.log(log.socket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
                     });
                     break;
-                /*case "SWITCH_FOLDER":
-                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory switch request: " + msg.data);
-                    client.v[vId].directory = msg.data;
-                    updateWatchers(msg.data, function (ok) {
-                        // Send client back to root in case the requested directory can't be read
-                        if (!ok) client.v[vId].directory = "/";
-                        updateDirectory(client.v[vId].directory, function () {
-                            sendFiles(cookie, vId, "UPDATE_DIRECTORY");
-                        });
-                    });
-                    break;*/
                 case "GET_USERS":
                     if (!db.sessions[cookie].privileged) return;
                     sendUsers(cookie);
@@ -758,8 +747,9 @@
                 }
             }
             updateDirectory(relativeDir, function () {
-                var cv = clientsToUpdate.pop();
-                sendFiles(cv.cookie, cv.vId, "UPDATE_DIRECTORY"); //TODO: This line can still throw "TypeError: Cannot read property 'cookie' of undefined"
+                if (clientsToUpdate.length === 0) return;
+                var client = clientsToUpdate.pop();
+                sendFiles(client.cookie, client.vId, "UPDATE_DIRECTORY");
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
@@ -1220,7 +1210,7 @@
                             if (++done === last) {
                                 dirs[root] = dirContents;
                                 callback();
-                                generateDirSizes(root, dirContents);
+                                generateDirSizes(root, dirContents, callback);
                             }
                         }
                     });
@@ -1229,36 +1219,20 @@
         });
     }
 
-    function generateDirSizes(root, dirContents) {
+    function generateDirSizes(root, dirContents, callback) {
         var tmpDirs = [];
-
         Object.keys(dirContents).forEach(function (dir) {
             if (dirContents[dir].type === "d") tmpDirs.push(addFilePath(root + "/" + dir));
         });
-
         if (tmpDirs.length === 0) return;
 
         async.map(tmpDirs, du, function (err, results) {
-            var sizeList = {};
-
             for (var i = 0, l = results.length; i < l; i++)
-                sizeList[path.basename(tmpDirs[i])] = results[i];
-
-            for (var cookie in clients) {
-                if (clients.hasOwnProperty(cookie)) {
-                    var client = clients[cookie];
-                    for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                        if (client.v[vId].file === null && client.v[0].directory === root) {
-                            send(clients[cookie].ws, JSON.stringify({
-                                type   : "UPDATE_SIZES",
-                                folder : root,
-                                data   : sizeList,
-                                vId    : vId
-                            }));
-                        }
-                    }
-                }
-            }
+                dirs[root][path.basename(tmpDirs[i])].size = results[i];
+            setTimeout(function () {
+                // Hack: Give the client some time to render before sendind sizes
+                callback(true);
+            }, 500);
         });
     }
 

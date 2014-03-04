@@ -305,9 +305,6 @@
                 // Update view
                 openFile(view);
                 break;
-            case "UPDATE_SIZES":
-                updateSizes(getView(vId), msg.data);
-                break;
             case "UPLOAD_DONE":
                 if (droppy.zeroFiles.length) {
                     sendMessage(vId, "ZERO_FILES", droppy.zeroFiles);
@@ -1138,34 +1135,6 @@
         }
     }
 
-    // Update directory size information
-    function updateSizes(view, sizeData) {
-        var entries, liveName, interval = 250;
-        (function wait(timeout) {
-            if (timeout > 4000) {
-                return;
-            } else if (!droppy.ready) {
-                setTimeout(wait, interval, timeout + interval);
-                return;
-            } else {
-                entries = view.find('.data-row[data-type="folder"]');
-                if (entries.length) {
-                    entries.each(function () {
-                        liveName = $(this).find(".folder-link").text();
-                        $(this).find(".size").attr("data-size", sizeData[liveName] || 0);
-                        if (sizeData[liveName]) {
-                            var temp = convertToSI(sizeData[liveName]);
-                            $(this).find(".size").text(temp.size > 0 ? temp.size : "");
-                            $(this).find(".size-unit").text(temp.size > 0 ? temp.unit : "");
-                        }
-                    });
-                } else {
-                    setTimeout(wait, interval, timeout + interval);
-                }
-            }
-        })(interval);
-    }
-
     // Update the page title and trim a path to its basename
     function updateTitle(text, isPath) {
         var prefix = "", suffix = "droppy";
@@ -1351,7 +1320,7 @@
                             '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
                             '<span class="folder-link entry-link">' + file + '</span>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size">' + size + '</span>' +
+                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
                             '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
@@ -1466,7 +1435,6 @@
                 view.append(content);
                 droppy.isAnimating = true;
                 view.find(".data-row").addClass("animating");
-                console.log(view.find("#content").attr("class"));
                 view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
                 view.find("#newcontent").setTransitionClass(navRegex, "center");
                 view.find("#newcontent").addClass(type); // Add view type class for styling purposes
