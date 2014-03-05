@@ -396,7 +396,7 @@
                 cookie     = getCookie(ws.upgradeReq.headers.cookie),
                 client;
 
-            if (!cookie) {
+            if (!cookie && !config.noLogin) {
                 ws.close(4000);
                 log.log(log.socket(remoteIP, remotePort), " Unauthorized WebSocket connection closed.");
                 return;
@@ -863,12 +863,13 @@
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/!\/content/.test(URI)) {
-            if (firstRun) {
-                res.setHeader("X-Page-Type", "firstrun");
-                handleResourceRequest(req, res, "auth.html");
-            } else if (getCookie(req.headers.cookie)) {
+            if (getCookie(req.headers.cookie) || config.noLogin) {
+                if (config.noLogin) freeCookie(req, res);
                 res.setHeader("X-Page-Type", "main");
                 handleResourceRequest(req, res, "main.html");
+            } else if (firstRun) {
+                res.setHeader("X-Page-Type", "firstrun");
+                handleResourceRequest(req, res, "auth.html");
             } else {
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
@@ -950,7 +951,6 @@
                 if (isValidUser(postData.username, postData.password)) {
                     createCookie(req, res, postData);
                     endReq(req, res, true);
-
                     log.log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
                 } else {
                     endReq(req, res, false);
@@ -1440,13 +1440,20 @@
         return false;
     }
 
-    function createCookie(req, res, postData) {
-        var sessionID = crypto.randomBytes(32).toString("base64");
-        var priv = db.users[postData.username].privileged;
+    function freeCookie(req, res) {
+        var dateString = new Date(Date.now() + 31536000000).toUTCString(),
+            sessionID  = crypto.randomBytes(32).toString("base64");
 
+        res.setHeader("Set-Cookie", cookieName + "=" + sessionID + "; Expires=" + dateString);
+    }
+
+    function createCookie(req, res, postData) {
+        var sessionID = crypto.randomBytes(32).toString("base64"), priv, dateString;
+
+        priv = db.users[postData.username].privileged;
         if (postData.check === "on") {
             // Create a semi-permanent cookie
-            var dateString = new Date(Date.now() + 31536000000).toUTCString();
+            dateString = new Date(Date.now() + 31536000000).toUTCString();
             res.setHeader("Set-Cookie", cookieName + "=" + sessionID + "; Expires=" + dateString);
         } else {
             // Create a single-session cookie
