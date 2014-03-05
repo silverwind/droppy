@@ -71,7 +71,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **linkLength**: The amount of characters in a shortlink.
 - **maxOpen**: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
-- **noLogin**: Skips the login page if set to true, making the server essentially public.
+- **noLogin**: When enabled, the client skips the login page, making the server essentially public.
 - **timestamps**: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
 ###Path options
