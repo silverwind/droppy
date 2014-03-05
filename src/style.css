@@ -179,11 +179,11 @@ input:-webkit-autofill {
 .view.right { left:50%; right:0; }
 
 .content {
-    width: calc(100%);
+    width: 100%;
+    height: 100%;
     padding: .25em;
-    transition: left .2s ease-in;
+    transition: transform .25s ease-in;
     position: absolute;
-    bottom: 0;
     overflow-y: auto;
 }
 
@@ -191,9 +191,9 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .content { top: 32px; font-size: .9em } }
 @media all and (max-width:  639px) { .content { top: 27px; font-size: .8em } }
 
-.content.center  { left: 0     }
-.content.back    { left: -100% }
-.content.forward { left: 100%  }
+.content.center  { transform: translateX(0) }
+.content.back    { transform: translateX(-100%) }
+.content.forward { transform: translateX(100%) }
 
 .view .directory.content .empty,
 .view .directory.content ul {
