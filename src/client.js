@@ -1,4 +1,7 @@
-/*global CodeMirror jQuery */
+/*global CodeMirror */
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, browser: true, trailing: false, sub: true, eqeqeq: true,
+  forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
+  undef: true, unused: true, globalstrict: true, nonstandard: true, jquery: true */
 "use strict";
 
 (function ($, window, document) {

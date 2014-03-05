@@ -23,6 +23,9 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  --------------------------------------------------------------------------- */
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, browser: true, trailing: false, sub: true, eqeqeq: true,
+  forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
+  undef: true, unused: true, globalstrict: true, nonstandard: true, node: true */
 "use strict";
 
 (function () {
@@ -30,7 +33,6 @@
         // Libraries
         utils        = require("./lib/utils.js"),
         log          = require("./lib/log.js"),
-        svg          = require("./lib/svg.js"),
         configParser = require("./lib/configParser.js"),
         // Modules
         archiver   = require("archiver"),
@@ -121,7 +123,11 @@
 
         //Prepare SVGs
         try {
-            cache.svg = svg.process(config.srcDir + "svg/");
+            var svgDir = config.srcDir + "svg/", svgData = {};
+            fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
+                svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
+            });
+            cache.svg = svgData;
         } catch (error) {
             log.error("Error processing SVGs: ", error);
             process.exit(1);
