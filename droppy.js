@@ -23,9 +23,9 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  --------------------------------------------------------------------------- */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true, browser: true, trailing: false, sub: true, eqeqeq: true,
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
   forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, nonstandard: true, node: true */
+  undef: true, unused: true, globalstrict: true, node: true */
 "use strict";
 
 (function () {
@@ -33,7 +33,7 @@
         // Libraries
         utils        = require("./lib/utils.js"),
         log          = require("./lib/log.js"),
-        configParser = require("./lib/configParser.js"),
+        configParser = require("./lib/config.js"),
         // Modules
         archiver   = require("archiver"),
         async      = require("async"),
