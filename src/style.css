@@ -182,18 +182,19 @@ input:-webkit-autofill {
     width: 100%;
     height: 100%;
     padding: .25em;
-    transition: transform .25s ease-in;
+    transition: all .25s ease-in;
     position: absolute;
     overflow-y: auto;
+    transform: translateZ(0);
 }
 
 @media all and (min-width: 1024px) { .content { top: 37px; font-size:  1em } }
 @media all and (max-width: 1023px) { .content { top: 32px; font-size: .9em } }
 @media all and (max-width:  639px) { .content { top: 27px; font-size: .8em } }
 
-.content.center  { transform: translateX(0) }
-.content.back    { transform: translateX(-100%) }
-.content.forward { transform: translateX(100%) }
+.content.center  { transform: translate(0, 0); }
+.content.back    { transform: translate(-100%, 0); }
+.content.forward { transform: translate(100%, 0); }
 
 .view .directory.content .empty,
 .view .directory.content ul {

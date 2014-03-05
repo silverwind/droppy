@@ -1,5 +1,4 @@
-/*global CodeMirror */
-/*global jQuery */
+/*global CodeMirror jQuery */
 "use strict";
 
 (function ($, window, document) {
@@ -268,31 +267,20 @@
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
-                // Ignore update if we're uploading or the view is not viewing a directory
-                if ((droppy.isUploading) && !view[0].switchRequest) return;
-                if (view[0].switchRequest) {
-                    view[0].switchRequest = false;
-                    //$(".editor-filename").remove(); // TODO: Change to be view-relative once path is parented to view.
-                }
+                if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
+                view[0].switchRequest = false;
                 showSpinner();
-
                 if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
                     view[0].loaded === true; // Ensure to update path on the first load
                     if (view[0].vId === 0)
                         updateTitle(msg.folder, true);
                     updatePath(view, msg.folder);
-
                 }
-
                 view[0].currentFile = null;
                 view[0].currentFolder = msg.folder;
                 view[0].currentData = msg.data;
                 view.attr("data-type", "directory");
-
-                // Update view
                 openDirectory(view);
-                hideSpinner();
-                droppy.ready = false;
                 break;
             case "UPDATE_BE_FILE":
                 var path = fixRootPath((msg.folder + "/" + msg.file));
@@ -1171,7 +1159,7 @@
     function updateLocation(view, destination, skipPush) {
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
-            if ((!droppy.socketWait && !droppy.isAnimating) || time > 2000) {
+            if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
                 showSpinner();
                 var viewLoc = getViewLocation(view);
                 // Find the direction in which we should animate
@@ -1416,7 +1404,6 @@
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
             sortByHeader(view, $(this));
         });
-        droppy.ready = true;
         hideSpinner();
     }
 
@@ -1424,34 +1411,31 @@
     function loadContent(view, content) {
         var type = view.attr("data-type"),
             navRegex = /(forward|back|center)/;
+        if (view[0].animDirection === "center" && type !== "document") {
+            view.find("#content").replaceClass(navRegex, "center");
+            view.find("#content").before(content);
+            view.find("#newcontent").addClass(type);
+            finish();
+        } else {
+            view.append(content);
+            view[0].isAnimating = true;
+            view.find(".data-row").addClass("animating");
+            view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
+            view.find("#newcontent").setTransitionClass(navRegex, "center");
+            view.find("#newcontent").addClass(type); // Add view type class for styling purposes
+            view.find("#newcontent").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                if ($(event.originalEvent.target).attr("id") === "newcontent")
+                    finish();
+            });
+        }
+        view[0].animDirection = "center";
 
-        requestAnimation(function () {
-            if (view[0].animDirection === "center" && type !== "document") {
-                view.find("#content").replaceClass(navRegex, "center");
-                view.find("#content").before(content);
-                view.find("#newcontent").addClass(type);
-                finish();
-            } else {
-                view.append(content);
-                droppy.isAnimating = true;
-                view.find(".data-row").addClass("animating");
-                view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
-                view.find("#newcontent").setTransitionClass(navRegex, "center");
-                view.find("#newcontent").addClass(type); // Add view type class for styling purposes
-                view.find("#newcontent").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                    if ($(event.originalEvent.target).attr("id") === "newcontent")
-                        finish();
-                });
-            }
-            view[0].animDirection = "center";
-
-            function finish() {
-                droppy.isAnimating = false;
-                view.find("#content").remove();
-                view.find("#newcontent").attr("id", "content");
-                view.find(".data-row").removeClass("animating");
-            }
-        });
+        function finish() {
+            view[0].isAnimating = false;
+            view.find("#content").remove();
+            view.find("#newcontent").attr("id", "content");
+            view.find(".data-row").removeClass("animating");
+        }
     }
 
     function initEntryMenu() {
@@ -1812,11 +1796,9 @@
         droppy.activeFiles = [];
         droppy.audioUpdater = null;
         droppy.debug = null;
-        droppy.isAnimating = null;
         droppy.isPlaying = null;
         droppy.isUploading = null;
         droppy.mediaTypes = {};
-        droppy.ready = null;
         droppy.reopen = null;
         droppy.savedParts = null;
         droppy.socket = null;
