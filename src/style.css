@@ -1048,6 +1048,7 @@ input:-webkit-autofill {
 #about-box {
     background: #181818;
     border-radius: 6px;
+    box-shadow: 0 0 30px #111;
     color: #aaa;
     height: 200px;
     left: 50%;
@@ -1120,6 +1121,7 @@ input:-webkit-autofill {
 #config-box {
     background: #181818;
     border-radius: 6px;
+    box-shadow: 0 0 30px #111;
     color: #ccc;
     height: 400px;
     left: 50%;
