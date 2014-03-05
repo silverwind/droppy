@@ -182,7 +182,7 @@ input:-webkit-autofill {
     width: 100%;
     height: 100%;
     padding: .25em;
-    transition: all .25s ease-in;
+    transition: transform .2s ease-in;
     position: absolute;
     overflow-y: auto;
     transform: translateZ(0);
@@ -281,15 +281,13 @@ input:-webkit-autofill {
 /* ========================= File/Folder Display =========================== */
 
 #paste {
-    z-index: 32;
-    line-height: 1.5em;
-    width: 10em;
-    margin: 0 auto;
+    width: 100%;
     text-align: center;
-    color: #bbb;
+    color: #aaa;
     cursor: pointer;
-    transition: all .2s ease;
+    transition: all .3s ease;
 }
+
 #paste.in  { margin-bottom: .25em; }
 #paste.out { height: 0; overflow: hidden; }
 
@@ -297,16 +295,16 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { #paste { font-size: .9em } }
 @media all and (max-width:  639px) { #paste { font-size: .8em } }
 
-#paste:hover {color: #fff }
-#paste:hover svg {fill: #1af }
+#paste:hover {color: #ccc }
+#paste:hover svg {fill: #ccc }
 
-#paste .filename { color: #fff }
-#paste:hover .filename {color: #1af }
+#paste .filename { color: #ccc; transition: all .3s ease }
+#paste:hover .filename {color: #fff}
 
 #paste svg {
     height: 1em;
     width: 1em;
-    fill: #eee;
+    fill: #aaa;
     margin-right: .25em;
     transition: all .2s ease;
 }

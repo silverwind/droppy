@@ -1319,10 +1319,9 @@
         }
         list.children("li").sort(sortFunc).appendTo(list);
         var content = contentWrap(view).html(
-                    '<div id="paste" class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' +
-                        '<svg class="paste"></svg>' +
-                        '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
-                    '</div>');
+            '<div id="paste" class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
+                '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
+            '</div>');
         if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
         else content.append('<div id="empty" class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
 
