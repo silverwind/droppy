@@ -37,7 +37,7 @@
             theme: "base16-dark",
             indentWithTabs : false,
             indentUnit : 4,
-            lineWrapping: false,
+            lineWrapping: true,
             hasLoggedOut : false
         };
         // Load prefs and set missing ones to their default
@@ -1006,7 +1006,7 @@
             droppy.activeFiles.push($(this).text().toLowerCase());
         });
 
-        // Hide menu, click-catcher and the original link, stop any previus edits
+        // Hide menu, click-catcher and the original link, stop any previous edits
         $("#click-catcher").trigger("mousemove");
         var link = entry.find(".entry-link");
 
@@ -1030,12 +1030,12 @@
                 entry.removeClass("invalid");
         }).register("keyup", function (event) {
             if (event.keyCode === 27) stopEdit(); // Escape Key
-            if (event.keyCode === 13) submitEdit(false, callback); // Return Key
+            if (event.keyCode === 13) submitEdit(view, false, callback); // Return Key
         }).register("focusout", function () {
-            submitEdit(true, callback);
+            submitEdit(view, true, callback);
         }).select();
 
-        function submitEdit(skipInvalid, callback) {
+        function submitEdit(view, skipInvalid, callback) {
             var oldVal = namer.attr("placeholder"),
                 newVal = namer.val(),
                 success;
@@ -1053,7 +1053,12 @@
                 success = false;
                 stopEdit();
             }
-            if (typeof success === "boolean" && typeof callback === "function") callback(success, oldVal, newVal);
+            if (typeof success === "boolean" && typeof callback === "function") {
+                var oldPath = view[0].currentFolder === "/" ? "/" + oldVal : view[0].currentFolder + "/" + oldVal,
+                    newPath = view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal;
+                callback(success, oldPath, newPath);
+            }
+
         }
         function stopEdit() {
             $("#inline-namer, #inline-submit").remove();
@@ -1643,7 +1648,9 @@
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
         showSpinner();
-        $.ajax(url, {
+        $.ajax({
+            type: "GET",
+            url: url,
             dataType: "text",
             success : function (data) {
                 // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
@@ -1679,6 +1686,7 @@
                     indentUnit: droppy.get("indentUnit"),
                     lineWrapping: droppy.get("lineWrapping"),
                     lineNumbers: true,
+                    autofocus: true,
                     // keyMap: "sublime",
                     mode: mode
                 });

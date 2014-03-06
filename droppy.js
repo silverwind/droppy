@@ -522,19 +522,15 @@
                     });
                     break;
                 case "RENAME":
-                    var clientpath = client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/";
-                    var newname = clientpath + msg.data.new,
-                        oldname = clientpath + msg.data.old;
-
                     // Disallow whitespace-only and empty strings in renames
-                    if (!utils.isPathSane(msg.data.new) || /\s*/.test(msg.data.to) || msg.data.to === "") {
-                        log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + newname);
+                    if (!utils.isPathSane(msg.data.new, true) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
+                        log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + msg.data.new);
                         send(client.ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
                         return;
                     }
-                    fs.rename(addFilePath(oldname), addFilePath(newname), function (error) {
+                    fs.rename(addFilePath(msg.data.old), addFilePath(msg.data.new), function (error) {
                         if (error) log.error(error);
-                        log.log(log.socket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
+                        log.log(log.socket(remoteIP, remotePort), " Renamed: ", msg.data.old, " -> ", msg.data.new);
                     });
                     break;
                 case "GET_USERS":
@@ -864,13 +860,17 @@
     }
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
-        var URI = decodeURIComponent(req.url);
+        var URI = decodeURIComponent(req.url), isAuth = false;
         req.time = Date.now();
+
+        if (config.noLogin && !getCookie(req.headers.cookie)) freeCookie(req, res);
+        if (getCookie(req.headers.cookie) || config.noLogin)
+            isAuth = true;
+
         if (URI === "/") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/!\/content/.test(URI)) {
-            if (getCookie(req.headers.cookie) || config.noLogin) {
-                if (config.noLogin) freeCookie(req, res);
+            if (isAuth) {
                 res.setHeader("X-Page-Type", "main");
                 handleResourceRequest(req, res, "main.html");
             } else if (firstRun) {
@@ -903,7 +903,7 @@
         } else if (URI === "/favicon.ico") {
             handleResourceRequest(req, res, "favicon.ico");
         } else {
-            if (!getCookie(req.headers.cookie)) {
+            if (!isAuth) {
                 res.statusCode = 301;
                 res.setHeader("Location", "/");
                 res.end();
@@ -1119,7 +1119,7 @@
         log.log(socket, " Upload started");
 
         // FEATURE: Check permissions
-        if (!clients[cookie]) {
+        if (!clients[cookie] && !config.noLogin) {
             res.statusCode = 500;
             res.setHeader("Content-Type", "text/plain");
             res.end();
@@ -1425,9 +1425,9 @@
     var cookieName = "s", needToSave = false;
 
     function getCookie(cookie) {
-        var session = "";
+        var session = "", cookies;
         if (cookie) {
-            var cookies = cookie.split("; ");
+            cookies = cookie.split("; ");
             cookies.forEach(function (c) {
                 if (new RegExp("^" + cookieName + ".*").test(c)) {
                     session = c.substring(cookieName.length + 1);
@@ -1450,7 +1450,9 @@
         var dateString = new Date(Date.now() + 31536000000).toUTCString(),
             sessionID  = crypto.randomBytes(32).toString("base64");
 
-        res.setHeader("Set-Cookie", cookieName + "=" + sessionID + "; Expires=" + dateString);
+        res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";expires=" + dateString + ";path=/");
+        db.sessions[sessionID] = {privileged : true, lastSeen : Date.now()};
+        writeDB();
     }
 
     function createCookie(req, res, postData) {
@@ -1460,10 +1462,10 @@
         if (postData.check === "on") {
             // Create a semi-permanent cookie
             dateString = new Date(Date.now() + 31536000000).toUTCString();
-            res.setHeader("Set-Cookie", cookieName + "=" + sessionID + "; Expires=" + dateString);
+            res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";expires=" + dateString + ";path=/");
         } else {
             // Create a single-session cookie
-            res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";");
+            res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";path=/");
         }
         db.sessions[sessionID] = {privileged : priv, lastSeen : Date.now()};
         writeDB();
