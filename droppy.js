@@ -558,9 +558,9 @@
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
                         if (!utils.isPathSane(file)) return log.log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + file);
-                        wrench.mkdirSyncRecursive(path.dirname(file), mode.dir);
-                        fs.writeFileSync(file, "", {mode: mode.file});
-                        log.log(log.socket(remoteIP, remotePort), " Received: " + removeFilePath(file).substring(1));
+                        wrench.mkdirSyncRecursive(path.dirname(addFilePath(file)), mode.dir);
+                        fs.writeFileSync(addFilePath(file), "", {mode: mode.file});
+                        log.log(log.socket(remoteIP, remotePort), " Received: " + file.substring(1));
                     });
                     send(client.ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;

@@ -299,15 +299,15 @@
             case "UPLOAD_DONE":
                 view = getView(vId);
                 if (droppy.zeroFiles.length) {
-                    droppy.zeroFiles = droppy.zeroFiles.map(function(filename) {
-                        return (view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename;
-                    });
                     sendMessage(vId, "ZERO_FILES", droppy.zeroFiles);
                     droppy.zeroFiles = [];
                 } else {
                     droppy.isUploading = false;
                     updateTitle(getView(vId)[0].currentFolder, true);
                     $("#upload-info").attr("class", "out");
+                    view.find(".data-row.uploading").removeClass("uploading");
+                    view.find(".icon-uploading").remove();
+
                     hideSpinner();
                 }
                 break;
@@ -874,7 +874,7 @@
                     // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
                     // https://github.com/silverwind/droppy/issues/10
                     if (data[i].size === 0) {
-                        droppy.zeroFiles.push(filename);
+                        droppy.zeroFiles.push((view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename);
                     } else {
                         formLength++;
                         formData.append(filename, data[i], filename);
@@ -946,9 +946,6 @@
                 }));
                 xhr.send(formData);
             } else if (droppy.zeroFiles.length) {
-                droppy.zeroFiles = droppy.zeroFiles.map(function(filename) {
-                    return (view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename;
-                });
                 sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
             }
         }
