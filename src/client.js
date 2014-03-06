@@ -297,7 +297,11 @@
                 openFile(view);
                 break;
             case "UPLOAD_DONE":
+                view = getView(vId);
                 if (droppy.zeroFiles.length) {
+                    droppy.zeroFiles = droppy.zeroFiles.map(function(filename) {
+                        return (view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename;
+                    });
                     sendMessage(vId, "ZERO_FILES", droppy.zeroFiles);
                     droppy.zeroFiles = [];
                 } else {
@@ -942,6 +946,9 @@
                 }));
                 xhr.send(formData);
             } else if (droppy.zeroFiles.length) {
+                droppy.zeroFiles = droppy.zeroFiles.map(function(filename) {
+                    return (view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename;
+                });
                 sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
             }
         }

@@ -412,7 +412,7 @@
 
                 switch (msg.type) {
                 case "REQUEST_UPDATE":
-                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
 
                     readPath(msg.data, function (error, info) {
                         if (error) {
@@ -437,7 +437,7 @@
                     });
                     break;
                 case "REQUEST_SHORTLINK":
-                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log.log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
                     // Check if we already have a link for that file
                     for (var link in db.shortlinks) {
                         if (db.shortlinks[link] === msg.data) {
@@ -460,7 +460,7 @@
                     break;
                 case "DELETE_FILE":
                     log.log(log.socket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
-                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid file deletion request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log.log(log.socket(remoteIP, remotePort), " Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
                     fs.stat(msg.data, function (error, stats) {
                         if (error) {
@@ -476,7 +476,7 @@
                     break;
                 case "SAVE_FILE":
                     log.log(log.socket(remoteIP, remotePort), " Saving: " + msg.data.to.substring(1));
-                    if (!utils.isPathSane(msg.data.to, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid save request: " + msg.data);
+                    if (!utils.isPathSane(msg.data.to)) return log.log(log.socket(remoteIP, remotePort), " Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
                     fs.stat(msg.data.to, function (error, stats) {
                         if (error) {
@@ -500,8 +500,8 @@
                     break;
                 case "CLIPBOARD":
                     log.log(log.socket(remoteIP, remotePort), " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
-                    if (!utils.isPathSane(msg.data.from, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard source: " + msg.data.from);
-                    if (!utils.isPathSane(msg.data.to, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard destination: " + msg.data.to);
+                    if (!utils.isPathSane(msg.data.from)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard source: " + msg.data.from);
+                    if (!utils.isPathSane(msg.data.to)) return log.log(log.socket(remoteIP, remotePort), " Invalid clipboard destination: " + msg.data.to);
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
 
@@ -515,7 +515,7 @@
                     }
                     break;
                 case "CREATE_FOLDER":
-                    if (!utils.isPathSane(msg.data, true)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log.log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
                     fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
                         log.log(log.socket(remoteIP, remotePort), " Created: ", msg.data);
@@ -523,7 +523,7 @@
                     break;
                 case "RENAME":
                     // Disallow whitespace-only and empty strings in renames
-                    if (!utils.isPathSane(msg.data.new, true) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
+                    if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
                         log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + msg.data.new);
                         send(client.ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
                         return;
@@ -558,10 +558,9 @@
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
                         if (!utils.isPathSane(file)) return log.log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + file);
-                        var p = addFilePath(client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/") + decodeURIComponent(file);
-                        wrench.mkdirSyncRecursive(path.dirname(p), mode.dir);
-                        fs.writeFileSync(p, "", {mode: mode.file});
-                        log.log(log.socket(remoteIP, remotePort), " Received: " + removeFilePath(p).substring(1));
+                        wrench.mkdirSyncRecursive(path.dirname(file), mode.dir);
+                        fs.writeFileSync(file, "", {mode: mode.file});
+                        log.log(log.socket(remoteIP, remotePort), " Received: " + removeFilePath(file).substring(1));
                     });
                     send(client.ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;
