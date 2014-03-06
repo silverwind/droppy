@@ -733,8 +733,13 @@ input:-webkit-autofill {
 .content.document > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
 .content.document > .sidebar > .light:hover svg   { fill: #ff5 }
 .content.document > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
-.content.document > .sidebar > .opts:hover svg, .opts.active svg   { fill: #c4c }
-.content.document > .sidebar > .opts:hover span, .opts.active span { color: #c4c; opacity: 1 }
+.content.document > .sidebar > .opts:hover svg, .opts.active svg {
+    fill: #1af !important;
+}
+.content.document > .sidebar > .opts:hover span, .opts.active span {
+    color: #1af !important;
+    opacity: 1 !important;
+}
 .doc.readonly > .sidebar > .save { display: none }
 
 /* ============================ Text Editor ============================ */
