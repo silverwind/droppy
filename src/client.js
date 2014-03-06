@@ -323,6 +323,9 @@
                 view.find("#path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
                 setTimeout(function () { view.find("#path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
+            case "ERROR":
+                // TODO: Display server errors
+                hideSpinner();
             }
         };
     }

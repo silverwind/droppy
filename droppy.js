@@ -525,7 +525,13 @@
                     var clientpath = client.v[vId].directory === "/" ? "/" : client.v[vId].directory + "/";
                     var newname = clientpath + msg.data.new,
                         oldname = clientpath + msg.data.old;
-                    if (!utils.isPathSane(msg.data.new)) return log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + newname);
+
+                    // Disallow whitespace-only and empty strings in renames
+                    if (!utils.isPathSane(msg.data.new) || /\s*/.test(msg.data.to) || msg.data.to === "") {
+                        log.log(log.socket(remoteIP, remotePort), " Invalid rename request: " + newname);
+                        send(client.ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
+                        return;
+                    }
                     fs.rename(addFilePath(oldname), addFilePath(newname), function (error) {
                         if (error) log.error(error);
                         log.log(log.socket(remoteIP, remotePort), " Renamed: ", oldname, " -> ", newname);
