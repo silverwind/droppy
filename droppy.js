@@ -1273,9 +1273,8 @@
 
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory and stream it to a client
-    // TODO: push zipping of a directory to all clients
     function streamArchive(req, res, type) {
-        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
+        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next;
         fs.stat(zipPath, function (err, stats) {
             if (err) {
                 log.error(err);
@@ -1293,25 +1292,27 @@
 
                 archive = archiver(type, {zlib: { level: config.zipLevel }});
                 archive.on("error", function (error) { log.error(error); });
+
+                next = function (currentPath) {
+                    if (currentPath[currentPath.length - 1] !== "/")
+                        archive.file(currentPath, {name: removeFilePath(currentPath)});
+                    else
+                        archive.append("", { name: removeFilePath(currentPath) });
+                };
+
+                archive.on("entry", function (error) {
+                    if (error) log.error(error);
+                    if (paths.length)
+                        next(paths.pop());
+                    else
+                        archive.finalize();
+                });
                 archive.pipe(res);
 
-                utils.walkDirectory(zipPath, true, function (error, paths) {
-                    paths = paths.filter(function (s) { return s !== ""; });
+                utils.walkDirectory(zipPath, true, function (error, foundPaths) {
                     if (error) log.error(error);
-                    (function read(currentPath) {
-                        if (currentPath[currentPath.length - 1] !== "/")
-                            archive.file(currentPath, {name: removeFilePath(currentPath)}, next);
-                        else
-                            archive.append("", { name: removeFilePath(currentPath) }, next);
-
-                        function next(error) {
-                            if (error) log.error(error);
-                            if (paths.length)
-                                read(paths.pop());
-                            else
-                                archive.finalize();
-                        }
-                    })(paths.pop());
+                    paths = foundPaths.filter(function (s) { return s !== ""; });
+                    next(paths.pop());
                 });
             } else {
                 res.statusCode = 404;
