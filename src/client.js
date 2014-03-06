@@ -161,7 +161,7 @@
     }
 
     function contentWrap(view) {
-        return $('<div id="newcontent" class="content ' + view[0].animDirection + '"></div>');
+        return $('<div class="new content ' + view[0].animDirection + '"></div>');
     }
 
 // ============================================================================
@@ -619,10 +619,10 @@
                             '</li>';
 
             if ($("#empty").length > 0) {
-                $("#content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+                $(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
                 wasEmpty = true;
             } else {
-                $(dummyHtml).appendTo("#content ul");
+                $(dummyHtml).appendTo(".content ul");
             }
             dummyFolder = $(".data-row.new-folder");
             view = dummyFolder.parents(".view");
@@ -826,7 +826,7 @@
         function stop(event) {
             if (event.type === "ended") {
                 var next = $(".playing").next();
-                preparePlayback($((next.length) ? next.find(".icon-play") : $("#content ul").find(".icon-play").first()));
+                preparePlayback($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
             }
             document.getElementById("audio-title").innerHTML = "";
             if (droppy.audioUpdater) {
@@ -1417,19 +1417,19 @@
         var type = view.attr("data-type"),
             navRegex = /(forward|back|center)/;
         if (view[0].animDirection === "center" && type !== "document") {
-            view.find("#content").replaceClass(navRegex, "center");
-            view.find("#content").before(content);
-            view.find("#newcontent").addClass(type);
+            view.find(".content").replaceClass(navRegex, "center");
+            view.find(".content").before(content);
+            view.find(".new").addClass(type);
             finish();
         } else {
             view.append(content);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
-            view.find("#content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
-            view.find("#newcontent").setTransitionClass(navRegex, "center");
-            view.find("#newcontent").addClass(type); // Add view type class for styling purposes
-            view.find("#newcontent").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                if ($(event.originalEvent.target).attr("id") === "newcontent")
+            view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
+            view.find(".new").setTransitionClass(navRegex, "center");
+            view.find(".new").addClass(type); // Add view type class for styling purposes
+            view.find(".new").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                if ($(event.originalEvent.target).hasClass("new"))
                     finish();
             });
         }
@@ -1437,8 +1437,10 @@
 
         function finish() {
             view[0].isAnimating = false;
-            view.find("#content").remove();
-            view.find("#newcontent").attr("id", "content");
+            view.find(".content").each(function(){
+                if (!$(this).hasClass("new")) $(this).remove();
+            });
+            view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
         }
     }
@@ -1521,7 +1523,7 @@
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        var sortedEntries = view.find("#content ul li").sort(sortFunc);
+        var sortedEntries = view.find(".content ul li").sort(sortFunc);
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             $(sortedEntries[index]).css({
                 "order": index,
