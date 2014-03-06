@@ -563,7 +563,7 @@
                         fs.writeFileSync(p, "", {mode: mode.file});
                         log.log(log.socket(remoteIP, remotePort), " Received: " + removeFilePath(p).substring(1));
                     });
-                    send(client.ws, JSON.stringify({ type : "UPLOAD_DONE" }));
+                    send(client.ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;
                 }
             });
