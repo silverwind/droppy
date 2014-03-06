@@ -191,8 +191,6 @@
         out.css = ap("last 2 versions").process(out.css).css;
         // Minify CSS
         out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
-        // Set the client debug variable to mirror the server's
-        out.js = out.js.replace("debug = null;", config.debug ? "debug = true;" : "debug = false;");
         // Minify JS
         if (!config.debug)
             out.js = require("uglify-js").minify(out.js, {
@@ -411,9 +409,14 @@
                     vId = msg.vId;
 
                 switch (msg.type) {
+                case "REQUEST_SETTINGS":
+                    send(client.ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
+                        debug: config.debug,
+                        demoMode: config.demoMode
+                    }}));
+                    break;
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data)) return log.log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
-
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data);

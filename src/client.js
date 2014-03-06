@@ -233,6 +233,7 @@
 
         droppy.socket.onopen = function () {
             retries = 5; // reset retries on connection loss
+            if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"})); // Request settings when debug is uninitialized
             if (queuedData)
                 sendMessage();
             else {
@@ -327,14 +328,28 @@
                 view.find("#path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
                 setTimeout(function () { view.find("#path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
+            case "SETTINGS":
+                droppy.debug = msg.settings.debug;
+                droppy.demoMode = msg.settings.demoMode;
+                break;
             case "ERROR":
                 // TODO: Display server errors
                 hideSpinner();
+                break;
             }
         };
     }
+    function sendMessage(vId, type, data) {
+        var sendObject = {};
 
-    function sendMessage(vId, msgType, msgData) {
+        if (typeof vId === "number")
+            sendObject.vId  = vId;
+        else
+            throw "Attempt to send non-numerical vId";
+
+        if (type) sendObject.type = type;
+        if (data) sendObject.data = data;
+
         if (droppy.socket.readyState === 1) { // open
             // Lock the UI while we wait for a socket response
             droppy.socketWait = true;
@@ -347,11 +362,13 @@
             if (queuedData) {
                 droppy.socket.send(queuedData);
                 queuedData = false;
-            } else
-                droppy.socket.send(JSON.stringify({type: msgType, vId: vId, data: msgData}));
+            } else {
+                droppy.socket.send(JSON.stringify(sendObject));
+            }
+
         } else {
             // We can't send right now, so queue up the last added message to be sent later
-            queuedData = JSON.stringify({type: msgType, vId: vId, data: msgData});
+            queuedData = JSON.stringify(sendObject);
 
             if (droppy.socket.readyState === 2) { // closing
                 // Socket is closing, queue a re-opening
@@ -1815,6 +1832,7 @@
         droppy.activeFiles = [];
         droppy.audioUpdater = null;
         droppy.debug = null;
+        droppy.demoMode = null;
         droppy.isPlaying = null;
         droppy.isUploading = null;
         droppy.mediaTypes = {};
