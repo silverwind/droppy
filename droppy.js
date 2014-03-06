@@ -1277,7 +1277,9 @@
     function streamArchive(req, res, type) {
         var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive;
         fs.stat(zipPath, function (err, stats) {
-            if (!err && stats.isDirectory()) {
+            if (err) {
+                log.error(err);
+            } else if (stats.isDirectory()) {
                 res.statusCode = 200;
                 res.setHeader("Content-Type", mime.lookup(type));
 

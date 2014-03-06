@@ -340,16 +340,7 @@
         };
     }
     function sendMessage(vId, type, data) {
-        var sendObject = {};
-
-        if (typeof vId === "number")
-            sendObject.vId  = vId;
-        else
-            throw "Attempt to send non-numerical vId";
-
-        if (type) sendObject.type = type;
-        if (data) sendObject.data = data;
-
+        var sendObject = { vId: vId, type: type, data: data};
         if (droppy.socket.readyState === 1) { // open
             // Lock the UI while we wait for a socket response
             droppy.socketWait = true;
@@ -365,7 +356,6 @@
             } else {
                 droppy.socket.send(JSON.stringify(sendObject));
             }
-
         } else {
             // We can't send right now, so queue up the last added message to be sent later
             queuedData = JSON.stringify(sendObject);
