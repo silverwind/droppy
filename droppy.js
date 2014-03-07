@@ -758,10 +758,11 @@
                     }
                 }
             }
-            updateDirectory(relativeDir, function () {
+            updateDirectory(relativeDir, function (sizes) {
                 if (clientsToUpdate.length === 0) return;
                 var client = clientsToUpdate.pop();
-                sendFiles(client.cookie, client.vId, "UPDATE_DIRECTORY");
+                sendFiles(client.cookie, client.vId, "UPDATE_DIRECTORY", sizes);
+                if (!sizes) clientsToUpdate.push(client);
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
@@ -1245,10 +1246,7 @@
         async.map(tmpDirs, du, function (err, results) {
             for (var i = 0, l = results.length; i < l; i++)
                 dirs[root][path.basename(tmpDirs[i])].size = results[i];
-            setTimeout(function () {
-                // Hack: Give the client some time to render before sendind sizes
-                callback(true);
-            }, 500);
+            callback(true);
         });
     }
 
