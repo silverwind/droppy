@@ -32,9 +32,9 @@
 (function () {
     var
         // Libraries
-        utils        = require("./lib/utils.js"),
-        log          = require("./lib/log.js"),
-        configParser = require("./lib/config.js"),
+        utils    = require("./lib/utils.js"),
+        log      = require("./lib/log.js"),
+        cfg      = require("./lib/config.js"),
         // Modules
         archiver = require("archiver"),
         async    = require("async"),
@@ -43,6 +43,7 @@
         chalk    = require("chalk"),
         crypto   = require("crypto"),
         fs       = require("graceful-fs"),
+        http     = require("http"),
         mime     = require("mime"),
         path     = require("path"),
         qs       = require("querystring"),
@@ -94,7 +95,7 @@
     log.simple(chalk.yellow(" ->> "), chalk.blue("droppy "), chalk.green(version), " running on ",
                chalk.blue("node "), chalk.green(process.version.substring(1)));
 
-    config = configParser(path.join(process.cwd(), "config.json"));
+    config = cfg(path.join(process.cwd(), "config.json"));
 
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
@@ -229,7 +230,7 @@
     //-----------------------------------------------------------------------------
     // Set up the directory
     function setupDirectories() {
-        wrench.rmdirSyncRecursive(config.incomingDir, true);
+        cleanupTemp(true);
         try {
             wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
             wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
@@ -237,6 +238,19 @@
             log.simple("Unable to create directories:");
             log.error(error);
             process.exit(1);
+        }
+    }
+
+    //-----------------------------------------------------------------------------
+    // Clean up the directory for incoming files
+    function cleanupTemp(initial) {
+        try {
+            wrench.rmdirSyncRecursive(config.incomingDir, true);
+            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
+        } catch (error) {
+            log.simple("Error cleanin up temporary directories:");
+            log.error(error);
+            if (initial) process.exit(1);
         }
     }
 
@@ -265,7 +279,7 @@
     //-----------------------------------------------------------------------------
     // Bind to listening port
     function createListener() {
-        var server, key, cert, ca, http = require("http");
+        var server, key, cert, ca;
         if (!config.useTLS) {
             server = http.createServer(onRequest);
         } else {
@@ -967,7 +981,7 @@
         } else if (URI === "/adduser" && firstRun) {
             req.on("data", function (data) { body += data; });
             req.on("end", function () {
-                var postData = require("querystring").parse(body);
+                var postData = qs.parse(body);
                 if (postData.username !== "" && postData.password !== "") {
                     addOrUpdateUser(postData.username, postData.password, true);
                     createCookie(req, res, postData);
@@ -1394,6 +1408,7 @@
         if (isCLI) log.simple(chalk.magenta(user), " successfully ", isNew ? "added." : "updated.");
         return 1;
     }
+
     //-----------------------------------------------------------------------------
     // Remove a user from the database
     function delUser(user) {
@@ -1554,6 +1569,7 @@
 
         if (count > 0) log.log("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
+        cleanupTemp();
         cleanUpSessions();
         writeDB();
 
