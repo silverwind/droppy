@@ -23,9 +23,10 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  --------------------------------------------------------------------------- */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
-  forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, node: true */
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true,
+  trailing: false, sub: true, eqeqeq: true, forin: true, freeze: true,
+  loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true,
+  newcap: true, undef: true, unused: true, globalstrict: true, node: true */
 "use strict";
 
 (function () {
@@ -35,19 +36,20 @@
         log          = require("./lib/log.js"),
         configParser = require("./lib/config.js"),
         // Modules
-        archiver   = require("archiver"),
-        async      = require("async"),
-        ap         = require("autoprefixer"),
-        Busboy     = require("busboy"),
-        crypto     = require("crypto"),
-        fs         = require("graceful-fs"),
-        mime       = require("mime"),
-        path       = require("path"),
-        qs         = require("querystring"),
-        util       = require("util"),
-        Wss        = require("ws").Server,
-        wrench     = require("wrench"),
-        zlib       = require("zlib"),
+        archiver = require("archiver"),
+        async    = require("async"),
+        ap       = require("autoprefixer"),
+        Busboy   = require("busboy"),
+        chalk    = require("chalk"),
+        crypto   = require("crypto"),
+        fs       = require("graceful-fs"),
+        mime     = require("mime"),
+        path     = require("path"),
+        qs       = require("querystring"),
+        util     = require("util"),
+        Wss      = require("ws").Server,
+        wrench   = require("wrench"),
+        zlib     = require("zlib"),
         // Variables
         version  = require("./package.json").version,
         config   = null,
@@ -89,10 +91,8 @@
     if (isCLI) handleArguments();
 
     log.simple(log.logo);
-    log.simple(log.color.yellow, " ->> ", log.color.blue, "droppy ", log.color.reset,
-               log.color.green, version, log.color.reset, " running on ", log.color.blue, "node ", log.color.reset,
-               log.color.green, process.version.substring(1), log.color.reset
-    );
+    log.simple(chalk.yellow(" ->> "), chalk.blue("droppy "), chalk.green(version), " running on ",
+               chalk.blue("node "), chalk.green(process.version.substring(1)));
 
     config = configParser(path.join(process.cwd(), "config.json"));
 
@@ -176,7 +176,7 @@
         }
 
         // Concatenate CSS and JS
-        log.simple(log.color.yellow, " ->> ", log.color.reset, "minifying resources...");
+        log.simple(chalk.yellow(" ->> "), "minifying resources...");
         resourceData.css.forEach(function (data) {
             out.css += data + "\n";
         });
@@ -332,23 +332,19 @@
         server.on("listening", function () {
             setupSocket(server);
             if (config.debug) watchCSS();
-            log.simple(log.color.yellow, " ->> ", log.color.reset, "listening on ",
-                       log.color.cyan, server.address().address, log.color.reset, ":",
-                       log.color.blue, server.address().port, log.color.reset
-            );
+            log.simple(chalk.yellow(" ->> "), "listening on ", chalk.cyan(server.address().address),
+                       ":", chalk.blue(server.address().port));
         });
 
         server.on("error", function (error) {
             if (error.code === "EADDRINUSE")
-                log.error("Failed to bind to ",
-                          log.color.cyan, config.listenHost, log.color.red, ":",
-                          log.color.blue, config.listenPort, log.color.red, ". Address already in use.\n");
+                log.simple("Failed to bind to ", chalk.cyan(config.listenHost), chalk.red(":"),
+                          chalk.blue(config.listenPort), chalk.red(". Address already in use.\n"));
             else if (error.code === "EACCES")
-                log.error("Failed to bind to ",
-                          log.color.cyan, config.listenHost, log.color.red, ":",
-                          log.color.blue, config.listenPort, log.color.red, ". Need permission to bind to ports < 1024.\n");
+                log.simple("Failed to bind to ", chalk.cyan(config.listenHost), chalk.red(":"),
+                          chalk.blue(config.listenPort), chalk.red(". Need permission to bind to ports < 1024.\n"));
             else
-                log.error("Error: ", util.inspect(error));
+                log.error(error);
             process.exit(1);
         });
 
@@ -546,15 +542,15 @@
                     if (pass === "") {
                         if (!db.users[name]) return;
                         delUser(msg.data.name);
-                        log.log(log.socket(remoteIP, remotePort), " Deleted user: ", log.color.magenta, name, log.color.reset);
+                        log.log(log.socket(remoteIP, remotePort), " Deleted user: ", chalk.magenta(name));
                         sendUsers(cookie);
                     } else {
                         var isNew = !db.users[name];
                         addOrUpdateUser(name, pass, priv);
                         if (isNew)
-                            log.log(log.socket(remoteIP, remotePort), " Added user: ", log.color.magenta, name, log.color.reset);
+                            log.log(log.socket(remoteIP, remotePort), " Added user: ", chalk.magenta(name));
                         else
-                            log.log(log.socket(remoteIP, remotePort), " Updated user: ", log.color.magenta, name, log.color.reset);
+                            log.log(log.socket(remoteIP, remotePort), " Updated user: ", chalk.magenta(name));
                         sendUsers(cookie);
                     }
                     break;
@@ -1155,7 +1151,7 @@
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                     fs.rename(files[name].src, files[name].dst, function () {
-                        log.log(socket, " Received: " + req.query.to.substring(1) + "/" + name);
+                        log.log(socket, " Received: " + decodeURIComponent(req.query.to) + "/" + name);
                     });
                 })(names.pop());
             }
@@ -1331,7 +1327,7 @@
             readDB();
             var out = ["Active Users: "];
             Object.keys(db.users).forEach(function (user) {
-                out.push(log.color.magenta, user, log.color.reset, ", ");
+                out.push(chalk.magenta(user), ", ");
             });
             log.simple.apply(null, out.length > 1 ? out.slice(0, out.length - 2) : out);
             process.exit(0);
@@ -1374,7 +1370,7 @@
                 db = {users: {}, sessions: {}, shortlinks: {}};
 
                 // Recreate DB file in case it doesn't exist / is empty
-                log.simple(log.color.yellow, " ->> ", log.color.reset, "creating ", log.color.magenta, path.basename(config.db), log.color.reset, "...");
+                log.simple(chalk.yellow(" ->> "), "creating ", chalk.magenta(path.basename(config.db)), "...");
                 doWrite = true;
             } else {
                 log.error("Error reading ", config.db, "\n", util.inspect(error));
@@ -1395,7 +1391,7 @@
             privileged: privileged
         };
         writeDB();
-        if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " successfully ", isNew ? "added." : "updated.");
+        if (isCLI) log.simple(chalk.magenta(user), " successfully ", isNew ? "added." : "updated.");
         return 1;
     }
     //-----------------------------------------------------------------------------
@@ -1404,10 +1400,10 @@
         if (db.users[user]) {
             delete db.users[user];
             writeDB();
-            if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " successfully removed.");
+            if (isCLI) log.simple(chalk.magenta(user), " successfully removed.");
             return 0;
         } else {
-            if (isCLI) log.simple(log.color.magenta, user, log.color.reset, " does not exist!");
+            if (isCLI) log.simple(chalk.magenta(user), " does not exist!");
             return 1;
         }
     }
