@@ -904,6 +904,8 @@
             log.response(req, res);
         } else if (/^\/!\/null/.test(URI)) {
             res.statusCode = 200;
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.setHeader("Content-Length", 0);
             res.end();
             log.response(req, res);
             return;

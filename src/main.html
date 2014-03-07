@@ -44,7 +44,7 @@
 		</div>
 		<div id="upload-time">
 			<svg class="time"></svg>
-			<span id="upload-time-left">sometimes</span>
+			<span id="upload-time-left"></span>
 		</div>
 		<div id="upload-cancel">
 			<svg class="remove"></svg>
@@ -52,12 +52,21 @@
 		</div>
 	</section>
 	<section id="audio-controls" class="out">
-		<span id="volume-icon" title="Scroll or click to modify the volume"><svg class="volume-medium"></svg></span>
-		<input id="volume-slider" class="out" type="range" min="0" max="100" step="1"></input>
+		<span id="volume-icon" title="Scroll or click to modify the volume">
+            <svg class="volume-medium"></svg>
+        </span>
+		<input id="volume-slider" class="out" type="range" min="0" max="100" step="1">
 		<span id="volume-level"></span>
 		<span id="audio-title"></span>
-		<div id="seekbar"><div id="seekbar-played"></div><div id="seekbar-loaded"></div></div>
-		<div id="time"><span id="time-cur"></span><span> / </span><span id="time-max"></span></div>
+		<div id="seekbar">
+            <div id="seekbar-played"></div>
+            <div id="seekbar-loaded"></div>
+        </div>
+		<div id="time">
+            <span id="time-cur"></span>
+            <span> / </span>
+            <span id="time-max"></span>
+        </div>
 	</section>
 </div>
 <input type="file" name="file" id="file" multiple>
@@ -90,8 +99,14 @@
 <div id="config-box" class="out">
 	<span id="userlist-header">Manage Accounts</span>
 	<ul id="userlist"></ul>
-	<div id="user-add"><svg class="plus"></svg><span>Add User<span></div>
-	<button id="save-users" class="submit" tabindex="4"><svg class="ok"></svg><span>Save Users<span></button>
+	<div id="user-add">
+        <svg class="plus"></svg>
+        <span>Add User<span>
+    </div>
+	<button id="save-users" class="submit" tabindex="4">
+        <svg class="ok"></svg>
+        <span>Save Users<span>
+        </button>
 </div>
 <audio id="audio-player" preload="none"></audio>
 <div id="tooltip"></div>
