@@ -273,18 +273,22 @@
                 view = getView(vId);
                 if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
                 view[0].switchRequest = false;
-                showSpinner();
-                if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
-                    view[0].loaded === true; // Ensure to update path on the first load
-                    if (view[0].vId === 0)
-                        updateTitle(msg.folder, true);
-                    updatePath(view, msg.folder);
+                if (msg.sizes) {
+                    addSizes(view, msg.folder, msg.data);
+                } else {
+                    showSpinner();
+                    if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
+                        view[0].loaded === true; // Ensure to update path on the first load
+                        if (view[0].vId === 0)
+                            updateTitle(msg.folder, true);
+                        updatePath(view, msg.folder);
+                    }
+                    view[0].currentFile = null;
+                    view[0].currentFolder = msg.folder;
+                    view[0].currentData = msg.data;
+                    view.attr("data-type", "directory");
+                    openDirectory(view);
                 }
-                view[0].currentFile = null;
-                view[0].currentFolder = msg.folder;
-                view[0].currentData = msg.data;
-                view.attr("data-type", "directory");
-                openDirectory(view);
                 break;
             case "UPDATE_BE_FILE":
                 var path = fixRootPath((msg.folder + "/" + msg.file));
@@ -637,7 +641,7 @@
             }
             dummyFolder = $(".data-row.new-folder");
             view = dummyFolder.parents(".view");
-            view.scrollTop(dummyFolder.offset().top);
+            view.find(".content").scrollTop(dummyFolder.offset().top);
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
@@ -1286,10 +1290,11 @@
 
     // Convert the received data into HTML
     function openDirectory(view, isUpload) {
-        var list = $("<ul></ul>"),
+        var downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes,
             folder = view[0].currentFolder,
             fileList = view[0].currentData,
-            downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes;
+            list = $("<ul></ul>");
+
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
                 svgIcon = "", classes = "";
@@ -1435,10 +1440,12 @@
         if (view[0].animDirection === "center" && type !== "document") {
             view.find(".content").replaceClass(navRegex, "center");
             view.find(".content").before(content);
+            view.find(".new").attr("data-root", view[0].currentFolder);
             view.find(".new").addClass(type);
             finish();
         } else {
             view.append(content);
+            view.find(".new").attr("data-root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
             view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
@@ -1833,6 +1840,24 @@
         droppy.sorting = {col: "name", dir: "down"};
         droppy.svg = {};
         droppy.zeroFiles = null;
+    }
+
+    // Add directory sizes
+    function addSizes(view, folder, data) {
+        var bytes, temp;
+        view.children(".content").each(function () {
+            if ($(this).data("root") === folder) {
+                $(this).find(".entry-link").each(function(){
+                    bytes = data[$(this).text()].size;
+                    if (bytes) {
+                        temp = convertToSI(bytes);
+                        $(this).siblings(".size").attr("data-size", bytes).text(temp.size > 0 ? temp.size : "0");
+                        $(this).siblings(".size-unit").text(temp.size > 0 ? temp.unit : "b");
+                        return;
+                    }
+                });
+            }
+        });
     }
 
     // Convert raw byte numbers to SI values

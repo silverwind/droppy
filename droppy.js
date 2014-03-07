@@ -432,8 +432,8 @@
                         } else {
                             client.v[vId].file = null;
                             client.v[vId].directory = msg.data;
-                            updateDirectory(client.v[vId].directory, function (force) {
-                                sendFiles(cookie, vId, "UPDATE_DIRECTORY", force);
+                            updateDirectory(client.v[vId].directory, function (sizes) {
+                                sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                             });
                             updateWatchers(client.v[vId].directory);
                         }
@@ -592,24 +592,26 @@
     //-----------------------------------------------------------------------------
     // Send a file list update
     var updateFuncs = {};
-    function sendFiles(cookie, vId, eventType, force) {
+    function sendFiles(cookie, vId, eventType, sizes) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
 
         var func = function (cookie, eventType) {
-            var dir = clients[cookie].v[vId].directory;
-            var data = JSON.stringify({
-                vId    : vId,
-                type   : eventType,
-                folder : dir,
-                data   : dirs[dir]
-            });
+            var dir = clients[cookie].v[vId].directory,
+                data = {
+                    vId    : vId,
+                    type   : eventType,
+                    folder : dir,
+                    data   : dirs[dir]
+                };
+            if (sizes) data.sizes = true;
+            data = JSON.stringify(data);
             send(clients[cookie].ws, data);
         };
 
         if (!updateFuncs[cookie])
             updateFuncs[cookie] = utils.throttle(func, 250, { leading: true, trailing: false });
 
-        if (!force)
+        if (!sizes)
             updateFuncs[cookie](cookie, eventType);
         else
             func(cookie, eventType);
