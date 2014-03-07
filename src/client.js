@@ -645,9 +645,7 @@
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
-                    sendMessage(null, "CREATE_FOLDER",
-                        view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal
-                    );
+                    sendMessage(null, "CREATE_FOLDER", newVal);
                 }
                 dummyFolder.remove();
             });
