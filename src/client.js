@@ -637,11 +637,11 @@
                 $(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
                 wasEmpty = true;
             } else {
-                $(dummyHtml).appendTo(".content ul");
+                $(dummyHtml).prependTo(".content ul");
             }
             dummyFolder = $(".data-row.new-folder");
             view = dummyFolder.parents(".view");
-            view.find(".content").scrollTop(dummyFolder.offset().top);
+            view.find(".content").scrollTop(0);
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner();
