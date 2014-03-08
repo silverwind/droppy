@@ -1312,8 +1312,7 @@
                         archive.append("", { name: removeFilePath(currentPath) });
                 };
 
-                archive.on("entry", function (error) {
-                    if (error) log.error(error);
+                archive.on("entry", function () {
                     if (paths.length)
                         next(paths.pop());
                     else
