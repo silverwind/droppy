@@ -44,7 +44,7 @@
         prefs = JSON.parse(localStorage.getItem("prefs")) || {};
         for (var pref in defaults) {
             if (defaults.hasOwnProperty(pref)) {
-                if (!prefs[pref]) {
+                if (prefs[pref] === undefined) {
                     doSave = true;
                     prefs[pref] = defaults[pref];
                 }
@@ -1644,7 +1644,7 @@
                           '<option value="tabs">Tabs</option>' +
                         '</select>' +
                         '<select class="indentunit">' +
-                          '<option value="2">2</option> ' +
+                          '<option value="2">2</option>' +
                           '<option value="4">4</option>' +
                           '<option value="8">8</option>' +
                         '</select>' +
@@ -1663,6 +1663,7 @@
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
+
         showSpinner();
         $.ajax({
             type: "GET",
@@ -1726,6 +1727,7 @@
                 });
                 doc.find(".opts").register("click", function () {
                     var opts = $(this);
+                    setOptionsValues(view);
                     if (opts.hasClass("active")) {
                         opts.removeClass("active");
                     } else {
@@ -1773,6 +1775,21 @@
     function saveEditorOptions(editor) {
         ["theme", "indentWithTabs", "indentUnit", "lineWrapping"].forEach(function (option) {
             droppy.set(option, editor.getOption(option));
+        });
+    }
+
+    function setOptionsValues(view) {
+        view.find(".indentmode option").each(function() {
+            if ($(this).attr("value") === (droppy.get("indentWithTabs") ? "tabs" : "spaces"))
+                $(this).attr("selected", "selected");
+        });
+        view.find(".indentunit option").each(function() {
+            if ($(this).attr("value") === String(droppy.get("indentUnit")))
+                $(this).attr("selected", "selected");
+        });
+        view.find(".wrap option").each(function() {
+            if ($(this).attr("value") === (droppy.get("lineWrapping") ? "wrap" : "nowrap"))
+                $(this).attr("selected", "selected");
         });
     }
 
