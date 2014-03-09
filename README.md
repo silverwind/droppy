@@ -53,9 +53,9 @@ Configuration is done through `config.json`, which is created on the first run, 
     "resDir"       : "./res/",
     "srcDir"       : "./src/",
     "tls" : {
-        "key"      : "./keys/key.pem",
-        "cert"     : "./keys/cert.pem",
-        "ca"       : []
+        "key"      : "./key.pem",
+        "cert"     : "./cert.pem",
+        "ca"       : ["./ca1.pem", "./ca2.pem"]
     }
 }
 ````
@@ -84,7 +84,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **tls**: See TLS options below.
 
 ###TLS options
-These are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when **useTLS** is enabled.
+These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when **useTLS** is enabled. All files are required in PEM format.
 
 - **key**: Path to your private key.
 - **cert**: Path to your certificate.
