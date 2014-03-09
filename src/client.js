@@ -1663,7 +1663,6 @@
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
-
         showSpinner();
         $.ajax({
             type: "GET",
@@ -1707,6 +1706,7 @@
                     // keyMap: "sublime",
                     mode: mode
                 });
+                $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                 });

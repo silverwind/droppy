@@ -43,6 +43,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "readInterval" : 250,
     "keepAlive"    : 20000,
     "linkLength"   : 3,
+    "logLevel"     : 2,
     "maxOpen"      : 256,
     "zipLevel"     : 1,
     "noLogin"      : false,
@@ -69,6 +70,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **readInterval**: The minimum time gap in milliseconds in which updates to a single directory are sent.
 - **keepAlive**: The interval in milliseconds in which the server sends keepalive message over the websocket. This obviously adds some overhead, but may be needed to keep clients connected when proxies are involved. Set to **0** to disable keepalive messages.
 - **linkLength**: The amount of characters in a shortlink.
+- **logLevel**: The amount of logging to show. `0` is no logging, `1` is errors, `2` is info (requests), `3` is debug.
 - **maxOpen**: The maximum number of concurrently opened files. This option is primarily there for Windows servers.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
 - **noLogin**: When enabled, the client skips the login page, making the server essentially public.
