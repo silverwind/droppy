@@ -91,7 +91,7 @@
     if (isCLI) handleArguments();
 
     log.simple(log.logo);
-    log.simple(chalk.yellow(" ->> "), chalk.blue("droppy "), chalk.green(version), " running on ",
+    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
                chalk.blue("node "), chalk.green(process.version.substring(1)));
 
     config = cfg(path.join(process.cwd(), "config.json"));
@@ -176,7 +176,7 @@
         }
 
         // Concatenate CSS and JS
-        log.simple(chalk.yellow(" ->> "), "minifying resources...");
+        log.simple("Minifying resources...");
         resourceData.css.forEach(function (data) {
             out.css += data + "\n";
         });
@@ -345,7 +345,7 @@
         server.on("listening", function () {
             setupSocket(server);
             if (config.debug) watchCSS();
-            log.simple(chalk.yellow(" ->> "), "listening on ", chalk.cyan(server.address().address),
+            log.simple("Listening on ", chalk.cyan(server.address().address),
                        ":", chalk.blue(server.address().port));
         });
 
@@ -377,12 +377,12 @@
         case "OPTIONS":
             res.setHeader("Allow", "GET,POST,OPTIONS");
             res.end("\n");
-            log.response(req, res);
+            log(req, res);
             break;
         default:
             res.statusCode = 405;
             res.end("\n");
-            log.response(req, res);
+            log(req, res);
         }
     }
 
@@ -398,17 +398,15 @@
             }, config.keepAlive);
         }
         wss.on("connection", function (ws) {
-            var remoteIP   = ws.upgradeReq.headers["x-real-ip"]   || ws._socket.remoteAddress,
-                remotePort = ws.upgradeReq.headers["x-real-port"] || ws._socket.remotePort,
-                cookie     = getCookie(ws.upgradeReq.headers.cookie),
+            var cookie = getCookie(ws.upgradeReq.headers.cookie),
                 client;
 
             if (!cookie && !config.noLogin) {
                 ws.close(4000);
-                log(log.socket(remoteIP, remotePort), " Unauthorized WebSocket connection closed.");
+                log(ws, null, "Unauthorized WebSocket connection closed.");
                 return;
             } else {
-                log(log.socket(remoteIP, remotePort), " WebSocket ", "connected");
+                log(ws, null, "WebSocket [", chalk.green("connected"), "] ");
                 clients[cookie] = { v: [{}], ws: ws };
                 client = clients[cookie];
             }
@@ -425,10 +423,10 @@
                     }}));
                     break;
                 case "REQUEST_UPDATE":
-                    if (!utils.isPathSane(msg.data)) return log(log.socket(remoteIP, remotePort), " Invalid update request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log(ws, null, "Invalid update request: " + msg.data);
                     readPath(msg.data, function (error, info) {
                         if (error) {
-                            return log(log.socket(remoteIP, remotePort), " Non-existing update request: " + msg.data);
+                            return log(ws, null, "Non-existing update request: " + msg.data);
                         } else if (info.type === "f") {
                             client.v[vId].file = path.basename(msg.data);
                             client.v[vId].directory = path.dirname(msg.data);
@@ -449,7 +447,7 @@
                     });
                     break;
                 case "REQUEST_SHORTLINK":
-                    if (!utils.isPathSane(msg.data)) return log(log.socket(remoteIP, remotePort), " Invalid shortlink request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log(ws, null, "Invalid shortlink request: " + msg.data);
                     // Check if we already have a link for that file
                     for (var link in db.shortlinks) {
                         if (db.shortlinks[link] === msg.data) {
@@ -465,14 +463,14 @@
                         while (link.length < config.linkLength)
                             link += chars.charAt(Math.floor(Math.random() * chars.length));
                     } while (db.shortlinks[link]); // In case the RNG generates an existing link, go again
-                    log(log.socket(remoteIP, remotePort), " Shortlink created: " + link + " -> " + msg.data);
+                    log(ws, null, "Shortlink created: " + link + " -> " + msg.data);
                     db.shortlinks[link] = msg.data;
                     sendLink(cookie, link);
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    log(log.socket(remoteIP, remotePort), " Deleting: " + msg.data.substring(1));
-                    if (!utils.isPathSane(msg.data)) return log(log.socket(remoteIP, remotePort), " Invalid file deletion request: " + msg.data);
+                    log(ws, null, "Deleting: " + msg.data.substring(1));
+                    if (!utils.isPathSane(msg.data)) return log(ws, null, "Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
                     fs.stat(msg.data, function (error, stats) {
                         if (error) {
@@ -487,8 +485,8 @@
                     });
                     break;
                 case "SAVE_FILE":
-                    log(log.socket(remoteIP, remotePort), " Saving: " + msg.data.to.substring(1));
-                    if (!utils.isPathSane(msg.data.to)) return log(log.socket(remoteIP, remotePort), " Invalid save request: " + msg.data);
+                    log(ws, null, "Saving: " + msg.data.to.substring(1));
+                    if (!utils.isPathSane(msg.data.to)) return log(ws, null, "Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
                     fs.stat(msg.data.to, function (error, stats) {
                         if (error) {
@@ -511,9 +509,9 @@
                     });
                     break;
                 case "CLIPBOARD":
-                    log(log.socket(remoteIP, remotePort), " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
-                    if (!utils.isPathSane(msg.data.from)) return log(log.socket(remoteIP, remotePort), " Invalid clipboard source: " + msg.data.from);
-                    if (!utils.isPathSane(msg.data.to)) return log(log.socket(remoteIP, remotePort), " Invalid clipboard destination: " + msg.data.to);
+                    log(ws, null, " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
+                    if (!utils.isPathSane(msg.data.from)) return log(ws, null, "Invalid clipboard source: " + msg.data.from);
+                    if (!utils.isPathSane(msg.data.to)) return log(ws, null, "Invalid clipboard destination: " + msg.data.to);
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
 
@@ -527,22 +525,22 @@
                     }
                     break;
                 case "CREATE_FOLDER":
-                    if (!utils.isPathSane(msg.data)) return log(log.socket(remoteIP, remotePort), " Invalid directory creation request: " + msg.data);
+                    if (!utils.isPathSane(msg.data)) return log(ws, null, "Invalid directory creation request: " + msg.data);
                     fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
-                        log(log.socket(remoteIP, remotePort), " Created: ", msg.data);
+                        log(ws, null, "Created: ", msg.data);
                     });
                     break;
                 case "RENAME":
                     // Disallow whitespace-only and empty strings in renames
                     if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
-                        log(log.socket(remoteIP, remotePort), " Invalid rename request: " + msg.data.new);
+                        log(ws, null, "Invalid rename request: " + msg.data.new);
                         send(client.ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
                         return;
                     }
                     fs.rename(addFilePath(msg.data.old), addFilePath(msg.data.new), function (error) {
                         if (error) log.error(error);
-                        log(log.socket(remoteIP, remotePort), " Renamed: ", msg.data.old, " -> ", msg.data.new);
+                        log(ws, null, "Renamed: ", msg.data.old, " -> ", msg.data.new);
                     });
                     break;
                 case "GET_USERS":
@@ -555,24 +553,24 @@
                     if (pass === "") {
                         if (!db.users[name]) return;
                         delUser(msg.data.name);
-                        log(log.socket(remoteIP, remotePort), " Deleted user: ", chalk.magenta(name));
+                        log(ws, null, "Deleted user: ", chalk.magenta(name));
                         sendUsers(cookie);
                     } else {
                         var isNew = !db.users[name];
                         addOrUpdateUser(name, pass, priv);
                         if (isNew)
-                            log(log.socket(remoteIP, remotePort), " Added user: ", chalk.magenta(name));
+                            log(ws, null, "Added user: ", chalk.magenta(name));
                         else
-                            log(log.socket(remoteIP, remotePort), " Updated user: ", chalk.magenta(name));
+                            log(ws, null, "Updated user: ", chalk.magenta(name));
                         sendUsers(cookie);
                     }
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
-                        if (!utils.isPathSane(file)) return log(log.socket(remoteIP, remotePort), " Invalid empty file creation request: " + file);
+                        if (!utils.isPathSane(file)) return log(ws, null, "Invalid empty file creation request: " + file);
                         wrench.mkdirSyncRecursive(path.dirname(addFilePath(file)), mode.dir);
                         fs.writeFileSync(addFilePath(file), "", {mode: mode.file});
-                        log(log.socket(remoteIP, remotePort), " Received: " + file.substring(1));
+                        log(ws, null, "Received: " + file.substring(1));
                     });
                     send(client.ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;
@@ -589,7 +587,7 @@
                     reason = "(Going away)";
                     delete clients[cookie];
                 }
-                log(log.socket(remoteIP, remotePort), " WebSocket ", "disconnected", " ", reason || "(Code: " + (code || "none")  + ")");
+               log(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
             });
 
             ws.on("error", function (error) {
@@ -900,13 +898,13 @@
             res.setHeader("Content-Type", "text/html; charset=utf-8");
             res.setHeader("Content-Length", json.length);
             res.end(json);
-            log.response(req, res);
+            log(req, res);
         } else if (/^\/!\/null/.test(URI)) {
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/html; charset=utf-8");
             res.setHeader("Content-Length", 0);
             res.end();
-            log.response(req, res);
+            log(req, res);
             return;
         } else if (/^\/!\//.test(URI)) {
             handleResourceRequest(req, res, req.url.substring(3));
@@ -923,7 +921,7 @@
                 res.statusCode = 301;
                 res.setHeader("Location", "/");
                 res.end();
-                log.response(req, res);
+                log(req, res);
                 return;
             }
 
@@ -936,7 +934,7 @@
                     res.statusCode = 301;
                     res.setHeader("Location", "/");
                     res.end();
-                    log.response(req, res);
+                    log(req, res);
                 }
             });
         }
@@ -950,7 +948,7 @@
             if (!getCookie(req.headers.cookie)) {
                 res.statusCode = 401;
                 res.end();
-                log.response(req, res);
+                log(req, res);
             }
             handleUploadRequest(req, res);
         } else if (URI === "/login") {
@@ -973,10 +971,10 @@
                 if (isValidUser(postData.username, postData.password)) {
                     createCookie(req, res, postData);
                     endReq(req, res, true);
-                    log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "authenticated");
+                    log(req, res, "User ", postData.username, chalk.green(" authenticated"));
                 } else {
                     endReq(req, res, false);
-                    log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " User ", postData.username, "unauthorized");
+                    log(req, res, "User ", postData.username, chalk.red(" unauthorized"));
                 }
             });
         } else if (URI === "/adduser" && firstRun) {
@@ -1002,7 +1000,7 @@
             res.setHeader("Content-Type", "text/plain");
             res.setHeader("Content-Length", 0);
             res.end();
-            log.response(req, res);
+            log(req, res);
         }
     }
 
@@ -1016,7 +1014,7 @@
             res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
             res.setHeader("Content-Length", Buffer.byteLength(cssCache, "utf8"));
             res.end(cssCache);
-            log.response(req, res);
+            log(req, res);
             return;
         }
 
@@ -1066,7 +1064,7 @@
                 }
             }
         }
-        log.response(req, res);
+        log(req, res);
     }
 
     //-----------------------------------------------------------------------------
@@ -1082,7 +1080,7 @@
             res.statusCode = 301;
             res.setHeader("Location", "/");
             res.end();
-            log.response(req, res);
+            log(req, res);
             return;
         }
 
@@ -1108,7 +1106,7 @@
                     }
                     res.setHeader("Content-Type", mimeType);
                     res.setHeader("Content-Length", stats.size);
-                    log.response(req, res);
+                    log(req, res);
                     fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
                 } else {
                     if (error.code === "ENOENT")
@@ -1118,7 +1116,7 @@
                     else
                         res.statusCode = 500;
                     res.end();
-                    log.response(req, res);
+                    log(req, res);
                     if (error)
                         log.error(error);
                 }
@@ -1128,18 +1126,17 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var socket = log.socket(req.socket.remoteAddress, req.socket.remotePort),
-            cookie = getCookie(req.headers.cookie);
+        var cookie = getCookie(req.headers.cookie);
 
         req.query = qs.parse(req.url.substring("/upload?".length));
-        log(socket, " Upload started");
+        log(req, res, "Upload started");
 
         // FEATURE: Check permissions
         if (!clients[cookie] && !config.noLogin) {
             res.statusCode = 500;
             res.setHeader("Content-Type", "text/plain");
             res.end();
-            log.response(req, res);
+            log(req, res);
             return;
         }
 
@@ -1166,7 +1163,7 @@
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
                     fs.rename(files[name].src, files[name].dst, function () {
-                        log(socket, " Received: " + decodeURIComponent(req.query.to) + "/" + name);
+                        log(req, res, "Received: " + decodeURIComponent(req.query.to) + "/" + name);
                     });
                 })(names.pop());
             }
@@ -1174,7 +1171,7 @@
         });
 
         req.on("close", function () {
-            if (!done) log(socket, " Upload cancelled");
+            if (!done) log(req, res, "Upload cancelled");
             closeConnection();
         });
 
@@ -1299,7 +1296,7 @@
                     res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(zipPath) + '.zip"');
 
                 res.setHeader("Transfer-Encoding", "chunked");
-                log(log.socket(req.socket.remoteAddress, req.socket.remotePort), " Creating zip of /", req.url.substring(4));
+                log(req, res, "Creating zip of /", req.url.substring(4));
 
                 archive = archiver(type, {zlib: { level: config.zipLevel }});
                 archive.on("error", function (error) { log.error(error); });
@@ -1327,7 +1324,7 @@
             } else {
                 res.statusCode = 404;
                 res.end();
-                log.response(req, res);
+                log(req, res);
             }
         });
     }
@@ -1336,14 +1333,11 @@
     // Argument handler
     function handleArguments() {
         var args = process.argv.slice(2), option = args[0];
+        config = cfg(path.join(process.cwd(), "config.json"));
 
         if (option === "list" && args.length === 1) {
             readDB();
-            var out = ["Active Users: "];
-            Object.keys(db.users).forEach(function (user) {
-                out.push(chalk.magenta(user), ", ");
-            });
-            log.simple.apply(null, out.length > 1 ? out.slice(0, out.length - 2) : out);
+            log.simple(["Active Users: "].concat(chalk.magenta(Object.keys(db.users).join(", "))).join(""));
             process.exit(0);
         } else if (option === "add" && args.length === 3) {
             readDB();
@@ -1351,7 +1345,7 @@
         } else if (option === "del" && args.length === 2) {
             readDB();
             process.exit(delUser(args[1]));
-        } else if (option === "version") {
+        } else if (option === "version" || option === "-v" || option === "--version") {
             log.simple(version);
             process.exit(0);
         } else {
@@ -1384,7 +1378,7 @@
                 db = {users: {}, sessions: {}, shortlinks: {}};
 
                 // Recreate DB file in case it doesn't exist / is empty
-                log.simple(chalk.yellow(" ->> "), "creating ", chalk.magenta(path.basename(config.db)), "...");
+                log.simple("Creating ", chalk.magenta(path.basename(config.db)), "...");
                 doWrite = true;
             } else {
                 log.error("Error reading ", config.db, "\n", util.inspect(error));
@@ -1555,7 +1549,7 @@
 
     //-----------------------------------------------------------------------------
     function shutdown(signal) {
-        log("Received " + signal + " - Shutting down...");
+        log.simple("Received " + signal + " - Shutting down...");
         var count = 0;
         for (var client in clients) {
             if (clients.hasOwnProperty(client)) {
@@ -1567,7 +1561,7 @@
             }
         }
 
-        if (count > 0) log("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
+        if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
         cleanupTemp();
         cleanUpSessions();
