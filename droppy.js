@@ -89,7 +89,6 @@
 
     // Argument handler
     if (isCLI) handleArguments();
-
     log.logo();
 
     config = cfg(path.join(process.cwd(), "config.json"));
