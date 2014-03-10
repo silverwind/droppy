@@ -176,7 +176,10 @@ input:-webkit-autofill {
     bottom: 0;
     left:0;
     right:0;
+    overflow: hidden;
 }
+
+.view + .view { border-left: 2px solid #444 }
 
 @media all and (min-width: 1024px) { .view { top: 39px } }
 @media all and (max-width: 1023px) { .view { top: 34px } }
