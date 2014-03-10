@@ -1169,17 +1169,17 @@
         parts[0] = droppy.svg.home;
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
         var pathStr = "";
-        if (droppy.savedParts) {
+        if (view[0].savedParts) {
             i = 1; // Skip the first element as it's always the same
             while (true) {
                 pathStr += "/" + parts[i];
-                if (!parts[i] && !droppy.savedParts[i]) break;
-                if (parts[i] !== droppy.savedParts[i]) {
-                    if (droppy.savedParts[i] && !parts[i]) {
+                if (!parts[i] && !view[0].savedParts[i]) break;
+                if (parts[i] !== view[0].savedParts[i]) {
+                    if (view[0].savedParts[i] && !parts[i]) {
                         view.find(".path li").slice(i).remove();
                         break;
                     }
-                    else if (parts[i] && !droppy.savedParts[i])
+                    else if (parts[i] && !view[0].savedParts[i])
                         createPart(parts[i], pathStr);
                 }
                 i++;
@@ -1197,7 +1197,7 @@
             }, 300);
         }
 
-        droppy.savedParts = parts;
+        view[0].savedParts = parts;
 
         function createPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
@@ -1806,7 +1806,6 @@
         droppy.isUploading = null;
         droppy.mediaTypes = {};
         droppy.reopen = null;
-        droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
         droppy.sorting = {col: "name", dir: "down"};
