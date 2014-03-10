@@ -296,7 +296,6 @@
                 view;
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
-                console.log("UPDATE_DIR:" + vId)
                 view = getView(vId);
                 if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
                 view[0].switchRequest = false;
@@ -595,8 +594,8 @@
         $(window).register("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
-                $(".view").each(function (elem) {
-                    checkPathOverflow($(elem));
+                $(".view").each(function () {
+                    checkPathOverflow($(this));
                 });
             }, 100);
         });
@@ -1203,7 +1202,6 @@
         if (typeof path === "undefined")
             path = getViewLocation(view);
         path = fixRootPath(path);
-        console.log("updatePath:"+view[0].vId+"@"+path)
         var parts = path.split("/"),
             i = 0, len;
         parts[0] = droppy.svg.home;
