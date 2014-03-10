@@ -143,6 +143,7 @@ input:-webkit-autofill {
 #about:hover         { color: #f71; border-bottom: 2px solid #f71 !important }
 #config:hover        { color: #ff5; border-bottom: 2px solid #ff5 !important }
 #logout:hover        { color: #e33; border-bottom: 2px solid #e33 !important }
+#split-view:hover    { color: #f5f; border-bottom: 2px solid #f5f !important }
 
 #upload-file:hover svg   { fill: #29f }
 #upload-folder:hover svg { fill: #f1a }
@@ -150,6 +151,8 @@ input:-webkit-autofill {
 #about:hover svg         { fill: #f71 }
 #config:hover svg        { fill: #ff5 }
 #logout:hover svg        { fill: #e33 }
+#split-view:hover svg.split .left  { fill: #f22 }
+#split-view:hover svg.split .right { fill: #28f }
 
 #upload-folder.disabled { color: #666; cursor: not-allowed }
 #upload-folder.disabled svg { fill: #666 }

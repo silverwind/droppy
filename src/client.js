@@ -1568,17 +1568,6 @@
     }
 
     function sortFunc(a, b) {
-        function compare(a, b) {
-            if (typeof a === "number" && typeof b === "number") {
-                return b - a;
-            } else {
-                try {
-                    return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
-                } catch (undefError) {
-                    return -1;
-                }
-            }
-        }
         if (droppy.sorting.asc) {
             var temp = a;
             a = b;
@@ -1592,6 +1581,18 @@
             return compare($(a).find(".mtime").data("timestamp"), $(b).find(".mtime").data("timestamp"));
         } else if (droppy.sorting.col === "size") {
             return compare($(a).find(".size").data("size"), $(b).find(".size").data("size"));
+        }
+
+        function compare(a, b) {
+            if (typeof a === "number" && typeof b === "number") {
+                return b - a;
+            } else {
+                try {
+                    return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
+                } catch (undefError) {
+                    return -1;
+                }
+            }
         }
     }
 
