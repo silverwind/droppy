@@ -651,6 +651,20 @@
             });
         });
 
+        $("#split-view").register("click", function () {
+            if ($("#view-container").children(".view").length < 2) {
+                $("#view-container .view").addClass("left");
+                $("#view-container .view").clone().removeClass("left").addClass("right").appendTo("#view-container");
+                $(this).children(".button-text").text("Merge view");
+                $(this).attr("title", "Merge views back together");
+            } else {
+                $("#view-container .view.right").remove();
+                $("#view-container .view.left").removeClass("left");
+                $(this).children(".button-text").text("Split view");
+                $(this).attr("title", "Split the view in half");
+            }
+        });
+
         var aboutbox  = $("#about-box"),
             configbox = $("#config-box");
 
@@ -1133,7 +1147,7 @@
 
                 temp = createElement("input", "user-pass");
                 temp.type = "password";
-                temp.setAttribute("title", "The user's password");
+                temp.setAttribute("title", "Password");
                 temp.onkeyup = onkeyupHandler;
                 entry.appendChild(temp);
 
