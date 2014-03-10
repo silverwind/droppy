@@ -725,10 +725,13 @@
                             value  = $(this).val();
 
                         if (value === "true") value = true;
-                        if (value === "false") value = true;
+                        if (value === "false") value = false;
                         if (/^[0-9]*$/.test(value)) value = Number(value);
 
                         droppy.set(option, value);
+                        $(".view").each(function () {
+                            if(this.editor) this.editor.setOption(option, value);
+                        });
                     });
                 });
 
