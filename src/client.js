@@ -1592,9 +1592,9 @@
         var source = playButton.parent().parent().find(".file-link").attr("href");
         play(source, playButton);
     }
-
     function closeDoc(view) {
         updateLocation(view, view[0].currentFolder);
+        view[0].editor = null;
     }
     function openFile(view) {
         // Determine filetype and how to open it
