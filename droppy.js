@@ -511,6 +511,11 @@
                     log.info(ws, null, " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
+                    if (msg.data.to.indexOf(msg.data.from) !== -1) {
+                        log.error("Can't copy directory into itself");
+                        send(client.ws, JSON.stringify({ type : "ERROR", text: "Can't copy directory into itself."}));
+                        return;
+                    }
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
 
@@ -691,10 +696,11 @@
                         }
                     });
                 } else if (stats.isDirectory()) {
-                    wrench.copyDirSyncRecursive(from, to);
-                    if (type === "cut") {
-                        deleteDirectory(from);
-                    }
+                    wrench.copyDirRecursive(from, to, {forceDelete: true, preserveTimestamps: true}, function(){
+                        if (type === "cut") {
+                            deleteDirectory(from);
+                        }
+                    });
                 }
             }
         });
