@@ -1344,7 +1344,7 @@
         }
         list.children("li").sort(sortFunc).appendTo(list);
         var content = contentWrap(view).html(
-            '<div class="paste ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
+            '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
                 '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
             '</div>');
         if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
@@ -1390,7 +1390,7 @@
             });
         });
         // Paste a file/folder into a folder
-        content.find(".paste").register("click", function (event) {
+        content.find(".paste-button").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
@@ -1490,8 +1490,8 @@
                 from  = entry.data("id");
             droppy.clipboard = { type: $(this).attr("class"), from: from };
             $("#click-catcher").trigger("click");
-            view.find(".paste .filename").text(basename(from));
-            view.find(".paste").replaceClass("out", "in");
+            view.find(".paste-button .filename").text(basename(from));
+            view.find(".paste-button").replaceClass("out", "in");
         });
 
         // Open a file/folder in browser

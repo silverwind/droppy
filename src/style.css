@@ -286,7 +286,7 @@ input:-webkit-autofill {
 
 /* ========================= File/Folder Display =========================== */
 
-.paste {
+.paste-button {
     width: 100%;
     text-align: center;
     color: #aaa;
@@ -294,19 +294,19 @@ input:-webkit-autofill {
     transition: all .3s ease;
 }
 
-.paste.in  { margin-bottom: .25em; }
-.paste.out { height: 0; overflow: hidden; }
+.paste-button.in  { margin-bottom: .25em; }
+.paste-button.out { height: 0; overflow: hidden; }
 
-@media all and (min-width: 1024px) { .paste { font-size:  1em } }
-@media all and (max-width: 1023px) { .paste { font-size: .9em } }
-@media all and (max-width:  639px) { .paste { font-size: .8em } }
+@media all and (min-width: 1024px) { .paste-button { font-size:  1em } }
+@media all and (max-width: 1023px) { .paste-button { font-size: .9em } }
+@media all and (max-width:  639px) { .paste-button { font-size: .8em } }
 
-.paste:hover {color: #ccc }
-.paste:hover svg {fill: #ccc }
-.paste .filename { color: #ccc; transition: all .3s ease }
-.paste:hover .filename {color: #fff}
+.paste-button:hover {color: #ccc }
+.paste-button:hover svg {fill: #ccc }
+.paste-button .filename { color: #ccc; transition: all .3s ease }
+.paste-button:hover .filename {color: #fff}
 
-.paste svg {
+.paste-button svg {
     height: 1em;
     width: 1em;
     fill: #aaa;
