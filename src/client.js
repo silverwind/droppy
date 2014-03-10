@@ -724,9 +724,12 @@
                         var option = $(this).attr("class"),
                             value  = $(this).val();
 
-                        if (value === "true") value = true;
-                        if (value === "false") value = false;
-                        if (/^[0-9]*$/.test(value)) value = Number(value);
+                        if (value === "true")
+                            value = true;
+                        else if (value === "false")
+                            value = false;
+                        else if (typeof parseFloat(value) === "number")
+                            value = Number(value);
 
                         droppy.set(option, value);
                         $(".view").each(function () {
