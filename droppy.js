@@ -407,7 +407,7 @@
                 return;
             } else {
                 log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
-                clients[cookie] = { v: [{}], ws: ws };
+                clients[cookie] = { v: [], ws: ws };
                 client = clients[cookie];
             }
             ws.on("message", function (message) {
@@ -445,6 +445,13 @@
                             updateWatchers(client.v[vId].directory);
                         }
                     });
+                    break;
+                case "NEW_VIEW":
+                    client.v[vId] = {}
+                    break;
+                case "DESTROY_VIEW":
+                    delete client.v[vId]
+                    // Remove watchers
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -604,10 +611,9 @@
     //-----------------------------------------------------------------------------
     // Send a file list update
     var updateFuncs = {};
-    function sendFiles(cookie, vId, eventType, sizes) {
+    function sendFiles(cookie, viewId, eventType, sizes) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
-
-        var func = function (cookie, eventType) {
+        var func = function (cookie, eventType, vId, sizes) {
             var dir = clients[cookie].v[vId].directory,
                 data = {
                     vId    : vId,
@@ -624,9 +630,9 @@
             updateFuncs[cookie] = utils.throttle(func, 250, { leading: true, trailing: false });
 
         if (!sizes)
-            updateFuncs[cookie](cookie, eventType);
+            updateFuncs[cookie](cookie, eventType, viewId, sizes);
         else
-            func(cookie, eventType);
+            func(cookie, eventType, viewId, sizes);
     }
 
     //-----------------------------------------------------------------------------
