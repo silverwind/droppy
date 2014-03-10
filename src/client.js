@@ -729,6 +729,9 @@
                         if (/^[0-9]*$/.test(value)) value = Number(value);
 
                         droppy.set(option, value);
+                        $(".view").each(function () {
+                            if(this.editor) this.editor.setOption(option, value);
+                        });
                     });
                 });
 
@@ -1694,7 +1697,7 @@
                             return ext;
                         }
                     })();
-                editor = CodeMirror.fromTextArea(doc.find(".text-editor textarea")[0], {
+                view[0].editor = editor = CodeMirror.fromTextArea(doc.find(".text-editor textarea")[0], {
                     styleSelectedText: true,
                     readOnly: true,
                     showCursorWhenSelecting: true,
