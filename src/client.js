@@ -276,7 +276,7 @@
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
                 } else {
-                    showSpinner();
+                    showSpinner(view);
                     if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
                         view[0].loaded === true; // Ensure to update path on the first load
                         if (view[0].vId === 0)
@@ -312,8 +312,7 @@
                     $("#upload-info").attr("class", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
                     view.find(".icon-uploading").remove();
-
-                    hideSpinner();
+                    hideSpinner(view);
                 }
                 break;
             case "UPDATE_CSS":
@@ -327,8 +326,8 @@
                 populateUserList(msg.users);
                 break;
             case "SAVE_STATUS":
-                hideSpinner();
                 view = getView(vId);
+                hideSpinner(view);
                 view.find("#path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
                 setTimeout(function () { view.find("#path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
                 break;
@@ -338,7 +337,8 @@
                 break;
             case "ERROR":
                 // TODO: Display server errors
-                hideSpinner();
+                view = getView(vId);
+                hideSpinner(view);
                 break;
             }
         };
@@ -644,7 +644,7 @@
             view.find(".content").scrollTop(0);
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
-                    showSpinner();
+                    showSpinner(view);
                     sendMessage(null, "CREATE_FOLDER", newVal);
                 }
                 dummyFolder.remove();
@@ -1184,7 +1184,7 @@
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
             if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
-                showSpinner();
+                showSpinner(view);
                 var viewLoc = getViewLocation(view);
                 // Find the direction in which we should animate
                 if (destination.length > viewLoc.length) view[0].animDirection = "forward";
@@ -1394,9 +1394,9 @@
             event.stopPropagation();
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
-                showSpinner();
+                showSpinner(view);
                 droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
-                sendMessage(null, "CLIPBOARD", droppy.clipboard);
+                sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
             } else {
                 throw "Clipboard was empty!";
             }
@@ -1428,7 +1428,7 @@
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
             sortByHeader(view, $(this));
         });
-        hideSpinner();
+        hideSpinner(view);
     }
 
     // Load generated list into view with an animation
@@ -1476,7 +1476,7 @@
                 vId = view[0].vId;
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
-                    showSpinner();
+                    showSpinner(view);
                     sendMessage(vId, "RENAME", { "old": oldVal, "new": newVal });
                 }
             });
@@ -1622,7 +1622,7 @@
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
-        hideSpinner();
+        hideSpinner(view);
     }
     function openDoc(view) {
         view.attr("data-type", "document");
@@ -1663,7 +1663,7 @@
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
-        showSpinner();
+        showSpinner(view);
         $.ajax({
             type: "GET",
             url: url,
@@ -1711,7 +1711,7 @@
                     closeDoc(view);
                 });
                 doc.find(".save").register("click", function () {
-                    showSpinner();
+                    showSpinner(view);
                     sendMessage(view[0].vId, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
@@ -1763,7 +1763,7 @@
                     editor.on("change", function () {
                         view.find("#path li:last-child").removeClass("saved save-failed").addClass("dirty");
                     });
-                    hideSpinner();
+                    hideSpinner(view);
                 }, 200);
             },
             error : function () {
@@ -2066,12 +2066,19 @@
         $("<style></style>").text(css).appendTo($("head"));
     }
 
-    function showSpinner() {
-        document.getElementById("spinner").className = "";
+    function showSpinner(view) {
+        var spinner;
+        if (!view.find(".spinner").length)
+            view.find("#path").append('<div class="spinner"></div>');
+
+        spinner = view.find(".spinner");
+        if (spinner.hasClass("out")) spinner.removeClass("out");
     }
 
-    function hideSpinner() {
-        document.getElementById("spinner").className = "out";
+    function hideSpinner(view) {
+        var spinner = view.find(".spinner");
+        if (spinner.length && !spinner.hasClass("out"))
+            spinner.addClass("out");
     }
 
     function debounce(func, wait) {

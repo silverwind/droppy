@@ -206,7 +206,7 @@
             resourceData.html.forEach(function (data) {
                 var name = path.basename(resources.html[index]);
                 // Minify HTML by removing tabs, CRs and LFs
-                fs.writeFileSync(getResPath(path.basename(name)), data.replace(/[\t\r\n]/gm, "").replace("{{version}}", version));
+                fs.writeFileSync(getResPath(path.basename(name)), data.replace(/\n^\s*/gm, "").replace("{{version}}", version));
                 index++;
             });
             fs.writeFileSync(getResPath("client.js"), out.js);
@@ -508,12 +508,12 @@
                     });
                     break;
                 case "CLIPBOARD":
-                    log.info(ws, null, " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
+                    log.info(ws, null, msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
                     if (msg.data.to.indexOf(msg.data.from) !== -1) {
                         log.error("Can't copy directory into itself");
-                        send(client.ws, JSON.stringify({ type : "ERROR", text: "Can't copy directory into itself."}));
+                        send(client.ws, JSON.stringify({ vId: vId, type : "ERROR", text: "Can't copy directory into itself."}));
                         return;
                     }
                     msg.data.from = addFilePath(msg.data.from);

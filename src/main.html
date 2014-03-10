@@ -1,112 +1,110 @@
 <div id="flex-container">
-	<section id="navigation" class="out">
-		<ul id="buttons">
-			<li id="upload-file" class="button" title="Upload files into the current directory">
-				<svg class="upload-file"></svg>
-				<span class="button-text">Add files</span>
-			</li>
-			<li id="upload-folder" class="button" title="Upload a folder into the current directory">
-				<svg class="upload-folder"></svg>
-				<span class="button-text">Add folder</span>
-			</li>
-			<li id="create-folder" class="button" title="Create a new folder">
-				<svg class="create-folder"></svg>
-				<span class="button-text">New Folder</span>
-			</li>
-			<li id="config" class="button" title="Manage droppy's users">
-				<svg class="cog"></svg>
-				<span class="button-text">Manage</span>
-			</li>
-			<li id="about" class="button" title="About droppy">
-				<svg class="droplet"></svg>
-				<span class="button-text">About</span>
-			</li>
-			<li id="logout" class="button" title="Sign out of droppy">
-				<svg class="signout"></svg>
-				<span class="button-text">Sign out</span>
-			</li>
-		</ul>
-	</section>
-	<section id="view-container">
-		<div class="view">
-			<ul id="path">
-				<div id="spinner" class="inline-spin"></div>
-			</ul>
-			<div class="content">
-			</div>
-		</div>
-	</section>
-	<section id="upload-info" class="out">
-		<div id="upload-title"></div>
-		<div id="upload-percentage"></div>
-		<div id="upload-bar">
-			<div id="upload-bar-inner"></div>
-		</div>
-		<div id="upload-time">
-			<svg class="time"></svg>
-			<span id="upload-time-left"></span>
-		</div>
-		<div id="upload-cancel">
-			<svg class="remove"></svg>
-			<span>Cancel Upload<span>
-		</div>
-	</section>
-	<section id="audio-controls" class="out">
-		<span id="volume-icon" title="Scroll or click to modify the volume">
-            <svg class="volume-medium"></svg>
-        </span>
-		<input id="volume-slider" class="out" type="range" min="0" max="100" step="1">
-		<span id="volume-level"></span>
-		<span id="audio-title"></span>
-		<div id="seekbar">
-            <div id="seekbar-played"></div>
-            <div id="seekbar-loaded"></div>
-        </div>
-		<div id="time">
-            <span id="time-cur"></span>
-            <span> / </span>
-            <span id="time-max"></span>
-        </div>
-	</section>
+  <section id="navigation" class="out">
+    <ul id="buttons">
+      <li id="upload-file" class="button" title="Upload files into the current directory">
+        <svg class="upload-file"></svg>
+        <span class="button-text">Add files</span>
+      </li>
+      <li id="upload-folder" class="button" title="Upload a folder into the current directory">
+        <svg class="upload-folder"></svg>
+        <span class="button-text">Add folder</span>
+      </li>
+      <li id="create-folder" class="button" title="Create a new folder">
+        <svg class="create-folder"></svg>
+        <span class="button-text">New Folder</span>
+      </li>
+      <li id="config" class="button" title="Manage droppy's users">
+        <svg class="cog"></svg>
+        <span class="button-text">Manage</span>
+      </li>
+      <li id="about" class="button" title="About droppy">
+        <svg class="droplet"></svg>
+        <span class="button-text">About</span>
+      </li>
+      <li id="logout" class="button" title="Sign out of droppy">
+        <svg class="signout"></svg>
+        <span class="button-text">Sign out</span>
+      </li>
+    </ul>
+  </section>
+  <section id="view-container">
+    <div class="view">
+      <ul id="path"></ul>
+      <div class="content">
+      </div>
+    </div>
+  </section>
+  <section id="upload-info" class="out">
+    <div id="upload-title"></div>
+    <div id="upload-percentage"></div>
+    <div id="upload-bar">
+      <div id="upload-bar-inner"></div>
+    </div>
+    <div id="upload-time">
+      <svg class="time"></svg>
+      <span id="upload-time-left"></span>
+    </div>
+    <div id="upload-cancel">
+      <svg class="remove"></svg>
+      <span>Cancel Upload<span>
+    </div>
+  </section>
+  <section id="audio-controls" class="out">
+    <span id="volume-icon" title="Scroll or click to modify the volume">
+      <svg class="volume-medium"></svg>
+    </span>
+    <input id="volume-slider" class="out" type="range" min="0" max="100" step="1">
+    <span id="volume-level"></span>
+    <span id="audio-title"></span>
+    <div id="seekbar">
+      <div id="seekbar-played"></div>
+      <div id="seekbar-loaded"></div>
+    </div>
+    <div id="time">
+      <span id="time-cur"></span>
+      <span> / </span>
+      <span id="time-max"></span>
+    </div>
+  </section>
 </div>
 <input type="file" name="file" id="file" multiple>
 <div id="click-catcher" class="out"></div>
 <div id="entry-menu" class="out">
-	<div class="radius-wrap">
-		<div class="open show"><svg class="eye"></svg><span>Open</span></div>
-		<div class="open play"><svg class="play"></svg><span>Play</span></div>
-		<div class="edit"><svg class="pencil"></svg><span>Edit</span></div>
-		<div class="rename"><svg class="rename"></svg><span>Rename</span></div>
-		<div class="delete"><svg class="trash"></svg><span>Delete</span></div>
-		<div class="cut"><svg class="scissors"></svg><span>Cut</span></div>
-		<div class="copy"><svg class="copy"></svg><span>Copy</span></div>
-	</div>
+  <div class="radius-wrap">
+    <div class="open show"><svg class="eye"></svg><span>Open</span></div>
+    <div class="open play"><svg class="play"></svg><span>Play</span></div>
+    <div class="edit"><svg class="pencil"></svg><span>Edit</span></div>
+    <div class="rename"><svg class="rename"></svg><span>Rename</span></div>
+    <div class="delete"><svg class="trash"></svg><span>Delete</span></div>
+    <div class="cut"><svg class="scissors"></svg><span>Cut</span></div>
+    <div class="copy"><svg class="copy"></svg><span>Copy</span></div>
+  </div>
 </div>
 <div id="drop-preview" class="out">
-	<svg class="up-arrow"></svg>
+  <svg class="up-arrow"></svg>
 </div>
 <div id="about-box" class="out">
-	<svg class="droplet"></svg>
-	<div id="about-content">
-		<p id="about-title">droppy {{version}}</p>
-		<p id="about-text">Powered by <a target="_blank" href="http://nodejs.org/">node.js</a>, <a target="_blank" href="http://jquery.com/">jQuery</a>, <a target="_blank" href="https://github.com/einaros/ws">ws</a>, <a target="_blank" href="https://github.com/mscdex/busboy">busboy</a>, <a target="_blank" href="https://github.com/ai/autoprefixer">autoprefixer</a>, <a target="_blank" href="https://github.com/mishoo/UglifyJS2">uglifyjs2</a>, <a target="_blank" href="https://github.com/GoalSmashers/clean-css">clean-css</a>, <a target="_blank" href="https://github.com/ctalkington/node-archiver">archiver</a> and the <a target="_blank" href="http://www.google.com/fonts/specimen/Open+Sans">Open Sans Font Family</a>.</p>
-		<p id="about-copy">© 2012 - 2014 <a href="https://github.com/silverwind" target="_blank">silverwind</a>.</p>
-	</div>
-	<a title="Visit droppy's github repository" target="_blank" href="https://github.com/silverwind/droppy">
-		<svg class="github"></svg>
-	</a>
+  <svg class="droplet"></svg>
+  <div id="about-content">
+    <p id="about-title">droppy {{version}}</p>
+    <p id="about-text">Powered by <a target="_blank" href="http://nodejs.org/">node.js</a>, <a target="_blank" href="http://jquery.com/">jQuery</a>, <a target="_blank" href="https://github.com/einaros/ws">ws</a>, <a target="_blank" href="https://github.com/mscdex/busboy">busboy</a>, <a target="_blank" href="https://github.com/ai/autoprefixer">autoprefixer</a>, <a target="_blank" href="https://github.com/mishoo/UglifyJS2">uglifyjs2</a>, <a target="_blank" href="https://github.com/GoalSmashers/clean-css">clean-css</a>, <a target="_blank" href="https://github.com/ctalkington/node-archiver">archiver</a> and the <a target="_blank" href="http://www.google.com/fonts/specimen/Open+Sans">Open Sans Font Family</a>.</p>
+    <p id="about-copy">© 2012 - 2014 <a href="https://github.com/silverwind" target="_blank">silverwind</a>.</p>
+  </div>
+  <a title="Visit droppy's github repository" target="_blank" href="https://github.com/silverwind/droppy">
+    <svg class="github"></svg>
+  </a>
 </div>
 <div id="config-box" class="out">
-	<span id="userlist-header">Manage Accounts</span>
-	<ul id="userlist"></ul>
-	<div id="user-add">
-        <svg class="plus"></svg>
-        <span>Add User<span>
-    </div>
-	<button id="save-users" class="submit" tabindex="4">
-        <svg class="ok"></svg>
-        <span>Save Users<span>
-        </button>
+  <span id="userlist-header">Manage Accounts</span>
+  <ul id="userlist"></ul>
+  <div id="user-add">
+    <svg class="plus"></svg>
+    <span>Add User<span>
+  </div>
+  <button id="save-users" class="submit" tabindex="4">
+    <svg class="ok"></svg>
+    <span>Save Users<span>
+    </button>
 </div>
 <audio id="audio-player" preload="none"></audio>
 <div id="tooltip"></div>

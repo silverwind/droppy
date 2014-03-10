@@ -571,7 +571,7 @@ input:-webkit-autofill {
     transition: transform .2s ease;
 }
 
-#loading {
+.loading {
     position: absolute;
     animation: spin 1s infinite linear;
     border-bottom : 5px solid #18f;
@@ -586,7 +586,7 @@ input:-webkit-autofill {
     top:  calc(50% - 100px);
 }
 
-#spinner {
+.spinner {
     float: right;
     animation: spin .75s infinite linear;
     border-bottom-color : #18f;
@@ -599,13 +599,13 @@ input:-webkit-autofill {
     border-radius: 100%;
     z-index: 32;
 }
-#spinner.out {
+.spinner.out {
     display: none;
 }
 
-@media all and (min-width: 1024px) { #spinner { height: 29px; width: 29px; border-width: 4px } }
-@media all and (max-width: 1023px) { #spinner { height: 24px; width: 24px; border-width: 4px } }
-@media all and (max-width:  639px) { #spinner { height: 19px; width: 19px; border-width: 3px } }
+@media all and (min-width: 1024px) { .spinner { height: 29px; width: 29px; border-width: 4px } }
+@media all and (max-width: 1023px) { .spinner { height: 24px; width: 24px; border-width: 4px } }
+@media all and (max-width:  639px) { .spinner { height: 19px; width: 19px; border-width: 3px } }
 
 @keyframes spin {
  from { transform: rotate(0deg)   }
