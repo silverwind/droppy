@@ -742,12 +742,14 @@ input:-webkit-autofill {
 }
 
 .content.document > .sidebar > li:hover, .opts.active { background: #333; cursor: pointer }
-.content.document > .sidebar > .exit:hover svg    { fill: #f33 }
-.content.document > .sidebar > .exit:hover span  { color: #f33; opacity: 1 }
-.content.document > .sidebar > .save:hover svg    { fill: #5f0 }
-.content.document > .sidebar > .save:hover span  { color: #5f0; opacity: 1 }
-.content.document > .sidebar > .light:hover svg   { fill: #ff5 }
-.content.document > .sidebar > .light:hover span { color: #ff5; opacity: 1 }
+.content.document > .sidebar > .exit:hover svg       { fill: #f33 }
+.content.document > .sidebar > .exit:hover span      { color: #f33; opacity: 1 }
+.content.document > .sidebar > .save:hover svg       { fill: #5f0 }
+.content.document > .sidebar > .save:hover span      { color: #5f0; opacity: 1 }
+.content.document > .sidebar > .light:hover svg      { fill: #ff5 }
+.content.document > .sidebar > .light:hover span     { color: #ff5; opacity: 1 }
+.content.document > .sidebar > .ww:hover svg   { fill: #f1a }
+.content.document > .sidebar > .ww:hover span  { color: #f1a; opacity: 1 }
 .content.document > .sidebar > .opts:hover svg, .opts.active svg {
     fill: #1af !important;
 }

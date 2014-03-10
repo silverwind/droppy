@@ -1568,6 +1568,7 @@
                 '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
                 '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
                 '<li class="light">' + droppy.svg.bulb + '<span>Color</span></li>' +
+                '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>' +
                 '<li class="opts">' + droppy.svg.cog + '<span>Opts</span>' +
                     '<div class="opts-container">' +
                         '<label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>' +
@@ -1655,6 +1656,13 @@
                     } else {
                         editor.setOption("theme", "base16-dark");
                     }
+                    saveEditorOptions(editor);
+                });
+                doc.find(".ww").register("click", function () {
+                    if (editor.options.lineWrapping)
+                        editor.setOption("lineWrapping", false);
+                    else
+                        editor.setOption("lineWrapping", true);
                     saveEditorOptions(editor);
                 });
                 doc.find(".opts").register("click", function () {
