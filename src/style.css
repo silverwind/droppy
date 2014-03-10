@@ -130,6 +130,10 @@ input:-webkit-autofill {
     fill: #ccc;
     display: inline-block;
     vertical-align: middle;
+
+}
+
+.button svg, .button svg path, .button svg rect {
     transition: fill .25s ease;
 }
 
