@@ -149,17 +149,40 @@
 // ============================================================================
 //  View handling
 // ============================================================================
+    var viewsById = [];
     function getView(id) {
-        if (!droppy.views) updateViews();
-        if (id && droppy.views[id]) return $(droppy.views[id]);
-        else return $(droppy.views[0]);
+        if (id) return $(viewsById[id]);
+        else return (function(){
+            var view;
+            // get first element not undefined
+            viewsById.every(function(E){
+                view = E;
+            });
+            return $(view);
+        }());
     }
-
-    function updateViews() {
-        droppy.views = $(".view");
-        droppy.views.each(function (index, elem) {
-            elem.vId = index;
-        });
+    window.getView = getView;
+    function getUniqueVid(checked){
+        return viewsById[checked] ? getUniqueVid(checked + 1) : checked;
+    }
+    function newView(dest) {
+        var view =$("<div class=\"view\">" +
+                        "<ul class=\"path\"></ul>" +
+                        "<div class=\"content\"></div>" +
+                    "</div>"),
+            vId = getUniqueVid(0);
+        view.appendTo("#view-container");
+        view[0].vId = vId;
+        view[0].currentFolder = "/";
+        viewsById[vId] = view[0];
+        sendMessage(vId, "NEW_VIEW");
+        if (dest) updateLocation(view, dest);
+        return getView(vId);
+    }
+    function destroyView(vId) {
+        sendMessage(vId, "DESTROY_VIEW");
+        getView(vId).remove();
+        delete viewsById[vId];
     }
 
     function contentWrap(view) {
@@ -232,7 +255,6 @@
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
-
         droppy.socket.onopen = function () {
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
@@ -240,7 +262,8 @@
             if (queuedData)
                 sendMessage();
             else {
-                updateLocation(getView(), getView()[0].currentFolder || decodeURIComponent(window.location.pathname), true); // Request initial update
+                // Create new view with initiallizing
+                newView(decodeURIComponent(window.location.pathname) || "/");
             }
         };
 
@@ -273,6 +296,7 @@
                 view;
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
+                console.log("UPDATE_DIR:" + vId)
                 view = getView(vId);
                 if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
                 view[0].switchRequest = false;
@@ -571,8 +595,9 @@
         $(window).register("resize", function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function () {
-                for (var vId = droppy.views.length - 1; vId >= 0; vId--)
-                    checkPathOverflow(getView([vId]));
+                $(".view").each(function (elem) {
+                    checkPathOverflow($(elem));
+                });
             }, 100);
         });
 
@@ -652,18 +677,21 @@
                 dummyFolder.remove();
             });
         });
-
+        var secondViewId = null;
         $("#split-button").register("click", function () {
-            if ($("#view-container").children(".view").length < 2) {
-                $("#view-container .view").addClass("left");
-                $("#view-container .view").clone().removeClass("left").addClass("right").appendTo("#view-container");
+            if (secondViewId === null) {
+                var firstView = $("#view-container .view").addClass("left"),
+                    initDest = fixRootPath(firstView[0].currentFolder + "/" + (firstView[0].currentFile || "")),
+                    secondView = newView(initDest).addClass("right");
+                secondViewId = secondView[0].vId;
                 $(this).children(".button-text").text("Merge");
                 $(this).attr("title", "Merge views back into a single one");
             } else {
-                $("#view-container .view.right").remove();
                 $("#view-container .view.left").removeClass("left");
                 $(this).children(".button-text").text("Split");
                 $(this).attr("title", "Split the view in half");
+                destroyView(secondViewId);
+                secondViewId = null;
             }
         });
 
@@ -1140,7 +1168,7 @@
 
     function fixRootPath(p) {
         // removes starting "//" or prepends "/"
-        return p.replace(/^\/*(.*)$/g, "/$1");
+        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
     }
 
     function getViewLocation(view) {
@@ -1174,22 +1202,24 @@
     function updatePath(view, path) {
         if (typeof path === "undefined")
             path = getViewLocation(view);
+        path = fixRootPath(path);
+        console.log("updatePath:"+view[0].vId+"@"+path)
         var parts = path.split("/"),
             i = 0, len;
         parts[0] = droppy.svg.home;
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
         var pathStr = "";
-        if (droppy.savedParts) {
+        if (view[0].savedParts) {
             i = 1; // Skip the first element as it's always the same
             while (true) {
                 pathStr += "/" + parts[i];
-                if (!parts[i] && !droppy.savedParts[i]) break;
-                if (parts[i] !== droppy.savedParts[i]) {
-                    if (droppy.savedParts[i] && !parts[i]) {
+                if (!parts[i] && !view[0].savedParts[i]) break;
+                if (parts[i] !== view[0].savedParts[i]) {
+                    if (view[0].savedParts[i] && !parts[i]) {
                         view.find(".path li").slice(i).remove();
                         break;
                     }
-                    else if (parts[i] && !droppy.savedParts[i])
+                    else if (parts[i] && !view[0].savedParts[i])
                         createPart(parts[i], pathStr);
                 }
                 i++;
@@ -1207,7 +1237,7 @@
             }, 300);
         }
 
-        droppy.savedParts = parts;
+        view[0].savedParts = parts;
 
         function createPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
@@ -1443,7 +1473,7 @@
             event.stopPropagation();
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"), // #view-container
+                view = entry.parents(".view"),
                 vId = view[0].vId;
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
@@ -1824,7 +1854,6 @@
         droppy.isUploading = null;
         droppy.mediaTypes = {};
         droppy.reopen = null;
-        droppy.savedParts = null;
         droppy.socket = null;
         droppy.socketWait = null;
         droppy.sorting = {col: "name", dir: "down"};
