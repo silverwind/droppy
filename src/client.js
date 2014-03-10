@@ -598,7 +598,7 @@
         });
 
         // File upload button
-        $("#upload-file").register("click", function () {
+        $("#upload-file-button").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog!
             if (droppy.detects.fileinputdirectory)
                 $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
@@ -608,7 +608,7 @@
         // Folder upload button - check if we support directory uploads
         if (droppy.detects.fileinputdirectory) {
             // Directory uploads supported - enable the button
-            $("#upload-folder").register("click", function () {
+            $("#upload-folder-button").register("click", function () {
                 // Set the directory attribute so we get a directory picker dialog
                 fileInput.attr({
                     directory: "directory",
@@ -620,13 +620,13 @@
             });
         } else {
             // No directory upload support - disable the button
-            $("#upload-folder").addClass("disabled");
-            $("#upload-folder").register("click", function () {
+            $("#upload-folder-button").addClass("disabled");
+            $("#upload-folder-button").register("click", function () {
                 window.alert("Sorry, your browser doesn't support directory uploading yet!");
             });
         }
 
-        $("#create-folder").register("click", function () {
+        $("#create-folder-button").register("click", function () {
             var dummyFolder, wasEmpty, view,
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
                                 '<span class="sprite sprite-folder-open"></span>' +
@@ -651,78 +651,36 @@
             });
         });
 
-        $("#split-view").register("click", function () {
+        $("#split-button").register("click", function () {
             if ($("#view-container").children(".view").length < 2) {
                 $("#view-container .view").addClass("left");
                 $("#view-container .view").clone().removeClass("left").addClass("right").appendTo("#view-container");
-                $(this).children(".button-text").text("Merge view");
-                $(this).attr("title", "Merge views back together");
+                $(this).children(".button-text").text("Merge");
+                $(this).attr("title", "Merge views back into a single one");
             } else {
                 $("#view-container .view.right").remove();
                 $("#view-container .view.left").removeClass("left");
-                $(this).children(".button-text").text("Split view");
+                $(this).children(".button-text").text("Split");
                 $(this).attr("title", "Split the view in half");
             }
         });
 
-        var aboutbox  = $("#about-box"),
-            configbox = $("#config-box");
-
-        $("#about").register("click", function () {
+        $("#about-button").register("click", function () {
             requestAnimation(function () {
-                aboutbox.attr("class", aboutbox.attr("class") !== "in" ? "in" : "out");
+                $("#about-box").attr("class", $("#about-box").attr("class") !== "in" ? "in" : "out");
                 toggleCatcher();
             });
         });
 
-        $("#config").register("click", function () {
+        $("#options-button").register("click", function () {
             requestAnimation(function () {
-                configbox.attr("class", configbox.attr("class") !== "in" ? "in" : "out");
+                $("#options-box").attr("class", $("#options-box").attr("class") !== "in" ? "in" : "out");
                 sendMessage(null, "GET_USERS");
                 toggleCatcher();
             });
         });
 
-        $("#user-add").register("click", function () {
-            //TODO: UI
-            var user = window.prompt("Username?");
-            var pass = window.prompt("Password?");
-            if (!user || !pass) return;
-            sendMessage(null, "UPDATE_USER", {
-                name: user,
-                pass: pass,
-                priv: true
-            });
-        });
-
-        $("#save-users").register("click", function () {
-            var users = [], entry, user, isChanged;
-            var entries = document.getElementsByClassName("user-entry");
-            for (var i = 0, l = entries.length; i < l; i++) {
-                entry = entries[i];
-                user = {};
-                isChanged = false;
-                for (var j = 0, k = entry.childNodes.length; j < k; j++) {
-                    if (entry.getAttribute("data-changed") === "true") {
-                        if      (entry.childNodes[j].className === "user-name") user.name = entry.childNodes[j].innerHTML;
-                        else if (entry.childNodes[j].className === "user-pass") user.pass = entry.childNodes[j].value;
-                        else if (entry.childNodes[j].className === "user-priv") user.priv = entry.childNodes[j].checked;
-                        if (user.pass && user.pass.length > 0) {
-                            isChanged = true;
-                        }
-                    }
-                }
-                if (isChanged) users.push(user);
-            }
-
-            users.forEach(function (user) {
-                sendMessage(null, "UPDATE_USER", user);
-            });
-            configbox.attr("class", "out");
-            toggleCatcher();
-        });
-
-        $("#logout").register("click", function () {
+        $("#logout-button").register("click", function () {
             if (droppy.socket) droppy.socket.close(4001);
             deleteCookie("session");
             initVariables(); // Reset vars to their init state
@@ -732,7 +690,7 @@
 
         // Hide modals when clicking outside their box
         $("#click-catcher").register("click", function () {
-            $("#config-box").replaceClass("in", "out");
+            $("#options-box").replaceClass("in", "out");
             $("#about-box").replaceClass("in", "out");
             $("#entry-menu").replaceClass("in", "out");
             toggleCatcher();

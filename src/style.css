@@ -141,26 +141,26 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .button svg { height: 20px } }
 @media all and (max-width: 639px)  { .button svg { height: 16px; margin-right: 0 } }
 
-#upload-file:hover   { color: #29f; border-bottom: 2px solid #29f !important }
-#upload-folder:hover { color: #f1a; border-bottom: 2px solid #f1a !important }
-#create-folder:hover { color: #ae5; border-bottom: 2px solid #ae5 !important }
-#about:hover         { color: #f71; border-bottom: 2px solid #f71 !important }
-#config:hover        { color: #ff5; border-bottom: 2px solid #ff5 !important }
-#logout:hover        { color: #e33; border-bottom: 2px solid #e33 !important }
-#split-view:hover    { color: #f5f; border-bottom: 2px solid #f5f !important }
+#upload-file-button:hover   { color: #29f; border-bottom: 2px solid #29f !important }
+#upload-folder-button:hover { color: #f1a; border-bottom: 2px solid #f1a !important }
+#create-folder-button:hover { color: #ae5; border-bottom: 2px solid #ae5 !important }
+#about-button:hover         { color: #f71; border-bottom: 2px solid #f71 !important }
+#options-button:hover       { color: #ff5; border-bottom: 2px solid #ff5 !important }
+#logout-button:hover        { color: #e33; border-bottom: 2px solid #e33 !important }
+#split-button:hover         { color: #f5f; border-bottom: 2px solid #f5f !important }
 
-#upload-file:hover svg   { fill: #29f }
-#upload-folder:hover svg { fill: #f1a }
-#create-folder:hover svg { fill: #ae5 }
-#about:hover svg         { fill: #f71 }
-#config:hover svg        { fill: #ff5 }
-#logout:hover svg        { fill: #e33 }
-#split-view:hover svg.split .left  { fill: #f22 }
-#split-view:hover svg.split .right { fill: #28f }
+#upload-file-button:hover svg        { fill: #29f }
+#upload-folder-button:hover svg      { fill: #f1a }
+#create-folder-button:hover svg      { fill: #ae5 }
+#about-button:hover svg              { fill: #f71 }
+#options-button:hover svg            { fill: #ff5 }
+#logout-button:hover svg             { fill: #e33 }
+#split-button:hover svg.split .left  { fill: #f22 }
+#split-button:hover svg.split .right { fill: #28f }
 
-#upload-folder.disabled { color: #666; cursor: not-allowed }
-#upload-folder.disabled svg { fill: #666 }
-#upload-folder.disabled:hover { border-bottom: 2px solid #666 !important }
+.button.disabled { color: #666; cursor: not-allowed !important }
+.button.disabled svg { fill: #666 !important }
+.button.disabled:hover { border-bottom: 2px solid #666 !important }
 
 #view-container {
     flex: 1 1;
@@ -1136,10 +1136,9 @@ input:-webkit-autofill {
 }
 #about-box .github:hover { fill: #f1a }
 
-/* =============================== Config box ============================== */
+/* =============================== Options ============================== */
 
-/* TODO: Make responsive */
-#config-box {
+#options-box {
     background: #181818;
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
@@ -1155,121 +1154,8 @@ input:-webkit-autofill {
     z-index: 32;
 }
 
-#config-box.in  { transform: translateY(0);  opacity: 1; }
-#config-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
-
-#userlist-header {
-    color: #ddd;
-    display: block;
-    font-size: 1.25em;
-    margin: .5em 0;
-    text-align: center;
-}
-
-.user-entry {
-    color: #aaa;
-    height: 36px;
-    border-left: 2px solid transparent;
-    border-right: 2px solid transparent;
-    background: #222;
-}
-
-.user-entry:nth-child(2n) {
-    background: #181818;
-}
-
-.user-entry:hover {
-    border-left: 2px solid #18f;
-    border-right: 2px solid #18f;
-    color: #fff;
-}
-
-.user-pass {
-    background: transparent;
-    border: 1px solid transparent;
-    color: #999;
-    width: 38%;
-    margin-top: 3px;
-    padding: 4px 4px;
-    height: 30px;
-    transition: color .25s ease;
-    float: left;
-}
-
-.user-name {
-    text-align: right;
-    padding-right: .5em;
-    width: 42%;
-    float: left;
-    line-height: 36px;
-}
-
-.user-entry label {
-    margin-left: .5em;
-    float: left;
-    position: relative;
-    top: 3px;
-    width: 30px;
-    height: 30px;
-    border: 1px solid transparent;
-    cursor: pointer;
-}
-
-.user-entry .key {
-    fill: #aaa;
-    height: 1em;
-    position: relative;
-    left: -2px;
-    top: 3px;
-    opacity: 0;
-    transition: opacity .2s ease;
-}
-
-.user-priv:checked + label .key { opacity: 1 }
-
-.user-entry:hover .user-pass, .user-entry:hover label {
-    background: #111;
-    border: 1px solid #444;
-}
-
-.user-entry label:hover:after { color: #fff }
-.user-entry.changed > .user-name, .user-entry.changed > .user-pass { color: #18f }
-.user-entry.changed label .key { fill: #18f }
-
-.user-entry .trash {
-    fill: #999;
-    height: 24px;
-    float: right;
-    display: inline-block;
-    vertical-align: center;
-    margin: 6px .5em;
-    cursor: pointer;
-}
-
-.user-entry .trash:hover { fill: #f23 }
-
-#user-add .plus {
-    fill: #999;
-    display: inline-block;
-    vertical-align: middle;
-    height: 1em;
-    transition: fill .25s ease;
-}
-
-#user-add {
-    text-align: center;
-    cursor: pointer;
-    padding: .5em 0;
-    width: 10em;
-    margin: 0 auto;
-}
-
-#user-add span {
-    transition: color .25s ease;
-    vertical-align: middle;
-}
-#user-add:hover { color: #fff }
-#user-add:hover .plus { fill: #fff }
+#options-box.in  { transform: translateY(0);  opacity: 1; }
+#options-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 
 /* ============================== Login Form =============================== */
 
