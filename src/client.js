@@ -233,7 +233,8 @@
 
         droppy.socket.onopen = function () {
             retries = 5; // reset retries on connection loss
-            if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"})); // Request settings when debug is uninitialized
+            // Request settings when droppy.debug is uninitialized, could use another variable too.
+            if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
             if (queuedData)
                 sendMessage();
             else {
@@ -482,7 +483,6 @@
             event.stopPropagation();
             event.preventDefault();
             endDrag();
-
             var items = event.dataTransfer.items,
                 fileItem = null,
                 entryFunc = null;
@@ -1010,7 +1010,7 @@
         var link = entry.find(".entry-link");
 
         // Add inline elements
-        namer = $('<input id="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '"/>');
+        namer = $('<input class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '">');
         link.after(namer);
 
         entry.addClass("editing");
@@ -1042,7 +1042,7 @@
                 if (oldVal !== newVal) {
                     success = true;
                 }
-                stopEdit();
+                stopEdit(view);
             } else if (exists && !skipInvalid) {
                 namer.addClass("shake");
                 setTimeout(function () {
@@ -1050,7 +1050,7 @@
                 }, 500);
             } else {
                 success = false;
-                stopEdit();
+                stopEdit(view);
             }
             if (typeof success === "boolean" && typeof callback === "function") {
                 var oldPath = view[0].currentFolder === "/" ? "/" + oldVal : view[0].currentFolder + "/" + oldVal,
@@ -1059,9 +1059,9 @@
             }
 
         }
-        function stopEdit() {
-            $("#inline-namer, #inline-submit").remove();
-            $(".data-row.new-folder").remove();
+        function stopEdit(view) {
+            view.find(".inline-namer").remove();
+            view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
             if (wasEmpty) loadContent(view);
         }
