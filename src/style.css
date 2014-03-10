@@ -1168,6 +1168,16 @@ input:-webkit-autofill {
     transition: all .3s ease;
     width: 320px;
     z-index: 32;
+    font-size: .8em;
+    overflow: scroll;
+}
+
+#options-box select {
+    width: 60%;
+    display: block;
+    margin-left: 20%;
+    margin-top: .5em;
+    margin-bottom: .5em;
 }
 
 #options-box.in  { transform: translateY(0);  opacity: 1; }

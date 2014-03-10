@@ -677,8 +677,46 @@
         $("#options-button").register("click", function () {
             requestAnimation(function () {
                 $("#options-box").attr("class", $("#options-box").attr("class") !== "in" ? "in" : "out");
-                sendMessage(null, "GET_USERS");
+
+                if (!$("#options-box")[0].initialized) {
+                    $("#options-box").append(getSelect("indentWithTabs", [true, false]));
+                    $("#options-box").append(getSelect("indentUnit",     [2, 4, 8]));
+                    $("#options-box").append(getSelect("theme",          ["base16-dark", "xq-light"]));
+                    $("#options-box").append(getSelect("lineWrapping",   [true, false]));
+                    $("#options-box").append(getSelect("clickAction",    ["download", "view"]));
+                    $("#options-box").append(getSelect("indentWithTabs", [true, false]));
+                    $("#options-box")[0].initialized = true;
+                }
+
+                // TODO: User managment
+                //sendMessage(null, "GET_USERS");
+
                 toggleCatcher();
+                $("#click-catcher").one("click", function() {
+                    $("#options-box").find("select").each( function() {
+                        var option = $(this).attr("class"),
+                            value  = $(this).val();
+
+                        if (value === "true") value = true;
+                        if (value === "false") value = true;
+                        if (/^[0-9]*$/.test(value)) value = Number(value);
+
+                        droppy.set(option, value);
+                    });
+                });
+
+                function getSelect(variable, values) {
+                    var output = "";
+                    output += '<select class="' + variable + '">';
+                    values.forEach(function (value) {
+                        if (droppy.get(variable) === value)
+                            output += '<option value="' + value + '" selected>' + value + '</option>';
+                        else
+                            output += '<option value="' + value + '">' + value + '</option>';
+                    });
+                    output += '</select>';
+                    return output;
+                }
             });
         });
 
