@@ -1089,12 +1089,12 @@ input:-webkit-autofill {
     color: #aaa;
     height: 200px;
     left: 50%;
-    margin-left: -150px;
+    margin-left: -160px;
     margin-top: -100px;
     position: fixed;
     top: 50%;
     transition: all .3s ease;
-    width: 300px;
+    width: 320px;
     z-index: 32;
 }
 
@@ -1146,7 +1146,7 @@ input:-webkit-autofill {
 #about-box .github {
     fill: #aaa;
     bottom: 0;
-    padding: 6px;
+    padding: 6px 5%;
     position: absolute;
     right: 0;
 }
@@ -1159,14 +1159,14 @@ input:-webkit-autofill {
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
     color: #ccc;
-    height: 400px;
+    height: 200px;
     left: 50%;
-    margin-left: -300px;
-    margin-top: -200px;
+    margin-left: -150px;
+    margin-top: -100px;
     position: fixed;
     top: 50%;
     transition: all .3s ease;
-    width: 600px;
+    width: 320px;
     z-index: 32;
 }
 

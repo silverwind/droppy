@@ -38,7 +38,9 @@
             indentWithTabs : false,
             indentUnit : 4,
             lineWrapping: true,
-            hasLoggedOut : false
+            hasLoggedOut : false,
+            clickAction: "download",
+            renameExistingOnUpload: false
         };
         // Load prefs and set missing ones to their default
         prefs = JSON.parse(localStorage.getItem("prefs")) || {};
@@ -1070,7 +1072,7 @@
     // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
         if ($("#about-box").hasClass("in") ||
-            $("#config-box").hasClass("in") ||
+            $("#options-box").hasClass("in") ||
             $("#entry-menu").hasClass("in")
         ) {
             $("#click-catcher").attr("class", "in");
