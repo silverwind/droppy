@@ -244,11 +244,12 @@
     function cleanupTemp(initial) {
         try {
             wrench.rmdirSyncRecursive(config.incomingDir, true);
-            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
         } catch (error) {
-            log.simple("Error cleanin up temporary directories:");
-            log.error(error);
-            if (initial) process.exit(1);
+            if (initial) {
+                log.simple("Error cleaning up temporary directories:");
+                log.error(error);
+                process.exit(1);
+            }
         }
     }
 

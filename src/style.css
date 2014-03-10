@@ -800,102 +800,102 @@ input:-webkit-autofill {
 
 /* ============================ Upload Progress ============================ */
 
-#upload-info {
+.upload-info {
     background: linear-gradient(#111,#222);
-    border-radius: 3px 3px 0 0;
     color: #999;
-    flex: 0 0 120px;
-    order: 3;
-    position: relative;
-    overflow: hidden;
+    position: fixed;
+    bottom: 0;
     transition: all .2s ease;
     width: 100%;
+    box-shadow: -2px 0 0 2px #444;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+@media all and (min-width: 1024px) { .upload-info { font-size: .9em } }
+@media all and (max-width: 1023px) { .upload-info { font-size: .8em } }
+@media all and (max-width:  639px) { .upload-info { font-size: .7em } }
+
+.upload-info.in  { height: 1.5em }
+.upload-info.out { height: 0; box-shadow: none; }
+
+.upload-status {
+    flex: 1 1 5em;
+    order: 1;
+    color: #eee;
     z-index: 2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-#upload-info.in  { flex-basis: 120px }
-#upload-info.out { flex-basis: 0 }
 
-#upload-title {
+.upload-time {
     color: #eee;
-    line-height: 2em;
-    width: 100%;
-    text-align: center;
+    flex: 0 0 7em;
+    order: 2;
+    vertical-align: middle;
+    display: inline-block;
+    z-index: 2;
+    text-align: right;
+    padding-right: 1em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-#upload-percentage {
+.upload-cancel {
+    transition: color .2s ease;
+    cursor: pointer;
     color: #eee;
-    font-size: .8em;
-    line-height: 26px;
-    position: absolute;
-    text-align: center;
-    top: 45px;
-    width: 100%;
-    z-index: 1;
+    flex: 0 0 9em;
+    text-align: right;
+    padding-right: 1em;
+    order: 3;
+    z-index: 2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-#upload-bar {
+@media all and (max-width:  639px) {
+    .upload-title { display: none; }
+    .upload-cancel { flex: 0 0 2em; }
+    .upload-cancel span { display: none; }
+}
+
+.upload-speed:before {
+    content: "@";
+    color: #aaa;
+}
+
+.upload-bar {
     box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
-    height: 26px;
-    margin-left: 10%;
     position: absolute;
-    top: 45px;
-    width: 80%;
+    left: 0; right: 0; top: 0; bottom: 0;
+    z-index: 1;
+    pointer-event: none;
 }
 
-#upload-bar-inner {
-    background: linear-gradient(#24a,#46b);
+.upload-bar-inner {
+    background: linear-gradient(#333,#444);
     height: 100%;
     left: 0;
     position: absolute;
     top: 0;
     transition: all .2s ease;
     width: 0;
+    pointer-event: none;
 }
 
-#upload-time {
-    color: #eee;
-    bottom: 0;
-    font-size: .66em;
-    left: 10%;
-    line-height: 3.5em;
-    position: absolute;
-    text-align: center;
-    white-space: nowrap;
-    font-weight: 400;
-}
-
-#upload-time svg.time {
+.upload-info svg {
     fill: #eee;
-    height: 1.6em;
-    display: inline-block;
-    vertical-align: middle;
+    height: 1em;
+    vertical-align: top;
     transition: fill .2s ease;
 }
 
-#upload-cancel {
-    bottom: 0;
-    font-size: .66em;
-    right: 10%;
-    line-height: 3.5em;
-    position: absolute;
-    text-align: center;
-    transition: color .2s ease;
-    white-space: nowrap;
-    font-weight: 400;
-    cursor: pointer;
-    color: #eee;
-}
 
-#upload-cancel svg.remove {
-    fill: #eee;
-    height: 1.3em;
-    display: inline-block;
-    vertical-align: middle;
-    transition: fill .2s ease;
-}
-
-#upload-cancel:hover { color: #f44 }
-#upload-cancel:hover svg.remove { fill: #f44 }
+.upload-cancel:hover { color: #f44 }
+.upload-cancel:hover svg.remove { fill: #f44 }
 #file { display: none }
 
 /* =============================== Audio Panel =============================== */

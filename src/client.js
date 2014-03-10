@@ -309,7 +309,7 @@
                 } else {
                     droppy.isUploading = false;
                     updateTitle(getView(vId)[0].currentFolder, true);
-                    $("#upload-info").attr("class", "out");
+                    view.find(".upload-info").setTransitionClass("in", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
                     view.find(".icon-uploading").remove();
                     hideSpinner(view);
@@ -866,6 +866,7 @@
         var numFiles, formLength;
         function upload(view, data) {
             var formData = new FormData();
+
             droppy.zeroFiles = [];
             numFiles = 0;
             formLength = 0;
@@ -927,23 +928,16 @@
 
             // Create the XHR2 and bind the progress events
             var xhr = new XMLHttpRequest();
-            xhr.upload.addEventListener("progress", uploadProgress, false);
-            xhr.upload.addEventListener("load", uploadDone, false);
-            xhr.upload.addEventListener("error", uploadDone, false);
+            xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); }, false);
+            xhr.upload.addEventListener("load", function() { uploadDone(view); }, false);
+            xhr.upload.addEventListener("error", function() { uploadDone(view); }, false);
 
             // Init the UI
-            $("#upload-cancel").register("click", function () {
+            uploadInit(view, numFiles);
+            $(".upload-cancel").register("click", function () {
                 xhr.abort();
-                uploadCancel();
+                uploadCancel(view);
             });
-
-            title.text(numFiles < 2 ? "Uploading..." : "Uploading " + numFiles + " files...");
-            start = Date.now();
-            updateTitle("0%");
-            uperc.text("0%");
-            prog.css("width", "0%");
-            timeleft.text("");
-            $("#upload-info").attr("class", "in");
 
             // And send the files
             droppy.isUploading = true;
@@ -958,52 +952,72 @@
                 sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
             }
         }
+        var start, lastUpdate;
+        function uploadInit(view, numFiles) {
+            var uploadInfo = '<section class="upload-info out">' +
+                    '<div class="upload-bar">' +
+                        '<div class="upload-bar-inner"></div>' +
+                    '</div>' +
+                    '<span class="upload-status">' +
+                        '<span class="upload-title"></span>' +
+                        '<span class="upload-speed"></span>' +
+                    '</span>' +
+                    '<span class="upload-time">' +
+                        droppy.svg.time +
+                        '<span class="upload-time-left"></span>' +
+                        '</span>' +
+                    '<span class="upload-cancel">' +
+                        droppy.svg.remove +
+                        '<span>Cancel Upload<span>' +
+                    '</span>' +
+                '</section>';
 
-        var start, lastUpdate,
-            timeleft = $("#upload-time-left"),
-            prog     = $("#upload-bar-inner"),
-            title    = $("#upload-title"),
-            uperc    = $("#upload-percentage");
-
-        function uploadDone() {
-            prog.css("width", "100%");
-            title.text("Processing...");
-            uperc.text("100%");
+            start = Date.now();
+            if (!view.find(".upload-info").length) view.append(uploadInfo);
+            view.find(".upload-info").setTransitionClass("out", "in");
+            view.find(".upload-title").text(numFiles < 2 ? "Uploading 1 file" : "Uploading " + numFiles + " files");
+            view.find(".upload-bar-inner").css("width", "0%");
+            view.find(".upload-time-left").text("");
+            view.find(".upload-speed").text("");
+            updateTitle("0%");
         }
 
-        function uploadCancel() {
-            prog.css("width", "0");
-            title.text("Aborting...");
-            uperc.text("");
-            $(".uploading").remove();
+        function uploadDone(view) {
+            view.find(".upload-bar-inner").css("width", "100%");
+            view.find(".upload-title").text("Processing...");
         }
 
-        function uploadProgress(event) {
+        function uploadCancel(view) {
+            view.find(".upload-bar-inner").css("width", "0");
+            view.find(".upload-title").text("Aborting...");
+            $(".uploading").remove(); // Remove preview elements
+        }
+
+        function uploadProgress(view, event) {
             if (!event.lengthComputable) return;
 
             // Update progress every 250ms at most
-            if (!lastUpdate || (Number(new Date()) - lastUpdate) >= 250) {
-                lastUpdate = Number(new Date());
-
+            if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
                 var bytesSent  = event.loaded,
                     bytesTotal = event.total,
                     progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                    speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2);
+                    speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2),
+                    elapsed, secs;
 
-                prog.css("width", progress);
                 updateTitle(progress);
-                uperc.text(progress + " - " + speed.size + " " + speed.unit + "/s");
+                view.find(".upload-bar-inner").css("width", progress);
+                view.find(".upload-speed").text(speed.size + " " + speed.unit + "/s");
 
                 // Calculate estimated time left
-                var elapsed = Date.now() - start;
-                var estimate = bytesTotal / (bytesSent / elapsed);
-                var secs = (estimate - elapsed) / 1000;
+                elapsed = Date.now() - start;
+                secs = ((bytesTotal / (bytesSent / elapsed)) - elapsed) / 1000;
 
-                if (secs > 60) {
-                    timeleft.text(Math.ceil(secs / 60) + " mins left");
-                } else {
-                    timeleft.text(Math.ceil(secs) + " secs left");
-                }
+                if (secs > 60)
+                    view.find(".upload-time-left").text(Math.ceil(secs / 60) + " mins");
+                else
+                    view.find(".upload-time-left").text(Math.ceil(secs) + " secs");
+
+                lastUpdate = Date.now();
             }
         }
     }
