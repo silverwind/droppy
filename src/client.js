@@ -1589,11 +1589,6 @@
         var source = playButton.parent().parent().find(".file-link").attr("href");
         play(source, playButton);
     }
-    function setDocOption(option, value) {
-        $(".view").each(function () {
-            if(this.editor) this.editor.setOption(option, value);
-        });
-    }
     function closeDoc(view) {
         updateLocation(view, view[0].currentFolder);
         view[0].editor = null;
