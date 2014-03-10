@@ -323,7 +323,7 @@
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
             case "USER_LIST":
-                populateUserList(msg.users);
+                // TODO
                 break;
             case "SAVE_STATUS":
                 view = getView(vId);
@@ -723,7 +723,7 @@
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
             tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
             tooltip.attr("class", "in");
-            updateTextbyId("tooltip", secsToTime(player.duration * (event.clientX / window.innerWidth)));
+            $("tooltip").text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
 
         seekbar.register("mouseleave", debounce(function () {
@@ -794,15 +794,15 @@
 
             if (!cur || !max) return;
             played.css("width", (cur  / max * 100)  + "%");
-            updateTextbyId("time-cur", secsToTime(cur));
-            updateTextbyId("time-max", secsToTime(max));
+            $("time-cur").text(secsToTime(cur));
+            $("time-max").text(secsToTime(max));
         }
 
         function playing() {
             var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
             droppy.isPlaying = true;
             updateTitle(getView()[0].currentFolder, true);
-            updateTextbyId("audio-title", matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
+            $("audio-title").text(matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
             controls.attr("class", "in");
             fullyLoaded = false;
             droppy.audioUpdater = setInterval(updater, 100);
@@ -1076,61 +1076,6 @@
             $("#click-catcher").attr("class", "in");
         } else
             $("#click-catcher").attr("class", "out");
-    }
-
-    function populateUserList(userList) {
-        var temp, entry,
-        onkeyupHandler = function () {
-            this.parentNode.setAttribute("data-changed", "true");
-            $(this.parentNode).addClass("changed");
-        },
-        onchangeHandler = function () {
-            this.parentNode.setAttribute("data-changed", "true");
-            $(this.parentNode).addClass("changed");
-        },
-        onclickHandler = function () {
-            var children = this.parentNode.childNodes;
-            for (var i = 0, l = children.length; i < l; i++) {
-                if (children[i].className === "user-name") {
-                    sendMessage(null, "UPDATE_USER", { name: children[i].innerHTML, pass: ""});
-                    break;
-                }
-            }
-        };
-        document.getElementById("userlist").innerHTML = "";
-        for (var user in userList) {
-            if (userList.hasOwnProperty(user)) {
-                entry = createElement("li", "user-entry");
-                entry.appendChild(createElement("span", "user-name", user));
-
-                temp = createElement("input", "user-pass");
-                temp.type = "password";
-                temp.setAttribute("title", "Password");
-                temp.onkeyup = onkeyupHandler;
-                entry.appendChild(temp);
-
-                temp = createElement("input", "user-priv");
-                temp.type = "checkbox";
-                temp.id = "check-" + user;
-                temp.checked = userList[user] ? "checked" : "";
-                temp.onchange = onchangeHandler;
-                entry.appendChild(temp);
-
-                temp = createElement("label");
-                temp.setAttribute("title", "Priviledged");
-                temp.setAttribute("for", "check-" + user);
-                temp.innerHTML = droppy.svg.key;
-                entry.appendChild(temp);
-
-                temp = createElement("span");
-                temp.innerHTML = droppy.svg.trash;
-                temp.setAttribute("title", "Delete");
-                temp.onclick = onclickHandler;
-                entry.appendChild(temp);
-
-                document.getElementById("userlist").appendChild(entry);
-            }
-        }
     }
 
     // Update the page title and trim a path to its basename
@@ -1807,11 +1752,6 @@
             }
             playButton.html(player.paused ? droppy.svg.play : droppy.svg.pause);
         }
-    }
-
-    // Wrapper function for setting textContent on an id
-    function updateTextbyId(id, text) {
-        document.getElementById(id).textContent = text;
     }
 
     // Extract the extension from a file name
