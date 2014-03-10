@@ -511,7 +511,7 @@
                     log.info(ws, null, " " + msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
-                    if (msg.data.to.indexOf(msg.data.from) !== -1) {
+                    if (msg.data.to.indexOf(msg.data.from) !== -1 && msg.data.to !== msg.data.from) {
                         log.error("Can't copy directory into itself");
                         send(client.ws, JSON.stringify({ type : "ERROR", text: "Can't copy directory into itself."}));
                         return;
