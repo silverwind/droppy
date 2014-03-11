@@ -447,11 +447,11 @@
                     });
                     break;
                 case "NEW_VIEW":
-                    client.v[vId] = {}
+                    client.v[vId] = {};
                     break;
                 case "DESTROY_VIEW":
-                    delete client.v[vId]
-                    // Remove watchers
+                    delete client.v[vId];
+                    checkWatchedDirs(); // Remove watchers
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -820,8 +820,9 @@
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
                 for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    if (client.v[vId].file === null)
+                    if (client.v[vId].file === null) {
                         neededDirs[client.v[vId].directory] = true;
+                    }
                 }
             }
         }

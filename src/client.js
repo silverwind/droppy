@@ -263,7 +263,7 @@
                 sendMessage();
             else {
                 // Create new view with initiallizing
-                newView(decodeURIComponent(window.location.pathname) || "/");
+                newView(normalizePath(decodeURIComponent(window.location.pathname)));
             }
         };
 
@@ -680,8 +680,15 @@
         $("#split-button").register("click", function () {
             if (secondViewId === null) {
                 var firstView = $("#view-container .view").addClass("left"),
-                    initDest = fixRootPath(firstView[0].currentFolder + "/" + (firstView[0].currentFile || "")),
-                    secondView = newView(initDest).addClass("right");
+                    initDest,
+                    secondView;
+
+                if (firstView[0].currentFile)
+                    initDest = fixRootPath(firstView[0].currentFolder + "/" + (firstView[0].currentFile || ""));
+                else
+                    initDest = fixRootPath(firstView[0].currentFolder);
+
+                secondView = newView(initDest).addClass("right");
                 secondViewId = secondView[0].vId;
                 $(this).children(".button-text").text("Merge");
                 $(this).attr("title", "Merge views back into a single one");
@@ -1170,11 +1177,6 @@
         if (!droppy.socket) return;
         updateLocation(getView(), decodeURIComponent(window.location.pathname), true);
     });
-
-    function fixRootPath(p) {
-        // removes starting "//" or prepends "/"
-        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
-    }
 
     function getViewLocation(view) {
         if (view[0].currentFolder === undefined)
@@ -2056,13 +2058,6 @@
         }
     }, 5000);
 
-    function createElement(type, className, text) {
-        var el = document.createElement(type);
-        if (className) el.className = className;
-        if (text) el.appendChild(document.createTextNode(text));
-        return el;
-    }
-
     function reloadCSS(css) {
         if (!droppy.debug) return;
         $('link[rel="stylesheet"]').remove();
@@ -2102,6 +2097,18 @@
         };
     }
 
+    // removes starting "//" or prepends "/"
+    function fixRootPath(p) {
+        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
+    }
+
+    // Normalize path from /dir/ to /dir, stripping a trailing slash
+    function normalizePath(p) {
+        if (p[p.length -1 ] === "/") p = p.substring(0, p.length - 1);
+        return p || "/";
+    }
+
+    // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
     }
