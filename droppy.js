@@ -89,9 +89,10 @@
 
     // Argument handler
     if (isCLI) handleArguments();
-    log.logo();
 
     config = cfg(path.join(process.cwd(), "config.json"));
+    log.init(config);
+    log.logo();
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
 
