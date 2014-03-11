@@ -707,11 +707,10 @@ input:-webkit-autofill {
     margin: .25em;
     top: 0; left: 0; bottom: 0; right: 0;
     text-align: center;
-    background: #eee;
-    border-radius: 6px;
+    overflow-y: auto;
 }
+
 .previewer .media-container {
-    padding: .125em;
     position: relative;
     top: 50%;
     transform: translateY(-50%);
@@ -720,6 +719,7 @@ input:-webkit-autofill {
 .previewer .media-container > img {
     max-width: 100%;
     max-height: 100%;
+    border-radius: 6px;
 }
 
 /* ============================ Document Previewer ============================ */
