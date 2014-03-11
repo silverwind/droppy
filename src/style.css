@@ -332,8 +332,8 @@ input:-webkit-autofill {
     z-index: 31;
 }
 
-#click-catcher.out { opacity: 0   ; visibility: hidden }
-#click-catcher.in  { opacity: .75 ; visibility: visible }
+#click-catcher.out { opacity: 0  ; visibility: hidden }
+#click-catcher.in  { opacity: .6 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -1175,28 +1175,48 @@ input:-webkit-autofill {
     position: fixed;
     transition: all .3s ease;
     z-index: 32;
-    padding: .5em 4em;
+    padding: .5em 0;
     overflow: auto;
     font-size: .8em;
 }
 
-#options-box > ul {
-    width: 100%;
-    text-align: right;
+@media all and (min-width: 1024px) { #options-box { font-size: .8em; } }
+@media all and (max-width: 1023px) { #options-box { font-size: .7em; } }
+@media all and (max-width:  639px), all and (max-height: 399px) {
+    #options-box {
+        height: 80%;
+        width: 80%;
+        left: 10%;
+        top: 10%;
+    }
+}
+
+@media all and (max-width:  639px) {
+    #options-box > ul {
+        text-align: left;
+    }
 }
 
 #options-box > ul > li {
     margin:.25em 0;
 }
 
-#options-box > ul label {
-    width: 50%;
-    margin: 0 .5em;
+#options-box > ul label, #options-box > ul select {
+    display: inline-block;
+    margin: .25em .5em;
 }
 
-#options-box > ul select {
-    width: 50%;
-    margin: 0 .5em;
+#options-box > ul label  {text-align: right;  width: 40%;}
+#options-box > ul select {text-align: center; width: 40%;}
+
+@media all and (max-width:  639px) {
+    #options-box > ul label, #options-box > ul select {
+       width: 80%;
+       margin: 0.1em 10%;
+    }
+    #options-box > ul label {
+        text-align: left;
+    }
 }
 
 #options-box.in  { transform: translateY(0);  opacity: 1; }
