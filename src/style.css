@@ -196,7 +196,7 @@ input:-webkit-autofill {
     transform: translateZ(0);
 }
 
-.content:after {
+.content.directory:after {
     bottom: 0;
     content: "";
     display: block;
@@ -450,7 +450,6 @@ input:-webkit-autofill {
 }
 
 .inline-namer { background: transparent }
-
 
 .playing, .playing a {
     background: #333;
