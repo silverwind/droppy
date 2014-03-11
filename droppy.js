@@ -416,6 +416,7 @@
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
+                log.debug(ws, null, chalk.magenta("RECV "), message);
                 switch (msg.type) {
                 case "REQUEST_SETTINGS":
                     send(client.ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
@@ -679,6 +680,7 @@
         (function queue(ws, data, time) {
             if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
             if (ws && ws.readyState === 1) {
+                log.debug(ws, null, chalk.green("SEND "), data);
                 ws.send(data, function (error) {
                     if (error) log.error(error);
                 });
