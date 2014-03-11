@@ -1,0 +1,58 @@
+{{##def.svg.triangle:
+<triangle/>
+#}}
+{{##def.svg.zip:
+<zip/>
+#}}
+{{##def.svg.menu:
+<menu/>
+#}}
+{{##def.svg.link:
+<link/>
+#}}
+
+{{##def.directoryHeader:
+    <div class="file-header">
+        <span class="header-name" class="down">Name {{# def.svg.triangle }}</span>
+        <span class="header-mtime" class="up">Modified {{# def.svg.triangle }}</span>
+        <span class="header-size" class="up">Size {{# def.svg.triangle }}</span>
+        <span class="header-spacer"></span>
+    </div>
+#}}
+{{##def.folderLink:
+    <li class="data-row{{= link.classes }}" data-type="folder" data-id="{{= link.id }}">
+        <span class="sprite sprite-folder">{{= link.svgIcon }}</span>
+        <span class="folder-link entry-link">{{= link.file }}</span>
+        <span class="mtime" data-timestamp="{{= link.mtime }}">{{= link.timeDifference(mtime) }}</span>
+        <span class="size" data-size="{{= link.bytes }}">{{= link.size }}</span>
+        <span class="size-unit">{{= link.sizeUnit }}</span>
+        <span><a class="zip" title="Create Zip" href="/~~{{= link.id }}" download="{{= link.file }}.zip">{{# def.svg.zip }}</a></span>
+        <span class="entry-menu" title="Actions">{{# def.svg.menu }}</span>
+    </li>
+#}}
+{{##def.fileLink:
+    <li class="data-row{{= link.classes }}" data-type="file" data-id="{{= link.id }}">
+        <span class="sprite {{= link.spriteClass}}">{{= link.svgIcon }}</span>
+        <a class="file-link entry-link" href="{{= link.downloadURL }}" dowload="{{= link.file }}">{{= link.file }}</span>
+        <span class="mtime" data-timestamp="{{= link.mtime }}">{{= link.timeDifference(mtime) }}</span>
+        <span class="size" data-size="{{= link.bytes }}">{{= link.size }}</span>
+        <span class="size-unit">{{= link.sizeUnit }}</span>
+        <span class="shortlink" title="Create Shortlink">{{# def.svg.link }}</span>
+        <span class="entry-menu" title="Actions">{{# def.svg.menu }}</span>
+    </li>
+#}}
+
+<div class="paste-button  {{ out+=(droppy.clipboard ? "in" : "out") }}"> {{# def.svg.paste }}
+    <span>Paste <span class="filename">{{= it.clipboardBasename }}</span> here</span>
+</div>
+    {{? it.isEmpty }}
+        <div id="empty" class="empty">{{# def.svg.uploadCloud }}<div class="text">Add files</div></div>
+    {{??}}
+        {{~it.entries :link:index}}
+            {{? link.type === "f" || link.type === "nf" }}
+                {{#def.fileLink}}
+            {{?? link.type === "d" || link.type === "nd" }}
+                {{#def.folderLink}}
+            {{?}}
+        {{~}}
+    {{?}}

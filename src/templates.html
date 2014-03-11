@@ -1,51 +1,9 @@
 <!--directoryContent-->
-{{##def.directoryHeader:
-<div class="file-header">
-  <span class="header-name" class="down">Name {{#def.svg.triangle}}</span>
-  <span class="header-mtime" class="up">Modified {{#def.svg.triangle}}</span>
-  <span class="header-size" class="up">Size {{#def.svg.triangle}}</span>
-  <span class="header-spacer"></span>
-</div>
-#}}
 <!---->
 <!--entryLink-->
 
 <!---->
 <!--documentContent-->
-<ul class="sidebar">
-    <li class="exit"> {{#def.svg.remove}}  <span>Close</span></li>
-    <li class="save"> {{#def.svg.disk}}    <span>Save </span></li>
-    <li class="light">{{#def.svg.bulb}}    <span>Color</span></li>
-    <li class="ww">   {{#def.svg.wordwrap}}<span>Wrap </span></li>
-    <li class="opts"> {{#def.svg.cog}}     <span>Opts </span>
-        <div class="opts-container">
-            <label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>
-            <select class="indentmode">
-              <option value="spaces">Spaces</option> 
-              <option value="tabs">Tabs</option>
-            </select>
-            <select class="indentunit">
-              <option value="2">2</option>
-              <option value="4">4</option>
-              <option value="8">8</option>
-            </select>
-            <select class="wrap">
-              <option value="nowrap">No Wrap</option> 
-              <option value="wrap">Wrap</option>
-            </select>
-        </div>
-    </li>
-</ul>
-<div class="doc {{? it.readOnly }}readonly{{??}}editing{{?}}">
-    <div class="text-editor">
-        <textarea></textarea>
-    </div>
-</div>
 <!---->
 <!--imagePreviewContent-->
-<div class="previewer image">
-    <div class="media-container">
-        <img src="{{=it.url}}"></img>
-    </div>
-</div>
 <!---->
