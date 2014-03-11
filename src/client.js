@@ -735,8 +735,8 @@
                             value = true;
                         else if (value === "false")
                             value = false;
-                        else if (typeof parseFloat(value) === "number" && !isNaN(parseFloat(value)))
-                            value = Number(value);
+                        else
+                            value = parseFloat(value) || value;
 
                         droppy.set(option, value);
                         $(".view").each(function () {
