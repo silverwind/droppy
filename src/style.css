@@ -196,7 +196,8 @@ input:-webkit-autofill {
     transform: translateZ(0);
 }
 
-.content.directory:after {
+/* Bottom padding fix for Firefox, see https://bugzilla.mozilla.org/show_bug.cgi?id=878058 */
+.firefox .content.directory:after {
     bottom: 0;
     content: "";
     display: block;

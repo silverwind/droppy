@@ -146,6 +146,9 @@
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 
+    // UA check for https://bugzilla.mozilla.org/show_bug.cgi?id=878058
+    if (navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
+        $("html").addClass("firefox");
 // ============================================================================
 //  View handling
 // ============================================================================
