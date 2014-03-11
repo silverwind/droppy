@@ -14,7 +14,7 @@
     "autoprefixer": "~1.1.20140302",
     "busboy": "~0.2.3",
     "chalk": "~0.4.0",
-    "clean-css": "~2.1.5",
+    "clean-css": "~2.1.6",
     "codemirror": "~3.22.0",
     "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
