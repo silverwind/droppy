@@ -452,8 +452,8 @@
                     client.v[vId] = {};
                     break;
                 case "DESTROY_VIEW":
+                    checkWatchedDirs();
                     delete client.v[vId];
-                    checkWatchedDirs(); // Remove watchers
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
