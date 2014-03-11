@@ -1083,10 +1083,11 @@ input:-webkit-autofill {
 /* =============================== About box =============================== */
 
 #about-box {
-    background: #181818;
+    background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
-    color: #aaa;
+    color: #666;
+    font-weight: 300;
     height: 200px;
     left: 50%;
     margin-left: -160px;
@@ -1102,7 +1103,7 @@ input:-webkit-autofill {
 #about-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 
 #about-box .droplet {
-    fill: #282828;
+    fill: #fff;
     position: absolute;
     left: 75px;
     height: 100%;
@@ -1116,19 +1117,20 @@ input:-webkit-autofill {
 }
 
 #about-box a {
-    color: #eee;
-    transition: color .2s ease;
+    color: #333;
     font-weight: 400;
 }
 
 #about-box a:hover {
-    color: #f1a;
+    color: #f55;
 }
 
 #about-title {
-    color: #fff;
+    color: #333;
     font-size: 1.4em;
     line-height: 1.8em;
+    width: 100%;
+    text-align: center;
 }
 
 #about-text {
@@ -1144,40 +1146,50 @@ input:-webkit-autofill {
 }
 
 #about-box .github {
-    fill: #aaa;
+    fill: #333;
     bottom: 0;
     padding: 6px 5%;
     position: absolute;
     right: 0;
 }
-#about-box .github:hover { fill: #f1a }
+#about-box .github:hover { fill: #f55 }
 
 /* =============================== Options ============================== */
 
 #options-box {
-    background: #181818;
+    background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
-    color: #ccc;
-    height: 200px;
-    left: 50%;
-    margin-left: -150px;
-    margin-top: -100px;
+    color: #333;
+    height: 50%;
+    width: 50%;
+    left: 25%;
+    top: 25%;
     position: fixed;
-    top: 50%;
     transition: all .3s ease;
-    width: 320px;
     z-index: 32;
+    padding: .5em 4em;
+    overflow: auto;
     font-size: .8em;
-    overflow: scroll;
 }
 
-#options-box select {
-    width: 60%;
-    display: block;
-    margin-left: 20%;
-    margin-top: .5em;
-    margin-bottom: .5em;
+#options-box > ul {
+    width: 100%;
+    text-align: right;
+}
+
+#options-box > ul > li {
+    margin:.25em 0;
+}
+
+#options-box > ul label {
+    width: 50%;
+    margin: 0 .5em;
+}
+
+#options-box > ul select {
+    width: 50%;
+    margin: 0 .5em;
 }
 
 #options-box.in  { transform: translateY(0);  opacity: 1; }

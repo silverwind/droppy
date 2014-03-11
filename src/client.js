@@ -716,12 +716,14 @@
                 $("#options-box").attr("class", $("#options-box").attr("class") !== "in" ? "in" : "out");
 
                 if (!$("#options-box")[0].initialized) {
-                    $("#options-box").append(getSelect("indentWithTabs", [true, false]));
-                    $("#options-box").append(getSelect("indentUnit",     [2, 4, 8]));
-                    $("#options-box").append(getSelect("theme",          ["base16-dark", "xq-light"]));
-                    $("#options-box").append(getSelect("lineWrapping",   [true, false]));
-                    $("#options-box").append(getSelect("clickAction",    ["download", "view"]));
-                    $("#options-box").append(getSelect("indentWithTabs", [true, false]));
+                    var list = $("<ul>");
+                    list.append(createOption("indentWithTabs", [true, false], ["Tabs", "Spaces"], "Indentation Mode"));
+                    list.append(createOption("indentUnit", [2, 4, 8], [2, 4, 8], "Indentation Unit"));
+                    list.append(createOption("theme", ["base16-dark", "xq-light"], ["Dark", "Light"], "Editor Theme"));
+                    list.append(createOption("lineWrapping", [true, false], ["Wrap", "No Wrap"], "Wordwrap Mode"));
+                    list.append(createOption("clickAction", ["download", "view"], ["Download", "View"], "File Click Action"));
+                    list.append(createOption("renameExistingOnUpload", [true, false], ["Rename", "Replace"], "Upload Mode"));
+                    list.appendTo($("#options-box"));
                     $("#options-box")[0].initialized = true;
                 }
 
@@ -748,17 +750,18 @@
                     });
                 });
 
-                function getSelect(variable, values) {
+                function createOption(variable, values, valueNames, label) {
                     var output = "";
+                    output += '<label>' + label + '</label>';
                     output += '<select class="' + variable + '">';
-                    values.forEach(function (value) {
+                    values.forEach(function (value, i) {
                         if (droppy.get(variable) === value)
-                            output += '<option value="' + value + '" selected>' + value + '</option>';
+                            output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
                         else
-                            output += '<option value="' + value + '">' + value + '</option>';
+                            output += '<option value="' + value + '">' + valueNames[i] + '</option>';
                     });
                     output += '</select>';
-                    return output;
+                    return '<li>' + output + '</li>';
                 }
             });
         });
