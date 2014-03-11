@@ -35,6 +35,7 @@
         utils    = require("./lib/utils.js"),
         log      = require("./lib/log.js"),
         cfg      = require("./lib/config.js"),
+        tpls     = require("./lib/dottemplates.js"),
         // Modules
         archiver = require("archiver"),
         async    = require("async"),
@@ -65,11 +66,18 @@
         isCLI    = (process.argv.length > 2),
         // Resources
         cmPath    = "node_modules/codemirror/",
+        templateList = ["directory.html", "document.html", "image.html"],
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
-            html : ["src/base.html", "src/auth.html", "src/main.html"]
+            html : ["src/base.html", "src/auth.html", "src/main.html"],
+            templates : []
         };
+    // Add Templates
+    templateList.forEach(function (relPath) {
+        resources.templates.push("src/templates/" + relPath);
+    });
+
     // Add CodeMirror source paths
     // Addons
     ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
@@ -119,7 +127,6 @@
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
             resourceList = utils.flatten(resources),
             matches = { resource: 0, compiled: 0 };
-
         //Prepare SVGs
         try {
             var svgDir = config.srcDir + "svg/", svgData = {};
@@ -185,6 +192,14 @@
             // any double-semicolons and whitespace.
             out.js += data + ";\n";
         });
+
+        out.js += "(function (){var t = {};";
+        var index = 0;
+        resourceData.templates.forEach(function (data) {
+            // Produce the doT functions
+            out.js += tpls.produceFunction("t." + templateList[index++].replace(/^(\w+)[\S\s]+$/, "$1"), data);
+        });
+        out.js += ";window.t = t;}());";
 
         // Add CSS vendor prefixes
         out.css = ap("last 2 versions").process(out.css).css;
