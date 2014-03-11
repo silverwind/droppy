@@ -798,13 +798,13 @@ input:-webkit-autofill {
     height: 2.42rem; /* Hack: magic number */
     text-align: center;
     background: #333;
-    transition: all .2s ease;
+    transition: opacity .2s ease;
     width: 14rem;
-    visibility: visible;
     opacity: 0;
+    display: none;
 }
 .opts.active { border-radius:  0 4px 4px 0 !important}
-.opts.active .opts-container { opacity: 1 }
+.opts.active .opts-container { display: block; opacity: 1 }
 
 .opts-container select {
     width: 4rem;
