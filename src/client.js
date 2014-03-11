@@ -735,7 +735,7 @@
                             value = true;
                         else if (value === "false")
                             value = false;
-                        else if (typeof parseFloat(value) === "number")
+                        else if (typeof parseFloat(value) === "number" && !isNaN(parseFloat(value)))
                             value = Number(value);
 
                         droppy.set(option, value);
