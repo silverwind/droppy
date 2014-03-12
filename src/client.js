@@ -352,7 +352,7 @@
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
             case "USER_LIST":
-                // TODO
+                showOptions(msg.users);
                 break;
             case "SAVE_STATUS":
                 view = getView(vId);
@@ -712,58 +712,7 @@
         });
 
         $("#options-button").register("click", function () {
-            requestAnimation(function () {
-                $("#options-box").attr("class", $("#options-box").attr("class") !== "in" ? "in" : "out");
-
-                if (!$("#options-box")[0].initialized) {
-                    var list = $("<ul>");
-                    list.append(createOption("indentWithTabs", [true, false], ["Tabs", "Spaces"], "Indentation Mode"));
-                    list.append(createOption("indentUnit", [2, 4, 8], [2, 4, 8], "Indentation Unit"));
-                    list.append(createOption("theme", ["base16-dark", "xq-light"], ["Dark", "Light"], "Editor Theme"));
-                    list.append(createOption("lineWrapping", [true, false], ["Wrap", "No Wrap"], "Wordwrap Mode"));
-                    list.append(createOption("clickAction", ["download", "view"], ["Download", "View"], "File Click Action"));
-                    list.append(createOption("renameExistingOnUpload", [true, false], ["Rename", "Replace"], "Upload Mode"));
-                    list.appendTo($("#options-box"));
-                    $("#options-box")[0].initialized = true;
-                }
-
-                // TODO: User managment
-                //sendMessage(null, "GET_USERS");
-
-                toggleCatcher();
-                $("#click-catcher").one("click", function() {
-                    $("#options-box").find("select").each( function() {
-                        var option = $(this).attr("class"),
-                            value  = $(this).val();
-
-                        if (value === "true")
-                            value = true;
-                        else if (value === "false")
-                            value = false;
-                        else
-                            value = parseFloat(value) || value;
-
-                        droppy.set(option, value);
-                        $(".view").each(function () {
-                            if(this.editor) this.editor.setOption(option, value);
-                        });
-                    });
-                });
-
-                function createOption(variable, values, valueNames, label) {
-                    var output = "";
-                    output += '<label>' + label + '</label>';
-                    output += '<select class="' + variable + '">';
-                    values.forEach(function (value, i) {
-                        if (droppy.get(variable) === value)
-                            output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
-                        else
-                            output += '<option value="' + value + '">' + valueNames[i] + '</option>';
-                    });
-                    output += '</select>';
-                    return '<li>' + output + '</li>';
-                }
-            });
+            sendMessage(null, "GET_USERS");
         });
 
         $("#logout-button").register("click", function () {
@@ -1812,6 +1761,72 @@
         view.find(".wrap option").each(function() {
             if ($(this).attr("value") === (droppy.get("lineWrapping") ? "wrap" : "nowrap"))
                 $(this).attr("selected", "selected");
+        });
+    }
+
+    function createOptions() {
+        var list = $("<ul>");
+        list.append(createSelect("indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]));
+        list.append(createSelect("indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]));
+        list.append(createSelect("theme", "Editor Theme", ["base16-dark", "xq-light"], ["Dark", "Light"]));
+        list.append(createSelect("lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]));
+        list.append(createSelect("clickAction", "File Click Action", ["download", "view"], ["Download", "View"]));
+        list.append(createSelect("renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]));
+        list.prepend("<h1>Options</h1>");
+        return $("<div class='list-options'>").append(list);
+
+        function createSelect(option, label, values, valueNames) {
+            var output = "";
+            output += '<label>' + label + '</label>';
+            output += '<div><select class="' + option + '">';
+            values.forEach(function (value, i) {
+                if (droppy.get(option) === value)
+                    output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
+                else
+                    output += '<option value="' + value + '">' + valueNames[i] + '</option>';
+            });
+            output += '</select></div>';
+            return '<li>' + output + '</li>';
+        }
+    }
+
+    function createUserList(users) {
+        var output = "<div class='list-user'><h1>User List</h1>";
+        output += "<ul>";
+        Object.keys(users).forEach(function (user) {
+            output += '<li>' + user + droppy.svg.remove + '</li>';
+        });
+        output += "</ul>";
+        output += "<div class='add-user'>" + droppy.svg.plus + "Add User</div>";
+        output += "</div>";
+        return output;
+    }
+
+    function showOptions(userlist) {
+        var $box = $("#options-box");
+        $box.empty().append(createOptions);
+        if (Object.keys(userlist).length > 0) {
+            $box.append(createUserList(userlist));
+            $box.replaceClass("single", "double");
+        } else {
+            $box.replaceClass("double", "single");
+        }
+        $("#options-box").replaceClass("out", "in");
+
+        toggleCatcher();
+        $("#click-catcher").one("click", function() {
+            $box.find("select").each( function() {
+                var option = $(this).attr("class"), value  = $(this).val();
+
+                if (value === "true") value = true;
+                else if (value === "false") value = false;
+                else value = parseFloat(value) || value;
+
+                droppy.set(option, value);
+                $(".view").each(function () {
+                    if(this.editor) this.editor.setOption(option, value);
+                });
+            });
         });
     }
 
