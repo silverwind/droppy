@@ -353,7 +353,10 @@
                 window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 break;
             case "USER_LIST":
-                showOptions(msg.users);
+                if (!$("#options-box").hasClass("in"))
+                    showOptions(msg.users);
+                else
+                    updateUsers(msg.users);
                 break;
             case "SAVE_STATUS":
                 view = getView(vId);
@@ -1709,12 +1712,17 @@
         var output = "<div class='list-user'><h1>User List</h1>";
         output += "<ul>";
         Object.keys(users).forEach(function (user) {
-            output += '<li>' + user + droppy.svg.remove + '</li>';
+            output += '<li><span class="username">' + user + "</span>" + droppy.svg.remove + '</li>';
         });
         output += "</ul>";
         output += "<div class='add-user'>" + droppy.svg.plus + "Add User</div>";
         output += "</div>";
         return output;
+    }
+
+    function updateUsers(userlist) {
+        $("#options-box").find(".list-user").empty().append(createUserList(userlist));
+        bindUserlistEvents();
     }
 
     function showOptions(userlist) {
@@ -1726,8 +1734,8 @@
         } else {
             $box.replaceClass("double", "single");
         }
+        bindUserlistEvents();
         $("#options-box").replaceClass("out", "in");
-
         toggleCatcher();
         $("#click-catcher").one("click", function() {
             $box.find("select").each( function() {
@@ -1741,6 +1749,26 @@
                 $(".view").each(function () {
                     if(this.editor) this.editor.setOption(option, value);
                 });
+            });
+        });
+    }
+
+    function bindUserlistEvents() {
+        $(".add-user").register("click", function() {
+           var user = window.prompt("Username?"),
+               pass = window.prompt("Password?");
+           if (!user || !pass) return;
+           sendMessage(null, "UPDATE_USER", {
+               name: user,
+               pass: pass,
+               priv: true
+           });
+        });
+        $(".list-user .remove").on("click", function(event) {
+            event.stopPropagation();
+            sendMessage(null, "UPDATE_USER", {
+                name: $(this).parents("li").children(".username").text(),
+                pass: ""
             });
         });
     }
