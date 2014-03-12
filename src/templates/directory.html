@@ -53,8 +53,9 @@ it = {
 {{? Object.keys(it.entries).length === 0 }}
     <div id="empty" class="empty">{{= svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
-    {{  var folder = (it.folder === "/") ? "/" : it.folder + "/",
-            sortedEntries = (it.sortBy === 'name' ? t.fn.sortKeysByNameAndType : t.fn.sortKeysByProperty )(it.entries, it.sortBy),
+    {{  if (it.sortBy === "name") it.sortBy = "type";
+        var folder = (it.folder === "/") ? "/" : it.folder + "/",
+            sortedEntries = t.fn.sortKeysByProperty(it.entries, it.sortBy),
             extRE = /[^.]*$/,
             tempSize,
             temp = {};

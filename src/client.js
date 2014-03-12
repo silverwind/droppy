@@ -1251,10 +1251,6 @@
 
     // Convert the received data into HTML
     function openDirectory(view, isUpload) {
-        var downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes,
-            folder = view[0].currentFolder,
-            fileList = view[0].currentData,
-            list = $("<ul></ul>");
         var tdata = {
             entries: view[0].currentData,
             folder: view[0].currentFolder,
@@ -1262,7 +1258,7 @@
             sortBy: "name",
             sortAsc: false,
             clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
-        }
+        };
         var content = contentWrap(view).html(t.directory(tdata));
         loadContent(view, content);
         // Upload button on empty page
@@ -1476,32 +1472,21 @@
                 return -1;
             }
         }
-    }
+    };
+    // Compare by property, then by key
     t.fn.compare2 = function (entries, property) {
         var result;
         return function (a, b) {
             result = t.fn.compare(entries[a][property],entries[b][property]);
             if (result === 0) result = t.fn.compare(a, b);
             return result;
-        }
-    }
-    t.fn.sortKeysByKey = function (entries) {
-        var objs = Object.keys(entries);
-        objs = objs.sort(t.fn.compare);
-        return objs;
-    }
-    t.fn.sortKeysByNameAndType = function (entries) {
-        var objs = Object.keys(entries);
-        objs = objs.sort(t.fn.compare2(entries, "type"));
-        return objs;
-    }
+        };
+    };
     t.fn.sortKeysByProperty = function (entries, by) {
         var objs = Object.keys(entries);
-        objs = objs.sort(function (a, b) {
-            t.fn.compare(entries[a][by], entries[b][by]);
-        })
+        objs = objs.sort(t.fn.compare2(entries, by));
         return objs;
-    }
+    };
     function sortFunc(a, b) {
         if (droppy.sorting.asc) {
             var temp = a;
