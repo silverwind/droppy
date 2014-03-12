@@ -1167,60 +1167,168 @@ input:-webkit-autofill {
     background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
-    color: #333;
-    height: 50%;
-    width: 50%;
-    left: 25%;
-    top: 25%;
-    position: fixed;
-    transition: all .3s ease;
+    color: #444;
+    max-height: 80%;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+    transition: transform .3s ease, opacity .3s ease, visibility .3s ease;
     z-index: 32;
-    padding: .5em 0;
-    overflow: auto;
-    font-size: .8em;
+    padding: .5em;
+    overflow-y: auto;
+
 }
 
-@media all and (min-width: 1024px) { #options-box { font-size: .8em; } }
-@media all and (max-width: 1023px) { #options-box { font-size: .7em; } }
-@media all and (max-width:  639px), all and (max-height: 399px) {
-    #options-box {
-        height: 80%;
-        width: 80%;
-        left: 10%;
-        top: 10%;
-    }
+@media all and (min-width: 1024px) { #options-box { font-size: .9em  } }
+@media all and (max-width: 1023px) { #options-box { font-size: .8em  } }
+@media all and (max-width:  799px) { #options-box { font-size: .65em } }
+
+#options-box.in  { transform: translateY(-50%);  opacity: 1; }
+#options-box.out { transform: translateY(calc(-50% + 100px)); opacity: 0; visibility: hidden }
+
+@media all and (min-width: 800px) {
+    #options-box.single { width: 40%; left: 30%; }
+    #options-box.double { width: 80%; left: 10%; }
+    #options-box.single > div { width: 100%; }
+    #options-box.double > div { width: 50%;  }
+}
+@media all and (max-width: 799px) {
+    #options-box.single { width: 80%; left: 10%; }
+    #options-box.double { width: 80%; left: 10%; }
+    #options-box.single > div { width: 100%; }
+    #options-box.double > div { width: 100%; }
 }
 
-@media all and (max-width:  639px) {
-    #options-box > ul {
-        text-align: left;
-    }
+#options-box > div {
+    padding: 0 .25em;
+    float: left;
 }
 
-#options-box > ul > li {
-    margin:.25em 0;
+#options-box h1 {
+    text-align: center;
+    margin-top: .125em;
+    margin-bottom: .125em;
+    border-bottom: 2px solid #ccc;
+    font-size: 2em;
+    font-weight: 300;
+    color: #444;
 }
 
-#options-box > ul label, #options-box > ul select {
+#options-box .list-options label,
+#options-box .list-options select {
     display: inline-block;
-    margin: .25em .5em;
+    margin: .125em;
+}
+#options-box .list-options li:hover select {
+    color: #000;
 }
 
-#options-box > ul label  {text-align: right;  width: 40%;}
-#options-box > ul select {text-align: center; width: 40%;}
+#options-box .list-options label {
+    text-align: Left;
+    width: calc(50% - .25em);
+    font-weight: 400;
+}
 
-@media all and (max-width:  639px) {
-    #options-box > ul label, #options-box > ul select {
-       width: 80%;
-       margin: 0.1em 10%;
-    }
-    #options-box > ul label {
-        text-align: left;
+@media all and (max-width: 319px) {
+    #options-box .list-options label {
+        width: 100%;
     }
 }
 
-#options-box.in  { transform: translateY(0);  opacity: 1; }
-#options-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
+#options-box .list-options select {
+    text-align: center;
+    width: 100%;
+}
+#options-box .list-options div {
+    display: inline-block;
+    width: calc(50% - .25em);
+}
+
+@media all and (max-width: 319px) {
+    #options-box .list-options div {
+        width: 100%;
+    }
+}
+
+#options-box .list-options select {
+    border-radius: 4px;
+    background: #fff;
+    color: #666;
+    border: none;
+    outline: none;
+    display: inline-block;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: "";
+}
+
+#options-box .list-options select::-ms-expand { display: none }
+#options-box .list-options div { position:relative }
+#options-box .list-options div:after {
+    content: "<>";
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+    color: #666;
+    transform: rotate(90deg);
+    right: 0;
+    top: 7px;
+    position: absolute;
+    pointer-events: none;
+}
+
+#options-box .list-user li {
+    margin: .125em;
+    line-height: 1.5em;
+    border-radius: 6px;
+    padding: 0 .125em;
+    font-weight: 400;
+}
+
+#options-box .list-user li svg.remove {
+    position: relative;
+    top: .125em;
+    right: 0;
+    height: 1.25em;
+    width: 1.25em;
+    float: right;
+    fill: #666;
+    cursor: pointer;
+}
+
+#options-box .list-user li svg.remove:hover {
+    fill: #f44;
+}
+
+#options-box .list-user .add-user {
+    line-height: 2em;
+    background: #fff;
+    text-align: center;
+    border-radius: 6px;
+    width: 60%;
+    margin-left: 20%;
+    margin-top: .5em;
+    cursor: pointer;
+    transition: background .2s ease;
+    font-weight: 400;
+    margin-bottom: .5em;
+}
+#options-box .list-user .add-user:hover {
+    background: #1af;
+    color: #fff;
+}
+#options-box .list-user .add-user:hover svg {
+    fill: #fff;
+}
+
+#options-box .list-user .add-user svg {
+    height: 1.25em;
+    width: 1.25em;
+    position: relative;
+    top: .25em;
+    margin-right: .5em;
+    fill: #666;
+}
 
 /* ============================== Login Form =============================== */
 

@@ -575,8 +575,12 @@
                     });
                     break;
                 case "GET_USERS":
-                    if (!db.sessions[cookie].privileged) return;
-                    sendUsers(cookie);
+                    if (db.sessions[cookie].privileged) {
+                        sendUsers(cookie);
+                    } else {
+                        // Send an empty user list so the client know not to display the management options
+                        send(client.ws, JSON.stringify({ type : "USER_LIST", users : {} }));
+                    }
                     break;
                 case "UPDATE_USER":
                     var name = msg.data.name, pass = msg.data.pass, priv = msg.data.priv;
