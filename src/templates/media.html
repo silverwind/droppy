@@ -1,0 +1,25 @@
+{{##def.data:
+<script>
+it = {
+    type: String // Type of media, appended to previewer classes
+    src: String // url src for image or media
+    caption: String // Caption for our media
+}
+</script>
+#}}
+<div class="previewer {{= it.type}}">
+    <figure class="media-container">
+        {{? it.type === "video"}}
+            <video loop="true">
+                <source src="{{= it.src }}"/>
+            </video>
+        {{?? it.type === "image"}}
+            <img src="{{= it.src }}"></img>
+        {{??}}
+            <img src="{{= it.src }}"></img>
+        {{?}}
+        {{? it.caption }}
+            <figcaption>{{= it.caption}}</figcaption>
+        {{?}}
+    </figure>
+</div>
