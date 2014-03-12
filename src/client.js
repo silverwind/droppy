@@ -1,4 +1,4 @@
-/*global CodeMirror */
+/*global CodeMirror, t */
 /*jslint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
   forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
   undef: true, unused: true, globalstrict: true, browser: true, jquery: true */
@@ -6,6 +6,7 @@
 
 (function ($, window, document) {
     var droppy = {};
+    window.t = window.t || {fn:{}};
     initVariables();
 // ============================================================================
 //  Feature Detects
@@ -200,7 +201,7 @@
 
     function getPage() {
         $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
-            droppy.svg = JSON.parse(svgReq[0]);
+            droppy.svg = window.svg = JSON.parse(svgReq[0]);
             loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
         });
     }
@@ -1645,37 +1646,7 @@
             url = "/_" + entryId,
             readOnly = false, // Check if not readonly
             editor = null,
-            doc = $(
-            '<ul class="sidebar">' +
-                '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
-                '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
-                '<li class="light">' + droppy.svg.bulb + '<span>Color</span></li>' +
-                '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>' +
-                '<li class="opts">' + droppy.svg.cog + '<span>Opts</span>' +
-                    '<div class="opts-container">' +
-                        '<label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>' +
-                        '<select class="indentmode">' +
-                          '<option value="spaces">Spaces</option> ' +
-                          '<option value="tabs">Tabs</option>' +
-                        '</select>' +
-                        '<select class="indentunit">' +
-                          '<option value="2">2</option>' +
-                          '<option value="4">4</option>' +
-                          '<option value="8">8</option>' +
-                        '</select>' +
-                        '<select class="wrap">' +
-                          '<option value="nowrap">No Wrap</option> ' +
-                          '<option value="wrap">Wrap</option>' +
-                        '</select>' +
-                    '</div>' +
-                '</li>' +
-            '</ul>' +
-            '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                '<div class="text-editor">' +
-                    '<textarea></textarea>' +
-                '</div>' +
-            '</div>'
-            );
+            doc = $(t.document({readOnly:readOnly}));
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
         showSpinner(view);
@@ -1910,6 +1881,7 @@
             };
         }
     }
+    window.t.fn.convertToSI = convertToSI;
 
     // SVG preprocessing
     function prepareSVG(html) {
@@ -2036,6 +2008,7 @@
         }
         return retval;
     }
+    window.t.fn.timeDifference = timeDifference;
 
     function secsToTime(secs) {
         var mins, hrs, time = "";

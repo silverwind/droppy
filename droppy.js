@@ -187,6 +187,7 @@
         resourceData.css.forEach(function (data) {
             out.css += data + "\n";
         });
+
         resourceData.js.forEach(function (data) {
             // Append a semicolon to each javascript file to make sure it's
             // properly terminated. The minifier afterwards will take care of
@@ -194,11 +195,11 @@
             out.js += data + ";\n";
         });
 
-        out.js += "(function (){var t = {};";
+        out.js += "(function (){var t = window.t || {}; t.fn = {};";
         var index = 0;
         resourceData.templates.forEach(function (data) {
             // Produce the doT functions
-            out.js += tpls.produceFunction("t." + templateList[index++].replace(/^(\w+)[\S\s]+$/, "$1"), data);
+            out.js += tpls.produceFunction("t." + templateList[index++].match(/^\w+/)[0], data);
         });
         out.js += ";window.t = t;}());";
 
