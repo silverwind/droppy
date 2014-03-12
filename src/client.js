@@ -1313,64 +1313,7 @@
             sortBy: "name",
             sortAsc: false,
             clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
-        }/*
-        for (var filename in fileList) {
-            if (fileList.hasOwnProperty(filename)) {
-                svgIcon = "", classes = "";
-                type = fileList[filename].type;
-                bytes = fileList[filename].size;
-                temp = convertToSI(bytes);
-                size = temp.size > 0 ? temp.size : "0";
-                sizeUnit = temp.size > 0 ? temp.unit : "b";
-                mtime = fileList[filename].mtime;
-                id = (folder === "/") ? "/" + filename : folder + "/" + filename;
-                if (type === "nf" || type === "nd") {
-                    svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
-                    classes += " uploading";
-                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(filename)) {
-                    svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
-                    classes += " playable";
-                }
-                if (type === "f" || type === "nf") { // Create a file row
-                    var ext = getExt(filename), spriteClass = getSpriteClass(ext);
-                    downloadURL = "/~" + id;
-                    if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[filename].mime;
-                    if (isUpload) filename = decodeURIComponent(filename);
-                    list.append(
-                        '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
-                            '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="file-link entry-link" href="' + downloadURL + '" download="' + filename + '">' + filename + '</a>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
-                        '</li>'
-                    );
-                } else if (type === "d" || type === "nd") {  // Create a folder row
-                    if (isUpload) filename = decodeURIComponent(filename);
-                    list.append(
-                        '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
-                            '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
-                            '<span class="folder-link entry-link">' + filename + '</span>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + filename + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
-                        '</li>'
-                    );
-                }
-            }
         }
-        list.children("li").sort(sortFunc).appendTo(list);
-        var content = contentWrap(view).html(
-            '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
-                '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
-            '</div>');
-        if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
-        else content.append('<div id="empty" class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
-        */
         var content = contentWrap(view).html(t.directory(tdata));
         loadContent(view, content);
         // Upload button on empty page

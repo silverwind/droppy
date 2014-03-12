@@ -50,7 +50,7 @@ it = {
 <div class="paste-button {{= (it.clipboardBasename ? "in" : "out") }}"> {{= svg.paste }}
     <span>Paste <span class="filename">{{= it.clipboardBasename }}</span> here</span>
 </div>
-{{? it.entries.length === 0 }}
+{{? Object.keys(it.entries).length === 0 }}
     <div id="empty" class="empty">{{= svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
     {{  var folder = (it.folder === "/") ? "/" : it.folder + "/",
