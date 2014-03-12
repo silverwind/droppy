@@ -567,7 +567,7 @@
                     }
                     break;
                 case "UPDATE_USER":
-                    var name = msg.data.name, pass = msg.data.pass, priv = msg.data.priv;
+                    var name = msg.data.name, pass = msg.data.pass;
                     if (!db.sessions[cookie].privileged) return;
                     if (pass === "") {
                         if (!db.users[name]) return;
@@ -576,13 +576,14 @@
                         sendUsers(cookie);
                     } else {
                         var isNew = !db.users[name];
-                        addOrUpdateUser(name, pass, priv);
+                        addOrUpdateUser(name, pass, msg.data.priv);
                         if (isNew)
                             log.info(ws, null, "Added user: ", chalk.magenta(name));
                         else
                             log.info(ws, null, "Updated user: ", chalk.magenta(name));
                         sendUsers(cookie);
                     }
+                    if (db.sessions[cookie].privileged) sendUsers(cookie);
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
