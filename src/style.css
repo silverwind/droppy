@@ -196,7 +196,8 @@ input:-webkit-autofill {
     transform: translateZ(0);
 }
 
-.content:after {
+/* Bottom padding fix for Firefox, see https://bugzilla.mozilla.org/show_bug.cgi?id=878058 */
+.firefox .content.directory:after {
     bottom: 0;
     content: "";
     display: block;
@@ -331,8 +332,8 @@ input:-webkit-autofill {
     z-index: 31;
 }
 
-#click-catcher.out { opacity: 0   ; visibility: hidden }
-#click-catcher.in  { opacity: .75 ; visibility: visible }
+#click-catcher.out { opacity: 0  ; visibility: hidden }
+#click-catcher.in  { opacity: .6 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -450,7 +451,6 @@ input:-webkit-autofill {
 }
 
 .inline-namer { background: transparent }
-
 
 .playing, .playing a {
     background: #333;
@@ -703,16 +703,23 @@ input:-webkit-autofill {
 
 /* ============================ Image Previewer ============================ */
 .previewer {
-    display: table;
-    width: 100%;
-    height: 100%;
-}
-.previewer .media-container {
-    display: table-cell;
-    vertical-align: middle;
+    position: absolute;
+    margin: .25em;
+    top: 0; left: 0; bottom: 0; right: 0;
     text-align: center;
+    overflow-y: auto;
+}
+
+.previewer .media-container {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.previewer .media-container > img {
     max-width: 100%;
     max-height: 100%;
+    border-radius: 6px;
 }
 
 /* ============================ Document Previewer ============================ */
@@ -798,13 +805,13 @@ input:-webkit-autofill {
     height: 2.42rem; /* Hack: magic number */
     text-align: center;
     background: #333;
-    transition: all .2s ease;
+    transition: opacity .2s ease;
     width: 14rem;
-    visibility: visible;
     opacity: 0;
+    display: none;
 }
 .opts.active { border-radius:  0 4px 4px 0 !important}
-.opts.active .opts-container { opacity: 1 }
+.opts.active .opts-container { display: block; opacity: 1 }
 
 .opts-container select {
     width: 4rem;
@@ -1083,10 +1090,11 @@ input:-webkit-autofill {
 /* =============================== About box =============================== */
 
 #about-box {
-    background: #181818;
+    background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
-    color: #aaa;
+    color: #666;
+    font-weight: 300;
     height: 200px;
     left: 50%;
     margin-left: -160px;
@@ -1102,7 +1110,7 @@ input:-webkit-autofill {
 #about-box.out { transform: translateY(100px); opacity: 0; visibility: hidden }
 
 #about-box .droplet {
-    fill: #282828;
+    fill: #fff;
     position: absolute;
     left: 75px;
     height: 100%;
@@ -1116,19 +1124,20 @@ input:-webkit-autofill {
 }
 
 #about-box a {
-    color: #eee;
-    transition: color .2s ease;
+    color: #333;
     font-weight: 400;
 }
 
 #about-box a:hover {
-    color: #f1a;
+    color: #f55;
 }
 
 #about-title {
-    color: #fff;
+    color: #333;
     font-size: 1.4em;
     line-height: 1.8em;
+    width: 100%;
+    text-align: center;
 }
 
 #about-text {
@@ -1144,40 +1153,70 @@ input:-webkit-autofill {
 }
 
 #about-box .github {
-    fill: #aaa;
+    fill: #333;
     bottom: 0;
     padding: 6px 5%;
     position: absolute;
     right: 0;
 }
-#about-box .github:hover { fill: #f1a }
+#about-box .github:hover { fill: #f55 }
 
 /* =============================== Options ============================== */
 
 #options-box {
-    background: #181818;
+    background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px #111;
-    color: #ccc;
-    height: 200px;
-    left: 50%;
-    margin-left: -150px;
-    margin-top: -100px;
+    color: #333;
+    height: 50%;
+    width: 50%;
+    left: 25%;
+    top: 25%;
     position: fixed;
-    top: 50%;
     transition: all .3s ease;
-    width: 320px;
     z-index: 32;
+    padding: .5em 0;
+    overflow: auto;
     font-size: .8em;
-    overflow: scroll;
 }
 
-#options-box select {
-    width: 60%;
-    display: block;
-    margin-left: 20%;
-    margin-top: .5em;
-    margin-bottom: .5em;
+@media all and (min-width: 1024px) { #options-box { font-size: .8em; } }
+@media all and (max-width: 1023px) { #options-box { font-size: .7em; } }
+@media all and (max-width:  639px), all and (max-height: 399px) {
+    #options-box {
+        height: 80%;
+        width: 80%;
+        left: 10%;
+        top: 10%;
+    }
+}
+
+@media all and (max-width:  639px) {
+    #options-box > ul {
+        text-align: left;
+    }
+}
+
+#options-box > ul > li {
+    margin:.25em 0;
+}
+
+#options-box > ul label, #options-box > ul select {
+    display: inline-block;
+    margin: .25em .5em;
+}
+
+#options-box > ul label  {text-align: right;  width: 40%;}
+#options-box > ul select {text-align: center; width: 40%;}
+
+@media all and (max-width:  639px) {
+    #options-box > ul label, #options-box > ul select {
+       width: 80%;
+       margin: 0.1em 10%;
+    }
+    #options-box > ul label {
+        text-align: left;
+    }
 }
 
 #options-box.in  { transform: translateY(0);  opacity: 1; }

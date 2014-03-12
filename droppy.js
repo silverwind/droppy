@@ -97,9 +97,10 @@
 
     // Argument handler
     if (isCLI) handleArguments();
-    log.logo();
 
     config = cfg(path.join(process.cwd(), "config.json"));
+    log.init(config);
+    log.logo();
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
 
@@ -430,6 +431,7 @@
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
+                log.debug(ws, null, chalk.magenta("RECV "), message);
                 switch (msg.type) {
                 case "REQUEST_SETTINGS":
                     send(client.ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
@@ -439,6 +441,7 @@
                     break;
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
+                    if (!client.v[vId]) client.v[vId] = {}; // This can happen when the server restarts
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.info(ws, null, "Non-existing update request: " + msg.data);
@@ -462,11 +465,11 @@
                     });
                     break;
                 case "NEW_VIEW":
-                    client.v[vId] = {}
+                    client.v[vId] = {};
                     break;
                 case "DESTROY_VIEW":
-                    delete client.v[vId]
-                    // Remove watchers
+                    checkWatchedDirs();
+                    delete client.v[vId];
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -693,6 +696,7 @@
         (function queue(ws, data, time) {
             if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
             if (ws && ws.readyState === 1) {
+                log.debug(ws, null, chalk.green("SEND "), data);
                 ws.send(data, function (error) {
                     if (error) log.error(error);
                 });
@@ -835,8 +839,9 @@
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
                 for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    if (client.v[vId].file === null)
+                    if (client.v[vId] && client.v[vId].file === null) {
                         neededDirs[client.v[vId].directory] = true;
+                    }
                 }
             }
         }

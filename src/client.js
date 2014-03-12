@@ -146,6 +146,9 @@
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 
+    // UA check for https://bugzilla.mozilla.org/show_bug.cgi?id=878058
+    if (navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
+        $("html").addClass("firefox");
 // ============================================================================
 //  View handling
 // ============================================================================
@@ -263,7 +266,7 @@
                 sendMessage();
             else {
                 // Create new view with initiallizing
-                newView(decodeURIComponent(window.location.pathname) || "/");
+                newView(normalizePath(decodeURIComponent(window.location.pathname)));
             }
         };
 
@@ -680,8 +683,15 @@
         $("#split-button").register("click", function () {
             if (secondViewId === null) {
                 var firstView = $("#view-container .view").addClass("left"),
-                    initDest = fixRootPath(firstView[0].currentFolder + "/" + (firstView[0].currentFile || "")),
-                    secondView = newView(initDest).addClass("right");
+                    initDest,
+                    secondView;
+
+                if (firstView[0].currentFile)
+                    initDest = fixRootPath(firstView[0].currentFolder + "/" + (firstView[0].currentFile || ""));
+                else
+                    initDest = fixRootPath(firstView[0].currentFolder);
+
+                secondView = newView(initDest).addClass("right");
                 secondViewId = secondView[0].vId;
                 $(this).children(".button-text").text("Merge");
                 $(this).attr("title", "Merge views back into a single one");
@@ -706,12 +716,14 @@
                 $("#options-box").attr("class", $("#options-box").attr("class") !== "in" ? "in" : "out");
 
                 if (!$("#options-box")[0].initialized) {
-                    $("#options-box").append(getSelect("indentWithTabs", [true, false]));
-                    $("#options-box").append(getSelect("indentUnit",     [2, 4, 8]));
-                    $("#options-box").append(getSelect("theme",          ["base16-dark", "xq-light"]));
-                    $("#options-box").append(getSelect("lineWrapping",   [true, false]));
-                    $("#options-box").append(getSelect("clickAction",    ["download", "view"]));
-                    $("#options-box").append(getSelect("indentWithTabs", [true, false]));
+                    var list = $("<ul>");
+                    list.append(createOption("indentWithTabs", [true, false], ["Tabs", "Spaces"], "Indentation Mode"));
+                    list.append(createOption("indentUnit", [2, 4, 8], [2, 4, 8], "Indentation Unit"));
+                    list.append(createOption("theme", ["base16-dark", "xq-light"], ["Dark", "Light"], "Editor Theme"));
+                    list.append(createOption("lineWrapping", [true, false], ["Wrap", "No Wrap"], "Wordwrap Mode"));
+                    list.append(createOption("clickAction", ["download", "view"], ["Download", "View"], "File Click Action"));
+                    list.append(createOption("renameExistingOnUpload", [true, false], ["Rename", "Replace"], "Upload Mode"));
+                    list.appendTo($("#options-box"));
                     $("#options-box")[0].initialized = true;
                 }
 
@@ -728,8 +740,8 @@
                             value = true;
                         else if (value === "false")
                             value = false;
-                        else if (typeof parseFloat(value) === "number")
-                            value = Number(value);
+                        else
+                            value = parseFloat(value) || value;
 
                         droppy.set(option, value);
                         $(".view").each(function () {
@@ -738,17 +750,18 @@
                     });
                 });
 
-                function getSelect(variable, values) {
+                function createOption(variable, values, valueNames, label) {
                     var output = "";
+                    output += '<label>' + label + '</label>';
                     output += '<select class="' + variable + '">';
-                    values.forEach(function (value) {
+                    values.forEach(function (value, i) {
                         if (droppy.get(variable) === value)
-                            output += '<option value="' + value + '" selected>' + value + '</option>';
+                            output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
                         else
-                            output += '<option value="' + value + '">' + value + '</option>';
+                            output += '<option value="' + value + '">' + valueNames[i] + '</option>';
                     });
                     output += '</select>';
-                    return output;
+                    return '<li>' + output + '</li>';
                 }
             });
         });
@@ -1170,11 +1183,6 @@
         if (!droppy.socket) return;
         updateLocation(getView(), decodeURIComponent(window.location.pathname), true);
     });
-
-    function fixRootPath(p) {
-        // removes starting "//" or prepends "/"
-        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
-    }
 
     function getViewLocation(view) {
         if (view[0].currentFolder === undefined)
@@ -2056,13 +2064,6 @@
         }
     }, 5000);
 
-    function createElement(type, className, text) {
-        var el = document.createElement(type);
-        if (className) el.className = className;
-        if (text) el.appendChild(document.createTextNode(text));
-        return el;
-    }
-
     function reloadCSS(css) {
         if (!droppy.debug) return;
         $('link[rel="stylesheet"]').remove();
@@ -2102,6 +2103,18 @@
         };
     }
 
+    // removes starting "//" or prepends "/"
+    function fixRootPath(p) {
+        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
+    }
+
+    // Normalize path from /dir/ to /dir, stripping a trailing slash
+    function normalizePath(p) {
+        if (p[p.length -1 ] === "/") p = p.substring(0, p.length - 1);
+        return p || "/";
+    }
+
+    // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
     }
