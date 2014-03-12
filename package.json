@@ -19,7 +19,7 @@
     "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",
-    "spdy": "~1.19.4",
+    "spdy": "~1.20.0",
     "uglify-js": "~2.4.13",
     "wrench": "~1.5.8",
     "ws": "~0.4.31"
@@ -51,7 +51,7 @@
   },
   "license": "BSD-2-Clause",
   "devDependencies": {
-    "grunt": "~0.4.3",
+    "grunt": "~0.4.4",
     "grunt-bump": "~0.0.13",
     "grunt-shell": "~0.6.4"
   }
