@@ -71,7 +71,7 @@ input:-webkit-autofill {
 }
 
 /* bolder font */
-#login-info-box, #userlist-header, #about-title, #about-copy, .submit {
+#login-info-box, #about-title, #about-copy, .submit {
     font-weight: 400;
     letter-spacing: 0;
 }
@@ -1176,12 +1176,11 @@ input:-webkit-autofill {
     max-height: 80%;
     top: 50%;
     transform: translateY(-50%);
-    position: absolute;
+    position: fixed;
     transition: transform .3s ease, opacity .3s ease, visibility .3s ease;
     z-index: 32;
     padding: .5em;
     overflow-y: auto;
-
 }
 
 @media all and (min-width: 1024px) { #options-box { font-size: .9em  } }
