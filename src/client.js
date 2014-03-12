@@ -1510,27 +1510,25 @@
             case "jpg":
             case "gif":
             case "png":
-                openImage(view);
+                openMedia(view, "image");
+                break;
+            case "ogg":
+            case "mp4":
+                openMedia(view, "video");
                 break;
             default:
                 openDoc(view);
         }
     }
-    function openImage(view) {
-        view.attr("data-type", "image");
+    function openMedia(view, type) {
+        view.attr("data-type", type);
         var filename = view[0].currentFile,
-            entryId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
-            i = entryId.length - 1;
+            encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
+            i = encodedId.length - 1;
         for (;i >= 0; i--)
-            entryId[i] = encodeURIComponent(entryId[i]);
-        var url = "/_" + entryId.join("/"),
-            previewer = $(
-            '<div class="previewer image">' +
-                '<div class="media-container">' +
-                    '<img src=' + url + '></img>' +
-                '</div>' +
-            '</div>'
-            );
+            encodedId[i] = encodeURIComponent(encodedId[i]);
+        var url = "/_" + encodedId.join("/"),
+            previewer = $(t.media({ type:type, caption:filename, src:url}));
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);

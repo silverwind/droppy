@@ -66,7 +66,7 @@
         isCLI    = (process.argv.length > 2),
         // Resources
         cmPath    = "node_modules/codemirror/",
-        templateList = ["directory.html", "document.html", "image.html"],
+        templateList = ["directory.html", "document.html", "media.html"],
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
