@@ -195,7 +195,7 @@
             out.js += data + ";\n";
         });
 
-        out.js += "(function (){var t = window.t || {}; t.fn = {};";
+        out.js += "(function (){var t = window.t || {fn:{}};";
         var index = 0;
         resourceData.templates.forEach(function (data) {
             // Produce the doT functions

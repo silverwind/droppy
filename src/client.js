@@ -1306,33 +1306,40 @@
             folder = view[0].currentFolder,
             fileList = view[0].currentData,
             list = $("<ul></ul>");
-
-        for (var file in fileList) {
-            if (fileList.hasOwnProperty(file)) {
+        var tdata = {
+            entries: view[0].currentData,
+            folder: view[0].currentFolder,
+            isUpload: isUpload,
+            sortBy: "name",
+            sortAsc: false,
+            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
+        }/*
+        for (var filename in fileList) {
+            if (fileList.hasOwnProperty(filename)) {
                 svgIcon = "", classes = "";
-                type = fileList[file].type;
-                bytes = fileList[file].size;
+                type = fileList[filename].type;
+                bytes = fileList[filename].size;
                 temp = convertToSI(bytes);
                 size = temp.size > 0 ? temp.size : "0";
                 sizeUnit = temp.size > 0 ? temp.unit : "b";
-                mtime = fileList[file].mtime;
-                id = (folder === "/") ? "/" + file : folder + "/" + file;
+                mtime = fileList[filename].mtime;
+                id = (folder === "/") ? "/" + filename : folder + "/" + filename;
                 if (type === "nf" || type === "nd") {
                     svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
                     classes += " uploading";
-                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(file)) {
+                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(filename)) {
                     svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
                     classes += " playable";
                 }
                 if (type === "f" || type === "nf") { // Create a file row
-                    var ext = getExt(file), spriteClass = getSpriteClass(ext);
+                    var ext = getExt(filename), spriteClass = getSpriteClass(ext);
                     downloadURL = "/~" + id;
-                    if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[file].mime;
-                    if (isUpload) file = decodeURIComponent(file);
+                    if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[filename].mime;
+                    if (isUpload) filename = decodeURIComponent(filename);
                     list.append(
                         '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="file-link entry-link" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                            '<a class="file-link entry-link" href="' + downloadURL + '" download="' + filename + '">' + filename + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1341,15 +1348,15 @@
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
-                    if (isUpload) file = decodeURIComponent(file);
+                    if (isUpload) filename = decodeURIComponent(filename);
                     list.append(
                         '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
                             '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
-                            '<span class="folder-link entry-link">' + file + '</span>' +
+                            '<span class="folder-link entry-link">' + filename + '</span>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
+                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + filename + '.zip">' + droppy.svg.zip + '</a></span>' +
                             '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
                         '</li>'
                     );
@@ -1363,7 +1370,8 @@
             '</div>');
         if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
         else content.append('<div id="empty" class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
-
+        */
+        var content = contentWrap(view).html(t.directory(tdata));
         loadContent(view, content);
         // Upload button on empty page
         content.find(".empty").register("click", function () {
@@ -1557,7 +1565,7 @@
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
-        header.siblings().removeClass("active up down");
+        header.siblings().removeClass("active up down"); // TODO: Use currentData with t.fn.sortByProperty
         var sortedEntries = view.find(".content ul li").sort(sortFunc);
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             $(sortedEntries[index]).css({
@@ -1566,7 +1574,42 @@
             });
         }
     }
-
+    t.fn.compare = function (a, b) {
+        if (typeof a === "number" && typeof b === "number") {
+            return b - a;
+        } else {
+            try {
+                return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
+            } catch (undefError) {
+                return -1;
+            }
+        }
+    }
+    t.fn.compare2 = function (entries, property) {
+        var result;
+        return function (a, b) {
+            result = t.fn.compare(entries[a][property],entries[b][property]);
+            if (result === 0) result = t.fn.compare(a, b);
+            return result;
+        }
+    }
+    t.fn.sortKeysByKey = function (entries) {
+        var objs = Object.keys(entries);
+        objs = objs.sort(t.fn.compare);
+        return objs;
+    }
+    t.fn.sortKeysByNameAndType = function (entries) {
+        var objs = Object.keys(entries);
+        objs = objs.sort(t.fn.compare2(entries, "type"));
+        return objs;
+    }
+    t.fn.sortKeysByProperty = function (entries, by) {
+        var objs = Object.keys(entries);
+        objs = objs.sort(function (a, b) {
+            t.fn.compare(entries[a][by], entries[b][by]);
+        })
+        return objs;
+    }
     function sortFunc(a, b) {
         if (droppy.sorting.asc) {
             var temp = a;
@@ -1909,6 +1952,7 @@
         }
         return "sprite sprite-bin";
     }
+    t.fn.getSpriteClass = getSpriteClass;
 
     // Extension to Icon mappings
     var iconmap = {
