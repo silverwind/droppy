@@ -1453,10 +1453,11 @@
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
-        header.siblings().removeClass("active up down"); // TODO: Use currentData with t.fn.sortByProperty
-        var sortedEntries = view.find(".content ul li").sort(sortFunc);
+        header.siblings().removeClass("active up down");
+        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
+        if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            $(sortedEntries[index]).css({
+            $("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index),
             });
@@ -1487,34 +1488,6 @@
         objs = objs.sort(t.fn.compare2(entries, by));
         return objs;
     };
-    function sortFunc(a, b) {
-        if (droppy.sorting.asc) {
-            var temp = a;
-            a = b;
-            b = temp;
-        }
-        if (droppy.sorting.col === "name") {
-            var type = compare($(b).data("type"), $(a).data("type")),
-                text = compare($(a).find(".entry-link").text(), $(b).find(".entry-link").text().toUpperCase());
-            return (type !== 0) ? type : text;
-        } else if (droppy.sorting.col === "mtime") {
-            return compare($(a).find(".mtime").data("timestamp"), $(b).find(".mtime").data("timestamp"));
-        } else if (droppy.sorting.col === "size") {
-            return compare($(a).find(".size").data("size"), $(b).find(".size").data("size"));
-        }
-
-        function compare(a, b) {
-            if (typeof a === "number" && typeof b === "number") {
-                return b - a;
-            } else {
-                try {
-                    return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
-                } catch (undefError) {
-                    return -1;
-                }
-            }
-        }
-    }
 
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
@@ -1803,11 +1776,7 @@
 
     // Extract the extension from a file name
     function getExt(filename) {
-        var dot = filename.lastIndexOf(".");
-        if (dot > -1 && dot < filename.length)
-            return filename.substring(dot + 1, filename.length);
-        else
-            return filename;
+        return (filename.match(/[^.\\\/]+$/) || [""])[0];
     }
 
     function deleteCookie(name) {
