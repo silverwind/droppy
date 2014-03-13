@@ -6,7 +6,7 @@
 
 (function ($, window, document) {
     var droppy = {};
-    window.t = window.t || {fn:{}};
+    window.t = window.t || {fn:{},views:{}};
     initVariables();
 // ============================================================================
 //  Feature Detects
@@ -1262,7 +1262,7 @@
             sortAsc: false,
             clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
         };
-        var content = contentWrap(view).html(t.directory(tdata));
+        var content = contentWrap(view).html(t.views.directory(tdata));
         loadContent(view, content);
         // Upload button on empty page
         content.find(".empty").register("click", function () {
@@ -1528,7 +1528,7 @@
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
         var url = "/_" + encodedId.join("/"),
-            previewer = $(t.media({ type:type, caption:filename, src:url}));
+            previewer = $(t.views.media({ type:type, caption:filename, src:url}));
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
@@ -1540,7 +1540,7 @@
             url = "/_" + entryId,
             readOnly = false, // Check if not readonly
             editor = null,
-            doc = $(t.document({readOnly:readOnly}));
+            doc = $(t.views.document({readOnly:readOnly}));
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
         showSpinner(view);
@@ -1681,29 +1681,17 @@
     }
 
     function createOptions() {
-        var list = $("<ul>");
-        list.append(createSelect("indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]));
-        list.append(createSelect("indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]));
-        list.append(createSelect("theme", "Editor Theme", ["base16-dark", "xq-light"], ["Dark", "Light"]));
-        list.append(createSelect("lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]));
-        list.append(createSelect("clickAction", "File Click Action", ["download", "view"], ["Download", "View"]));
-        list.append(createSelect("renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]));
-        list.prepend("<h1>Options</h1>");
-        return $("<div class='list-options'>").append(list);
-
-        function createSelect(option, label, values, valueNames) {
-            var output = "";
-            output += '<label>' + label + '</label>';
-            output += '<div><select class="' + option + '">';
-            values.forEach(function (value, i) {
-                if (droppy.get(option) === value)
-                    output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
-                else
-                    output += '<option value="' + value + '">' + valueNames[i] + '</option>';
-            });
-            output += '</select></div>';
-            return '<li>' + output + '</li>';
-        }
+        return $("<div class='list-options'>").append(t.options({
+            droppy:droppy,
+            options:[
+                ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
+                ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
+                ["theme", "Editor Theme", ["base16-dark", "xq-light"], ["Dark", "Light"]],
+                ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
+                ["clickAction", "File Click Action", ["download", "view"], ["Download", "View"]],
+                ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
+            ]
+        }));
     }
 
     function createUserList(users) {

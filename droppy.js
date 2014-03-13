@@ -66,7 +66,7 @@
         isCLI    = (process.argv.length > 2),
         // Resources
         cmPath    = "node_modules/codemirror/",
-        templateList = ["directory.html", "document.html", "media.html"],
+        templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
@@ -195,11 +195,10 @@
             out.js += data + ";\n";
         });
 
-        out.js += "(function (){var t = window.t || {fn:{}};";
-        var index = 0;
-        resourceData.templates.forEach(function (data) {
+        out.js += "(function (){var t = window.t || {fn:{},views:{}};";
+        resourceData.templates.forEach(function (data, index) {
             // Produce the doT functions
-            out.js += tpls.produceFunction("t." + templateList[index++].match(/^\w+/)[0], data);
+            out.js += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/,'').replace(/[\\\/]/,'.'), data);
         });
         out.js += ";window.t = t;}());";
 
@@ -1568,7 +1567,7 @@
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
 
     function getResPath(name)  { return path.join(config.resDir, name); }
-    function getSrcPath(name)  { return path.join(config.srcDir, name); }
+    // function getSrcPath(name)  { return path.join(config.srcDir, name); }
 
     // removeFilePath is intentionally not an inverse to the add function
     function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }

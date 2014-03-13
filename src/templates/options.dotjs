@@ -1,0 +1,41 @@
+{{##def.data:
+<script>
+it = {
+    droppy: droppy,
+    options: [
+        [
+          0:option,
+          1:label,
+          2:values,
+          3:valueNames,
+        ]
+    ]
+}
+</script>
+#}}
+{{##def.select:
+{{  var option = opt[0],
+        label = opt[1],
+        values = opt[2],
+        valueNames = opt[3];
+}}
+<li>
+    <label>{{= label }}</label>
+    <div>
+        <select class="{{= option }}">
+            {{~values :value:index}}
+                <option value="{{= value }}" {{? it.droppy.get(option) === value }}selected{{?}}>
+                    {{= valueNames[index] }}
+                </option>
+            {{~}}
+        </select>
+    </div>
+</li>
+#}}
+
+<ul>
+{{~it.options :opt}}
+    {{ console.log(opt); }}
+    {{#def.select }}
+{{~}}
+</ul>
