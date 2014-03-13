@@ -74,6 +74,7 @@
     if (isCLI) handleArguments();
 
     config = cfg(path.join(process.cwd(), "config.json"));
+
     log.init(config);
     log.logo();
     fs.MAX_OPEN = config.maxOpen;
