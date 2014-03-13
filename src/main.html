@@ -79,30 +79,42 @@
   </a>
 </div>
 <style>
-#drop>div{display:none; flex: 1 1 auto; transition: all .2s ease; color: #f2f2f2; line-height:100%;}
-#drop>div:hover {color:white;}
+#drop>div{display:none; position:relative; color: #dbdbdb;height:100%;
+  transition: box-shadow .2s ease, -webkit-box-shadow .2s ease;
+  -webkit-box-shadow: inset 0 0 1em rgba(255,255,255,0); 
+  box-shadow: inset 0 0 0em white; }
+#drop.options-1>div{height:100%;}
+#drop.options-2>div{height:50%;}
+#drop.options-3>div{height:33.3333%;}
+#drop.options-4>div{height:25%;}
+#drop.options-5>div{height:20%;}
+#drop>div>span{position:relative; display:block; top:50%;transform: translateY(-50%); text-align: center;}
 #drop.editor-file [data-open-in=editor],
 #drop.preview-file [data-open-in=preview],
 #drop.upload-file [data-open-in=upload],
-#drop.directory-view [data-open-in=directory],
-#drop.directory-view [data-open-in=directory],
 #drop.directory-view [data-open-in=directory]
 {display:block;}
+#drop[title=editor] .editor,
+#drop[title=preview] .preview,
+#drop[title=upload] .upload,
+#drop[title=move] .move,
+#drop[title=copy] .copy
+{ color: white;
+  -webkit-box-shadow: inset 0 0 2em rgba(255,255,255,.65);
+  box-shadow: inset 0 0 2em white; }
 #drop { 
     position: absolute;
-    display: flex;
-    flex-direction: column;
     background-color: rgba(0,0,0,0.65);
 }
 #drop-spawn { position:fixed; width:0; height:0; }
 </style>
 <div id="drop-spawn">
   <div id="drop">
-    <div data-open-in="editor">Open <span class="from"></span> in editor</div>
-    <div data-open-in="preview">Open <span class="from"></span> in preview</div>
-    <div data-open-in="upload">Upload <span class="from"></span> to <span class="to"></span></div>
-    <div data-open-in="directory">Move <span class="from"></span> to <span class="to"></span></div>
-    <div data-open-in="directory">Copy <span class="from"></span> to <span class="to"></span></div>
+    <div class="editor" data-open-in="editor"><span>Open <span class="from"></span> in editor</span></div>
+    <div class="preview" data-open-in="preview"><span>Open <span class="from"></span> in preview</span></div>
+    <div class="upload" data-open-in="upload"><span>Upload <span class="from"></span> to <span class="to"></span></span></div>
+    <div class="move" data-open-in="directory"><span>Move <span class="from"></span> to <span class="to"></span></span></div>
+    <div class="copy" data-open-in="directory"><span>Copy <span class="from"></span> to <span class="to"></span></span></div>
   </div>
 </div>
 <div id="options-box" class="out"></div>

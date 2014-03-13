@@ -192,10 +192,20 @@
         var content = $('<div class="new content ' + view[0].animDirection + '"></div>');
         content.register("dragenter", function(event) {
             event.stopPropagation();
+            clearTimeout(droppy.dragTimer);
             var content = $(this).addClass("hovering"),
-                offset = content.offset();
+                offset = content.offset(),
+                drop = $("#drop").removeClass(),
+                classes =   "upload-file " +
+                            view.attr("data-type") + "-view ";
+                            // Add typeof source "$1-source" = | "directory-source" | "upload-source" | "link-source"
+                            // Add typeof file "$1-file" = | "editor-file" | "upload-file" | "preview-file"
+            drop.addClass(classes);
             setTimeout(function(){
-                $("#drop").show().css(offset).css({width:content.outerWidth(), height:content.outerHeight()});
+                drop.show()
+                .addClass("options-" + drop.find(">div:not(:hidden)").length)
+                .css(offset)
+                .css({ width:content.outerWidth(), height:content.outerHeight() });
             }, 50);
         });
         return content;
@@ -499,18 +509,29 @@
         var endTimer, isHovering = false;
         function closeDrop(){
             $("#drop").hide();
+            $("#drop").removeClass();
             isHovering = false;
             $(".hovering").removeClass("hovering");
+        }
+        function optionsEnter(event){
+            if(this === event.target) {
+                this.parentNode.title = this.className;
+            }
         }
         function enter(event) {
             event.preventDefault(); // Stop dragenter and dragover from killing our drop event
             clearTimeout(endTimer);
             if (!isHovering) {
                 $("#drop").addClass("upload-file")
-                .register("dragleave", function(event) {
-                    if(!$(this).is(event.target)) event.stopPropagation();
-                    closeDrop();
-                });
+                .register("dragleave", function (event) {
+                    if(this === event.target){
+                        clearTimeout(droppy.dragTimer);
+                        droppy.dragTimer = setTimeout(closeDrop, 50);
+                        event.stopPropagation();
+                    }
+                }).find(">div")
+                .register("dragenter",optionsEnter)
+                .register("dragover", optionsEnter);
                 //$("#drop-preview").replaceClass("out", "in");
                 isHovering = true;
             }
@@ -527,6 +548,7 @@
         $(document.documentElement).register("dragleave", leave);
         $(document.documentElement).register("dragend", leave);
         $(document.documentElement).register("drop", function (event) {
+            console.log(event.target);
             event.stopPropagation();
             event.preventDefault();
             var items = event.dataTransfer.items,
