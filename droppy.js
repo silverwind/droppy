@@ -52,40 +52,23 @@
         wrench   = require("wrench"),
         zlib     = require("zlib"),
         // Variables
-        version  = require("./package.json").version,
-        config   = null,
-        cache    = {},
-        clients  = {},
-        db       = {},
-        dirs     = {},
-        watchers = {},
-        cssCache = null,
-        firstRun = null,
-        mode     = {file: "644", dir: "755"},
-        isCLI    = (process.argv.length > 2),
-        // Resources
+        version   = require("./package.json").version,
         cmPath    = "node_modules/codemirror/",
+        cache     = {},
+        clients   = {},
+        db        = {},
+        dirs      = {},
+        watchers  = {},
+        config    = null,
+        cssCache  = null,
+        firstRun  = null,
+        isCLI     = (process.argv.length > 2),
+        mode      = {file: "644", dir: "755"},
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
             html : ["src/base.html", "src/auth.html", "src/main.html"]
         };
-    // Add CodeMirror source paths
-    // Addons
-    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
-        resources.js.push(cmPath + "addon/" + relPath);
-    });
-    // Modes
-    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
-     "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
-        resources.js.push(cmPath + "mode/" + relPath);
-    });
-    // Keymaps
-    // resources.js.push(cmPath + "keymap/sublime.js");
-    // Themes
-    ["xq-light.css", "base16-dark.css"].forEach(function (relPath) {
-        resources.css.push(cmPath + "theme/" + relPath);
-    });
 
     // Argument handler
     if (isCLI) handleArguments();
@@ -118,8 +101,24 @@
     function prepareContent() {
         var out = { css : "", js  : "" },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-            resourceList = utils.flatten(resources),
-            matches = { resource: 0, compiled: 0 };
+            matches = { resource: 0, compiled: 0 },
+            resourceList;
+
+        // CodeMirror Addons
+        ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
+            resources.js.push(cmPath + "addon/" + relPath);
+        });
+        // CodeMirror Modes
+        ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
+         "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
+            resources.js.push(cmPath + "mode/" + relPath);
+        });
+        // CodeMirror Themes
+        ["xq-light.css", "base16-dark.css"].forEach(function (relPath) {
+            resources.css.push(cmPath + "theme/" + relPath);
+        });
+
+        resourceList = utils.flatten(resources);
 
         //Prepare SVGs
         try {
@@ -230,14 +229,53 @@
     // Set up the directory
     function setupDirectories() {
         cleanupTemp(true);
+        if (config.demoMode) {
+            cleanupForDemo();
+            setInterval(cleanupForDemo, 60 * 60 * 1000);
+        }
         try {
             wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
             wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
         } catch (error) {
-            log.simple("Unable to create directories:");
+            log.error("Unable to create directories:");
             log.error(error);
             process.exit(1);
         }
+    }
+
+    //-----------------------------------------------------------------------------
+    // Restore the files directory to an initial state for the demo mode
+    // HACK: These timeouts seem to be needed for wrench to not error out randomly
+    function cleanupForDemo() {
+        var oldWatched = [], currentWatched = Object.keys(watchers);
+        log.simple("Cleaning up files for demo mode");
+        if (currentWatched.length > 0) {
+            oldWatched = currentWatched;
+            currentWatched.forEach(function(dir) {
+                watchers[dir].close();
+                delete watchers[dir];
+            });
+        }
+        try {
+            wrench.rmdirSyncRecursive(config.filesDir, true);
+            setTimeout(function() {
+                wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
+            }, 1000);
+        } catch (error) {
+            log.error("Error cleaning up the files directory:");
+            log.error(error);
+        }
+        setTimeout(function() {
+            log.simple("Adding sample files");
+            wrench.copyDirSyncRecursive(__dirname, config.filesDir, {
+                preserveTimestamps: true,
+                forceDelete: true,
+                exclude: /(files|db\.json|config\.json|\.git|temp)/
+            });
+            oldWatched.forEach(function(dir) {
+                updateWatchers(dir);
+            });
+        }, 1000);
     }
 
     //-----------------------------------------------------------------------------
@@ -421,7 +459,8 @@
                 case "REQUEST_SETTINGS":
                     send(client.ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
                         debug: config.debug,
-                        demoMode: config.demoMode
+                        demoMode: config.demoMode,
+                        noLogin: config.noLogin
                     }}));
                     break;
                 case "REQUEST_UPDATE":
@@ -479,6 +518,7 @@
                     writeDB();
                     break;
                 case "DELETE_FILE":
+                    if (config.demoMode) return send(client.ws, JSON.stringify({ type : "ERROR", text: "Deleting is disabled in demo mode."}));
                     log.info(ws, null, "Deleting: " + msg.data.substring(1));
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
@@ -1162,9 +1202,14 @@
             return;
         }
 
-        var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
-            done = false,
-            files = [];
+        var busboy, done = false, files = [], limits;
+
+        if (config.demoMode)
+            limits = { fileSize: 5 * 1024 * 1024 };
+        else
+            limits = { fieldNameSize : 255, fieldSize: 10 * 1024 * 1024};
+
+        busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 });
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
@@ -1176,6 +1221,10 @@
                 dst: decodeURIComponent(dst)
             };
             file.pipe(fs.createWriteStream(tmp, { mode: mode.file}));
+        });
+
+        busboy.on("filesLimit", function () {
+            closeConnection();
         });
 
         busboy.on("finish", function () {
@@ -1243,6 +1292,7 @@
             if (!files || files.length === 0) {
                 dirs[root] = dirContents;
                 callback();
+                return;
             }
             last = files.length;
 

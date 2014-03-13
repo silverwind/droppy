@@ -207,8 +207,7 @@
     // Switch the page content with an animation
     function loadPage(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
-        var newPage = $("#newpage"),
-            oldPage = $("#page");
+        var newPage = $("#newpage"), oldPage = $("#page");
         if (type === "main") {
             initMainPage();
             initEntryMenu();
@@ -366,6 +365,17 @@
             case "SETTINGS":
                 droppy.debug = msg.settings.debug;
                 droppy.demoMode = msg.settings.demoMode;
+                droppy.noLogin = msg.settings.noLogin;
+                if (droppy.demoMode || droppy.noLogin)
+                    $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
+                else
+                    $("#logout-button").register("click", function () {
+                       if (droppy.socket) droppy.socket.close(4001);
+                       deleteCookie("session");
+                       initVariables(); // Reset vars to their init state
+                       droppy.set("hasLoggedOut", true);
+                       requestPage();
+                    });
                 break;
             case "ERROR":
                 // TODO: Display server errors
@@ -652,10 +662,7 @@
             });
         } else {
             // No directory upload support - disable the button
-            $("#upload-folder-button").addClass("disabled");
-            $("#upload-folder-button").register("click", function () {
-                window.alert("Sorry, your browser doesn't support directory uploading yet!");
-            });
+            $("#upload-folder-button").addClass("disabled").attr("title","Sorry, your browser doesn't support directory uploading yet!");
         }
 
         $("#create-folder-button").register("click", function () {
@@ -716,14 +723,6 @@
 
         $("#options-button").register("click", function () {
             sendMessage(null, "GET_USERS");
-        });
-
-        $("#logout-button").register("click", function () {
-            if (droppy.socket) droppy.socket.close(4001);
-            deleteCookie("session");
-            initVariables(); // Reset vars to their init state
-            droppy.set("hasLoggedOut", true);
-            requestPage();
         });
 
         // Hide modals when clicking outside their box
@@ -1035,7 +1034,7 @@
 //  General helpers
 // ============================================================================
     function entryRename(view, entry, wasEmpty, callback) {
-        var namer, canSubmit, exists, valid, inputText;
+        var canSubmit, exists, valid, inputText, link, namer, nameLength;
         // Populate active files list
         droppy.activeFiles = [];
         view.find(".entry-link").each(function () {
@@ -1045,7 +1044,7 @@
 
         // Hide menu, click-catcher and the original link, stop any previous edits
         $("#click-catcher").trigger("mousemove");
-        var link = entry.find(".entry-link");
+        link = entry.find(".entry-link");
 
         // Add inline elements
         namer = $('<input class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '">');
@@ -1066,11 +1065,15 @@
             else
                 entry.removeClass("invalid");
         }).register("keyup", function (event) {
-            if (event.keyCode === 27) stopEdit(); // Escape Key
+            if (event.keyCode === 27) stopEdit(view); // Escape Key
             if (event.keyCode === 13) submitEdit(view, false, callback); // Return Key
         }).register("focusout", function () {
             submitEdit(view, true, callback);
-        }).select();
+        });
+
+        nameLength = link.text().lastIndexOf(".");
+        namer[0].setSelectionRange(0,nameLength > -1 ? nameLength : link.text().length);
+        namer[0].focus();
 
         function submitEdit(view, skipInvalid, callback) {
             var oldVal = namer.attr("placeholder"),
@@ -1908,6 +1911,7 @@
         droppy.isPlaying = null;
         droppy.isUploading = null;
         droppy.mediaTypes = {};
+        droppy.noLogin = null;
         droppy.reopen = null;
         droppy.socket = null;
         droppy.socketWait = null;
