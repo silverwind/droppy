@@ -189,7 +189,16 @@
     }
 
     function contentWrap(view) {
-        return $('<div class="new content ' + view[0].animDirection + '"></div>');
+        var content = $('<div class="new content ' + view[0].animDirection + '"></div>');
+        content.register("dragenter", function(event) {
+            event.stopPropagation();
+            var content = $(this).addClass("hovering"),
+                offset = content.offset();
+            setTimeout(function(){
+                $("#drop").show().css(offset).css({width:content.outerWidth(), height:content.outerHeight()});
+            }, 50);
+        });
+        return content;
     }
 
 // ============================================================================
@@ -487,22 +496,29 @@
         // Open the WebSocket
         openSocket();
 
-        var endTimer, isHovering;
-        function endDrag() {
-            $("#drop-preview").replaceClass("in", "out");
+        var endTimer, isHovering = false;
+        function closeDrop(){
+            $("#drop").hide();
             isHovering = false;
+            $(".hovering").removeClass("hovering");
         }
         function enter(event) {
             event.preventDefault(); // Stop dragenter and dragover from killing our drop event
             clearTimeout(endTimer);
             if (!isHovering) {
-                $("#drop-preview").replaceClass("out", "in");
+                $("#drop").addClass("upload-file")
+                .register("dragleave", function(event) {
+                    if(!$(this).is(event.target)) event.stopPropagation();
+                    closeDrop();
+                });
+                //$("#drop-preview").replaceClass("out", "in");
                 isHovering = true;
             }
         }
         function leave() {
             clearTimeout(endTimer);
-            endTimer = setTimeout(endDrag, 100);
+            endTimer = setTimeout(closeDrop, 100);
+            //$(".content").off("dragenter").off("dragleave");
         }
 
         // Drag and Drop handlers
@@ -513,10 +529,13 @@
         $(document.documentElement).register("drop", function (event) {
             event.stopPropagation();
             event.preventDefault();
-            endDrag();
             var items = event.dataTransfer.items,
                 fileItem = null,
-                entryFunc = null;
+                entryFunc = null,
+                view =  $(".hovering").parents(".view");
+
+            console.log("Dropped into view: " + view[0].vId);
+            closeDrop();
 
             // Try to find the supported getAsEntry function
             if (items && items[0]) {
@@ -533,7 +552,7 @@
             // Check if we support getAsEntry();
             if (!items || !fileItem[entryFunc]()) {
                 // No support, fallback to normal File API
-                upload(getView(), event.dataTransfer.files);
+                upload(view, event.dataTransfer.files);
                 return;
             }
 
@@ -587,7 +606,7 @@
                     return;
                 } else {
                     if (cbCount > 0 && cbFired === cbCount) {
-                        upload(getView(), obj);
+                        upload(view, obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
                     }
