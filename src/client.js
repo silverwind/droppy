@@ -1260,7 +1260,8 @@
             isUpload: isUpload,
             sortBy: "name",
             sortAsc: false,
-            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
+            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : "",
+            mimeByExt: droppy.mediaTypes
         };
         var content = contentWrap(view).html(t.views.directory(tdata));
         loadContent(view, content);

@@ -13,6 +13,7 @@ it = {
             size: Number // Size in bytes
         }
     }
+    mimeByExt: Object // Map of extensions to mime-types to populate
 }
 </script>
 #}}
@@ -57,6 +58,7 @@ it = {
         var folder = (it.folder === "/") ? "/" : it.folder + "/",
             sortedEntries = t.fn.sortKeysByProperty(it.entries, it.sortBy),
             extRE = /[^.]*$/,
+            entryExt,
             tempSize,
             temp = {};
         if(it.sortAsc) sortedEntries.reverse();
@@ -66,11 +68,13 @@ it = {
         {{~sortedEntries :entryname}}
             {{  var obj = it.entries[entryname],
                     tempSize = t.fn.convertToSI(obj.size);
+                    entryExt = entryname.match(extRE)[0];
                     temp.size = tempSize.size;
                     temp.sizeUnit = tempSize.unit;
                     temp.id = folder + entryname;
-                    temp.spriteClass = t.fn.getSpriteClass(entryname.match(extRE)[0]);
+                    temp.spriteClass = t.fn.getSpriteClass(entryExt);
                     temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;
+                    it.mimeByExt[entryExt] = obj.mime;
                 if (obj.type === "nd" || obj.type === "nf") {
                     temp.classes = " uploading";
                     temp.svgIcon = '<span class="icon-uploading">' + svg["up-arrow"] + '</span>';
