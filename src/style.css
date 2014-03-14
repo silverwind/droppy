@@ -178,8 +178,6 @@ input:-webkit-autofill {
     overflow: hidden;
 }
 
-.view + .view { border-left: 2px solid #444 }
-
 @media all and (min-width: 1024px) { .view { top: 39px } }
 @media all and (max-width: 1023px) { .view { top: 34px } }
 @media all and (max-width:  639px) { .view { top: 27px } }
@@ -233,6 +231,8 @@ input:-webkit-autofill {
    text-align: left;
    position: absolute;
 }
+
+.view.right .path { border-left: 2px solid #444}
 
 @media all and (min-width: 1024px) { .path { height: 37px; font-size: .9em } }
 @media all and (max-width: 1023px) { .path { height: 32px; font-size: .8em } }
