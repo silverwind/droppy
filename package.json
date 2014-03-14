@@ -54,5 +54,9 @@
     "grunt": "~0.4.4",
     "grunt-bump": "~0.0.13",
     "grunt-shell": "~0.6.4"
+  },
+  "subdomain": "droppy",
+  "scripts": {
+    "start": "droppy.js"
   }
 }

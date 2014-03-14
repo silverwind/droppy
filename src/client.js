@@ -399,9 +399,8 @@
             if (queuedData) {
                 droppy.socket.send(queuedData);
                 queuedData = false;
-            } else {
-                droppy.socket.send(JSON.stringify(sendObject));
             }
+            droppy.socket.send(JSON.stringify(sendObject));
         } else {
             // We can't send right now, so queue up the last added message to be sent later
             queuedData = JSON.stringify(sendObject);
@@ -684,7 +683,7 @@
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner(view);
-                    sendMessage(null, "CREATE_FOLDER", newVal);
+                    sendMessage(view[0].vId, "CREATE_FOLDER", newVal);
                 }
                 dummyFolder.remove();
             });

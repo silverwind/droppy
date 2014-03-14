@@ -438,8 +438,7 @@
             }, config.keepAlive);
         }
         wss.on("connection", function (ws) {
-            var cookie = getCookie(ws.upgradeReq.headers.cookie),
-                client;
+            var cookie = getCookie(ws.upgradeReq.headers.cookie);
 
             if (!cookie && !config.noLogin) {
                 ws.close(4000);
@@ -448,17 +447,16 @@
             } else {
                 log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
                 clients[cookie] = { v: [], ws: ws };
-                client = clients[cookie];
             }
             ws.on("message", function (message) {
                 if (message === "pong") return;
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
-                log.debug(ws, null, chalk.magenta("RECV "), message);
+                log.debug(ws, null, chalk.green("RECV "), message);
                 switch (msg.type) {
                 case "REQUEST_SETTINGS":
-                    send(client.ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
+                    send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
                         debug: config.debug,
                         demoMode: config.demoMode,
                         noLogin: config.noLogin
@@ -466,35 +464,40 @@
                     break;
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
-                    if (!client.v[vId]) client.v[vId] = {}; // This can happen when the server restarts
+                    if (!clients[cookie].v[vId]) clients[cookie].v[vId] = {}; // This can happen when the server restarts
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.info(ws, null, "Non-existing update request: " + msg.data);
                         } else if (info.type === "f") {
-                            client.v[vId].file = path.basename(msg.data);
-                            client.v[vId].directory = path.dirname(msg.data);
+                            clients[cookie].v[vId].file = path.basename(msg.data);
+                            clients[cookie].v[vId].directory = path.dirname(msg.data);
                             info.folder = path.dirname(msg.data);
                             info.file = path.basename(msg.data);
                             info.isFile = true;
                             info.vId = vId;
                             info.type = "UPDATE_BE_FILE";
-                            send(client.ws, JSON.stringify(info));
+                            send(clients[cookie].ws, JSON.stringify(info));
                         } else {
-                            client.v[vId].file = null;
-                            client.v[vId].directory = msg.data;
-                            updateDirectory(client.v[vId].directory, function (sizes) {
+                            clients[cookie].v[vId].file = null;
+                            clients[cookie].v[vId].directory = msg.data;
+                            updateDirectory(clients[cookie].v[vId].directory, function (sizes) {
                                 sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                             });
-                            updateWatchers(client.v[vId].directory);
+                            updateWatchers(clients[cookie].v[vId].directory, function (success) {
+                                // Send client back to / in case the directory can't be read
+                                updateDirectory(success ? clients[cookie].v[vId].directory : "/", function (sizes) {
+                                    sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
+                                });
+                            });
                         }
                     });
                     break;
                 case "NEW_VIEW":
-                    client.v[vId] = {};
+                    clients[cookie].v[vId] = {};
                     break;
                 case "DESTROY_VIEW":
                     checkWatchedDirs();
-                    delete client.v[vId];
+                    delete clients[cookie].v[vId];
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -519,7 +522,7 @@
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    if (config.demoMode) return send(client.ws, JSON.stringify({ type : "ERROR", text: "Deleting is disabled in demo mode."}));
+                    if (config.demoMode) return send(clients[cookie].ws, JSON.stringify({ type : "ERROR", text: "Deleting is disabled in demo mode."}));
                     log.info(ws, null, "Deleting: " + msg.data.substring(1));
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
@@ -565,7 +568,7 @@
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
                     if (msg.data.to.indexOf(msg.data.from) !== -1 && msg.data.to !== msg.data.from) {
                         log.error("Can't copy directory into itself");
-                        send(client.ws, JSON.stringify({ vId: vId, type : "ERROR", text: "Can't copy directory into itself."}));
+                        send(clients[cookie].ws, JSON.stringify({ vId: vId, type : "ERROR", text: "Can't copy directory into itself."}));
                         return;
                     }
                     msg.data.from = addFilePath(msg.data.from);
@@ -591,7 +594,7 @@
                     // Disallow whitespace-only and empty strings in renames
                     if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
                         log.info(ws, null, "Invalid rename request: " + msg.data.new);
-                        send(client.ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
+                        send(clients[cookie].ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
                         return;
                     }
                     fs.rename(addFilePath(msg.data.old), addFilePath(msg.data.new), function (error) {
@@ -604,7 +607,7 @@
                         sendUsers(cookie);
                     } else {
                         // Send an empty user list so the client know not to display the management options
-                        send(client.ws, JSON.stringify({ type : "USER_LIST", users : {} }));
+                        send(clients[cookie].ws, JSON.stringify({ type : "USER_LIST", users : {} }));
                     }
                     break;
                 case "UPDATE_USER":
@@ -633,7 +636,7 @@
                         fs.writeFileSync(addFilePath(file), "", {mode: mode.file});
                         log.info(ws, null, "Received: " + file.substring(1));
                     });
-                    send(client.ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                    send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;
                 }
             });
@@ -727,7 +730,7 @@
         (function queue(ws, data, time) {
             if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
             if (ws && ws.readyState === 1) {
-                log.debug(ws, null, chalk.green("SEND "), data);
+                log.debug(ws, null, chalk.red("SEND "), data);
                 ws.send(data, function (error) {
                     if (error) log.error(error);
                 });
@@ -814,12 +817,12 @@
     //-----------------------------------------------------------------------------
     // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
-        var relativeDir = removeFilePath(directory);
-        var watcher = fs.watch(directory, utils.throttle(function () {
-            var clientsToUpdate = [];
+        var relativeDir = removeFilePath(directory), watcher, clientsToUpdate, client;
+        watcher = fs.watch(directory, utils.throttle(function () {
+            clientsToUpdate = [];
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
-                    var client = clients[cookie];
+                    client = clients[cookie];
                     for (var vId = client.v.length - 1; vId >= 0; vId--) {
                         if (client.v[vId].directory === relativeDir && client.v[vId].file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
@@ -829,9 +832,9 @@
             }
             updateDirectory(relativeDir, function (sizes) {
                 if (clientsToUpdate.length === 0) return;
-                var client = clientsToUpdate.pop();
-                sendFiles(client.cookie, client.vId, "UPDATE_DIRECTORY", sizes);
-                if (!sizes) clientsToUpdate.push(client);
+                var clientToUpdate = clientsToUpdate.pop();
+                sendFiles(clientToUpdate.cookie, clientToUpdate.vId, "UPDATE_DIRECTORY", sizes);
+                if (!sizes) clientsToUpdate.push(clientToUpdate);
             });
         }, config.readInterval));
         watcher.on("error", function (error) {
