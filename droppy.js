@@ -92,9 +92,10 @@
 
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
-        setupDirectories();
-        cleanupLinks();
-        createListener();
+        setupDirectories( function() {
+            cleanupLinks();
+            createListener();
+        });
     });
 
     //-----------------------------------------------------------------------------
@@ -228,27 +229,29 @@
 
     //-----------------------------------------------------------------------------
     // Set up the directory
-    function setupDirectories() {
+    function setupDirectories(callback) {
         cleanupTemp(true);
-        if (config.demoMode) {
-            cleanupForDemo();
-            setInterval(cleanupForDemo, 60 * 60 * 1000);
-        }
-        try {
-            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
-            wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
-        } catch (error) {
-            log.error("Unable to create directories:");
-            log.error(error);
-            process.exit(1);
-        }
+        cleanupForDemo(function() {
+            try {
+                wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
+                wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
+            } catch (error) {
+                log.error("Unable to create directories:");
+                log.error(error);
+                process.exit(1);
+            }
+            callback();
+        });
     }
 
     //-----------------------------------------------------------------------------
     // Restore the files directory to an initial state for the demo mode
     // HACK: These timeouts seem to be needed for wrench to not error out randomly
-    function cleanupForDemo() {
-        var oldWatched = [], currentWatched = Object.keys(watchers);
+    function cleanupForDemo(callback) {
+        var oldWatched, currentWatched;
+        if (!config.demoMode) callback();
+        oldWatched = [];
+        currentWatched = Object.keys(watchers);
         log.simple("Cleaning up files for demo mode");
         if (currentWatched.length > 0) {
             oldWatched = currentWatched;
@@ -276,6 +279,8 @@
             oldWatched.forEach(function(dir) {
                 updateWatchers(dir);
             });
+            setInterval(cleanupForDemo, 60 * 60 * 1000);
+            callback();
         }, 1000);
     }
 
@@ -446,7 +451,7 @@
                 return;
             } else {
                 log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
-                clients[cookie] = { v: [], ws: ws };
+                clients[cookie] = { views: [], ws: ws };
             }
             ws.on("message", function (message) {
                 if (message === "pong") return;
@@ -464,13 +469,13 @@
                     break;
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
-                    if (!clients[cookie].v[vId]) clients[cookie].v[vId] = {}; // This can happen when the server restarts
+                    if (!clients[cookie].views[vId]) clients[cookie] = { views: [], ws: ws }; // This can happen when the server restarts
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.info(ws, null, "Non-existing update request: " + msg.data);
                         } else if (info.type === "f") {
-                            clients[cookie].v[vId].file = path.basename(msg.data);
-                            clients[cookie].v[vId].directory = path.dirname(msg.data);
+                            clients[cookie].views[vId].file = path.basename(msg.data);
+                            clients[cookie].views[vId].directory = path.dirname(msg.data);
                             info.folder = path.dirname(msg.data);
                             info.file = path.basename(msg.data);
                             info.isFile = true;
@@ -478,14 +483,14 @@
                             info.type = "UPDATE_BE_FILE";
                             send(clients[cookie].ws, JSON.stringify(info));
                         } else {
-                            clients[cookie].v[vId].file = null;
-                            clients[cookie].v[vId].directory = msg.data;
-                            updateDirectory(clients[cookie].v[vId].directory, function (sizes) {
+                            clients[cookie].views[vId].file = null;
+                            clients[cookie].views[vId].directory = msg.data;
+                            updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
                                 sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                             });
-                            updateWatchers(clients[cookie].v[vId].directory, function (success) {
+                            updateWatchers(clients[cookie].views[vId].directory, function (success) {
                                 // Send client back to / in case the directory can't be read
-                                updateDirectory(success ? clients[cookie].v[vId].directory : "/", function (sizes) {
+                                updateDirectory(success ? clients[cookie].views[vId].directory : "/", function (sizes) {
                                     sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                                 });
                             });
@@ -493,11 +498,11 @@
                     });
                     break;
                 case "NEW_VIEW":
-                    clients[cookie].v[vId] = {};
+                    clients[cookie].views[vId] = {};
                     break;
                 case "DESTROY_VIEW":
                     checkWatchedDirs();
-                    delete clients[cookie].v[vId];
+                    delete clients[cookie].views[vId];
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -666,7 +671,7 @@
     function sendFiles(cookie, viewId, eventType, sizes) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
         var func = function (cookie, eventType, vId, sizes) {
-            var dir = clients[cookie].v[vId].directory,
+            var dir = clients[cookie].views[vId].directory,
                 data = {
                     vId    : vId,
                     type   : eventType,
@@ -820,14 +825,15 @@
         var relativeDir = removeFilePath(directory), watcher, clientsToUpdate, client;
         watcher = fs.watch(directory, utils.throttle(function () {
             clientsToUpdate = [];
+
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
                     client = clients[cookie];
-                    for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                        if (client.v[vId].directory === relativeDir && client.v[vId].file === null) {
+                    client.views.forEach(function(view, vId) {
+                        if (view && view.directory === relativeDir && view.file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
-                    }
+                    });
                 }
             }
             updateDirectory(relativeDir, function (sizes) {
@@ -872,11 +878,11 @@
         for (var cookie in clients) {
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
-                for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    if (client.v[vId] && client.v[vId].file === null) {
-                        neededDirs[client.v[vId].directory] = true;
+                client.views.forEach(function(view, vId) {
+                    if (view && view.directory && view.file === null) {
+                        neededDirs[client.views[vId].directory] = true;
                     }
-                }
+                });
             }
         }
         for (var directory in watchers) {
