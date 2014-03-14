@@ -1135,9 +1135,9 @@ input:-webkit-autofill {
     overflow-y: auto;
 }
 
-@media all and (min-width: 1024px) { #options-box { font-size: .9em  } }
-@media all and (max-width: 1023px) { #options-box { font-size: .8em  } }
-@media all and (max-width:  799px) { #options-box { font-size: .65em } }
+@media all and (min-width: 1024px) { #options-box { font-size: .8em } }
+@media all and (max-width: 1023px) { #options-box { font-size: .7em } }
+@media all and (max-width:  799px) { #options-box { font-size: .6em } }
 
 #options-box.in  { transform: translateY(-50%);  opacity: 1; }
 #options-box.out { transform: translateY(calc(-50% + 100px)); opacity: 0; visibility: hidden }
@@ -1165,7 +1165,7 @@ input:-webkit-autofill {
     margin-top: .125em;
     margin-bottom: .125em;
     border-bottom: 2px solid #ccc;
-    font-size: 2em;
+    font-size: 1.5em;
     font-weight: 300;
     color: #444;
 }

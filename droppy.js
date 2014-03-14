@@ -249,7 +249,7 @@
     // HACK: These timeouts seem to be needed for wrench to not error out randomly
     function cleanupForDemo(callback) {
         var oldWatched, currentWatched;
-        if (!config.demoMode) callback();
+        if (!config.demoMode) return callback();
         oldWatched = [];
         currentWatched = Object.keys(watchers);
         log.simple("Cleaning up files for demo mode");

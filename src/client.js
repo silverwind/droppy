@@ -37,7 +37,7 @@
             theme: "mdn-like",
             indentWithTabs : false,
             indentUnit : 4,
-            lineWrapping: true,
+            lineWrapping: false,
             hasLoggedOut : false,
             clickAction: "download",
             renameExistingOnUpload: false
@@ -1181,7 +1181,6 @@
                 if (parts[i] !== view[0].savedParts[i]) {
                     if (view[0].savedParts[i] && !parts[i]) {
                         toRemove = view.find(".path li").slice(i);
-                        console.log(Date.now() + "removing " + toRemove.length);
                         toRemove.setTransitionClass("in", "out");
                         toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
                             $(event.target).remove();
