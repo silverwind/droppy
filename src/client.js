@@ -1167,14 +1167,12 @@
 
     // Update the path indicator
     function updatePath(view, path) {
+        var parts, pathStr = "", toRemove, i = 0, len;
         if (typeof path === "undefined")
             path = getViewLocation(view);
-        path = fixRootPath(path);
-        var parts = path.split("/"),
-            i = 0, len;
+        parts = fixRootPath(path).split("/"),
         parts[0] = droppy.svg.home;
         if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
-        var pathStr = "";
         if (view[0].savedParts) {
             i = 1; // Skip the first element as it's always the same
             while (true) {
@@ -1182,7 +1180,12 @@
                 if (!parts[i] && !view[0].savedParts[i]) break;
                 if (parts[i] !== view[0].savedParts[i]) {
                     if (view[0].savedParts[i] && !parts[i]) {
-                        view.find(".path li").slice(i).remove();
+                        toRemove = view.find(".path li").slice(i);
+                        console.log(Date.now() + "removing " + toRemove.length);
+                        toRemove.setTransitionClass("in", "out");
+                        toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                            $(event.target).remove();
+                        });
                         break;
                     }
                     else if (parts[i] && !view[0].savedParts[i])
@@ -1190,7 +1193,7 @@
                 }
                 i++;
             }
-            requestAnimation(finalize);
+            finalize();
         } else {
             // Delay initial slide-in
             setTimeout(function () {
@@ -1199,8 +1202,8 @@
                     pathStr += "/" + parts[i];
                     createPart(parts[i], pathStr);
                 }
-                requestAnimation(finalize);
-            }, 300);
+                finalize();
+            }, 200);
         }
 
         view[0].savedParts = parts;
@@ -1209,9 +1212,15 @@
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path || "/");
             li.click(function () {
-                if ($(this).is(":last-child")) return;
-                view[0].switchRequest = true; // This needs to be set so we can switch out of a editor view
-                updateLocation(view, $(this).data("destination"));
+                if (droppy.socketWait) return;
+                if ($(this).is(":last-child")) {
+                    if ($(this).parents(".view").data("type") === "directory") {
+                            updateLocation(view, $(this).data("destination"));
+                    }
+                } else {
+                    view[0].switchRequest = true; // This is set so we can switch out of a editor view
+                    updateLocation(view, $(this).data("destination"));
+                }
             });
 
             view.find(".path").append(li);
@@ -1221,16 +1230,14 @@
         function finalize() {
             view.find(".path li.out").setTransitionClass("out", "in");
             setTimeout(function () {
-                // Remove the class after the transition and keep the list scrolled to the last element
-                view.find(".path li.in").removeClass("in");
                 checkPathOverflow(view);
-            }, 200);
+            }, 500);
         }
     }
 
     // Check if the path indicator overflows and scroll it if neccessary
     function checkPathOverflow(view) {
-        var width = 60,
+        var width = 40,
             space = view.width(),
             pathElements = view.find(".path li");
 
@@ -1239,17 +1246,9 @@
         }
 
         if (width > space) {
-            requestAnimation(function () {
-                if (droppy.detects.animation)
-                    view.find(".path li").css({"left": space - width + "px"});
-                else
-                    view.find(".path li").animate({"left": space - width}, {duration: 200});
-            });
+            view.find(".path > li").css("transform", "translateX(" + (space - width) + "px)");
         } else {
-            requestAnimation(function () {
-                if (view.find(".path li").css("left") !== 0)
-                    view.find(".path li").animate({"left": 0}, {duration: 200});
-            });
+            view.find(".path > li").css("transform", "translateX(0)");
         }
     }
 

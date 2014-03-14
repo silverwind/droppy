@@ -459,7 +459,7 @@
                     vId = msg.vId;
 
                 if (msg.type !== "SAVE_FILE") // Don't log these as they spam the file contents into the log
-                    log.debug(ws, null, chalk.green("RECV "), message);
+                    log.debug(ws, null, chalk.magenta("RECV "), message);
 
                 switch (msg.type) {
                 case "REQUEST_SETTINGS":
@@ -492,9 +492,11 @@
                             });
                             updateWatchers(clients[cookie].views[vId].directory, function (success) {
                                 // Send client back to / in case the directory can't be read
-                                updateDirectory(success ? clients[cookie].views[vId].directory : "/", function (sizes) {
-                                    sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
-                                });
+                                if (!success) {
+                                    updateDirectory("/", function (sizes) {
+                                        sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
+                                    });
+                                }
                             });
                         }
                     });
@@ -737,7 +739,12 @@
         (function queue(ws, data, time) {
             if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
             if (ws && ws.readyState === 1) {
-                log.debug(ws, null, chalk.red("SEND "), data);
+                if (config.logLevel === 3) {
+                    var debugData = JSON.parse(data);
+                    if (debugData.type === "UPDATE_DIRECTORY")
+                        debugData.data = {};
+                    log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
+                }
                 ws.send(data, function (error) {
                     if (error) log.error(error);
                 });
@@ -825,6 +832,7 @@
     // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
         var relativeDir = removeFilePath(directory), watcher, clientsToUpdate, client;
+        log.debug(chalk.green("Adding Watcher: ") + relativeDir);
         watcher = fs.watch(directory, utils.throttle(function () {
             clientsToUpdate = [];
 
@@ -889,6 +897,7 @@
         }
         for (var directory in watchers) {
             if (!neededDirs[directory]) {
+                log.debug(chalk.red("Removing Watcher: ") + directory);
                 watchers[directory].close();
                 delete watchers[directory];
             }

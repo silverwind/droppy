@@ -259,10 +259,10 @@ input:-webkit-autofill {
     position: relative;
 }
 
-.path li.in  { left: 0 }
-.path li.out { left: -100px }
+.path li.in  { transform: translateX(0);}
+.path li.out { transform: translateX(-200px) !important;}
 .path li:first-of-type { padding-left: .5em }
-.path li { color: #ddd; transition: color .3s ease, left .5s ease }
+.path li { color: #ddd; transition: color .3s ease, transform .5s ease }
 
 .path li:nth-child(odd)        { background: #383838 }
 .path li:nth-child(odd) > .triangle  { fill: #383838 }
@@ -780,9 +780,7 @@ input:-webkit-autofill {
     width: 100%;
     position: relative;
 }
-.path>li:last-child {
-    transition: color .4s ease, left .4s ease;
-}
+
 .path li.dirty { color: #f71 !important}
 .path li.saved { color: #7f1 !important}
 .path li.save-failed { color: #f44 !important }
