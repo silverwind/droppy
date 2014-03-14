@@ -671,29 +671,17 @@
 
     //-----------------------------------------------------------------------------
     // Send a file list update
-    var updateFuncs = {};
-    function sendFiles(cookie, viewId, eventType, sizes) {
+    function sendFiles(cookie, vId, eventType, sizes) {
         if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
-        var func = function (cookie, eventType, vId, sizes) {
-            var dir = clients[cookie].views[vId].directory,
-                data = {
-                    vId    : vId,
-                    type   : eventType,
-                    folder : dir,
-                    data   : dirs[dir]
-                };
-            if (sizes) data.sizes = true;
-            data = JSON.stringify(data);
-            send(clients[cookie].ws, data);
-        };
-
-        if (!updateFuncs[cookie])
-            updateFuncs[cookie] = utils.throttle(func, 250, { leading: true, trailing: false });
-
-        if (!sizes)
-            updateFuncs[cookie](cookie, eventType, viewId, sizes);
-        else
-            func(cookie, eventType, viewId, sizes);
+        var dir = clients[cookie].views[vId].directory,
+            data = {
+                vId    : vId,
+                type   : eventType,
+                folder : dir,
+                data   : dirs[dir]
+            };
+        if (sizes) data.sizes = true;
+        send(clients[cookie].ws, JSON.stringify(data));
     }
 
     //-----------------------------------------------------------------------------
@@ -831,32 +819,32 @@
     //-----------------------------------------------------------------------------
     // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
-        var relativeDir = removeFilePath(directory), watcher, clientsToUpdate, client;
-        log.debug(chalk.green("Adding Watcher: ") + relativeDir);
+        var dir = removeFilePath(directory), watcher, clientsToUpdate, client;
+        log.debug(chalk.green("Adding Watcher: ") + dir);
         watcher = fs.watch(directory, utils.throttle(function () {
             clientsToUpdate = [];
-
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
                     client = clients[cookie];
                     client.views.forEach(function(view, vId) {
-                        if (view && view.directory === relativeDir && view.file === null) {
+                        if (view && view.directory === dir && view.file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
                     });
                 }
             }
-            updateDirectory(relativeDir, function (sizes) {
-                if (clientsToUpdate.length === 0) return;
-                var clientToUpdate = clientsToUpdate.pop();
-                sendFiles(clientToUpdate.cookie, clientToUpdate.vId, "UPDATE_DIRECTORY", sizes);
-                if (!sizes) clientsToUpdate.push(clientToUpdate);
-            });
-        }, config.readInterval));
+            if (clientsToUpdate.length > 0) {
+                updateDirectory(dir, function (sizes) {
+                    clientsToUpdate.forEach(function (cl) {
+                        sendFiles(cl.cookie, cl.vId, "UPDATE_DIRECTORY", sizes);
+                    });
+                });
+            }
+        }, config.readInterval, { leading: true, trailing: false }));
         watcher.on("error", function (error) {
-            log.error("Error trying to watch ", relativeDir, "\n", error);
+            log.error("Error trying to watch ", dir, "\n", error);
         });
-        watchers[relativeDir] = watcher;
+        watchers[dir] = watcher;
     }
 
     //-----------------------------------------------------------------------------
