@@ -740,8 +740,6 @@ input:-webkit-autofill {
 .content.document > .sidebar > li {
     position: relative;
     z-index: 5;
-    padding: .25em 0;
-    border-radius: 4px;
     margin-bottom: .25em;
 }
 
@@ -760,24 +758,17 @@ input:-webkit-autofill {
     font-weight: 400;
 }
 
-.content.document > .sidebar > li:hover, .opts.active { background: #333; cursor: pointer }
-.content.document > .sidebar > .exit:hover svg       { fill: #f33 }
-.content.document > .sidebar > .exit:hover span      { color: #f33; opacity: 1 }
-.content.document > .sidebar > .save:hover svg       { fill: #5f0 }
-.content.document > .sidebar > .save:hover span      { color: #5f0; opacity: 1 }
-.content.document > .sidebar > .light:hover svg      { fill: #ff5 }
-.content.document > .sidebar > .light:hover span     { color: #ff5; opacity: 1 }
-.content.document > .sidebar > .ww:hover svg   { fill: #f1a }
-.content.document > .sidebar > .ww:hover span  { color: #f1a; opacity: 1 }
-.content.document > .sidebar > .opts:hover svg, .opts.active svg {
-    fill: #1af !important;
-}
-.content.document > .sidebar > .opts:hover span, .opts.active span {
-    color: #1af !important;
-    opacity: 1 !important;
-}
+.content.document > .sidebar > li:hover         { cursor: pointer }
+.content.document > .sidebar > .exit:hover svg  { fill: #c33 }
+.content.document > .sidebar > .exit:hover span { color: #c33; opacity: 1 }
+.content.document > .sidebar > .save:hover svg  { fill: #169 }
+.content.document > .sidebar > .save:hover span { color: #169; opacity: 1 }
+.content.document > .sidebar > .ww:hover svg    { fill: #940 }
+.content.document > .sidebar > .ww:hover span   { color: #940; opacity: 1 }
 .doc.readonly > .sidebar > .save { display: none }
 
+.cm-s-mdn-like .CodeMirror-linenumber { margin-left: 0 !important }
+.cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
 /* ============================ Text Editor ============================ */
 
 .doc > .text-editor > .CodeMirror {
@@ -796,38 +787,6 @@ input:-webkit-autofill {
 .path li.saved { color: #7f1 !important}
 .path li.save-failed { color: #f44 !important }
 .path li.dirty:after { content: "*" }
-
-.opts-container {
-    position: absolute;
-    top: 0;
-    border-radius: 4px 0 0 4px;
-    right: 2.42rem; /* Hack: magic number */
-    height: 2.42rem; /* Hack: magic number */
-    text-align: center;
-    background: #333;
-    transition: opacity .2s ease;
-    width: 14rem;
-    opacity: 0;
-    display: none;
-}
-.opts.active { border-radius:  0 4px 4px 0 !important}
-.opts.active .opts-container { display: block; opacity: 1 }
-
-.opts-container select {
-    width: 4rem;
-    height: 1.6em;
-    margin: 0 .25rem;
-    font-size: .6em;
-    text-align: center;
-}
-
-.opts-container label {
-    color: #fff;
-    font-size: .6em;
-    width: 4rem;
-    margin: 0 .25rem;
-    display: inline-block;
-}
 
 /* ============================ Upload Progress ============================ */
 

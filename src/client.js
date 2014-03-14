@@ -34,7 +34,7 @@
     $(function () {
         var prefs, doSave, defaults = {
             volume : 0.5,
-            theme: "base16-dark",
+            theme: "mdn-like",
             indentWithTabs : false,
             indentUnit : 4,
             lineWrapping: true,
@@ -1600,35 +1600,16 @@
             readOnly = false, // Check if not readonly
             editor = null,
             doc = $(
-            '<ul class="sidebar">' +
-                '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
-                '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
-                '<li class="light">' + droppy.svg.bulb + '<span>Color</span></li>' +
-                '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>' +
-                '<li class="opts">' + droppy.svg.cog + '<span>Opts</span>' +
-                    '<div class="opts-container">' +
-                        '<label>Indent Mode</label><label>Indent Unit</label><label>Wrap Mode</label>' +
-                        '<select class="indentmode">' +
-                          '<option value="spaces">Spaces</option> ' +
-                          '<option value="tabs">Tabs</option>' +
-                        '</select>' +
-                        '<select class="indentunit">' +
-                          '<option value="2">2</option>' +
-                          '<option value="4">4</option>' +
-                          '<option value="8">8</option>' +
-                        '</select>' +
-                        '<select class="wrap">' +
-                          '<option value="nowrap">No Wrap</option> ' +
-                          '<option value="wrap">Wrap</option>' +
-                        '</select>' +
+                '<ul class="sidebar">' +
+                    '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
+                    '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
+                    '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
+                '</ul>' +
+                '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
+                    '<div class="text-editor">' +
+                        '<textarea></textarea>' +
                     '</div>' +
-                '</li>' +
-            '</ul>' +
-            '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                '<div class="text-editor">' +
-                    '<textarea></textarea>' +
-                '</div>' +
-            '</div>'
+                '</div>'
             );
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
@@ -1686,50 +1667,15 @@
                         "value": editor.getValue()
                     });
                 });
-                doc.find(".light").register("click", function () {
-                    if (editor.options.theme === "base16-dark") {
-                        editor.setOption("theme", "xq-light");
-                    } else {
-                        editor.setOption("theme", "base16-dark");
-                    }
-                    saveEditorOptions(editor);
-                });
                 doc.find(".ww").register("click", function () {
-                    if (editor.options.lineWrapping)
+                    if (editor.options.lineWrapping) {
                         editor.setOption("lineWrapping", false);
-                    else
-                        editor.setOption("lineWrapping", true);
-                    saveEditorOptions(editor);
-                });
-                doc.find(".opts").register("click", function () {
-                    var opts = $(this);
-                    setOptionsValues(view);
-                    if (opts.hasClass("active")) {
-                        opts.removeClass("active");
+                        droppy.set("lineWrapping", false);
+
                     } else {
-                        opts.addClass("active");
-                    }
-                });
-                doc.find(".opts-container").register("click", function (event) {
-                    event.stopPropagation();
-                });
-                doc.find(".indentmode").register("change", function () {
-                    if ($(this).val() === "tabs")
-                        editor.setOption("indentWithTabs", true);
-                    else
-                        editor.setOption("indentWithTabs", false);
-                    saveEditorOptions(editor);
-                });
-                doc.find(".indentunit").register("change", function () {
-                    editor.setOption("indentUnit", Number($(this).val()));
-                    saveEditorOptions(editor);
-                });
-                doc.find(".wrap").register("change", function () {
-                    if ($(this).val() === "wrap")
                         editor.setOption("lineWrapping", true);
-                    else
-                        editor.setOption("lineWrapping", false);
-                    saveEditorOptions(editor);
+                        droppy.set("lineWrapping", true);
+                    }
                 });
                 setTimeout(function () {
                     editor.setOption("readOnly", readOnly);
@@ -1748,32 +1694,11 @@
         });
     }
 
-    function saveEditorOptions(editor) {
-        ["theme", "indentWithTabs", "indentUnit", "lineWrapping"].forEach(function (option) {
-            droppy.set(option, editor.getOption(option));
-        });
-    }
-
-    function setOptionsValues(view) {
-        view.find(".indentmode option").each(function() {
-            if ($(this).attr("value") === (droppy.get("indentWithTabs") ? "tabs" : "spaces"))
-                $(this).attr("selected", "selected");
-        });
-        view.find(".indentunit option").each(function() {
-            if ($(this).attr("value") === String(droppy.get("indentUnit")))
-                $(this).attr("selected", "selected");
-        });
-        view.find(".wrap option").each(function() {
-            if ($(this).attr("value") === (droppy.get("lineWrapping") ? "wrap" : "nowrap"))
-                $(this).attr("selected", "selected");
-        });
-    }
-
     function createOptions() {
         var list = $("<ul>");
         list.append(createSelect("indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]));
         list.append(createSelect("indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]));
-        list.append(createSelect("theme", "Editor Theme", ["base16-dark", "xq-light"], ["Dark", "Light"]));
+        list.append(createSelect("theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]));
         list.append(createSelect("lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]));
         list.append(createSelect("clickAction", "File Click Action", ["download", "view"], ["Download", "View"]));
         list.append(createSelect("renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]));

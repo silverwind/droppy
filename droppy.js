@@ -116,7 +116,7 @@
             resources.js.push(cmPath + "mode/" + relPath);
         });
         // CodeMirror Themes
-        ["xq-light.css", "base16-dark.css"].forEach(function (relPath) {
+        ["mdn-like.css", "xq-light.css", "base16-dark.css"].forEach(function (relPath) {
             resources.css.push(cmPath + "theme/" + relPath);
         });
 
@@ -458,7 +458,9 @@
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
-                log.debug(ws, null, chalk.green("RECV "), message);
+                if (msg.type !== "SAVE_FILE") // Don't log these as they spam the file contents into the log
+                    log.debug(ws, null, chalk.green("RECV "), message);
+
                 switch (msg.type) {
                 case "REQUEST_SETTINGS":
                     send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
