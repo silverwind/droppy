@@ -584,7 +584,7 @@
 
                     // In case source and destination are the same, append a number to the file/foldername
                     if (msg.data.from === msg.data.to) {
-                        utils.getNewPath(msg.data.to, 2, function (name) {
+                        utils.getNewPath(msg.data.to, function (name) {
                             doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
                         });
                     } else {
@@ -1217,10 +1217,12 @@
                 dst = path.join(config.filesDir, req.query.to, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
+            log.info(req, res, "Receiving: " + dstRelative);
             files[dstRelative] = {
                 src: tmp,
                 dst: decodeURIComponent(dst)
             };
+
             file.pipe(fs.createWriteStream(tmp, { mode: mode.file}));
         });
 
@@ -1233,14 +1235,36 @@
             var names = Object.keys(files);
             while (names.length > 0) {
                 (function (name) {
-                    wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
-                    fs.rename(files[name].src, files[name].dst, function (err) {
-                        if (err) log.error(err);
-                        log.info(req, res, "Received: " + decodeURIComponent(req.query.to) + "/" + name);
+                    fs.stat(files[name].dst, function (error) {
+                        if (error) { // File doesn't exist
+                            fs.stat(path.dirname(files[name].dst), function (error) {
+                                if (error) { // Dir doesn't exist
+                                    wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
+                                }
+                                moveFile(files[name].src, files[name].dst);
+                            });
+                        } else {
+                            if (req.query.r === "true") { // Rename option from the client
+                                (function(src, dst) {
+                                    utils.getNewPath(dst, function (newDst) {
+                                        moveFile(src, newDst);
+                                    });
+                                })(files[name].src, files[name].dst);
+
+                            } else {
+                                moveFile(files[name].src, files[name].dst);
+                            }
+                        }
                     });
                 })(names.pop());
             }
             closeConnection();
+
+            function moveFile(src, dst) {
+              fs.rename(src, dst, function (err) {
+                  if (err) log.error(err);
+              });
+            }
         });
 
         req.on("close", function () {

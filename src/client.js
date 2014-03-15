@@ -956,7 +956,8 @@
             if (formLength) {
                 xhr.open("POST", "/upload?" + $.param({
                     vId : view[0].vId,
-                    to  : encodeURIComponent(view[0].currentFolder)
+                    to  : encodeURIComponent(view[0].currentFolder),
+                    r   : droppy.get("renameExistingOnUpload")
                 }));
                 xhr.send(formData);
             } else if (droppy.zeroFiles.length) {
