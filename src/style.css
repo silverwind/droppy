@@ -132,7 +132,7 @@ input:-webkit-autofill {
     vertical-align: middle;
 }
 
-.button svg, .button svg path, .button svg rect {
+.button svg {
     transition: fill .25s ease;
 }
 
