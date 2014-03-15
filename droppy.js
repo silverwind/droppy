@@ -574,7 +574,7 @@
                     log.info(ws, null, msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
-                    if (msg.data.to.indexOf(msg.data.from) !== -1 && msg.data.to !== msg.data.from) {
+                    if (msg.data.to.indexOf(msg.data.from + "/") !== -1 && msg.data.to !== msg.data.from) {
                         log.error("Can't copy directory into itself");
                         send(clients[cookie].ws, JSON.stringify({ vId: vId, type : "ERROR", text: "Can't copy directory into itself."}));
                         return;
@@ -744,27 +744,27 @@
     // Perform clipboard operation, copy/paste or cut/paste
     function doClipboard(type, from, to) {
         fs.stat(from, function (error, stats) {
+            if (error) logError(error);
             if (stats && !error) {
-                if (stats.isFile()) {
-                    copyFile(from, to, function (error) {
-                        if (error) {
-                            log.error("Error copying single file from \"" + from + "\" to \"" + to + "\"");
-                            log.error(error);
-                        } else {
-                            if (type === "cut") {
-                                deleteFile(from);
-                            }
-                        }
-                    });
-                } else if (stats.isDirectory()) {
-                    wrench.copyDirRecursive(from, to, {forceDelete: true, preserveTimestamps: true}, function(){
-                        if (type === "cut") {
-                            deleteDirectory(from);
-                        }
-                    });
+                if (type === "cut") {
+                    fs.rename(from, to, logError);
+                } else {
+                    if (stats.isFile()) {
+                        copyFile(from, to, logError);
+                    } else if (stats.isDirectory()) {
+                        wrench.copyDirRecursive(from, to, {forceDelete: true}, logError);
+                    }
                 }
             }
         });
+        function logError(error) {
+            if (!error) return;
+            if (type == "cut")
+                log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
+            else
+                log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
+            log.error(error);
+        }
     }
     //-----------------------------------------------------------------------------
     // Copy a file from one location to another quickly
@@ -1234,7 +1234,8 @@
             while (names.length > 0) {
                 (function (name) {
                     wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
-                    fs.rename(files[name].src, files[name].dst, function () {
+                    fs.rename(files[name].src, files[name].dst, function (err) {
+                        if (err) log.error(err);
                         log.info(req, res, "Received: " + decodeURIComponent(req.query.to) + "/" + name);
                     });
                 })(names.pop());
