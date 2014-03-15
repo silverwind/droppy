@@ -476,6 +476,7 @@
                         if (error) {
                             return log.info(ws, null, "Non-existing update request: " + msg.data);
                         } else if (info.type === "f") {
+                            clients[cookie].views[vId] = {};
                             clients[cookie].views[vId].file = path.basename(msg.data);
                             clients[cookie].views[vId].directory = path.dirname(msg.data);
                             info.folder = path.dirname(msg.data);
@@ -485,6 +486,7 @@
                             info.type = "UPDATE_BE_FILE";
                             send(clients[cookie].ws, JSON.stringify(info));
                         } else {
+                            clients[cookie].views[vId] = {};
                             clients[cookie].views[vId].file = null;
                             clients[cookie].views[vId].directory = msg.data;
                             updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
@@ -980,7 +982,7 @@
             handleResourceRequest(req, res, req.url.substring(3));
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
             handleFileRequest(req, res, true);
-        } else if (/^\/_\//.test(URI) || /^\/\$\//.test(URI)) {
+        } else if (/^\/_\//.test(URI)) {
             handleFileRequest(req, res, false);
         } else if (/^\/~~\//.test(URI)) {
             streamArchive(req, res, "zip");

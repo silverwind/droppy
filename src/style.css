@@ -706,20 +706,20 @@ input:-webkit-autofill {
     position: absolute;
     margin: .25em;
     top: 0; left: 0; bottom: 0; right: 0;
-    text-align: center;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 .previewer .media-container {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
+    height: 100%;
 }
 
 .previewer .media-container > img {
+    display: block;
+    margin: 0 auto;
     max-width: 100%;
     max-height: 100%;
-    border-radius: 6px;
+    width:auto;
+    height:auto;
 }
 
 /* ============================ Document Previewer ============================ */
