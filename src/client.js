@@ -339,6 +339,9 @@
                     updateTitle(getView(vId)[0].currentFolder, true);
                     view.find(".upload-info").setTransitionClass("in", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
+                    setTimeout(function() {
+                        view.find(".upload-bar-inner").removeAttr("style");
+                    }, 200);
                     view.find(".icon-uploading").remove();
                     hideSpinner(view);
                 }
@@ -983,7 +986,7 @@
             start = Date.now();
             if (!view.find(".upload-info").length) view.append(uploadInfo);
             view.find(".upload-info").setTransitionClass("out", "in");
-            view.find(".upload-title").text(numFiles < 2 ? "Uploading 1 file" : "Uploading " + numFiles + " files");
+            view.find(".upload-title").text("Uploading " + numFiles + " file" + (numFiles > 1 ? "s" : ""));
             view.find(".upload-bar-inner").css("width", "0%");
             view.find(".upload-time-left").text("");
             view.find(".upload-speed").text("");

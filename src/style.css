@@ -801,13 +801,18 @@ input:-webkit-autofill {
     justify-content: space-between;
     overflow: hidden;
     z-index: 1;
+
 }
 
 @media all and (min-width: 1024px) { .upload-info { font-size: .9em } }
 @media all and (max-width: 1023px) { .upload-info { font-size: .8em } }
 @media all and (max-width:  639px) { .upload-info { font-size: .7em } }
 
-.upload-info.in  { height: 1.5em }
+.upload-info.in  {
+    height: 2em;
+    box-shadow: 0 0 0 .125em #111;
+    padding-top: .25em;
+}
 .upload-info.out { height: 0; box-shadow: none; }
 
 .upload-status {
@@ -853,20 +858,22 @@ input:-webkit-autofill {
 }
 
 .upload-speed:before {
-    content: "@";
+    content: " at ";
     color: #aaa;
 }
 
 .upload-bar {
-    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
     position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
+    left: 0; right: 0;
+    top: .125em;
+    height: .25em;
     z-index: 2;
+    background: #111;
     pointer-event: none;
 }
 
 .upload-bar-inner {
-    background: linear-gradient(#333,#444);
+    background: #eee;
     height: 100%;
     left: 0;
     position: absolute;
