@@ -1,17 +1,20 @@
 #droppy <a href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a>
-A personal cloud storage solution with a speedy HTML5 interface, running on [node.js](http://nodejs.org/).
+A personal cloud storage solution with a speedy HTML5 interface, running on [node.js](http://nodejs.org/). Check out the [demo](http://droppy.jit.su).
 
-![droppy](http://i.imgur.com/X08SGQd.png)
+![Main View](http://i.imgur.com/izxnfAN.png)
+![Editor](http://i.imgur.com/Ziv79rJ.png)
+![Images](http://i.imgur.com/h7tfXkU.png)
 
 ###Features
-* Realtime updating of all connected clients via WebSockets.
 * Lightweight. Performs great, even on a Raspberry Pi.
-* Asynchronous Drag-and-Drop uploading of files.
+* Realtime updating of all connected clients via WebSockets.
+* Asynchronous Drag-and-Drop uploading of files. Recursive directory uploads in Chrome.
 * Fully responsive, mobile-ready CSS.
-* Recursive directory uploads in WebKit/Blink.
-* Download directories as ZIPs.
-* Playback of audio files via HTML5 `<audio>`, depending on [browser/platform format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
-* Support for shortened and easy shareable links for unauthenticted downloads.
+* Download whole directories as ZIPs.
+* Edit text files in a feature-rich editor (CodeMirror).
+* Basic file system operations: Cut, Copy, Rename, Delete.
+* Playback of audio files supported by the via [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+* Support for shortened links to share with your friends.
 
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
