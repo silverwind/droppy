@@ -950,7 +950,7 @@
         if (getCookie(req.headers.cookie) || config.noLogin)
             isAuth = true;
 
-        if (URI === "/") {
+        if (URI === "/" || URI === "//") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/!\/content/.test(URI)) {
             if (isAuth) {
