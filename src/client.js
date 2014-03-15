@@ -934,7 +934,7 @@
                 }
             }
 
-            // Load the new files into view, tagged
+            // Load the new files into view
             openDirectory(view, true);
 
             // Create the XHR2 and bind the progress events
@@ -1266,6 +1266,8 @@
                 svgIcon = "", classes = "";
                 type = fileList[file].type;
                 bytes = fileList[file].size;
+                if (!bytes && droppy.sizeCache[folder] && droppy.sizeCache[folder][file])
+                    bytes = droppy.sizeCache[folder][file];
                 temp = convertToSI(bytes);
                 size = temp.size > 0 ? temp.size : "0";
                 sizeUnit = temp.size > 0 ? temp.unit : "b";
@@ -1301,7 +1303,7 @@
                             '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
                             '<span class="folder-link entry-link">' + file + '</span>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
+                            '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
                             '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
@@ -1838,6 +1840,7 @@
         droppy.mediaTypes = {};
         droppy.noLogin = null;
         droppy.reopen = null;
+        droppy.sizeCache = {};
         droppy.socket = null;
         droppy.socketWait = null;
         droppy.sorting = {col: "name", dir: "down"};
@@ -1847,20 +1850,31 @@
 
     // Add directory sizes
     function addSizes(view, folder, data) {
-        var bytes, temp;
+        var bytes, name;
         view.children(".content").each(function () {
             if ($(this).data("root") === folder) {
-                $(this).find(".entry-link").each(function(){
-                    bytes = data[$(this).text()].size;
-                    if (bytes) {
-                        temp = convertToSI(bytes);
-                        $(this).siblings(".size").attr("data-size", bytes).text(temp.size > 0 ? temp.size : "0");
-                        $(this).siblings(".size-unit").text(temp.size > 0 ? temp.unit : "b");
-                        return;
+                droppy.sizeCache[folder] = {};
+                $(this).find(".folder-link").each(function () {
+                    name = $(this).text();
+                    bytes = data[name].size;
+                    if (bytes && bytes > 0) {
+                        // cache the  size information
+                        droppy.sizeCache[folder][name] = bytes;
+                        setSize(this, bytes);
+                    } else {
+                        // Try to load from cache
+                        if (droppy.sizeCache[folder] && droppy.sizeCache[folder][name])
+                            setSize(this, droppy.sizeCache[folder][name]);
                     }
                 });
             }
         });
+    }
+
+    function setSize(el, bytes) {
+        var temp = convertToSI(bytes);
+        $(el).siblings(".size").attr("data-size", bytes).text(temp.size);
+        $(el).siblings(".size-unit").text(temp.unit);
     }
 
     // Convert raw byte numbers to SI values

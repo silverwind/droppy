@@ -531,7 +531,6 @@
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    if (config.demoMode) return send(clients[cookie].ws, JSON.stringify({ type : "ERROR", text: "Deleting is disabled in demo mode."}));
                     log.info(ws, null, "Deleting: " + msg.data.substring(1));
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
@@ -1197,7 +1196,7 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var cookie = getCookie(req.headers.cookie);
+        var busboy, done = false, files = [], cookie = getCookie(req.headers.cookie);
 
         req.query = qs.parse(req.url.substring("/upload?".length));
         log.info(req, res, "Upload started");
@@ -1211,14 +1210,7 @@
             return;
         }
 
-        var busboy, done = false, files = [], limits;
-
-        if (config.demoMode)
-            limits = { fileSize: 5 * 1024 * 1024 };
-        else
-            limits = { fieldNameSize : 255, fieldSize: 10 * 1024 * 1024};
-
-        busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 });
+        busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}});
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
