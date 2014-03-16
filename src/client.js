@@ -562,20 +562,20 @@
         }
 
         $("#create-folder-button").register("click", function () {
-            var dummyFolder, wasEmpty, view,
+            var dummyFolder, wasEmpty,
+                view = getView(), // TODO: Create folder in last active view
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
                                 '<span class="sprite sprite-folder-open"></span>' +
                                 '<span class="folder-link entry-link"></span>' +
                             '</li>';
 
-            if ($("#empty").length > 0) {
-                $(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+            if (view.find(".empty").length > 0) {
+                view.find(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
                 wasEmpty = true;
             } else {
-                $(dummyHtml).prependTo(".content ul");
+                view.find(".content ul").prepend(dummyHtml);
             }
             dummyFolder = $(".data-row.new-folder");
-            view = dummyFolder.parents(".view");
             view.find(".content").scrollTop(0);
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
@@ -1212,7 +1212,7 @@
                 '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
             '</div>');
         if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
-        else content.append('<div id="empty" class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
+        else content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
 
         loadContent(view, content);
         // Upload button on empty page
