@@ -641,6 +641,7 @@ input:-webkit-autofill {
     color: #333;
     z-index: 32;
     box-shadow: 0 0 30px #000;
+    width: 6.25em;
 }
 @media all and (min-width: 1024px) { #entry-menu { font-size: .9em } }
 @media all and (max-width: 1023px) { #entry-menu { font-size: .8em } }
@@ -662,9 +663,16 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
-#entry-menu>.radius-wrap>div:hover {
+#entry-menu>.radius-wrap>div:hover, #entry-menu>.radius-wrap>a:hover {
     background: #fff;
     cursor: pointer;
+}
+
+#entry-menu a {
+    padding: .25em;
+    text-decoration: none;
+    color: #333;
+    display: block;
 }
 
 #entry-menu svg {
@@ -679,7 +687,7 @@ input:-webkit-autofill {
     vertical-align: top;
 }
 
-#entry-menu .open, #entry-menu .edit {
+#entry-menu .open, #entry-menu .edit, #entry-menu .download {
     display: none;
 }
 #entry-menu.type-js>div>.edit,
@@ -697,8 +705,9 @@ input:-webkit-autofill {
 #entry-menu.type-png>div>.show,
 #entry-menu.type-jpg>div>.show,
 #entry-menu.type-gif>div>.show,
-#entry-menu.type-html>div>.show {
-    display: block;
+#entry-menu.type-html>div>.show,
+#entry-menu.type-download .download {
+    display: inline-block;
 }
 
 /* ============================ Image Previewer ============================ */

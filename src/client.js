@@ -1238,7 +1238,7 @@
         });
 
         // Click on a file link
-        if (droppy.get("clickaction") !== "download") {
+        if (droppy.get("clickAction") !== "download") {
             content.find(".file-link").register("click", function (event) {
                 event.preventDefault();
                 if (droppy.socketWait) return;
@@ -1257,6 +1257,13 @@
 
             type = type.match(/sprite\-(\w+)/);
             if (type) type = type[1];
+
+            // Show a download entry when the click action is not download
+            if (droppy.get("clickAction") !== "download" && entry.attr("data-type") === "file") {
+                type = "download";
+                $("#entry-menu").find(".download").attr("download", entry.children(".file-link").attr("download"));
+                $("#entry-menu").find(".download").attr("href", entry.children(".file-link").attr("href"));
+            }
 
             $("#entry-menu")
                 .attr("class", "in")
@@ -1570,10 +1577,6 @@
             sendMessage(null, "DELETE_FILE", $("#entry-menu").data("target").data("id"));
             $("#click-catcher").trigger("click");
         });
-
-        // Add missing titles to the SVGs
-        $("#entry-menu .rename").attr("title", "Rename");
-        $("#entry-menu .delete").attr("title", "Delete");
     }
 
     function sortByHeader(view, header) {
