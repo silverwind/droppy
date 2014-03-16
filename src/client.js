@@ -118,6 +118,7 @@
         }
         return this;
     };
+
     if (droppy.detects.animation) {
         var animStart = function (event) {
             if (event.animationName === "nodeInserted") {
@@ -527,9 +528,9 @@
                         obj[files[i].name] = files[i];
                     }
                 }
-                upload(view, obj);
+                upload(getView(), obj); // TODO: view relative
             } else if ($("#file").val()) {
-                upload(view, $("#file").get(0).files);
+                upload(getView(), $("#file").get(0).files);
             }
             $("#file").val(""); // Reset the input
         });
@@ -1326,8 +1327,22 @@
             });
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
+            bindDragEvents(view);
             bindDropEvents(view);
         }
+    }
+
+    function bindDragEvents(view) {
+        view.find(".data-row").each(function() {
+            var row = $(this);
+            row.attr("draggable", "true");
+            row.parents(".view")[0].ondragstart = function (event) {
+                var src = $(event.target).parents(".data-row").data("id") || $(event.target).data("id"),
+                    img = $(event.target).siblings(".sprite")[0] || $(event.target).children(".sprite")[0];
+                event.dataTransfer.setData("text/plain", src);
+                event.dataTransfer.setDragImage(img, 0, 0);
+            };
+        });
     }
 
     function bindDropEvents(view) {
@@ -1360,7 +1375,21 @@
             endDrag();
             var items = event.dataTransfer.items,
                 fileItem = null,
-                entryFunc = null;
+                entryFunc = null,
+                dragData = event.dataTransfer.getData("text/plain");
+
+            if (dragData) { // It's a drag between views
+                var clip = {
+                    type: event.ctrlKey ? "copy" : "cut",
+                    from: dragData,
+                    to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
+                };
+
+                if (clip.from !== clip.to || clip.type === "copy") {
+                    showSpinner(view);
+                    sendMessage(view[0].vId, "CLIPBOARD", clip);
+                }
+            }
 
             // Try to find the supported getAsEntry function
             if (items && items[0]) {
