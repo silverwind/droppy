@@ -569,7 +569,7 @@
                 view = getView(), // TODO: Create folder in last active view
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
                                 '<span class="sprite sprite-folder-open"></span>' +
-                                '<span class="folder-link entry-link"></span>' +
+                                '<a class="folder-link entry-link"></a>' +
                             '</li>';
 
             if (view.find(".empty").length > 0) {
@@ -1203,7 +1203,7 @@
                     list.append(
                         '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
                             '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
-                            '<span class="folder-link entry-link">' + file + '</span>' +
+                            '<a class="folder-link entry-link">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1230,7 +1230,8 @@
             $("#file").click();
         });
         // Switch into a folder
-        content.find(".data-row[data-type='folder']").register("click", function () {
+        content.find(".data-row[data-type='folder']").register("click", function (event) {
+            event.preventDefault();
             if (droppy.socketWait) return;
             var destination = $(this).data("id");
             updateLocation(view, destination);
