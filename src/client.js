@@ -1414,7 +1414,7 @@
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     var clip = {
-                        type: event.ctrlKey ? "copy" : "cut",
+                        type: (event.ctrlKey || event.metaKey) ? "copy" : "cut",
                         from: dragData,
                         to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
                     };
