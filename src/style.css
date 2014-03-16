@@ -680,6 +680,7 @@ input:-webkit-autofill {
     width: 1em;
     margin-right: .25em;
     fill: #333;
+    float: left;
 }
 
 #entry-menu div {
