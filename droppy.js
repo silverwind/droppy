@@ -244,7 +244,7 @@
         if (config.demoMode) {
             cleanupForDemo(function schedule() {
                 callback();
-                setTimeout(cleanupForDemo, 60 * 1000, schedule);
+                setTimeout(cleanupForDemo, 60 * 60 * 1000, schedule);
             });
         } else {
             callback();
