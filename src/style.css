@@ -1521,6 +1521,40 @@ input[type="checkbox"] { display: none }
 
 /* ============================= Misc Elements ============================= */
 
+#error-box {
+    background: #511;
+    color: #f44;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 2px #f44;
+    font-size: .8em;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    position: fixed;
+    transition: all .3s ease;
+    z-index: 33;
+    padding: .5em;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#error-box.in {opacity: 1; visibility: visible;}
+
+#error-box h1 {
+    width: 100%;
+    display: block;
+    font-size: 1.33em;
+    text-align: center;
+    margin: 0 0 .25em 0;
+}
+
+#error-box span {
+    text-align: center;
+    display: block;
+    width: 100%;
+}
+
 .dropzone {
     position: absolute;
     transition: opacity 0.3s ease, visibility 0.3s ease;

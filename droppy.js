@@ -576,7 +576,7 @@
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
                     if (msg.data.to.indexOf(msg.data.from + "/") !== -1 && msg.data.to !== msg.data.from) {
                         log.error("Can't copy directory into itself");
-                        send(clients[cookie].ws, JSON.stringify({ vId: vId, type : "ERROR", text: "Can't copy directory into itself."}));
+                        send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Can't copy directory into itself."}));
                         return;
                     }
                     msg.data.from = addFilePath(msg.data.from);
@@ -602,7 +602,7 @@
                     // Disallow whitespace-only and empty strings in renames
                     if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
                         log.info(ws, null, "Invalid rename request: " + msg.data.new);
-                        send(clients[cookie].ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
+                        send(clients[cookie].ws, JSON.stringify({ type: "ERROR", text: "Invalid rename request"}));
                         return;
                     }
                     fs.rename(addFilePath(msg.data.old), addFilePath(msg.data.new), function (error) {

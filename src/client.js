@@ -383,9 +383,12 @@
                     });
                 break;
             case "ERROR":
-                // TODO: Display server errors
-                view = getView(vId);
-                hideSpinner(view);
+                $("#error-box").children("span").text(msg.text);
+                $("#error-box").attr("class","in");
+                setTimeout(function() {
+                    $("#error-box").removeAttr("class");
+                }, 4000);
+                hideSpinner(getView(vId));
                 break;
             }
         };
@@ -1405,6 +1408,7 @@
                     updatePath(view, dragData);
                     openFile(view);
                 }
+                return;
             }
 
             // Try to find the supported getAsEntry function
