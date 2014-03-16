@@ -527,9 +527,9 @@
                         obj[files[i].name] = files[i];
                     }
                 }
-                upload(getView(), obj);
+                upload(view, obj);
             } else if ($("#file").val()) {
-                upload(getView(), $("#file").get(0).files);
+                upload(view, $("#file").get(0).files);
             }
             $("#file").val(""); // Reset the input
         });
@@ -1377,7 +1377,7 @@
             // Check if we support getAsEntry();
             if (!items || !fileItem[entryFunc]()) {
                 // No support, fallback to normal File API
-                upload(getView(), event.dataTransfer.files);
+                upload(view, event.dataTransfer.files);
                 return;
             }
 
@@ -1431,7 +1431,7 @@
                     return;
                 } else {
                     if (cbCount > 0 && cbFired === cbCount) {
-                        upload(getView(), obj);
+                        upload(view, obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
                     }
