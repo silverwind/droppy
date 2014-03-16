@@ -641,7 +641,7 @@ input:-webkit-autofill {
     color: #333;
     z-index: 32;
     box-shadow: 0 0 30px #000;
-    width: 6.25em;
+    width: 6.5em;
 }
 @media all and (min-width: 1024px) { #entry-menu { font-size: .9em } }
 @media all and (max-width: 1023px) { #entry-menu { font-size: .8em } }
@@ -682,6 +682,9 @@ input:-webkit-autofill {
     fill: #333;
 }
 
+#entry-menu div {
+    width: 100%;
+}
 #entry-menu div > span {
     display: inline-block;
     vertical-align: top;
@@ -707,7 +710,7 @@ input:-webkit-autofill {
 #entry-menu.type-gif>div>.show,
 #entry-menu.type-html>div>.show,
 #entry-menu.type-download .download {
-    display: inline-block;
+    display: block;
 }
 
 /* ============================ Image Previewer ============================ */
