@@ -231,28 +231,32 @@
     // Set up the directory
     function setupDirectories(callback) {
         cleanupTemp(true);
-        cleanupForDemo(function() {
-            try {
-                wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
-                wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
-            } catch (error) {
-                log.error("Unable to create directories:");
-                log.error(error);
-                process.exit(1);
-            }
+
+        try {
+            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
+            wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
+        } catch (error) {
+            log.error("Unable to create directories:");
+            log.error(error);
+            process.exit(1);
+        }
+
+        if (config.demoMode) {
+            cleanupForDemo(function schedule() {
+                callback();
+                setTimeout(cleanupForDemo, 60 * 1000, schedule);
+            });
+        } else {
             callback();
-        });
+        }
     }
 
     //-----------------------------------------------------------------------------
     // Restore the files directory to an initial state for the demo mode
-    // HACK: These timeouts seem to be needed for wrench to not error out randomly
     function cleanupForDemo(callback) {
-        var oldWatched, currentWatched;
-        if (!config.demoMode) return callback();
+        var oldWatched, currentWatched, retry;
         oldWatched = [];
         currentWatched = Object.keys(watchers);
-        log.simple("Cleaning up files for demo mode");
         if (currentWatched.length > 0) {
             oldWatched = currentWatched;
             currentWatched.forEach(function(dir) {
@@ -260,30 +264,24 @@
                 delete watchers[dir];
             });
         }
-        try {
-            wrench.rmdirSyncRecursive(config.filesDir, true);
-            setTimeout(function() {
+        log.simple("Cleaning up files and adding samples...");
+        try { // This can fail for strange reasons, we'll try till it goes through
+            retry = function () {
+                wrench.rmdirSyncRecursive(config.filesDir, true);
                 wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
-            }, 1000);
-        } catch (error) {
-            log.error("Error cleaning up the files directory:");
-            log.error(error);
+                wrench.copyDirSyncRecursive(__dirname, config.filesDir, {
+                    preserveTimestamps: true,
+                    forceDelete: true,
+                    exclude: /(files|db\.json|config\.json|\.git|temp)/
+                });
+            };
+            retry();
+        } catch (e) {
+            retry();
         }
-        setTimeout(function() {
-            log.simple("Adding sample files");
-            wrench.copyDirSyncRecursive(__dirname, config.filesDir, {
-                preserveTimestamps: true,
-                forceDelete: true,
-                exclude: /(files|db\.json|config\.json|\.git|temp)/
-            });
-            oldWatched.forEach(function(dir) {
-                updateWatchers(dir);
-            });
-            setInterval(cleanupForDemo, 60 * 60 * 1000);
-            callback();
-        }, 1000);
+        log.simple("Cleaning done.");
+        callback();
     }
-
     //-----------------------------------------------------------------------------
     // Clean up the directory for incoming files
     function cleanupTemp(initial) {
