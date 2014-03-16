@@ -1521,19 +1521,18 @@ input[type="checkbox"] { display: none }
 
 /* ============================= Misc Elements ============================= */
 
-#drop-preview {
-    position: fixed;
-    background: #000;
-    transition: opacity 0.5s ease;
+.dropzone {
+    position: absolute;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     left: 0; right: 0; top: 0; bottom: 0;
     z-index: 2;
+    opacity: 0 ;
+    visibility: hidden;
 }
 
-#drop-preview.out { opacity: 0 ; visibility: hidden }
-#drop-preview.in  { opacity: .75 ; visibility: visible }
+.dropzone.in  { opacity: .75 ; visibility: visible }
 
-
-#drop-preview svg {
+.dropzone svg {
     position: absolute;
     left: 25%;
     top: 25%;

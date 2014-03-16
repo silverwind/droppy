@@ -172,6 +172,7 @@
         var view =$("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content\"></div>" +
+                        "<div class=\"dropzone\">" + droppy.svg["up-arrow"] + "</div>" +
                     "</div>"),
             vId = getUniqueVid(0);
         view.appendTo("#view-container");
@@ -499,114 +500,6 @@
         // Open the WebSocket
         openSocket();
 
-        var endTimer, isHovering;
-        function endDrag() {
-            $("#drop-preview").replaceClass("in", "out");
-            isHovering = false;
-        }
-        function enter(event) {
-            event.preventDefault(); // Stop dragenter and dragover from killing our drop event
-            clearTimeout(endTimer);
-            if (!isHovering) {
-                $("#drop-preview").replaceClass("out", "in");
-                isHovering = true;
-            }
-        }
-        function leave() {
-            clearTimeout(endTimer);
-            endTimer = setTimeout(endDrag, 100);
-        }
-
-        // Drag and Drop handlers
-        $(document.documentElement).register("dragenter", enter);
-        $(document.documentElement).register("dragover", enter);
-        $(document.documentElement).register("dragleave", leave);
-        $(document.documentElement).register("dragend", leave);
-        $(document.documentElement).register("drop", function (event) {
-            event.stopPropagation();
-            event.preventDefault();
-            endDrag();
-            var items = event.dataTransfer.items,
-                fileItem = null,
-                entryFunc = null;
-
-            // Try to find the supported getAsEntry function
-            if (items && items[0]) {
-                fileItem = (items[0].type === "text/uri-list") ? items[1] : items[0];
-                var funcs = ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"];
-                for (var f = 0; f < funcs.length; f++) {
-                    if (fileItem[funcs[f]]) {
-                        entryFunc = funcs[f];
-                        break;
-                    }
-                }
-            }
-
-            // Check if we support getAsEntry();
-            if (!items || !fileItem[entryFunc]()) {
-                // No support, fallback to normal File API
-                upload(getView(), event.dataTransfer.files);
-                return;
-            }
-
-            // We support GetAsEntry, go ahead and read recursively
-            var obj = {};
-            var cbCount = 0, cbFired = 0, dirCount = 0,
-                rootFileFunction = function (file) {
-                    obj[file.name] = file;
-                    cbFired++;
-                },
-                childFileFunction = function (path) {
-                    return function (file) {
-                        obj[path + "/" + file.name] = file;
-                        cbFired++;
-                    };
-                },
-                increaseFired =  function () { cbFired++; },
-                readDirectory = function (entry, path) {
-                    if (!path) path = entry.name;
-                    obj[path] = {};
-                    entry.createReader().readEntries(function (entries) {
-                        for (var i = 0; i < entries.length; i++) {
-                            if (entries[i].isDirectory) {
-                                dirCount++;
-                                readDirectory(entries[i], path + "/" + entries[i].name);
-                            } else {
-                                cbCount++;
-                                entries[i].file(childFileFunction(path), increaseFired);
-                            }
-                        }
-                    });
-                };
-            var length = event.dataTransfer.items.length;
-            for (var i = 0; i < length; i++) {
-                var entry = event.dataTransfer.items[i][entryFunc]();
-                if (!entry) continue;
-                if (entry.isFile) {
-                    cbCount++;
-                    entry.file(rootFileFunction, increaseFired);
-                } else if (entry.isDirectory) {
-                    dirCount++;
-                    readDirectory(entry);
-                }
-            }
-
-            // TODO: Uploading just empty folders without any files runs into the timeout
-            // Possible solution would be to send the folder creations over the websocket
-            // as we can't send empty FormData.
-            (function wait(timeout) {
-                if (timeout > 10000) {
-                    return;
-                } else {
-                    if (cbCount > 0 && cbFired === cbCount) {
-                        upload(getView(), obj);
-                    } else {
-                        setTimeout(wait, timeout + 50, timeout + 50);
-                    }
-                }
-            })(50);
-        });
-
         // Re-fit path line after 100ms of no resizing
         var resizeTimeout;
         $(window).register("resize", function () {
@@ -870,167 +763,166 @@
         player.addEventListener("pause", stop);
         player.addEventListener("ended", stop);
         player.addEventListener("playing", playing);
+    }
+    // ============================================================================
+    //  Upload functions
+    // ============================================================================
+    var numFiles, formLength;
+    function upload(view, data) {
+        var formData = new FormData();
 
-        // ============================================================================
-        //  Helper functions for the main page
-        // ============================================================================
-        var numFiles, formLength;
-        function upload(view, data) {
-            var formData = new FormData();
-
-            droppy.zeroFiles = [];
-            numFiles = 0;
-            formLength = 0;
-            if (!data) return;
-            if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
-                if (data.length === 0) return;
-                for (var i = 0, len = data.length; i < len; i++) {
-                    var filename = encodeURIComponent(data[i].name);
-                    numFiles++;
-                    getView()[0].currentData[filename] = {
-                        size  : data[i].size,
-                        type  : "nf",
-                        mtime : Date.now()
-                    };
-                    // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
-                    // https://github.com/silverwind/droppy/issues/10
-                    if (data[i].size === 0) {
-                        droppy.zeroFiles.push((view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename);
-                    } else {
-                        formLength++;
-                        formData.append(filename, data[i], filename);
-                    }
+        droppy.zeroFiles = [];
+        numFiles = 0;
+        formLength = 0;
+        if (!data) return;
+        if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
+            if (data.length === 0) return;
+            for (var i = 0, len = data.length; i < len; i++) {
+                var filename = encodeURIComponent(data[i].name);
+                numFiles++;
+                getView()[0].currentData[filename] = {
+                    size  : data[i].size,
+                    type  : "nf",
+                    mtime : Date.now()
+                };
+                // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
+                // https://github.com/silverwind/droppy/issues/10
+                if (data[i].size === 0) {
+                    droppy.zeroFiles.push((view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename);
+                } else {
+                    formLength++;
+                    formData.append(filename, data[i], filename);
                 }
-            } else { // We got an object for recursive folder uploads
-                var addedDirs = {};
-                for (var path in data) {
-                    if (data.hasOwnProperty(path)) {
-                        formLength++;
-                        formData.append(path, data[path], encodeURIComponent(path));
-                        var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
-                        switch (Object.prototype.toString.call(data[path])) {
-                        case "[object Object]":
-                            if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                                view[0].currentData[name] = {
-                                    size : 0,
-                                    type : "nd",
-                                    mtime : Date.now()
-                                };
-                                addedDirs[name] = true;
-                            }
-                            break;
-                        case "[object File]":
-                            numFiles++;
-                            if (!addedDirs[name]) {
-                                view[0].currentData[name] = {
-                                    size  : data[path].size,
-                                    type  : "nf",
-                                    mtime : Date.now()
-                                };
-                            }
-                            break;
+            }
+        } else { // We got an object for recursive folder uploads
+            var addedDirs = {};
+            for (var path in data) {
+                if (data.hasOwnProperty(path)) {
+                    formLength++;
+                    formData.append(path, data[path], encodeURIComponent(path));
+                    var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
+                    switch (Object.prototype.toString.call(data[path])) {
+                    case "[object Object]":
+                        if (!addedDirs[name] && data.hasOwnProperty(path)) {
+                            view[0].currentData[name] = {
+                                size : 0,
+                                type : "nd",
+                                mtime : Date.now()
+                            };
+                            addedDirs[name] = true;
                         }
+                        break;
+                    case "[object File]":
+                        numFiles++;
+                        if (!addedDirs[name]) {
+                            view[0].currentData[name] = {
+                                size  : data[path].size,
+                                type  : "nf",
+                                mtime : Date.now()
+                            };
+                        }
+                        break;
                     }
                 }
             }
-
-            // Load the new files into view
-            openDirectory(view, true);
-
-            // Create the XHR2 and bind the progress events
-            var xhr = new XMLHttpRequest();
-            xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); }, false);
-            xhr.upload.addEventListener("load", function() { uploadDone(view); }, false);
-            xhr.upload.addEventListener("error", function() { uploadDone(view); }, false);
-
-            // Init the UI
-            uploadInit(view, numFiles);
-            $(".upload-cancel").register("click", function () {
-                xhr.abort();
-                uploadCancel(view);
-            });
-
-            // And send the files
-            droppy.isUploading = true;
-
-            if (formLength) {
-                xhr.open("POST", "/upload?" + $.param({
-                    vId : view[0].vId,
-                    to  : encodeURIComponent(view[0].currentFolder),
-                    r   : droppy.get("renameExistingOnUpload")
-                }));
-                xhr.send(formData);
-            } else if (droppy.zeroFiles.length) {
-                sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
-            }
         }
-        var start, lastUpdate;
-        function uploadInit(view, numFiles) {
-            var uploadInfo = '<section class="upload-info out">' +
-                    '<div class="upload-bar">' +
-                        '<div class="upload-bar-inner"></div>' +
-                    '</div>' +
-                    '<span class="upload-status">' +
-                        '<span class="upload-title"></span>' +
-                        '<span class="upload-speed"></span>' +
+
+        // Load the new files into view
+        openDirectory(view, true);
+
+        // Create the XHR2 and bind the progress events
+        var xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); }, false);
+        xhr.upload.addEventListener("load", function() { uploadDone(view); }, false);
+        xhr.upload.addEventListener("error", function() { uploadDone(view); }, false);
+
+        // Init the UI
+        uploadInit(view, numFiles);
+        $(".upload-cancel").register("click", function () {
+            xhr.abort();
+            uploadCancel(view);
+        });
+
+        // And send the files
+        droppy.isUploading = true;
+
+        if (formLength) {
+            xhr.open("POST", "/upload?" + $.param({
+                vId : view[0].vId,
+                to  : encodeURIComponent(view[0].currentFolder),
+                r   : droppy.get("renameExistingOnUpload")
+            }));
+            xhr.send(formData);
+        } else if (droppy.zeroFiles.length) {
+            sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
+        }
+    }
+    var start, lastUpdate;
+    function uploadInit(view, numFiles) {
+        var uploadInfo = '<section class="upload-info out">' +
+                '<div class="upload-bar">' +
+                    '<div class="upload-bar-inner"></div>' +
+                '</div>' +
+                '<span class="upload-status">' +
+                    '<span class="upload-title"></span>' +
+                    '<span class="upload-speed"></span>' +
+                '</span>' +
+                '<span class="upload-time">' +
+                    droppy.svg.time +
+                    '<span class="upload-time-left"></span>' +
                     '</span>' +
-                    '<span class="upload-time">' +
-                        droppy.svg.time +
-                        '<span class="upload-time-left"></span>' +
-                        '</span>' +
-                    '<span class="upload-cancel">' +
-                        droppy.svg.remove +
-                        '<span>Cancel Upload<span>' +
-                    '</span>' +
-                '</section>';
+                '<span class="upload-cancel">' +
+                    droppy.svg.remove +
+                    '<span>Cancel Upload<span>' +
+                '</span>' +
+            '</section>';
 
-            start = Date.now();
-            if (!view.find(".upload-info").length) view.append(uploadInfo);
-            view.find(".upload-info").setTransitionClass("out", "in");
-            view.find(".upload-title").text("Uploading " + numFiles + " file" + (numFiles > 1 ? "s" : ""));
-            view.find(".upload-bar-inner").css("width", "0%");
-            view.find(".upload-time-left").text("");
-            view.find(".upload-speed").text("");
-            updateTitle("0%");
-        }
+        start = Date.now();
+        if (!view.find(".upload-info").length) view.append(uploadInfo);
+        view.find(".upload-info").setTransitionClass("out", "in");
+        view.find(".upload-title").text("Uploading " + numFiles + " file" + (numFiles > 1 ? "s" : ""));
+        view.find(".upload-bar-inner").css("width", "0%");
+        view.find(".upload-time-left").text("");
+        view.find(".upload-speed").text("");
+        updateTitle("0%");
+    }
 
-        function uploadDone(view) {
-            view.find(".upload-bar-inner").css("width", "100%");
-            view.find(".upload-title").text("Processing...");
-        }
+    function uploadDone(view) {
+        view.find(".upload-bar-inner").css("width", "100%");
+        view.find(".upload-title").text("Processing...");
+    }
 
-        function uploadCancel(view) {
-            view.find(".upload-bar-inner").css("width", "0");
-            view.find(".upload-title").text("Aborting...");
-            $(".uploading").remove(); // Remove preview elements
-        }
+    function uploadCancel(view) {
+        view.find(".upload-bar-inner").css("width", "0");
+        view.find(".upload-title").text("Aborting...");
+        $(".uploading").remove(); // Remove preview elements
+    }
 
-        function uploadProgress(view, event) {
-            if (!event.lengthComputable) return;
+    function uploadProgress(view, event) {
+        if (!event.lengthComputable) return;
 
-            // Update progress every 250ms at most
-            if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
-                var bytesSent  = event.loaded,
-                    bytesTotal = event.total,
-                    progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                    speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2),
-                    elapsed, secs;
+        // Update progress every 250ms at most
+        if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
+            var bytesSent  = event.loaded,
+                bytesTotal = event.total,
+                progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
+                speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2),
+                elapsed, secs;
 
-                updateTitle(progress);
-                view.find(".upload-bar-inner").css("width", progress);
-                view.find(".upload-speed").text(speed.size + " " + speed.unit + "/s");
+            updateTitle(progress);
+            view.find(".upload-bar-inner").css("width", progress);
+            view.find(".upload-speed").text(speed.size + " " + speed.unit + "/s");
 
-                // Calculate estimated time left
-                elapsed = Date.now() - start;
-                secs = ((bytesTotal / (bytesSent / elapsed)) - elapsed) / 1000;
+            // Calculate estimated time left
+            elapsed = Date.now() - start;
+            secs = ((bytesTotal / (bytesSent / elapsed)) - elapsed) / 1000;
 
-                if (secs > 60)
-                    view.find(".upload-time-left").text(Math.ceil(secs / 60) + " mins");
-                else
-                    view.find(".upload-time-left").text(Math.ceil(secs) + " secs");
+            if (secs > 60)
+                view.find(".upload-time-left").text(Math.ceil(secs / 60) + " mins");
+            else
+                view.find(".upload-time-left").text(Math.ceil(secs) + " secs");
 
-                lastUpdate = Date.now();
-            }
+            lastUpdate = Date.now();
         }
     }
 // ============================================================================
@@ -1434,7 +1326,118 @@
             });
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
+            bindDropEvents(view);
         }
+    }
+
+    function bindDropEvents(view) {
+        var endTimer, isHovering;
+        function endDrag() {
+            view.find(".dropzone").replaceClass("in", "out");
+            isHovering = false;
+        }
+        function enter(event) {
+            event.preventDefault(); // Stop dragenter and dragover from killing our drop event
+            clearTimeout(endTimer);
+            if (!isHovering) {
+                view.find(".dropzone").replaceClass("out", "in");
+                isHovering = true;
+            }
+        }
+        function leave() {
+            clearTimeout(endTimer);
+            endTimer = setTimeout(endDrag, 100);
+        }
+
+        // Drag and Drop handlers
+        view.register("dragenter", enter);
+        view.register("dragover", enter);
+        view.register("dragleave", leave);
+        view.register("dragend", leave);
+        view.register("drop", function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            endDrag();
+            var items = event.dataTransfer.items,
+                fileItem = null,
+                entryFunc = null;
+
+            // Try to find the supported getAsEntry function
+            if (items && items[0]) {
+                fileItem = (items[0].type === "text/uri-list") ? items[1] : items[0];
+                var funcs = ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"];
+                for (var f = 0; f < funcs.length; f++) {
+                    if (fileItem[funcs[f]]) {
+                        entryFunc = funcs[f];
+                        break;
+                    }
+                }
+            }
+
+            // Check if we support getAsEntry();
+            if (!items || !fileItem[entryFunc]()) {
+                // No support, fallback to normal File API
+                upload(getView(), event.dataTransfer.files);
+                return;
+            }
+
+            // We support GetAsEntry, go ahead and read recursively
+            var obj = {};
+            var cbCount = 0, cbFired = 0, dirCount = 0,
+                rootFileFunction = function (file) {
+                    obj[file.name] = file;
+                    cbFired++;
+                },
+                childFileFunction = function (path) {
+                    return function (file) {
+                        obj[path + "/" + file.name] = file;
+                        cbFired++;
+                    };
+                },
+                increaseFired =  function () { cbFired++; },
+                readDirectory = function (entry, path) {
+                    if (!path) path = entry.name;
+                    obj[path] = {};
+                    entry.createReader().readEntries(function (entries) {
+                        for (var i = 0; i < entries.length; i++) {
+                            if (entries[i].isDirectory) {
+                                dirCount++;
+                                readDirectory(entries[i], path + "/" + entries[i].name);
+                            } else {
+                                cbCount++;
+                                entries[i].file(childFileFunction(path), increaseFired);
+                            }
+                        }
+                    });
+                };
+            var length = event.dataTransfer.items.length;
+            for (var i = 0; i < length; i++) {
+                var entry = event.dataTransfer.items[i][entryFunc]();
+                if (!entry) continue;
+                if (entry.isFile) {
+                    cbCount++;
+                    entry.file(rootFileFunction, increaseFired);
+                } else if (entry.isDirectory) {
+                    dirCount++;
+                    readDirectory(entry);
+                }
+            }
+
+            // TODO: Uploading just empty folders without any files runs into the timeout
+            // Possible solution would be to send the folder creations over the websocket
+            // as we can't send empty FormData.
+            (function wait(timeout) {
+                if (timeout > 10000) {
+                    return;
+                } else {
+                    if (cbCount > 0 && cbFired === cbCount) {
+                        upload(getView(), obj);
+                    } else {
+                        setTimeout(wait, timeout + 50, timeout + 50);
+                    }
+                }
+            })(50);
+        });
     }
 
     function initEntryMenu() {
