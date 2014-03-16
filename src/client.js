@@ -1236,6 +1236,19 @@
             var destination = $(this).data("id");
             updateLocation(view, destination);
         });
+
+        // Click on a file link
+        if (droppy.get("clickaction") !== "download") {
+            content.find(".file-link").register("click", function (event) {
+                event.preventDefault();
+                if (droppy.socketWait) return;
+                var view = $(event.target).parents(".view");
+                view[0].currentFile = $(event.target).text();
+                updatePath(view);
+                openFile(view);
+            });
+        }
+
         content.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
