@@ -1064,7 +1064,7 @@
 
     // Update the path indicator
     function updatePath(view, path) {
-        var parts, pathStr = "", toRemove, i = 0, len;
+        var parts, pathStr = "", i = 0, len;
         if (typeof path === "undefined")
             path = getViewLocation(view);
         parts = fixRootPath(path).split("/"),
@@ -1076,16 +1076,14 @@
                 pathStr += "/" + parts[i];
                 if (!parts[i] && !view[0].savedParts[i]) break;
                 if (parts[i] !== view[0].savedParts[i]) {
-                    if (view[0].savedParts[i] && !parts[i]) {
-                        toRemove = view.find(".path li").slice(i);
-                        toRemove.setTransitionClass("in", "out");
-                        toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                            $(event.target).remove();
-                        });
+                    if (view[0].savedParts[i] && !parts[i]) { // remove this part
+                        removePart(i);
                         break;
-                    }
-                    else if (parts[i] && !view[0].savedParts[i])
+                    } else if (parts[i] && !view[0].savedParts[i]) { // Add a part
                         createPart(parts[i], pathStr);
+                    } else if (parts[i] && view[0].savedParts[i] !== parts[i] ) { // remove and add a part
+                        view.find(".path li:last-child").html(parts[i] + droppy.svg.triangle);
+                    }
                 }
                 i++;
             }
@@ -1118,9 +1116,16 @@
                     updateLocation(view, $(this).data("destination"));
                 }
             });
-
             view.find(".path").append(li);
             li.append(droppy.svg.triangle);
+        }
+
+        function removePart(i) {
+            var toRemove = view.find(".path li").slice(i);
+            toRemove.setTransitionClass("in", "out");
+            toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                $(event.target).remove();
+            });
         }
 
         function finalize() {
@@ -1327,8 +1332,12 @@
             });
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
-            bindDragEvents(view);
-            bindDropEvents(view);
+            if ($(view).attr("data-type") === "directory") {
+                bindDragEvents(view);
+                bindDropEvents(view);
+            } else if ($(view).attr("data-type") === "document") {
+                bindDropEvents(view);
+            }
         }
     }
 
@@ -1379,15 +1388,22 @@
                 dragData = event.dataTransfer.getData("text/plain");
 
             if (dragData) { // It's a drag between views
-                var clip = {
-                    type: event.ctrlKey ? "copy" : "cut",
-                    from: dragData,
-                    to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
-                };
+                if (view.attr("data-type") === "directory") { // dropping into a directory view
+                    var clip = {
+                        type: event.ctrlKey ? "copy" : "cut",
+                        from: dragData,
+                        to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
+                    };
 
-                if (clip.from !== clip.to || clip.type === "copy") {
-                    showSpinner(view);
-                    sendMessage(view[0].vId, "CLIPBOARD", clip);
+                    if (clip.from !== clip.to || clip.type === "copy") {
+                        showSpinner(view);
+                        sendMessage(view[0].vId, "CLIPBOARD", clip);
+                    }
+                } else if (view.attr("data-type") === "document") { // dropping into a document view
+                    view[0].currentFolder = dirname(dragData);
+                    view[0].currentFile = basename(dragData);
+                    updatePath(view, dragData);
+                    openFile(view);
                 }
             }
 
@@ -1598,7 +1614,7 @@
         // Determine filetype and how to open it
         var path = getViewLocation(view),
             fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        updatePath(view);
+        updatePath(view, path);
         switch(fileext) {
             case "jpg":
             case "gif":
@@ -2136,5 +2152,9 @@
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
+    }
+    // turn /path/to/file to /path/to
+    function dirname(path) {
+        return path.replace(/\/[^\/]*$/,'');
     }
 }(jQuery, window, document));

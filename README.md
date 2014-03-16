@@ -12,6 +12,7 @@ A personal cloud storage solution with a speedy HTML5 interface, running on [nod
 * Fully responsive, mobile-ready CSS.
 * Download whole directories as ZIPs.
 * Edit text files in a feature-rich editor (CodeMirror).
+* Perform Drag and Drop operations between multiple directory views. Hold CTRL/CMD to copy.
 * Basic file system operations: Cut, Copy, Rename, Delete.
 * Playback of audio files supported by via the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Support for shortened links to share with your friends.
