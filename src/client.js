@@ -1373,9 +1373,8 @@
                         to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
 
                     to = fixRootPath(to + "/" + basename(from));
-                    if (from) {
-                        sendDropData(view, event, from, to);
-                    }
+                    if (from) sendDropData(view, event, from, to);
+                    event.preventDefault();
                 });
             }
             $(document.documentElement).register("drop", function () {
@@ -1425,24 +1424,15 @@
         });
     }
 
-    function sendDropData(view, event, from, to) {
-        var type;
-
-        // IE10 compat, dropEffect is always "none"
-        if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE")) {
-            type = event.ctrlKey ? "copy" : "cut";
-        } else {
+    function sendDropData(view, event, from, to, showSpinner) {
+        var type, clip;
+        if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE"))
+            type = event.ctrlKey ? "copy" : "cut"; // IE10 compat, dropEffect is always "none"
+        else
             type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
-        }
-
-        var clip = {
-            type: type,
-            from: from,
-            to  : to
-        };
-
+        clip = { type: type, from: from, to  : to };
         if (clip.from !== clip.to || clip.type === "copy") {
-            showSpinner(view);
+            if (showSpinner) showSpinner(view);
             sendMessage(view[0].vId, "CLIPBOARD", clip);
         }
     }
@@ -1461,7 +1451,7 @@
 
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
-                    sendDropData(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)));
+                    sendDropData(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
                     view[0].currentFolder = dirname(dragData);
                     view[0].currentFile = basename(dragData);
