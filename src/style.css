@@ -404,9 +404,9 @@ input:-webkit-autofill {
 
 .data-row.editing { background: #fff }
 .data-row.editing.invalid { background: #fdd }
-
 .data-row.editing .entry-link { display: none; }
 
+.data-row.drop-hover { background: #fff }
 .data-row, .data-row a {
     color: #333;
 }

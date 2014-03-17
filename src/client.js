@@ -1348,10 +1348,40 @@
             if ($(view).attr("data-type") === "directory") {
                 bindDragEvents(view);
                 bindDropEvents(view);
+                bindFolderHoverEvents(view);
             } else if ($(view).attr("data-type") === "document" || $(view).attr("data-type") === "image") {
                 bindDropEvents(view);
             }
         }
+    }
+
+
+    //In-view drag events - WIP
+    function bindFolderHoverEvents(view) {
+        var row;
+        $(".data-row").each(function() {
+            row = $(this);
+            bindHover(row, true, function(el, enter) {
+                if (enter && el.attr("data-type") === "folder")
+                    el.addClass("drop-hover");
+                else
+                    el.removeClass("drop-hover");
+            }, true);
+            if (row.attr("data-type") === "folder") {
+                row.register("drop", function (event) {
+                    var from = event.dataTransfer.getData("text"),
+                        to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
+
+                    to = fixRootPath(to + "/" + basename(from));
+                    if (from) {
+                        sendDropData(view, event, from, to);
+                    }
+                });
+            }
+            $(document.documentElement).register("drop", function () {
+                $(".data-row").removeClass("drop-hover");
+            });
+        });
     }
 
     // Bind hover events to an element
@@ -1395,12 +1425,33 @@
         });
     }
 
+    function sendDropData(view, event, from, to) {
+        var type;
+
+        // IE10 compat, dropEffect is always "none"
+        if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE")) {
+            type = event.ctrlKey ? "copy" : "cut";
+        } else {
+            type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
+        }
+
+        var clip = {
+            type: type,
+            from: from,
+            to  : to
+        };
+
+        if (clip.from !== clip.to || clip.type === "copy") {
+            showSpinner(view);
+            sendMessage(view[0].vId, "CLIPBOARD", clip);
+        }
+    }
+
     function bindDropEvents(view) {
         bindHover(view, false, function(el, enter) {
             el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
         });
         view.register("drop", function (event) {
-            event.stopPropagation();
             event.preventDefault();
             view.find(".dropzone").replaceClass("in", "out");
             var items = event.dataTransfer.items,
@@ -1410,25 +1461,7 @@
 
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
-                    var type;
-
-                    // IE10 compat, dropEffect is always "none"
-                    if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE")) {
-                        type = event.ctrlKey ? "copy" : "cut";
-                    } else {
-                        type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
-                    }
-
-                    var clip = {
-                        type: type,
-                        from: dragData,
-                        to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
-                    };
-
-                    if (clip.from !== clip.to || clip.type === "copy") {
-                        showSpinner(view);
-                        sendMessage(view[0].vId, "CLIPBOARD", clip);
-                    }
+                    sendDropData(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)));
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
                     view[0].currentFolder = dirname(dragData);
                     view[0].currentFile = basename(dragData);
