@@ -1570,7 +1570,6 @@ input[type="checkbox"] { display: none }
 
 .dropzone {
     position: absolute;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
     left: 0; right: 0; top: 0; bottom: 0;
     z-index: 2;
     opacity: 0 ;
