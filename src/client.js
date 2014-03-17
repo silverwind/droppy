@@ -1237,18 +1237,6 @@
             updateLocation(view, destination);
         });
 
-        // Click on a file link
-        if (droppy.get("clickAction") !== "download") {
-            content.find(".file-link").register("click", function (event) {
-                event.preventDefault();
-                if (droppy.socketWait) return;
-                var view = $(event.target).parents(".view");
-                view[0].currentFile = $(event.target).text();
-                updatePath(view);
-                openFile(view);
-            });
-        }
-
         content.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
@@ -1321,6 +1309,7 @@
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
             sortByHeader(view, $(this));
         });
+        setClickAction();
         hideSpinner(view);
     }
 
@@ -1622,15 +1611,34 @@
         }
     }
 
+    // Click on a file link
+    function setClickAction() {
+        if (droppy.get("clickAction") !== "download") {
+            $(".file-link").register("click", function (event) {
+                event.preventDefault();
+                if (droppy.socketWait) return;
+                var view = $(event.target).parents(".view");
+                view[0].currentFile = $(event.target).text();
+                updatePath(view);
+                openFile(view);
+            });
+        } else {
+            $(".file-link").off("click");
+        }
+    }
+
+
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
         var source = playButton.parent().parent().find(".file-link").attr("href");
         play(source, playButton);
     }
+
     function closeDoc(view) {
         updateLocation(view, view[0].currentFolder);
         view[0].editor = null;
     }
+
     function openFile(view) {
         // Determine filetype and how to open it
         var path = getViewLocation(view),
@@ -1835,6 +1843,7 @@
                     if(this.editor) this.editor.setOption(option, value);
                 });
             });
+            setClickAction(); // Set click actions here so it applies immediately after a change
         });
     }
 
