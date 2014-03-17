@@ -1328,7 +1328,7 @@
             view.find(".new").attr("data-root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
-            view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : "forward");
+            view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
             view.find(".new").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
@@ -1348,7 +1348,7 @@
             if ($(view).attr("data-type") === "directory") {
                 bindDragEvents(view);
                 bindDropEvents(view);
-            } else if ($(view).attr("data-type") === "document") {
+            } else if ($(view).attr("data-type") === "document" || $(view).attr("data-type") === "image") {
                 bindDropEvents(view);
             }
         }
@@ -1412,7 +1412,7 @@
                         showSpinner(view);
                         sendMessage(view[0].vId, "CLIPBOARD", clip);
                     }
-                } else if (view.attr("data-type") === "document") { // dropping into a document view
+                } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
                     view[0].currentFolder = dirname(dragData);
                     view[0].currentFile = basename(dragData);
                     updatePath(view, dragData);
@@ -1669,7 +1669,6 @@
                 '</div>' +
             '</div>'
             );
-        view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
@@ -1692,7 +1691,6 @@
                     '</div>' +
                 '</div>'
             );
-        view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(doc));
         showSpinner(view);
         $.ajax({
