@@ -1410,8 +1410,14 @@
 
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
+                    var type;
+                    if (event.dataTransfer.dropEffect !== "none") {
+                        type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
+                    } else { // IE10 compat, dropEffect is always "none"
+                        type = event.ctrlKey ? "copy" : "cut";
+                    }
                     var clip = {
-                        type: (event.dataTransfer.dropEffect === "copy") ? "copy" : "cut",
+                        type: type,
                         from: dragData,
                         to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
                     };
