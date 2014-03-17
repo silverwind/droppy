@@ -69,7 +69,7 @@
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
-    // Add the dataTransfer property to the "drop" event.
+    // Add the dataTransfer property to the drag-and-drop events
     $.event.props.push("dataTransfer");
 
     // Shorthand for safe event listeners
@@ -1363,6 +1363,7 @@
                     img = $(event.target).siblings(".sprite")[0] || $(event.target).children(".sprite")[0];
                 event.dataTransfer.setData("text/plain", src);
                 event.dataTransfer.setDragImage(img, 0, 0);
+                event.dataTransfer.effectAllowed = "all";
             };
         });
     }
@@ -1374,7 +1375,7 @@
             isHovering = false;
         }
         function enter(event) {
-            event.preventDefault(); // Stop dragenter and dragover from killing our drop event
+            event.preventDefault(); // Allow the event
             clearTimeout(endTimer);
             if (!isHovering) {
                 view.find(".dropzone").replaceClass("out", "in");
@@ -1392,6 +1393,7 @@
         view.register("dragleave", leave);
         view.register("dragend", leave);
         view.register("drop", function (event) {
+            console.log(event);
             event.stopPropagation();
             event.preventDefault();
             endDrag();
@@ -1403,7 +1405,7 @@
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     var clip = {
-                        type: (event.ctrlKey || event.metaKey) ? "copy" : "cut",
+                        type: (event.dataTransfer.dropEffect === "copy") ? "copy" : "cut",
                         from: dragData,
                         to:   fixRootPath(view[0].currentFolder + "/" + basename(dragData))
                     };
