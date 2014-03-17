@@ -1411,11 +1411,14 @@
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     var type;
-                    if (event.dataTransfer.dropEffect !== "none") {
-                        type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
-                    } else { // IE10 compat, dropEffect is always "none"
+
+                    // IE10 compat, dropEffect is always "none"
+                    if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE")) {
                         type = event.ctrlKey ? "copy" : "cut";
+                    } else {
+                        type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
                     }
+
                     var clip = {
                         type: type,
                         from: dragData,
