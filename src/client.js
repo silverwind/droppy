@@ -2195,12 +2195,20 @@
 
         spinner = view.find(".spinner");
         if (spinner.hasClass("out")) spinner.removeClass("out");
+
+        // HACK: Safeguard so a view won't get stuck in loading state
+        if (view.attr("data-type") === "directory") {
+            view.stuckTimeout = setTimeout(function() {
+                sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
+            }, 4000);
+        }
     }
 
     function hideSpinner(view) {
         var spinner = view.find(".spinner");
         if (spinner.length && !spinner.hasClass("out"))
             spinner.addClass("out");
+        if (view.stuckTimeout) clearTimeout(view.stuckTimeout);
     }
 
     function debounce(func, wait) {
