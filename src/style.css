@@ -176,6 +176,7 @@ input:-webkit-autofill {
     left:0;
     right:0;
     overflow: hidden;
+    transition: left .2s ease, right .2s ease;
 }
 
 @media all and (min-width: 1024px) { .view { top: 39px } }
