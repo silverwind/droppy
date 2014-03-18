@@ -92,9 +92,11 @@
 
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
-        setupDirectories( function() {
-            cleanupLinks();
-            createListener();
+        prepareSVG(function () {
+            setupDirectories( function() {
+                cleanupLinks();
+                createListener();
+            });
         });
     });
 
@@ -121,18 +123,6 @@
         });
 
         resourceList = utils.flatten(resources);
-
-        //Prepare SVGs
-        try {
-            var svgDir = config.srcDir + "svg/", svgData = {};
-            fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
-                svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
-            });
-            cache.svg = svgData;
-        } catch (error) {
-            log.error("Error processing SVGs: ", error);
-            process.exit(1);
-        }
 
         // Intialize the CSS cache when debugging
         if (config.debug) updateCSS();
@@ -894,52 +884,61 @@
     //-----------------------------------------------------------------------------
     // Read resources and store them in the cache object
     function cacheResources(dir, callback) {
-        var gzipFiles, relPath, fileName, fileData, fileTime;
+        var relPath, fileData, fileTime, cbCalled = 0, cbFired = 0;
         cache.res = {};
 
         dir = dir.substring(0, dir.length - 1); // Strip trailing slash
         utils.walkDirectory(dir, false, function (error, results) {
             if (error) log.error(error);
-            gzipFiles = [];
             results.forEach(function (fullPath) {
                 relPath = fullPath.substring(dir.length + 1);
-                fileName = path.basename(fullPath);
-
                 try {
                     fileData = fs.readFileSync(fullPath);
                     fileTime = fs.statSync(fullPath).mtime;
                 } catch (error) {
-                    log.error(error);
+                    log.error("Unable to read resource", error);
+                    process.exit(1);
                 }
 
                 cache.res[relPath] = {};
                 cache.res[relPath].data = fileData;
                 cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
                 cache.res[relPath].mime = mime.lookup(fullPath);
-                if (/.*(js|css|html|svg)$/.test(fileName)) {
-                    gzipFiles.push(relPath);
+                if (/.*(js|css|html)$/.test(path.basename(fullPath))) {
+                    (function(filePath, data) {
+                        cbCalled++;
+                        zlib.gzip(data, function (error, gzipped) {
+                            if (error) log.error(error);
+                            cache.res[filePath].gzipData = gzipped;
+                            if (++cbFired === cbCalled)
+                                callback();
+                        });
+                    })(relPath, cache.res[relPath].data);
                 }
             });
-
-            if (gzipFiles.length > 0)
-                runGzip();
-            else
-                callback();
-
-            function runGzip() {
-                var currentFile = gzipFiles[0];
-                zlib.gzip(cache.res[currentFile].data, function (error, compressedData) {
-                    if (error) log.error(error);
-                    cache.res[currentFile].gzipData = compressedData;
-                    gzipFiles = gzipFiles.slice(1);
-                    if (gzipFiles.length > 0)
-                        runGzip();
-                    else
-                        callback();
-                });
-            }
         });
     }
+
+    //-----------------------------------------------------------------------------
+    // prepare SVGs
+    function prepareSVG(callback) {
+        cache.res.svg = {};
+        try {
+            var svgDir = config.srcDir + "svg/", svgData = {};
+            fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
+                svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
+            });
+            cache.res.svg.data = JSON.stringify(svgData);
+            zlib.gzip(new Buffer(cache.res["svg"].data, "utf-8"), function (error, gzipped) {
+                cache.res.svg.gzipData = gzipped;
+                callback();
+            });
+        } catch (error) {
+            log.error("Error processing SVGs: ",  error);
+            process.exit(1);
+        }
+    }
+
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url), isAuth = false;
@@ -963,12 +962,7 @@
                 handleResourceRequest(req, res, "auth.html");
             }
         } else if (/^\/!\/svg/.test(URI)) {
-            var json = JSON.stringify(cache.svg);
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/html; charset=utf-8");
-            res.setHeader("Content-Length", json.length);
-            res.end(json);
-            log.info(req, res);
+            handleResourceRequest(req, res, "svg");
         } else if (/^\/!\/null/.test(URI)) {
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -1117,7 +1111,7 @@
                     res.setHeader("ETag", cache.res[resourceName].etag);
                 }
 
-                if (/.*(js|css|html|svg)$/.test(resourceName))
+                if (/.+\.(js|css|html)$/.test(resourceName))
                     res.setHeader("Content-Type", cache.res[resourceName].mime + "; charset=utf-8");
                 else
                     res.setHeader("Content-Type", cache.res[resourceName].mime);
