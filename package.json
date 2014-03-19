@@ -15,6 +15,7 @@
     "busboy": "~0.2.3",
     "chalk": "~0.4.0",
     "clean-css": "~2.1.6",
+    "cpr": "~0.1.1",
     "codemirror": "~3.22.0",
     "graceful-fs": "~2.0.2",
     "jquery": "~2.1.0",
@@ -23,7 +24,6 @@
     "rimraf": "~2.2.6",
     "spdy": "~1.24.0",
     "uglify-js": "~2.4.13",
-    "wrench": "~1.5.8",
     "ws": "~0.4.31"
   },
   "directories": {

@@ -254,7 +254,7 @@
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
-    var queuedData, retries = 5, retryTimeout = 4000;
+    var retries = 5, retryTimeout = 4000;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
         droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
@@ -262,7 +262,7 @@
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
             if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
-            if (queuedData)
+            if (droppy.queuedData)
                 sendMessage();
             else {
                 // Create new view with initiallizing
@@ -303,6 +303,7 @@
                 if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
                 view[0].switchRequest = false;
                 if (msg.sizes) {
+                    console.log("siz");
                     addSizes(view, msg.folder, msg.data);
                 } else {
                     showSpinner(view);
@@ -403,14 +404,14 @@
                 droppy.socketWait = false;
             }, 1000);
 
-            if (queuedData) {
-                droppy.socket.send(queuedData);
-                queuedData = false;
+            if (droppy.queuedData) {
+                droppy.socket.send(droppy.queuedData);
+                droppy.queuedData = null;
             }
             droppy.socket.send(JSON.stringify(sendObject));
         } else {
             // We can't send right now, so queue up the last added message to be sent later
-            queuedData = JSON.stringify(sendObject);
+            droppy.queuedData = JSON.stringify(sendObject);
 
             if (droppy.socket.readyState === 2) { // closing
                 // Socket is closing, queue a re-opening
@@ -1423,7 +1424,7 @@
         });
     }
 
-    function sendDropData(view, event, from, to, showSpinner) {
+    function sendDropData(view, event, from, to, spinner) {
         var type, clip;
         if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE"))
             type = event.ctrlKey ? "copy" : "cut"; // IE10 compat, dropEffect is always "none"
@@ -1431,7 +1432,7 @@
             type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
         clip = { type: type, from: from, to  : to };
         if (clip.from !== clip.to || clip.type === "copy") {
-            if (showSpinner) showSpinner(view);
+            if (spinner) showSpinner(view);
             sendMessage(view[0].vId, "CLIPBOARD", clip);
         }
     }
@@ -1955,6 +1956,7 @@
         droppy.isUploading = null;
         droppy.mediaTypes = {};
         droppy.noLogin = null;
+        droppy.queuedData = null;
         droppy.reopen = null;
         droppy.sizeCache = {};
         droppy.socket = null;
@@ -2187,9 +2189,10 @@
 
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.attr("data-type") === "directory") {
+            clearTimeout(view.stuckTimeout);
             view.stuckTimeout = setTimeout(function() {
                 sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
-            }, 4000);
+            }, 2000);
         }
     }
 

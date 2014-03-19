@@ -39,6 +39,7 @@
         archiver = require("archiver"),
         async    = require("async"),
         ap       = require("autoprefixer"),
+        cpr      = require("cpr"),
         Busboy   = require("busboy"),
         chalk    = require("chalk"),
         crypto   = require("crypto"),
@@ -51,7 +52,6 @@
         rimraf   = require("rimraf"),
         util     = require("util"),
         Wss      = require("ws").Server,
-        wrench   = require("wrench"),
         zlib     = require("zlib"),
         // Variables
         version   = require("./package.json").version,
@@ -246,7 +246,7 @@
     //-----------------------------------------------------------------------------
     // Restore the files directory to an initial state for the demo mode
     function cleanupForDemo(callback) {
-        var oldWatched, currentWatched, retry;
+        var oldWatched, currentWatched;
         oldWatched = [];
         currentWatched = Object.keys(watchers);
         if (currentWatched.length > 0) {
@@ -257,22 +257,16 @@
             });
         }
         log.simple("Cleaning up files and adding samples...");
-        try { // This can fail for strange reasons, we'll try till it goes through
-            retry = function () {
-                mkdirp.sync(config.filesDir, true);
-                mkdirp.sync(config.filesDir, mode.dir);
-                wrench.copyDirSyncRecursive(__dirname, config.filesDir, {
-                    preserveTimestamps: true,
-                    forceDelete: true,
-                    exclude: /(files|db\.json|config\.json|\.git|temp)/
-                });
-            };
-            retry();
-        } catch (e) {
-            retry();
-        }
-        log.simple("Cleaning done.");
-        callback();
+        cpr(__dirname, config.filesDir, {
+            deleteFirst: true,
+            overwrite: true,
+            filter: /(files|db\.json|config\.json|\.git|temp)/
+        }, function(err) {
+            if (err) log.error(err);
+            log.simple("Cleaning done.");
+            callback();
+        });
+
     }
     //-----------------------------------------------------------------------------
     // Clean up the directory for incoming files
@@ -573,7 +567,6 @@
                     }
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
-
                     // In case source and destination are the same, append a number to the file/foldername
                     if (msg.data.from === msg.data.to) {
                         utils.getNewPath(msg.data.to, function (name) {
@@ -724,8 +717,8 @@
             if (ws && ws.readyState === 1) {
                 if (config.logLevel === 3) {
                     var debugData = JSON.parse(data);
-                    // if (debugData.type === "UPDATE_DIRECTORY")
-                    //     debugData.data = {};
+                    if (debugData.type === "UPDATE_DIRECTORY")
+                        debugData.data = {"...":"..."};
                     log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
                 }
                 ws.send(data, function (error) {
@@ -748,7 +741,7 @@
                     if (stats.isFile()) {
                         copyFile(from, to, logError);
                     } else if (stats.isDirectory()) {
-                        wrench.copyDirRecursive(from, to, {forceDelete: true}, logError);
+                        cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
                     }
                 }
             }
@@ -765,21 +758,22 @@
     //-----------------------------------------------------------------------------
     // Copy a file from one location to another quickly
     // snippet from: http://stackoverflow.com/a/14387791/2096729
-    function copyFile(source, target, cb) {
+    function copyFile(from, to, cb) {
         var cbCalled = false;
 
-        var rd = fs.createReadStream(source);
-        rd.on("error", function (err) {
+        from = fs.createReadStream(from);
+        from.on("error", function (err) {
             done(err);
         });
-        var wr = fs.createWriteStream(target);
-        wr.on("error", function (err) {
+
+        to = fs.createWriteStream(to);
+        to.on("error", function (err) {
             done(err);
         });
-        wr.on("close", function () {
+        to.on("close", function () {
             done();
         });
-        rd.pipe(wr);
+        from.pipe(to);
 
         function done(err) {
             if (!cbCalled) {
