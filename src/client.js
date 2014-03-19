@@ -303,7 +303,6 @@
                 if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
                 view[0].switchRequest = false;
                 if (msg.sizes) {
-                    console.log("siz");
                     addSizes(view, msg.folder, msg.data);
                 } else {
                     showSpinner(view);
@@ -1347,81 +1346,12 @@
             view.find(".data-row").removeClass("animating");
             if ($(view).attr("data-type") === "directory") {
                 bindDragEvents(view);
+                bindHoverEvents(view);
                 bindDropEvents(view);
-                bindFolderHoverEvents(view);
             } else if ($(view).attr("data-type") === "document" || $(view).attr("data-type") === "image") {
                 bindDropEvents(view);
             }
         }
-    }
-
-
-    //In-view drag events - WIP
-    function bindFolderHoverEvents(view) {
-        var row;
-        $(".data-row").each(function() {
-            row = $(this);
-            bindHover(row, true, function(el, enter) {
-                if (enter && el.attr("data-type") === "folder")
-                    el.addClass("drop-hover");
-                else
-                    el.removeClass("drop-hover");
-            }, true);
-            if (row.attr("data-type") === "folder") {
-                row.register("drop", function (event) {
-                    var from = event.dataTransfer.getData("text"),
-                        to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
-
-                    to = fixRootPath(to + "/" + basename(from));
-                    if (from) sendDropData(view, event, from, to);
-                    event.preventDefault();
-                });
-            }
-            $(document.documentElement).register("drop", function () {
-                $(".data-row").removeClass("drop-hover");
-            });
-        });
-    }
-
-    // Bind hover events to an element
-    // @callback recieves the element and a boolean if something has been dragged over
-    function bindHover(el, stopProp, callback) {
-        var isHovering, endTimer;
-        function enter(event) {
-            event.preventDefault(); // Allow the event
-            if (stopProp) event.stopPropagation(); // Optionally stop bubbling
-            clearTimeout(endTimer);
-            if (!isHovering) {
-                isHovering = true;
-                callback(el, isHovering);
-            }
-        }
-        function leave(event) {
-            if (stopProp) event.stopPropagation();
-            clearTimeout(endTimer);
-            endTimer = setTimeout(end, 50);
-        }
-        function end() {
-            isHovering = false;
-            callback(el, isHovering);
-        }
-        el.register("dragenter dragover", enter);
-        el.register("dragleave dragend", leave);
-    }
-
-    function bindDragEvents(view) {
-        view.find(".data-row").each(function() {
-            var row = $(this);
-            row.attr("draggable", "true");
-            row.parents(".view")[0].ondragstart = function (event) {
-                var src = $(event.target).parents(".data-row").data("id") || $(event.target).data("id"),
-                    img = $(event.target).siblings(".sprite")[0] || $(event.target).children(".sprite")[0];
-                event.dataTransfer.setData("text", src);
-                event.dataTransfer.effectAllowed = "all";
-                if ("setDragImage" in event.dataTransfer)
-                    event.dataTransfer.setDragImage(img, 0, 0);
-            };
-        });
     }
 
     function sendDropData(view, event, from, to, spinner) {
@@ -1437,9 +1367,85 @@
         }
     }
 
-    function bindDropEvents(view) {
-        bindHover(view, false, function(el, enter) {
+    // Set drag properties for internal drag sources
+    function bindDragEvents(view) {
+        view.find(".data-row").each(function() {
+            var row = $(this);
+            row.attr("draggable", "true");
+            row.parents(".view")[0].ondragstart = function (event) {
+                var src = $(event.target).parents(".data-row").data("id") || $(event.target).data("id"),
+                    img = $(event.target).siblings(".sprite")[0] || $(event.target).children(".sprite")[0];
+                event.dataTransfer.setData("text", src);
+                event.dataTransfer.effectAllowed = "copyMove";
+                if ("setDragImage" in event.dataTransfer)
+                    event.dataTransfer.setDragImage(img, 0, 0);
+            };
+        });
+    }
+
+    // Hover evenets for upload arrows
+    function bindHoverEvents(view) {
+        view.find(".data-row").each(function() {
+            var row = $(this);
+            bindHover(row.children("a"), false, function(el, event, enter) {
+                if (!enter) el.removeClass("drop-hover");
+                if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
+                    event.stopPropagation();
+                    if (enter && el.parents(".data-row").attr("data-type") === "folder") {
+                        el.addClass("drop-hover");
+                        el.parents(".view").find(".dropzone").replaceClass("in", "out");
+                    } else {
+                        el.parents(".view").find(".dropzone").replaceClass("out", "in");
+                    }
+                }
+            }, true);
+        });
+        bindHover(view, false, function(el, event, enter) {
             el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
+        });
+    }
+
+    // Bind hover events to an element
+    function bindHover(el, stopProp, callback) {
+        var isHovering, endTimer;
+        function enter(event) {
+            event.preventDefault(); // Allow the event
+            if (stopProp) event.stopPropagation(); // Optionally stop bubbling
+            clearTimeout(endTimer);
+            if (!isHovering) {
+                isHovering = true;
+                callback(el, event, true);
+            }
+        }
+        function leave(event) {
+            if (stopProp) event.stopPropagation();
+            clearTimeout(endTimer);
+            endTimer = setTimeout(end, 50);
+        }
+        function end(event) {
+            isHovering = false;
+            callback(el, event, false);
+        }
+        el.register("dragenter dragover", enter);
+        el.register("dragleave dragend", leave);
+    }
+
+    function bindDropEvents(view) {
+        $(".data-row").each(function() {
+            var row = $(this);
+            if (row.attr("data-type") === "folder") {
+                row.children("a").register("drop", function (event) {
+                    var from = event.dataTransfer.getData("text"),
+                        to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
+
+                    to = fixRootPath(to + "/" + basename(from));
+                    if (from) sendDropData(view, event, from, to);
+                    event.preventDefault();
+                });
+            }
+        });
+        $(document.documentElement).register("drop", function () {
+            $(".data-row > a").removeClass("drop-hover");
         });
         view.register("drop", function (event) {
             event.preventDefault();
@@ -1460,6 +1466,7 @@
                 }
                 return;
             }
+            // At this point, it's a file drop
 
             // Try to find the supported getAsEntry function
             if (items && items[0]) {
