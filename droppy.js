@@ -45,8 +45,10 @@
         fs       = require("graceful-fs"),
         http     = require("http"),
         mime     = require("mime"),
+        mkdirp   = require("mkdirp"),
         path     = require("path"),
         qs       = require("querystring"),
+        rimraf   = require("rimraf"),
         util     = require("util"),
         Wss      = require("ws").Server,
         wrench   = require("wrench"),
@@ -220,25 +222,25 @@
     //-----------------------------------------------------------------------------
     // Set up the directory
     function setupDirectories(callback) {
-        cleanupTemp(true);
+        cleanupTemp(true, function() {
+            try {
+                mkdirp.sync(config.filesDir, mode.dir);
+                mkdirp.sync(config.incomingDir, mode.dir);
+            } catch (error) {
+                log.error("Unable to create directories:");
+                log.error(error);
+                process.exit(1);
+            }
 
-        try {
-            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
-            wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
-        } catch (error) {
-            log.error("Unable to create directories:");
-            log.error(error);
-            process.exit(1);
-        }
-
-        if (config.demoMode) {
-            cleanupForDemo(function schedule() {
+            if (config.demoMode) {
+                cleanupForDemo(function schedule() {
+                    callback();
+                    setTimeout(cleanupForDemo, 60 * 60 * 1000, schedule);
+                });
+            } else {
                 callback();
-                setTimeout(cleanupForDemo, 60 * 60 * 1000, schedule);
-            });
-        } else {
-            callback();
-        }
+            }
+        });
     }
 
     //-----------------------------------------------------------------------------
@@ -257,8 +259,8 @@
         log.simple("Cleaning up files and adding samples...");
         try { // This can fail for strange reasons, we'll try till it goes through
             retry = function () {
-                wrench.rmdirSyncRecursive(config.filesDir, true);
-                wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
+                mkdirp.sync(config.filesDir, true);
+                mkdirp.sync(config.filesDir, mode.dir);
                 wrench.copyDirSyncRecursive(__dirname, config.filesDir, {
                     preserveTimestamps: true,
                     forceDelete: true,
@@ -274,16 +276,16 @@
     }
     //-----------------------------------------------------------------------------
     // Clean up the directory for incoming files
-    function cleanupTemp(initial) {
-        try {
-            wrench.rmdirSyncRecursive(config.incomingDir, true);
-        } catch (error) {
-            if (initial) {
+    function cleanupTemp(initial, callback) {
+        rimraf(config.incomingDir, function(error) {
+            if (!initial) return callback();
+            if (error) {
                 log.simple("Error cleaning up temporary directories:");
                 log.error(error);
                 process.exit(1);
             }
-        }
+            callback();
+        });
     }
 
     //-----------------------------------------------------------------------------
@@ -583,7 +585,7 @@
                     break;
                 case "CREATE_FOLDER":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                    fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
+                    mkdirp(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
                         log.info(ws, null, "Created: ", msg.data);
                     });
@@ -629,12 +631,16 @@
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
+                        var cbCalled = 0, cbFired = 0;
                         if (!utils.isPathSane(file)) return log.info(ws, null, "Invalid empty file creation request: " + file);
-                        wrench.mkdirSyncRecursive(path.dirname(addFilePath(file)), mode.dir);
-                        fs.writeFileSync(addFilePath(file), "", {mode: mode.file});
-                        log.info(ws, null, "Received: " + file.substring(1));
+                        cbCalled++;
+                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function() {
+                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function() {
+                                log.info(ws, null, "Received: " + file.substring(1));
+                                if (++cbFired === cbCalled) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                            });
+                        });
                     });
-                    send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;
                 }
             });
@@ -718,8 +724,8 @@
             if (ws && ws.readyState === 1) {
                 if (config.logLevel === 3) {
                     var debugData = JSON.parse(data);
-                    if (debugData.type === "UPDATE_DIRECTORY")
-                        debugData.data = {};
+                    // if (debugData.type === "UPDATE_DIRECTORY")
+                    //     debugData.data = {};
                     log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
                 }
                 ws.send(data, function (error) {
@@ -794,15 +800,8 @@
     //-----------------------------------------------------------------------------
     // Delete a directory recursively
     function deleteDirectory(directory) {
-        try {
-            wrench.rmdirSyncRecursive(directory);
-            checkWatchedDirs();
-        } catch (error) {
-            // Specifically log this error as it possibly has to do with
-            // wrench not using graceful-fs
-            log.error("Error applying wrench.rmdirSyncRecursive");
-            log.error(error);
-        }
+        rimraf.sync(directory);
+        checkWatchedDirs();
     }
 
     //-----------------------------------------------------------------------------
@@ -811,6 +810,7 @@
         var dir = removeFilePath(directory), watcher, clientsToUpdate, client;
         log.debug(chalk.green("Adding Watcher: ") + dir);
         watcher = fs.watch(directory, utils.throttle(function () {
+            log.debug("Watcher detected update for ", chalk.blue(dir));
             clientsToUpdate = [];
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
@@ -1233,7 +1233,7 @@
                         if (error) { // File doesn't exist
                             fs.stat(path.dirname(files[name].dst), function (error) {
                                 if (error) { // Dir doesn't exist
-                                    wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
+                                    mkdirp.sync(path.dirname(files[name].dst), mode.dir);
                                 }
                                 moveFile(files[name].src, files[name].dst);
                             });
@@ -1655,10 +1655,10 @@
 
         if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
-        cleanupTemp();
-        cleanUpSessions();
-        writeDB();
-
-        process.exit(0);
+        cleanupTemp(false, function () {
+            cleanUpSessions();
+            writeDB();
+            process.exit(0);
+        });
     }
 })();
