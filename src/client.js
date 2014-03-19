@@ -1449,6 +1449,7 @@
         });
         view.register("drop", function (event) {
             event.preventDefault();
+            event.stopPropagation();
             view.find(".dropzone").replaceClass("in", "out");
             var items = event.dataTransfer.items,
                 fileItem = null,
