@@ -250,7 +250,7 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .path li { line-height: 30px; padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { .path li { line-height: 25px; padding: 0 .1em 0 1.2em } }
 
-.triangle { position: absolute }
+.path .triangle { position: absolute }
 
 .path .home {
     fill: #ddd;
@@ -291,9 +291,9 @@ input:-webkit-autofill {
 .path li:nth-child(15) { z-index: 2 }
 .path li:nth-child(16) { z-index: 1 }
 
-@media all and (min-width: 1024px) { .triangle { height: 35px; width: 35px; right: -34.5px } }
-@media all and (max-width: 1023px) { .triangle { height: 30px; width: 30px; right: -29.5px } }
-@media all and (max-width:  639px) { .triangle { height: 25px; width: 25px; right: -24.5px } }
+@media all and (min-width: 1024px) { .path .triangle { height: 35px; width: 35px; right: -34.5px } }
+@media all and (max-width: 1023px) { .path .triangle { height: 30px; width: 30px; right: -29.5px } }
+@media all and (max-width:  639px) { .path .triangle { height: 25px; width: 25px; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
 
@@ -350,27 +350,27 @@ input:-webkit-autofill {
     position: relative;
     cursor: pointer;
     white-space: nowrap;
+    line-height: 1.1em;
 }
 
 .file-header .triangle {
-    display: inline-block;
     position: relative;
     height: .6em;
-    top: .25em;
-    left: -.25em;
-    vertical-align: top;
+    width: .6em;
+    margin-left: .25em;
     transition: all .2s ease;
     fill: #666;
+    z-index: 2;
 }
 
 .file-header .down .triangle {
     transform: rotate(90deg);
-    top: .375em;
+    top: .15em;
 }
 
 .file-header .up .triangle {
     transform: rotate(270deg);
-    top: .125em;
+    top: -.15em;
 }
 
 .file-header .active  { color: #000; }
