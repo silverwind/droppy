@@ -346,6 +346,7 @@ input:-webkit-autofill {
 .file-header span {
     border-bottom: 1px solid #bbb;
     background: #dadada;
+    border-radius: 4px 4px 0 0;
     position: relative;
     cursor: pointer;
     white-space: nowrap;
