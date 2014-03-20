@@ -16,7 +16,7 @@
     "chalk": "~0.4.0",
     "clean-css": "~2.1.6",
     "cpr": "~0.1.1",
-    "codemirror": "~3.22.0",
+    "codemirror": "~4.0.3",
     "graceful-fs": "~2.0.3",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",

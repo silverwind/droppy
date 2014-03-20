@@ -124,6 +124,8 @@
          "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
             resources.js.push(cmPath + "mode/" + relPath);
         });
+        // CodeMirror Modes
+        resources.js.push(cmPath + "keymap/sublime.js");
         // CodeMirror Themes
         ["mdn-like.css", "xq-light.css", "base16-dark.css"].forEach(function (relPath) {
             resources.css.push(cmPath + "theme/" + relPath);

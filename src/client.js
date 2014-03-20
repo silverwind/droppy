@@ -1783,7 +1783,7 @@
                     lineWrapping: droppy.get("lineWrapping"),
                     lineNumbers: true,
                     autofocus: true,
-                    // keyMap: "sublime",
+                    keyMap: "sublime",
                     mode: mode
                 });
                 $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
