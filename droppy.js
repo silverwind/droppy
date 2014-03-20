@@ -465,7 +465,7 @@
                     break;
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
-                    if (!clients[cookie].views[vId]) clients[cookie] = { views: [], ws: ws }; // This can happen when the server restarts
+                    if (!clients[cookie]) clients[cookie] = { views: [], ws: ws }; // This can happen when the server restarts
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.info(ws, null, "Non-existing update request: " + msg.data);
@@ -473,12 +473,13 @@
                             clients[cookie].views[vId] = {};
                             clients[cookie].views[vId].file = path.basename(msg.data);
                             clients[cookie].views[vId].directory = path.dirname(msg.data);
-                            info.folder = path.dirname(msg.data);
-                            info.file = path.basename(msg.data);
-                            info.isFile = true;
-                            info.vId = vId;
-                            info.type = "UPDATE_BE_FILE";
-                            send(clients[cookie].ws, JSON.stringify(info));
+                            send(clients[cookie].ws, JSON.stringify({
+                                type: "UPDATE_BE_FILE",
+                                file: clients[cookie].views[vId].file,
+                                folder: clients[cookie].views[vId].directory,
+                                isFile: true,
+                                vId: vId,
+                            }));
                         } else {
                             clients[cookie].views[vId] = {};
                             clients[cookie].views[vId].file = null;
@@ -497,12 +498,9 @@
                         }
                     });
                     break;
-                case "NEW_VIEW":
-                    clients[cookie].views[vId] = {};
-                    break;
                 case "DESTROY_VIEW":
+                    clients[cookie].views[vId] = null;
                     checkWatchedDirs();
-                    delete clients[cookie].views[vId];
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -546,23 +544,21 @@
                     log.info(ws, null, "Saving: " + msg.data.to.substring(1));
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
-                    fs.stat(msg.data.to, function (error, stats) {
-                        if (error) {
-                            log.error("Error getting stats to save " + msg.data.to);
+                    fs.stat(msg.data.to, function (error) {
+                        if (error && error.code !== "ENOENT") {
+                            log.error("Error saving " + msg.data.to);
                             log.error(error);
-                        } else if (stats) {
-                            if (stats.isFile()) {
-                                // TODO: Check if user has permission
-                                fs.writeFile(msg.data.to, msg.data.value, function (error) {
-                                    if (error) {
-                                        log.error("Error writing " + msg.data.to);
-                                        log.error(error);
-                                        sendSaveStatus(cookie, vId, 1); // Save failed
-                                    } else {
-                                        sendSaveStatus(cookie, vId, 0); // Save successful
-                                    }
-                                });
-                            }
+                            send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Error saving " + msg.data.to + ": " + error}));
+                        } else {
+                            fs.writeFile(msg.data.to, msg.data.value, function (error) {
+                                if (error) {
+                                    log.error("Error writing " + msg.data.to);
+                                    log.error(error);
+                                    sendSaveStatus(cookie, vId, 1); // Save failed
+                                } else {
+                                    sendSaveStatus(cookie, vId, 0); // Save successful
+                                }
+                            });
                         }
                     });
                     break;
@@ -670,7 +666,7 @@
     //-----------------------------------------------------------------------------
     // Send a file list update
     function sendFiles(cookie, vId, eventType, sizes) {
-        if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
+        if (!clients[cookie].views[vId] || !clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
         var dir = clients[cookie].views[vId].directory,
             data = {
                 vId    : vId,

@@ -152,41 +152,38 @@
 // ============================================================================
 //  View handling
 // ============================================================================
-    var viewsById = [];
     function getView(id) {
-        if (id) return $(viewsById[id]);
+        if (id) return $(droppy.views[id]);
         else return (function(){
             var view;
             // get first element not undefined
-            viewsById.every(function(E){
-                view = E;
+            droppy.views.every(function (el) {
+                view = el;
             });
             return $(view);
         }());
     }
-    window.getView = getView;
-    function getUniqueVid(checked){
-        return viewsById[checked] ? getUniqueVid(checked + 1) : checked;
-    }
-    function newView(dest) {
+
+    function newView(dest, vId) {
         var view =$("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content\"></div>" +
                         "<div class=\"dropzone\">" + droppy.svg["up-arrow"] + "</div>" +
-                    "</div>"),
-            vId = getUniqueVid(0);
+                    "</div>");
+        destroyView(vId);
         view.appendTo("#view-container");
         view[0].vId = vId;
         view[0].currentFolder = "/";
-        viewsById[vId] = view[0];
-        sendMessage(vId, "NEW_VIEW");
+        droppy.views[vId] = view[0];
         if (dest) updateLocation(view, dest);
         return getView(vId);
     }
     function destroyView(vId) {
-        sendMessage(vId, "DESTROY_VIEW");
         getView(vId).remove();
-        delete viewsById[vId];
+        droppy.views = droppy.views.filter(function(view, index) { // Remove view from views array
+            return index !== vId;
+        });
+        sendMessage(vId, "DESTROY_VIEW");
     }
 
     function contentWrap(view) {
@@ -266,7 +263,7 @@
                 sendMessage();
             else {
                 // Create new view with initiallizing
-                newView(normalizePath(decodeURIComponent(window.location.pathname)));
+                newView(normalizePath(decodeURIComponent(window.location.pathname)), 0);
             }
         };
 
@@ -300,7 +297,7 @@
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
-                if ((droppy.isUploading) && !view[0].switchRequest) return; // Ignore update if we're uploading or the view is not viewing a directory
+                if ((!view || view[0].isUploading || view[0].currentFile) && !view[0].switchRequest) return;
                 view[0].switchRequest = false;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
@@ -323,11 +320,8 @@
                 var path = fixRootPath((msg.folder + "/" + msg.file));
                 view = getView(vId);
                 updatePath(view, path);
-
                 view[0].currentFolder = msg.folder;
                 view[0].currentFile = msg.file;
-
-                // Update view
                 openFile(view);
                 break;
             case "UPLOAD_DONE":
@@ -336,7 +330,7 @@
                     sendMessage(vId, "ZERO_FILES", droppy.zeroFiles);
                     droppy.zeroFiles = [];
                 } else {
-                    droppy.isUploading = false;
+                    view[0].isUploading = false;
                     updateTitle(getView(vId)[0].currentFolder, true);
                     view.find(".upload-info").setTransitionClass("in", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
@@ -587,30 +581,34 @@
                 dummyFolder.remove();
             });
         });
-        var secondViewId = null;
-        $("#split-button").register("click", function () {
-            if (secondViewId === null) {
-                var firstView = $("#view-container .view").addClass("left"),
-                    initDest,
-                    secondView;
 
-                if (firstView[0].currentFile)
-                    initDest = fixRootPath(firstView[0].currentFolder + "/" + (firstView[0].currentFile || ""));
+        $("#split-button").register("click", split);
+
+        function split() {
+            var dest, first, second, button;
+            button = $("#split-button");
+            button.off("click");
+            first = getView(0);
+            if (droppy.views.length === 1) {
+                first.addClass("left");
+                if (first[0].currentFile)
+                    dest = fixRootPath(first[0].currentFolder + "/" + (first[0].currentFile || ""));
                 else
-                    initDest = fixRootPath(firstView[0].currentFolder);
-
-                secondView = newView(initDest).addClass("right");
-                secondViewId = secondView[0].vId;
-                $(this).children(".button-text").text("Merge");
-                $(this).attr("title", "Merge views back into a single one");
+                    dest = fixRootPath(first[0].currentFolder);
+                second = newView(dest, 1).addClass("right");
+                button.children(".button-text").text("Merge");
+                button.attr("title", "Merge views back into a single one");
             } else {
-                $("#view-container .view.left").removeClass("left");
-                $(this).children(".button-text").text("Split");
-                $(this).attr("title", "Split the view in half");
-                destroyView(secondViewId);
-                secondViewId = null;
+                destroyView(1);
+                getView(0).removeClass("left");
+                button.children(".button-text").text("Split");
+                button.attr("title", "Split the view in half");
             }
-        });
+            first.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                button.register("click", split);
+                event.stopPropagation();
+            });
+        }
 
         $("#about-button").register("click", function () {
             requestAnimation(function () {
@@ -847,7 +845,7 @@
         });
 
         // And send the files
-        droppy.isUploading = true;
+        view[0].isUploading = true;
 
         if (formLength) {
             xhr.open("POST", "/upload?" + $.param({
@@ -1048,6 +1046,7 @@
     function updateLocation(view, destination, skipPush) {
         // Queue the folder switching if we are mid-animation or waiting for the server
         (function queue(time) {
+            if (!droppy.views[view[0].vId]) return;
             if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
                 showSpinner(view);
                 var viewLoc = getViewLocation(view);
@@ -1218,9 +1217,10 @@
             '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
                 '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
             '</div>');
-        if (list.children("li").length) content.append(list.prepend(getHeaderHTML()));
-        else content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
-
+        if (list.children("li").length)
+            content.append(list.prepend(getHeaderHTML()));
+        else
+            content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
         loadContent(view, content);
         // Upload button on empty page
         content.find(".empty").register("click", function () {
@@ -1388,7 +1388,7 @@
         view.find(".data-row").each(function() {
             var row = $(this);
             bindHover(row.children("a"), false, function(el, event, enter) {
-                if (!enter) el.removeClass("drop-hover");
+                if (!enter) return el.removeClass("drop-hover");
                 if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
                     if (enter && el.parents(".data-row").attr("data-type") === "folder") {
@@ -1435,12 +1435,14 @@
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.children("a").register("drop", function (event) {
+                    $(event.target).removeClass("drop-hover");
                     var from = event.dataTransfer.getData("text"),
                         to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
 
                     to = fixRootPath(to + "/" + basename(from));
                     if (from) sendDropData(view, event, from, to);
                     event.preventDefault();
+                    event.stopPropagation();
                 });
             }
         });
@@ -1660,15 +1662,15 @@
     }
 
     // Click on a file link
-    function setClickAction() {
+    function setClickAction(view) {
         if (droppy.get("clickAction") !== "download") {
+            // TODO: Use a common function with the entry menu
             $(".file-link").register("click", function (event) {
-                event.preventDefault();
-                if (droppy.socketWait) return;
                 var view = $(event.target).parents(".view");
-                view[0].currentFile = $(event.target).text();
-                updatePath(view);
-                openFile(view);
+                if (droppy.socketWait) return;
+                event.preventDefault();
+                updateLocation(view, fixRootPath(view[0].currentFolder + "/" + $(event.target).text()));
+
             });
         } else {
             $(".file-link").off("click");
@@ -1683,8 +1685,9 @@
     }
 
     function closeDoc(view) {
-        updateLocation(view, view[0].currentFolder);
+        view[0].switchRequest = true;
         view[0].editor = null;
+        updateLocation(view, view[0].currentFolder);
     }
 
     function openFile(view) {
@@ -1961,7 +1964,6 @@
         droppy.debug = null;
         droppy.demoMode = null;
         droppy.isPlaying = null;
-        droppy.isUploading = null;
         droppy.mediaTypes = {};
         droppy.noLogin = null;
         droppy.queuedData = null;
@@ -1971,6 +1973,7 @@
         droppy.socketWait = null;
         droppy.sorting = {col: "name", dir: "down"};
         droppy.svg = {};
+        droppy.views = [];
         droppy.zeroFiles = null;
     }
 
