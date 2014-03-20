@@ -390,7 +390,7 @@
             process.exit(1);
         });
 
-        server.listen(config.listenPort, (process.env.NODE_ENV === "production") ? process.env.PORT : config.listenPort);
+        server.listen(config.listenPort);
     }
 
     //-----------------------------------------------------------------------------
