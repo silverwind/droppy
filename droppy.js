@@ -64,6 +64,7 @@
         config    = null,
         cssCache  = null,
         firstRun  = null,
+        ready     = false,
         isCLI     = (process.argv.length > 2),
         mode      = {file: "644", dir: "755"},
         resources = {
@@ -89,6 +90,9 @@
     readDB();
     firstRun = Object.keys(db.users).length < 1;
 
+    // Listen but refuse requests until ready
+    createListener();
+
     // Copy/Minify JS, CSS and HTML content
     prepareContent();
 
@@ -97,7 +101,8 @@
         prepareSVG(function () {
             setupDirectories( function() {
                 cleanupLinks();
-                createListener();
+                ready = true;
+                log.simple("Ready for requests!");
             });
         });
     });
@@ -396,6 +401,11 @@
     //-----------------------------------------------------------------------------
     // GET/POST handler
     function onRequest(req, res) {
+        if (!ready) {
+            res.statusCode = 503;
+            res.end("droppy starting up...");
+            return;
+        }
         switch (req.method.toUpperCase()) {
         case "GET":
             handleGET(req, res);
