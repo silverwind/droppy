@@ -1,7 +1,7 @@
 /*global CodeMirror */
 /*jshint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
   forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true */
+  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true, devel: true */
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -331,21 +331,20 @@
                         view[0].loaded === true; // Ensure to update path on the first load
                         if (view[0].vId === 0)
                             updateTitle(msg.folder, true);
-                        updatePath(view, msg.folder);
+                        view[0].currentFile = null;
+                        view[0].currentFolder = msg.folder;
+                        updatePath(view);
                     }
-                    view[0].currentFile = null;
-                    view[0].currentFolder = msg.folder;
                     view[0].currentData = msg.data;
                     view.attr("data-type", "directory");
                     openDirectory(view);
                 }
                 break;
             case "UPDATE_BE_FILE":
-                var path = fixRootPath((msg.folder + "/" + msg.file));
                 view = getView(vId);
-                updatePath(view, path);
                 view[0].currentFolder = msg.folder;
                 view[0].currentFile = msg.file;
+                updatePath(view);
                 openFile(view);
                 break;
             case "UPLOAD_DONE":
@@ -1090,48 +1089,44 @@
     }
 
     // Update the path indicator
-    function updatePath(view, path) {
-        var parts, pathStr = "", i = 0, len;
-        if (typeof path === "undefined")
-            path = getViewLocation(view);
-        parts = fixRootPath(path).split("/"),
-        parts[0] = droppy.svg.home;
-        if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
+    function updatePath(view) {
+        var parts, oldParts, pathStr = "", i = 0, len;
+        parts = normalizePath(fixRootPath(view[0].currentFolder)).split("/");
+        if (parts[parts.length - 1] === "") parts.pop();
+        if (view[0].currentFile !== null) parts.push(view[0].currentFile);
+        parts[0] = droppy.svg.home; // Replace empty string with our home icon
         if (view[0].savedParts) {
             i = 1; // Skip the first element as it's always the same
+            oldParts = view[0].savedParts;
             while (true) {
                 pathStr += "/" + parts[i];
-                if (!parts[i] && !view[0].savedParts[i]) break;
-                if (parts[i] !== view[0].savedParts[i]) {
-                    if (view[0].savedParts[i] && !parts[i]) { // remove this part
+                if (!parts[i] && !oldParts[i]) break;
+                if (parts[i] !== oldParts[i]) {
+                    if (!parts[i] && oldParts[i] !== parts[i]) { // remove this part
                         removePart(i);
-                        break;
-                    } else if (parts[i] && !view[0].savedParts[i]) { // Add a part
+                    } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
                         createPart(parts[i], pathStr);
-                    } else if (parts[i] && view[0].savedParts[i] !== parts[i]) { // remove and add a part
-                        view.find(".path li:last-child").html(parts[i] + droppy.svg.triangle);
+                    } else { // rename part
+                        $(view.find(".path li")[i]).html(parts[i] + droppy.svg.triangle);
                     }
                 }
                 i++;
             }
             finalize();
         } else {
-            // Delay initial slide-in
-            setTimeout(function () {
-                createPart(parts[0]);
-                for (i = 1, len = parts.length; i < len; i++) {
-                    pathStr += "/" + parts[i];
-                    createPart(parts[i], pathStr);
-                }
-                finalize();
-            }, 200);
+            createPart(parts[0], "/");
+            for (i = 1, len = parts.length; i < len; i++) {
+                pathStr += "/" + parts[i];
+                createPart(parts[i], pathStr);
+            }
+            finalize();
         }
 
         view[0].savedParts = parts;
 
         function createPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
-            li.data("destination", path || "/");
+            li.data("destination", path);
             li.click(function () {
                 if (droppy.socketWait) return;
                 if ($(this).is(":last-child")) {
@@ -1490,7 +1485,8 @@
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
                     view[0].currentFolder = dirname(dragData);
                     view[0].currentFile = basename(dragData);
-                    updatePath(view, dragData);
+                    view[0].editNew = true;
+                    updatePath(view);
                     openFile(view);
                 }
                 return;
@@ -1720,7 +1716,6 @@
         // Determine filetype and how to open it
         var path = getViewLocation(view),
             fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        updatePath(view, path);
         switch (fileext) {
             case "jpg":
             case "gif":
@@ -1839,10 +1834,15 @@
                     editor.clearHistory();
                     editor.refresh();
                     editor.on("change", function () {
-                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                        if (!view[0].editNew) {
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                        }
+                    });
+                    editor.on("keyup", function () {
+                        view[0].editNew = false;
                     });
                     hideSpinner(view);
-                }, 200);
+                }, 1000);
             },
             error : function () {
                 closeDoc(view);
@@ -2270,6 +2270,9 @@
     }
     // turn /path/to/file to /path/to
     function dirname(path) {
-        return path.replace(/\/[^\/]*$/, "");
+        if (path === "/")
+            return "/";
+        else
+            return path.replace(/\/[^\/]*$/, "");
     }
 }(jQuery, window, document));
