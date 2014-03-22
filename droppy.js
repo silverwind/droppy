@@ -23,8 +23,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  --------------------------------------------------------------------------- */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true,
-  trailing: false, sub: true, eqeqeq: true, forin: true, freeze: true,
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, freeze: true,
+  trailing: false, sub: true, eqeqeq: true, forin: true, quotmark: false,
   loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true,
   newcap: true, undef: true, unused: true, globalstrict: true, node: true */
 "use strict";

@@ -1,3 +1,7 @@
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, freeze: true,
+  trailing: false, sub: true, eqeqeq: true, forin: true, quotmark: false,
+  loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true,
+  newcap: true, undef: true, unused: true, globalstrict: true, node: true */
 "use strict";
 
 module.exports = function (grunt) {

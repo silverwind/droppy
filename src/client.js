@@ -1,7 +1,7 @@
 /*global CodeMirror */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
+/*jshint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
   forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, browser: true, jquery: true */
+  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true, devel: true */
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -150,22 +150,47 @@
     if (navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
         $("html").addClass("firefox");
 // ============================================================================
+//  Map touch events to mouse events when necessary
+// ============================================================================
+    if ("ontouchstart" in document.documentElement) {
+        $(function () {
+            function touchHandler(event) {
+                var touch = event.changedTouches[0],
+                    simulatedEvent = document.createEvent("MouseEvent");
+                simulatedEvent.initMouseEvent({
+                    touchstart: "mousedown",
+                    touchmove: "mousemove",
+                    touchend: "mouseup"
+                }[event.type], true, true, window, 1,
+                    touch.screenX, touch.screenY,
+                    touch.clientX, touch.clientY, false,
+                    false, false, false, 0, null);
+                touch.target.dispatchEvent(simulatedEvent);
+                event.preventDefault();
+            }
+            document.addEventListener("touchstart", touchHandler, true);
+            document.addEventListener("touchmove", touchHandler, true);
+            document.addEventListener("touchend", touchHandler, true);
+            document.addEventListener("touchcancel", touchHandler, true);
+        });
+    }
+// ============================================================================
 //  View handling
 // ============================================================================
     function getView(id) {
-        if (id) return $(droppy.views[id]);
-        else return (function(){
+        if (id) {
+            return $(droppy.views[id]);
+        } else {
             var view;
-            // get first element not undefined
-            droppy.views.every(function (el) {
+            droppy.views.every(function (el) { // get first element not undefined
                 view = el;
             });
             return $(view);
-        }());
+        }
     }
 
     function newView(dest, vId) {
-        var view =$("<div class=\"view\">" +
+        var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content\"></div>" +
                         "<div class=\"dropzone\">" + droppy.svg["up-arrow"] + "</div>" +
@@ -180,7 +205,7 @@
     }
     function destroyView(vId) {
         getView(vId).remove();
-        droppy.views = droppy.views.filter(function(view, index) { // Remove view from views array
+        droppy.views = droppy.views.filter(function (view, index) { // Remove view from views array
             return index !== vId;
         });
         sendMessage(vId, "DESTROY_VIEW");
@@ -290,7 +315,6 @@
                 return droppy.socket.send("pong");
             else
                 droppy.socketWait = false;
-
             var msg = JSON.parse(event.data),
                 vId = msg.vId,
                 view;
@@ -307,21 +331,20 @@
                         view[0].loaded === true; // Ensure to update path on the first load
                         if (view[0].vId === 0)
                             updateTitle(msg.folder, true);
-                        updatePath(view, msg.folder);
+                        view[0].currentFile = null;
+                        view[0].currentFolder = msg.folder;
+                        updatePath(view);
                     }
-                    view[0].currentFile = null;
-                    view[0].currentFolder = msg.folder;
                     view[0].currentData = msg.data;
                     view.attr("data-type", "directory");
                     openDirectory(view);
                 }
                 break;
             case "UPDATE_BE_FILE":
-                var path = fixRootPath((msg.folder + "/" + msg.file));
                 view = getView(vId);
-                updatePath(view, path);
                 view[0].currentFolder = msg.folder;
                 view[0].currentFile = msg.file;
+                updatePath(view);
                 openFile(view);
                 break;
             case "UPLOAD_DONE":
@@ -334,7 +357,7 @@
                     updateTitle(getView(vId)[0].currentFolder, true);
                     view.find(".upload-info").setTransitionClass("in", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         view.find(".upload-bar-inner").removeAttr("style");
                     }, 200);
                     view.find(".icon-uploading").remove();
@@ -368,17 +391,17 @@
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
                     $("#logout-button").register("click", function () {
-                       if (droppy.socket) droppy.socket.close(4001);
-                       deleteCookie("session");
-                       initVariables(); // Reset vars to their init state
-                       droppy.set("hasLoggedOut", true);
-                       requestPage();
+                        if (droppy.socket) droppy.socket.close(4001);
+                        deleteCookie("session");
+                        initVariables(); // Reset vars to their init state
+                        droppy.set("hasLoggedOut", true);
+                        requestPage();
                     });
                 break;
             case "ERROR":
                 $("#error-box").children("span").text(msg.text);
-                $("#error-box").attr("class","in");
-                setTimeout(function() {
+                $("#error-box").attr("class", "in");
+                setTimeout(function () {
                     $("#error-box").removeAttr("class");
                 }, 4000);
                 hideSpinner(getView(vId));
@@ -554,7 +577,9 @@
             });
         } else {
             // No directory upload support - disable the button
-            $("#upload-folder-button").addClass("disabled").attr("title","Sorry, your browser doesn't support directory uploading yet!");
+            $("#upload-folder-button")
+                .addClass("disabled")
+                .attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
         $("#create-folder-button").register("click", function () {
@@ -833,9 +858,9 @@
 
         // Create the XHR2 and bind the progress events
         var xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); }, false);
-        xhr.upload.addEventListener("load", function() { uploadDone(view); }, false);
-        xhr.upload.addEventListener("error", function() { uploadDone(view); }, false);
+        xhr.upload.addEventListener("progress", function (event) { uploadProgress(view, event); }, false);
+        xhr.upload.addEventListener("load", function () { uploadDone(view); }, false);
+        xhr.upload.addEventListener("error", function () { uploadDone(view); }, false);
 
         // Init the UI
         uploadInit(view, numFiles);
@@ -968,7 +993,7 @@
         });
 
         nameLength = link.text().lastIndexOf(".");
-        namer[0].setSelectionRange(0,nameLength > -1 ? nameLength : link.text().length);
+        namer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
         namer[0].focus();
 
         function submitEdit(view, skipInvalid, callback) {
@@ -1064,53 +1089,49 @@
     }
 
     // Update the path indicator
-    function updatePath(view, path) {
-        var parts, pathStr = "", i = 0, len;
-        if (typeof path === "undefined")
-            path = getViewLocation(view);
-        parts = fixRootPath(path).split("/"),
-        parts[0] = droppy.svg.home;
-        if (parts[parts.length - 1] === "") parts.pop(); // Remove trailing empty string
+    function updatePath(view) {
+        var parts, oldParts, pathStr = "", i = 0, len;
+        parts = normalizePath(fixRootPath(view[0].currentFolder)).split("/");
+        if (parts[parts.length - 1] === "") parts.pop();
+        if (view[0].currentFile !== null) parts.push(view[0].currentFile);
+        parts[0] = droppy.svg.home; // Replace empty string with our home icon
         if (view[0].savedParts) {
             i = 1; // Skip the first element as it's always the same
+            oldParts = view[0].savedParts;
             while (true) {
                 pathStr += "/" + parts[i];
-                if (!parts[i] && !view[0].savedParts[i]) break;
-                if (parts[i] !== view[0].savedParts[i]) {
-                    if (view[0].savedParts[i] && !parts[i]) { // remove this part
+                if (!parts[i] && !oldParts[i]) break;
+                if (parts[i] !== oldParts[i]) {
+                    if (!parts[i] && oldParts[i] !== parts[i]) { // remove this part
                         removePart(i);
-                        break;
-                    } else if (parts[i] && !view[0].savedParts[i]) { // Add a part
+                    } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
                         createPart(parts[i], pathStr);
-                    } else if (parts[i] && view[0].savedParts[i] !== parts[i] ) { // remove and add a part
-                        view.find(".path li:last-child").html(parts[i] + droppy.svg.triangle);
+                    } else { // rename part
+                        $(view.find(".path li")[i]).html(parts[i] + droppy.svg.triangle);
                     }
                 }
                 i++;
             }
             finalize();
         } else {
-            // Delay initial slide-in
-            setTimeout(function () {
-                createPart(parts[0]);
-                for (i = 1, len = parts.length; i < len; i++) {
-                    pathStr += "/" + parts[i];
-                    createPart(parts[i], pathStr);
-                }
-                finalize();
-            }, 200);
+            createPart(parts[0], "/");
+            for (i = 1, len = parts.length; i < len; i++) {
+                pathStr += "/" + parts[i];
+                createPart(parts[i], pathStr);
+            }
+            finalize();
         }
 
         view[0].savedParts = parts;
 
         function createPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
-            li.data("destination", path || "/");
+            li.data("destination", path);
             li.click(function () {
                 if (droppy.socketWait) return;
                 if ($(this).is(":last-child")) {
                     if ($(this).parents(".view").data("type") === "directory") {
-                            updateLocation(view, $(this).data("destination"));
+                        updateLocation(view, $(this).data("destination"));
                     }
                 } else {
                     view[0].switchRequest = true; // This is set so we can switch out of a editor view
@@ -1339,7 +1360,7 @@
 
         function finish() {
             view[0].isAnimating = false;
-            view.find(".content").each(function(){
+            view.find(".content").each(function () {
                 if (!$(this).hasClass("new")) $(this).remove();
             });
             view.find(".new").removeClass("new");
@@ -1369,7 +1390,7 @@
 
     // Set drag properties for internal drag sources
     function bindDragEvents(view) {
-        view.find(".data-row").each(function() {
+        view.find(".data-row").each(function () {
             var row = $(this);
             row.attr("draggable", "true");
             row.parents(".view")[0].ondragstart = function (event) {
@@ -1385,9 +1406,9 @@
 
     // Hover evenets for upload arrows
     function bindHoverEvents(view) {
-        view.find(".data-row").each(function() {
+        view.find(".data-row").each(function () {
             var row = $(this);
-            bindHover(row.children("a"), false, function(el, event, enter) {
+            bindHover(row.children("a"), false, function (el, event, enter) {
                 if (!enter) return el.removeClass("drop-hover");
                 if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
@@ -1400,7 +1421,7 @@
                 }
             }, true);
         });
-        bindHover(view, false, function(el, event, enter) {
+        bindHover(view, false, function (el, event, enter) {
             el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
         });
     }
@@ -1431,7 +1452,7 @@
     }
 
     function bindDropEvents(view) {
-        $(".data-row").each(function() {
+        $(".data-row").each(function () {
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.children("a").register("drop", function (event) {
@@ -1464,7 +1485,8 @@
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
                     view[0].currentFolder = dirname(dragData);
                     view[0].currentFile = basename(dragData);
-                    updatePath(view, dragData);
+                    view[0].editNew = true;
+                    updatePath(view);
                     openFile(view);
                 }
                 return;
@@ -1662,7 +1684,7 @@
     }
 
     // Click on a file link
-    function setClickAction(view) {
+    function setClickAction() {
         if (droppy.get("clickAction") !== "download") {
             // TODO: Use a common function with the entry menu
             $(".file-link").register("click", function (event) {
@@ -1694,8 +1716,7 @@
         // Determine filetype and how to open it
         var path = getViewLocation(view),
             fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        updatePath(view, path);
-        switch(fileext) {
+        switch (fileext) {
             case "jpg":
             case "gif":
             case "png":
@@ -1813,10 +1834,15 @@
                     editor.clearHistory();
                     editor.refresh();
                     editor.on("change", function () {
-                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                        if (!view[0].editNew) {
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                        }
+                    });
+                    editor.on("keyup", function () {
+                        view[0].editNew = false;
                     });
                     hideSpinner(view);
-                }, 200);
+                }, 1000);
             },
             error : function () {
                 closeDoc(view);
@@ -1879,8 +1905,8 @@
         bindUserlistEvents();
         $("#options-box").replaceClass("out", "in");
         toggleCatcher();
-        $("#click-catcher").one("click", function() {
-            $box.find("select").each( function() {
+        $("#click-catcher").one("click", function () {
+            $box.find("select").each(function () {
                 var option = $(this).attr("class"), value  = $(this).val();
 
                 if (value === "true") value = true;
@@ -1889,7 +1915,7 @@
 
                 droppy.set(option, value);
                 $(".view").each(function () {
-                    if(this.editor) this.editor.setOption(option, value);
+                    if (this.editor) this.editor.setOption(option, value);
                 });
             });
             setClickAction(); // Set click actions here so it applies immediately after a change
@@ -1897,17 +1923,17 @@
     }
 
     function bindUserlistEvents() {
-        $(".add-user").register("click", function() {
-           var user = window.prompt("Username?"),
-               pass = window.prompt("Password?");
-           if (!user || !pass) return;
-           sendMessage(null, "UPDATE_USER", {
-               name: user,
-               pass: pass,
-               priv: true
-           });
+        $(".add-user").register("click", function () {
+            var user = window.prompt("Username?"),
+                pass = window.prompt("Password?");
+            if (!user || !pass) return;
+            sendMessage(null, "UPDATE_USER", {
+                name: user,
+                pass: pass,
+                priv: true
+            });
         });
-        $(".list-user .remove").on("click", function(event) {
+        $(".list-user .remove").on("click", function (event) {
             event.stopPropagation();
             sendMessage(null, "UPDATE_USER", {
                 name: $(this).parents("li").children(".username").text(),
@@ -2201,7 +2227,7 @@
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.attr("data-type") === "directory") {
             clearTimeout(view.stuckTimeout);
-            view.stuckTimeout = setTimeout(function() {
+            view.stuckTimeout = setTimeout(function () {
                 sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
             }, 2000);
         }
@@ -2229,12 +2255,12 @@
 
     // removes starting "//" or prepends "/"
     function fixRootPath(p) {
-        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
+        return p.replace(/^\/*(.*)$/g, "/$1").replace("//", "/");
     }
 
     // Normalize path from /dir/ to /dir, stripping a trailing slash
     function normalizePath(p) {
-        if (p[p.length -1 ] === "/") p = p.substring(0, p.length - 1);
+        if (p[p.length - 1] === "/") p = p.substring(0, p.length - 1);
         return p || "/";
     }
 
@@ -2244,6 +2270,9 @@
     }
     // turn /path/to/file to /path/to
     function dirname(path) {
-        return path.replace(/\/[^\/]*$/,'');
+        if (path === "/")
+            return "/";
+        else
+            return path.replace(/\/[^\/]*$/, "");
     }
 }(jQuery, window, document));
