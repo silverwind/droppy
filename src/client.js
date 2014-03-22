@@ -1,7 +1,7 @@
 /*global CodeMirror */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
+/*jshint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
   forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, browser: true, jquery: true */
+  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true */
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -152,45 +152,45 @@
 // ============================================================================
 //  Map touch events to mouse events when necessary
 // ============================================================================
-if ("ontouchstart" in document.documentElement) {
-    $(function () {
-        function touchHandler(event) {
-            var touch = event.changedTouches[0],
-                simulatedEvent = document.createEvent("MouseEvent");
-            simulatedEvent.initMouseEvent({
-                touchstart: "mousedown",
-                touchmove: "mousemove",
-                touchend: "mouseup"
-            }[event.type], true, true, window, 1,
-                touch.screenX, touch.screenY,
-                touch.clientX, touch.clientY, false,
-                false, false, false, 0, null);
-            touch.target.dispatchEvent(simulatedEvent);
-            event.preventDefault();
-        }
-        document.addEventListener("touchstart", touchHandler, true);
-        document.addEventListener("touchmove", touchHandler, true);
-        document.addEventListener("touchend", touchHandler, true);
-        document.addEventListener("touchcancel", touchHandler, true);
-    });
-}
+    if ("ontouchstart" in document.documentElement) {
+        $(function () {
+            function touchHandler(event) {
+                var touch = event.changedTouches[0],
+                    simulatedEvent = document.createEvent("MouseEvent");
+                simulatedEvent.initMouseEvent({
+                    touchstart: "mousedown",
+                    touchmove: "mousemove",
+                    touchend: "mouseup"
+                }[event.type], true, true, window, 1,
+                    touch.screenX, touch.screenY,
+                    touch.clientX, touch.clientY, false,
+                    false, false, false, 0, null);
+                touch.target.dispatchEvent(simulatedEvent);
+                event.preventDefault();
+            }
+            document.addEventListener("touchstart", touchHandler, true);
+            document.addEventListener("touchmove", touchHandler, true);
+            document.addEventListener("touchend", touchHandler, true);
+            document.addEventListener("touchcancel", touchHandler, true);
+        });
+    }
 // ============================================================================
 //  View handling
 // ============================================================================
     function getView(id) {
-        if (id) return $(droppy.views[id]);
-        else return (function(){
+        if (id) {
+            return $(droppy.views[id]);
+        } else {
             var view;
-            // get first element not undefined
-            droppy.views.every(function (el) {
+            droppy.views.every(function (el) { // get first element not undefined
                 view = el;
             });
             return $(view);
-        }());
+        }
     }
 
     function newView(dest, vId) {
-        var view =$("<div class=\"view\">" +
+        var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content\"></div>" +
                         "<div class=\"dropzone\">" + droppy.svg["up-arrow"] + "</div>" +
@@ -205,7 +205,7 @@ if ("ontouchstart" in document.documentElement) {
     }
     function destroyView(vId) {
         getView(vId).remove();
-        droppy.views = droppy.views.filter(function(view, index) { // Remove view from views array
+        droppy.views = droppy.views.filter(function (view, index) { // Remove view from views array
             return index !== vId;
         });
         sendMessage(vId, "DESTROY_VIEW");
@@ -315,7 +315,6 @@ if ("ontouchstart" in document.documentElement) {
                 return droppy.socket.send("pong");
             else
                 droppy.socketWait = false;
-
             var msg = JSON.parse(event.data),
                 vId = msg.vId,
                 view;
@@ -359,7 +358,7 @@ if ("ontouchstart" in document.documentElement) {
                     updateTitle(getView(vId)[0].currentFolder, true);
                     view.find(".upload-info").setTransitionClass("in", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         view.find(".upload-bar-inner").removeAttr("style");
                     }, 200);
                     view.find(".icon-uploading").remove();
@@ -393,17 +392,17 @@ if ("ontouchstart" in document.documentElement) {
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
                     $("#logout-button").register("click", function () {
-                       if (droppy.socket) droppy.socket.close(4001);
-                       deleteCookie("session");
-                       initVariables(); // Reset vars to their init state
-                       droppy.set("hasLoggedOut", true);
-                       requestPage();
+                        if (droppy.socket) droppy.socket.close(4001);
+                        deleteCookie("session");
+                        initVariables(); // Reset vars to their init state
+                        droppy.set("hasLoggedOut", true);
+                        requestPage();
                     });
                 break;
             case "ERROR":
                 $("#error-box").children("span").text(msg.text);
-                $("#error-box").attr("class","in");
-                setTimeout(function() {
+                $("#error-box").attr("class", "in");
+                setTimeout(function () {
                     $("#error-box").removeAttr("class");
                 }, 4000);
                 hideSpinner(getView(vId));
@@ -579,7 +578,9 @@ if ("ontouchstart" in document.documentElement) {
             });
         } else {
             // No directory upload support - disable the button
-            $("#upload-folder-button").addClass("disabled").attr("title","Sorry, your browser doesn't support directory uploading yet!");
+            $("#upload-folder-button")
+                .addClass("disabled")
+                .attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
         $("#create-folder-button").register("click", function () {
@@ -858,9 +859,9 @@ if ("ontouchstart" in document.documentElement) {
 
         // Create the XHR2 and bind the progress events
         var xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); }, false);
-        xhr.upload.addEventListener("load", function() { uploadDone(view); }, false);
-        xhr.upload.addEventListener("error", function() { uploadDone(view); }, false);
+        xhr.upload.addEventListener("progress", function (event) { uploadProgress(view, event); }, false);
+        xhr.upload.addEventListener("load", function () { uploadDone(view); }, false);
+        xhr.upload.addEventListener("error", function () { uploadDone(view); }, false);
 
         // Init the UI
         uploadInit(view, numFiles);
@@ -993,7 +994,7 @@ if ("ontouchstart" in document.documentElement) {
         });
 
         nameLength = link.text().lastIndexOf(".");
-        namer[0].setSelectionRange(0,nameLength > -1 ? nameLength : link.text().length);
+        namer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
         namer[0].focus();
 
         function submitEdit(view, skipInvalid, callback) {
@@ -1107,7 +1108,7 @@ if ("ontouchstart" in document.documentElement) {
                         break;
                     } else if (parts[i] && !view[0].savedParts[i]) { // Add a part
                         createPart(parts[i], pathStr);
-                    } else if (parts[i] && view[0].savedParts[i] !== parts[i] ) { // remove and add a part
+                    } else if (parts[i] && view[0].savedParts[i] !== parts[i]) { // remove and add a part
                         view.find(".path li:last-child").html(parts[i] + droppy.svg.triangle);
                     }
                 }
@@ -1135,7 +1136,7 @@ if ("ontouchstart" in document.documentElement) {
                 if (droppy.socketWait) return;
                 if ($(this).is(":last-child")) {
                     if ($(this).parents(".view").data("type") === "directory") {
-                            updateLocation(view, $(this).data("destination"));
+                        updateLocation(view, $(this).data("destination"));
                     }
                 } else {
                     view[0].switchRequest = true; // This is set so we can switch out of a editor view
@@ -1364,7 +1365,7 @@ if ("ontouchstart" in document.documentElement) {
 
         function finish() {
             view[0].isAnimating = false;
-            view.find(".content").each(function(){
+            view.find(".content").each(function () {
                 if (!$(this).hasClass("new")) $(this).remove();
             });
             view.find(".new").removeClass("new");
@@ -1394,7 +1395,7 @@ if ("ontouchstart" in document.documentElement) {
 
     // Set drag properties for internal drag sources
     function bindDragEvents(view) {
-        view.find(".data-row").each(function() {
+        view.find(".data-row").each(function () {
             var row = $(this);
             row.attr("draggable", "true");
             row.parents(".view")[0].ondragstart = function (event) {
@@ -1410,9 +1411,9 @@ if ("ontouchstart" in document.documentElement) {
 
     // Hover evenets for upload arrows
     function bindHoverEvents(view) {
-        view.find(".data-row").each(function() {
+        view.find(".data-row").each(function () {
             var row = $(this);
-            bindHover(row.children("a"), false, function(el, event, enter) {
+            bindHover(row.children("a"), false, function (el, event, enter) {
                 if (!enter) return el.removeClass("drop-hover");
                 if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
@@ -1425,7 +1426,7 @@ if ("ontouchstart" in document.documentElement) {
                 }
             }, true);
         });
-        bindHover(view, false, function(el, event, enter) {
+        bindHover(view, false, function (el, event, enter) {
             el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
         });
     }
@@ -1456,7 +1457,7 @@ if ("ontouchstart" in document.documentElement) {
     }
 
     function bindDropEvents(view) {
-        $(".data-row").each(function() {
+        $(".data-row").each(function () {
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.children("a").register("drop", function (event) {
@@ -1687,7 +1688,7 @@ if ("ontouchstart" in document.documentElement) {
     }
 
     // Click on a file link
-    function setClickAction(view) {
+    function setClickAction() {
         if (droppy.get("clickAction") !== "download") {
             // TODO: Use a common function with the entry menu
             $(".file-link").register("click", function (event) {
@@ -1720,7 +1721,7 @@ if ("ontouchstart" in document.documentElement) {
         var path = getViewLocation(view),
             fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
         updatePath(view, path);
-        switch(fileext) {
+        switch (fileext) {
             case "jpg":
             case "gif":
             case "png":
@@ -1904,8 +1905,8 @@ if ("ontouchstart" in document.documentElement) {
         bindUserlistEvents();
         $("#options-box").replaceClass("out", "in");
         toggleCatcher();
-        $("#click-catcher").one("click", function() {
-            $box.find("select").each( function() {
+        $("#click-catcher").one("click", function () {
+            $box.find("select").each(function () {
                 var option = $(this).attr("class"), value  = $(this).val();
 
                 if (value === "true") value = true;
@@ -1914,7 +1915,7 @@ if ("ontouchstart" in document.documentElement) {
 
                 droppy.set(option, value);
                 $(".view").each(function () {
-                    if(this.editor) this.editor.setOption(option, value);
+                    if (this.editor) this.editor.setOption(option, value);
                 });
             });
             setClickAction(); // Set click actions here so it applies immediately after a change
@@ -1922,17 +1923,17 @@ if ("ontouchstart" in document.documentElement) {
     }
 
     function bindUserlistEvents() {
-        $(".add-user").register("click", function() {
-           var user = window.prompt("Username?"),
-               pass = window.prompt("Password?");
-           if (!user || !pass) return;
-           sendMessage(null, "UPDATE_USER", {
-               name: user,
-               pass: pass,
-               priv: true
-           });
+        $(".add-user").register("click", function () {
+            var user = window.prompt("Username?"),
+                pass = window.prompt("Password?");
+            if (!user || !pass) return;
+            sendMessage(null, "UPDATE_USER", {
+                name: user,
+                pass: pass,
+                priv: true
+            });
         });
-        $(".list-user .remove").on("click", function(event) {
+        $(".list-user .remove").on("click", function (event) {
             event.stopPropagation();
             sendMessage(null, "UPDATE_USER", {
                 name: $(this).parents("li").children(".username").text(),
@@ -2226,7 +2227,7 @@ if ("ontouchstart" in document.documentElement) {
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.attr("data-type") === "directory") {
             clearTimeout(view.stuckTimeout);
-            view.stuckTimeout = setTimeout(function() {
+            view.stuckTimeout = setTimeout(function () {
                 sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
             }, 2000);
         }
@@ -2254,12 +2255,12 @@ if ("ontouchstart" in document.documentElement) {
 
     // removes starting "//" or prepends "/"
     function fixRootPath(p) {
-        return p.replace(/^\/*(.*)$/g, "/$1").replace("//","/");
+        return p.replace(/^\/*(.*)$/g, "/$1").replace("//", "/");
     }
 
     // Normalize path from /dir/ to /dir, stripping a trailing slash
     function normalizePath(p) {
-        if (p[p.length -1 ] === "/") p = p.substring(0, p.length - 1);
+        if (p[p.length - 1] === "/") p = p.substring(0, p.length - 1);
         return p || "/";
     }
 
@@ -2269,6 +2270,6 @@ if ("ontouchstart" in document.documentElement) {
     }
     // turn /path/to/file to /path/to
     function dirname(path) {
-        return path.replace(/\/[^\/]*$/,'');
+        return path.replace(/\/[^\/]*$/, "");
     }
 }(jQuery, window, document));
