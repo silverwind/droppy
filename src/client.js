@@ -667,6 +667,7 @@
             controls   = $("#audio-controls"),
             seekbar    = $("#seekbar"),
             level      = $("#volume-level"),
+            tooltip    = $("#tooltip"),
             player     = $("#audio-player")[0];
 
         volumeIcon.register("click", function () {
@@ -678,14 +679,13 @@
             player.currentTime = player.duration * (event.clientX / window.innerWidth);
         });
 
-        var tooltip = $("#tooltip");
         seekbar.register("mousemove", debounce(function (event) {
             if (!player.duration) return;
             var left = event.clientX;
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
             tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
             tooltip.attr("class", "in");
-            $("#tooltip").text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
+            tooltip.text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
 
         seekbar.register("mouseleave", debounce(function () {
@@ -775,7 +775,7 @@
                 var next = $(".playing").next();
                 preparePlayback($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
             }
-            document.getElementById("audio-title").innerHTML = "";
+            $("#audio-title").html("");
             if (droppy.audioUpdater) {
                 clearInterval(droppy.audioUpdater);
                 droppy.audioUpdater = null;
