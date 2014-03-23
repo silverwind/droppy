@@ -1394,11 +1394,7 @@
     }
 
     function sendDropData(view, event, from, to, spinner) {
-        var type, clip;
-        if (event.dataTransfer.dropEffect === "none" && navigator.userAgent.indexOf("MSIE"))
-            type = event.ctrlKey ? "copy" : "cut"; // IE10 compat, dropEffect is always "none"
-        else
-            type = event.dataTransfer.dropEffect === "copy" ? "copy" : "cut";
+        var type = (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) ? "copy" : "cut",
         clip = { type: type, from: from, to  : to };
         if (clip.from !== clip.to || clip.type === "copy") {
             if (spinner) showSpinner(view);
