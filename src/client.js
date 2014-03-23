@@ -78,19 +78,22 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-        var classes, classMatch, hasClass = false;
-        if (typeof this[0] === "undefined") return false;
-        classes = this[0].className.split(" ").filter(function (className) {
-            if (className === match) return false;
-            if (className === replacement) hasClass = true;
+        var elem, classes, classMatch, i = this.length - 1, hasClass = false;
+        for (; i >= 0; i--) {
+            elem = this[i];
+            if (typeof elem === "undefined") return false;
+            classes = elem.className.split(" ").filter(function (className) {
+                if (className === match) return false;
+                if (className === replacement) hasClass = true;
 
-            classMatch = className.match(match);
-            // filter out if the entire capture matches the entire className
-            if (classMatch) return classMatch[0] !== className || classMatch[0] === replacement;
-            else return true;
-        });
-        if (!hasClass) classes.push(replacement);
-        this[0].className = classes.join(" ");
+                classMatch = className.match(match);
+                // filter out if the entire capture matches the entire className
+                if (classMatch) return classMatch[0] !== className || classMatch[0] === replacement;
+                else return true;
+            });
+            if (!hasClass) classes.push(replacement);
+            elem.className = classes.join(" ");
+        };
         return this;
     };
 
@@ -1657,13 +1660,11 @@
         // Copy/cut a file/folder
         $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
             event.stopPropagation();
-            var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"),
-                from  = entry.data("id");
-            droppy.clipboard = { type: $(this).attr("class"), from: from };
+            var entry = $("#entry-menu").data("target");
+            droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
             $("#click-catcher").trigger("click");
-            view.find(".paste-button .filename").text(basename(from));
-            view.find(".paste-button").replaceClass("out", "in");
+            $(".paste-button .filename").text(basename(droppy.clipboard.from));
+            $(".paste-button").replaceClass("out", "in");
         });
 
         // Open a file/folder in browser
