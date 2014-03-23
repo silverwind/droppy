@@ -933,6 +933,7 @@
             cache.res.svg.data = JSON.stringify(svgData);
             zlib.gzip(new Buffer(cache.res["svg"].data, "utf-8"), function (error, gzipped) {
                 cache.res.svg.gzipData = gzipped;
+                cache.res.svg.etag = crypto.createHash("md5").update(String(new Date())).digest("hex");
                 callback();
             });
         } catch (error) {
@@ -1117,6 +1118,9 @@
                     res.setHeader("Content-Type", cache.res[resourceName].mime + "; charset=utf-8");
                 else
                     res.setHeader("Content-Type", cache.res[resourceName].mime);
+
+                if (resourceName === "svg")
+                    res.setHeader("Content-Type", "text/plain" + "; charset=utf-8");
 
                 var acceptEncoding = req.headers["accept-encoding"] || "";
                 if (/\bgzip\b/.test(acceptEncoding) && cache.res[resourceName].gzipData !== undefined) {
