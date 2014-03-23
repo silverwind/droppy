@@ -289,6 +289,8 @@
             else {
                 // Create new view with initiallizing
                 newView(normalizePath(decodeURIComponent(window.location.pathname)), 0);
+                if (window.location.hash.length)
+                    droppy.split(normalizePath(decodeURIComponent(window.location.hash.slice(1))));
             }
         };
 
@@ -607,19 +609,20 @@
             });
         });
 
-        $("#split-button").register("click", split);
+        $("#split-button").register("click", function() {split()} );
 
-        function split() {
-            var dest, first, second, button;
+        var split = droppy.split = function (dest) {
+            var first, second, button;
             button = $("#split-button");
             button.off("click");
             first = getView(0);
             if (droppy.views.length === 1) {
                 first.addClass("left");
-                if (first[0].currentFile)
-                    dest = fixRootPath(first[0].currentFolder + "/" + (first[0].currentFile || ""));
-                else
-                    dest = fixRootPath(first[0].currentFolder);
+                if (typeof dest !== "string")
+                    if (first[0].currentFile)
+                        dest = fixRootPath(first[0].currentFolder + "/" + first[0].currentFile);
+                    else
+                        dest = fixRootPath(first[0].currentFolder);
                 second = newView(dest, 1).addClass("right");
                 button.children(".button-text").text("Merge");
                 button.attr("title", "Merge views back into a single one");
@@ -1057,7 +1060,7 @@
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
-        updateLocation(getView(), decodeURIComponent(window.location.pathname), true);
+        updateLocation(null, [decodeURIComponent(window.location.pathname), decodeURIComponent(window.location.hash.slice(1))], true);
     });
 
     function getViewLocation(view) {
@@ -1069,23 +1072,37 @@
 
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
+        if (typeof destination !== "string" && typeof destination !== "array") throw "Destination needs to be string or array"
         // Queue the folder switching if we are mid-animation or waiting for the server
-        (function queue(time) {
-            if (!droppy.views[view[0].vId]) return;
-            if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
-                showSpinner(view);
-                var viewLoc = getViewLocation(view);
-                // Find the direction in which we should animate
-                if (destination.length > viewLoc.length) view[0].animDirection = "forward";
-                else if (destination.length === viewLoc.length) view[0].animDirection = "center";
-                else view[0].animDirection = "back";
-                sendMessage(view[0].vId, "REQUEST_UPDATE", destination);
+        function sendReq(view, viewDest, time) {
+            (function queue (time) {
+                if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
+                    showSpinner(view);
+                    var viewLoc = getViewLocation(view);
+                    // Find the direction in which we should animate
+                    if (viewDest.length > viewLoc.length) view[0].animDirection = "forward";
+                    else if (viewDest.length === viewLoc.length) view[0].animDirection = "center";
+                    else view[0].animDirection = "back";
+                    sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
-                // Skip the push if we're already navigating through history
-                if (!skipPush) window.history.pushState(null, null, destination);
-            } else
-                setTimeout(queue, 50, time + 50);
-        })(0);
+                    // Skip the push if we're already navigating through history
+                    if (!skipPush) {
+                        var newDest;
+                        if (view[0].vId === 0) newDest = viewDest + window.location.hash; 
+                        else newDest = window.location.pathname + "#" + viewDest;
+                        window.history.pushState(null, null, newDest);
+                    }
+                } else
+                    setTimeout(queue, 50, time + 50);
+            })(time);
+        };
+        if (view === null) {
+            // Only when navigating backwards
+            for (var i = destination.length - 1; i >= 0; i--) {
+                if (destination[i].length && getViewLocation(getView(i)) !== destination[i])
+                    sendReq(getView(i), destination[i], 0);
+            };
+        } else if (droppy.views[view[0].vId]) sendReq(view, destination, 0);
     }
 
     // Update the path indicator
