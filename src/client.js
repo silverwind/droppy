@@ -289,6 +289,8 @@
             else {
                 // Create new view with initiallizing
                 newView(normalizePath(decodeURIComponent(window.location.pathname)), 0);
+                if (window.location.hash.length)
+                    droppy.split(normalizePath(decodeURIComponent(window.location.hash.slice(1))));
             }
         };
 
@@ -321,7 +323,7 @@
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
-                if ((!view || view[0].isUploading || view[0].currentFile) && !view[0].switchRequest) return;
+                if ((!view || view[0].isUploading) && !view[0].switchRequest) return;
                 view[0].switchRequest = false;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
@@ -607,24 +609,26 @@
             });
         });
 
-        $("#split-button").register("click", split);
+        $("#split-button").register("click", function () { split(); });
 
-        function split() {
-            var dest, first, second, button;
+        var split = droppy.split = function (dest) {
+            var first, second, button;
             button = $("#split-button");
             button.off("click");
             first = getView(0);
             if (droppy.views.length === 1) {
                 first.addClass("left");
-                if (first[0].currentFile)
-                    dest = fixRootPath(first[0].currentFolder + "/" + (first[0].currentFile || ""));
-                else
-                    dest = fixRootPath(first[0].currentFolder);
+                if (typeof dest !== "string")
+                    if (first[0].currentFile)
+                        dest = fixRootPath(first[0].currentFolder + "/" + first[0].currentFile);
+                    else
+                        dest = fixRootPath(first[0].currentFolder);
                 second = newView(dest, 1).addClass("right");
                 button.children(".button-text").text("Merge");
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
+                window.history.replaceState(null, null, first[0].currentFolder); // removes the hash
                 getView(0).removeClass("left");
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
@@ -633,7 +637,7 @@
                 button.register("click", split);
                 event.stopPropagation();
             });
-        }
+        };
 
         $("#about-button").register("click", function () {
             requestAnimation(function () {
@@ -1057,7 +1061,7 @@
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
-        updateLocation(getView(), decodeURIComponent(window.location.pathname), true);
+        updateLocation(null, [decodeURIComponent(window.location.pathname), decodeURIComponent(window.location.hash.slice(1))], true);
     });
 
     function getViewLocation(view) {
@@ -1069,23 +1073,37 @@
 
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
+        if (typeof destination.length !== "number") throw "Destination needs to be string or array";
         // Queue the folder switching if we are mid-animation or waiting for the server
-        (function queue(time) {
-            if (!droppy.views[view[0].vId]) return;
-            if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
-                showSpinner(view);
-                var viewLoc = getViewLocation(view);
-                // Find the direction in which we should animate
-                if (destination.length > viewLoc.length) view[0].animDirection = "forward";
-                else if (destination.length === viewLoc.length) view[0].animDirection = "center";
-                else view[0].animDirection = "back";
-                sendMessage(view[0].vId, "REQUEST_UPDATE", destination);
+        function sendReq(view, viewDest, time) {
+            (function queue(time) {
+                if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
+                    showSpinner(view);
+                    var viewLoc = getViewLocation(view);
+                    // Find the direction in which we should animate
+                    if (viewDest.length > viewLoc.length) view[0].animDirection = "forward";
+                    else if (viewDest.length === viewLoc.length) view[0].animDirection = "center";
+                    else view[0].animDirection = "back";
+                    sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
-                // Skip the push if we're already navigating through history
-                if (!skipPush) window.history.pushState(null, null, destination);
-            } else
-                setTimeout(queue, 50, time + 50);
-        })(0);
+                    // Skip the push if we're already navigating through history
+                    if (!skipPush) {
+                        var newDest;
+                        if (view[0].vId === 0) newDest = viewDest + window.location.hash;
+                        else newDest = window.location.pathname + "#" + viewDest;
+                        window.history.pushState(null, null, newDest);
+                    }
+                } else
+                    setTimeout(queue, 50, time + 50);
+            })(time);
+        }
+        if (view === null) {
+            // Only when navigating backwards
+            for (var i = destination.length - 1; i >= 0; i--) {
+                if (destination[i].length && getViewLocation(getView(i)) !== destination[i])
+                    sendReq(getView(i), destination[i], 0);
+            }
+        } else if (droppy.views[view[0].vId]) sendReq(view, destination, 0);
     }
 
     // Update the path indicator
@@ -1843,10 +1861,10 @@
                         view[0].editNew = false;
                     });
                     // Keyboard shortcuts
-                    $(window).register("keydown", function(e) {
+                    $(window).register("keydown", function (e) {
                         if (editor && (e.metaKey || e.ctrlKey)) {
                             // s - save
-                            if(e.keyCode == 83) {
+                            if (e.keyCode === 83) {
                                 e.preventDefault();
                                 showSpinner(view);
                                 sendMessage(view[0].vId, "SAVE_FILE", {
@@ -2242,10 +2260,10 @@
 
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.attr("data-type") === "directory") {
-            clearTimeout(view.stuckTimeout);
-            view.stuckTimeout = setTimeout(function () {
-                sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
-            }, 2000);
+            clearTimeout(view[0].stuckTimeout);
+            view[0].stuckTimeout = setTimeout(function () {
+                sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
+            }, 5000);
         }
     }
 
@@ -2253,7 +2271,7 @@
         var spinner = view.find(".spinner");
         if (spinner.length && !spinner.hasClass("out"))
             spinner.addClass("out");
-        if (view.stuckTimeout) clearTimeout(view.stuckTimeout);
+        if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
     }
 
     function debounce(func, wait) {
