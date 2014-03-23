@@ -1526,7 +1526,7 @@
     }
 
     function bindDropEvents(view) {
-        $(".data-row").each(function () {
+        view.find(".data-row").each(function () {
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.register("drop", function (event) {
