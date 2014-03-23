@@ -1,0 +1,25 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": ".\\src",
+			"name": "Client Files"
+		},
+		{
+			"follow_symlinks": true,
+			"path": ".\\lib",
+			"name": "Server Files"
+		},
+		{
+			"follow_symlinks": true,
+			"path": ".\\",
+			"name": "droppy",
+			"folder_exclude_patterns": ["res", "node_modules", "temp", "files", "lib", "src"]
+		},
+	],
+    "settings":
+    {
+        "translate_tabs_to_spaces": true
+    }
+}

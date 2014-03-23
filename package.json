@@ -1,7 +1,8 @@
 {
   "name": "droppy",
-  "version": "0.9.24",
-  "author": "silverwind <silv3rwind@gmail.com>",
+  "version": "0.10.4",
+  "author": "silverwind <me@silverwind.io>",
+  "contributors": ["ZombieHippie <cole@zombiehippie.com>"],
   "description": "A personal cloud storage solution with a speedy HTML5 interface.",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": {
@@ -11,18 +12,20 @@
   "dependencies": {
     "archiver": "~0.6.1",
     "async": "~0.2.10",
-    "autoprefixer": "~1.1.20140302",
+    "autoprefixer": "~1.1.20140319",
     "busboy": "~0.2.3",
     "chalk": "~0.4.0",
     "clean-css": "~2.1.6",
-    "codemirror": "~3.22.0",
+    "cpr": "~0.1.1",
+    "codemirror": "~4.0.3",
     "dot": "~1.0.2",
-    "graceful-fs": "~2.0.2",
+    "graceful-fs": "~2.0.3",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",
-    "spdy": "~1.20.0",
+    "mkdirp": "~0.3.5",
+    "rimraf": "~2.2.6",
+    "spdy": "~1.24.0",
     "uglify-js": "~2.4.13",
-    "wrench": "~1.5.8",
     "ws": "~0.4.31"
   },
   "directories": {
@@ -55,5 +58,9 @@
     "grunt": "~0.4.4",
     "grunt-bump": "~0.0.13",
     "grunt-shell": "~0.6.4"
+  },
+  "subdomain": "droppy",
+  "scripts": {
+    "start": "droppy.js"
   }
 }

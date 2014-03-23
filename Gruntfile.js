@@ -1,3 +1,7 @@
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, freeze: true,
+  trailing: false, sub: true, eqeqeq: true, forin: true, quotmark: false,
+  loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true,
+  newcap: true, undef: true, unused: true, globalstrict: true, node: true */
 "use strict";
 
 module.exports = function (grunt) {
@@ -31,14 +35,19 @@ module.exports = function (grunt) {
             },
             modules: {
                 command: "rm -rf node_modules && npm install"
+            },
+            deploy : {
+                command: "jitsu login && jitsu deploy && jitsu logs tail"
             }
         }
     });
 
     grunt.registerTask("update",  ["shell:update", "shell:modules"]);
-    grunt.registerTask("release", ["bump", "shell:push", "shell:publish"]);
+    grunt.registerTask("release", ["bump", "shell:push", "shell:publish", "shell:deploy"]);
     grunt.registerTask("minor",   ["bump:minor", "shell:push", "shell:publish"]);
     grunt.registerTask("major",   ["bump:major", "shell:push", "shell:publish"]);
+    grunt.registerTask("deploy",  ["shell:deploy"]);
+
 
     grunt.loadNpmTasks("grunt-bump");
     grunt.loadNpmTasks("grunt-shell");

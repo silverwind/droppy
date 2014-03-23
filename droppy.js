@@ -23,8 +23,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  --------------------------------------------------------------------------- */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true,
-  trailing: false, sub: true, eqeqeq: true, forin: true, freeze: true,
+/*jslint evil: true, expr: true, regexdash: true, bitwise: true, freeze: true,
+  trailing: false, sub: true, eqeqeq: true, forin: true, quotmark: false,
   loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true,
   newcap: true, undef: true, unused: true, globalstrict: true, node: true */
 "use strict";
@@ -40,65 +40,47 @@
         archiver = require("archiver"),
         async    = require("async"),
         ap       = require("autoprefixer"),
+        cpr      = require("cpr"),
         Busboy   = require("busboy"),
         chalk    = require("chalk"),
         crypto   = require("crypto"),
         fs       = require("graceful-fs"),
         http     = require("http"),
         mime     = require("mime"),
+        mkdirp   = require("mkdirp"),
         path     = require("path"),
         qs       = require("querystring"),
+        rimraf   = require("rimraf"),
         util     = require("util"),
         Wss      = require("ws").Server,
-        wrench   = require("wrench"),
         zlib     = require("zlib"),
         // Variables
-        version  = require("./package.json").version,
-        config   = null,
-        cache    = {},
-        clients  = {},
-        db       = {},
-        dirs     = {},
-        watchers = {},
-        cssCache = null,
-        firstRun = null,
-        mode     = {file: "644", dir: "755"},
-        isCLI    = (process.argv.length > 2),
-        // Resources
+        version   = require("./package.json").version,
         cmPath    = "node_modules/codemirror/",
         templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
+        cache     = {},
+        clients   = {},
+        db        = {},
+        dirs      = {},
+        watchers  = {},
+        config    = null,
+        cssCache  = null,
+        firstRun  = null,
+        ready     = false,
+        isCLI     = (process.argv.length > 2),
+        mode      = {file: "644", dir: "755"},
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
             html : ["src/base.html", "src/auth.html", "src/main.html"],
             templates : []
         };
-    // Add Templates
-    templateList.forEach(function (relPath) {
-        resources.templates.push("src/templates/" + relPath);
-    });
-
-    // Add CodeMirror source paths
-    // Addons
-    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
-        resources.js.push(cmPath + "addon/" + relPath);
-    });
-    // Modes
-    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
-     "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
-        resources.js.push(cmPath + "mode/" + relPath);
-    });
-    // Keymaps
-    // resources.js.push(cmPath + "keymap/sublime.js");
-    // Themes
-    ["xq-light.css", "base16-dark.css"].forEach(function (relPath) {
-        resources.css.push(cmPath + "theme/" + relPath);
-    });
 
     // Argument handler
     if (isCLI) handleArguments();
 
     config = cfg(path.join(process.cwd(), "config.json"));
+
     log.init(config);
     log.logo();
     fs.MAX_OPEN = config.maxOpen;
@@ -111,14 +93,21 @@
     readDB();
     firstRun = Object.keys(db.users).length < 1;
 
+    // Listen but refuse requests until ready
+    createListener();
+
     // Copy/Minify JS, CSS and HTML content
     prepareContent();
 
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
-        setupDirectories();
-        cleanupLinks();
-        createListener();
+        prepareSVG(function () {
+            setupDirectories( function() {
+                cleanupLinks();
+                ready = true;
+                log.simple("Ready for requests!");
+            });
+        });
     });
 
     //-----------------------------------------------------------------------------
@@ -126,19 +115,30 @@
     function prepareContent() {
         var out = { css : "", js  : "" },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-            resourceList = utils.flatten(resources),
-            matches = { resource: 0, compiled: 0 };
-        //Prepare SVGs
-        try {
-            var svgDir = config.srcDir + "svg/", svgData = {};
-            fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
-                svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
-            });
-            cache.svg = svgData;
-        } catch (error) {
-            log.error("Error processing SVGs: ", error);
-            process.exit(1);
-        }
+            matches = { resource: 0, compiled: 0 },
+            resourceList;
+
+        // Add Templates
+        templateList.forEach(function (relPath) {
+            resources.templates.push("src/templates/" + relPath);
+        });
+        // CodeMirror Addons
+        ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
+            resources.js.push(cmPath + "addon/" + relPath);
+        });
+        // CodeMirror Modes
+        ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
+         "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
+            resources.js.push(cmPath + "mode/" + relPath);
+        });
+        // CodeMirror Modes
+        resources.js.push(cmPath + "keymap/sublime.js");
+        // CodeMirror Themes
+        ["mdn-like.css", "xq-light.css", "base16-dark.css"].forEach(function (relPath) {
+            resources.css.push(cmPath + "theme/" + relPath);
+        });
+
+        resourceList = utils.flatten(resources);
 
         // Intialize the CSS cache when debugging
         if (config.debug) updateCSS();
@@ -243,30 +243,65 @@
 
     //-----------------------------------------------------------------------------
     // Set up the directory
-    function setupDirectories() {
-        cleanupTemp(true);
-        try {
-            wrench.mkdirSyncRecursive(config.filesDir, mode.dir);
-            wrench.mkdirSyncRecursive(config.incomingDir, mode.dir);
-        } catch (error) {
-            log.simple("Unable to create directories:");
-            log.error(error);
-            process.exit(1);
-        }
+    function setupDirectories(callback) {
+        cleanupTemp(true, function() {
+            try {
+                mkdirp.sync(config.filesDir, mode.dir);
+                mkdirp.sync(config.incomingDir, mode.dir);
+            } catch (error) {
+                log.error("Unable to create directories:");
+                log.error(error);
+                process.exit(1);
+            }
+
+            if (config.demoMode) {
+                cleanupForDemo(function schedule() {
+                    callback();
+                    setTimeout(cleanupForDemo, 60 * 60 * 1000, schedule);
+                });
+            } else {
+                callback();
+            }
+        });
     }
 
     //-----------------------------------------------------------------------------
+    // Restore the files directory to an initial state for the demo mode
+    function cleanupForDemo(callback) {
+        var oldWatched, currentWatched;
+        oldWatched = [];
+        currentWatched = Object.keys(watchers);
+        if (currentWatched.length > 0) {
+            oldWatched = currentWatched;
+            currentWatched.forEach(function(dir) {
+                watchers[dir].close();
+                delete watchers[dir];
+            });
+        }
+        log.simple("Cleaning up files and adding samples...");
+        cpr(__dirname, config.filesDir, {
+            deleteFirst: true,
+            overwrite: true,
+            filter: /(files|db\.json|config\.json|\.git|temp)/
+        }, function(err) {
+            if (err) log.error(err);
+            log.simple("Cleaning done.");
+            callback();
+        });
+
+    }
+    //-----------------------------------------------------------------------------
     // Clean up the directory for incoming files
-    function cleanupTemp(initial) {
-        try {
-            wrench.rmdirSyncRecursive(config.incomingDir, true);
-        } catch (error) {
-            if (initial) {
+    function cleanupTemp(initial, callback) {
+        rimraf(config.incomingDir, function(error) {
+            if (!initial) return callback();
+            if (error) {
                 log.simple("Error cleaning up temporary directories:");
                 log.error(error);
                 process.exit(1);
             }
-        }
+            callback();
+        });
     }
 
     //-----------------------------------------------------------------------------
@@ -377,12 +412,17 @@
             process.exit(1);
         });
 
-        server.listen(config.listenPort, (process.env.NODE_ENV === "production") ? process.env.PORT : config.listenPort);
+        server.listen(config.listenPort);
     }
 
     //-----------------------------------------------------------------------------
     // GET/POST handler
     function onRequest(req, res) {
+        if (!ready) {
+            res.statusCode = 503;
+            res.end("droppy starting up...");
+            return;
+        }
         switch (req.method.toUpperCase()) {
         case "GET":
             handleGET(req, res);
@@ -414,8 +454,7 @@
             }, config.keepAlive);
         }
         wss.on("connection", function (ws) {
-            var cookie = getCookie(ws.upgradeReq.headers.cookie),
-                client;
+            var cookie = getCookie(ws.upgradeReq.headers.cookie);
 
             if (!cookie && !config.noLogin) {
                 ws.close(4000);
@@ -423,53 +462,62 @@
                 return;
             } else {
                 log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
-                clients[cookie] = { v: [], ws: ws };
-                client = clients[cookie];
+                clients[cookie] = { views: [], ws: ws };
             }
             ws.on("message", function (message) {
                 if (message === "pong") return;
                 var msg = JSON.parse(message),
                     vId = msg.vId;
 
-                log.debug(ws, null, chalk.magenta("RECV "), message);
+                if (msg.type !== "SAVE_FILE") // Don't log these as they spam the file contents into the log
+                    log.debug(ws, null, chalk.magenta("RECV "), message);
+
                 switch (msg.type) {
                 case "REQUEST_SETTINGS":
-                    send(client.ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
+                    send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
                         debug: config.debug,
-                        demoMode: config.demoMode
+                        demoMode: config.demoMode,
+                        noLogin: config.noLogin
                     }}));
                     break;
                 case "REQUEST_UPDATE":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
-                    if (!client.v[vId]) client.v[vId] = {}; // This can happen when the server restarts
+                    if (!clients[cookie]) clients[cookie] = { views: [], ws: ws }; // This can happen when the server restarts
                     readPath(msg.data, function (error, info) {
                         if (error) {
                             return log.info(ws, null, "Non-existing update request: " + msg.data);
                         } else if (info.type === "f") {
-                            client.v[vId].file = path.basename(msg.data);
-                            client.v[vId].directory = path.dirname(msg.data);
-                            info.folder = path.dirname(msg.data);
-                            info.file = path.basename(msg.data);
-                            info.isFile = true;
-                            info.vId = vId;
-                            info.type = "UPDATE_BE_FILE";
-                            send(client.ws, JSON.stringify(info));
+                            clients[cookie].views[vId] = {};
+                            clients[cookie].views[vId].file = path.basename(msg.data);
+                            clients[cookie].views[vId].directory = path.dirname(msg.data);
+                            send(clients[cookie].ws, JSON.stringify({
+                                type: "UPDATE_BE_FILE",
+                                file: clients[cookie].views[vId].file,
+                                folder: clients[cookie].views[vId].directory,
+                                isFile: true,
+                                vId: vId,
+                            }));
                         } else {
-                            client.v[vId].file = null;
-                            client.v[vId].directory = msg.data;
-                            updateDirectory(client.v[vId].directory, function (sizes) {
+                            clients[cookie].views[vId] = {};
+                            clients[cookie].views[vId].file = null;
+                            clients[cookie].views[vId].directory = msg.data;
+                            updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
                                 sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                             });
-                            updateWatchers(client.v[vId].directory);
+                            updateWatchers(clients[cookie].views[vId].directory, function (success) {
+                                // Send client back to / in case the directory can't be read
+                                if (!success) {
+                                    updateDirectory("/", function (sizes) {
+                                        sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
+                                    });
+                                }
+                            });
                         }
                     });
                     break;
-                case "NEW_VIEW":
-                    client.v[vId] = {};
-                    break;
                 case "DESTROY_VIEW":
+                    clients[cookie].views[vId] = null;
                     checkWatchedDirs();
-                    delete client.v[vId];
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
@@ -513,50 +561,42 @@
                     log.info(ws, null, "Saving: " + msg.data.to.substring(1));
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
-                    fs.stat(msg.data.to, function (error, stats) {
-                        if (error) {
-                            log.error("Error getting stats to save " + msg.data.to);
+                    fs.stat(msg.data.to, function (error) {
+                        if (error && error.code !== "ENOENT") {
+                            log.error("Error saving " + msg.data.to);
                             log.error(error);
-                        } else if (stats) {
-                            if (stats.isFile()) {
-                                // TODO: Check if user has permission
-                                fs.writeFile(msg.data.to, msg.data.value, function (error) {
-                                    if (error) {
-                                        log.error("Error writing " + msg.data.to);
-                                        log.error(error);
-                                        sendSaveStatus(cookie, vId, 1); // Save failed
-                                    } else {
-                                        sendSaveStatus(cookie, vId, 0); // Save successful
-                                    }
-                                });
-                            }
+                            send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Error saving " + msg.data.to + ": " + error}));
+                        } else {
+                            fs.writeFile(msg.data.to, msg.data.value, function (error) {
+                                if (error) {
+                                    log.error("Error writing " + msg.data.to);
+                                    log.error(error);
+                                    sendSaveStatus(cookie, vId, 1); // Save failed
+                                } else {
+                                    sendSaveStatus(cookie, vId, 0); // Save successful
+                                }
+                            });
                         }
                     });
                     break;
                 case "CLIPBOARD":
-                    log.info(ws, null, msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
-                    if (msg.data.to.indexOf(msg.data.from) !== -1 && msg.data.to !== msg.data.from) {
+                    if (msg.data.to.indexOf(msg.data.from + "/") !== -1 && msg.data.to !== msg.data.from) {
                         log.error("Can't copy directory into itself");
-                        send(client.ws, JSON.stringify({ vId: vId, type : "ERROR", text: "Can't copy directory into itself."}));
+                        send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Can't copy directory into itself."}));
                         return;
                     }
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
-
                     // In case source and destination are the same, append a number to the file/foldername
-                    if (msg.data.from === msg.data.to) {
-                        utils.getNewPath(msg.data.to, 2, function (name) {
-                            doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
-                        });
-                    } else {
-                        doClipboard(msg.data.type, msg.data.from, msg.data.to);
-                    }
+                    utils.getNewPath(msg.data.to, function (name) {
+                        doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
+                    });
                     break;
                 case "CREATE_FOLDER":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                    fs.mkdir(addFilePath(msg.data), mode.dir, function (error) {
+                    mkdirp(addFilePath(msg.data), mode.dir, function (error) {
                         if (error) log.error(error);
                         log.info(ws, null, "Created: ", msg.data);
                     });
@@ -565,7 +605,7 @@
                     // Disallow whitespace-only and empty strings in renames
                     if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
                         log.info(ws, null, "Invalid rename request: " + msg.data.new);
-                        send(client.ws, JSON.stringify({ type : "ERROR", text: "Invalid rename request"}));
+                        send(clients[cookie].ws, JSON.stringify({ type: "ERROR", text: "Invalid rename request"}));
                         return;
                     }
                     fs.rename(addFilePath(msg.data.old), addFilePath(msg.data.new), function (error) {
@@ -578,7 +618,7 @@
                         sendUsers(cookie);
                     } else {
                         // Send an empty user list so the client know not to display the management options
-                        send(client.ws, JSON.stringify({ type : "USER_LIST", users : {} }));
+                        send(clients[cookie].ws, JSON.stringify({ type : "USER_LIST", users : {} }));
                     }
                     break;
                 case "UPDATE_USER":
@@ -602,12 +642,16 @@
                     break;
                 case "ZERO_FILES":
                     msg.data.forEach(function (file) {
+                        var cbCalled = 0, cbFired = 0;
                         if (!utils.isPathSane(file)) return log.info(ws, null, "Invalid empty file creation request: " + file);
-                        wrench.mkdirSyncRecursive(path.dirname(addFilePath(file)), mode.dir);
-                        fs.writeFileSync(addFilePath(file), "", {mode: mode.file});
-                        log.info(ws, null, "Received: " + file.substring(1));
+                        cbCalled++;
+                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function() {
+                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function() {
+                                log.info(ws, null, "Received: " + file.substring(1));
+                                if (++cbFired === cbCalled) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                            });
+                        });
                     });
-                    send(client.ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                     break;
                 }
             });
@@ -633,29 +677,17 @@
 
     //-----------------------------------------------------------------------------
     // Send a file list update
-    var updateFuncs = {};
-    function sendFiles(cookie, viewId, eventType, sizes) {
-        if (!clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
-        var func = function (cookie, eventType, vId, sizes) {
-            var dir = clients[cookie].v[vId].directory,
-                data = {
-                    vId    : vId,
-                    type   : eventType,
-                    folder : dir,
-                    data   : dirs[dir]
-                };
-            if (sizes) data.sizes = true;
-            data = JSON.stringify(data);
-            send(clients[cookie].ws, data);
-        };
-
-        if (!updateFuncs[cookie])
-            updateFuncs[cookie] = utils.throttle(func, 250, { leading: true, trailing: false });
-
-        if (!sizes)
-            updateFuncs[cookie](cookie, eventType, viewId, sizes);
-        else
-            func(cookie, eventType, viewId, sizes);
+    function sendFiles(cookie, vId, eventType, sizes) {
+        if (!clients[cookie].views[vId] || !clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
+        var dir = clients[cookie].views[vId].directory,
+            data = {
+                vId    : vId,
+                type   : eventType,
+                folder : dir,
+                data   : dirs[dir]
+            };
+        if (sizes) data.sizes = true;
+        send(clients[cookie].ws, JSON.stringify(data));
     }
 
     //-----------------------------------------------------------------------------
@@ -701,7 +733,12 @@
         (function queue(ws, data, time) {
             if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
             if (ws && ws.readyState === 1) {
-                log.debug(ws, null, chalk.green("SEND "), data);
+                if (config.logLevel === 3) {
+                    var debugData = JSON.parse(data);
+                    if (debugData.type === "UPDATE_DIRECTORY")
+                        debugData.data = {"...":"..."};
+                    log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
+                }
                 ws.send(data, function (error) {
                     if (error) log.error(error);
                 });
@@ -714,46 +751,47 @@
     // Perform clipboard operation, copy/paste or cut/paste
     function doClipboard(type, from, to) {
         fs.stat(from, function (error, stats) {
+            if (error) logError(error);
             if (stats && !error) {
-                if (stats.isFile()) {
-                    copyFile(from, to, function (error) {
-                        if (error) {
-                            log.error("Error copying single file from \"" + from + "\" to \"" + to + "\"");
-                            log.error(error);
-                        } else {
-                            if (type === "cut") {
-                                deleteFile(from);
-                            }
-                        }
-                    });
-                } else if (stats.isDirectory()) {
-                    wrench.copyDirRecursive(from, to, {forceDelete: true, preserveTimestamps: true}, function(){
-                        if (type === "cut") {
-                            deleteDirectory(from);
-                        }
-                    });
+                if (type === "cut") {
+                    fs.rename(from, to, logError);
+                } else {
+                    if (stats.isFile()) {
+                        copyFile(from, to, logError);
+                    } else if (stats.isDirectory()) {
+                        cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
+                    }
                 }
             }
         });
+        function logError(error) {
+            if (!error) return;
+            if (type == "cut")
+                log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
+            else
+                log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
+            log.error(error);
+        }
     }
     //-----------------------------------------------------------------------------
     // Copy a file from one location to another quickly
     // snippet from: http://stackoverflow.com/a/14387791/2096729
-    function copyFile(source, target, cb) {
+    function copyFile(from, to, cb) {
         var cbCalled = false;
 
-        var rd = fs.createReadStream(source);
-        rd.on("error", function (err) {
+        from = fs.createReadStream(from);
+        from.on("error", function (err) {
             done(err);
         });
-        var wr = fs.createWriteStream(target);
-        wr.on("error", function (err) {
+
+        to = fs.createWriteStream(to);
+        to.on("error", function (err) {
             done(err);
         });
-        wr.on("close", function () {
+        to.on("close", function () {
             done();
         });
-        rd.pipe(wr);
+        from.pipe(to);
 
         function done(err) {
             if (!cbCalled) {
@@ -774,44 +812,40 @@
     //-----------------------------------------------------------------------------
     // Delete a directory recursively
     function deleteDirectory(directory) {
-        try {
-            wrench.rmdirSyncRecursive(directory);
-            checkWatchedDirs();
-        } catch (error) {
-            // Specifically log this error as it possibly has to do with
-            // wrench not using graceful-fs
-            log.error("Error applying wrench.rmdirSyncRecursive");
-            log.error(error);
-        }
+        rimraf.sync(directory);
+        checkWatchedDirs();
     }
 
     //-----------------------------------------------------------------------------
     // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
-        var relativeDir = removeFilePath(directory);
-        var watcher = fs.watch(directory, utils.throttle(function () {
-            var clientsToUpdate = [];
+        var dir = removeFilePath(directory), watcher, clientsToUpdate, client;
+        log.debug(chalk.green("Adding Watcher: ") + dir);
+        watcher = fs.watch(directory, utils.throttle(function () {
+            log.debug("Watcher detected update for ", chalk.blue(dir));
+            clientsToUpdate = [];
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
-                    var client = clients[cookie];
-                    for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                        if (client.v[vId].directory === relativeDir && client.v[vId].file === null) {
+                    client = clients[cookie];
+                    client.views.forEach(function(view, vId) {
+                        if (view && view.directory === dir && view.file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
-                    }
+                    });
                 }
             }
-            updateDirectory(relativeDir, function (sizes) {
-                if (clientsToUpdate.length === 0) return;
-                var client = clientsToUpdate.pop();
-                sendFiles(client.cookie, client.vId, "UPDATE_DIRECTORY", sizes);
-                if (!sizes) clientsToUpdate.push(client);
-            });
-        }, config.readInterval));
+            if (clientsToUpdate.length > 0) {
+                updateDirectory(dir, function (sizes) {
+                    clientsToUpdate.forEach(function (cl) {
+                        sendFiles(cl.cookie, cl.vId, "UPDATE_DIRECTORY", sizes);
+                    });
+                });
+            }
+        }, config.readInterval, { leading: true, trailing: false }));
         watcher.on("error", function (error) {
-            log.error("Error trying to watch ", relativeDir, "\n", error);
+            log.error("Error trying to watch ", dir, "\n", error);
         });
-        watchers[relativeDir] = watcher;
+        watchers[dir] = watcher;
     }
 
     //-----------------------------------------------------------------------------
@@ -843,15 +877,16 @@
         for (var cookie in clients) {
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
-                for (var vId = client.v.length - 1; vId >= 0; vId--) {
-                    if (client.v[vId] && client.v[vId].file === null) {
-                        neededDirs[client.v[vId].directory] = true;
+                client.views.forEach(function(view, vId) {
+                    if (view && view.directory && view.file === null) {
+                        neededDirs[client.views[vId].directory] = true;
                     }
-                }
+                });
             }
         }
         for (var directory in watchers) {
             if (!neededDirs[directory]) {
+                log.debug(chalk.red("Removing Watcher: ") + directory);
                 watchers[directory].close();
                 delete watchers[directory];
             }
@@ -861,52 +896,62 @@
     //-----------------------------------------------------------------------------
     // Read resources and store them in the cache object
     function cacheResources(dir, callback) {
-        var gzipFiles, relPath, fileName, fileData, fileTime;
+        var relPath, fileData, fileTime, cbCalled = 0, cbFired = 0;
         cache.res = {};
 
         dir = dir.substring(0, dir.length - 1); // Strip trailing slash
         utils.walkDirectory(dir, false, function (error, results) {
             if (error) log.error(error);
-            gzipFiles = [];
             results.forEach(function (fullPath) {
                 relPath = fullPath.substring(dir.length + 1);
-                fileName = path.basename(fullPath);
-
                 try {
                     fileData = fs.readFileSync(fullPath);
                     fileTime = fs.statSync(fullPath).mtime;
                 } catch (error) {
-                    log.error(error);
+                    log.error("Unable to read resource", error);
+                    process.exit(1);
                 }
 
                 cache.res[relPath] = {};
                 cache.res[relPath].data = fileData;
                 cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
                 cache.res[relPath].mime = mime.lookup(fullPath);
-                if (/.*(js|css|html|svg)$/.test(fileName)) {
-                    gzipFiles.push(relPath);
+                if (/.*(js|css|html)$/.test(path.basename(fullPath))) {
+                    (function(filePath, data) {
+                        cbCalled++;
+                        zlib.gzip(data, function (error, gzipped) {
+                            if (error) log.error(error);
+                            cache.res[filePath].gzipData = gzipped;
+                            if (++cbFired === cbCalled)
+                                callback();
+                        });
+                    })(relPath, cache.res[relPath].data);
                 }
             });
-
-            if (gzipFiles.length > 0)
-                runGzip();
-            else
-                callback();
-
-            function runGzip() {
-                var currentFile = gzipFiles[0];
-                zlib.gzip(cache.res[currentFile].data, function (error, compressedData) {
-                    if (error) log.error(error);
-                    cache.res[currentFile].gzipData = compressedData;
-                    gzipFiles = gzipFiles.slice(1);
-                    if (gzipFiles.length > 0)
-                        runGzip();
-                    else
-                        callback();
-                });
-            }
         });
     }
+
+    //-----------------------------------------------------------------------------
+    // prepare SVGs
+    function prepareSVG(callback) {
+        cache.res.svg = {};
+        try {
+            var svgDir = config.srcDir + "svg/", svgData = {};
+            fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
+                svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
+            });
+            cache.res.svg.data = JSON.stringify(svgData);
+            zlib.gzip(new Buffer(cache.res["svg"].data, "utf-8"), function (error, gzipped) {
+                cache.res.svg.gzipData = gzipped;
+                cache.res.svg.etag = crypto.createHash("md5").update(String(new Date())).digest("hex");
+                callback();
+            });
+        } catch (error) {
+            log.error("Error processing SVGs: ",  error);
+            process.exit(1);
+        }
+    }
+
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
         var URI = decodeURIComponent(req.url), isAuth = false;
@@ -916,7 +961,7 @@
         if (getCookie(req.headers.cookie) || config.noLogin)
             isAuth = true;
 
-        if (URI === "/") {
+        if (URI === "/" || URI === "//") {
             handleResourceRequest(req, res, "base.html");
         } else if (/^\/!\/content/.test(URI)) {
             if (isAuth) {
@@ -930,12 +975,7 @@
                 handleResourceRequest(req, res, "auth.html");
             }
         } else if (/^\/!\/svg/.test(URI)) {
-            var json = JSON.stringify(cache.svg);
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/html; charset=utf-8");
-            res.setHeader("Content-Length", json.length);
-            res.end(json);
-            log.info(req, res);
+            handleResourceRequest(req, res, "svg");
         } else if (/^\/!\/null/.test(URI)) {
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -947,7 +987,7 @@
             handleResourceRequest(req, res, req.url.substring(3));
         } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
             handleFileRequest(req, res, true);
-        } else if (/^\/_\//.test(URI) || /^\/\$\//.test(URI)) {
+        } else if (/^\/_\//.test(URI)) {
             handleFileRequest(req, res, false);
         } else if (/^\/~~\//.test(URI)) {
             streamArchive(req, res, "zip");
@@ -1084,10 +1124,13 @@
                     res.setHeader("ETag", cache.res[resourceName].etag);
                 }
 
-                if (/.*(js|css|html|svg)$/.test(resourceName))
+                if (/.+\.(js|css|html)$/.test(resourceName))
                     res.setHeader("Content-Type", cache.res[resourceName].mime + "; charset=utf-8");
                 else
                     res.setHeader("Content-Type", cache.res[resourceName].mime);
+
+                if (resourceName === "svg")
+                    res.setHeader("Content-Type", "text/plain" + "; charset=utf-8");
 
                 var acceptEncoding = req.headers["accept-encoding"] || "";
                 if (/\bgzip\b/.test(acceptEncoding) && cache.res[resourceName].gzipData !== undefined) {
@@ -1163,7 +1206,7 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var cookie = getCookie(req.headers.cookie);
+        var busboy, done = false, files = [], cookie = getCookie(req.headers.cookie);
 
         req.query = qs.parse(req.url.substring("/upload?".length));
         log.info(req, res, "Upload started");
@@ -1177,20 +1220,24 @@
             return;
         }
 
-        var busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024 }),
-            done = false,
-            files = [];
+        busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}});
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
                 dst = path.join(config.filesDir, req.query.to, dstRelative),
                 tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
+            log.info(req, res, "Receiving: " + dstRelative);
             files[dstRelative] = {
                 src: tmp,
                 dst: decodeURIComponent(dst)
             };
+
             file.pipe(fs.createWriteStream(tmp, { mode: mode.file}));
+        });
+
+        busboy.on("filesLimit", function () {
+            closeConnection();
         });
 
         busboy.on("finish", function () {
@@ -1198,13 +1245,36 @@
             var names = Object.keys(files);
             while (names.length > 0) {
                 (function (name) {
-                    wrench.mkdirSyncRecursive(path.dirname(files[name].dst), mode.dir);
-                    fs.rename(files[name].src, files[name].dst, function () {
-                        log.info(req, res, "Received: " + decodeURIComponent(req.query.to) + "/" + name);
+                    fs.stat(files[name].dst, function (error) {
+                        if (error) { // File doesn't exist
+                            fs.stat(path.dirname(files[name].dst), function (error) {
+                                if (error) { // Dir doesn't exist
+                                    mkdirp.sync(path.dirname(files[name].dst), mode.dir);
+                                }
+                                moveFile(files[name].src, files[name].dst);
+                            });
+                        } else {
+                            if (req.query.r === "true") { // Rename option from the client
+                                (function(src, dst) {
+                                    utils.getNewPath(dst, function (newDst) {
+                                        moveFile(src, newDst);
+                                    });
+                                })(files[name].src, files[name].dst);
+
+                            } else {
+                                moveFile(files[name].src, files[name].dst);
+                            }
+                        }
                     });
                 })(names.pop());
             }
             closeConnection();
+
+            function moveFile(src, dst) {
+              fs.rename(src, dst, function (err) {
+                  if (err) log.error(err);
+              });
+            }
         });
 
         req.on("close", function () {
@@ -1252,32 +1322,27 @@
     // Update a directory's content
     function updateDirectory(root, callback) {
         fs.readdir(addFilePath(root), function (error, files) {
-            var dirContents = {}, done = 0, last;
+            var dirContents = {}, fileNames;
             if (error) log.error(error);
-
             if (!files || files.length === 0) {
                 dirs[root] = dirContents;
                 callback();
+                return;
             }
-            last = files.length;
-
-            for (var i = 0 ; i < last; i++) {
-                (function (entry) {
-                    readPath(root + "/" + entry, function (error, info) {
-                        if (error) {
-                            log.error(error);
-                            callback();
-                        } else {
-                            dirContents[entry] = info;
-                            if (++done === last) {
-                                dirs[root] = dirContents;
-                                callback();
-                                generateDirSizes(root, dirContents, callback);
-                            }
-                        }
-                    });
-                })(files[i]);
-            }
+            fileNames = files;
+            files = files.map(function(entry) { return root + "/" + entry});
+            async.map(files, readPath, function(err, results) {
+                var i = fileNames.length;
+                while (i > -1) {
+                    if (results[i]) {
+                        dirContents[fileNames[i]] = results[i];
+                    }
+                    i--;
+                }
+                dirs[root] = dirContents;
+                callback();
+                generateDirSizes(root, dirContents, callback);
+            });
         });
     }
 
@@ -1600,10 +1665,10 @@
 
         if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
-        cleanupTemp();
-        cleanUpSessions();
-        writeDB();
-
-        process.exit(0);
+        cleanupTemp(false, function () {
+            cleanUpSessions();
+            writeDB();
+            process.exit(0);
+        });
     }
 })();

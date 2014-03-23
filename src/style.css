@@ -50,8 +50,8 @@ html {
     -webkit-backface-visibility: hidden;
 }
 
-::selection      { background: #f1a; color: #fff }
-::-moz-selection { background: #f1a; color: #fff }
+::selection      { background: #f81; color: #fff }
+::-moz-selection { background: #f81; color: #fff }
 ::-webkit-scrollbar:vertical    { width: 4px }
 ::-webkit-scrollbar:horizontal  { height: 4px }
 ::-webkit-scrollbar-track       { background: transparent}
@@ -110,7 +110,7 @@ input:-webkit-autofill {
 @media all and (max-width:  639px) { #buttons { line-height: 25px } }
 
 .button {
-    border-bottom: 2px solid #333 !important;
+    border-bottom: 2px solid #333;
     color: #ddd;
     cursor: pointer;
     flex: 1 1;
@@ -132,7 +132,7 @@ input:-webkit-autofill {
     vertical-align: middle;
 }
 
-.button svg, .button svg path, .button svg rect {
+.button svg {
     transition: fill .25s ease;
 }
 
@@ -140,13 +140,13 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .button svg { height: 20px } }
 @media all and (max-width: 639px)  { .button svg { height: 16px; margin-right: 0 } }
 
-#upload-file-button:hover   { color: #29f; border-bottom: 2px solid #29f !important }
-#upload-folder-button:hover { color: #f1a; border-bottom: 2px solid #f1a !important }
-#create-folder-button:hover { color: #ae5; border-bottom: 2px solid #ae5 !important }
-#about-button:hover         { color: #f71; border-bottom: 2px solid #f71 !important }
-#options-button:hover       { color: #ff5; border-bottom: 2px solid #ff5 !important }
-#logout-button:hover        { color: #e33; border-bottom: 2px solid #e33 !important }
-#split-button:hover         { color: #f5f; border-bottom: 2px solid #f5f !important }
+#upload-file-button:hover   { color: #29f; border-bottom: 2px solid #29f }
+#upload-folder-button:hover { color: #f1a; border-bottom: 2px solid #f1a }
+#create-folder-button:hover { color: #ae5; border-bottom: 2px solid #ae5 }
+#about-button:hover         { color: #f71; border-bottom: 2px solid #f71 }
+#options-button:hover       { color: #ff5; border-bottom: 2px solid #ff5 }
+#logout-button:hover        { color: #e33; border-bottom: 2px solid #e33 }
+#split-button:hover         { color: #f5f; border-bottom: 2px solid #f5f }
 
 #upload-file-button:hover svg        { fill: #29f }
 #upload-folder-button:hover svg      { fill: #f1a }
@@ -157,9 +157,9 @@ input:-webkit-autofill {
 #split-button:hover svg.split .left  { fill: #f22 }
 #split-button:hover svg.split .right { fill: #28f }
 
-.button.disabled { color: #666; cursor: not-allowed !important }
+.button.disabled { color: #666 !important; cursor: not-allowed !important }
 .button.disabled svg { fill: #666 !important }
-.button.disabled:hover { border-bottom: 2px solid #666 !important }
+.button.disabled:hover { color: #666!important ; border-bottom: 2px solid #666 !important }
 
 #view-container {
     flex: 1 1;
@@ -176,9 +176,8 @@ input:-webkit-autofill {
     left:0;
     right:0;
     overflow: hidden;
+    transition: left .2s ease, right .2s ease;
 }
-
-.view + .view { border-left: 2px solid #444 }
 
 @media all and (min-width: 1024px) { .view { top: 39px } }
 @media all and (max-width: 1023px) { .view { top: 34px } }
@@ -234,6 +233,8 @@ input:-webkit-autofill {
    position: absolute;
 }
 
+.view.right .path { border-left: 2px solid #444}
+
 @media all and (min-width: 1024px) { .path { height: 37px; font-size: .9em } }
 @media all and (max-width: 1023px) { .path { height: 32px; font-size: .8em } }
 @media all and (max-width:  639px) { .path { height: 27px; font-size: .7em } }
@@ -249,7 +250,7 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .path li { line-height: 30px; padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { .path li { line-height: 25px; padding: 0 .1em 0 1.2em } }
 
-.triangle { position: absolute }
+.path .triangle { position: absolute }
 
 .path .home {
     fill: #ddd;
@@ -259,10 +260,10 @@ input:-webkit-autofill {
     position: relative;
 }
 
-.path li.in  { left: 0 }
-.path li.out { left: -100px }
+.path li.in  { opacity: 1; transform: translateX(0);}
+.path li.out { opacity: 0; transform: translateX(-100px) !important;}
 .path li:first-of-type { padding-left: .5em }
-.path li { color: #ddd; transition: color .3s ease, left .5s ease }
+.path li { color: #ccc; transition: transform .4s ease, opacity .4s ease }
 
 .path li:nth-child(odd)        { background: #383838 }
 .path li:nth-child(odd) > .triangle  { fill: #383838 }
@@ -290,9 +291,9 @@ input:-webkit-autofill {
 .path li:nth-child(15) { z-index: 2 }
 .path li:nth-child(16) { z-index: 1 }
 
-@media all and (min-width: 1024px) { .triangle { height: 35px; width: 35px; right: -34.5px } }
-@media all and (max-width: 1023px) { .triangle { height: 30px; width: 30px; right: -29.5px } }
-@media all and (max-width:  639px) { .triangle { height: 25px; width: 25px; right: -24.5px } }
+@media all and (min-width: 1024px) { .path .triangle { height: 35px; width: 35px; right: -34.5px } }
+@media all and (max-width: 1023px) { .path .triangle { height: 30px; width: 30px; right: -29.5px } }
+@media all and (max-width:  639px) { .path .triangle { height: 25px; width: 25px; right: -24.5px } }
 
 /* ========================= File/Folder Display =========================== */
 
@@ -333,45 +334,47 @@ input:-webkit-autofill {
 }
 
 #click-catcher.out { opacity: 0  ; visibility: hidden }
-#click-catcher.in  { opacity: .6 ; visibility: visible }
+#click-catcher.in  { opacity: .5 ; visibility: visible }
 
 .file-header {
     display: flex;
     order: -1;
-    color: #333;
+    color: #444;
     user-select: none;
 }
 
 .file-header span {
-    border-bottom: 2px solid #aaa;
-    background: linear-gradient(rgba(255,255,255,0), #ccc);
+    border-bottom: 1px solid #bbb;
+    background: #dadada;
+    border-radius: 4px 4px 0 0;
     position: relative;
     cursor: pointer;
     white-space: nowrap;
+    line-height: 1.1em;
 }
 
 .file-header .triangle {
-    display: inline-block;
     position: relative;
-    height: .5em;
-    top: .25em;
-    left: -.25em;
-    vertical-align: top;
+    height: .6em;
+    width: .6em;
+    margin-left: .25em;
     transition: all .2s ease;
-    fill: #333;
+    fill: #666;
+    z-index: 2;
 }
 
 .file-header .down .triangle {
     transform: rotate(90deg);
-    top: .375em;
+    top: .15em;
 }
 
 .file-header .up .triangle {
     transform: rotate(270deg);
-    top: .125em;
+    top: -.15em;
 }
 
-.file-header .active { border-bottom: 2px solid #f1a }
+.file-header .active  { color: #000; }
+.file-header .active .triangle { fill: #000; }
 
 .header-name {
     flex: 1 1;
@@ -404,9 +407,19 @@ input:-webkit-autofill {
 
 .data-row.editing { background: #fff }
 .data-row.editing.invalid { background: #fdd }
-
 .data-row.editing .entry-link { display: none; }
 
+.data-row .drop-hover { color: #000; font-weight: 400; }
+.data-row .drop-hover:after {
+    content: "";
+    height: 1em;
+    width: 1em;
+    position: relative;
+    right: 0;
+    display: inline-block;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cGF0aCBkPSJNNC42ODcgMTEuMTE5bDkuMjg3IDguOTMzdi01LjQxMmMyLjgxMyAwIDkuOTczLjA2MiA5Ljk3MyA3LjQyNiAwIDMuODU1LTIuNzM0IDcuMDcyLTYuMzY5IDcuODE2IDUuODQyLS43OTIgMTAuMzU5LTUuNzQ3IDEwLjM1OS0xMS44MDYgMC0xMS4yNTYtMTIuMDI2LTExLjM1Mi0xMy45NjMtMTEuMzUydi00LjYwNmwtOS4yODcgOS4wMDF6Ii8+PC9zdmc+);
+    background-size: contain;
+}
 .data-row, .data-row a {
     color: #333;
 }
@@ -444,6 +457,7 @@ input:-webkit-autofill {
     white-space: nowrap;
     cursor: pointer;
 }
+
 .entry-link, .inline-namer {
     padding: 0 .25em;
     flex: 1 1;
@@ -641,6 +655,7 @@ input:-webkit-autofill {
     color: #333;
     z-index: 32;
     box-shadow: 0 0 30px #000;
+    width: 6.5em;
 }
 @media all and (min-width: 1024px) { #entry-menu { font-size: .9em } }
 @media all and (max-width: 1023px) { #entry-menu { font-size: .8em } }
@@ -662,9 +677,16 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
-#entry-menu>.radius-wrap>div:hover {
+#entry-menu>.radius-wrap>div:hover, #entry-menu>.radius-wrap>a:hover {
     background: #fff;
     cursor: pointer;
+}
+
+#entry-menu a {
+    padding: .25em;
+    text-decoration: none;
+    color: #333;
+    display: block;
 }
 
 #entry-menu svg {
@@ -672,14 +694,18 @@ input:-webkit-autofill {
     width: 1em;
     margin-right: .25em;
     fill: #333;
+    float: left;
 }
 
+#entry-menu div {
+    width: 100%;
+}
 #entry-menu div > span {
     display: inline-block;
     vertical-align: top;
 }
 
-#entry-menu .open, #entry-menu .edit {
+#entry-menu .open, #entry-menu .edit, #entry-menu .download {
     display: none;
 }
 #entry-menu.type-js>div>.edit,
@@ -697,7 +723,8 @@ input:-webkit-autofill {
 #entry-menu.type-png>div>.show,
 #entry-menu.type-jpg>div>.show,
 #entry-menu.type-gif>div>.show,
-#entry-menu.type-html>div>.show {
+#entry-menu.type-html>div>.show,
+#entry-menu.type-download .download {
     display: block;
 }
 
@@ -722,9 +749,12 @@ input:-webkit-autofill {
 }
 
 .previewer .media-container > img {
+    display: block;
+    margin: 0 auto;
     max-width: 100%;
     max-height: 100%;
-    border-radius: 6px;
+    width:auto;
+    height:auto;
 }
 
 /* ============================ Document Previewer ============================ */
@@ -745,8 +775,6 @@ input:-webkit-autofill {
 .content.document > .sidebar > li {
     position: relative;
     z-index: 5;
-    padding: .25em 0;
-    border-radius: 4px;
     margin-bottom: .25em;
 }
 
@@ -765,24 +793,17 @@ input:-webkit-autofill {
     font-weight: 400;
 }
 
-.content.document > .sidebar > li:hover, .opts.active { background: #333; cursor: pointer }
-.content.document > .sidebar > .exit:hover svg       { fill: #f33 }
-.content.document > .sidebar > .exit:hover span      { color: #f33; opacity: 1 }
-.content.document > .sidebar > .save:hover svg       { fill: #5f0 }
-.content.document > .sidebar > .save:hover span      { color: #5f0; opacity: 1 }
-.content.document > .sidebar > .light:hover svg      { fill: #ff5 }
-.content.document > .sidebar > .light:hover span     { color: #ff5; opacity: 1 }
-.content.document > .sidebar > .ww:hover svg   { fill: #f1a }
-.content.document > .sidebar > .ww:hover span  { color: #f1a; opacity: 1 }
-.content.document > .sidebar > .opts:hover svg, .opts.active svg {
-    fill: #1af !important;
-}
-.content.document > .sidebar > .opts:hover span, .opts.active span {
-    color: #1af !important;
-    opacity: 1 !important;
-}
+.content.document > .sidebar > li:hover         { cursor: pointer }
+.content.document > .sidebar > .exit:hover svg  { fill: #c33 }
+.content.document > .sidebar > .exit:hover span { color: #c33; opacity: 1 }
+.content.document > .sidebar > .save:hover svg  { fill: #169 }
+.content.document > .sidebar > .save:hover span { color: #169; opacity: 1 }
+.content.document > .sidebar > .ww:hover svg    { fill: #940 }
+.content.document > .sidebar > .ww:hover span   { color: #940; opacity: 1 }
 .doc.readonly > .sidebar > .save { display: none }
 
+.cm-s-mdn-like .CodeMirror-linenumber { margin-left: 0 !important }
+.cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
 /* ============================ Text Editor ============================ */
 
 .doc > .text-editor > .CodeMirror {
@@ -794,45 +815,11 @@ input:-webkit-autofill {
     width: 100%;
     position: relative;
 }
-.path>li:last-child {
-    transition: color .4s ease, left .4s ease;
-}
+
 .path li.dirty { color: #f71 !important}
 .path li.saved { color: #7f1 !important}
 .path li.save-failed { color: #f44 !important }
 .path li.dirty:after { content: "*" }
-
-.opts-container {
-    position: absolute;
-    top: 0;
-    border-radius: 4px 0 0 4px;
-    right: 2.42rem; /* Hack: magic number */
-    height: 2.42rem; /* Hack: magic number */
-    text-align: center;
-    background: #333;
-    transition: opacity .2s ease;
-    width: 14rem;
-    opacity: 0;
-    display: none;
-}
-.opts.active { border-radius:  0 4px 4px 0 !important}
-.opts.active .opts-container { display: block; opacity: 1 }
-
-.opts-container select {
-    width: 4rem;
-    height: 1.6em;
-    margin: 0 .25rem;
-    font-size: .6em;
-    text-align: center;
-}
-
-.opts-container label {
-    color: #fff;
-    font-size: .6em;
-    width: 4rem;
-    margin: 0 .25rem;
-    display: inline-block;
-}
 
 /* ============================ Upload Progress ============================ */
 
@@ -849,13 +836,18 @@ input:-webkit-autofill {
     justify-content: space-between;
     overflow: hidden;
     z-index: 1;
+
 }
 
 @media all and (min-width: 1024px) { .upload-info { font-size: .9em } }
 @media all and (max-width: 1023px) { .upload-info { font-size: .8em } }
 @media all and (max-width:  639px) { .upload-info { font-size: .7em } }
 
-.upload-info.in  { height: 1.5em }
+.upload-info.in  {
+    height: 2em;
+    box-shadow: 0 0 0 .125em #111;
+    padding-top: .25em;
+}
 .upload-info.out { height: 0; box-shadow: none; }
 
 .upload-status {
@@ -901,20 +893,22 @@ input:-webkit-autofill {
 }
 
 .upload-speed:before {
-    content: "@";
+    content: " at ";
     color: #aaa;
 }
 
 .upload-bar {
-    box-shadow: inset 0 0 10px #000, 0 0 3px rgba(128, 128, 128, .4);
     position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
+    left: 0; right: 0;
+    top: .125em;
+    height: .25em;
     z-index: 2;
+    background: #111;
     pointer-event: none;
 }
 
 .upload-bar-inner {
-    background: linear-gradient(#333,#444);
+    background: #eee;
     height: 100%;
     left: 0;
     position: absolute;
@@ -946,6 +940,7 @@ input:-webkit-autofill {
     overflow: hidden;
     position: relative;
     transition: all .2s ease;
+    box-shadow: -2px 0 0 2px #444;
     width: 100%;
 }
 
@@ -1057,13 +1052,11 @@ input:-webkit-autofill {
 #seekbar {
     position: absolute;
     width: 100%;
-    height: 8px;
-    border-top: 4px solid #111;
-    top: -2px;
+    height: 4px;
+    top: 0;
     transition: all .2s ease;
     z-index: 4;
 }
-#seekbar:hover { border-top: 6px solid #111; top: -4px; height: 12px }
 
 #seekbar-played {
     position: absolute;
@@ -1183,9 +1176,9 @@ input:-webkit-autofill {
     overflow-y: auto;
 }
 
-@media all and (min-width: 1024px) { #options-box { font-size: .9em  } }
-@media all and (max-width: 1023px) { #options-box { font-size: .8em  } }
-@media all and (max-width:  799px) { #options-box { font-size: .65em } }
+@media all and (min-width: 1024px) { #options-box { font-size: .8em } }
+@media all and (max-width: 1023px) { #options-box { font-size: .7em } }
+@media all and (max-width:  799px) { #options-box { font-size: .6em } }
 
 #options-box.in  { transform: translateY(-50%);  opacity: 1; }
 #options-box.out { transform: translateY(calc(-50% + 100px)); opacity: 0; visibility: hidden }
@@ -1213,7 +1206,7 @@ input:-webkit-autofill {
     margin-top: .125em;
     margin-bottom: .125em;
     border-bottom: 2px solid #ccc;
-    font-size: 2em;
+    font-size: 1.5em;
     font-weight: 300;
     color: #444;
 }
@@ -1271,13 +1264,27 @@ input:-webkit-autofill {
 #options-box .list-options select::-ms-expand { display: none }
 #options-box .list-options div { position:relative }
 #options-box .list-options div:after {
-    content: "<>";
+    content: "";
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cG9seWdvbiBwb2ludHM9IjEwLDE2IDIyLDE2IDE2LDI0IiBmaWxsPSIjNjY2Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxNCAyMiwxNCAxNiw2IiBmaWxsPSIjNjY2Ii8+PC9zdmc+Cg==), linear-gradient(#fff,#fff);
+    background-size: contain;
     font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+    width: 1.5em;
     color: #666;
-    transform: rotate(90deg);
-    right: 0;
-    top: 7px;
+    right: -1px;
+    top: 2px;
+    bottom: 2px;
+    border-radius: 3px;
     position: absolute;
+    pointer-events: none;
+}
+
+#options-box .list-options div:before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: -2px;
+    box-shadow: inset 0 0 0 1px #eee;
+    border-radius: 4px;
+    z-index: 5;
     pointer-events: none;
 }
 
@@ -1546,21 +1553,113 @@ input[type="checkbox"] { display: none }
 
 @media all and (max-width: 639px), all and (max-height: 399px) { .submit span { line-height: 32px } }
 
-/* ============================= Misc Elements ============================= */
+/* =============================== Info Box ================================ */
 
-#drop-preview {
+#info-box {
+    border-radius: 6px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -40%);
     position: fixed;
-    background: #000;
-    transition: opacity 0.5s ease;
-    left: 0; right: 0; top: 0; bottom: 0;
-    z-index: 2;
+    transition: all .3s ease;
+    z-index: 33;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    padding: 1em;
 }
 
-#drop-preview.out { opacity: 0 ; visibility: hidden }
-#drop-preview.in  { opacity: .75 ; visibility: visible }
+#info-box.info {
+    background: #eee;
+    color: #444;
+    box-shadow: 0 0 30px #111;
+    transform: translate(-50%, -50%);
 
+}
 
-#drop-preview svg {
+#info-box.error {
+    background: #eee;
+    color: #f44;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #111;
+}
+
+#info-box.in {opacity: 1; visibility: visible;}
+
+#info-box h1 {
+    width: 100%;
+    display: block;
+    font-size: 1.33em;
+    text-align: center;
+    margin: 0 0 .25em 0;
+}
+
+#info-box span {
+    text-align: center;
+    display: block;
+    width: 100%;
+}
+/* =========================== Drop Select Menu ============================ */
+
+#drop-select {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 10em;
+    line-height: 2em;
+    z-index: 34;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    box-shadow: 0 0 30px #111;
+    border-radius: 6px;
+    visibility: hidden;
+    transition: visibilty .3s ease, opacity .3s ease;
+    font-weight: 400;
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+#drop-select span {
+    cursor: pointer;
+    text-align: center;
+    transition: all .1s ease;
+    flex: 1;
+    font-size: .75em;
+}
+
+#drop-select span:hover {
+    background: #f81; color: #fff;
+}
+
+#drop-select.in { visibility: visible; opacity: 1 }
+#drop-select .movefile:hover { border-radius: 6px 0 0 6px }
+#drop-select .viewfile:hover { border-radius: 0 6px 6px 0 }
+
+@media all and (max-width: 639px) {
+    #drop-select {
+        flex-direction: column;
+        width: 3.5em;
+        font-size: .8em;
+        line-height: 1.75em;
+    }
+    #drop-select .movefile:hover { border-radius: 6px 6px 0 0 }
+    #drop-select .viewfile:hover { border-radius: 0 0 6px 6px }
+}
+/* ============================= Misc Elements ============================= */
+
+.dropzone {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    z-index: 2;
+    opacity: 0 ;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.dropzone.in  { opacity: .75 ; visibility: visible }
+
+.dropzone svg {
     position: absolute;
     left: 25%;
     top: 25%;
@@ -1577,6 +1676,7 @@ input[type="checkbox"] { display: none }
     visibility: hidden;
     opacity: 0;
     width: 80px;
+    height: 1.5em;
     text-align: center;
     padding: 2px 6px;
     background: #222;
