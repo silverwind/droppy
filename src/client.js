@@ -609,7 +609,7 @@
             });
         });
 
-        $("#split-button").register("click", function() {split()} );
+        $("#split-button").register("click", function () { split(); });
 
         var split = droppy.split = function (dest) {
             var first, second, button;
@@ -628,6 +628,7 @@
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
+                window.history.replaceState(null, null, first[0].currentFolder); // removes the hash
                 getView(0).removeClass("left");
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
@@ -636,7 +637,7 @@
                 button.register("click", split);
                 event.stopPropagation();
             });
-        }
+        };
 
         $("#about-button").register("click", function () {
             requestAnimation(function () {
@@ -1057,7 +1058,7 @@
     }
 
     // Listen for popstate events, which indicate the user navigated back
-    $(window).register("popstate", function (event) {
+    $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
         updateLocation(null, [decodeURIComponent(window.location.pathname), decodeURIComponent(window.location.hash.slice(1))], true);
@@ -1072,10 +1073,10 @@
 
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
-        if (typeof destination.length !== "number") throw "Destination needs to be string or array"
+        if (typeof destination.length !== "number") throw "Destination needs to be string or array";
         // Queue the folder switching if we are mid-animation or waiting for the server
         function sendReq(view, viewDest, time) {
-            (function queue (time) {
+            (function queue(time) {
                 if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
                     showSpinner(view);
                     var viewLoc = getViewLocation(view);
@@ -1088,20 +1089,20 @@
                     // Skip the push if we're already navigating through history
                     if (!skipPush) {
                         var newDest;
-                        if (view[0].vId === 0) newDest = viewDest + window.location.hash; 
+                        if (view[0].vId === 0) newDest = viewDest + window.location.hash;
                         else newDest = window.location.pathname + "#" + viewDest;
                         window.history.pushState(null, null, newDest);
                     }
                 } else
                     setTimeout(queue, 50, time + 50);
             })(time);
-        };
+        }
         if (view === null) {
             // Only when navigating backwards
             for (var i = destination.length - 1; i >= 0; i--) {
                 if (destination[i].length && getViewLocation(getView(i)) !== destination[i])
                     sendReq(getView(i), destination[i], 0);
-            };
+            }
         } else if (droppy.views[view[0].vId]) sendReq(view, destination, 0);
     }
 
@@ -1860,10 +1861,10 @@
                         view[0].editNew = false;
                     });
                     // Keyboard shortcuts
-                    $(window).register("keydown", function(e) {
+                    $(window).register("keydown", function (e) {
                         if (editor && (e.metaKey || e.ctrlKey)) {
                             // s - save
-                            if(e.keyCode == 83) {
+                            if (e.keyCode === 83) {
                                 e.preventDefault();
                                 showSpinner(view);
                                 sendMessage(view[0].vId, "SAVE_FILE", {
