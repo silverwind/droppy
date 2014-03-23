@@ -1810,6 +1810,7 @@
                 $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
+                    editor = null;
                 });
                 doc.find(".save").register("click", function () {
                     showSpinner(view);
@@ -1840,6 +1841,21 @@
                     });
                     editor.on("keyup", function () {
                         view[0].editNew = false;
+                    });
+                    // Keyboard shortcuts
+                    $(window).register("keydown", function(e) {
+                        if (editor && (e.metaKey || e.ctrlKey)) {
+                            // s - save
+                            if(e.keyCode == 83) {
+                                e.preventDefault();
+                                showSpinner(view);
+                                sendMessage(view[0].vId, "SAVE_FILE", {
+                                    "to": entryId,
+                                    "value": editor.getValue()
+                                });
+                                return false;
+                            }
+                        }
                     });
                     hideSpinner(view);
                 }, 1000);
