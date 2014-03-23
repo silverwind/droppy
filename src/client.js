@@ -412,12 +412,12 @@
                     });
                 break;
             case "ERROR":
-                var box = $("#info-box");
-                box.attr("class", "error in");
-                box.children("h1").text("Error");
-                box.children("span").text(msg.text);
+                var infobox = $("#info-box");
+                infobox.attr("class", "error in");
+                infobox.children("h1").text("Error");
+                infobox.children("span").text(msg.text);
                 setTimeout(function () {
-                    box.removeAttr("class");
+                    infobox.removeAttr("class");
                 }, 4000);
                 hideSpinner(getView(vId));
                 break;
@@ -1292,7 +1292,7 @@
             var destination = $(this).data("id");
             updateLocation(view, destination);
         });
-        content.find(".data-row").each(function(index) {
+        content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
         content.find(".data-row .entry-menu").register("click", function (event) {
@@ -1389,7 +1389,7 @@
             view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
-            setTimeout(function() {
+            setTimeout(function () {
                 finish();
             }, 200);
         }
@@ -1411,34 +1411,34 @@
     }
 
     function handleDrop(view, event, from, to, spinner) {
-        var type, clip, catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
+        var catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
         $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
 
         if (event.shiftKey) {
-            sendDrop(view, "cut", from, to);
+            sendDrop(view, "cut", from, to, spinner);
         }
         else if (event.ctrlKey || event.metaKey || event.altKey)
-            sendDrop(view, "copy", from, to);
+            sendDrop(view, "copy", from, to, spinner);
         else {
             $("#drop-select").attr("class", "in").css({
                 left: event.originalEvent.clientX,
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            $("#drop-select .movefile").one("click", function() {
-                sendDrop(view, "cut", from, to);
+            $("#drop-select .movefile").one("click", function () {
+                sendDrop(view, "cut", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
-            })
-            $("#drop-select .copyfile").one("click", function() {
-                sendDrop(view, "copy", from, to);
+            });
+            $("#drop-select .copyfile").one("click", function () {
+                sendDrop(view, "copy", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
-            })
-            $("#drop-select .viewfile").one("click", function() {
+            });
+            $("#drop-select .viewfile").one("click", function () {
                 view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
-            })
+            });
             return;
         }
     }
@@ -1714,7 +1714,7 @@
         header.siblings().removeClass("active up down");
         var sortedEntries = view.find(".content ul li").sort(sortFunc);
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            sortedEntries[index].setAttribute("order",index);
+            sortedEntries[index].setAttribute("order", index);
             $(sortedEntries[index]).css({
                 "order": index,
                 "-ms-flex-order": String(index),
@@ -2353,6 +2353,7 @@
     function basename(path) {
         return path.replace(/^.*\//, "");
     }
+
     // turn /path/to/file to /path/to
     function dirname(path) {
         if (path === "/")
