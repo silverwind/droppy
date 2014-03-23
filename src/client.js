@@ -78,9 +78,9 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-        var classes = this[0].className.split(" "), classMatch,
-            hasClass = false;
-        classes = classes.filter(function (className) {
+        var classes, classMatch, hasClass = false;
+        if (typeof this[0] === "undefined") return false;
+        classes = this[0].className.split(" ").filter(function (className) {
             if (className === match) return false;
             if (className === replacement) hasClass = true;
 
@@ -297,7 +297,7 @@
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
             if (droppy.get("hasLoggedOut") || event.code === 4000) return;
-            if (event.code >= 1002 && event.code < 3999) {
+            if (event.code >= 1001 && event.code < 3999) {
                 if (retries > 0) {
                     // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
                     // TODO: Indicate connection drop in the UI, especially on close code 1006
@@ -1389,18 +1389,15 @@
             view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
-            view.find(".new").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                if ($(event.originalEvent.target).hasClass("new"))
-                    finish();
-            });
+            setTimeout(function() {
+                finish();
+            }, 200);
         }
         view[0].animDirection = "center";
 
         function finish() {
             view[0].isAnimating = false;
-            view.find(".content").each(function () {
-                if (!$(this).hasClass("new")) $(this).remove();
-            });
+            view.find(".content:not(.new)").remove();
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
             if ($(view).attr("data-type") === "directory") {
@@ -1415,6 +1412,9 @@
 
     function handleDrop(view, event, from, to, spinner) {
         var type, clip, catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
+        $(".drop-hover").removeClass("drop-hover");
+        $(".dropzone").removeClass("in");
+
         if (event.shiftKey) {
             sendDrop(view, "cut", from, to);
         }
@@ -1426,10 +1426,6 @@
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            catcher.one("mousemove", function () {
-                $("#drop-select").removeAttr("class");
-                toggleCatcher();
-            });
             $("#drop-select .movefile").one("click", function() {
                 sendDrop(view, "cut", from, to);
                 catcher.off("mousemove").trigger("click");
@@ -1482,17 +1478,23 @@
                 if (!enter) return el.removeClass("drop-hover");
                 if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
+                    var dropZone = el.parents(".view").find(".dropzone");
                     if (enter && el.attr("data-type") === "folder") {
                         el.addClass("drop-hover");
-                        el.parents(".view").find(".dropzone").replaceClass("in", "out");
+                        dropZone.removeClass("in");
                     } else {
-                        el.parents(".view").find(".dropzone").replaceClass("out", "in");
+                        if (!dropZone.hasClass("in")) dropZone.addClass("in");
                     }
                 }
             }, true);
         });
         bindHover(view, false, function (el, event, enter) {
-            el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
+            var dropZone = el.find(".dropzone");
+            if (enter) {
+                if (!dropZone.hasClass("in")) dropZone.addClass("in");
+            } else {
+                dropZone.removeClass("in");
+            }
         });
     }
 
@@ -1526,7 +1528,8 @@
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.register("drop", function (event) {
-                    row.removeClass("drop-hover");
+                    $(".drop-hover").removeClass("drop-hover");
+                    $(".dropzone").removeClass("in");
                     var from = event.dataTransfer.getData("text"),
                         to = row.attr("data-id");
 
@@ -1537,13 +1540,10 @@
                 });
             }
         });
-        $(document.documentElement).register("drop", function () {
-            $(".drop-hover").removeClass("drop-hover");
-        });
         view.register("drop", function (event) {
             event.preventDefault();
             event.stopPropagation();
-            view.find(".dropzone").replaceClass("in", "out");
+            $(".dropzone").removeClass("in");
             var items = event.dataTransfer.items,
                 fileItem = null,
                 entryFunc = null,
@@ -1777,6 +1777,7 @@
     function closeDoc(view) {
         view[0].switchRequest = true;
         view[0].editor = null;
+        view[0].currentFile = null;
         updateLocation(view, view[0].currentFolder);
     }
 

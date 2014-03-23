@@ -1614,6 +1614,7 @@ input[type="checkbox"] { display: none }
 
 #drop-select span {
     cursor: pointer;
+    display: inline-block;
     text-align: center;
     transition: all .1s ease;
     flex: 1;
