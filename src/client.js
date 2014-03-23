@@ -1425,8 +1425,8 @@
             });
             toggleCatcher();
             catcher.one("mousemove", function () {
-                //$("#drop-select").removeAttr("class");
-                //toggleCatcher();
+                $("#drop-select").removeAttr("class");
+                toggleCatcher();
             });
             $("#drop-select .movefile").one("click", function() {
                 sendDrop(view, "cut", from, to);
@@ -1437,11 +1437,8 @@
                 catcher.off("mousemove").trigger("click");
             })
             $("#drop-select .viewfile").one("click", function() {
-                view[0].currentFolder = dirname(dragData);
-                view[0].currentFile = basename(dragData);
                 view[0].editNew = true;
-                updatePath(view);
-                openFile(view);
+                updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
             })
             return;
@@ -1554,11 +1551,8 @@
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
-                    view[0].currentFolder = dirname(dragData);
-                    view[0].currentFile = basename(dragData);
                     view[0].editNew = true;
-                    updatePath(view);
-                    openFile(view);
+                    updateLocation(view, dragData);
                 }
                 return;
             }
@@ -1905,12 +1899,12 @@
                     editor.setValue(data);
                     editor.clearHistory();
                     editor.refresh();
-                    editor.on("change", function () {
+                    $(editor).register("change", function () {
                         if (!view[0].editNew) {
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
                     });
-                    editor.on("keyup", function () {
+                    $(editor).register("keyup", function () {
                         view[0].editNew = false;
                     });
                     // Keyboard shortcuts
