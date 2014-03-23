@@ -1,7 +1,5 @@
 /*global CodeMirror */
-/*jshint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
-  forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true, devel: true */
+
 (function ($, window, document) {
     "use strict";
     var droppy = {};
