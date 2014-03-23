@@ -1123,7 +1123,7 @@
                     if (!parts[i] && oldParts[i] !== parts[i]) { // remove this part
                         removePart(i);
                     } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
-                        createPart(parts[i], pathStr);
+                        addPart(parts[i], pathStr);
                     } else { // rename part
                         $(view.find(".path li")[i]).html(parts[i] + droppy.svg.triangle);
                     }
@@ -1132,17 +1132,17 @@
             }
             finalize();
         } else {
-            createPart(parts[0], "/");
+            addPart(parts[0], "/");
             for (i = 1, len = parts.length; i < len; i++) {
                 pathStr += "/" + parts[i];
-                createPart(parts[i], pathStr);
+                addPart(parts[i], pathStr);
             }
             finalize();
         }
 
         view[0].savedParts = parts;
 
-        function createPart(name, path) {
+        function addPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path);
             li.click(function () {
@@ -1162,14 +1162,14 @@
 
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
-            toRemove.setTransitionClass("in", "out");
+            toRemove.setTransitionClass("in", "out gone");
             toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
                 $(event.target).remove();
             });
         }
 
         function finalize() {
-            view.find(".path li.out").setTransitionClass("out", "in");
+            view.find(".path li.out:not(.gone)").setTransitionClass("out", "in");
             setTimeout(function () {
                 checkPathOverflow(view);
             }, 500);
@@ -1187,9 +1187,10 @@
         }
 
         if (width > space) {
-            view.find(".path > li").css("transform", "translateX(" + (space - width) + "px)");
+            view.find(".path li").css({"left": space - width + "px"});
         } else {
-            view.find(".path > li").css("transform", "translateX(0)");
+            if (view.find(".path li").css("left") !== 0)
+                view.find(".path li").animate({"left": 0}, {duration: 200});
         }
     }
 
