@@ -668,6 +668,7 @@
             $("#options-box").replaceClass("in", "out");
             $("#about-box").replaceClass("in", "out");
             $("#entry-menu").replaceClass("in", "out");
+            $("#drop-select").removeAttr("class");
             $("#info-box").removeAttr("class");
             toggleCatcher();
         });
@@ -1052,11 +1053,13 @@
         if ($("#about-box").hasClass("in") ||
             $("#options-box").hasClass("in") ||
             $("#info-box").hasClass("in") ||
-            $("#entry-menu").hasClass("in")
+            $("#entry-menu").hasClass("in") ||
+            $("#drop-select").hasClass("in")
         ) {
             $("#click-catcher").attr("class", "in");
-        } else
+        } else {
             $("#click-catcher").attr("class", "out");
+        }
     }
 
     // Update the page title and trim a path to its basename
@@ -1408,12 +1411,39 @@
         }
     }
 
-    function sendDropData(view, event, from, to, spinner) {
-        var type = (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) ? "copy" : "cut",
-        clip = { type: type, from: from, to  : to };
-        if (clip.from !== clip.to || clip.type === "copy") {
+    function handleDrop(view, event, from, to, spinner) {
+        var type, clip;
+        if (event.shiftKey) {
+            sendDrop(view, "cut", from, to);
+        }
+        else if (event.ctrlKey || event.metaKey || event.altKey)
+            sendDrop(view, "copy", from, to);
+        else {
+            $("#drop-select").attr("class", "in").css({
+                left: event.originalEvent.clientX,
+                top:  event.originalEvent.clientY,
+            });
+            toggleCatcher();
+            $("#drop-select .move").one("click", function() {
+                sendDrop(view, "cut", from, to);
+                $("#click-catcher").trigger("click");
+            })
+            $("#drop-select .copy").one("click", function() {
+                sendDrop(view, "copy", from, to);
+                $("#click-catcher").trigger("click");
+            })
+            return;
+        }
+    }
+
+    function sendDrop(view, type, from, to, spinner) {
+        if (from !== to || type === "copy") {
             if (spinner) showSpinner(view);
-            sendMessage(view[0].vId, "CLIPBOARD", clip);
+            sendMessage(view[0].vId, "CLIPBOARD", {
+                type: type,
+                from: from,
+                to:   to
+            });
         }
     }
 
@@ -1490,7 +1520,7 @@
                         to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
 
                     to = fixRootPath(to + "/" + basename(from));
-                    if (from) sendDropData(view, event, from, to);
+                    if (from) handleDrop(view, event, from, to);
                     event.preventDefault();
                     event.stopPropagation();
                 });
@@ -1510,7 +1540,7 @@
 
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
-                    sendDropData(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
+                    handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
                     view[0].currentFolder = dirname(dragData);
                     view[0].currentFile = basename(dragData);

@@ -1591,6 +1591,39 @@ input[type="checkbox"] { display: none }
     display: block;
     width: 100%;
 }
+/* =========================== Drop Select Menu ============================ */
+
+#drop-select {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 8em;
+    line-height: 1.5em;
+    z-index: 34;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    box-shadow: 0 0 30px #111;
+    border-radius: 6px;
+    visibility: hidden;
+    font-weight: 400;
+    opacity: 0;
+}
+
+#drop-select span {
+    text-align: center;
+    cursor: pointer;
+    transition: all .1s ease;
+}
+
+#drop-select span:hover {
+    background: #1af; color: #fff;
+}
+
+#drop-select.in { visibility: visible; opacity: 1 }
+#drop-select .copy { width: 50%; float: left  }
+#drop-select .move { width: 50%; float: right }
+#drop-select .copy:hover { border-radius: 6px 0 0 6px }
+#drop-select .move:hover { border-radius: 0 6px 6px 0 }
 
 /* ============================= Misc Elements ============================= */
 

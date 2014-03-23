@@ -565,7 +565,6 @@
                     });
                     break;
                 case "CLIPBOARD":
-                    log.info(ws, null, msg.data.type + ": " + msg.data.from + " -> " + msg.data.to);
                     if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
                     if (msg.data.to.indexOf(msg.data.from + "/") !== -1 && msg.data.to !== msg.data.from) {
@@ -576,13 +575,9 @@
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
                     // In case source and destination are the same, append a number to the file/foldername
-                    if (msg.data.from === msg.data.to) {
-                        utils.getNewPath(msg.data.to, function (name) {
-                            doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
-                        });
-                    } else {
-                        doClipboard(msg.data.type, msg.data.from, msg.data.to);
-                    }
+                    utils.getNewPath(msg.data.to, function (name) {
+                        doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
+                    });
                     break;
                 case "CREATE_FOLDER":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
