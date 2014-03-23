@@ -1389,18 +1389,15 @@
             view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
-            view.find(".new").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                if ($(event.originalEvent.target).hasClass("new"))
-                    finish();
-            });
+            setTimeout(function() {
+                finish();
+            }, 200);
         }
         view[0].animDirection = "center";
 
         function finish() {
             view[0].isAnimating = false;
-            view.find(".content").each(function () {
-                if (!$(this).hasClass("new")) $(this).remove();
-            });
+            view.find(".content:not(.new)").remove();
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
             if ($(view).attr("data-type") === "directory") {
@@ -1429,10 +1426,6 @@
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            catcher.one("mousemove", function () {
-                $("#drop-select").removeAttr("class");
-                toggleCatcher();
-            });
             $("#drop-select .movefile").one("click", function() {
                 sendDrop(view, "cut", from, to);
                 catcher.off("mousemove").trigger("click");
@@ -1784,6 +1777,7 @@
     function closeDoc(view) {
         view[0].switchRequest = true;
         view[0].editor = null;
+        view[0].currentFile = null;
         updateLocation(view, view[0].currentFolder);
     }
 
