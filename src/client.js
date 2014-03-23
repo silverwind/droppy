@@ -1478,11 +1478,11 @@
     function bindHoverEvents(view) {
         view.find(".data-row").each(function () {
             var row = $(this);
-            bindHover(row.children("a"), false, function (el, event, enter) {
+            bindHover(row, false, function (el, event, enter) {
                 if (!enter) return el.removeClass("drop-hover");
                 if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
-                    if (enter && el.parents(".data-row").attr("data-type") === "folder") {
+                    if (enter && el.attr("data-type") === "folder") {
                         el.addClass("drop-hover");
                         el.parents(".view").find(".dropzone").replaceClass("in", "out");
                     } else {
@@ -1525,10 +1525,10 @@
         $(".data-row").each(function () {
             var row = $(this);
             if (row.attr("data-type") === "folder") {
-                row.children("a").register("drop", function (event) {
-                    $(event.target).removeClass("drop-hover");
+                row.register("drop", function (event) {
+                    row.removeClass("drop-hover");
                     var from = event.dataTransfer.getData("text"),
-                        to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
+                        to = row.attr("data-id");
 
                     to = fixRootPath(to + "/" + basename(from));
                     if (from) handleDrop(view, event, from, to);
@@ -1538,7 +1538,7 @@
             }
         });
         $(document.documentElement).register("drop", function () {
-            $(".data-row > a").removeClass("drop-hover");
+            $(".drop-hover").removeClass("drop-hover");
         });
         view.register("drop", function (event) {
             event.preventDefault();

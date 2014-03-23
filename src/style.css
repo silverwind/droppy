@@ -409,8 +409,8 @@ input:-webkit-autofill {
 .data-row.editing.invalid { background: #fdd }
 .data-row.editing .entry-link { display: none; }
 
-.data-row .drop-hover { color: #000; font-weight: 400; }
-.data-row .drop-hover:after {
+.data-row.drop-hover a.folder-link { color: #000; font-weight: 400; }
+.data-row.drop-hover a.folder-link:after {
     content: "";
     height: 1em;
     width: 1em;
