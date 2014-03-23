@@ -1292,7 +1292,9 @@
             var destination = $(this).data("id");
             updateLocation(view, destination);
         });
-
+        content.find(".data-row").each(function(index) {
+            this.setAttribute("order", index);
+        });
         content.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
@@ -1712,6 +1714,7 @@
         header.siblings().removeClass("active up down");
         var sortedEntries = view.find(".content ul li").sort(sortFunc);
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
+            sortedEntries[index].setAttribute("order",index);
             $(sortedEntries[index]).css({
                 "order": index,
                 "-ms-flex-order": String(index),
