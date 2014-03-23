@@ -1388,7 +1388,7 @@
             view.find(".new").attr("data-root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
-            view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
+            view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
             setTimeout(function () {
