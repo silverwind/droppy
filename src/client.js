@@ -297,7 +297,7 @@
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
             if (droppy.get("hasLoggedOut") || event.code === 4000) return;
-            if (event.code >= 1002 && event.code < 3999) {
+            if (event.code >= 1001 && event.code < 3999) {
                 if (retries > 0) {
                     // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
                     // TODO: Indicate connection drop in the UI, especially on close code 1006
