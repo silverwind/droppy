@@ -1145,8 +1145,9 @@
         function addPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path);
-            li.click(function () {
+            li.click(function (event) {
                 if (droppy.socketWait) return;
+                var view = $(event.target).parents(".view");
                 if ($(this).is(":last-child")) {
                     if ($(this).parents(".view").data("type") === "directory") {
                         updateLocation(view, $(this).data("destination"));
@@ -1155,6 +1156,7 @@
                     view[0].switchRequest = true; // This is set so we can switch out of a editor view
                     updateLocation(view, $(this).data("destination"));
                 }
+                setTimeout(function () {checkPathOverflow(view); }, 400);
             });
             view.find(".path").append(li);
             li.append(droppy.svg.triangle);
@@ -1170,9 +1172,7 @@
 
         function finalize() {
             view.find(".path li.out:not(.gone)").setTransitionClass("out", "in");
-            setTimeout(function () {
-                checkPathOverflow(view);
-            }, 500);
+            setTimeout(function () {checkPathOverflow(view); }, 400);
         }
     }
 
@@ -1180,17 +1180,16 @@
     function checkPathOverflow(view) {
         var width = 40,
             space = view.width(),
-            pathElements = view.find(".path li");
+            pathElements = view.find(".path li.in");
 
         for (var i = 0, l = pathElements.length; i < l; i++) {
             width += pathElements[i].offsetWidth;
         }
 
         if (width > space) {
-            view.find(".path li").css({"left": space - width + "px"});
+            view.find(".path li").animate({"left": space - width + "px"}, {duration: 200});
         } else {
-            if (view.find(".path li").css("left") !== 0)
-                view.find(".path li").animate({"left": 0}, {duration: 200});
+            view.find(".path li").animate({"left": 0}, {duration: 200});
         }
     }
 
@@ -1408,14 +1407,14 @@
         view.find(".data-row").each(function () {
             var row = $(this);
             row.attr("draggable", "true");
-            row.parents(".view")[0].ondragstart = function (event) {
+            row.parents(".view").register("dragstart", function (event) {
                 var src = $(event.target).parents(".data-row").data("id") || $(event.target).data("id"),
                     img = $(event.target).siblings(".sprite")[0] || $(event.target).children(".sprite")[0];
                 event.dataTransfer.setData("text", src);
                 event.dataTransfer.effectAllowed = "copyMove";
                 if ("setDragImage" in event.dataTransfer)
                     event.dataTransfer.setDragImage(img, 0, 0);
-            };
+            });
         });
     }
 

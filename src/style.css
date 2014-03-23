@@ -260,10 +260,10 @@ input:-webkit-autofill {
     position: relative;
 }
 
-.path li.in  { transform: translateX(0);}
-.path li.out { transform: translateX(-200px) !important;}
+.path li.in  { opacity: 1; transform: translateX(0);}
+.path li.out { opacity: 0; transform: translateX(-100px) !important;}
 .path li:first-of-type { padding-left: .5em }
-.path li { color: #ddd; transition: color .3s ease, transform .5s ease }
+.path li { color: #ccc; transition: transform .4s ease, opacity .4s ease }
 
 .path li:nth-child(odd)        { background: #383838 }
 .path li:nth-child(odd) > .triangle  { fill: #383838 }
