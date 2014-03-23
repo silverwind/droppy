@@ -1057,7 +1057,7 @@
     }
 
     // Listen for popstate events, which indicate the user navigated back
-    $(window).register("popstate", function () {
+    $(window).register("popstate", function (event) {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
         updateLocation(null, [decodeURIComponent(window.location.pathname), decodeURIComponent(window.location.hash.slice(1))], true);
@@ -1072,7 +1072,7 @@
 
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
-        if (typeof destination !== "string" && typeof destination !== "array") throw "Destination needs to be string or array"
+        if (typeof destination.length !== "number") throw "Destination needs to be string or array"
         // Queue the folder switching if we are mid-animation or waiting for the server
         function sendReq(view, viewDest, time) {
             (function queue (time) {
