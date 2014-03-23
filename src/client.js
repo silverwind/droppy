@@ -1344,7 +1344,7 @@
 
             droppy.clipboard = null;
             $("#click-catcher").trigger("click");
-            $(this).replaceClass("in", "out");
+            $(".paste-button").replaceClass("in", "out");
         });
         // Stop navigation when clicking on an <a>
         content.find(".data-row .zip, .entry-link.file").register("click", function (event) {

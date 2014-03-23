@@ -580,8 +580,8 @@
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
                     // In case source and destination are the same, append a number to the file/foldername
-                    utils.getNewPath(msg.data.to, function (name) {
-                        doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
+                    utils.getNewPath(msg.data.to, function (newPath) {
+                        doClipboard(msg.data.type, msg.data.from, newPath);
                     });
                     break;
                 case "CREATE_FOLDER":
