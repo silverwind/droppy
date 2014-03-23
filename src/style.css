@@ -50,8 +50,8 @@ html {
     -webkit-backface-visibility: hidden;
 }
 
-::selection      { background: #f1a; color: #fff }
-::-moz-selection { background: #f1a; color: #fff }
+::selection      { background: #f81; color: #fff }
+::-moz-selection { background: #f81; color: #fff }
 ::-webkit-scrollbar:vertical    { width: 4px }
 ::-webkit-scrollbar:horizontal  { height: 4px }
 ::-webkit-scrollbar-track       { background: transparent}
@@ -334,7 +334,7 @@ input:-webkit-autofill {
 }
 
 #click-catcher.out { opacity: 0  ; visibility: hidden }
-#click-catcher.in  { opacity: .6 ; visibility: visible }
+#click-catcher.in  { opacity: .5 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -1545,29 +1545,40 @@ input[type="checkbox"] { display: none }
 
 @media all and (max-width: 639px), all and (max-height: 399px) { .submit span { line-height: 32px } }
 
-/* ============================= Misc Elements ============================= */
+/* =============================== Info Box ================================ */
 
-#error-box {
-    background: #511;
-    color: #f44;
+#info-box {
     border-radius: 6px;
-    box-shadow: inset 0 0 0 2px #f44;
-    font-size: .8em;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -40%);
     position: fixed;
     transition: all .3s ease;
     z-index: 33;
-    padding: .5em;
     overflow-y: auto;
     opacity: 0;
     visibility: hidden;
+    padding: 1em;
 }
 
-#error-box.in {opacity: 1; visibility: visible;}
+#info-box.info {
+    background: #eee;
+    color: #444;
+    box-shadow: 0 0 30px #111;
+    transform: translate(-50%, -50%);
 
-#error-box h1 {
+}
+
+#info-box.error {
+    background: #eee;
+    color: #f44;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 30px #111;
+}
+
+#info-box.in {opacity: 1; visibility: visible;}
+
+#info-box h1 {
     width: 100%;
     display: block;
     font-size: 1.33em;
@@ -1575,11 +1586,13 @@ input[type="checkbox"] { display: none }
     margin: 0 0 .25em 0;
 }
 
-#error-box span {
+#info-box span {
     text-align: center;
     display: block;
     width: 100%;
 }
+
+/* ============================= Misc Elements ============================= */
 
 .dropzone {
     position: absolute;

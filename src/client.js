@@ -370,8 +370,19 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                //TODO: UI
-                window.prompt("Shortlink:", window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
+                var box = $("#info-box");
+                box.attr("class", "info in");
+                box.children("h1").text("Shortlink");
+                box.children("span").text(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
+                toggleCatcher();
+                // Select the span for to user to copy
+                box.children("span").on("click", function () {
+                    var selection = window.getSelection(),
+                    range = document.createRange();
+                    range.selectNodeContents(box.children("span")[0]);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
                 break;
             case "USER_LIST":
                 if (!$("#options-box").hasClass("in"))
@@ -401,10 +412,12 @@
                     });
                 break;
             case "ERROR":
-                $("#error-box").children("span").text(msg.text);
-                $("#error-box").attr("class", "in");
+                var box = $("#info-box");
+                box.attr("class", "error in");
+                box.children("h1").text("Error");
+                box.children("span").text(msg.text);
                 setTimeout(function () {
-                    $("#error-box").removeAttr("class");
+                    box.removeAttr("class");
                 }, 4000);
                 hideSpinner(getView(vId));
                 break;
@@ -655,6 +668,7 @@
             $("#options-box").replaceClass("in", "out");
             $("#about-box").replaceClass("in", "out");
             $("#entry-menu").replaceClass("in", "out");
+            $("#info-box").removeAttr("class");
             toggleCatcher();
         });
 
@@ -1037,6 +1051,7 @@
     function toggleCatcher() {
         if ($("#about-box").hasClass("in") ||
             $("#options-box").hasClass("in") ||
+            $("#info-box").hasClass("in") ||
             $("#entry-menu").hasClass("in")
         ) {
             $("#click-catcher").attr("class", "in");
