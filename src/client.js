@@ -323,7 +323,7 @@
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
-                if ((!view || view[0].isUploading || view[0].currentFile) && !view[0].switchRequest) return;
+                if ((!view || view[0].isUploading) && !view[0].switchRequest) return;
                 view[0].switchRequest = false;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
@@ -2259,10 +2259,10 @@
 
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.attr("data-type") === "directory") {
-            clearTimeout(view.stuckTimeout);
-            view.stuckTimeout = setTimeout(function () {
-                sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
-            }, 2000);
+            clearTimeout(view[0].stuckTimeout);
+            view[0].stuckTimeout = setTimeout(function () {
+                sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
+            }, 5000);
         }
     }
 
@@ -2270,7 +2270,7 @@
         var spinner = view.find(".spinner");
         if (spinner.length && !spinner.hasClass("out"))
             spinner.addClass("out");
-        if (view.stuckTimeout) clearTimeout(view.stuckTimeout);
+        if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
     }
 
     function debounce(func, wait) {
