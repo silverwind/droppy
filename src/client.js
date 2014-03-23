@@ -1412,7 +1412,7 @@
     }
 
     function handleDrop(view, event, from, to, spinner) {
-        var type, clip;
+        var type, clip, catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
         if (event.shiftKey) {
             sendDrop(view, "cut", from, to);
         }
@@ -1424,13 +1424,25 @@
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            $("#drop-select .move").one("click", function() {
+            catcher.one("mousemove", function () {
+                //$("#drop-select").removeAttr("class");
+                //toggleCatcher();
+            });
+            $("#drop-select .movefile").one("click", function() {
                 sendDrop(view, "cut", from, to);
-                $("#click-catcher").trigger("click");
+                catcher.off("mousemove").trigger("click");
             })
-            $("#drop-select .copy").one("click", function() {
+            $("#drop-select .copyfile").one("click", function() {
                 sendDrop(view, "copy", from, to);
-                $("#click-catcher").trigger("click");
+                catcher.off("mousemove").trigger("click");
+            })
+            $("#drop-select .viewfile").one("click", function() {
+                view[0].currentFolder = dirname(dragData);
+                view[0].currentFile = basename(dragData);
+                view[0].editNew = true;
+                updatePath(view);
+                openFile(view);
+                catcher.off("mousemove").trigger("click");
             })
             return;
         }

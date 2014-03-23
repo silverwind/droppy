@@ -1597,34 +1597,47 @@ input[type="checkbox"] { display: none }
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 8em;
-    line-height: 1.5em;
+    width: 10em;
+    line-height: 2em;
     z-index: 34;
     transform: translate(-50%, -50%);
     background: #fff;
     box-shadow: 0 0 30px #111;
     border-radius: 6px;
     visibility: hidden;
+    transition: visibilty .3s ease, opacity .3s ease;
     font-weight: 400;
     opacity: 0;
+    display: flex;
+    flex-direction: row;
 }
 
 #drop-select span {
-    text-align: center;
     cursor: pointer;
+    text-align: center;
     transition: all .1s ease;
+    flex: 1;
+    font-size: .75em;
 }
 
 #drop-select span:hover {
-    background: #1af; color: #fff;
+    background: #f81; color: #fff;
 }
 
 #drop-select.in { visibility: visible; opacity: 1 }
-#drop-select .copy { width: 50%; float: left  }
-#drop-select .move { width: 50%; float: right }
-#drop-select .copy:hover { border-radius: 6px 0 0 6px }
-#drop-select .move:hover { border-radius: 0 6px 6px 0 }
+#drop-select .movefile:hover { border-radius: 6px 0 0 6px }
+#drop-select .viewfile:hover { border-radius: 0 6px 6px 0 }
 
+@media all and (max-width: 639px) {
+    #drop-select {
+        flex-direction: column;
+        width: 3.5em;
+        font-size: .8em;
+        line-height: 1.75em;
+    }
+    #drop-select .movefile:hover { border-radius: 6px 6px 0 0 }
+    #drop-select .viewfile:hover { border-radius: 0 0 6px 6px }
+}
 /* ============================= Misc Elements ============================= */
 
 .dropzone {
