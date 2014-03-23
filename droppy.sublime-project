@@ -15,7 +15,7 @@
 			"follow_symlinks": true,
 			"path": ".\\",
 			"name": "droppy",
-			"folder_exclude_patterns": ["res", "node_modules", "temp", "files"]
+			"folder_exclude_patterns": ["res", "node_modules", "temp", "files", "lib", "src"]
 		},
 	],
     "settings":
