@@ -685,7 +685,7 @@
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
             tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
             tooltip.attr("class", "in");
-            $("tooltip").text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
+            $("#tooltip").text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
         }), 50);
 
         seekbar.register("mouseleave", debounce(function () {

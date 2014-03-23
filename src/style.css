@@ -1610,6 +1610,7 @@ input[type="checkbox"] { display: none }
     visibility: hidden;
     opacity: 0;
     width: 80px;
+    height: 1.5em;
     text-align: center;
     padding: 2px 6px;
     background: #222;
