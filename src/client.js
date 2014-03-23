@@ -78,9 +78,9 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-        var classes = this[0].className.split(" "), classMatch,
-            hasClass = false;
-        classes = classes.filter(function (className) {
+        var classes, classMatch, hasClass = false;
+        if (typeof this[0] === "undefined") return false;
+        classes = this[0].className.split(" ").filter(function (className) {
             if (className === match) return false;
             if (className === replacement) hasClass = true;
 
@@ -1413,6 +1413,9 @@
 
     function handleDrop(view, event, from, to, spinner) {
         var type, clip, catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
+        $(".drop-hover").removeClass("drop-hover");
+        $(".dropzone").removeClass("in");
+
         if (event.shiftKey) {
             sendDrop(view, "cut", from, to);
         }
@@ -1480,17 +1483,23 @@
                 if (!enter) return el.removeClass("drop-hover");
                 if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
+                    var dropZone = el.parents(".view").find(".dropzone");
                     if (enter && el.parents(".data-row").attr("data-type") === "folder") {
                         el.addClass("drop-hover");
-                        el.parents(".view").find(".dropzone").replaceClass("in", "out");
+                        dropZone.removeClass("in");
                     } else {
-                        el.parents(".view").find(".dropzone").replaceClass("out", "in");
+                        if (!dropZone.hasClass("in")) dropZone.addClass("in");
                     }
                 }
             }, true);
         });
         bindHover(view, false, function (el, event, enter) {
-            el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
+            var dropZone = el.find(".dropzone");
+            if (enter) {
+                if (!dropZone.hasClass("in")) dropZone.addClass("in");
+            } else {
+                dropZone.removeClass("in");
+            }
         });
     }
 
@@ -1524,7 +1533,8 @@
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.children("a").register("drop", function (event) {
-                    $(event.target).removeClass("drop-hover");
+                    $(".drop-hover").removeClass("drop-hover");
+                    $(".dropzone").removeClass("in");
                     var from = event.dataTransfer.getData("text"),
                         to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
 
@@ -1535,13 +1545,10 @@
                 });
             }
         });
-        $(document.documentElement).register("drop", function () {
-            $(".data-row > a").removeClass("drop-hover");
-        });
         view.register("drop", function (event) {
             event.preventDefault();
             event.stopPropagation();
-            view.find(".dropzone").replaceClass("in", "out");
+            $(".dropzone").removeClass("in");
             var items = event.dataTransfer.items,
                 fileItem = null,
                 entryFunc = null,
