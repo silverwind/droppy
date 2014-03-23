@@ -756,15 +756,15 @@
 
             if (!cur || !max) return;
             played.css("width", (cur  / max * 100)  + "%");
-            $("time-cur").text(secsToTime(cur));
-            $("time-max").text(secsToTime(max));
+            $("#time-cur").text(secsToTime(cur));
+            $("#time-max").text(secsToTime(max));
         }
 
         function playing() {
             var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
             droppy.isPlaying = true;
             updateTitle(getView()[0].currentFolder, true);
-            $("audio-title").text(matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
+            $("#audio-title").text(matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
             controls.attr("class", "in");
             fullyLoaded = false;
             droppy.audioUpdater = setInterval(updater, 100);

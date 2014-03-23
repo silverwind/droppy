@@ -932,6 +932,7 @@ input:-webkit-autofill {
     overflow: hidden;
     position: relative;
     transition: all .2s ease;
+    box-shadow: -2px 0 0 2px #444;
     width: 100%;
 }
 
@@ -1043,13 +1044,11 @@ input:-webkit-autofill {
 #seekbar {
     position: absolute;
     width: 100%;
-    height: 8px;
-    border-top: 4px solid #111;
-    top: -2px;
+    height: 4px;
+    top: 0;
     transition: all .2s ease;
     z-index: 4;
 }
-#seekbar:hover { border-top: 6px solid #111; top: -4px; height: 12px }
 
 #seekbar-played {
     position: absolute;
