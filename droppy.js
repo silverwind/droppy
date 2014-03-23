@@ -1307,33 +1307,27 @@
     // Update a directory's content
     function updateDirectory(root, callback) {
         fs.readdir(addFilePath(root), function (error, files) {
-            var dirContents = {}, done = 0, last;
+            var dirContents = {}, fileNames;
             if (error) log.error(error);
-
             if (!files || files.length === 0) {
                 dirs[root] = dirContents;
                 callback();
                 return;
             }
-            last = files.length;
-
-            for (var i = 0 ; i < last; i++) {
-                (function (entry) {
-                    readPath(root + "/" + entry, function (error, info) {
-                        if (error) {
-                            log.error(error);
-                            callback();
-                        } else {
-                            dirContents[entry] = info;
-                            if (++done === last) {
-                                dirs[root] = dirContents;
-                                callback();
-                                generateDirSizes(root, dirContents, callback);
-                            }
-                        }
-                    });
-                })(files[i]);
-            }
+            fileNames = files;
+            files = files.map(function(entry) { return root + "/" + entry});
+            async.map(files, readPath, function(err, results) {
+                var i = fileNames.length;
+                while (i > -1) {
+                    if (results[i]) {
+                        dirContents[fileNames[i]] = results[i];
+                    }
+                    i--;
+                }
+                dirs[root] = dirContents;
+                callback();
+                generateDirSizes(root, dirContents, callback);
+            });
         });
     }
 
