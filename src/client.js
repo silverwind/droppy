@@ -1,7 +1,5 @@
 /*global CodeMirror */
-/*jshint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
-  forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true, devel: true */
+
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -93,7 +91,7 @@
             });
             if (!hasClass) classes.push(replacement);
             elem.className = classes.join(" ");
-        };
+        }
         return this;
     };
 
@@ -333,7 +331,7 @@
                 } else {
                     showSpinner(view);
                     if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
-                        view[0].loaded === true; // Ensure to update path on the first load
+                        view[0].loaded = true; // Ensure to update path on the first load
                         if (view[0].vId === 0)
                             updateTitle(msg.folder, true);
                         view[0].currentFile = null;
@@ -1223,7 +1221,8 @@
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
-                svgIcon = "", classes = "";
+                svgIcon = "";
+                classes = "";
                 type = fileList[file].type;
                 bytes = fileList[file].size;
                 if (!bytes && droppy.sizeCache[folder] && droppy.sizeCache[folder][file])
@@ -2353,13 +2352,5 @@
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
-    }
-
-    // turn /path/to/file to /path/to
-    function dirname(path) {
-        if (path === "/")
-            return "/";
-        else
-            return path.replace(/\/[^\/]*$/, "");
     }
 }(jQuery, window, document));

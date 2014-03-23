@@ -1,11 +1,14 @@
 files/
-examples/
 temp/
-media/
 res/*.js
 res/*.css
 res/*.html
 db.json
 config.json
 droppy*.tgz
+.editorconfig
+.npmignore
+.gitignore
+.gitattributes
 *.sublime-project
+Gruntfile.js
