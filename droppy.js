@@ -76,21 +76,30 @@
     // Argument handler
     if (isCLI) handleArguments();
 
-    config = cfg(path.join(process.cwd(), "config.json"));
+    console.log([
+            "....__..............................\n",
+            ".--|  |----.-----.-----.-----.--.--.\n",
+            "|  _  |   _|  _  |  _  |  _  |  |  |\n",
+            "|_____|__| |_____|   __|   __|___  |\n",
+            ".................|__|..|__|..|_____|\n",
+        ].join("").replace(/\./gm, chalk.black("."))
+                  .replace(/\_/gm, chalk.magenta("_"))
+                  .replace(/\-/gm, chalk.magenta("-"))
+                  .replace(/\|/gm, chalk.magenta("|"))
+    );
+    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
+               chalk.blue("node "), chalk.green(process.version.substring(1), "\n"));
 
+    config = cfg(path.join(process.cwd(), "config.json"));
     log.init(config);
-    log.logo();
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
-
-    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
-               chalk.blue("node "), chalk.green(process.version.substring(1)));
 
     // Read user/sessions from DB and check if its the first run
     readDB();
     firstRun = Object.keys(db.users).length < 1;
 
-    // Listen but refuse requests until ready
+    // Listen but show an loading page until ready
     createListener();
 
     // Copy/Minify JS, CSS and HTML content
