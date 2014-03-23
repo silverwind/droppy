@@ -104,7 +104,7 @@
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
         prepareSVG(function () {
-            setupDirectories( function() {
+            setupDirectories(function () {
                 cleanupLinks();
                 ready = true;
                 log.simple("Ready for requests!");
@@ -234,7 +234,7 @@
     //-----------------------------------------------------------------------------
     // Set up the directory
     function setupDirectories(callback) {
-        cleanupTemp(true, function() {
+        cleanupTemp(true, function () {
             try {
                 mkdirp.sync(config.filesDir, mode.dir);
                 mkdirp.sync(config.incomingDir, mode.dir);
@@ -263,7 +263,7 @@
         currentWatched = Object.keys(watchers);
         if (currentWatched.length > 0) {
             oldWatched = currentWatched;
-            currentWatched.forEach(function(dir) {
+            currentWatched.forEach(function (dir) {
                 watchers[dir].close();
                 delete watchers[dir];
             });
@@ -273,7 +273,7 @@
             deleteFirst: true,
             overwrite: true,
             filter: /(files|db\.json|config\.json|\.git|temp)/
-        }, function(err) {
+        }, function (err) {
             if (err) log.error(err);
             log.simple("Cleaning done.");
             callback();
@@ -283,7 +283,7 @@
     //-----------------------------------------------------------------------------
     // Clean up the directory for incoming files
     function cleanupTemp(initial, callback) {
-        rimraf(config.incomingDir, function(error) {
+        rimraf(config.incomingDir, function (error) {
             if (!initial) return callback();
             if (error) {
                 log.simple("Error cleaning up temporary directories:");
@@ -635,8 +635,8 @@
                         var cbCalled = 0, cbFired = 0;
                         if (!utils.isPathSane(file)) return log.info(ws, null, "Invalid empty file creation request: " + file);
                         cbCalled++;
-                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function() {
-                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function() {
+                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function () {
+                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function () {
                                 log.info(ws, null, "Received: " + file.substring(1));
                                 if (++cbFired === cbCalled) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                             });
@@ -656,7 +656,7 @@
                     reason = "(Going away)";
                     delete clients[cookie];
                 }
-               log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
+                log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
             });
 
             ws.on("error", function (error) {
@@ -726,7 +726,7 @@
                 if (config.logLevel === 3) {
                     var debugData = JSON.parse(data);
                     if (debugData.type === "UPDATE_DIRECTORY")
-                        debugData.data = {"...":"..."};
+                        debugData.data = {"...": "..."};
                     log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
                 }
                 ws.send(data, function (error) {
@@ -756,7 +756,7 @@
         });
         function logError(error) {
             if (!error) return;
-            if (type == "cut")
+            if (type === "cut")
                 log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
             else
                 log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
@@ -817,7 +817,7 @@
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
                     client = clients[cookie];
-                    client.views.forEach(function(view, vId) {
+                    client.views.forEach(function (view, vId) {
                         if (view && view.directory === dir && view.file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
@@ -867,7 +867,7 @@
         for (var cookie in clients) {
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
-                client.views.forEach(function(view, vId) {
+                client.views.forEach(function (view, vId) {
                     if (view && view.directory && view.file === null) {
                         neededDirs[client.views[vId].directory] = true;
                     }
@@ -907,7 +907,7 @@
                 cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
                 cache.res[relPath].mime = mime.lookup(fullPath);
                 if (/.*(js|css|html)$/.test(path.basename(fullPath))) {
-                    (function(filePath, data) {
+                    (function (filePath, data) {
                         cbCalled++;
                         zlib.gzip(data, function (error, gzipped) {
                             if (error) log.error(error);
@@ -931,7 +931,7 @@
                 svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
             });
             cache.res.svg.data = JSON.stringify(svgData);
-            zlib.gzip(new Buffer(cache.res["svg"].data, "utf-8"), function (error, gzipped) {
+            zlib.gzip(new Buffer(cache.res.svg.data, "utf-8"), function (error, gzipped) {
                 cache.res.svg.gzipData = gzipped;
                 cache.res.svg.etag = crypto.createHash("md5").update(String(new Date())).digest("hex");
                 callback();
@@ -1245,7 +1245,7 @@
                             });
                         } else {
                             if (req.query.r === "true") { // Rename option from the client
-                                (function(src, dst) {
+                                (function (src, dst) {
                                     utils.getNewPath(dst, function (newDst) {
                                         moveFile(src, newDst);
                                     });
@@ -1261,9 +1261,9 @@
             closeConnection();
 
             function moveFile(src, dst) {
-              fs.rename(src, dst, function (err) {
-                  if (err) log.error(err);
-              });
+                fs.rename(src, dst, function (err) {
+                    if (err) log.error(err);
+                });
             }
         });
 
@@ -1320,8 +1320,8 @@
                 return;
             }
             fileNames = files;
-            files = files.map(function(entry) { return root + "/" + entry});
-            async.map(files, readPath, function(err, results) {
+            files = files.map(function (entry) { return root + "/" + entry; });
+            async.map(files, readPath, function (err, results) {
                 var i = fileNames.length;
                 while (i > -1) {
                     if (results[i]) {
@@ -1622,7 +1622,6 @@
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
 
     function getResPath(name)  { return path.join(config.resDir, name); }
-    function getSrcPath(name)  { return path.join(config.srcDir, name); }
 
     // removeFilePath is intentionally not an inverse to the add function
     function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }

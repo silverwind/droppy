@@ -15,7 +15,6 @@
     "loopfunc": true,
     "newcap": true,
     "noarg": true,
-    "nonbsp": true,
     "node": true,
     "nonew": true,
     "quotmark": false,
