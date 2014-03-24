@@ -199,7 +199,7 @@
                         "<div class=\"dropzone\">" + droppy.svg["upload-cloud"] + "</div>" +
                     "</div>");
         destroyView(vId);
-        view.appendTo("#view-container");
+        view.appendTo("#view-split-container");
         view[0].vId = vId;
         view[0].currentFolder = "/";
         droppy.views[vId] = view[0];
