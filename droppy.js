@@ -64,8 +64,8 @@
         isCLI     = (process.argv.length > 2),
         mode      = {file: "644", dir: "755"},
         resources = {
-            css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
-            js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
+            css  : [cmPath + "lib/codemirror.css", "node_modules/touch-splitter-jquery/src/touchsplitter.css", "src/style.css", "src/sprites.css"],
+            js   : ["node_modules/jquery/dist/jquery.js", "node_modules/touch-splitter-jquery/src/jquery.touchsplitter.js", "src/client.js", cmPath + "lib/codemirror.js"],
             html : ["src/base.html", "src/auth.html", "src/main.html"]
         };
 

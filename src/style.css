@@ -168,6 +168,14 @@ input:-webkit-autofill {
     transition: all .2s ease;
     overflow-y: auto;
 }
+#view-split-container {
+    position: absolute;
+    bottom: 0;
+    left:0;
+    right:0;
+    top: 0;
+}
+
 
 /* ================================== View ================================= */
 .view {
@@ -183,8 +191,8 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .view { top: 34px } }
 @media all and (max-width:  639px) { .view { top: 27px } }
 
-.view.left  { left:0; right:50%; }
-.view.right { left:50%; right:0; }
+:not(.TouchSplitter)>.view.left  { left:0; right:50%; }
+:not(.TouchSplitter)>.view.right { left:50%; right:0; }
 
 .content {
     width: 100%;
