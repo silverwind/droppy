@@ -758,8 +758,13 @@
             if (!error) return;
             if (type === "cut")
                 log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
-            else
-                log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
+            else  {
+                if (error === "no files to copy") {
+                    mkdirp(to);
+                } else {
+                    log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
+                }
+            }
             log.error(error);
         }
     }
