@@ -196,7 +196,7 @@
         var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content\"></div>" +
-                        "<div class=\"dropzone\">" + droppy.svg["up-arrow"] + "</div>" +
+                        "<div class=\"dropzone\">" + droppy.svg["upload-cloud"] + "</div>" +
                     "</div>");
         destroyView(vId);
         view.appendTo("#view-container");
@@ -1421,24 +1421,23 @@
 
         if (event.shiftKey) {
             sendDrop(view, "cut", from, to, spinner);
-        }
-        else if (event.ctrlKey || event.metaKey || event.altKey)
+        } else if (event.ctrlKey || event.metaKey || event.altKey) {
             sendDrop(view, "copy", from, to, spinner);
-        else {
+        } else {
             $("#drop-select").attr("class", "in").css({
                 left: event.originalEvent.clientX,
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            $("#drop-select .movefile").one("click", function () {
+            $("#drop-select .movefile").off("click").one("click", function () {
                 sendDrop(view, "cut", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
             });
-            $("#drop-select .copyfile").one("click", function () {
+            $("#drop-select .copyfile").off("click").one("click", function () {
                 sendDrop(view, "copy", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
             });
-            $("#drop-select .viewfile").one("click", function () {
+            $("#drop-select .viewfile").off("click").one("click", function () {
                 view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
@@ -1476,55 +1475,52 @@
 
     // Hover evenets for upload arrows
     function bindHoverEvents(view) {
-        view.find(".data-row").each(function () {
-            var row = $(this);
-            bindHover(row, false, function (el, event, enter) {
-                if (!enter) return el.removeClass("drop-hover");
-                if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
-                    event.stopPropagation();
-                    var dropZone = el.parents(".view").find(".dropzone");
-                    if (enter && el.attr("data-type") === "folder") {
-                        el.addClass("drop-hover");
-                        dropZone.removeClass("in");
-                    } else {
-                        if (!dropZone.hasClass("in")) dropZone.addClass("in");
+        view.register("dragenter", function (event) {
+            event.stopPropagation();
+            var target = $(event.target),
+                view = target.parents(".view"),
+                dropzone = view.children(".dropzone"),
+                dragSource = event.dataTransfer.getData("text"),
+                row;
+            if (dragSource) { // internal source
+                if (target.hasClass("folder-link")) {
+                    row = target.parent();
+                    event.preventDefault();
+                    if (!row.hasClass("drop-hover")) {
+                        if (row.attr("data-id") !== dragSource)
+                            row.addClass("drop-hover");
+                        view.children(".dropzone").attr("class", "out");
+                    }
+                } else {
+                    view.find(".drop-hover").removeClass("drop-hover");
+                }
+            } else { // external source
+                if (target.hasClass("content") || target.parents().hasClass("content")) {
+                    $(".dropzone").each(function () {
+                        if (this !== dropzone[0]) $(this).removeClass("in");
+                    });
+                    if (!dropzone.hasClass("in")) dropzone.addClass("in");
+
+                }
+            }
+        });
+        view.register("dragover", function (event) {
+            event.preventDefault();
+        });
+        view.register("dragleave", function (event) {
+            event.stopPropagation();
+            var target = $(event.target),
+                dragSource = event.dataTransfer.getData("text"),
+                row;
+            if (dragSource) { // internal source
+                if (target.hasClass("folder-link")) {
+                    row = target.parent();
+                    if (row.hasClass("drop-hover")) {
+                        row.removeClass("drop-hover");
                     }
                 }
-            }, true);
-        });
-        bindHover(view, false, function (el, event, enter) {
-            var dropZone = el.find(".dropzone");
-            if (enter) {
-                if (!dropZone.hasClass("in")) dropZone.addClass("in");
-            } else {
-                dropZone.removeClass("in");
             }
         });
-    }
-
-    // Bind hover events to an element
-    function bindHover(el, stopProp, callback) {
-        var isHovering, endTimer;
-        function enter(event) {
-            event.preventDefault(); // Allow the event
-            if (stopProp) event.stopPropagation(); // Optionally stop bubbling
-            clearTimeout(endTimer);
-            if (!isHovering) {
-                isHovering = true;
-                callback(el, event, true);
-            }
-        }
-        function leave(event) {
-            if (stopProp) event.stopPropagation();
-            clearTimeout(endTimer);
-            endTimer = setTimeout(end, 50);
-        }
-        function end(event) {
-            isHovering = false;
-            callback(el, event, false);
-        }
-        el.register("dragenter dragover", enter);
-        el.register("dragleave dragend", leave);
     }
 
     function bindDropEvents(view) {
@@ -1532,6 +1528,8 @@
             var row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.register("drop", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     $(".drop-hover").removeClass("drop-hover");
                     $(".dropzone").removeClass("in");
                     var from = event.dataTransfer.getData("text"),
@@ -1539,8 +1537,7 @@
 
                     to = fixRootPath(to + "/" + basename(from));
                     if (from) handleDrop(view, event, from, to);
-                    event.preventDefault();
-                    event.stopPropagation();
+
                 });
             }
         });
@@ -1548,7 +1545,8 @@
             event.preventDefault();
             event.stopPropagation();
             $(".dropzone").removeClass("in");
-            var items = event.dataTransfer.items,
+            var view = $(event.target).parents(".view"),
+                items = event.dataTransfer.items,
                 fileItem = null,
                 entryFunc = null,
                 dragData = event.dataTransfer.getData("text");
