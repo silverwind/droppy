@@ -1415,7 +1415,9 @@
     }
 
     function handleDrop(view, event, from, to, spinner) {
-        var catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
+        var catcher = $("#click-catcher"),
+            dropSelect = $("#drop-select"),
+            dragData = event.dataTransfer.getData("text");
         $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
 
@@ -1424,20 +1426,29 @@
         } else if (event.ctrlKey || event.metaKey || event.altKey) {
             sendDrop(view, "copy", from, to, spinner);
         } else {
-            $("#drop-select").attr("class", "in").css({
-                left: event.originalEvent.clientX,
+            // Keep the drop-select in view
+            var limit = dropSelect[0].offsetWidth / 2 - 20, left;
+            if (event.originalEvent.clientX < limit)
+                left = event.originalEvent.clientX + limit;
+            else if ((event.originalEvent.clientX + limit) > window.innerWidth)
+                left = event.originalEvent.clientX - limit;
+            else
+                left = event.originalEvent.clientX;
+
+            dropSelect.attr("class", "in").css({
+                left: left,
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            $("#drop-select .movefile").off("click").one("click", function () {
+            dropSelect.children(".movefile").off("click").one("click", function () {
                 sendDrop(view, "cut", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
             });
-            $("#drop-select .copyfile").off("click").one("click", function () {
+            dropSelect.children(".copyfile").off("click").one("click", function () {
                 sendDrop(view, "copy", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
             });
-            $("#drop-select .viewfile").off("click").one("click", function () {
+            dropSelect.children(".viewfile").off("click").one("click", function () {
                 view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
