@@ -768,7 +768,6 @@
     // snippet from: http://stackoverflow.com/a/14387791/2096729
     function copyFile(from, to, cb) {
         var cbCalled = false;
-
         from = fs.createReadStream(from);
         from.on("error", function (err) {
             done(err);

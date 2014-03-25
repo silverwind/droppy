@@ -285,6 +285,7 @@
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
             if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
+            else if (droppy.debug) location.reload() // if in debug mode reload to see changes to client.js
             if (droppy.queuedData)
                 sendMessage();
             else {
@@ -1474,26 +1475,25 @@
 
     // Hover evenets for upload arrows
     function bindHoverEvents(view) {
+        var dropZone = view.find(".dropzone");
         view.find(".data-row").each(function () {
             var row = $(this);
             bindHover(row, false, function (el, event, enter) {
-                if (!enter) return el.removeClass("drop-hover");
-                if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
+                if (!enter) el.removeClass("drop-hover");
+                else if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
                     event.stopPropagation();
-                    var dropZone = el.parents(".view").find(".dropzone");
                     if (enter && el.attr("data-type") === "folder") {
                         el.addClass("drop-hover");
                         dropZone.removeClass("in");
                     } else {
-                        if (!dropZone.hasClass("in")) dropZone.addClass("in");
+                        dropZone.addClass("in");
                     }
                 }
-            }, true);
+            });
         });
         bindHover(view, false, function (el, event, enter) {
-            var dropZone = el.find(".dropzone");
             if (enter) {
-                if (!dropZone.hasClass("in")) dropZone.addClass("in");
+                dropZone.addClass("in");
             } else {
                 dropZone.removeClass("in");
             }
