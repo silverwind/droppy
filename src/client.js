@@ -1788,7 +1788,6 @@
     function closeDoc(view) {
         view[0].switchRequest = true;
         view[0].editor = null;
-        view[0].currentFile = null;
         updateLocation(view, view[0].currentFolder);
     }
 
