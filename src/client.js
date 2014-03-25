@@ -628,7 +628,7 @@
         $("#split-button").register("click", function () { split(); });
 
         var split = droppy.split = function (dest) {
-            var first, button;
+            var first, second, button;
             button = $("#split-button");
             button.off("click");
             first = getView(0);
@@ -638,21 +638,24 @@
                         dest = fixRootPath(first[0].currentFolder + "/" + first[0].currentFile);
                     else
                         dest = fixRootPath(first[0].currentFolder);
-                newView(dest, 1);
+                second = newView(dest, 1);
                 $("#view-split-container").touchSplit({ dock: "both", leftMin: 300, rightMin: 300 });
                 button.children(".button-text").text("Merge");
                 button.attr("title", "Merge views back into a single one");
+                second.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+                    button.register("click", split);
+                    event.stopPropagation();
+                });
             } else {
                 $("#view-split-container")[0].touchSplitter.destroy();
                 destroyView(1);
                 window.history.replaceState(null, null, first[0].currentFolder); // removes the hash
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
+                setTimeout(function () {
+                    button.register("click", split);
+                }, 0);
             }
-            first.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                button.register("click", split);
-                event.stopPropagation();
-            });
         };
 
         $("#about-button").register("click", function () {
