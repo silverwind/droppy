@@ -1213,7 +1213,7 @@ input:-webkit-autofill {
 }
 
 #options-box .list-options label {
-    text-align: Left;
+    text-align: left;
     width: calc(50% - .25em);
     font-weight: 400;
 }
@@ -1253,9 +1253,8 @@ input:-webkit-autofill {
     text-overflow: "";
 }
 
-#options-box .list-options select::-ms-expand { display: none }
 #options-box .list-options div { position:relative }
-#options-box .list-options div:after {
+html:not(.ie) #options-box .list-options div:after {
     content: "";
     background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cG9seWdvbiBwb2ludHM9IjEwLDE2IDIyLDE2IDE2LDI0IiBmaWxsPSIjNjY2Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxNCAyMiwxNCAxNiw2IiBmaWxsPSIjNjY2Ii8+PC9zdmc+Cg==), linear-gradient(#fff,#fff);
     background-size: contain;
@@ -1270,7 +1269,7 @@ input:-webkit-autofill {
     pointer-events: none;
 }
 
-#options-box .list-options div:before {
+html:not(.ie) #options-box .list-options div:before {
     content: "";
     position: absolute;
     top: 0; bottom: 0; left: 0; right: -2px;
@@ -1308,8 +1307,8 @@ input:-webkit-autofill {
     background: #fff;
     text-align: center;
     border-radius: 6px;
-    width: 60%;
-    margin-left: 20%;
+    width: 40%;
+    margin-left: 30%;
     margin-top: .5em;
     cursor: pointer;
     transition: background .2s ease;
@@ -1317,7 +1316,7 @@ input:-webkit-autofill {
     margin-bottom: .5em;
 }
 #options-box .list-user .add-user:hover {
-    background: #1af;
+    background: #f81;
     color: #fff;
 }
 #options-box .list-user .add-user:hover svg {
@@ -1654,11 +1653,15 @@ input[type="checkbox"] { display: none }
 
 .dropzone svg {
     position: absolute;
-    left: 25%;
-    top: 25%;
-    height: 50%;
-    width: 50%;
+    left: 30%;
+    top: 35%;
+    height: 30%;
+    width: 40%;
     fill: #aaa;
+    stroke: #888;
+    stroke-width: .25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 #tooltip {
