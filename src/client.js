@@ -1419,7 +1419,7 @@
         var catcher = $("#click-catcher"),
             dropSelect = $("#drop-select"),
             dragData = event.dataTransfer.getData("text");
-        droppy.dragSource = null;
+        droppy.dragTimer.clear();
         $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
 
@@ -1475,14 +1475,35 @@
         view.find(".data-row").attr("draggable", "true");
         view.register("dragstart", function (event) {
             var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
-            droppy.dragSource = row.data("id");
+            droppy.dragTimer.refresh(row.data("id"));
             event.dataTransfer.setData("text", row.data("id"));
             event.dataTransfer.effectAllowed = "copyMove";
             if ("setDragImage" in event.dataTransfer)
                 event.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
         });
     }
+    droppy.dragTimer = new (function () {
+        var dt = function () {
 
+        };
+        dt.prototype.timer = null;
+        dt.prototype.data = "";
+        dt.prototype.isInternal = false;
+        dt.prototype.refresh = function (data) {
+            if (typeof data === "string")
+                this.data = data, this.isInternal = true;
+            clearTimeout(this.timer)
+            this.timer = setTimeout(this.clear, 1000);
+        }
+        dt.prototype.clear = function () {
+            if (!this.isInternal)
+                $(".dropzone").removeClass("in");
+            clearTimeout(this.timer);
+            this.isInternal = false;
+            this.data = "";
+        }
+        return dt;
+    }())();
     // Hover evenets for upload arrows
     function bindHoverEvents(view) {
         var dropZone = view.find(".dropzone");
@@ -1490,12 +1511,12 @@
             event.stopPropagation();
             var target = $(event.target),
                 row;
-            if (droppy.dragSource) { // internal source
+            if (droppy.dragTimer.isInternal) { // internal source
                 if (target.hasClass("folder-link")) {
                     row = target.parent();
                     event.preventDefault();
                     if (!row.hasClass("drop-hover")) {
-                        if (row.attr("data-id") !== droppy.dragSource)
+                        if (row.attr("data-id") !== droppy.dragTimer.data)
                             $(".drop-hover").removeClass("drop-hover"),
                             row.addClass("drop-hover");
                         dropZone.removeClass("in");
@@ -1514,12 +1535,13 @@
         });
         view.register("dragover", function (event) {
             event.preventDefault();
+            droppy.dragTimer.refresh();
         });
         view.register("dragleave", function (event) {
             event.stopPropagation();
             var target = $(event.target),
                 row;
-            if (droppy.dragSource) { // internal source
+            if (droppy.dragTimer.isInternal) { // internal source
                 if (target.hasClass("folder-link")) {
                     row = target.parent();
                     if (row.hasClass("drop-hover")) {
