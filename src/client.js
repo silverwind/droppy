@@ -628,24 +628,24 @@
         $("#split-button").register("click", function () { split(); });
 
         var split = droppy.split = function (dest) {
-            var first, second, button;
+            var first, button;
             button = $("#split-button");
             button.off("click");
             first = getView(0);
             if (droppy.views.length === 1) {
-                first.addClass("left");
                 if (typeof dest !== "string")
                     if (first[0].currentFile)
                         dest = fixRootPath(first[0].currentFolder + "/" + first[0].currentFile);
                     else
                         dest = fixRootPath(first[0].currentFolder);
-                second = newView(dest, 1).addClass("right");
+                newView(dest, 1);
+                $("#view-split-container").touchSplit({ dock: "both", leftMin: 300, rightMin: 300 });
                 button.children(".button-text").text("Merge");
                 button.attr("title", "Merge views back into a single one");
             } else {
+                $("#view-split-container")[0].touchSplitter.destroy();
                 destroyView(1);
                 window.history.replaceState(null, null, first[0].currentFolder); // removes the hash
-                getView(0).removeClass("left");
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
             }
