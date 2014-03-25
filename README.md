@@ -15,7 +15,7 @@ A personal cloud storage solution with a speedy HTML5 interface, running on [nod
 * Perform Drag and Drop operations between multiple directory views. Hold CTRL/CMD to copy.
 * Basic file system operations: Cut, Copy, Rename, Delete.
 * Playback of audio files supported by via the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
-* Support for shortened links for to share with your friends.
+* Support for shortened links to share file downloads with your friends without them needing to log in.
 
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
