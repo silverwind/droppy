@@ -106,7 +106,7 @@ input:-webkit-autofill {
 }
 
 @media all and (min-width: 1024px) { #buttons { line-height: 35px } }
-@media all and (max-width: 1023px) { #buttons { line-height: 30px } }
+@media all and (max-width: 1023px) { #buttons { line-height: 32px } }
 @media all and (max-width:  639px) { #buttons { line-height: 25px } }
 
 .button {
@@ -191,6 +191,20 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .view { top: 34px } }
 @media all and (max-width:  639px) { .view { top: 27px } }
 
+.TouchSplitter .splitter-bar:before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    left:0;
+    right: 0;
+    background: linear-gradient(#111,#222);
+    border-bottom: 2px solid #444;
+}
+
+@media all and (min-width: 1024px) { .TouchSplitter .splitter-bar:before { top: 39px; height: 35px; } }
+@media all and (max-width: 1023px) { .TouchSplitter .splitter-bar:before { top: 34px; height: 30px; } }
+@media all and (max-width:  639px) { .TouchSplitter .splitter-bar:before { top: 27px; height: 25px; } }
+
 :not(.TouchSplitter)>.view.left  { left:0; right:50%; }
 :not(.TouchSplitter)>.view.right { left:50%; right:0; }
 
@@ -241,7 +255,7 @@ input:-webkit-autofill {
    position: absolute;
 }
 
-.view.right .path { border-left: 2px solid #444}
+.view.right .path, .TouchSplitter .view:nth-child(3) .path { border-left: 2px solid #444}
 
 @media all and (min-width: 1024px) { .path { height: 37px; font-size: .9em } }
 @media all and (max-width: 1023px) { .path { height: 32px; font-size: .8em } }
