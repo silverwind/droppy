@@ -1661,11 +1661,15 @@ input[type="checkbox"] { display: none }
 
 .dropzone svg {
     position: absolute;
-    left: 25%;
-    top: 25%;
-    height: 50%;
-    width: 50%;
+    left: 30%;
+    top: 35%;
+    height: 30%;
+    width: 40%;
     fill: #aaa;
+    stroke: #888;
+    stroke-width: .25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 #tooltip {
