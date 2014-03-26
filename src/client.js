@@ -153,31 +153,6 @@
     else if (navigator.userAgent.toLowerCase().indexOf("msie") > -1)
         $("html").addClass("ie");
 // ============================================================================
-//  Map touch events to mouse events when necessary
-// ============================================================================
-    if ("ontouchstart" in document.documentElement) {
-        $(function () {
-            function touchHandler(event) {
-                var touch = event.changedTouches[0],
-                    simulatedEvent = document.createEvent("MouseEvent");
-                simulatedEvent.initMouseEvent({
-                    touchstart: "mousedown",
-                    touchmove: "mousemove",
-                    touchend: "mouseup"
-                }[event.type], true, true, window, 1,
-                    touch.screenX, touch.screenY,
-                    touch.clientX, touch.clientY, false,
-                    false, false, false, 0, null);
-                touch.target.dispatchEvent(simulatedEvent);
-                event.preventDefault();
-            }
-            document.addEventListener("touchstart", touchHandler, true);
-            document.addEventListener("touchmove", touchHandler, true);
-            document.addEventListener("touchend", touchHandler, true);
-            document.addEventListener("touchcancel", touchHandler, true);
-        });
-    }
-// ============================================================================
 //  View handling
 // ============================================================================
     function getView(id) {
@@ -407,7 +382,7 @@
                 if (droppy.demoMode || droppy.noLogin)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
-                    $("#logout-button").register("click touchstart", function () {
+                    $("#logout-button").register("click", function () {
                         if (droppy.socket) droppy.socket.close(4001);
                         deleteCookie("session");
                         initVariables(); // Reset vars to their init state
@@ -505,7 +480,7 @@
             }
         });
 
-        submit.register("click touchstart", function () { form.submit(); });
+        submit.register("click", function () { form.submit(); });
         form.register("submit", function () {
             $.ajax({
                 type: "POST",
@@ -574,7 +549,7 @@
         });
 
         // File upload button
-        $("#upload-file-button").register("click touchstart", function () {
+        $("#upload-file-button").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog!
             if (droppy.detects.fileinputdirectory)
                 $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
@@ -584,7 +559,7 @@
         // Folder upload button - check if we support directory uploads
         if (droppy.detects.fileinputdirectory) {
             // Directory uploads supported - enable the button
-            $("#upload-folder-button").register("click touchstart", function () {
+            $("#upload-folder-button").register("click", function () {
                 // Set the directory attribute so we get a directory picker dialog
                 fileInput.attr({
                     directory: "directory",
@@ -601,7 +576,7 @@
                 .attr("title", "Sorry, your browser doesn't support directory uploading yet!");
         }
 
-        $("#create-folder-button").register("click touchstart", function () {
+        $("#create-folder-button").register("click", function () {
             var dummyFolder, wasEmpty,
                 view = getView(), // TODO: Create folder in last active view
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
@@ -626,7 +601,7 @@
             });
         });
 
-        $("#split-button").register("click touchstart", function () { split(); });
+        $("#split-button").register("click", function () { split(); });
 
         var split = droppy.split = function (dest) {
             var first, second, button;
@@ -651,24 +626,24 @@
                 button.attr("title", "Split the view in half");
             }
             first.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                button.register("click touchstart", split);
+                button.register("click", split);
                 event.stopPropagation();
             });
         };
 
-        $("#about-button").register("click touchstart", function () {
+        $("#about-button").register("click", function () {
             requestAnimation(function () {
                 $("#about-box").attr("class", $("#about-box").attr("class") !== "in" ? "in" : "out");
                 toggleCatcher();
             });
         });
 
-        $("#options-button").register("click touchstart", function () {
+        $("#options-button").register("click", function () {
             sendMessage(null, "GET_USERS");
         });
 
         // Hide modals when clicking outside their box
-        $("#click-catcher").register("click touchstart", function () {
+        $("#click-catcher").register("click", function () {
             $("#options-box").replaceClass("in", "out");
             $("#about-box").replaceClass("in", "out");
             $("#entry-menu").replaceClass("in", "out");
@@ -689,12 +664,12 @@
             tooltip    = $("#tooltip"),
             player     = $("#audio-player")[0];
 
-        volumeIcon.register("click touchstart", function () {
+        volumeIcon.register("click", function () {
             slider.attr("class", slider.attr("class") === "" ? "in" : "");
             level.attr("class", level.attr("class") === "" ? "in" : "");
         });
 
-        seekbar.register("click touchstart", function (event) {
+        seekbar.register("click", function (event) {
             player.currentTime = player.duration * (event.clientX / window.innerWidth);
         });
 
@@ -887,7 +862,7 @@
 
         // Init the UI
         uploadInit(view, numFiles);
-        $(".upload-cancel").register("click touchstart", function () {
+        $(".upload-cancel").register("click", function () {
             xhr.abort();
             uploadCancel(view);
         });
@@ -1167,7 +1142,7 @@
         function addPart(name, path) {
             var li = $("<li class='out'>" + name + "</li>");
             li.data("destination", path);
-            li.register("click touchstart", function (event) {
+            li.register("click", function (event) {
                 if (droppy.socketWait) return;
                 var view = $(event.target).parents(".view");
                 if ($(this).is(":last-child")) {
@@ -1285,13 +1260,13 @@
             content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
         loadContent(view, content);
         // Upload button on empty page
-        content.find(".empty").register("click touchstart", function () {
+        content.find(".empty").register("click", function () {
             if (droppy.detects.fileinputdirectory)
                 $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
             $("#file").click();
         });
         // Switch into a folder
-        content.find(".data-row[data-type='folder']").register("click touchstart", function (event) {
+        content.find(".data-row[data-type='folder']").register("click", function (event) {
             event.preventDefault();
             if (droppy.socketWait) return;
             var destination = $(this).data("id");
@@ -1300,7 +1275,7 @@
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
-        content.find(".data-row .entry-menu").register("click touchstart", function (event) {
+        content.find(".data-row .entry-menu").register("click", function (event) {
             event.stopPropagation();
             var entry = $(this).parent("li.data-row"),
                 type = entry.find(".sprite").attr("class"),
@@ -1334,7 +1309,7 @@
             });
         });
         // Paste a file/folder into a folder
-        content.find(".paste-button").register("click touchstart", function (event) {
+        content.find(".paste-button").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
             if (droppy.clipboard) {
@@ -1350,7 +1325,7 @@
             $(".paste-button").replaceClass("in", "out");
         });
         // Stop navigation when clicking on an <a>
-        content.find(".data-row .zip, .entry-link.file").register("click touchstart", function (event) {
+        content.find(".data-row .zip, .entry-link.file").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
 
@@ -1362,14 +1337,14 @@
             }, 2000);
         });
         // Request a shortlink
-        content.find(".data-row .shortlink").register("click touchstart", function () {
+        content.find(".data-row .shortlink").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage(null, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
         });
-        content.find(".icon-play").register("click touchstart", function () {
+        content.find(".icon-play").register("click", function () {
             preparePlayback($(this));
         });
-        content.find(".header-name, .header-mtime, .header-size").register("click touchstart", function () {
+        content.find(".header-name, .header-mtime, .header-size").register("click", function () {
             sortByHeader(view, $(this));
         });
         setClickAction();
@@ -1670,7 +1645,7 @@
 
     function initEntryMenu() {
         // Rename a file/folder
-        $("#entry-menu .rename").register("click touchstart", function (event) {
+        $("#entry-menu .rename").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target"),
@@ -1685,7 +1660,7 @@
         });
 
         // Copy/cut a file/folder
-        $("#entry-menu .copy, #entry-menu .cut").register("click touchstart", function (event) {
+        $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
             event.stopPropagation();
             var entry = $("#entry-menu").data("target");
             droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
@@ -1695,7 +1670,7 @@
         });
 
         // Open a file/folder in browser
-        $("#entry-menu .open").register("click touchstart", function (event) {
+        $("#entry-menu .open").register("click", function (event) {
             event.stopPropagation();
             var entry = $("#entry-menu").data("target"),
                 url = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
@@ -1719,7 +1694,7 @@
         });
 
         // Edit a file/folder in a text editor
-        $("#entry-menu .edit").register("click touchstart", function (event) {
+        $("#entry-menu .edit").register("click", function (event) {
             event.stopPropagation();
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
@@ -1728,7 +1703,7 @@
         });
 
         // Delete a file/folder
-        $("#entry-menu .delete").register("click touchstart", function () {
+        $("#entry-menu .delete").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage(null, "DELETE_FILE", $("#entry-menu").data("target").data("id"));
             $("#click-catcher").trigger("click");
@@ -1783,7 +1758,7 @@
     function setClickAction() {
         if (droppy.get("clickAction") !== "download") {
             // TODO: Use a common function with the entry menu
-            $(".file-link").register("click touchstart", function (event) {
+            $(".file-link").register("click", function (event) {
                 var view = $(event.target).parents(".view");
                 if (droppy.socketWait) return;
                 event.preventDefault();
@@ -1904,18 +1879,18 @@
                     mode: mode
                 });
                 $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
-                doc.find(".exit").register("click touchstart", function () {
+                doc.find(".exit").register("click", function () {
                     closeDoc(view);
                     editor = null;
                 });
-                doc.find(".save").register("click touchstart", function () {
+                doc.find(".save").register("click", function () {
                     showSpinner(view);
                     sendMessage(view[0].vId, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
                     });
                 });
-                doc.find(".ww").register("click touchstart", function () {
+                doc.find(".ww").register("click", function () {
                     if (editor.options.lineWrapping) {
                         editor.setOption("lineWrapping", false);
                         droppy.set("lineWrapping", false);
@@ -2035,7 +2010,7 @@
     }
 
     function bindUserlistEvents() {
-        $(".add-user").register("click touchstart", function () {
+        $(".add-user").register("click", function () {
             var user = window.prompt("Username?"),
                 pass = window.prompt("Password?");
             if (!user || !pass) return;
