@@ -24,7 +24,7 @@
     "mkdirp": "~0.3.5",
     "rimraf": "~2.2.6",
     "spdy": "~1.24.0",
-    "touch-splitter-jquery": "~0.3.4",
+    "touch-splitter-jquery": "~0.4.0",
     "uglify-js": "~2.4.13",
     "ws": "~0.4.31"
   },
