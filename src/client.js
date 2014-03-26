@@ -462,7 +462,7 @@
         });
 
         // Return submits the form
-        $(".login-input").register("keyup", function (event) {
+        $("#pass").register("keyup", function (event) {
             if (event.keyCode === 13) {
                 form.submit();
             }
