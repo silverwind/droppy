@@ -467,7 +467,8 @@
                     send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
                         debug: config.debug,
                         demoMode: config.demoMode,
-                        noLogin: config.noLogin
+                        noLogin: config.noLogin,
+                        maxFileSize: config.maxFileSize
                     }}));
                     break;
                 case "REQUEST_UPDATE":
@@ -1200,7 +1201,7 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var busboy, done = false, files = [], cookie = getCookie(req.headers.cookie);
+        var busboy, opts, done = false, files = [], cookie = getCookie(req.headers.cookie);
 
         req.query = qs.parse(req.url.substring("/upload?".length));
         log.info(req, res, "Upload started");
@@ -1214,7 +1215,11 @@
             return;
         }
 
-        busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}});
+        opts = { headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
+
+        if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
+        busboy = new Busboy(opts);
+
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,

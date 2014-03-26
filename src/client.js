@@ -379,6 +379,7 @@
                 droppy.debug = msg.settings.debug;
                 droppy.demoMode = msg.settings.demoMode;
                 droppy.noLogin = msg.settings.noLogin;
+                droppy.maxFileSize = msg.settings.maxFileSize;
                 if (droppy.demoMode || droppy.noLogin)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
@@ -391,13 +392,7 @@
                     });
                 break;
             case "ERROR":
-                var infobox = $("#info-box");
-                infobox.attr("class", "error in");
-                infobox.children("h1").text("Error");
-                infobox.children("span").text(msg.text);
-                setTimeout(function () {
-                    infobox.removeAttr("class");
-                }, 4000);
+                showError(msg.text);
                 hideSpinner(getView(vId));
                 break;
             }
@@ -802,6 +797,11 @@
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
+                if (droppy.maxFileSize > 0 && data[i].size > droppy.maxFileSize) {
+                    var si = convertToSI(droppy.maxFileSize);
+                    showError("Maximum file size for uploads is " + si.size + si.unit);
+                    return;
+                }
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
                 getView()[0].currentData[filename] = {
@@ -2325,6 +2325,16 @@
         if (spinner.length && !spinner.hasClass("out"))
             spinner.addClass("out");
         if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
+    }
+
+    function showError(text) {
+        var infobox = $("#info-box");
+        infobox.attr("class", "error in");
+        infobox.children("h1").text("Error");
+        infobox.children("span").text(text);
+        setTimeout(function () {
+            infobox.removeAttr("class");
+        }, 4000);
     }
 
     function debounce(func, wait) {
