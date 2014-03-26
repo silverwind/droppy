@@ -1901,9 +1901,10 @@
                     lineNumbers: true,
                     autofocus: true,
                     keyMap: "sublime",
-                    mode: mode
+                    mode: mode,
+                    value: data
                 });
-                $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                     editor = null;
@@ -1927,17 +1928,14 @@
                 });
                 setTimeout(function () {
                     editor.setOption("readOnly", readOnly);
-                    editor.setValue(data);
                     editor.clearHistory();
                     editor.refresh();
-                    $(editor).register("change", function () {
-                        if (!view[0].editNew) {
+                    editor.on("change", function () {
+                        if (view[0].editNew) {
+                            view[0].editNew = false;
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
-                    });
-                    $(editor).register("keyup", function () {
-                        view[0].editNew = false;
-                    });
+                    })
                     // Keyboard shortcuts
                     $(window).register("keydown", function (e) {
                         if (editor && (e.metaKey || e.ctrlKey)) {
@@ -1954,7 +1952,7 @@
                         }
                     });
                     hideSpinner(view);
-                }, 1000);
+                }, 5000);
             },
             error : function () {
                 closeDoc(view);
