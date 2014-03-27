@@ -1836,26 +1836,26 @@
                     '<div class="text-editor"></div>' +
                 '</div>'
             );
-        loadContent(view, contentWrap(view).append(doc));
-        showSpinner(view);
-        view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-            styleSelectedText: true,
-            readOnly: true,
-            showCursorWhenSelecting: true,
-            theme: droppy.get("theme"),
-            indentWithTabs: droppy.get("indentWithTabs"),
-            indentUnit: droppy.get("indentUnit"),
-            lineWrapping: droppy.get("lineWrapping"),
-            lineNumbers: true,
-            autofocus: true,
-            keyMap: "sublime"
-        });
 
         $.ajax({
             type: "GET",
             url: url,
             dataType: "text",
             success : function (data) {
+                loadContent(view, contentWrap(view).append(doc));
+                showSpinner(view);
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                    styleSelectedText: true,
+                    readOnly: true,
+                    showCursorWhenSelecting: true,
+                    theme: droppy.get("theme"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    indentUnit: droppy.get("indentUnit"),
+                    lineWrapping: droppy.get("lineWrapping"),
+                    lineNumbers: true,
+                    autofocus: true,
+                    keyMap: "sublime"
+                });
                 // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
                 // $.getScript()
                 var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
