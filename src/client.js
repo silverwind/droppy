@@ -153,31 +153,6 @@
     else if (navigator.userAgent.toLowerCase().indexOf("msie") > -1)
         $("html").addClass("ie");
 // ============================================================================
-//  Map touch events to mouse events when necessary
-// ============================================================================
-    if ("ontouchstart" in document.documentElement) {
-        $(function () {
-            function touchHandler(event) {
-                var touch = event.changedTouches[0],
-                    simulatedEvent = document.createEvent("MouseEvent");
-                simulatedEvent.initMouseEvent({
-                    touchstart: "mousedown",
-                    touchmove: "mousemove",
-                    touchend: "mouseup"
-                }[event.type], true, true, window, 1,
-                    touch.screenX, touch.screenY,
-                    touch.clientX, touch.clientY, false,
-                    false, false, false, 0, null);
-                touch.target.dispatchEvent(simulatedEvent);
-                event.preventDefault();
-            }
-            document.addEventListener("touchstart", touchHandler, true);
-            document.addEventListener("touchmove", touchHandler, true);
-            document.addEventListener("touchend", touchHandler, true);
-            document.addEventListener("touchcancel", touchHandler, true);
-        });
-    }
-// ============================================================================
 //  View handling
 // ============================================================================
     function getView(id) {
@@ -404,6 +379,7 @@
                 droppy.debug = msg.settings.debug;
                 droppy.demoMode = msg.settings.demoMode;
                 droppy.noLogin = msg.settings.noLogin;
+                droppy.maxFileSize = msg.settings.maxFileSize;
                 if (droppy.demoMode || droppy.noLogin)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
@@ -416,13 +392,7 @@
                     });
                 break;
             case "ERROR":
-                var infobox = $("#info-box");
-                infobox.attr("class", "error in");
-                infobox.children("h1").text("Error");
-                infobox.children("span").text(msg.text);
-                setTimeout(function () {
-                    infobox.removeAttr("class");
-                }, 4000);
+                showError(msg.text);
                 hideSpinner(getView(vId));
                 break;
             }
@@ -492,7 +462,7 @@
         });
 
         // Return submits the form
-        $(".login-input").register("keyup", function (event) {
+        $("#pass").register("keyup", function (event) {
             if (event.keyCode === 13) {
                 form.submit();
             }
@@ -548,8 +518,11 @@
                     checkPathOverflow($(this));
                 });
             }, 100);
+        })
+        .on("keyup", function (event) {
+            if (event.keyCode === 27) // Escape Key
+                $("#click-catcher").click();// Hide open modals
         });
-
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -827,6 +800,11 @@
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
+                if (droppy.maxFileSize > 0 && data[i].size > droppy.maxFileSize) {
+                    var si = convertToSI(droppy.maxFileSize);
+                    showError("Maximum file size for uploads is " + si.size + si.unit);
+                    return;
+                }
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
                 getView()[0].currentData[filename] = {
@@ -1048,7 +1026,7 @@
             view.find(".inline-namer").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
+            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<a class="text">Add files</a></div>');
         }
     }
 
@@ -1165,9 +1143,9 @@
         view[0].savedParts = parts;
 
         function addPart(name, path) {
-            var li = $("<li class='out'>" + name + "</li>");
+            var li = $("<li class='out'><a>" + name + "</a></li>");
             li.data("destination", path);
-            li.click(function (event) {
+            li.register("click", function (event) {
                 if (droppy.socketWait) return;
                 var view = $(event.target).parents(".view");
                 if ($(this).is(":last-child")) {
@@ -1254,8 +1232,8 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="shortlink" title="Create Shortlink"><a>' + droppy.svg.link + '</a></span>' +
+                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1268,7 +1246,7 @@
                             '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
                 }
@@ -1859,19 +1837,6 @@
             );
         loadContent(view, contentWrap(view).append(doc));
         showSpinner(view);
-        view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-            styleSelectedText: true,
-            readOnly: true,
-            showCursorWhenSelecting: true,
-            theme: droppy.get("theme"),
-            indentWithTabs: droppy.get("indentWithTabs"),
-            indentUnit: droppy.get("indentUnit"),
-            lineWrapping: droppy.get("lineWrapping"),
-            lineNumbers: true,
-            autofocus: true,
-            keyMap: "sublime"
-        });
-
         $.ajax({
             type: "GET",
             url: url,
@@ -1901,6 +1866,19 @@
                             return ext;
                         }
                     })();
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                    styleSelectedText: true,
+                    readOnly: true,
+                    showCursorWhenSelecting: true,
+                    theme: droppy.get("theme"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    indentUnit: droppy.get("indentUnit"),
+                    lineWrapping: droppy.get("lineWrapping"),
+                    lineNumbers: true,
+                    autofocus: true,
+                    keyMap: "sublime",
+                    mode: mode
+                });
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
@@ -1928,7 +1906,6 @@
                 editor.refresh();
 
                 editor.setValue(data);
-                editor.setOption("mode", mode);
                 editor.on("change", function () {
                     if (view[0].editNew) {
                         view[0].editNew = false;
@@ -2347,6 +2324,16 @@
         if (spinner.length && !spinner.hasClass("out"))
             spinner.addClass("out");
         if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
+    }
+
+    function showError(text) {
+        var infobox = $("#info-box");
+        infobox.attr("class", "error in");
+        infobox.children("h1").text("Error");
+        infobox.children("span").text(text);
+        setTimeout(function () {
+            infobox.removeAttr("class");
+        }, 4000);
     }
 
     function debounce(func, wait) {
