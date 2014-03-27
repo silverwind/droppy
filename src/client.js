@@ -267,7 +267,7 @@
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
             if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
-            else if (droppy.debug) location.reload() // if in debug mode reload to see changes to client.js
+            else if (droppy.debug) location.reload(); // if in debug mode reload to see changes to client.js
             if (droppy.queuedData)
                 sendMessage();
             else {
@@ -1475,18 +1475,20 @@
         dt.prototype.data = "";
         dt.prototype.isInternal = false;
         dt.prototype.refresh = function (data) {
-            if (typeof data === "string")
-                this.data = data, this.isInternal = true;
-            clearTimeout(this.timer)
+            if (typeof data === "string") {
+                this.data = data;
+                this.isInternal = true;
+            }
+            clearTimeout(this.timer);
             this.timer = setTimeout(this.clear, 1000);
-        }
+        };
         dt.prototype.clear = function () {
             if (!this.isInternal)
                 $(".dropzone").removeClass("in");
             clearTimeout(this.timer);
             this.isInternal = false;
             this.data = "";
-        }
+        };
         return dt;
     }())();
     // Hover evenets for upload arrows
@@ -1501,9 +1503,10 @@
                     row = target.parent();
                     event.preventDefault();
                     if (!row.hasClass("drop-hover")) {
-                        if (row.attr("data-id") !== droppy.dragTimer.data)
-                            $(".drop-hover").removeClass("drop-hover"),
+                        if (row.attr("data-id") !== droppy.dragTimer.data) {
+                            $(".drop-hover").removeClass("drop-hover");
                             row.addClass("drop-hover");
+                        }
                         dropZone.removeClass("in");
                     }
                 } else {
