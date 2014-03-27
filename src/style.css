@@ -130,9 +130,9 @@ input:-webkit-autofill {
     fill: #ccc;
     display: inline-block;
     vertical-align: middle;
-
 }
-@media all and (max-width: 639px)  { .button svg { vertical-align: baseline} }
+
+@media all and (max-width: 639px) { .button svg { vertical-align: baseline } }
 
 .button svg {
     transition: fill .25s ease;
@@ -189,15 +189,9 @@ input:-webkit-autofill {
 .view.right { left:50%; right:0; }
 
 @media all and (orientation: portrait) {
-    .view.left  { left:0; right:0;}
-    .view.right { left:0; right:0; bottom: 0;}
-    .view.left {
-        border-bottom: 2px solid #444 !important;
-    }
+    .view.left  { left:0; right:0; bottom: 50%, border-bottom: 2px solid #444; }
+    .view.right { left:0; right:0; top: 50% }
 }
-
-@media all and (orientation: portrait) { .view.left  { bottom: 50% } }
-@media all and (orientation: portrait) { .view.right { top:    50% } }
 
 .content {
     width: 100%;
