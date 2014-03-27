@@ -1854,9 +1854,7 @@
                     '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
                 '</ul>' +
                 '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                    '<div class="text-editor">' +
-                        '<textarea></textarea>' +
-                    '</div>' +
+                    '<div class="text-editor"></div>' +
                 '</div>'
             );
         loadContent(view, contentWrap(view).append(doc));
@@ -1890,7 +1888,7 @@
                             return ext;
                         }
                     })();
-                view[0].editor = editor = CodeMirror.fromTextArea(doc.find(".text-editor textarea")[0], {
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     styleSelectedText: true,
                     readOnly: true,
                     showCursorWhenSelecting: true,
@@ -1901,8 +1899,7 @@
                     lineNumbers: true,
                     autofocus: true,
                     keyMap: "sublime",
-                    mode: mode,
-                    value: data
+                    mode: mode
                 });
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
@@ -1926,33 +1923,34 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                setTimeout(function () {
-                    editor.setOption("readOnly", readOnly);
-                    editor.clearHistory();
-                    editor.refresh();
-                    editor.on("change", function () {
-                        if (view[0].editNew) {
-                            view[0].editNew = false;
-                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                editor.setOption("readOnly", readOnly);
+                editor.clearHistory();
+                editor.refresh();
+
+                editor.setValue(data);
+                editor.on("change", function () {
+                    if (view[0].editNew) {
+                        view[0].editNew = false;
+                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                    }
+                })
+
+                // Keyboard shortcuts
+                $(window).register("keydown", function (e) {
+                    if (editor && (e.metaKey || e.ctrlKey)) {
+                        // s - save
+                        if (e.keyCode === 83) {
+                            e.preventDefault();
+                            showSpinner(view);
+                            sendMessage(view[0].vId, "SAVE_FILE", {
+                                "to": entryId,
+                                "value": editor.getValue()
+                            });
+                            return false;
                         }
-                    })
-                    // Keyboard shortcuts
-                    $(window).register("keydown", function (e) {
-                        if (editor && (e.metaKey || e.ctrlKey)) {
-                            // s - save
-                            if (e.keyCode === 83) {
-                                e.preventDefault();
-                                showSpinner(view);
-                                sendMessage(view[0].vId, "SAVE_FILE", {
-                                    "to": entryId,
-                                    "value": editor.getValue()
-                                });
-                                return false;
-                            }
-                        }
-                    });
-                    hideSpinner(view);
-                }, 5000);
+                    }
+                });
+                hideSpinner(view);
             },
             error : function () {
                 closeDoc(view);
