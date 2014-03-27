@@ -23,6 +23,9 @@
                 if (props.pop() in el) return true;
             }
             return false;
+        })(),
+        mobile : (function () {
+            return "ontouchstart" in document.documentElement;
         })()
     };
 // ============================================================================
@@ -147,11 +150,13 @@
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 
-    // UA check for https://bugzilla.mozilla.org/show_bug.cgi?id=878058 and another IE styling issue
+    // Add certain classes to the html tag based on UA
     if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
-        $("html").addClass("firefox");
+        $("html").addClass("firefox"); // https://bugzilla.mozilla.org/show_bug.cgi?id=878058
     else if (navigator.userAgent.toLowerCase().indexOf("msie") > -1)
         $("html").addClass("ie");
+    if (droppy.detects.mobile)
+        $("html").addClass("mobile");
 // ============================================================================
 //  View handling
 // ============================================================================
