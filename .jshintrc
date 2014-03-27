@@ -16,7 +16,7 @@
     "newcap": true,
     "noarg": true,
     "node": true,
-    "nonew": true,
+    "nonew": false,
     "quotmark": false,
     "regexdash": true,
     "strict": true,
