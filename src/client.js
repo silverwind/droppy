@@ -889,23 +889,25 @@
             sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
         }
     }
+
     var start, lastUpdate;
     function uploadInit(view, numFiles) {
         var uploadInfo = '<section class="upload-info out">' +
                 '<div class="upload-bar">' +
                     '<div class="upload-bar-inner"></div>' +
                 '</div>' +
-                '<span class="upload-status">' +
-                    '<span class="upload-title"></span>' +
-                    '<span class="upload-speed"></span>' +
+                '<span class="upload-title"></span>' +
+                '<span class="upload-speed">' +
+                    droppy.svg.speed +
+                    '<span></span>' +
                 '</span>' +
                 '<span class="upload-time">' +
                     droppy.svg.time +
                     '<span class="upload-time-left"></span>' +
-                    '</span>' +
+                '</span>' +
                 '<span class="upload-cancel">' +
                     droppy.svg.remove +
-                    '<span>Cancel Upload<span>' +
+                    '<span>Cancel</span>' +
                 '</span>' +
             '</section>';
 
@@ -915,18 +917,18 @@
         view.find(".upload-title").text("Uploading " + numFiles + " file" + (numFiles > 1 ? "s" : ""));
         view.find(".upload-bar-inner").css("width", "0%");
         view.find(".upload-time-left").text("");
-        view.find(".upload-speed").text("");
+        view.find(".upload-speed > span").text("");
         updateTitle("0%");
     }
 
     function uploadDone(view) {
         view.find(".upload-bar-inner").css("width", "100%");
-        view.find(".upload-title").text("Processing...");
+        view.find(".upload-title").text("Processing");
     }
 
     function uploadCancel(view) {
         view.find(".upload-bar-inner").css("width", "0");
-        view.find(".upload-title").text("Aborting...");
+        view.find(".upload-title").text("Aborting");
         $(".uploading").remove(); // Remove preview elements
     }
 
@@ -943,7 +945,7 @@
 
             updateTitle(progress);
             view.find(".upload-bar-inner").css("width", progress);
-            view.find(".upload-speed").text(speed.size + " " + speed.unit + "/s");
+            view.find(".upload-speed > span").text(speed.size + " " + speed.unit + "/s");
 
             // Calculate estimated time left
             elapsed = Date.now() - start;

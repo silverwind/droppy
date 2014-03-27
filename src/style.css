@@ -188,11 +188,6 @@ input:-webkit-autofill {
 .view.left  { left:0; right:50%; }
 .view.right { left:50%; right:0; }
 
-@media all and (orientation: portrait) {
-    .view.left  { left:0; right:0; bottom: 50%, border-bottom: 2px solid #444; }
-    .view.right { left:0; right:0; top: 50% }
-}
-
 .content {
     width: 100%;
     padding: .25em;
@@ -241,11 +236,6 @@ input:-webkit-autofill {
 }
 
 .view.right .path { border-left: 2px solid #444}
-@media all and (orientation: portrait) {
-    .view.right .path {
-        border-left: none;
-    }
-}
 
 @media all and (min-width: 1024px) { .path { height: 37px; font-size: .9em } }
 @media all and (max-width: 1023px) { .path { height: 32px; font-size: .8em } }
@@ -835,27 +825,32 @@ input:-webkit-autofill {
     transition: all .2s ease;
     width: 100%;
     box-shadow: -2px 0 0 2px #444;
-    display: inline-flex;
-    align-items: center;
+    display: flex;
+    align-items: stretch;
     justify-content: space-between;
     overflow: hidden;
     z-index: 1;
-
 }
 
 @media all and (min-width: 1024px) { .upload-info { font-size: .9em } }
 @media all and (max-width: 1023px) { .upload-info { font-size: .8em } }
 @media all and (max-width:  639px) { .upload-info { font-size: .7em } }
 
-.upload-info.in  {
+.upload-info.in {
     height: 2em;
     box-shadow: 0 0 0 .125em #111;
     padding-top: .25em;
 }
 .upload-info.out { height: 0; box-shadow: none; }
 
-.upload-status {
-    flex: 1 1 5em;
+.upload-info span {
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.5em;
+}
+
+.upload-title {
+    flex: 1 1;
     order: 1;
     color: #eee;
     z-index: 3;
@@ -864,16 +859,21 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
+.upload-speed {
+    color: #eee;
+    flex: 0 0 6.5em;
+    order: 2;
+    z-index: 3;
+    text-align: center;
+    white-space: nowrap;
+}
+
 .upload-time {
     color: #eee;
-    flex: 0 0 7em;
-    order: 2;
-    vertical-align: middle;
-    display: inline-block;
+    flex: 0 0 6.5em;
+    order: 3;
     z-index: 3;
-    text-align: right;
-    padding-right: 1em;
-    text-overflow: ellipsis;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -881,24 +881,26 @@ input:-webkit-autofill {
     transition: color .2s ease;
     cursor: pointer;
     color: #eee;
-    flex: 0 0 9em;
+    flex: 0 0 5em;
     text-align: right;
     padding-right: .25em;
-    order: 3;
+    order: 4;
     z-index: 3;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-@media all and (max-width:  639px) {
-    .upload-title { display: none; }
-    .upload-cancel { flex: 0 0 2em; }
-    .upload-cancel span { display: none; }
+@media all and (max-width: 1279px) {
+    .view.left .upload-title       , .view.right .upload-title       { display: none !important; }
+    .view.left .upload-cancel      , .view.right .upload-cancel      { flex: 0 0 2em !important; }
+    .view.left .upload-cancel span , .view.right .upload-cancel span { display: none !important; }
 }
 
-.upload-speed:before {
-    content: " at ";
-    color: #aaa;
+@media all and (max-width:  479px) {
+    .upload-title       { display: none !important; }
+    .upload-speed       { flex: 1 1 !important;     }
+    .upload-time        { flex: 1 1 !important;     }
+    .upload-cancel      { flex: 0 0 2em !important; }
+    .upload-cancel span { display: none !important; }
 }
 
 .upload-bar {
@@ -925,10 +927,9 @@ input:-webkit-autofill {
 .upload-info svg {
     fill: #eee;
     height: 1em;
-    vertical-align: top;
-    transition: fill .2s ease;
+    vertical-align: middle;
+    transition: fill .15s ease;
 }
-
 
 .upload-cancel:hover { color: #f44 }
 .upload-cancel:hover svg.remove { fill: #f44 }
@@ -944,11 +945,10 @@ input:-webkit-autofill {
     overflow: hidden;
     position: relative;
     transition: all .2s ease;
-    box-shadow: -2px 0 0 2px #444;
     width: 100%;
 }
 
-#audio-controls.in  { flex-basis: 2em }
+#audio-controls.in  { flex-basis: 2em; box-shadow: -2px 0 0 2px #444 }
 #audio-controls.out { flex-basis: 0 }
 
 @media all and (min-width: 1024px) { #audio-controls { font-size: .9em} }
