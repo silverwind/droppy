@@ -1828,9 +1828,9 @@
             editor = null,
             doc = $(
                 '<ul class="sidebar">' +
-                    '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
-                    '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
-                    '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
+                    '<li class="exit exit-button">' + droppy.svg.remove + '<span>Close</span></li>' +
+                    '<li class="save save-button">' + droppy.svg.disk + '<span>Save</span></li>' +
+                    '<li class="ww ww-button">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
                 '</ul>' +
                 '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
                     '<div class="text-editor"></div>' +
