@@ -130,7 +130,9 @@ input:-webkit-autofill {
     fill: #ccc;
     display: inline-block;
     vertical-align: middle;
+
 }
+@media all and (max-width: 639px)  { .button svg { vertical-align: baseline} }
 
 .button svg {
     transition: fill .25s ease;
@@ -186,6 +188,17 @@ input:-webkit-autofill {
 .view.left  { left:0; right:50%; }
 .view.right { left:50%; right:0; }
 
+@media all and (orientation: portrait) {
+    .view.left  { left:0; right:0;}
+    .view.right { left:0; right:0; bottom: 0;}
+    .view.left {
+        border-bottom: 2px solid #444 !important;
+    }
+}
+
+@media all and (orientation: portrait) { .view.left  { bottom: 50% } }
+@media all and (orientation: portrait) { .view.right { top:    50% } }
+
 .content {
     width: 100%;
     padding: .25em;
@@ -234,6 +247,11 @@ input:-webkit-autofill {
 }
 
 .view.right .path { border-left: 2px solid #444}
+@media all and (orientation: portrait) {
+    .view.right .path {
+        border-left: none;
+    }
+}
 
 @media all and (min-width: 1024px) { .path { height: 37px; font-size: .9em } }
 @media all and (max-width: 1023px) { .path { height: 32px; font-size: .8em } }
