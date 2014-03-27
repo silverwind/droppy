@@ -10,5 +10,7 @@ droppy*.tgz
 .npmignore
 .gitignore
 .gitattributes
+.jshintrc
 *.sublime-project
+*.pem
 Gruntfile.js
