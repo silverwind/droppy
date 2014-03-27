@@ -124,7 +124,7 @@ input:-webkit-autofill {
 
 @media all and (min-width: 1024px) { .button { font-size: .7em } }
 @media all and (max-width: 1023px) { .button { font-size: .7em } }
-@media all and (max-width:  750px) { .button-text { display: none } }
+@media all and (max-width:  750px) { #buttons span { display: none } }
 
 .button svg {
     fill: #ccc;

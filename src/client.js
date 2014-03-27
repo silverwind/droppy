@@ -518,8 +518,11 @@
                     checkPathOverflow($(this));
                 });
             }, 100);
+        })
+        .on("keyup", function (event) {
+            if (event.keyCode === 27) // Escape Key
+                $("#click-catcher").click();// Hide open modals
         });
-
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -1023,7 +1026,7 @@
             view.find(".inline-namer").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
+            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<a class="text">Add files</a></div>');
         }
     }
 
@@ -1140,7 +1143,7 @@
         view[0].savedParts = parts;
 
         function addPart(name, path) {
-            var li = $("<li class='out'>" + name + "</li>");
+            var li = $("<li class='out'><a>" + name + "</a></li>");
             li.data("destination", path);
             li.register("click", function (event) {
                 if (droppy.socketWait) return;
@@ -1229,8 +1232,8 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="shortlink" title="Create Shortlink"><a>' + droppy.svg.link + '</a></span>' +
+                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1243,7 +1246,7 @@
                             '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
                             '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
                 }
@@ -1252,7 +1255,7 @@
         list.children("li").sort(sortFunc).appendTo(list);
         var content = contentWrap(view).html(
             '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
-                '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
+                '<a>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</a>' +
             '</div>');
         if (list.children("li").length)
             content.append(list.prepend(getHeaderHTML()));
