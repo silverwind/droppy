@@ -1540,7 +1540,7 @@ input[type="checkbox"] { display: none }
         position: fixed;
     }
 }
-.submit .ok {
+.submit .signin {
     fill: #eee;
     display: inline-block;
     vertical-align: middle;
