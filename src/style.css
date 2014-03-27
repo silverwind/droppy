@@ -889,13 +889,13 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
-@media all and (max-width: 1279px) {
+@media all and (max-width: 959px) {
     .view.left .upload-title       , .view.right .upload-title       { display: none !important; }
     .view.left .upload-cancel      , .view.right .upload-cancel      { flex: 0 0 2em !important; }
     .view.left .upload-cancel span , .view.right .upload-cancel span { display: none !important; }
 }
 
-@media all and (max-width:  479px) {
+@media all and (max-width: 479px) {
     .upload-title       { display: none !important; }
     .upload-speed       { flex: 1 1 !important;     }
     .upload-time        { flex: 1 1 !important;     }
