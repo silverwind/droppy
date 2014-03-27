@@ -1255,7 +1255,7 @@
         list.children("li").sort(sortFunc).appendTo(list);
         var content = contentWrap(view).html(
             '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
-                '<a>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</a>' +
+                '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
             '</div>');
         if (list.children("li").length)
             content.append(list.prepend(getHeaderHTML()));

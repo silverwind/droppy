@@ -318,7 +318,7 @@ input:-webkit-autofill {
 }
 
 .paste-button.in  { margin-bottom: .25em; }
-.paste-button.out { height: 0; overflow: hidden; }
+.paste-button.out { height: 0; overflow: hidden; visibility: hidden; }
 
 @media all and (min-width: 1024px) { .paste-button { font-size:  1em } }
 @media all and (max-width: 1023px) { .paste-button { font-size: .9em } }
