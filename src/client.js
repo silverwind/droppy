@@ -1818,6 +1818,7 @@
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
+
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
@@ -1837,6 +1838,19 @@
             );
         loadContent(view, contentWrap(view).append(doc));
         showSpinner(view);
+        view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+            styleSelectedText: true,
+            readOnly: true,
+            showCursorWhenSelecting: true,
+            theme: droppy.get("theme"),
+            indentWithTabs: droppy.get("indentWithTabs"),
+            indentUnit: droppy.get("indentUnit"),
+            lineWrapping: droppy.get("lineWrapping"),
+            lineNumbers: true,
+            autofocus: true,
+            keyMap: "sublime"
+        });
+
         $.ajax({
             type: "GET",
             url: url,
@@ -1866,19 +1880,6 @@
                             return ext;
                         }
                     })();
-                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-                    styleSelectedText: true,
-                    readOnly: true,
-                    showCursorWhenSelecting: true,
-                    theme: droppy.get("theme"),
-                    indentWithTabs: droppy.get("indentWithTabs"),
-                    indentUnit: droppy.get("indentUnit"),
-                    lineWrapping: droppy.get("lineWrapping"),
-                    lineNumbers: true,
-                    autofocus: true,
-                    keyMap: "sublime",
-                    mode: mode
-                });
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
@@ -1906,6 +1907,7 @@
                 editor.refresh();
 
                 editor.setValue(data);
+                editor.setOption("mode", mode);
                 editor.on("change", function () {
                     if (view[0].editNew) {
                         view[0].editNew = false;
