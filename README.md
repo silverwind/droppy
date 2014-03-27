@@ -49,6 +49,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "linkLength"   : 3,
     "logLevel"     : 2,
     "maxOpen"      : 256,
+    "maxFileSize"  : 0,
     "zipLevel"     : 1,
     "noLogin"      : false,
     "demoMode"     : false,
@@ -77,6 +78,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **linkLength**: The amount of characters in a shortlink.
 - **logLevel**: The amount of logging to show. `0` is no logging, `1` is errors, `2` is info ( HTTP requests), `3` is debug (socket communication).
 - **maxOpen**: The maximum number of concurrently opened files. This number is primarily of concern for Windows servers.
+- **maxFileSize**: The maximum file size in bytes a user can upload in a single file.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
 - **noLogin**: When enabled, the client skips the login page, making the server essentially public.
 - **demoMode**: When enabled, the server will regularly clean out all files and restore samples.
