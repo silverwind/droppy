@@ -544,19 +544,19 @@
                         obj[files[i].name] = files[i];
                     }
                 }
-                upload(getView(), obj); // TODO: view relative
-            } else if ($("#file").val()) {
-                upload(getView(), $("#file").get(0).files);
+                upload(getView(fileInput[0].targetView), obj); // TODO: view relative
+            } else if (fileInput.val()) {
+                upload(getView(fileInput[0].targetView), fileInput.get(0).files);
             }
-            $("#file").val(""); // Reset the input
+            fileInput.val(""); // Reset the input
         });
 
         // File upload button
         $("#upload-file-button").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog!
             if (droppy.detects.fileinputdirectory)
-                $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
-            $("#file").click();
+                fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
+            fileInput.click();
         });
 
         // Folder upload button - check if we support directory uploads
@@ -1276,10 +1276,12 @@
             content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
         loadContent(view, content);
         // Upload button on empty page
-        content.find(".empty").register("click", function () {
+        content.find(".empty").register("click", function (event) {
+            var view = $(event.target).parents(".view"), fileInput = $("#file");
+            fileInput[0].targetView = view[0].vId;
             if (droppy.detects.fileinputdirectory)
-                $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
-            $("#file").click();
+                fileInput.removeAttr("directory mozdirectory webkitdirectory msdirectory");
+            fileInput.click();
         });
         // Switch into a folder
         content.find(".data-row[data-type='folder']").register("click", function (event) {
