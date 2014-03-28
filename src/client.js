@@ -1835,6 +1835,7 @@
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
+
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
@@ -1844,23 +1845,34 @@
             editor = null,
             doc = $(
                 '<ul class="sidebar">' +
-                    '<li class="exit">' + droppy.svg.remove + '<span>Close</span></li>' +
-                    '<li class="save">' + droppy.svg.disk + '<span>Save</span></li>' +
-                    '<li class="ww">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
+                    '<li class="exit exit-button">' + droppy.svg.remove + '<span>Close</span></li>' +
+                    '<li class="save save-button">' + droppy.svg.disk + '<span>Save</span></li>' +
+                    '<li class="ww ww-button">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
                 '</ul>' +
                 '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                    '<div class="text-editor">' +
-                        '<textarea></textarea>' +
-                    '</div>' +
+                    '<div class="text-editor"></div>' +
                 '</div>'
             );
-        loadContent(view, contentWrap(view).append(doc));
-        showSpinner(view);
+
         $.ajax({
             type: "GET",
             url: url,
             dataType: "text",
             success : function (data) {
+                loadContent(view, contentWrap(view).append(doc));
+                showSpinner(view);
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                    styleSelectedText: true,
+                    readOnly: true,
+                    showCursorWhenSelecting: true,
+                    theme: droppy.get("theme"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    indentUnit: droppy.get("indentUnit"),
+                    lineWrapping: droppy.get("lineWrapping"),
+                    lineNumbers: true,
+                    autofocus: true,
+                    keyMap: "sublime"
+                });
                 // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
                 // $.getScript()
                 var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
@@ -1885,20 +1897,7 @@
                             return ext;
                         }
                     })();
-                view[0].editor = editor = CodeMirror.fromTextArea(doc.find(".text-editor textarea")[0], {
-                    styleSelectedText: true,
-                    readOnly: true,
-                    showCursorWhenSelecting: true,
-                    theme: droppy.get("theme"),
-                    indentWithTabs: droppy.get("indentWithTabs"),
-                    indentUnit: droppy.get("indentUnit"),
-                    lineWrapping: droppy.get("lineWrapping"),
-                    lineNumbers: true,
-                    autofocus: true,
-                    keyMap: "sublime",
-                    mode: mode
-                });
-                $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                     editor = null;
@@ -1920,19 +1919,21 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                setTimeout(function () {
+                var editorLoaded = false;
+                function loadDocumentData() {
+                    if (editorLoaded) return;
+                    else editorLoaded = true;
                     editor.setOption("readOnly", readOnly);
+
                     editor.setValue(data);
                     editor.clearHistory();
-                    editor.refresh();
-                    $(editor).register("change", function () {
-                        if (!view[0].editNew) {
+                    editor.setOption("mode", mode);
+                    editor.on("change", function () {
+                        if (view[0].editNew) {
+                            view[0].editNew = false;
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
-                    });
-                    $(editor).register("keyup", function () {
-                        view[0].editNew = false;
-                    });
+                    })
                     // Keyboard shortcuts
                     $(window).register("keydown", function (e) {
                         if (editor && (e.metaKey || e.ctrlKey)) {
@@ -1949,7 +1950,9 @@
                         }
                     });
                     hideSpinner(view);
-                }, 1000);
+                }
+                if (droppy.detects.animations) view.one("transitionend msTransitionEnd webkitTransitionEnd", loadDocumentData);
+                else loadDocumentData();
             },
             error : function () {
                 closeDoc(view);

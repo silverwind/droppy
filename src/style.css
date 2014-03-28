@@ -756,8 +756,6 @@ input:-webkit-autofill {
     width: 100%;
     height: 100%;
 }
-.doc > .text-editor > textarea { visibility: hidden }
-
 .content.document > .sidebar {
     position: absolute;
     top: .75em;
