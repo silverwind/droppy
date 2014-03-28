@@ -61,7 +61,7 @@
         cssCache  = null,
         firstRun  = null,
         ready     = false,
-        isCLI     = (process.argv.length > 2),
+        isCLI     = (process.argv.length > 2 && process.argv[2] !== "--color"),
         mode      = {file: "644", dir: "755"},
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],

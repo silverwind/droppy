@@ -117,7 +117,7 @@ Description=droppy
 After=network.target
 
 [Service]
-ExecStart=/bin/env node /path/to/droppy/droppy.js
+ExecStart=/bin/env node /path/to/droppy/droppy.js --color
 WorkingDirectory=/path/to/droppy/
 Restart=always
 StandardOutput=syslog
