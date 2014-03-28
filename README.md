@@ -14,7 +14,7 @@ A personal cloud storage solution with a speedy HTML5 interface, running on [nod
 * Edit text files in a feature-rich editor (CodeMirror).
 * Perform Drag and Drop operations between multiple directory views. Hold CTRL/CMD to copy.
 * Basic file system operations: Cut, Copy, Rename, Delete.
-* Playback of audio files supported by via the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+* Playback of audio files supported by the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
 * Support for shortened links to share file downloads with your friends without them needing to log in.
 
 ##Installation
