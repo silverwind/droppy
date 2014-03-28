@@ -62,7 +62,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "tls" : {
         "key"      : "./key.pem",
         "cert"     : "./cert.pem",
-        "ca"       : ["./ca1.pem", "./ca2.pem"]
+        "ca"       : []
     }
 }
 ````
@@ -97,7 +97,7 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 
 - **key**: Path to your private key.
 - **cert**: Path to your certificate.
-- **ca**: Path(s) to any intermediate certificates.
+- **ca**: An optional array of paths to your intermediate (CA) certificates.
 
 ##Supported Browsers
 - Firefox (last 2 versions)
