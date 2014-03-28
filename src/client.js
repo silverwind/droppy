@@ -1902,35 +1902,40 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                editor.setOption("readOnly", readOnly);
-                editor.clearHistory();
-                editor.refresh();
+                var editorLoaded = false;
+                function loadDocumentData() {
+                    if (editorLoaded) return;
+                    else editorLoaded = true;
+                    editor.setOption("readOnly", readOnly);
 
-                editor.setValue(data);
-                editor.setOption("mode", mode);
-                editor.on("change", function () {
-                    if (view[0].editNew) {
-                        view[0].editNew = false;
-                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                    }
-                })
-
-                // Keyboard shortcuts
-                $(window).register("keydown", function (e) {
-                    if (editor && (e.metaKey || e.ctrlKey)) {
-                        // s - save
-                        if (e.keyCode === 83) {
-                            e.preventDefault();
-                            showSpinner(view);
-                            sendMessage(view[0].vId, "SAVE_FILE", {
-                                "to": entryId,
-                                "value": editor.getValue()
-                            });
-                            return false;
+                    editor.setValue(data);
+                    editor.clearHistory();
+                    editor.setOption("mode", mode);
+                    editor.on("change", function () {
+                        if (view[0].editNew) {
+                            view[0].editNew = false;
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
-                    }
-                });
-                hideSpinner(view);
+                    })
+                    // Keyboard shortcuts
+                    $(window).register("keydown", function (e) {
+                        if (editor && (e.metaKey || e.ctrlKey)) {
+                            // s - save
+                            if (e.keyCode === 83) {
+                                e.preventDefault();
+                                showSpinner(view);
+                                sendMessage(view[0].vId, "SAVE_FILE", {
+                                    "to": entryId,
+                                    "value": editor.getValue()
+                                });
+                                return false;
+                            }
+                        }
+                    });
+                    hideSpinner(view);
+                }
+                if (droppy.detects.animations) view.one("transitionend msTransitionEnd webkitTransitionEnd", loadDocumentData);
+                else loadDocumentData();
             },
             error : function () {
                 closeDoc(view);
