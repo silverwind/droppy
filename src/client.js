@@ -805,11 +805,7 @@
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
-                if (droppy.maxFileSize > 0 && data[i].size > droppy.maxFileSize) {
-                    var si = convertToSI(droppy.maxFileSize);
-                    showError("Maximum file size for uploads is " + si.size + si.unit);
-                    return;
-                }
+                if (isOverLimit(data[i].size)) return;
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
                 getView()[0].currentData[filename] = {
@@ -845,6 +841,7 @@
                         }
                         break;
                     case "[object File]":
+                        if (isOverLimit(data[path].size)) return;
                         numFiles++;
                         if (!addedDirs[name]) {
                             view[0].currentData[name] = {
@@ -887,6 +884,15 @@
             xhr.send(formData);
         } else if (droppy.zeroFiles.length) {
             sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
+        }
+
+        function isOverLimit(size) {
+            if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
+                var si = convertToSI(droppy.maxFileSize);
+                showError("Maximum file size for uploads is " + si.size + si.unit);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -1782,7 +1788,6 @@
             $(".file-link").off("click");
         }
     }
-
 
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
