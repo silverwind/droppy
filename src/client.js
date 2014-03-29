@@ -1239,7 +1239,7 @@
                     list.append(
                         '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="file-link entry-link" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                            '<a class="file-link entry-link" href="' + downloadURL + '"target="nope" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
@@ -1256,7 +1256,7 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<a class="zip" title="Create Zip" href="/~~' + id + '" target="nope" download="' + file + '.zip">' + droppy.svg.zip + '</a>' +
+                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" target="nope" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
                             '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
