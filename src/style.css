@@ -189,7 +189,8 @@ input:-webkit-autofill {
 .view.right { left:50%; right:0; }
 
 .content {
-    width: 100%;
+    left: 0;
+    right: 0;
     padding: .25em;
     transition: transform .2s ease-in;
     position: absolute;
