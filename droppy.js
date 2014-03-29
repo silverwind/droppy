@@ -1420,7 +1420,12 @@
                 utils.walkDirectory(zipPath, true, function (error, foundPaths) {
                     if (error) log.error(error);
                     paths = foundPaths.filter(function (s) { return s !== ""; });
-                    next(paths.pop());
+                    if (paths.length === 0) {
+                        archive.append("", { name: "Empty" });
+                    } else {
+                        next(paths.pop());
+                    }
+
                 });
             } else {
                 res.statusCode = 404;
