@@ -181,7 +181,6 @@
         destroyView(vId);
         view.appendTo("#view-container");
         view[0].vId = vId;
-        view[0].currentFolder = "/";
         droppy.views[vId] = view[0];
         if (dest) updateLocation(view, dest);
         return getView(vId);
