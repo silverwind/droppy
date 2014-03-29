@@ -710,22 +710,23 @@ input:-webkit-autofill {
 #entry-menu .open, #entry-menu .edit, #entry-menu .download {
     display: none;
 }
-#entry-menu.type-js>div>.edit,
-#entry-menu.type-text>div>.edit,
-#entry-menu.type-html>div>.edit,
-#entry-menu.type-css>div>.edit,
-#entry-menu.type-bin>div>.edit,
-#entry-menu.type-xml>div>.edit,
-#entry-menu.type-image>div>.edit,
-#entry-menu.type-json>div>.edit,
-#entry-menu.type-markdown>div>.edit,
 #entry-menu.type-audio>div>.play,
-#entry-menu.type-video>div>.play,
-#entry-menu.type-image>div>.show,
-#entry-menu.type-png>div>.show,
-#entry-menu.type-jpg>div>.show,
+#entry-menu.type-bin>div>.edit,
+#entry-menu.type-css>div>.edit,
 #entry-menu.type-gif>div>.show,
+#entry-menu.type-html>div>.edit,
 #entry-menu.type-html>div>.show,
+#entry-menu.type-image>div>.edit,
+#entry-menu.type-image>div>.show,
+#entry-menu.type-jpg>div>.show,
+#entry-menu.type-js>div>.edit,
+#entry-menu.type-json>div>.edit,
+#entry-menu.type-log>div>.edit,
+#entry-menu.type-markdown>div>.edit,
+#entry-menu.type-png>div>.show,
+#entry-menu.type-text>div>.edit,
+#entry-menu.type-video>div>.play,
+#entry-menu.type-xml>div>.edit,
 #entry-menu.type-download .download {
     display: block;
 }

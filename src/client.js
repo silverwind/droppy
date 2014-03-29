@@ -219,7 +219,6 @@
             initEntryMenu();
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
-                if (droppy.socketWait) showSpinner();
                 finalize();
             });
         } else if (type === "auth" || type === "firstrun") {
