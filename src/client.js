@@ -1256,7 +1256,7 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
+                            '<a class="zip" title="Create Zip" href="/~~' + id + '" target="nope" download="' + file + '.zip">' + droppy.svg.zip + '</a>' +
                             '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );

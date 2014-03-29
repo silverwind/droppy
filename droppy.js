@@ -1383,19 +1383,20 @@
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory and stream it to a client
     function streamArchive(req, res, type) {
-        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next;
+        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next, dispo;
         fs.stat(zipPath, function (err, stats) {
             if (err) {
                 log.error(err);
             } else if (stats.isDirectory()) {
                 res.statusCode = 200;
-                res.setHeader("Content-Type", mime.lookup(type));
 
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                    res.setHeader("Content-Disposition", 'attachment; filename="' + encodeURIComponent(path.basename(zipPath)) + '.zip"');
+                    dispo = ['attachment; filename="', encodeURIComponent(path.basename(zipPath)), '.zip"'].join("");
                 else
-                    res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(zipPath) + '.zip"');
+                    dispo = ['attachment; filename="', path.basename(zipPath), '.zip"'].join("");
 
+                res.setHeader("Content-Type", mime.lookup(type));
+                res.setHeader("Content-Disposition", dispo);
                 res.setHeader("Transfer-Encoding", "chunked");
                 log.info(req, res, "Creating zip of /", req.url.substring(4));
 
