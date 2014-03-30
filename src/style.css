@@ -349,13 +349,13 @@ input:-webkit-autofill {
 .file-header span {
     border-bottom: 1px solid #bbb;
     background: #dadada;
-    border-radius: 4px 4px 0 0;
     position: relative;
     cursor: pointer;
     white-space: nowrap;
     line-height: 1.1em;
 }
-
+.file-header span:first-of-type { border-top-left-radius: 4px }
+.file-header span:last-of-type { border-top-right-radius: 4px }
 .file-header .triangle {
     position: relative;
     height: .6em;
