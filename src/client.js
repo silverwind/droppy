@@ -1,7 +1,5 @@
-/*global CodeMirror, t */
-/*jshint evil: true, expr: true, regexdash: true, bitwise: true, trailing: false, sub: true, eqeqeq: true,
-  forin: true, freeze: true, loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true, newcap: true,
-  undef: true, unused: true, globalstrict: true, browser: true, quotmark: false, jquery: true, devel: true */
+/*global CodeMirror */
+
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -26,6 +24,9 @@
                 if (props.pop() in el) return true;
             }
             return false;
+        })(),
+        mobile : (function () {
+            return "ontouchstart" in document.documentElement;
         })()
     };
 // ============================================================================
@@ -79,19 +80,22 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-        var classes = this[0].className.split(" "), classMatch,
-            hasClass = false;
-        classes = classes.filter(function (className) {
-            if (className === match) return false;
-            if (className === replacement) hasClass = true;
+        var elem, classes, classMatch, i = this.length - 1, hasClass = false;
+        for (; i >= 0; i--) {
+            elem = this[i];
+            if (typeof elem === "undefined") return false;
+            classes = elem.className.split(" ").filter(function (className) {
+                if (className === match) return false;
+                if (className === replacement) hasClass = true;
 
-            classMatch = className.match(match);
-            // filter out if the entire capture matches the entire className
-            if (classMatch) return classMatch[0] !== className || classMatch[0] === replacement;
-            else return true;
-        });
-        if (!hasClass) classes.push(replacement);
-        this[0].className = classes.join(" ");
+                classMatch = className.match(match);
+                // filter out if the entire capture matches the entire className
+                if (classMatch) return classMatch[0] !== className || classMatch[0] === replacement;
+                else return true;
+            });
+            if (!hasClass) classes.push(replacement);
+            elem.className = classes.join(" ");
+        }
         return this;
     };
 
@@ -147,34 +151,13 @@
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 
-    // UA check for https://bugzilla.mozilla.org/show_bug.cgi?id=878058
-    if (navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
-        $("html").addClass("firefox");
-// ============================================================================
-//  Map touch events to mouse events when necessary
-// ============================================================================
-    if ("ontouchstart" in document.documentElement) {
-        $(function () {
-            function touchHandler(event) {
-                var touch = event.changedTouches[0],
-                    simulatedEvent = document.createEvent("MouseEvent");
-                simulatedEvent.initMouseEvent({
-                    touchstart: "mousedown",
-                    touchmove: "mousemove",
-                    touchend: "mouseup"
-                }[event.type], true, true, window, 1,
-                    touch.screenX, touch.screenY,
-                    touch.clientX, touch.clientY, false,
-                    false, false, false, 0, null);
-                touch.target.dispatchEvent(simulatedEvent);
-                event.preventDefault();
-            }
-            document.addEventListener("touchstart", touchHandler, true);
-            document.addEventListener("touchmove", touchHandler, true);
-            document.addEventListener("touchend", touchHandler, true);
-            document.addEventListener("touchcancel", touchHandler, true);
-        });
-    }
+    // Add certain classes to the html tag based on UA
+    if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
+        $("html").addClass("firefox"); // https://bugzilla.mozilla.org/show_bug.cgi?id=878058
+    else if (navigator.userAgent.toLowerCase().indexOf("msie") > -1)
+        $("html").addClass("ie");
+    if (droppy.detects.mobile)
+        $("html").addClass("mobile");
 // ============================================================================
 //  View handling
 // ============================================================================
@@ -194,12 +177,11 @@
         var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content\"></div>" +
-                        "<div class=\"dropzone\">" + droppy.svg["up-arrow"] + "</div>" +
+                        "<div class=\"dropzone\">" + droppy.svg["upload-cloud"] + "</div>" +
                     "</div>");
         destroyView(vId);
         view.appendTo("#view-container");
         view[0].vId = vId;
-        view[0].currentFolder = "/";
         droppy.views[vId] = view[0];
         if (dest) updateLocation(view, dest);
         return getView(vId);
@@ -237,7 +219,6 @@
             initEntryMenu();
             requestAnimation(function () {
                 oldPage.replaceClass("in", "out");
-                if (droppy.socketWait) showSpinner();
                 finalize();
             });
         } else if (type === "auth" || type === "firstrun") {
@@ -285,6 +266,7 @@
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
             if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
+            else if (droppy.debug) location.reload(); // if in debug mode reload to see changes to client.js
             if (droppy.queuedData)
                 sendMessage();
             else {
@@ -298,7 +280,7 @@
         // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
         droppy.socket.onclose = function (event) {
             if (droppy.get("hasLoggedOut") || event.code === 4000) return;
-            if (event.code >= 1002 && event.code < 3999) {
+            if (event.code >= 1001 && event.code < 3999) {
                 if (retries > 0) {
                     // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
                     // TODO: Indicate connection drop in the UI, especially on close code 1006
@@ -331,7 +313,7 @@
                 } else {
                     showSpinner(view);
                     if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
-                        view[0].loaded === true; // Ensure to update path on the first load
+                        view[0].loaded = true; // Ensure to update path on the first load
                         if (view[0].vId === 0)
                             updateTitle(msg.folder, true);
                         view[0].currentFile = null;
@@ -401,6 +383,7 @@
                 droppy.debug = msg.settings.debug;
                 droppy.demoMode = msg.settings.demoMode;
                 droppy.noLogin = msg.settings.noLogin;
+                droppy.maxFileSize = msg.settings.maxFileSize;
                 if (droppy.demoMode || droppy.noLogin)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
@@ -413,13 +396,7 @@
                     });
                 break;
             case "ERROR":
-                var box = $("#info-box");
-                box.attr("class", "error in");
-                box.children("h1").text("Error");
-                box.children("span").text(msg.text);
-                setTimeout(function () {
-                    box.removeAttr("class");
-                }, 4000);
+                showError(msg.text);
                 hideSpinner(getView(vId));
                 break;
             }
@@ -489,7 +466,7 @@
         });
 
         // Return submits the form
-        $(".login-input").register("keyup", function (event) {
+        $("#pass").register("keyup", function (event) {
             if (event.keyCode === 13) {
                 form.submit();
             }
@@ -545,8 +522,11 @@
                     checkPathOverflow($(this));
                 });
             }, 100);
+        })
+        .on("keyup", function (event) {
+            if (event.keyCode === 27) // Escape Key
+                $("#click-catcher").click();// Hide open modals
         });
-
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -563,19 +543,19 @@
                         obj[files[i].name] = files[i];
                     }
                 }
-                upload(getView(), obj); // TODO: view relative
-            } else if ($("#file").val()) {
-                upload(getView(), $("#file").get(0).files);
+                upload(getView(fileInput[0].targetView), obj); // TODO: view relative
+            } else if (fileInput.val()) {
+                upload(getView(fileInput[0].targetView), fileInput.get(0).files);
             }
-            $("#file").val(""); // Reset the input
+            fileInput.val(""); // Reset the input
         });
 
         // File upload button
         $("#upload-file-button").register("click", function () {
             // Remove the directory attributes so we get a file picker dialog!
             if (droppy.detects.fileinputdirectory)
-                $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
-            $("#file").click();
+                fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
+            fileInput.click();
         });
 
         // Folder upload button - check if we support directory uploads
@@ -824,6 +804,7 @@
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
+                if (isOverLimit(data[i].size)) return;
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
                 getView()[0].currentData[filename] = {
@@ -859,6 +840,7 @@
                         }
                         break;
                     case "[object File]":
+                        if (isOverLimit(data[path].size)) return;
                         numFiles++;
                         if (!addedDirs[name]) {
                             view[0].currentData[name] = {
@@ -902,24 +884,35 @@
         } else if (droppy.zeroFiles.length) {
             sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
         }
+
+        function isOverLimit(size) {
+            if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
+                var si = convertToSI(droppy.maxFileSize);
+                showError("Maximum file size for uploads is " + si.size + si.unit);
+                return true;
+            }
+            return false;
+        }
     }
+
     var start, lastUpdate;
     function uploadInit(view, numFiles) {
         var uploadInfo = '<section class="upload-info out">' +
                 '<div class="upload-bar">' +
                     '<div class="upload-bar-inner"></div>' +
                 '</div>' +
-                '<span class="upload-status">' +
-                    '<span class="upload-title"></span>' +
-                    '<span class="upload-speed"></span>' +
+                '<span class="upload-title"></span>' +
+                '<span class="upload-speed">' +
+                    droppy.svg.speed +
+                    '<span></span>' +
                 '</span>' +
                 '<span class="upload-time">' +
                     droppy.svg.time +
                     '<span class="upload-time-left"></span>' +
-                    '</span>' +
+                '</span>' +
                 '<span class="upload-cancel">' +
                     droppy.svg.remove +
-                    '<span>Cancel Upload<span>' +
+                    '<span>Cancel</span>' +
                 '</span>' +
             '</section>';
 
@@ -929,18 +922,18 @@
         view.find(".upload-title").text("Uploading " + numFiles + " file" + (numFiles > 1 ? "s" : ""));
         view.find(".upload-bar-inner").css("width", "0%");
         view.find(".upload-time-left").text("");
-        view.find(".upload-speed").text("");
+        view.find(".upload-speed > span").text("");
         updateTitle("0%");
     }
 
     function uploadDone(view) {
         view.find(".upload-bar-inner").css("width", "100%");
-        view.find(".upload-title").text("Processing...");
+        view.find(".upload-title").text("Processing");
     }
 
     function uploadCancel(view) {
         view.find(".upload-bar-inner").css("width", "0");
-        view.find(".upload-title").text("Aborting...");
+        view.find(".upload-title").text("Aborting");
         $(".uploading").remove(); // Remove preview elements
     }
 
@@ -957,7 +950,7 @@
 
             updateTitle(progress);
             view.find(".upload-bar-inner").css("width", progress);
-            view.find(".upload-speed").text(speed.size + " " + speed.unit + "/s");
+            view.find(".upload-speed > span").text(speed.size + " " + speed.unit + "/s");
 
             // Calculate estimated time left
             elapsed = Date.now() - start;
@@ -1045,7 +1038,7 @@
             view.find(".inline-namer").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) loadContent(view);
+            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<a class="text">Add files</a></div>');
         }
     }
 
@@ -1162,9 +1155,9 @@
         view[0].savedParts = parts;
 
         function addPart(name, path) {
-            var li = $("<li class='out'>" + name + "</li>");
+            var li = $("<li class='out'><a>" + name + "</a></li>");
             li.data("destination", path);
-            li.click(function (event) {
+            li.register("click", function (event) {
                 if (droppy.socketWait) return;
                 var view = $(event.target).parents(".view");
                 if ($(this).is(":last-child")) {
@@ -1233,7 +1226,8 @@
 
         for (var file in fileList) {
             if (fileList.hasOwnProperty(file)) {
-                svgIcon = "", classes = "";
+                svgIcon = "";
+                classes = "";
                 type = fileList[file].type;
                 bytes = fileList[file].size;
                 if (!bytes && droppy.sizeCache[folder] && droppy.sizeCache[folder][file])
@@ -1258,12 +1252,12 @@
                     list.append(
                         '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
                             '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="file-link entry-link" href="' + downloadURL + '" download="' + file + '">' + file + '</a>' +
+                            '<a class="file-link entry-link" href="' + downloadURL + '"target="nope" download="' + file + '">' + file + '</a>' +
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink" title="Create Shortlink">' + droppy.svg.link + '</span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span class="shortlink" title="Create Shortlink"><a>' + droppy.svg.link + '</a></span>' +
+                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
                 } else if (type === "d" || type === "nd") {  // Create a folder row
@@ -1275,8 +1269,8 @@
                             '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
                             '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
                             '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="entry-menu" title="Actions">' + droppy.svg.menu + '</span>' +
+                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" target="nope" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
+                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
                         '</li>'
                     );
                 }
@@ -1294,10 +1288,12 @@
 >>>>>>> master*/
         loadContent(view, content);
         // Upload button on empty page
-        content.find(".empty").register("click", function () {
+        content.find(".empty").register("click", function (event) {
+            var view = $(event.target).parents(".view"), fileInput = $("#file");
+            fileInput[0].targetView = view[0].vId;
             if (droppy.detects.fileinputdirectory)
-                $("#file").removeAttr("directory msdirectory mozdirectory webkitdirectory");
-            $("#file").click();
+                fileInput.removeAttr("directory mozdirectory webkitdirectory msdirectory");
+            fileInput.click();
         });
         // Switch into a folder
         content.find(".data-row[data-type='folder']").register("click", function (event) {
@@ -1306,7 +1302,7 @@
             var destination = $(this).data("id");
             updateLocation(view, destination);
         });
-        content.find(".data-row").each(function(index) {
+        content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
         content.find(".data-row .entry-menu").register("click", function (event) {
@@ -1356,7 +1352,7 @@
 
             droppy.clipboard = null;
             $("#click-catcher").trigger("click");
-            $(this).replaceClass("in", "out");
+            $(".paste-button").replaceClass("in", "out");
         });
         // Stop navigation when clicking on an <a>
         content.find(".data-row .zip, .entry-link.file").register("click", function (event) {
@@ -1400,21 +1396,18 @@
             view.find(".new").attr("data-root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
-            view.find(".content").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
+            view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
-            view.find(".new").one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                if ($(event.originalEvent.target).hasClass("new"))
-                    finish();
-            });
+            setTimeout(function () {
+                finish();
+            }, 200);
         }
         view[0].animDirection = "center";
 
         function finish() {
             view[0].isAnimating = false;
-            view.find(".content").each(function () {
-                if (!$(this).hasClass("new")) $(this).remove();
-            });
+            view.find(".content:not(.new)").remove();
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
             if ($(view).attr("data-type") === "directory") {
@@ -1428,35 +1421,45 @@
     }
 
     function handleDrop(view, event, from, to, spinner) {
-        var type, clip, catcher = $("#click-catcher"), dragData = event.dataTransfer.getData("text");
+        var catcher = $("#click-catcher"),
+            dropSelect = $("#drop-select"),
+            dragData = event.dataTransfer.getData("text");
+        droppy.dragTimer.clear();
+        $(".drop-hover").removeClass("drop-hover");
+        $(".dropzone").removeClass("in");
+
         if (event.shiftKey) {
-            sendDrop(view, "cut", from, to);
-        }
-        else if (event.ctrlKey || event.metaKey || event.altKey)
-            sendDrop(view, "copy", from, to);
-        else {
-            $("#drop-select").attr("class", "in").css({
-                left: event.originalEvent.clientX,
+            sendDrop(view, "cut", from, to, spinner);
+        } else if (event.ctrlKey || event.metaKey || event.altKey) {
+            sendDrop(view, "copy", from, to, spinner);
+        } else {
+            // Keep the drop-select in view
+            var limit = dropSelect[0].offsetWidth / 2 - 20, left;
+            if (event.originalEvent.clientX < limit)
+                left = event.originalEvent.clientX + limit;
+            else if ((event.originalEvent.clientX + limit) > window.innerWidth)
+                left = event.originalEvent.clientX - limit;
+            else
+                left = event.originalEvent.clientX;
+
+            dropSelect.attr("class", "in").css({
+                left: left,
                 top:  event.originalEvent.clientY,
             });
             toggleCatcher();
-            catcher.one("mousemove", function () {
-                $("#drop-select").removeAttr("class");
-                toggleCatcher();
+            dropSelect.children(".movefile").off("click").one("click", function () {
+                sendDrop(view, "cut", from, to, spinner);
+                catcher.off("mousemove").trigger("click");
             });
-            $("#drop-select .movefile").one("click", function() {
-                sendDrop(view, "cut", from, to);
+            dropSelect.children(".copyfile").off("click").one("click", function () {
+                sendDrop(view, "copy", from, to, spinner);
                 catcher.off("mousemove").trigger("click");
-            })
-            $("#drop-select .copyfile").one("click", function() {
-                sendDrop(view, "copy", from, to);
-                catcher.off("mousemove").trigger("click");
-            })
-            $("#drop-select .viewfile").one("click", function() {
+            });
+            dropSelect.children(".viewfile").off("click").one("click", function () {
                 view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
-            })
+            });
             return;
         }
     }
@@ -1474,91 +1477,112 @@
 
     // Set drag properties for internal drag sources
     function bindDragEvents(view) {
-        view.find(".data-row").each(function () {
-            var row = $(this);
-            row.attr("draggable", "true");
-            row.parents(".view").register("dragstart", function (event) {
-                var src = $(event.target).parents(".data-row").data("id") || $(event.target).data("id"),
-                    img = $(event.target).siblings(".sprite")[0] || $(event.target).children(".sprite")[0];
-                event.dataTransfer.setData("text", src);
-                event.dataTransfer.effectAllowed = "copyMove";
-                if ("setDragImage" in event.dataTransfer)
-                    event.dataTransfer.setDragImage(img, 0, 0);
-            });
+        view.find(".data-row").attr("draggable", "true");
+        view.register("dragstart", function (event) {
+            var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
+            droppy.dragTimer.refresh(row.data("id"));
+            event.dataTransfer.setData("text", row.data("id"));
+            event.dataTransfer.effectAllowed = "copyMove";
+            if ("setDragImage" in event.dataTransfer)
+                event.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
         });
     }
+    droppy.dragTimer = new (function () {
+        var dt = function () {
 
+        };
+        dt.prototype.timer = null;
+        dt.prototype.data = "";
+        dt.prototype.isInternal = false;
+        dt.prototype.refresh = function (data) {
+            if (typeof data === "string") {
+                this.data = data;
+                this.isInternal = true;
+            }
+            clearTimeout(this.timer);
+            this.timer = setTimeout(this.clear, 1000);
+        };
+        dt.prototype.clear = function () {
+            if (!this.isInternal)
+                $(".dropzone").removeClass("in");
+            clearTimeout(this.timer);
+            this.isInternal = false;
+            this.data = "";
+        };
+        return dt;
+    }())();
     // Hover evenets for upload arrows
     function bindHoverEvents(view) {
-        view.find(".data-row").each(function () {
-            var row = $(this);
-            bindHover(row.children("a"), false, function (el, event, enter) {
-                if (!enter) return el.removeClass("drop-hover");
-                if (event.dataTransfer.effectAllowed === "copyMove") { // internal source
-                    event.stopPropagation();
-                    if (enter && el.parents(".data-row").attr("data-type") === "folder") {
-                        el.addClass("drop-hover");
-                        el.parents(".view").find(".dropzone").replaceClass("in", "out");
-                    } else {
-                        el.parents(".view").find(".dropzone").replaceClass("out", "in");
+        var dropZone = view.find(".dropzone");
+        view.register("dragenter", function (event) {
+            event.stopPropagation();
+            var target = $(event.target),
+                row;
+            if (droppy.dragTimer.isInternal) { // internal source
+                if (target.hasClass("folder-link")) {
+                    row = target.parent();
+                    event.preventDefault();
+                    if (!row.hasClass("drop-hover")) {
+                        if (row.attr("data-id") !== droppy.dragTimer.data) {
+                            $(".drop-hover").removeClass("drop-hover");
+                            row.addClass("drop-hover");
+                        }
+                        dropZone.removeClass("in");
+                    }
+                } else {
+                    view.find(".drop-hover").removeClass("drop-hover");
+                }
+            } else { // external source
+                if (target.hasClass("content") || target.parents().hasClass("content")) {
+                    $(".dropzone").each(function () {
+                        if (this !== dropZone[0]) $(this).removeClass("in");
+                    });
+                    dropZone.addClass("in");
+                }
+            }
+        });
+        view.register("dragover", function (event) {
+            event.preventDefault();
+            droppy.dragTimer.refresh();
+        });
+        view.register("dragleave", function (event) {
+            event.stopPropagation();
+            var target = $(event.target),
+                row;
+            if (droppy.dragTimer.isInternal) { // internal source
+                if (target.hasClass("folder-link")) {
+                    row = target.parent();
+                    if (row.hasClass("drop-hover")) {
+                        row.removeClass("drop-hover");
                     }
                 }
-            }, true);
-        });
-        bindHover(view, false, function (el, event, enter) {
-            el.find(".dropzone").replaceClass(enter ? "out" : "in", enter ? "in" : "out");
-        });
-    }
-
-    // Bind hover events to an element
-    function bindHover(el, stopProp, callback) {
-        var isHovering, endTimer;
-        function enter(event) {
-            event.preventDefault(); // Allow the event
-            if (stopProp) event.stopPropagation(); // Optionally stop bubbling
-            clearTimeout(endTimer);
-            if (!isHovering) {
-                isHovering = true;
-                callback(el, event, true);
             }
-        }
-        function leave(event) {
-            if (stopProp) event.stopPropagation();
-            clearTimeout(endTimer);
-            endTimer = setTimeout(end, 50);
-        }
-        function end(event) {
-            isHovering = false;
-            callback(el, event, false);
-        }
-        el.register("dragenter dragover", enter);
-        el.register("dragleave dragend", leave);
+        });
     }
 
     function bindDropEvents(view) {
-        $(".data-row").each(function () {
+        view.find(".data-row").each(function () {
             var row = $(this);
             if (row.attr("data-type") === "folder") {
-                row.children("a").register("drop", function (event) {
-                    $(event.target).removeClass("drop-hover");
-                    var from = event.dataTransfer.getData("text"),
-                        to = $(event.target).attr("data-id") || $(event.target).parents(".data-row").attr("data-id");
-
-                    to = fixRootPath(to + "/" + basename(from));
-                    if (from) handleDrop(view, event, from, to);
+                row.register("drop", function (event) {
                     event.preventDefault();
                     event.stopPropagation();
+                    $(".drop-hover").removeClass("drop-hover");
+                    $(".dropzone").removeClass("in");
+                    var from = event.dataTransfer.getData("text"),
+                        to = row.attr("data-id");
+                    to = fixRootPath(to + "/" + basename(from));
+                    if (from) handleDrop(view, event, from, to);
+
                 });
             }
-        });
-        $(document.documentElement).register("drop", function () {
-            $(".data-row > a").removeClass("drop-hover");
         });
         view.register("drop", function (event) {
             event.preventDefault();
             event.stopPropagation();
-            view.find(".dropzone").replaceClass("in", "out");
-            var items = event.dataTransfer.items,
+            $(".dropzone").removeClass("in");
+            var view = $(event.target).parents(".view"),
+                items = event.dataTransfer.items,
                 fileItem = null,
                 entryFunc = null,
                 dragData = event.dataTransfer.getData("text");
@@ -1671,13 +1695,11 @@
         // Copy/cut a file/folder
         $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
             event.stopPropagation();
-            var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"),
-                from  = entry.data("id");
-            droppy.clipboard = { type: $(this).attr("class"), from: from };
+            var entry = $("#entry-menu").data("target");
+            droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
             $("#click-catcher").trigger("click");
-            view.find(".paste-button .filename").text(basename(from));
-            view.find(".paste-button").replaceClass("out", "in");
+            $(".paste-button .filename").text(basename(droppy.clipboard.from));
+            $(".paste-button").replaceClass("out", "in");
         });
 
         // Open a file/folder in browser
@@ -1777,7 +1799,6 @@
         }
     }
 
-
     function preparePlayback(playButton) {
         if (droppy.socketWait) return;
         var source = playButton.parent().parent().find(".file-link").attr("href");
@@ -1821,6 +1842,7 @@
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
+
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
@@ -1829,14 +1851,25 @@
             readOnly = false, // Check if not readonly
             editor = null,
             doc = $(t.views.document({readOnly:readOnly}));
-        view[0].animDirection = "forward";
-        loadContent(view, contentWrap(view).append(doc));
-        showSpinner(view);
         $.ajax({
             type: "GET",
             url: url,
             dataType: "text",
             success : function (data) {
+                loadContent(view, contentWrap(view).append(doc));
+                showSpinner(view);
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                    styleSelectedText: true,
+                    readOnly: true,
+                    showCursorWhenSelecting: true,
+                    theme: droppy.get("theme"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    indentUnit: droppy.get("indentUnit"),
+                    lineWrapping: droppy.get("lineWrapping"),
+                    lineNumbers: true,
+                    autofocus: true,
+                    keyMap: "sublime"
+                });
                 // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
                 // $.getScript()
                 var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
@@ -1861,20 +1894,7 @@
                             return ext;
                         }
                     })();
-                view[0].editor = editor = CodeMirror.fromTextArea(doc.find(".text-editor textarea")[0], {
-                    styleSelectedText: true,
-                    readOnly: true,
-                    showCursorWhenSelecting: true,
-                    theme: droppy.get("theme"),
-                    indentWithTabs: droppy.get("indentWithTabs"),
-                    indentUnit: droppy.get("indentUnit"),
-                    lineWrapping: droppy.get("lineWrapping"),
-                    lineNumbers: true,
-                    autofocus: true,
-                    keyMap: "sublime",
-                    mode: mode
-                });
-                $(".sidebar").attr("style", "right: calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
                     editor = null;
@@ -1896,19 +1916,21 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                setTimeout(function () {
+                var editorLoaded = false;
+                function loadDocumentData() {
+                    if (editorLoaded) return;
+                    else editorLoaded = true;
                     editor.setOption("readOnly", readOnly);
+
                     editor.setValue(data);
                     editor.clearHistory();
-                    editor.refresh();
-                    $(editor).register("change", function () {
-                        if (!view[0].editNew) {
+                    editor.setOption("mode", mode);
+                    editor.on("change", function () {
+                        if (view[0].editNew) {
+                            view[0].editNew = false;
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
-                    });
-                    $(editor).register("keyup", function () {
-                        view[0].editNew = false;
-                    });
+                    })
                     // Keyboard shortcuts
                     $(window).register("keydown", function (e) {
                         if (editor && (e.metaKey || e.ctrlKey)) {
@@ -1925,7 +1947,9 @@
                         }
                     });
                     hideSpinner(view);
-                }, 1000);
+                }
+                if (droppy.detects.animations) view.one("transitionend msTransitionEnd webkitTransitionEnd", loadDocumentData);
+                else loadDocumentData();
             },
             error : function () {
                 closeDoc(view);
@@ -2336,6 +2360,16 @@
         if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
     }
 
+    function showError(text) {
+        var infobox = $("#info-box");
+        infobox.attr("class", "error in");
+        infobox.children("h1").text("Error");
+        infobox.children("span").text(text);
+        setTimeout(function () {
+            infobox.removeAttr("class");
+        }, 4000);
+    }
+
     function debounce(func, wait) {
         var timeout, result;
         return function () {
@@ -2363,12 +2397,5 @@
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
-    }
-    // turn /path/to/file to /path/to
-    function dirname(path) {
-        if (path === "/")
-            return "/";
-        else
-            return path.replace(/\/[^\/]*$/, "");
     }
 }(jQuery, window, document));

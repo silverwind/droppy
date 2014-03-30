@@ -1,5 +1,5 @@
 #droppy <a href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a>
-A personal cloud storage solution with a speedy HTML5 interface, running on [node.js](http://nodejs.org/). Check out the [demo](http://droppy.jit.su).
+A personal cloud storage solution with a speedy HTML5 interface, running on [node.js](http://nodejs.org/). Check out the [demo](http://droppy.jit.su/#/).
 
 ![Main View](http://i.imgur.com/izxnfAN.png)
 ![Editor](http://i.imgur.com/Ziv79rJ.png)
@@ -14,8 +14,8 @@ A personal cloud storage solution with a speedy HTML5 interface, running on [nod
 * Edit text files in a feature-rich editor (CodeMirror).
 * Perform Drag and Drop operations between multiple directory views. Hold CTRL/CMD to copy.
 * Basic file system operations: Cut, Copy, Rename, Delete.
-* Playback of audio files supported by via the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
-* Support for shortened links for to share with your friends.
+* Playback of audio files supported by the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+* Support for shortened links to share file downloads with your friends without them needing to log in.
 
 ##Installation
 You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
@@ -49,6 +49,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "linkLength"   : 3,
     "logLevel"     : 2,
     "maxOpen"      : 256,
+    "maxFileSize"  : 0,
     "zipLevel"     : 1,
     "noLogin"      : false,
     "demoMode"     : false,
@@ -61,7 +62,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "tls" : {
         "key"      : "./key.pem",
         "cert"     : "./cert.pem",
-        "ca"       : ["./ca1.pem", "./ca2.pem"]
+        "ca"       : []
     }
 }
 ````
@@ -77,6 +78,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - **linkLength**: The amount of characters in a shortlink.
 - **logLevel**: The amount of logging to show. `0` is no logging, `1` is errors, `2` is info ( HTTP requests), `3` is debug (socket communication).
 - **maxOpen**: The maximum number of concurrently opened files. This number is primarily of concern for Windows servers.
+- **maxFileSize**: The maximum file size in bytes a user can upload in a single file.
 - **zipLevel**: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
 - **noLogin**: When enabled, the client skips the login page, making the server essentially public.
 - **demoMode**: When enabled, the server will regularly clean out all files and restore samples.
@@ -95,7 +97,7 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 
 - **key**: Path to your private key.
 - **cert**: Path to your certificate.
-- **ca**: Path(s) to any intermediate certificates.
+- **ca**: An optional array of paths to your intermediate (CA) certificates.
 
 ##Supported Browsers
 - Firefox (last 2 versions)
@@ -115,7 +117,7 @@ Description=droppy
 After=network.target
 
 [Service]
-ExecStart=/bin/env node /path/to/droppy/droppy.js
+ExecStart=/bin/env node /path/to/droppy/droppy.js --color
 WorkingDirectory=/path/to/droppy/
 Restart=always
 StandardOutput=syslog

@@ -124,13 +124,15 @@ input:-webkit-autofill {
 
 @media all and (min-width: 1024px) { .button { font-size: .7em } }
 @media all and (max-width: 1023px) { .button { font-size: .7em } }
-@media all and (max-width:  750px) { .button-text { display: none } }
+@media all and (max-width:  750px) { #buttons span { display: none } }
 
 .button svg {
     fill: #ccc;
     display: inline-block;
     vertical-align: middle;
 }
+
+@media all and (max-width: 639px) { .button svg { vertical-align: baseline } }
 
 .button svg {
     transition: fill .25s ease;
@@ -187,7 +189,8 @@ input:-webkit-autofill {
 .view.right { left:50%; right:0; }
 
 .content {
-    width: 100%;
+    left: 0;
+    right: 0;
     padding: .25em;
     transition: transform .2s ease-in;
     position: absolute;
@@ -306,7 +309,7 @@ input:-webkit-autofill {
 }
 
 .paste-button.in  { margin-bottom: .25em; }
-.paste-button.out { height: 0; overflow: hidden; }
+.paste-button.out { height: 0; overflow: hidden; visibility: hidden; }
 
 @media all and (min-width: 1024px) { .paste-button { font-size:  1em } }
 @media all and (max-width: 1023px) { .paste-button { font-size: .9em } }
@@ -409,8 +412,8 @@ input:-webkit-autofill {
 .data-row.editing.invalid { background: #fdd }
 .data-row.editing .entry-link { display: none; }
 
-.data-row .drop-hover { color: #000; font-weight: 400; }
-.data-row .drop-hover:after {
+.data-row.drop-hover a.folder-link { color: #000; font-weight: 400; }
+.data-row.drop-hover a.folder-link:after {
     content: "";
     height: 1em;
     width: 1em;
@@ -708,22 +711,23 @@ input:-webkit-autofill {
 #entry-menu .open, #entry-menu .edit, #entry-menu .download {
     display: none;
 }
-#entry-menu.type-js>div>.edit,
-#entry-menu.type-text>div>.edit,
-#entry-menu.type-html>div>.edit,
-#entry-menu.type-css>div>.edit,
-#entry-menu.type-bin>div>.edit,
-#entry-menu.type-xml>div>.edit,
-#entry-menu.type-image>div>.edit,
-#entry-menu.type-json>div>.edit,
-#entry-menu.type-markdown>div>.edit,
 #entry-menu.type-audio>div>.play,
-#entry-menu.type-video>div>.play,
-#entry-menu.type-image>div>.show,
-#entry-menu.type-png>div>.show,
-#entry-menu.type-jpg>div>.show,
+#entry-menu.type-bin>div>.edit,
+#entry-menu.type-css>div>.edit,
 #entry-menu.type-gif>div>.show,
+#entry-menu.type-html>div>.edit,
 #entry-menu.type-html>div>.show,
+#entry-menu.type-image>div>.edit,
+#entry-menu.type-image>div>.show,
+#entry-menu.type-jpg>div>.show,
+#entry-menu.type-js>div>.edit,
+#entry-menu.type-json>div>.edit,
+#entry-menu.type-log>div>.edit,
+#entry-menu.type-markdown>div>.edit,
+#entry-menu.type-png>div>.show,
+#entry-menu.type-text>div>.edit,
+#entry-menu.type-video>div>.play,
+#entry-menu.type-xml>div>.edit,
 #entry-menu.type-download .download {
     display: block;
 }
@@ -762,8 +766,6 @@ input:-webkit-autofill {
     width: 100%;
     height: 100%;
 }
-.doc > .text-editor > textarea { visibility: hidden }
-
 .content.document > .sidebar {
     position: absolute;
     top: .75em;
@@ -831,27 +833,32 @@ input:-webkit-autofill {
     transition: all .2s ease;
     width: 100%;
     box-shadow: -2px 0 0 2px #444;
-    display: inline-flex;
-    align-items: center;
+    display: flex;
+    align-items: stretch;
     justify-content: space-between;
     overflow: hidden;
     z-index: 1;
-
 }
 
 @media all and (min-width: 1024px) { .upload-info { font-size: .9em } }
 @media all and (max-width: 1023px) { .upload-info { font-size: .8em } }
 @media all and (max-width:  639px) { .upload-info { font-size: .7em } }
 
-.upload-info.in  {
+.upload-info.in {
     height: 2em;
     box-shadow: 0 0 0 .125em #111;
     padding-top: .25em;
 }
 .upload-info.out { height: 0; box-shadow: none; }
 
-.upload-status {
-    flex: 1 1 5em;
+.upload-info span {
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.5em;
+}
+
+.upload-title {
+    flex: 1 1;
     order: 1;
     color: #eee;
     z-index: 3;
@@ -860,16 +867,21 @@ input:-webkit-autofill {
     white-space: nowrap;
 }
 
+.upload-speed {
+    color: #eee;
+    flex: 0 0 6.5em;
+    order: 2;
+    z-index: 3;
+    text-align: center;
+    white-space: nowrap;
+}
+
 .upload-time {
     color: #eee;
-    flex: 0 0 7em;
-    order: 2;
-    vertical-align: middle;
-    display: inline-block;
+    flex: 0 0 6.5em;
+    order: 3;
     z-index: 3;
-    text-align: right;
-    padding-right: 1em;
-    text-overflow: ellipsis;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -877,24 +889,26 @@ input:-webkit-autofill {
     transition: color .2s ease;
     cursor: pointer;
     color: #eee;
-    flex: 0 0 9em;
+    flex: 0 0 5em;
     text-align: right;
     padding-right: .25em;
-    order: 3;
+    order: 4;
     z-index: 3;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-@media all and (max-width:  639px) {
-    .upload-title { display: none; }
-    .upload-cancel { flex: 0 0 2em; }
-    .upload-cancel span { display: none; }
+@media all and (max-width: 959px) {
+    .view.left .upload-title       , .view.right .upload-title       { display: none !important; }
+    .view.left .upload-cancel      , .view.right .upload-cancel      { flex: 0 0 2em !important; }
+    .view.left .upload-cancel span , .view.right .upload-cancel span { display: none !important; }
 }
 
-.upload-speed:before {
-    content: " at ";
-    color: #aaa;
+@media all and (max-width: 479px) {
+    .upload-title       { display: none !important; }
+    .upload-speed       { flex: 1 1 !important;     }
+    .upload-time        { flex: 1 1 !important;     }
+    .upload-cancel      { flex: 0 0 2em !important; }
+    .upload-cancel span { display: none !important; }
 }
 
 .upload-bar {
@@ -921,10 +935,9 @@ input:-webkit-autofill {
 .upload-info svg {
     fill: #eee;
     height: 1em;
-    vertical-align: top;
-    transition: fill .2s ease;
+    vertical-align: middle;
+    transition: fill .15s ease;
 }
-
 
 .upload-cancel:hover { color: #f44 }
 .upload-cancel:hover svg.remove { fill: #f44 }
@@ -940,11 +953,10 @@ input:-webkit-autofill {
     overflow: hidden;
     position: relative;
     transition: all .2s ease;
-    box-shadow: -2px 0 0 2px #444;
     width: 100%;
 }
 
-#audio-controls.in  { flex-basis: 2em }
+#audio-controls.in  { flex-basis: 2em; box-shadow: -2px 0 0 2px #444 }
 #audio-controls.out { flex-basis: 0 }
 
 @media all and (min-width: 1024px) { #audio-controls { font-size: .9em} }
@@ -1221,7 +1233,7 @@ input:-webkit-autofill {
 }
 
 #options-box .list-options label {
-    text-align: Left;
+    text-align: left;
     width: calc(50% - .25em);
     font-weight: 400;
 }
@@ -1261,9 +1273,8 @@ input:-webkit-autofill {
     text-overflow: "";
 }
 
-#options-box .list-options select::-ms-expand { display: none }
 #options-box .list-options div { position:relative }
-#options-box .list-options div:after {
+html:not(.ie) #options-box .list-options div:after {
     content: "";
     background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cG9seWdvbiBwb2ludHM9IjEwLDE2IDIyLDE2IDE2LDI0IiBmaWxsPSIjNjY2Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxNCAyMiwxNCAxNiw2IiBmaWxsPSIjNjY2Ii8+PC9zdmc+Cg==), linear-gradient(#fff,#fff);
     background-size: contain;
@@ -1278,7 +1289,7 @@ input:-webkit-autofill {
     pointer-events: none;
 }
 
-#options-box .list-options div:before {
+html:not(.ie) #options-box .list-options div:before {
     content: "";
     position: absolute;
     top: 0; bottom: 0; left: 0; right: -2px;
@@ -1316,8 +1327,8 @@ input:-webkit-autofill {
     background: #fff;
     text-align: center;
     border-radius: 6px;
-    width: 60%;
-    margin-left: 20%;
+    width: 40%;
+    margin-left: 30%;
     margin-top: .5em;
     cursor: pointer;
     transition: background .2s ease;
@@ -1325,7 +1336,7 @@ input:-webkit-autofill {
     margin-bottom: .5em;
 }
 #options-box .list-user .add-user:hover {
-    background: #1af;
+    background: #f81;
     color: #fff;
 }
 #options-box .list-user .add-user:hover svg {
@@ -1537,7 +1548,7 @@ input[type="checkbox"] { display: none }
         position: fixed;
     }
 }
-.submit .ok {
+.submit .signin {
     fill: #eee;
     display: inline-block;
     vertical-align: middle;
@@ -1622,6 +1633,7 @@ input[type="checkbox"] { display: none }
 
 #drop-select span {
     cursor: pointer;
+    display: inline-block;
     text-align: center;
     transition: all .1s ease;
     flex: 1;
@@ -1661,11 +1673,15 @@ input[type="checkbox"] { display: none }
 
 .dropzone svg {
     position: absolute;
-    left: 25%;
-    top: 25%;
-    height: 50%;
-    width: 50%;
+    left: 30%;
+    top: 35%;
+    height: 30%;
+    width: 40%;
     fill: #aaa;
+    stroke: #888;
+    stroke-width: .25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 #tooltip {

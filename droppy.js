@@ -23,10 +23,6 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  --------------------------------------------------------------------------- */
-/*jslint evil: true, expr: true, regexdash: true, bitwise: true, freeze: true,
-  trailing: false, sub: true, eqeqeq: true, forin: true, quotmark: false,
-  loopfunc: true, laxcomma: true, indent: false, white: true, nonew: true,
-  newcap: true, undef: true, unused: true, globalstrict: true, node: true */
 "use strict";
 
 (function () {
@@ -67,7 +63,7 @@
         cssCache  = null,
         firstRun  = null,
         ready     = false,
-        isCLI     = (process.argv.length > 2),
+        isCLI     = (process.argv.length > 2 && process.argv[2] !== "--color"),
         mode      = {file: "644", dir: "755"},
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
@@ -79,21 +75,30 @@
     // Argument handler
     if (isCLI) handleArguments();
 
-    config = cfg(path.join(process.cwd(), "config.json"));
+    console.log([
+            "....__..............................\n",
+            ".--|  |----.-----.-----.-----.--.--.\n",
+            "|  _  |   _|  _  |  _  |  _  |  |  |\n",
+            "|_____|__| |_____|   __|   __|___  |\n",
+            ".................|__|..|__|..|_____|\n",
+        ].join("").replace(/\./gm, chalk.black("."))
+                  .replace(/\_/gm, chalk.magenta("_"))
+                  .replace(/\-/gm, chalk.magenta("-"))
+                  .replace(/\|/gm, chalk.magenta("|"))
+    );
+    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
+               chalk.blue("node "), chalk.green(process.version.substring(1), "\n"));
 
+    config = cfg(path.join(process.cwd(), "config.json"));
     log.init(config);
-    log.logo();
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
-
-    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
-               chalk.blue("node "), chalk.green(process.version.substring(1)));
 
     // Read user/sessions from DB and check if its the first run
     readDB();
     firstRun = Object.keys(db.users).length < 1;
 
-    // Listen but refuse requests until ready
+    // Listen but show an loading page until ready
     createListener();
 
     // Copy/Minify JS, CSS and HTML content
@@ -102,7 +107,7 @@
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
         prepareSVG(function () {
-            setupDirectories( function() {
+            setupDirectories(function () {
                 cleanupLinks();
                 ready = true;
                 log.simple("Ready for requests!");
@@ -244,7 +249,7 @@
     //-----------------------------------------------------------------------------
     // Set up the directory
     function setupDirectories(callback) {
-        cleanupTemp(true, function() {
+        cleanupTemp(true, function () {
             try {
                 mkdirp.sync(config.filesDir, mode.dir);
                 mkdirp.sync(config.incomingDir, mode.dir);
@@ -273,7 +278,7 @@
         currentWatched = Object.keys(watchers);
         if (currentWatched.length > 0) {
             oldWatched = currentWatched;
-            currentWatched.forEach(function(dir) {
+            currentWatched.forEach(function (dir) {
                 watchers[dir].close();
                 delete watchers[dir];
             });
@@ -283,7 +288,7 @@
             deleteFirst: true,
             overwrite: true,
             filter: /(files|db\.json|config\.json|\.git|temp)/
-        }, function(err) {
+        }, function (err) {
             if (err) log.error(err);
             log.simple("Cleaning done.");
             callback();
@@ -293,7 +298,7 @@
     //-----------------------------------------------------------------------------
     // Clean up the directory for incoming files
     function cleanupTemp(initial, callback) {
-        rimraf(config.incomingDir, function(error) {
+        rimraf(config.incomingDir, function (error) {
             if (!initial) return callback();
             if (error) {
                 log.simple("Error cleaning up temporary directories:");
@@ -477,7 +482,8 @@
                     send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
                         debug: config.debug,
                         demoMode: config.demoMode,
-                        noLogin: config.noLogin
+                        noLogin: config.noLogin,
+                        maxFileSize: config.maxFileSize
                     }}));
                     break;
                 case "REQUEST_UPDATE":
@@ -590,8 +596,8 @@
                     msg.data.from = addFilePath(msg.data.from);
                     msg.data.to = addFilePath(msg.data.to);
                     // In case source and destination are the same, append a number to the file/foldername
-                    utils.getNewPath(msg.data.to, function (name) {
-                        doClipboard(msg.data.type, msg.data.from, path.join(path.dirname(msg.data.to), path.basename(name)));
+                    utils.getNewPath(msg.data.to, function (newPath) {
+                        doClipboard(msg.data.type, msg.data.from, newPath);
                     });
                     break;
                 case "CREATE_FOLDER":
@@ -645,8 +651,8 @@
                         var cbCalled = 0, cbFired = 0;
                         if (!utils.isPathSane(file)) return log.info(ws, null, "Invalid empty file creation request: " + file);
                         cbCalled++;
-                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function() {
-                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function() {
+                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function () {
+                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function () {
                                 log.info(ws, null, "Received: " + file.substring(1));
                                 if (++cbFired === cbCalled) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                             });
@@ -666,7 +672,7 @@
                     reason = "(Going away)";
                     delete clients[cookie];
                 }
-               log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
+                log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
             });
 
             ws.on("error", function (error) {
@@ -736,7 +742,7 @@
                 if (config.logLevel === 3) {
                     var debugData = JSON.parse(data);
                     if (debugData.type === "UPDATE_DIRECTORY")
-                        debugData.data = {"...":"..."};
+                        debugData.data = {"...": "..."};
                     log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
                 }
                 ws.send(data, function (error) {
@@ -766,10 +772,15 @@
         });
         function logError(error) {
             if (!error) return;
-            if (type == "cut")
+            if (type === "cut")
                 log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
-            else
-                log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
+            else  {
+                if (error === "no files to copy") {
+                    mkdirp(to);
+                } else {
+                    log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
+                }
+            }
             log.error(error);
         }
     }
@@ -778,7 +789,6 @@
     // snippet from: http://stackoverflow.com/a/14387791/2096729
     function copyFile(from, to, cb) {
         var cbCalled = false;
-
         from = fs.createReadStream(from);
         from.on("error", function (err) {
             done(err);
@@ -827,7 +837,7 @@
             for (var cookie in clients) {
                 if (clients.hasOwnProperty(cookie)) {
                     client = clients[cookie];
-                    client.views.forEach(function(view, vId) {
+                    client.views.forEach(function (view, vId) {
                         if (view && view.directory === dir && view.file === null) {
                             clientsToUpdate.push({cookie: cookie, vId: vId});
                         }
@@ -877,7 +887,7 @@
         for (var cookie in clients) {
             if (clients.hasOwnProperty(cookie)) {
                 var client = clients[cookie];
-                client.views.forEach(function(view, vId) {
+                client.views.forEach(function (view, vId) {
                     if (view && view.directory && view.file === null) {
                         neededDirs[client.views[vId].directory] = true;
                     }
@@ -917,7 +927,7 @@
                 cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
                 cache.res[relPath].mime = mime.lookup(fullPath);
                 if (/.*(js|css|html)$/.test(path.basename(fullPath))) {
-                    (function(filePath, data) {
+                    (function (filePath, data) {
                         cbCalled++;
                         zlib.gzip(data, function (error, gzipped) {
                             if (error) log.error(error);
@@ -941,7 +951,7 @@
                 svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
             });
             cache.res.svg.data = JSON.stringify(svgData);
-            zlib.gzip(new Buffer(cache.res["svg"].data, "utf-8"), function (error, gzipped) {
+            zlib.gzip(new Buffer(cache.res.svg.data, "utf-8"), function (error, gzipped) {
                 cache.res.svg.gzipData = gzipped;
                 cache.res.svg.etag = crypto.createHash("md5").update(String(new Date())).digest("hex");
                 callback();
@@ -1206,7 +1216,7 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var busboy, done = false, files = [], cookie = getCookie(req.headers.cookie);
+        var busboy, opts, done = false, files = [], cookie = getCookie(req.headers.cookie);
 
         req.query = qs.parse(req.url.substring("/upload?".length));
         log.info(req, res, "Upload started");
@@ -1220,7 +1230,11 @@
             return;
         }
 
-        busboy = new Busboy({ headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}});
+        opts = { headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
+
+        if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
+        busboy = new Busboy(opts);
+
 
         busboy.on("file", function (fieldname, file, filename) {
             var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
@@ -1255,7 +1269,7 @@
                             });
                         } else {
                             if (req.query.r === "true") { // Rename option from the client
-                                (function(src, dst) {
+                                (function (src, dst) {
                                     utils.getNewPath(dst, function (newDst) {
                                         moveFile(src, newDst);
                                     });
@@ -1271,9 +1285,9 @@
             closeConnection();
 
             function moveFile(src, dst) {
-              fs.rename(src, dst, function (err) {
-                  if (err) log.error(err);
-              });
+                fs.rename(src, dst, function (err) {
+                    if (err) log.error(err);
+                });
             }
         });
 
@@ -1330,8 +1344,8 @@
                 return;
             }
             fileNames = files;
-            files = files.map(function(entry) { return root + "/" + entry});
-            async.map(files, readPath, function(err, results) {
+            files = files.map(function (entry) { return root + "/" + entry; });
+            async.map(files, readPath, function (err, results) {
                 var i = fileNames.length;
                 while (i > -1) {
                     if (results[i]) {
@@ -1384,19 +1398,20 @@
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory and stream it to a client
     function streamArchive(req, res, type) {
-        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next;
+        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next, dispo;
         fs.stat(zipPath, function (err, stats) {
             if (err) {
                 log.error(err);
             } else if (stats.isDirectory()) {
                 res.statusCode = 200;
-                res.setHeader("Content-Type", mime.lookup(type));
 
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                    res.setHeader("Content-Disposition", 'attachment; filename="' + encodeURIComponent(path.basename(zipPath)) + '.zip"');
+                    dispo = ['attachment; filename="', encodeURIComponent(path.basename(zipPath)), '.zip"'].join("");
                 else
-                    res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(zipPath) + '.zip"');
+                    dispo = ['attachment; filename="', path.basename(zipPath), '.zip"'].join("");
 
+                res.setHeader("Content-Type", mime.lookup(type));
+                res.setHeader("Content-Disposition", dispo);
                 res.setHeader("Transfer-Encoding", "chunked");
                 log.info(req, res, "Creating zip of /", req.url.substring(4));
 
@@ -1421,7 +1436,12 @@
                 utils.walkDirectory(zipPath, true, function (error, foundPaths) {
                     if (error) log.error(error);
                     paths = foundPaths.filter(function (s) { return s !== ""; });
-                    next(paths.pop());
+                    if (paths.length === 0) {
+                        archive.append("", { name: "Empty" });
+                    } else {
+                        next(paths.pop());
+                    }
+
                 });
             } else {
                 res.statusCode = 404;
@@ -1632,7 +1652,6 @@
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
 
     function getResPath(name)  { return path.join(config.resDir, name); }
-    // function getSrcPath(name)  { return path.join(config.srcDir, name); }
 
     // removeFilePath is intentionally not an inverse to the add function
     function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }
