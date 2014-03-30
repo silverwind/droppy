@@ -1204,10 +1204,8 @@
             view.find(".path li").animate({"left": 0}, {duration: 200});
         }
     }
-
     // Convert the received data into HTML
     function openDirectory(view, isUpload) {
-        /**/
         var tdata = {
             entries: view[0].currentData,
             folder: view[0].currentFolder,
@@ -1218,74 +1216,6 @@
             mimeByExt: droppy.mediaTypes
         };
         var content = contentWrap(view).html(t.views.directory(tdata));
-/*=======
-        var downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes,
-            folder = view[0].currentFolder,
-            fileList = view[0].currentData,
-            list = $("<ul></ul>");
-
-        for (var file in fileList) {
-            if (fileList.hasOwnProperty(file)) {
-                svgIcon = "";
-                classes = "";
-                type = fileList[file].type;
-                bytes = fileList[file].size;
-                if (!bytes && droppy.sizeCache[folder] && droppy.sizeCache[folder][file])
-                    bytes = droppy.sizeCache[folder][file];
-                temp = convertToSI(bytes);
-                size = temp.size > 0 ? temp.size : "0";
-                sizeUnit = temp.size > 0 ? temp.unit : "b";
-                mtime = fileList[file].mtime;
-                id = (folder === "/") ? "/" + file : folder + "/" + file;
-                if (type === "nf" || type === "nd") {
-                    svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
-                    classes += " uploading";
-                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(file)) {
-                    svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
-                    classes += " playable";
-                }
-                if (type === "f" || type === "nf") { // Create a file row
-                    var ext = getExt(file), spriteClass = getSpriteClass(ext);
-                    downloadURL = "/~" + id;
-                    if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[file].mime;
-                    if (isUpload) file = decodeURIComponent(file);
-                    list.append(
-                        '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
-                            '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="file-link entry-link" href="' + downloadURL + '"target="nope" download="' + file + '">' + file + '</a>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink" title="Create Shortlink"><a>' + droppy.svg.link + '</a></span>' +
-                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
-                        '</li>'
-                    );
-                } else if (type === "d" || type === "nd") {  // Create a folder row
-                    if (isUpload) file = decodeURIComponent(file);
-                    list.append(
-                        '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
-                            '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
-                            '<a class="folder-link entry-link">' + file + '</a>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" target="nope" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
-                        '</li>'
-                    );
-                }
-            }
-        }
-        list.children("li").sort(sortFunc).appendTo(list);
-        var content = contentWrap(view).html(
-            '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
-                '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
-            '</div>');
-        if (list.children("li").length)
-            content.append(list.prepend(getHeaderHTML()));
-        else
-            content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
->>>>>>> master*/
         loadContent(view, content);
         // Upload button on empty page
         content.find(".empty").register("click", function (event) {
@@ -1958,43 +1888,17 @@
     }
 
     function createOptions() {
-/*<<<<<<< HEAD*/
         return $("<div class='list-options'>").append(t.options({
             droppy:droppy,
             options:[
                 ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
                 ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
-                ["theme", "Editor Theme", ["base16-dark", "xq-light"], ["Dark", "Light"]],
+                ["theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]],
                 ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
                 ["clickAction", "File Click Action", ["download", "view"], ["Download", "View"]],
                 ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
             ]
         }));
-/*=======
-        var list = $("<ul>");
-        list.append(createSelect("indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]));
-        list.append(createSelect("indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]));
-        list.append(createSelect("theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]));
-        list.append(createSelect("lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]));
-        list.append(createSelect("clickAction", "File Click Action", ["download", "view"], ["Download", "View"]));
-        list.append(createSelect("renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]));
-        list.prepend("<h1>Options</h1>");
-        return $("<div class='list-options'>").append(list);
-
-        function createSelect(option, label, values, valueNames) {
-            var output = "";
-            output += '<label>' + label + '</label>';
-            output += '<div><select class="' + option + '">';
-            values.forEach(function (value, i) {
-                if (droppy.get(option) === value)
-                    output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
-                else
-                    output += '<option value="' + value + '">' + valueNames[i] + '</option>';
-            });
-            output += '</select></div>';
-            return '<li>' + output + '</li>';
-        }
->>>>>>> master*/
     }
 
     function createUserList(users) {

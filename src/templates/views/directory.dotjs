@@ -28,23 +28,23 @@ it = {
 {{##def.folderLink:
     <li class="data-row{{= temp.classes }}" data-type="folder" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
         <span class="sprite sprite-folder">{{= temp.svgIcon }}</span>
-        <span class="folder-link entry-link">{{= temp.entryname }}</span>
+        <a class="folder-link entry-link">{{= temp.entryname }}</a>
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
         <span class="size-unit">{{= temp.sizeUnit }}</span>
-        <span><a class="zip" title="Create Zip" href="/~~{{= temp.id }}" download="{{= temp.entryname }}.zip">{{= svg.zip }}</a></span>
-        <span class="entry-menu" title="Actions">{{= svg.menu }}</span>
+        <span><a class="zip" title="Create Zip" href="/~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= svg.zip }}</a></span>
+        <span class="entry-menu faux-button" title="Actions">{{= svg.menu }}</span>
     </li>
 #}}
 {{##def.fileLink:
     <li class="data-row{{= temp.classes }}" data-type="file" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
         <span class="sprite {{= temp.spriteClass}}">{{= temp.svgIcon }}</span>
-        <a class="file-link entry-link" href="/~{{= temp.id }}" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
+        <a class="file-link entry-link" href="/~{{= temp.id }}" target="nope" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
         <span class="size-unit">{{= temp.sizeUnit }}</span>
-        <span class="shortlink" title="Create Shortlink">{{= svg.link }}</span>
-        <span class="entry-menu" title="Actions">{{= svg.menu }}</span>
+        <span class="shortlink faux-button" title="Create Shortlink">{{= svg.link }}</span>
+        <span class="entry-menu faux-button" title="Actions">{{= svg.menu }}</span>
     </li>
 #}}
 
