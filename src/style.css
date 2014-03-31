@@ -235,7 +235,7 @@ input:-webkit-autofill {
    text-align: left;
    position: absolute;
    z-index: 1;
-   box-shadow: 0 0 1.33em #000;
+   box-shadow: 0 0 .75em #111;
 }
 
 .view.right .path { border-left: 2px solid #444}
