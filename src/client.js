@@ -1401,8 +1401,10 @@
                 bindHoverEvents(view);
                 bindDropEvents(view);
             } else if ($(view).attr("data-type") === "document" || $(view).attr("data-type") === "image") {
+                bindHoverEvents(view);
                 bindDropEvents(view);
             }
+            allowDrop(view);
         }
     }
 
@@ -1497,7 +1499,15 @@
         };
         return dt;
     }())();
-    // Hover evenets for upload arrows
+
+    function allowDrop(el) {
+        el.register("dragover", function (event) {
+            event.preventDefault();
+            droppy.dragTimer.refresh();
+        });
+    }
+
+    // Hover events for upload arrows
     function bindHoverEvents(view) {
         var dropZone = view.find(".dropzone");
         view.register("dragenter", function (event) {
@@ -1526,10 +1536,6 @@
                     dropZone.addClass("in");
                 }
             }
-        });
-        view.register("dragover", function (event) {
-            event.preventDefault();
-            droppy.dragTimer.refresh();
         });
         view.register("dragleave", function (event) {
             event.stopPropagation();
@@ -1860,16 +1866,17 @@
                 loadContent(view, contentWrap(view).append(doc));
                 showSpinner(view);
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-                    styleSelectedText: true,
+                    autofocus: true,
+                    dragDrop: false,
+                    indentUnit: droppy.get("indentUnit"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    keyMap: "sublime",
+                    lineNumbers: true,
+                    lineWrapping: droppy.get("lineWrapping"),
                     readOnly: true,
                     showCursorWhenSelecting: true,
-                    theme: droppy.get("theme"),
-                    indentWithTabs: droppy.get("indentWithTabs"),
-                    indentUnit: droppy.get("indentUnit"),
-                    lineWrapping: droppy.get("lineWrapping"),
-                    lineNumbers: true,
-                    autofocus: true,
-                    keyMap: "sublime"
+                    styleSelectedText: true,
+                    theme: droppy.get("theme")
                 });
                 // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
                 // $.getScript()
