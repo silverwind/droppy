@@ -1814,16 +1814,11 @@
 
     function openFile(view) {
         // Determine filetype and how to open it
-        var path = getViewLocation(view),
-            fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        switch (fileext) {
-            case "jpg":
-            case "gif":
-            case "png":
-                openImage(view);
-                break;
-            default:
-                openDoc(view);
+        var ext = getExt(getViewLocation(view));
+        if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext !== -1)) {
+            openImage(view);
+        } else {
+            openDoc(view);
         }
     }
     function openImage(view) {
@@ -1870,7 +1865,6 @@
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
                 CodeMirror.defineInitHook(function (instance) {
-                    view[0].cm = instance;
                     instance.getDoc().droppyViewId = view[0].vId;
                     instance.clearHistory();
                     instance.setValue(data);
