@@ -1883,12 +1883,13 @@
                 });
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
-                    closeDoc(view);
+                    closeDoc($(this).parents(".view"));
                     editor = null;
                 });
                 doc.find(".save").register("click", function () {
+                    var view = $(this).parents(".view");
                     showSpinner(view);
-                    sendMessage($(this).parents(".view")[0].vId, "SAVE_FILE", {
+                    sendMessage(view)[0].vId, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
                     });
@@ -1930,8 +1931,10 @@
                     editor.refresh();
                     hideSpinner(view);
                 };
-                if (droppy.detects.animation) view.find(".content").one("transitionend webkitTransitionEnd", loadDocument);
-                else loadDocument("No animations");
+                if (droppy.detects.animation)
+                    view.find(".content").one("transitionend webkitTransitionEnd", loadDocument);
+                else
+                    loadDocument("No animations");
             },
             error : function () {
                 closeDoc(view);
