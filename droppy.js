@@ -1402,32 +1402,11 @@
 
                 archive = archiver(type, {zlib: { level: config.zipLevel }});
                 archive.on("error", function (error) { log.error(error); });
-
-                next = function (currentPath) {
-                    if (currentPath[currentPath.length - 1] !== "/")
-                        archive.file(currentPath, {name: removeFilePath(currentPath)});
-                    else
-                        archive.append("", { name: removeFilePath(currentPath) });
-                };
-
-                archive.on("entry", function () {
-                    if (paths.length)
-                        next(paths.pop());
-                    else
-                        archive.finalize();
-                });
                 archive.pipe(res);
-
-                utils.walkDirectory(zipPath, true, function (error, foundPaths) {
-                    if (error) log.error(error);
-                    paths = foundPaths.filter(function (s) { return s !== ""; });
-                    if (paths.length === 0) {
-                        archive.append("", { name: "Empty" });
-                    } else {
-                        next(paths.pop());
-                    }
-
-                });
+                archive.bulk([
+                    { expand: true, cwd: zipPath, src: ["**"], dest: path.basename(zipPath) }
+                ]);
+                archive.finalize();
             } else {
                 res.statusCode = 404;
                 res.end();
