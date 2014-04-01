@@ -175,7 +175,7 @@
     function newView(dest, vId) {
         var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
-                        "<div class=\"content\"></div>" +
+                        "<div class=\"content-container\"><div class=\"content\"></div></div>" +
                         "<div class=\"dropzone\">" + droppy.svg["upload-cloud"] + "</div>" +
                     "</div>");
         destroyView(vId);
@@ -1385,7 +1385,7 @@
             view.find(".new").addClass(type);
             finish();
         } else {
-            view.append(content);
+            view.children(".content-container").append(content);
             view.find(".new").attr("data-root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
