@@ -533,7 +533,7 @@
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    log.info(ws, null, "Deleting: " + msg.data.substring(1));
+                    log.info(ws, null, "Deleting: " + msg.data);
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
                     fs.stat(msg.data, function (error, stats) {
@@ -549,7 +549,7 @@
                     });
                     break;
                 case "SAVE_FILE":
-                    log.info(ws, null, "Saving: " + msg.data.to.substring(1));
+                    log.info(ws, null, "Saving: " + msg.data.to);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
                     fs.stat(msg.data.to, function (error) {

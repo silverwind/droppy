@@ -512,20 +512,27 @@
         // Open the WebSocket
         openSocket();
 
-        // Re-fit path line after 100ms of no resizing
-        var resizeTimeout;
-        $(window).register("resize", function () {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function () {
-                $(".view").each(function () {
-                    checkPathOverflow($(this));
-                });
-            }, 100);
-        })
-        .on("keyup", function (event) {
-            if (event.keyCode === 27) // Escape Key
-                $("#click-catcher").click();// Hide open modals
-        });
+        // Global events
+        $(window)
+            // Re-fit path line after 100ms of no resizing
+            .register("resize", function () {
+                clearTimeout(droppy.resizeTimer);
+                droppy.resizeTimer = setTimeout(function () {
+                    $(".view").each(function () {
+                        checkPathOverflow($(this));
+                    });
+                }, 100);
+            })
+            // Bind escape for hiding modals
+            .register("keyup", function (event) {
+                if (event.keyCode === 27)
+                    $("#click-catcher").click();
+            })
+            // Stop CTRL-S from showing a save dialog
+            .register("keydown", function (event) {
+                if (event.keyCode === 83 && (event.metaKey || event.ctrlKey)) event.preventDefault();
+            });
+
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -1843,8 +1850,7 @@
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
-            entryId = view[0].currentFolder + "/" + filename,
-            url = "/_" + entryId,
+            entryId = view[0].currentFolder === "/" ? "/" + filename : view[0].currentFolder + "/" + filename,
             readOnly = false, // Check if not readonly
             editor = null,
             doc = $(
@@ -1861,14 +1867,15 @@
         showSpinner(view);
         $.ajax({
             type: "GET",
-            url: url,
+            url: "/_" + entryId,
             dataType: "text",
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
                 CodeMirror.defineInitHook(function (instance) {
-                    instance.setOption("readOnly", readOnly);
-                    instance.setValue(data);
+                    instance.getDoc().droppyViewId = view[0].vId;
                     instance.clearHistory();
+                    instance.setValue(data);
+                    instance.setOption("readOnly", readOnly);
                     instance.setOption("mode", request.getResponseHeader("Content-Type"));
                     instance.on("change", function () {
                         if (view[0].editNew) {
@@ -1876,19 +1883,15 @@
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
                     });
-                    // Keyboard shortcuts
-                    $(window).register("keydown", function (e) {
-                        if (instance && (e.metaKey || e.ctrlKey)) {
-                            // s - save
-                            if (e.keyCode === 83) {
-                                e.preventDefault();
-                                showSpinner(view);
-                                sendMessage(view[0].vId, "SAVE_FILE", {
-                                    "to": entryId,
-                                    "value": instance.getValue()
-                                });
-                                return false;
-                            }
+                    instance.on("keyup", function (instance, e) { // Keyboard shortcuts
+                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                            var vId = instance.getDoc().droppyViewId;
+                            e.preventDefault();
+                            showSpinner(getView(vId));
+                            sendMessage(vId, "SAVE_FILE", {
+                                "to": entryId,
+                                "value": instance.getValue()
+                            });
                         }
                     });
                 });
@@ -2079,6 +2082,7 @@
         droppy.noLogin = null;
         droppy.queuedData = null;
         droppy.reopen = null;
+        droppy.resizeTimer = null;
         droppy.sizeCache = {};
         droppy.socket = null;
         droppy.socketWait = null;
