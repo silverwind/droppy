@@ -1840,7 +1840,7 @@
         hideSpinner(view);
     }
     function getCMView(cm) {
-        return getView(cm.getWrapperElement().parentElement.parentElement.parentElement.parentElement.vId);
+        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
     }
     function openDoc(view) {
         view.attr("data-type", "document");
@@ -1888,7 +1888,7 @@
                 });
                 doc.find(".save").register("click", function () {
                     showSpinner(view);
-                    sendMessage(view[0].vId, "SAVE_FILE", {
+                    sendMessage($(this).parents(".view")[0].vId, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
                     });
@@ -1910,12 +1910,10 @@
                     else called = true;
                     editor.setValue(data);
                     editor.setOption("mode", request.getResponseHeader("Content-Type"));
-                    editor.on("change", function (cm) {
+                    editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
-                        if (view[0].editNew) {
-                            view[0].editNew = false;
+                        if (change.origin !== "setValue")
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                        }
                     });
                     editor.on("keyup", function (cm, e) { // Keyboard shortcuts
                         if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
