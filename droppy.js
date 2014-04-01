@@ -836,7 +836,7 @@
                     });
                 });
             }
-        }, config.readInterval, { leading: true, trailing: false }));
+        }, config.readInterval, { leading: true, trailing: true }));
         watcher.on("error", function (error) {
             log.error("Error trying to watch ", dir, "\n", error);
         });
