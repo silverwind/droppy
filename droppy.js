@@ -1383,7 +1383,7 @@
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory and stream it to a client
     function streamArchive(req, res, type) {
-        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next, dispo;
+        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, dispo;
         fs.stat(zipPath, function (err, stats) {
             if (err) {
                 log.error(err);
