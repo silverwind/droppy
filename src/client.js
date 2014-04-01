@@ -1863,36 +1863,13 @@
             type: "GET",
             url: url,
             dataType: "text",
-            success : function (data) {
+            success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
                 CodeMirror.defineInitHook(function (instance) {
-                    // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
-                    var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
-                        mode = (function () {
-                            // If extension is different than modetype
-                            switch (ext) {
-                            case "coffee":
-                            case "litcoffee":
-                                return "coffeescript";
-                            case "js":
-                                return "javascript";
-                            case "json":
-                                return { name: "javascript", json : true };
-                            case "html":
-                                return "htmlmixed";
-                            case "ai":
-                            case "svg":
-                                return "xml";
-                            case "md":
-                                return "markdown";
-                            default:
-                                return ext;
-                            }
-                        })();
                     instance.setOption("readOnly", readOnly);
                     instance.setValue(data);
                     instance.clearHistory();
-                    instance.setOption("mode", mode);
+                    instance.setOption("mode", request.getResponseHeader("Content-Type"));
                     instance.on("change", function () {
                         if (view[0].editNew) {
                             view[0].editNew = false;
