@@ -1858,13 +1858,63 @@
                 '</div>'
             );
 
+        showSpinner(view);
         $.ajax({
             type: "GET",
             url: url,
             dataType: "text",
             success : function (data) {
                 loadContent(view, contentWrap(view).append(doc));
-                showSpinner(view);
+                CodeMirror.defineInitHook(function (instance) {
+                    // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
+                    var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
+                        mode = (function () {
+                            // If extension is different than modetype
+                            switch (ext) {
+                            case "coffee":
+                            case "litcoffee":
+                                return "coffeescript";
+                            case "js":
+                                return "javascript";
+                            case "json":
+                                return { name: "javascript", json : true };
+                            case "html":
+                                return "htmlmixed";
+                            case "ai":
+                            case "svg":
+                                return "xml";
+                            case "md":
+                                return "markdown";
+                            default:
+                                return ext;
+                            }
+                        })();
+                    instance.setOption("readOnly", readOnly);
+                    instance.setValue(data);
+                    instance.clearHistory();
+                    instance.setOption("mode", mode);
+                    instance.on("change", function () {
+                        if (view[0].editNew) {
+                            view[0].editNew = false;
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                        }
+                    });
+                    // Keyboard shortcuts
+                    $(window).register("keydown", function (e) {
+                        if (instance && (e.metaKey || e.ctrlKey)) {
+                            // s - save
+                            if (e.keyCode === 83) {
+                                e.preventDefault();
+                                showSpinner(view);
+                                sendMessage(view[0].vId, "SAVE_FILE", {
+                                    "to": entryId,
+                                    "value": instance.getValue()
+                                });
+                                return false;
+                            }
+                        }
+                    });
+                });
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,
                     dragDrop: false,
@@ -1878,30 +1928,6 @@
                     styleSelectedText: true,
                     theme: droppy.get("theme")
                 });
-                // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
-                // $.getScript()
-                var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
-                    mode = (function () {
-                        // If extension is different than modetype
-                        switch (ext) {
-                        case "coffee":
-                        case "litcoffee":
-                            return "coffeescript";
-                        case "js":
-                            return "javascript";
-                        case "json":
-                            return { name: "javascript", json : true };
-                        case "html":
-                            return "htmlmixed";
-                        case "ai":
-                        case "svg":
-                            return "xml";
-                        case "md":
-                            return "markdown";
-                        default:
-                            return ext;
-                        }
-                    })();
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
@@ -1924,40 +1950,7 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                var editorLoaded = false;
-                function loadDocumentData() {
-                    if (editorLoaded) return;
-                    else editorLoaded = true;
-                    editor.setOption("readOnly", readOnly);
-
-                    editor.setValue(data);
-                    editor.clearHistory();
-                    editor.setOption("mode", mode);
-                    editor.on("change", function () {
-                        if (view[0].editNew) {
-                            view[0].editNew = false;
-                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                        }
-                    })
-                    // Keyboard shortcuts
-                    $(window).register("keydown", function (e) {
-                        if (editor && (e.metaKey || e.ctrlKey)) {
-                            // s - save
-                            if (e.keyCode === 83) {
-                                e.preventDefault();
-                                showSpinner(view);
-                                sendMessage(view[0].vId, "SAVE_FILE", {
-                                    "to": entryId,
-                                    "value": editor.getValue()
-                                });
-                                return false;
-                            }
-                        }
-                    });
-                    hideSpinner(view);
-                }
-                if (droppy.detects.animations) view.one("transitionend msTransitionEnd webkitTransitionEnd", loadDocumentData);
-                else loadDocumentData();
+                hideSpinner(view);
             },
             error : function () {
                 closeDoc(view);
