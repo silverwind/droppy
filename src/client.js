@@ -1451,7 +1451,6 @@
                 catcher.off("mousemove").trigger("click");
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
-                view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
             });
@@ -1590,7 +1589,6 @@
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
-                    view[0].editNew = true;
                     updateLocation(view, dragData);
                 }
                 return;
@@ -1872,17 +1870,18 @@
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
                 CodeMirror.defineInitHook(function (instance) {
+                    view[0].cm = instance;
                     instance.getDoc().droppyViewId = view[0].vId;
                     instance.clearHistory();
                     instance.setValue(data);
                     instance.setOption("readOnly", readOnly);
                     instance.setOption("mode", request.getResponseHeader("Content-Type"));
-                    instance.on("change", function () {
-                        if (view[0].editNew) {
-                            view[0].editNew = false;
+                    instance.off("change");
+                    instance.on("change", function (instance, change) {
+                        if (change.origin !== "setValue")
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                        }
                     });
+                    instance.off("keyup");
                     instance.on("keyup", function (instance, e) { // Keyboard shortcuts
                         if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
                             var vId = instance.getDoc().droppyViewId;
@@ -1895,6 +1894,7 @@
                         }
                     });
                 });
+                // TODO: Recycle existing CodeMirror instances (and views) instead of recreating them every time
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,
                     dragDrop: false,
