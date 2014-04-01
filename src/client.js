@@ -1815,7 +1815,7 @@
     function openFile(view) {
         // Determine filetype and how to open it
         var ext = getExt(basename(getViewLocation(view)));
-        if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext !== -1)) {
+        if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext) !== -1) {
             openImage(view);
         } else {
             openDoc(view);
