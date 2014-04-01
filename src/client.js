@@ -633,7 +633,7 @@
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
             }
-            first.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function (event) {
+            first.one("transitionend webkitTransitionEnd", function (event) {
                 button.register("click", split);
                 event.stopPropagation();
             });
@@ -1183,7 +1183,7 @@
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
             toRemove.setTransitionClass("in", "out gone");
-            toRemove.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function () {
+            toRemove.one("transitionend webkitTransitionEnd", function () {
                 $(this).remove();
             });
         }
@@ -1931,7 +1931,7 @@
                     editor.refresh();
                     hideSpinner(view);
                 };
-                if (droppy.detects.animation) view.find(".content").one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", loadDocument);
+                if (droppy.detects.animation) view.find(".content").one("transitionend webkitTransitionEnd", loadDocument);
                 else loadDocument("No animations");
             },
             error : function () {
