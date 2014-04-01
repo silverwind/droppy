@@ -1403,6 +1403,7 @@
                 archive = archiver(type, {zlib: { level: config.zipLevel }});
                 archive.on("error", function (error) { log.error(error); });
                 archive.pipe(res);
+                archive.append(null, { name: path.basename(zipPath) + '/' });
                 archive.bulk([
                     { expand: true, cwd: zipPath, src: ["**"], dest: path.basename(zipPath) }
                 ]);

@@ -1451,7 +1451,6 @@
                 catcher.off("mousemove").trigger("click");
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
-                view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
             });
@@ -1590,7 +1589,6 @@
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
-                    view[0].editNew = true;
                     updateLocation(view, dragData);
                 }
                 return;
@@ -1816,16 +1814,11 @@
 
     function openFile(view) {
         // Determine filetype and how to open it
-        var path = getViewLocation(view),
-            fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        switch (fileext) {
-            case "jpg":
-            case "gif":
-            case "png":
-                openImage(view);
-                break;
-            default:
-                openDoc(view);
+        var ext = getExt(basename(getViewLocation(view)));
+        if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext !== -1)) {
+            openImage(view);
+        } else {
+            openDoc(view);
         }
     }
     function openImage(view) {
@@ -1873,6 +1866,34 @@
             dataType: "text",
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
+<<<<<<< HEAD
+=======
+                CodeMirror.defineInitHook(function (instance) {
+                    instance.getDoc().droppyViewId = view[0].vId;
+                    instance.clearHistory();
+                    instance.setValue(data);
+                    instance.setOption("readOnly", readOnly);
+                    instance.setOption("mode", request.getResponseHeader("Content-Type"));
+                    instance.off("change");
+                    instance.on("change", function (instance, change) {
+                        if (change.origin !== "setValue")
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                    });
+                    instance.off("keyup");
+                    instance.on("keyup", function (instance, e) { // Keyboard shortcuts
+                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                            var vId = instance.getDoc().droppyViewId;
+                            e.preventDefault();
+                            showSpinner(getView(vId));
+                            sendMessage(vId, "SAVE_FILE", {
+                                "to": entryId,
+                                "value": instance.getValue()
+                            });
+                        }
+                    });
+                });
+                // TODO: Recycle existing CodeMirror instances (and views) instead of recreating them every time
+>>>>>>> a8a09307b625c413c58441841cfab4e6dce0b319
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,
                     dragDrop: false,
