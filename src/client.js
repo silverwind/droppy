@@ -1905,7 +1905,7 @@
                 });
 
                 var called = false;
-                var loadDocument = function() {
+                var loadDocument = function () {
                     if (called) return;
                     else called = true;
                     editor.setValue(data);
