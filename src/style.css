@@ -177,7 +177,7 @@ input:-webkit-autofill {
     bottom: 0;
     left:0;
     right:0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     transition: left .2s ease, right .2s ease;
 }
 

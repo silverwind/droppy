@@ -633,7 +633,7 @@
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
             }
-            first.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+            first.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function (event) {
                 button.register("click", split);
                 event.stopPropagation();
             });
@@ -1183,8 +1183,8 @@
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
             toRemove.setTransitionClass("in", "out gone");
-            toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                $(event.target).remove();
+            toRemove.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function () {
+                $(this).remove();
             });
         }
 
@@ -1846,7 +1846,9 @@
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
-
+    function getCMView(cm) {
+        return getView(cm.getWrapperElement().parentElement.parentElement.parentElement.parentElement.vId);
+    }
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
@@ -1871,30 +1873,6 @@
             dataType: "text",
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
-                CodeMirror.defineInitHook(function (instance) {
-                    instance.getDoc().droppyViewId = view[0].vId;
-                    instance.clearHistory();
-                    instance.setValue(data);
-                    instance.setOption("readOnly", readOnly);
-                    instance.setOption("mode", request.getResponseHeader("Content-Type"));
-                    instance.on("change", function () {
-                        if (view[0].editNew) {
-                            view[0].editNew = false;
-                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                        }
-                    });
-                    instance.on("keyup", function (instance, e) { // Keyboard shortcuts
-                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
-                            var vId = instance.getDoc().droppyViewId;
-                            e.preventDefault();
-                            showSpinner(getView(vId));
-                            sendMessage(vId, "SAVE_FILE", {
-                                "to": entryId,
-                                "value": instance.getValue()
-                            });
-                        }
-                    });
-                });
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,
                     dragDrop: false,
@@ -1903,10 +1881,11 @@
                     keyMap: "sublime",
                     lineNumbers: true,
                     lineWrapping: droppy.get("lineWrapping"),
-                    readOnly: true,
+                    readOnly: readOnly,
                     showCursorWhenSelecting: true,
                     styleSelectedText: true,
-                    theme: droppy.get("theme")
+                    theme: droppy.get("theme"),
+                    mode: "text/plain"
                 });
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
@@ -1930,7 +1909,37 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                hideSpinner(view);
+
+                var called = false;
+                var loadDocument = function() {
+                    if (called) return;
+                    else called = true;
+                    editor.setValue(data);
+                    editor.setOption("mode", request.getResponseHeader("Content-Type"));
+                    editor.on("change", function (cm) {
+                        var view = getCMView(cm);
+                        if (view[0].editNew) {
+                            view[0].editNew = false;
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                        }
+                    });
+                    editor.on("keyup", function (cm, e) { // Keyboard shortcuts
+                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                            var view = getCMView(cm);
+                            e.preventDefault();
+                            showSpinner(view);
+                            sendMessage(view[0].vId, "SAVE_FILE", {
+                                "to": view[0].editorEntryId,
+                                "value": cm.getValue()
+                            });
+                        }
+                    });
+                    editor.clearHistory();
+                    editor.refresh();
+                    hideSpinner(view);
+                };
+                if (droppy.detects.animation) view.find(".content").one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", loadDocument);
+                else loadDocument("No animations");
             },
             error : function () {
                 closeDoc(view);
