@@ -2097,7 +2097,7 @@
     // Add directory sizes
     function addSizes(view, folder, data) {
         var bytes, name;
-        view.children(".content").each(function () {
+        view.find(".content").each(function () {
             if ($(this).data("root") === folder) {
                 droppy.sizeCache[folder] = {};
                 $(this).find(".folder-link").each(function () {
