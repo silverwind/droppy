@@ -1866,6 +1866,7 @@
             dataType: "text",
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
+                view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,
                     dragDrop: false,
