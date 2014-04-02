@@ -1889,7 +1889,7 @@
                 doc.find(".save").register("click", function () {
                     var view = $(this).parents(".view");
                     showSpinner(view);
-                    sendMessage(view)[0].vId, "SAVE_FILE", {
+                    sendMessage(view[0].vId, "SAVE_FILE", {
                         "to": entryId,
                         "value": editor.getValue()
                     });
