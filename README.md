@@ -1,5 +1,7 @@
 #droppy <a href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a>
-A personal cloud storage solution with a speedy HTML5 interface, running on [node.js](http://nodejs.org/). Check out the [demo](http://droppy.jit.su/#/).
+A personal cloud storage solution with a speedy HTML5 interface, running on [node.js](http://nodejs.org/).
+
+####Demos available: [Demo #1](http://droppy.jit.su/#/) [Demo #2](https://droppy-demo.herokuapp.com/#/).
 
 ![Main View](http://i.imgur.com/izxnfAN.png)
 ![Editor](http://i.imgur.com/Ziv79rJ.png)
