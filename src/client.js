@@ -1298,38 +1298,18 @@
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
+        content.find(".data-row").register("contextmenu", function (event) {
+            var target = $(event.target), targetRow;
+            if (target.attr("class") === ".data-row")
+                targetRow = target;
+            else
+                targetRow = target.parents(".data-row");
+            showEntryMenu(targetRow, event.clientX);
+            event.preventDefault();
+        });
         content.find(".data-row .entry-menu").register("click", function (event) {
-            event.stopPropagation();
-            var entry = $(this).parent("li.data-row"),
-                type = entry.find(".sprite").attr("class"),
-                button = $(this);
-
-            type = type.match(/sprite\-(\w+)/);
-            if (type) type = type[1];
-
-            // Show a download entry when the click action is not download
-            if (droppy.get("clickAction") !== "download" && entry.attr("data-type") === "file") {
-                type = "download";
-                $("#entry-menu").find(".download").attr("download", entry.children(".file-link").attr("download"));
-                $("#entry-menu").find(".download").attr("href", entry.children(".file-link").attr("href"));
-            }
-
-            $("#entry-menu")
-                .attr("class", "in")
-                .css("left", (button.offset().left + button.width() - $("#entry-menu").width()) + "px")
-                .data("target", entry)
-                .addClass("type-" + type);
-
-            var menuMaxTop = $(document).height() - $("#entry-menu").height(),
-                menuTop = entry.offset().top;
-            if (menuTop > menuMaxTop) menuTop = menuMaxTop;
-            $("#entry-menu").css("top", menuTop + "px");
-            toggleCatcher();
-
-            $("#click-catcher").one("mousemove", function () {
-                $("#entry-menu").attr("class", "out");
-                toggleCatcher();
-            });
+            showEntryMenu($(event.target).parents(".data-row"));
+            event.preventDefault();
         });
         // Paste a file/folder into a folder
         content.find(".paste-button").register("click", function (event) {
@@ -1739,6 +1719,40 @@
             $("#click-catcher").trigger("click");
         });
     }
+
+    function showEntryMenu(entry, x) {
+                var type = entry.find(".sprite").attr("class"),
+                    button = entry.find(".entry-menu"),
+                    menu = $("#entry-menu");
+
+                type = type.match(/sprite\-(\w+)/);
+                if (type) type = type[1];
+
+                // Show a download entry when the click action is not download
+                if (droppy.get("clickAction") !== "download" && entry.attr("data-type") === "file") {
+                    type = "download";
+                    menu.find(".download").attr("download", entry.children(".file-link").attr("download"));
+                    menu.find(".download").attr("href", entry.children(".file-link").attr("href"));
+                }
+
+                menu.attr("class", "in").data("target", entry).addClass("type-" + type);
+
+                if (x)
+                    menu.css("left", (x - menu.width() / 2) + "px");
+                else
+                    menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
+
+                var menuMaxTop = $(document).height() - $("#entry-menu").height(),
+                    menuTop = entry.offset().top;
+                if (menuTop > menuMaxTop) menuTop = menuMaxTop;
+                menu.css("top", menuTop + "px");
+                toggleCatcher();
+
+                $("#click-catcher").one("mousemove", function () {
+                    menu.attr("class", "out");
+                    toggleCatcher();
+                });
+            }
 
     function sortByHeader(view, header) {
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
