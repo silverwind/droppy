@@ -307,38 +307,53 @@ input:-webkit-autofill {
 /* ========================= File/Folder Display =========================== */
 
 .paste-button {
-    width: 100%;
+    background: #333;
     text-align: center;
-    color: #aaa;
+    position: absolute;
+    white-space: nowrap;
+    z-index: 445;
+    color: #bbb;
+    padding: 0 .25em;
+    right: 0;
+    top: 0;
     cursor: pointer;
-    transition: all .3s ease;
+    transition: opacity .4s ease, visibility .4s ease;
+    user-select: none;
 }
 
-.paste-button.in  { margin-bottom: .25em; }
-.paste-button.out { height: 0; overflow: hidden; visibility: hidden; }
+.paste-button.in  { opacity: 1; visibility: visible; }
+.paste-button.out { opacity: .5; visibility: hidden; }
 
-@media all and (min-width: 1024px) { .paste-button { font-size:  1em } }
-@media all and (max-width: 1023px) { .paste-button { font-size: .9em } }
-@media all and (max-width:  639px) { .paste-button { font-size: .8em } }
+@media all and (min-width: 1024px) { .paste-button { font-size:  1em; line-height: 35px } }
+@media all and (max-width: 1023px) { .paste-button { font-size: .9em; line-height: 30px } }
+@media all and (max-width:  639px) { .paste-button { font-size: .8em; line-height: 25px } }
 
-.paste-button:hover {color: #ccc }
-.paste-button:hover svg {fill: #ccc }
-.paste-button .filename { color: #ccc; transition: all .3s ease }
-.paste-button:hover .filename {color: #fff}
+.paste-button .triangle {
+    position: absolute;
+    transform: rotate(180deg);
+    fill: #333;
+}
+@media all and (min-width: 1024px) { .paste-button .triangle { height: 35px; width: 35px; left: -34.5px } }
+@media all and (max-width: 1023px) { .paste-button .triangle { height: 30px; width: 30px; left: -29.5px } }
+@media all and (max-width:  639px) { .paste-button .triangle { height: 25px; width: 25px; left: -24.5px } }
+
+.paste-button:hover svg.paste {fill: #fff }
+.paste-button:hover svg.triangle {fill: #a51 }
+.paste-button:hover { background: #a51; color: #fff; }
+.paste-button .filename { color: #fff; }
 
 .paste-button svg {
     height: 1em;
     width: 1em;
     fill: #aaa;
     margin-right: .25em;
-    transition: all .2s ease;
 }
 
 #click-catcher {
     background: #000;
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.25s ease;
     z-index: 31;
 }
 
@@ -665,6 +680,7 @@ input:-webkit-autofill {
     z-index: 32;
     box-shadow: 0 0 30px #000;
     width: 6.5em;
+    user-select: none;
 }
 @media all and (min-width: 1024px) { #entry-menu { font-size: .9em } }
 @media all and (max-width: 1023px) { #entry-menu { font-size: .8em } }

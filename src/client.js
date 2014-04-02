@@ -1271,10 +1271,8 @@
             }
         }
         list.children("li").sort(sortFunc).appendTo(list);
-        var content = contentWrap(view).html(
-            '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
-                '<span>Paste <span class="filename">' + (droppy.clipboard ? basename(droppy.clipboard.from) : "") + '</span> here</span>' +
-            '</div>');
+        var content = contentWrap(view);
+
         if (list.children("li").length)
             content.append(list.prepend(getHeaderHTML()));
         else
@@ -1306,26 +1304,12 @@
                 targetRow = target.parents(".data-row");
             showEntryMenu(targetRow, event.clientX);
             event.preventDefault();
+            event.stopPropagation();
         });
         content.find(".data-row .entry-menu").register("click", function (event) {
             showEntryMenu($(event.target).parents(".data-row"));
             event.preventDefault();
-        });
-        // Paste a file/folder into a folder
-        content.find(".paste-button").register("click", function (event) {
             event.stopPropagation();
-            if (droppy.socketWait) return;
-            if (droppy.clipboard) {
-                showSpinner(view);
-                droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
-                sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
-            } else {
-                throw "Clipboard was empty!";
-            }
-
-            droppy.clipboard = null;
-            $("#click-catcher").trigger("click");
-            $(".paste-button").replaceClass("in", "out");
         });
         // Stop navigation when clicking on an <a>
         content.find(".data-row .zip, .entry-link.file").register("click", function (event) {
@@ -1671,12 +1655,39 @@
 
         // Copy/cut a file/folder
         $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
-            event.stopPropagation();
             var entry = $("#entry-menu").data("target");
             droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
             $("#click-catcher").trigger("click");
-            $(".paste-button .filename").text(basename(droppy.clipboard.from));
-            $(".paste-button").replaceClass("out", "in");
+            $(".view").each(function () {
+                var view = $(this);
+                if (!view.children(".paste-button").length) {
+                    view.append(
+                        '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
+                            '<span>Paste <span class="filename">' +
+                                (droppy.clipboard ? basename(droppy.clipboard.from) : "") +
+                            '</span></span>' +
+                            droppy.svg.triangle +
+                        '</div>'
+                    ).register("click", function (event) {
+                        event.stopPropagation();
+                        if (droppy.socketWait) return;
+                        if (droppy.clipboard) {
+                            showSpinner(view);
+                            droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
+                            sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
+                        } else {
+                            throw "Clipboard was empty!";
+                        }
+                        droppy.clipboard = null;
+                        $("#click-catcher").trigger("click");
+                        $(".paste-button").replaceClass("in", "out");
+                    });
+                } else {
+                    $(".paste-button .filename").text(basename(droppy.clipboard.from));
+                }
+                $(".paste-button").setTransitionClass("out", "in");
+            });
+            event.stopPropagation();
         });
 
         // Open a file/folder in browser
