@@ -205,7 +205,7 @@
         var templateCode = "var t = {fn:{},views:{}};";
         resourceData.templates.forEach(function (data, index) {
             // Produce the doT functions
-            templateCode += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/,'').replace(/[\\\/]/,'.'), data);
+            templateCode += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/, '').replace(/[\\\/]/, '.'), data);
         });
         templateCode += ";";
         out.js = out.js.replace("/* {{ templates }} */", templateCode);

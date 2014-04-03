@@ -1,4 +1,4 @@
-/*global CodeMirror */
+/*global CodeMirror, t */
 
 (function ($, window, document) {
     "use strict";
@@ -1723,7 +1723,7 @@
             $("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index),
-            }).setAttribute("order",index);;
+            }).setAttribute("order", index);
         }
     }
     t.fn.compare = function (a, b) {
@@ -1741,7 +1741,7 @@
     t.fn.compare2 = function (entries, property) {
         var result;
         return function (a, b) {
-            result = t.fn.compare(entries[a][property],entries[b][property]);
+            result = t.fn.compare(entries[a][property], entries[b][property]);
             if (result === 0) result = t.fn.compare(a, b);
             return result;
         };
@@ -1799,7 +1799,7 @@
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
         var url = "/_" + encodedId.join("/"),
-            previewer = $(t.views.media({ type:type, caption:filename, src:url}));
+            previewer = $(t.views.media({ type: type, caption: filename, src: url}));
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
@@ -1899,8 +1899,8 @@
 
     function createOptions() {
         return $("<div class='list-options'>").append(t.options({
-            droppy:droppy,
-            options:[
+            droppy: droppy,
+            options: [
                 ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
                 ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
                 ["theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]],
