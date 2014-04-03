@@ -31,6 +31,7 @@
         utils    = require("./lib/utils.js"),
         log      = require("./lib/log.js"),
         cfg      = require("./lib/config.js"),
+        tpls     = require("./lib/dottemplates.js"),
         // Modules
         archiver = require("archiver"),
         async    = require("async"),
@@ -53,6 +54,7 @@
         // Variables
         version   = require("./package.json").version,
         cmPath    = "node_modules/codemirror/",
+        templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
         cache     = {},
         clients   = {},
         db        = {},
@@ -67,7 +69,8 @@
         resources = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
-            html : ["src/base.html", "src/auth.html", "src/main.html"]
+            html : ["src/base.html", "src/auth.html", "src/main.html"],
+            templates : []
         };
 
     // Argument handler
@@ -121,6 +124,10 @@
             matches = { resource: 0, compiled: 0 },
             resourceList;
 
+        // Add Templates
+        templateList.forEach(function (relPath) {
+            resources.templates.push("src/templates/" + relPath);
+        });
         // CodeMirror Addons
         ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
             resources.js.push(cmPath + "addon/" + relPath);
@@ -130,7 +137,7 @@
          "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
             resources.js.push(cmPath + "mode/" + relPath);
         });
-        // CodeMirror Modes
+        // CodeMirror Keymaps
         resources.js.push(cmPath + "keymap/sublime.js");
         // CodeMirror Themes
         ["mdn-like.css", "xq-light.css", "base16-dark.css"].forEach(function (relPath) {
@@ -186,12 +193,22 @@
         resourceData.css.forEach(function (data) {
             out.css += data + "\n";
         });
+
         resourceData.js.forEach(function (data) {
             // Append a semicolon to each javascript file to make sure it's
             // properly terminated. The minifier afterwards will take care of
             // any double-semicolons and whitespace.
             out.js += data + ";\n";
         });
+
+        // Insert Templates Code
+        var templateCode = "var t = {fn:{},views:{}};";
+        resourceData.templates.forEach(function (data, index) {
+            // Produce the doT functions
+            templateCode += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/,'').replace(/[\\\/]/,'.'), data);
+        });
+        templateCode += ";";
+        out.js = out.js.replace("/* {{ templates }} */", templateCode);
 
         // Add CSS vendor prefixes
         out.css = ap("last 2 versions").process(out.css).css;

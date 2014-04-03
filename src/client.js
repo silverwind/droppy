@@ -3,6 +3,8 @@
 (function ($, window, document) {
     "use strict";
     var droppy = {};
+    var svg; // (same as droppy.svg)
+    /* {{ templates }} */
     initVariables();
 // ============================================================================
 //  Feature Detects
@@ -205,7 +207,7 @@
 
     function getPage() {
         $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
-            droppy.svg = JSON.parse(svgReq[0]);
+            svg = droppy.svg = JSON.parse(svgReq[0]);
             loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
         });
     }
@@ -1044,7 +1046,7 @@
             view.find(".inline-namer").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<a class="text">Add files</a></div>');
+            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
         }
     }
 
@@ -1210,73 +1212,18 @@
             view.find(".path li").animate({"left": 0}, {duration: 200});
         }
     }
-
     // Convert the received data into HTML
     function openDirectory(view, isUpload) {
-        var downloadURL, type, temp, size, sizeUnit, mtime, id, classes, svgIcon, bytes,
-            folder = view[0].currentFolder,
-            fileList = view[0].currentData,
-            list = $("<ul></ul>");
-
-        for (var file in fileList) {
-            if (fileList.hasOwnProperty(file)) {
-                svgIcon = "";
-                classes = "";
-                type = fileList[file].type;
-                bytes = fileList[file].size;
-                if (!bytes && droppy.sizeCache[folder] && droppy.sizeCache[folder][file])
-                    bytes = droppy.sizeCache[folder][file];
-                temp = convertToSI(bytes);
-                size = temp.size > 0 ? temp.size : "0";
-                sizeUnit = temp.size > 0 ? temp.unit : "b";
-                mtime = fileList[file].mtime;
-                id = (folder === "/") ? "/" + file : folder + "/" + file;
-                if (type === "nf" || type === "nd") {
-                    svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
-                    classes += " uploading";
-                } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(file)) {
-                    svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
-                    classes += " playable";
-                }
-                if (type === "f" || type === "nf") { // Create a file row
-                    var ext = getExt(file), spriteClass = getSpriteClass(ext);
-                    downloadURL = "/~" + id;
-                    if (!droppy.mediaTypes[ext]) droppy.mediaTypes[ext] = fileList[file].mime;
-                    if (isUpload) file = decodeURIComponent(file);
-                    list.append(
-                        '<li class="data-row' + classes + '" data-type="file" data-id="' + id + '">' +
-                            '<span class="' + spriteClass + '">' + svgIcon + '</span>' +
-                            '<a class="file-link entry-link" href="' + downloadURL + '"target="nope" download="' + file + '">' + file + '</a>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || 0) + '">' + size + '</span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span class="shortlink" title="Create Shortlink"><a>' + droppy.svg.link + '</a></span>' +
-                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
-                        '</li>'
-                    );
-                } else if (type === "d" || type === "nd") {  // Create a folder row
-                    if (isUpload) file = decodeURIComponent(file);
-                    list.append(
-                        '<li class="data-row' + classes + '" data-type="folder" data-id="' + id + '">' +
-                            '<span class="sprite sprite-folder">' + svgIcon + '</span>' +
-                            '<a class="folder-link entry-link">' + file + '</a>' +
-                            '<span class="mtime" data-timestamp="' + mtime + '">' + timeDifference(mtime) + '</span>' +
-                            '<span class="size" data-size="' + (bytes || "") + '">' + size + '</span>' +
-                            '<span class="size-unit">' + sizeUnit + '</span>' +
-                            '<span><a class="zip" title="Create Zip" href="/~~' + id + '" target="nope" download="' + file + '.zip">' + droppy.svg.zip + '</a></span>' +
-                            '<span class="entry-menu" title="Actions"><a>' + droppy.svg.menu + '</a></span>' +
-                        '</li>'
-                    );
-                }
-            }
-        }
-        list.children("li").sort(sortFunc).appendTo(list);
-        var content = contentWrap(view);
-
-        if (list.children("li").length)
-            content.append(list.prepend(getHeaderHTML()));
-        else
-            content.append('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
+        var tdata = {
+            entries: view[0].currentData,
+            folder: view[0].currentFolder,
+            isUpload: isUpload,
+            sortBy: "name",
+            sortAsc: false,
+            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : "",
+            mimeByExt: droppy.mediaTypes
+        };
+        var content = contentWrap(view).html(t.views.directory(tdata));
         loadContent(view, content);
         // Upload button on empty page
         content.find(".empty").register("click", function (event) {
@@ -1770,44 +1717,40 @@
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        var sortedEntries = view.find(".content ul li").sort(sortFunc);
+        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
+        if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            sortedEntries[index].setAttribute("order", index);
-            $(sortedEntries[index]).css({
+            $("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index),
-            });
+            }).setAttribute("order",index);;
         }
     }
-
-    function sortFunc(a, b) {
-        if (droppy.sorting.asc) {
-            var temp = a;
-            a = b;
-            b = temp;
-        }
-        if (droppy.sorting.col === "name") {
-            var type = compare($(b).data("type"), $(a).data("type")),
-                text = compare($(a).find(".entry-link").text(), $(b).find(".entry-link").text().toUpperCase());
-            return (type !== 0) ? type : text;
-        } else if (droppy.sorting.col === "mtime") {
-            return compare($(a).find(".mtime").data("timestamp"), $(b).find(".mtime").data("timestamp"));
-        } else if (droppy.sorting.col === "size") {
-            return compare($(a).find(".size").data("size"), $(b).find(".size").data("size"));
-        }
-
-        function compare(a, b) {
-            if (typeof a === "number" && typeof b === "number") {
-                return b - a;
-            } else {
-                try {
-                    return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
-                } catch (undefError) {
-                    return -1;
-                }
+    t.fn.compare = function (a, b) {
+        if (typeof a === "number" && typeof b === "number") {
+            return b - a;
+        } else {
+            try {
+                return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
+            } catch (undefError) {
+                return -1;
             }
         }
-    }
+    };
+    // Compare by property, then by key
+    t.fn.compare2 = function (entries, property) {
+        var result;
+        return function (a, b) {
+            result = t.fn.compare(entries[a][property],entries[b][property]);
+            if (result === 0) result = t.fn.compare(a, b);
+            return result;
+        };
+    };
+    t.fn.sortKeysByProperty = function (entries, by) {
+        var objs = Object.keys(entries);
+        objs = objs.sort(t.fn.compare2(entries, by));
+        return objs;
+    };
 
     // Click on a file link
     function setClickAction() {
@@ -1841,26 +1784,23 @@
         // Determine filetype and how to open it
         var ext = getExt(basename(getViewLocation(view)));
         if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext) !== -1) {
-            openImage(view);
+            openMedia(view, "image");
+        } else if (["mp4", "ogg"].indexOf(ext) !== -1) {
+            openMedia(view, "video");
         } else {
             openDoc(view);
         }
     }
-    function openImage(view) {
-        view.attr("data-type", "image");
+    function openMedia(view, type) {
+        view.attr("data-type", type);
         var filename = view[0].currentFile,
-            entryId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
-            i = entryId.length - 1;
+            encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
+            i = encodedId.length - 1;
         for (;i >= 0; i--)
-            entryId[i] = encodeURIComponent(entryId[i]);
-        var url = "/_" + entryId.join("/"),
-            previewer = $(
-            '<div class="previewer image">' +
-                '<div class="media-container">' +
-                    '<img src=' + url + '></img>' +
-                '</div>' +
-            '</div>'
-            );
+            encodedId[i] = encodeURIComponent(encodedId[i]);
+        var url = "/_" + encodedId.join("/"),
+            previewer = $(t.views.media({ type:type, caption:filename, src:url}));
+        view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
@@ -1873,17 +1813,7 @@
             entryId = view[0].currentFolder === "/" ? "/" + filename : view[0].currentFolder + "/" + filename,
             readOnly = false, // Check if not readonly
             editor = null,
-            doc = $(
-                '<ul class="sidebar">' +
-                    '<li class="exit exit-button">' + droppy.svg.remove + '<span>Close</span></li>' +
-                    '<li class="save save-button">' + droppy.svg.disk + '<span>Save</span></li>' +
-                    '<li class="ww ww-button">' + droppy.svg.wordwrap + '<span>Wrap</span></li>'  +
-                '</ul>' +
-                '<div class="doc' + (readOnly ? ' readonly' : ' editing') + '">' +
-                    '<div class="text-editor"></div>' +
-                '</div>'
-            );
-
+            doc = $(t.views.document({readOnly: readOnly}));
         showSpinner(view);
         $.ajax({
             type: "GET",
@@ -1968,29 +1898,17 @@
     }
 
     function createOptions() {
-        var list = $("<ul>");
-        list.append(createSelect("indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]));
-        list.append(createSelect("indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]));
-        list.append(createSelect("theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]));
-        list.append(createSelect("lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]));
-        list.append(createSelect("clickAction", "File Click Action", ["download", "view"], ["Download", "View"]));
-        list.append(createSelect("renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]));
-        list.prepend("<h1>Options</h1>");
-        return $("<div class='list-options'>").append(list);
-
-        function createSelect(option, label, values, valueNames) {
-            var output = "";
-            output += '<label>' + label + '</label>';
-            output += '<div><select class="' + option + '">';
-            values.forEach(function (value, i) {
-                if (droppy.get(option) === value)
-                    output += '<option value="' + value + '" selected>' + valueNames[i] + '</option>';
-                else
-                    output += '<option value="' + value + '">' + valueNames[i] + '</option>';
-            });
-            output += '</select></div>';
-            return '<li>' + output + '</li>';
-        }
+        return $("<div class='list-options'>").append(t.options({
+            droppy:droppy,
+            options:[
+                ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
+                ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
+                ["theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]],
+                ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
+                ["clickAction", "File Click Action", ["download", "view"], ["Download", "View"]],
+                ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
+            ]
+        }));
     }
 
     function createUserList(users) {
@@ -2090,11 +2008,7 @@
 
     // Extract the extension from a file name
     function getExt(filename) {
-        var dot = filename.lastIndexOf(".");
-        if (dot > -1 && dot < filename.length)
-            return filename.substring(dot + 1, filename.length);
-        else
-            return filename;
+        return (filename.match(/[^.\\\/]+$/) || [""])[0];
     }
 
     function deleteCookie(name) {
@@ -2169,6 +2083,7 @@
             };
         }
     }
+    t.fn.convertToSI = convertToSI;
 
     // SVG preprocessing
     function prepareSVG(html) {
@@ -2196,6 +2111,7 @@
         }
         return "sprite sprite-bin";
     }
+    t.fn.getSpriteClass = getSpriteClass;
 
     // Extension to Icon mappings
     var iconmap = {
@@ -2295,6 +2211,7 @@
         }
         return retval;
     }
+    t.fn.timeDifference = timeDifference;
 
     function secsToTime(secs) {
         var mins, hrs, time = "";
