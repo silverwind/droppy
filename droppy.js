@@ -653,10 +653,17 @@
                             log.error(err);
                         } else {
                             var dest = path.join(msg.to, path.basename(msg.url));
-                            fs.writeFile(dest, data, {mode: mode.file}), function () {
+                            fs.writeFile(dest, data, {mode: mode.file}, function () {
                                 log.info("Sucessfully saved " + dest);
-                            }
+                            });
                         }
+                    });
+                    break;
+                case "CREATE_FILE":
+                    if (!utils.isPathSane(msg.to)) return log.info(ws, null, "Invalid file creation request: " + msg.to);
+                    var dest = path.join(addFilePath(msg.to), msg.name);
+                    fs.writeFile(dest, "", {mode: mode.file}, function () {
+                        log.info("Created " + dest);
                     });
                     break;
                 }
