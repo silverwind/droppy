@@ -73,7 +73,7 @@ it = {
                     it.mimeByExt[entryExt] = obj.mime;
                 if (obj.type === "nd" || obj.type === "nf") {
                     temp.classes = " uploading";
-                    temp.svgIcon = '<span class="icon-uploading">' + svg["up-arrow"] + '</span>';
+                    temp.svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
                 } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(entryname)) {
                     temp.classes = " playable";
                     temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';;
