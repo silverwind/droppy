@@ -47,10 +47,6 @@ it = {
         <span class="entry-menu faux-button" title="Actions">{{= svg.menu }}</span>
     </li>
 #}}
-
-<div class="paste-button {{= (it.clipboardBasename ? "in" : "out") }}"> {{= svg.paste }}
-    <span>Paste <span class="filename">{{= it.clipboardBasename }}</span> here</span>
-</div>
 {{? Object.keys(it.entries).length === 0 }}
     <div id="empty" class="empty">{{= svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
