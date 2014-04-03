@@ -3,8 +3,11 @@
 (function ($, window, document) {
     "use strict";
     var droppy = {};
-    var svg; // (same as droppy.svg)
+
+    /* The lines below will get replaced during compilation by the server */
+    /* {{ svg }} */
     /* {{ templates }} */
+
     initVariables();
 // ============================================================================
 //  Feature Detects
@@ -202,15 +205,19 @@
 // ============================================================================
 //  Page loading functions
 // ============================================================================
-    // Load both the content for the site and svg data, and continue loading once both requests finish
     $(getPage);
 
+    // Load HTML and replace SVG placeholders
     function getPage() {
-        $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
-            svg = droppy.svg = JSON.parse(svgReq[0]);
-            loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
+        $.ajax({
+            type: "GET",
+            url: "/!/content/" + Math.random().toString(36).substr(2, 4),
+            success : function (data, textStatus, request) {
+                loadPage(request.getResponseHeader("X-Page-Type"), prepareSVG(data));
+            }
         });
     }
+
     // Switch the page content with an animation
     function loadPage(type, data) {
         $("body").append('<div id="newpage">' + data + '</div>');
@@ -2030,7 +2037,6 @@
         droppy.socket = null;
         droppy.socketWait = null;
         droppy.sorting = {col: "name", dir: "down"};
-        droppy.svg = {};
         droppy.views = [];
         droppy.zeroFiles = null;
     }

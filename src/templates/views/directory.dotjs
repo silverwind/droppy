@@ -19,9 +19,9 @@ it = {
 #}}
 {{##def.directoryHeader:
     <div class="file-header">
-        <span data-sort="type" class="header-name" class="down">Name {{= svg.triangle }}</span>
-        <span data-sort="mtime" class="header-mtime" class="up">Modified {{= svg.triangle }}</span>
-        <span data-sort="size" class="header-size" class="up">Size {{= svg.triangle }}</span>
+        <span data-sort="type" class="header-name" class="down">Name {{= droppy.svg.triangle }}</span>
+        <span data-sort="mtime" class="header-mtime" class="up">Modified {{= droppy.svg.triangle }}</span>
+        <span data-sort="size" class="header-size" class="up">Size {{= droppy.svg.triangle }}</span>
         <span class="header-spacer"></span>
     </div>
 #}}
@@ -32,8 +32,8 @@ it = {
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
         <span class="size-unit">{{= temp.sizeUnit }}</span>
-        <span><a class="zip" title="Create Zip" href="/~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= svg.zip }}</a></span>
-        <span class="entry-menu faux-button" title="Actions">{{= svg.menu }}</span>
+        <span><a class="zip" title="Create Zip" href="/~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= droppy.svg.zip }}</a></span>
+        <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </li>
 #}}
 {{##def.fileLink:
@@ -43,12 +43,12 @@ it = {
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
         <span class="size-unit">{{= temp.sizeUnit }}</span>
-        <span class="shortlink faux-button" title="Create Shortlink">{{= svg.link }}</span>
-        <span class="entry-menu faux-button" title="Actions">{{= svg.menu }}</span>
+        <span class="shortlink faux-button" title="Create Shortlink">{{= droppy.svg.link }}</span>
+        <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </li>
 #}}
 {{? Object.keys(it.entries).length === 0 }}
-    <div id="empty" class="empty">{{= svg["upload-cloud"] }}<div class="text">Add files</div></div>
+    <div id="empty" class="empty">{{= droppy.svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
     {{  if (it.sortBy === "name") it.sortBy = "type";
         var folder = (it.folder === "/") ? "/" : it.folder + "/",
@@ -76,7 +76,7 @@ it = {
                     temp.svgIcon = '<span class="icon-uploading">' + svg["up-arrow"] + '</span>';
                 } else if (/^.+\.(mp3|ogg|wav|wave|webm)$/i.test(entryname)) {
                     temp.classes = " playable";
-                    temp.svgIcon = '<span class="icon-play">' + svg.play + '</span>';;
+                    temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';;
                 } else {
                     temp.classes = "";
                     temp.svgIcon = "";

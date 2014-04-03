@@ -107,12 +107,10 @@
 
     // Prepare to get up and running
     cacheResources(config.resDir, function () {
-        prepareSVG(function () {
-            setupDirectories(function () {
-                cleanupLinks();
-                ready = true;
-                log.simple("Ready for requests!");
-            });
+        setupDirectories(function () {
+            cleanupLinks();
+            ready = true;
+            log.simple("Ready for requests!");
         });
     });
 
@@ -201,6 +199,13 @@
             out.js += data + ";\n";
         });
 
+        // Add SVG object
+        var svgDir = config.srcDir + "svg/", svgData = {};
+        fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
+            svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
+        });
+        out.js = out.js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
+
         // Insert Templates Code
         var templateCode = "var t = {fn:{},views:{}};";
         resourceData.templates.forEach(function (data, index) {
@@ -209,6 +214,7 @@
         });
         templateCode += ";";
         out.js = out.js.replace("/* {{ templates }} */", templateCode);
+
 
         // Add CSS vendor prefixes
         out.css = ap("last 2 versions").process(out.css).css;
@@ -963,27 +969,6 @@
                 }
             });
         });
-    }
-
-    //-----------------------------------------------------------------------------
-    // prepare SVGs
-    function prepareSVG(callback) {
-        cache.res.svg = {};
-        try {
-            var svgDir = config.srcDir + "svg/", svgData = {};
-            fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
-                svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
-            });
-            cache.res.svg.data = JSON.stringify(svgData);
-            zlib.gzip(new Buffer(cache.res.svg.data, "utf-8"), function (error, gzipped) {
-                cache.res.svg.gzipData = gzipped;
-                cache.res.svg.etag = crypto.createHash("md5").update(String(new Date())).digest("hex");
-                callback();
-            });
-        } catch (error) {
-            log.error("Error processing SVGs: ",  error);
-            process.exit(1);
-        }
     }
 
     //-----------------------------------------------------------------------------
