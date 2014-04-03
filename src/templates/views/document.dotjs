@@ -11,6 +11,5 @@ it = {
     <li class="ww ww-button">   {{= svg.wordwrap}}<span>Wrap </span></li>
 </ul>
 <div class="doc {{? it.readOnly }}readonly{{??}}editing{{?}}">
-    <div class="text-editor">
-    </div>
+    <div class="text-editor"></div>
 </div>

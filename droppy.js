@@ -136,7 +136,7 @@
          "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
             resources.js.push(cmPath + "mode/" + relPath);
         });
-        // CodeMirror Modes
+        // CodeMirror Keymaps
         resources.js.push(cmPath + "keymap/sublime.js");
         // CodeMirror Themes
         ["mdn-like.css", "xq-light.css", "base16-dark.css"].forEach(function (relPath) {
@@ -200,12 +200,14 @@
             out.js += data + ";\n";
         });
 
-        out.js += "(function (){var t = window.t || {fn:{},views:{}};";
+        // Insert Templates Code
+        var templateCode = "var t = {fn:{},views:{}};";
         resourceData.templates.forEach(function (data, index) {
             // Produce the doT functions
-            out.js += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/,'').replace(/[\\\/]/,'.'), data);
+            templateCode += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/,'').replace(/[\\\/]/,'.'), data);
         });
-        out.js += ";window.t = t;}());";
+        templateCode += ";";
+        out.js = out.js.replace("/* {{ templates }} */", templateCode);
 
         // Add CSS vendor prefixes
         out.css = ap("last 2 versions").process(out.css).css;
@@ -548,7 +550,7 @@
                     writeDB();
                     break;
                 case "DELETE_FILE":
-                    log.info(ws, null, "Deleting: " + msg.data.substring(1));
+                    log.info(ws, null, "Deleting: " + msg.data);
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
                     msg.data = addFilePath(msg.data);
                     fs.stat(msg.data, function (error, stats) {
@@ -564,7 +566,7 @@
                     });
                     break;
                 case "SAVE_FILE":
-                    log.info(ws, null, "Saving: " + msg.data.to.substring(1));
+                    log.info(ws, null, "Saving: " + msg.data.to);
                     if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
                     msg.data.to = addFilePath(msg.data.to);
                     fs.stat(msg.data.to, function (error) {
@@ -851,7 +853,7 @@
                     });
                 });
             }
-        }, config.readInterval, { leading: true, trailing: false }));
+        }, config.readInterval, { leading: true, trailing: true }));
         watcher.on("error", function (error) {
             log.error("Error trying to watch ", dir, "\n", error);
         });
@@ -1398,7 +1400,7 @@
     //-----------------------------------------------------------------------------
     // Create a zip file from a directory and stream it to a client
     function streamArchive(req, res, type) {
-        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, paths, next, dispo;
+        var zipPath = addFilePath(decodeURIComponent(req.url.substring(4))), archive, dispo;
         fs.stat(zipPath, function (err, stats) {
             if (err) {
                 log.error(err);
@@ -1417,32 +1419,12 @@
 
                 archive = archiver(type, {zlib: { level: config.zipLevel }});
                 archive.on("error", function (error) { log.error(error); });
-
-                next = function (currentPath) {
-                    if (currentPath[currentPath.length - 1] !== "/")
-                        archive.file(currentPath, {name: removeFilePath(currentPath)});
-                    else
-                        archive.append("", { name: removeFilePath(currentPath) });
-                };
-
-                archive.on("entry", function () {
-                    if (paths.length)
-                        next(paths.pop());
-                    else
-                        archive.finalize();
-                });
                 archive.pipe(res);
-
-                utils.walkDirectory(zipPath, true, function (error, foundPaths) {
-                    if (error) log.error(error);
-                    paths = foundPaths.filter(function (s) { return s !== ""; });
-                    if (paths.length === 0) {
-                        archive.append("", { name: "Empty" });
-                    } else {
-                        next(paths.pop());
-                    }
-
-                });
+                archive.append(null, { name: path.basename(zipPath) + '/' });
+                archive.bulk([
+                    { expand: true, cwd: zipPath, src: ["**"], dest: path.basename(zipPath) }
+                ]);
+                archive.finalize();
             } else {
                 res.statusCode = 404;
                 res.end();

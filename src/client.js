@@ -3,7 +3,8 @@
 (function ($, window, document) {
     "use strict";
     var droppy = {};
-    window.t = window.t || {fn:{},views:{}};
+    var svg; // (same as droppy.svg)
+    /* {{ templates }} */
     initVariables();
 // ============================================================================
 //  Feature Detects
@@ -176,7 +177,7 @@
     function newView(dest, vId) {
         var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
-                        "<div class=\"content\"></div>" +
+                        "<div class=\"content-container\"><div class=\"content\"></div></div>" +
                         "<div class=\"dropzone\">" + droppy.svg["upload-cloud"] + "</div>" +
                     "</div>");
         destroyView(vId);
@@ -206,7 +207,7 @@
 
     function getPage() {
         $.when($.ajax("/!/content/" + Math.random().toString(36).substr(2, 4)), $.ajax("/!/svg")).then(function (dataReq, svgReq) {
-            droppy.svg = window.svg = JSON.parse(svgReq[0]);
+            svg = droppy.svg = JSON.parse(svgReq[0]);
             loadPage(dataReq[2].getResponseHeader("X-Page-Type"), prepareSVG(dataReq[0]));
         });
     }
@@ -513,20 +514,27 @@
         // Open the WebSocket
         openSocket();
 
-        // Re-fit path line after 100ms of no resizing
-        var resizeTimeout;
-        $(window).register("resize", function () {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function () {
-                $(".view").each(function () {
-                    checkPathOverflow($(this));
-                });
-            }, 100);
-        })
-        .on("keyup", function (event) {
-            if (event.keyCode === 27) // Escape Key
-                $("#click-catcher").click();// Hide open modals
-        });
+        // Global events
+        $(window)
+            // Re-fit path line after 100ms of no resizing
+            .register("resize", function () {
+                clearTimeout(droppy.resizeTimer);
+                droppy.resizeTimer = setTimeout(function () {
+                    $(".view").each(function () {
+                        checkPathOverflow($(this));
+                    });
+                }, 100);
+            })
+            // Bind escape for hiding modals
+            .register("keyup", function (event) {
+                if (event.keyCode === 27)
+                    $("#click-catcher").click();
+            })
+            // Stop CTRL-S from showing a save dialog
+            .register("keydown", function (event) {
+                if (event.keyCode === 83 && (event.metaKey || event.ctrlKey)) event.preventDefault();
+            });
+
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -627,7 +635,7 @@
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
             }
-            first.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
+            first.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function (event) {
                 button.register("click", split);
                 event.stopPropagation();
             });
@@ -1177,8 +1185,8 @@
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
             toRemove.setTransitionClass("in", "out gone");
-            toRemove.one("transitionend webkitTransitionEnd msTransitionEnd", function (event) {
-                $(event.target).remove();
+            toRemove.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function () {
+                $(this).remove();
             });
         }
 
@@ -1322,7 +1330,7 @@
             view.find(".new").addClass(type);
             finish();
         } else {
-            view.append(content);
+            view.children(".content-container").append(content);
             view.find(".new").attr("data-root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
@@ -1345,8 +1353,10 @@
                 bindHoverEvents(view);
                 bindDropEvents(view);
             } else if ($(view).attr("data-type") === "document" || $(view).attr("data-type") === "image") {
+                bindHoverEvents(view);
                 bindDropEvents(view);
             }
+            allowDrop(view);
         }
     }
 
@@ -1386,7 +1396,6 @@
                 catcher.off("mousemove").trigger("click");
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
-                view[0].editNew = true;
                 updateLocation(view, dragData);
                 catcher.off("mousemove").trigger("click");
             });
@@ -1441,7 +1450,15 @@
         };
         return dt;
     }())();
-    // Hover evenets for upload arrows
+
+    function allowDrop(el) {
+        el.register("dragover", function (event) {
+            event.preventDefault();
+            droppy.dragTimer.refresh();
+        });
+    }
+
+    // Hover events for upload arrows
     function bindHoverEvents(view) {
         var dropZone = view.find(".dropzone");
         view.register("dragenter", function (event) {
@@ -1470,10 +1487,6 @@
                     dropZone.addClass("in");
                 }
             }
-        });
-        view.register("dragover", function (event) {
-            event.preventDefault();
-            droppy.dragTimer.refresh();
         });
         view.register("dragleave", function (event) {
             event.stopPropagation();
@@ -1521,7 +1534,6 @@
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
-                    view[0].editNew = true;
                     updateLocation(view, dragData);
                 }
                 return;
@@ -1743,20 +1755,13 @@
 
     function openFile(view) {
         // Determine filetype and how to open it
-        var path = getViewLocation(view),
-            fileext = path.match(/[^\/\.]+$/)[0].toLowerCase();
-        switch (fileext) {
-            case "jpg":
-            case "gif":
-            case "png":
-                openMedia(view, "image");
-                break;
-            case "ogg":
-            case "mp4":
-                openMedia(view, "video");
-                break;
-            default:
-                openDoc(view);
+        var ext = getExt(basename(getViewLocation(view)));
+        if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext) !== -1) {
+            openImage(view);
+        } else if (["mp4", "ogg"].indexOf(ext) !== -1) {
+            openMedia(view, "video");
+        } else {
+            openDoc(view);
         }
     }
     function openMedia(view, type) {
@@ -1772,58 +1777,37 @@
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
     }
-
+    function getCMView(cm) {
+        return getView(cm.getWrapperElement().parentElement.parentElement.parentElement.parentElement.vId);
+    }
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
-            entryId = view[0].currentFolder + "/" + filename,
-            url = "/_" + entryId,
+            entryId = view[0].currentFolder === "/" ? "/" + filename : view[0].currentFolder + "/" + filename,
             readOnly = false, // Check if not readonly
             editor = null,
-            doc = $(t.views.document({readOnly:readOnly}));
+            doc = $(t.views.document({readOnly: readOnly}));
+        showSpinner(view);
         $.ajax({
             type: "GET",
-            url: url,
+            url: "/_" + entryId,
             dataType: "text",
-            success : function (data) {
+            success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
-                showSpinner(view);
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-                    styleSelectedText: true,
-                    readOnly: true,
-                    showCursorWhenSelecting: true,
-                    theme: droppy.get("theme"),
-                    indentWithTabs: droppy.get("indentWithTabs"),
-                    indentUnit: droppy.get("indentUnit"),
-                    lineWrapping: droppy.get("lineWrapping"),
-                    lineNumbers: true,
                     autofocus: true,
-                    keyMap: "sublime"
+                    dragDrop: false,
+                    indentUnit: droppy.get("indentUnit"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    keyMap: "sublime",
+                    lineNumbers: true,
+                    lineWrapping: droppy.get("lineWrapping"),
+                    readOnly: readOnly,
+                    showCursorWhenSelecting: true,
+                    styleSelectedText: true,
+                    theme: droppy.get("theme"),
+                    mode: "text/plain"
                 });
-                // TODO: Load CodeMirror Mode from mimetype/(fileext for js)
-                // $.getScript()
-                var ext = filename.match(/[^\.]+$/)[0].toLowerCase(),
-                    mode = (function () {
-                        // If extension is different than modetype
-                        switch (ext) {
-                        case "coffee":
-                        case "litcoffee":
-                            return "coffeescript";
-                        case "js":
-                            return "javascript";
-                        case "json":
-                            return { name: "javascript", json : true };
-                        case "html":
-                            return "htmlmixed";
-                        case "ai":
-                        case "svg":
-                            return "xml";
-                        case "md":
-                            return "markdown";
-                        default:
-                            return ext;
-                        }
-                    })();
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc(view);
@@ -1846,40 +1830,37 @@
                         droppy.set("lineWrapping", true);
                     }
                 });
-                var editorLoaded = false;
-                function loadDocumentData() {
-                    if (editorLoaded) return;
-                    else editorLoaded = true;
-                    editor.setOption("readOnly", readOnly);
 
+                var called = false;
+                var loadDocument = function() {
+                    if (called) return;
+                    else called = true;
                     editor.setValue(data);
-                    editor.clearHistory();
-                    editor.setOption("mode", mode);
-                    editor.on("change", function () {
+                    editor.setOption("mode", request.getResponseHeader("Content-Type"));
+                    editor.on("change", function (cm) {
+                        var view = getCMView(cm);
                         if (view[0].editNew) {
                             view[0].editNew = false;
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                         }
-                    })
-                    // Keyboard shortcuts
-                    $(window).register("keydown", function (e) {
-                        if (editor && (e.metaKey || e.ctrlKey)) {
-                            // s - save
-                            if (e.keyCode === 83) {
-                                e.preventDefault();
-                                showSpinner(view);
-                                sendMessage(view[0].vId, "SAVE_FILE", {
-                                    "to": entryId,
-                                    "value": editor.getValue()
-                                });
-                                return false;
-                            }
+                    });
+                    editor.on("keyup", function (cm, e) { // Keyboard shortcuts
+                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                            var view = getCMView(cm);
+                            e.preventDefault();
+                            showSpinner(view);
+                            sendMessage(view[0].vId, "SAVE_FILE", {
+                                "to": view[0].editorEntryId,
+                                "value": cm.getValue()
+                            });
                         }
                     });
+                    editor.clearHistory();
+                    editor.refresh();
                     hideSpinner(view);
-                }
-                if (droppy.detects.animations) view.one("transitionend msTransitionEnd webkitTransitionEnd", loadDocumentData);
-                else loadDocumentData();
+                };
+                if (droppy.detects.animation) view.find(".content").one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", loadDocument);
+                else loadDocument("No animations");
             },
             error : function () {
                 closeDoc(view);
@@ -2015,6 +1996,7 @@
         droppy.noLogin = null;
         droppy.queuedData = null;
         droppy.reopen = null;
+        droppy.resizeTimer = null;
         droppy.sizeCache = {};
         droppy.socket = null;
         droppy.socketWait = null;
@@ -2072,7 +2054,7 @@
             };
         }
     }
-    window.t.fn.convertToSI = convertToSI;
+    t.fn.convertToSI = convertToSI;
 
     // SVG preprocessing
     function prepareSVG(html) {
@@ -2200,7 +2182,7 @@
         }
         return retval;
     }
-    window.t.fn.timeDifference = timeDifference;
+    t.fn.timeDifference = timeDifference;
 
     function secsToTime(secs) {
         var mins, hrs, time = "";
