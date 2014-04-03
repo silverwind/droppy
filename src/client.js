@@ -1784,7 +1784,7 @@
         // Determine filetype and how to open it
         var ext = getExt(basename(getViewLocation(view)));
         if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext) !== -1) {
-            openImage(view);
+            openMedia(view, "image");
         } else if (["mp4", "ogg"].indexOf(ext) !== -1) {
             openMedia(view, "video");
         } else {
