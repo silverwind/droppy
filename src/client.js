@@ -635,7 +635,7 @@
                 button.children(".button-text").text("Split");
                 button.attr("title", "Split the view in half");
             }
-            first.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function (event) {
+            first.one("transitionend webkitTransitionEnd", function (event) {
                 button.register("click", split);
                 event.stopPropagation();
             });
@@ -1046,7 +1046,7 @@
             view.find(".inline-namer").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<a class="text">Add files</a></div>');
+            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
         }
     }
 
@@ -1185,7 +1185,7 @@
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
             toRemove.setTransitionClass("in", "out gone");
-            toRemove.one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function () {
+            toRemove.one("transitionend webkitTransitionEnd", function () {
                 $(this).remove();
             });
         }
@@ -1243,54 +1243,20 @@
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
-        content.find(".data-row .entry-menu").register("click", function (event) {
+        content.find(".data-row").register("contextmenu", function (event) {
+            var target = $(event.target), targetRow;
+            if (target.attr("class") === ".data-row")
+                targetRow = target;
+            else
+                targetRow = target.parents(".data-row");
+            showEntryMenu(targetRow, event.clientX);
+            event.preventDefault();
             event.stopPropagation();
-            var entry = $(this).parent("li.data-row"),
-                type = entry.find(".sprite").attr("class"),
-                button = $(this);
-
-            type = type.match(/sprite\-(\w+)/);
-            if (type) type = type[1];
-
-            // Show a download entry when the click action is not download
-            if (droppy.get("clickAction") !== "download" && entry.attr("data-type") === "file") {
-                type = "download";
-                $("#entry-menu").find(".download").attr("download", entry.children(".file-link").attr("download"));
-                $("#entry-menu").find(".download").attr("href", entry.children(".file-link").attr("href"));
-            }
-
-            $("#entry-menu")
-                .attr("class", "in")
-                .css("left", (button.offset().left + button.width() - $("#entry-menu").width()) + "px")
-                .data("target", entry)
-                .addClass("type-" + type);
-
-            var menuMaxTop = $(document).height() - $("#entry-menu").height(),
-                menuTop = entry.offset().top;
-            if (menuTop > menuMaxTop) menuTop = menuMaxTop;
-            $("#entry-menu").css("top", menuTop + "px");
-            toggleCatcher();
-
-            $("#click-catcher").one("mousemove", function () {
-                $("#entry-menu").attr("class", "out");
-                toggleCatcher();
-            });
         });
-        // Paste a file/folder into a folder
-        content.find(".paste-button").register("click", function (event) {
+        content.find(".data-row .entry-menu").register("click", function (event) {
+            showEntryMenu($(event.target).parents(".data-row"));
+            event.preventDefault();
             event.stopPropagation();
-            if (droppy.socketWait) return;
-            if (droppy.clipboard) {
-                showSpinner(view);
-                droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
-                sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
-            } else {
-                throw "Clipboard was empty!";
-            }
-
-            droppy.clipboard = null;
-            $("#click-catcher").trigger("click");
-            $(".paste-button").replaceClass("in", "out");
         });
         // Stop navigation when clicking on an <a>
         content.find(".data-row .zip, .entry-link.file").register("click", function (event) {
@@ -1636,12 +1602,39 @@
 
         // Copy/cut a file/folder
         $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
-            event.stopPropagation();
             var entry = $("#entry-menu").data("target");
             droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
             $("#click-catcher").trigger("click");
-            $(".paste-button .filename").text(basename(droppy.clipboard.from));
-            $(".paste-button").replaceClass("out", "in");
+            $(".view").each(function () {
+                var view = $(this);
+                if (!view.children(".paste-button").length) {
+                    view.append(
+                        '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
+                            '<span>Paste <span class="filename">' +
+                                (droppy.clipboard ? basename(droppy.clipboard.from) : "") +
+                            '</span></span>' +
+                            droppy.svg.triangle +
+                        '</div>'
+                    ).register("click", function (event) {
+                        event.stopPropagation();
+                        if (droppy.socketWait) return;
+                        if (droppy.clipboard) {
+                            showSpinner(view);
+                            droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
+                            sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
+                        } else {
+                            throw "Clipboard was empty!";
+                        }
+                        droppy.clipboard = null;
+                        $("#click-catcher").trigger("click");
+                        $(".paste-button").replaceClass("in", "out");
+                    });
+                } else {
+                    $(".paste-button .filename").text(basename(droppy.clipboard.from));
+                }
+                $(".paste-button").setTransitionClass("out", "in");
+            });
+            event.stopPropagation();
         });
 
         // Open a file/folder in browser
@@ -1684,6 +1677,40 @@
             $("#click-catcher").trigger("click");
         });
     }
+
+    function showEntryMenu(entry, x) {
+                var type = entry.find(".sprite").attr("class"),
+                    button = entry.find(".entry-menu"),
+                    menu = $("#entry-menu");
+
+                type = type.match(/sprite\-(\w+)/);
+                if (type) type = type[1];
+
+                // Show a download entry when the click action is not download
+                if (droppy.get("clickAction") !== "download" && entry.attr("data-type") === "file") {
+                    type = "download";
+                    menu.find(".download").attr("download", entry.children(".file-link").attr("download"));
+                    menu.find(".download").attr("href", entry.children(".file-link").attr("href"));
+                }
+
+                menu.attr("class", "in").data("target", entry).addClass("type-" + type);
+
+                if (x)
+                    menu.css("left", (x - menu.width() / 2) + "px");
+                else
+                    menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
+
+                var menuMaxTop = $(document).height() - $("#entry-menu").height(),
+                    menuTop = entry.offset().top;
+                if (menuTop > menuMaxTop) menuTop = menuMaxTop;
+                menu.css("top", menuTop + "px");
+                toggleCatcher();
+
+                $("#click-catcher").one("mousemove", function () {
+                    menu.attr("class", "out");
+                    toggleCatcher();
+                });
+            }
 
     function sortByHeader(view, header) {
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
@@ -1778,7 +1805,7 @@
         hideSpinner(view);
     }
     function getCMView(cm) {
-        return getView(cm.getWrapperElement().parentElement.parentElement.parentElement.parentElement.vId);
+        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
     }
     function openDoc(view) {
         view.attr("data-type", "document");
@@ -1794,6 +1821,7 @@
             dataType: "text",
             success : function (data, textStatus, request) {
                 loadContent(view, contentWrap(view).append(doc));
+                view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,
                     dragDrop: false,
@@ -1810,10 +1838,11 @@
                 });
                 $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
-                    closeDoc(view);
+                    closeDoc($(this).parents(".view"));
                     editor = null;
                 });
                 doc.find(".save").register("click", function () {
+                    var view = $(this).parents(".view");
                     showSpinner(view);
                     sendMessage(view[0].vId, "SAVE_FILE", {
                         "to": entryId,
@@ -1832,17 +1861,15 @@
                 });
 
                 var called = false;
-                var loadDocument = function() {
+                var loadDocument = function () {
                     if (called) return;
                     else called = true;
                     editor.setValue(data);
                     editor.setOption("mode", request.getResponseHeader("Content-Type"));
-                    editor.on("change", function (cm) {
+                    editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
-                        if (view[0].editNew) {
-                            view[0].editNew = false;
+                        if (change.origin !== "setValue")
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                        }
                     });
                     editor.on("keyup", function (cm, e) { // Keyboard shortcuts
                         if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
@@ -1859,8 +1886,10 @@
                     editor.refresh();
                     hideSpinner(view);
                 };
-                if (droppy.detects.animation) view.find(".content").one("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", loadDocument);
-                else loadDocument("No animations");
+                if (droppy.detects.animation)
+                    view.find(".content").one("transitionend webkitTransitionEnd", loadDocument);
+                else
+                    loadDocument("No animations");
             },
             error : function () {
                 closeDoc(view);
@@ -2009,7 +2038,7 @@
     // Add directory sizes
     function addSizes(view, folder, data) {
         var bytes, name;
-        view.children(".content").each(function () {
+        view.find(".content").each(function () {
             if ($(this).data("root") === folder) {
                 droppy.sizeCache[folder] = {};
                 $(this).find(".folder-link").each(function () {

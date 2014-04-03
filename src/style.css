@@ -307,38 +307,53 @@ input:-webkit-autofill {
 /* ========================= File/Folder Display =========================== */
 
 .paste-button {
-    width: 100%;
+    background: #333;
     text-align: center;
-    color: #aaa;
+    position: absolute;
+    white-space: nowrap;
+    z-index: 445;
+    color: #bbb;
+    padding: 0 .25em;
+    right: 0;
+    top: 0;
     cursor: pointer;
-    transition: all .3s ease;
+    transition: opacity .4s ease, visibility .4s ease;
+    user-select: none;
 }
 
-.paste-button.in  { margin-bottom: .25em; }
-.paste-button.out { height: 0; overflow: hidden; visibility: hidden; }
+.paste-button.in  { opacity: 1; visibility: visible; }
+.paste-button.out { opacity: .5; visibility: hidden; }
 
-@media all and (min-width: 1024px) { .paste-button { font-size:  1em } }
-@media all and (max-width: 1023px) { .paste-button { font-size: .9em } }
-@media all and (max-width:  639px) { .paste-button { font-size: .8em } }
+@media all and (min-width: 1024px) { .paste-button { font-size:  1em; line-height: 35px } }
+@media all and (max-width: 1023px) { .paste-button { font-size: .9em; line-height: 30px } }
+@media all and (max-width:  639px) { .paste-button { font-size: .8em; line-height: 25px } }
 
-.paste-button:hover {color: #ccc }
-.paste-button:hover svg {fill: #ccc }
-.paste-button .filename { color: #ccc; transition: all .3s ease }
-.paste-button:hover .filename {color: #fff}
+.paste-button .triangle {
+    position: absolute;
+    transform: rotate(180deg);
+    fill: #333;
+}
+@media all and (min-width: 1024px) { .paste-button .triangle { height: 35px; width: 35px; left: -34.5px } }
+@media all and (max-width: 1023px) { .paste-button .triangle { height: 30px; width: 30px; left: -29.5px } }
+@media all and (max-width:  639px) { .paste-button .triangle { height: 25px; width: 25px; left: -24.5px } }
+
+.paste-button:hover svg.paste {fill: #fff }
+.paste-button:hover svg.triangle {fill: #a51 }
+.paste-button:hover { background: #a51; color: #fff; }
+.paste-button .filename { color: #fff; }
 
 .paste-button svg {
     height: 1em;
     width: 1em;
     fill: #aaa;
     margin-right: .25em;
-    transition: all .2s ease;
 }
 
 #click-catcher {
     background: #000;
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.25s ease;
     z-index: 31;
 }
 
@@ -665,6 +680,7 @@ input:-webkit-autofill {
     z-index: 32;
     box-shadow: 0 0 30px #000;
     width: 6.5em;
+    user-select: none;
 }
 @media all and (min-width: 1024px) { #entry-menu { font-size: .9em } }
 @media all and (max-width: 1023px) { #entry-menu { font-size: .8em } }
@@ -1206,6 +1222,17 @@ input:-webkit-autofill {
     #options-box.double { width: 80%; left: 10%; }
     #options-box.single > div { width: 100%; }
     #options-box.double > div { width: 50%;  }
+    #options-box.double > div + div:before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0  ;
+        width: 1px;
+        margin: .5em 0;
+        background: #bbb;
+        z-index: 0;
+        height: calc(100% - 1em);
+    }
 }
 @media all and (max-width: 799px) {
     #options-box.single { width: 80%; left: 10%; }
@@ -1221,9 +1248,7 @@ input:-webkit-autofill {
 
 #options-box h1 {
     text-align: center;
-    margin-top: .125em;
-    margin-bottom: .125em;
-    border-bottom: 2px solid #ccc;
+    margin-top: .5em;
     font-size: 1.5em;
     font-weight: 300;
     color: #444;
@@ -1306,11 +1331,18 @@ html:not(.ie) #options-box .list-options div:before {
 }
 
 #options-box .list-user li {
-    margin: .125em;
+    margin: .25em 3em;
+    padding: .25em .5em;
     line-height: 1.5em;
-    border-radius: 6px;
-    padding: 0 .125em;
+    border-radius: 4px;
     font-weight: 400;
+    background: #fff;
+}
+@media all and (max-width: 319px) {
+    #options-box .list-user li {
+        width: 90%;
+        margin-left: 5%;
+    }
 }
 
 #options-box .list-user li svg.remove {
@@ -1328,7 +1360,7 @@ html:not(.ie) #options-box .list-options div:before {
     fill: #f44;
 }
 
-#options-box .list-user .add-user {
+#options-box .add-user {
     line-height: 2em;
     background: #fff;
     text-align: center;
@@ -1337,10 +1369,17 @@ html:not(.ie) #options-box .list-options div:before {
     margin-left: 30%;
     margin-top: .5em;
     cursor: pointer;
-    transition: background .2s ease;
     font-weight: 400;
     margin-bottom: .5em;
 }
+
+@media all and (max-width: 319px) {
+    #options-box .add-user {
+        width: 80%;
+        margin-left: 10%;
+    }
+}
+
 #options-box .list-user .add-user:hover {
     background: #f81;
     color: #fff;

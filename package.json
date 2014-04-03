@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
@@ -21,6 +21,7 @@
     "cpr": "~0.1.1",
     "codemirror": "~4.0.3",
     "dot": "~1.0.2",
+    "got": "~0.1.0",
     "graceful-fs": "~2.0.3",
     "jquery": "~2.1.0",
     "mime": "~1.2.11",

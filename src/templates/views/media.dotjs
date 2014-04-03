@@ -10,8 +10,8 @@ it = {
 <div class="previewer {{= it.type}}">
     <figure class="media-container">
         {{? it.type === "video"}}
-            <video loop="true">
-                <source src="{{= it.src }}"/>
+            <video autoplay controls>
+                <source src="{{= it.src }}" type="video/{{= it.src.match(/\.([^\\\/\.]+?)$/)[1] }}"/>
             </video>
         {{?? it.type === "image"}}
             <img src="{{= it.src }}"></img>
