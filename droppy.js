@@ -40,6 +40,7 @@
         chalk    = require("chalk"),
         crypto   = require("crypto"),
         fs       = require("graceful-fs"),
+        got      = require("got"),
         http     = require("http"),
         mime     = require("mime"),
         mkdirp   = require("mkdirp"),
@@ -642,6 +643,20 @@
                                 if (++cbFired === cbCalled) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                             });
                         });
+                    });
+                    break;
+                case "GET_URL":
+                    log.info("Attempting to download " + msg.url + " to " + msg.to);
+                    got(msg.url, function (err, data) {
+                        if (err) {
+                            log.error("Error requesting " + msg.url);
+                            log.error(err);
+                        } else {
+                            var dest = path.join(msg.to, path.basename(msg.url));
+                            fs.writeFile(dest, data, {mode: mode.file}), function () {
+                                log.info("Sucessfully saved " + dest);
+                            }
+                        }
                     });
                     break;
                 }
