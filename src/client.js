@@ -15,7 +15,7 @@
     droppy.detects = {
         animation : (function () {
             var props = ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
-                   el = document.createElement("div");
+                el    = document.createElement("div");
             while (props.length) {
                 if (props.pop() in el.style) return true;
             }
@@ -23,7 +23,7 @@
         })(),
         fileinputdirectory : (function () {
             var props = ["directory", "mozdirectory", "webkitdirectory", "msdirectory"],
-                   el = document.createElement("input");
+                el    = document.createElement("input");
             while (props.length) {
                 if (props.pop() in el) return true;
             }
@@ -49,14 +49,12 @@
         };
         // Load prefs and set missing ones to their default
         prefs = JSON.parse(localStorage.getItem("prefs")) || {};
-        for (var pref in defaults) {
-            if (defaults.hasOwnProperty(pref)) {
-                if (prefs[pref] === undefined) {
-                    doSave = true;
-                    prefs[pref] = defaults[pref];
-                }
+        Object.keys(defaults).forEach(function (pref) {
+            if (prefs[pref] === undefined) {
+                doSave = true;
+                prefs[pref] = defaults[pref];
             }
-        }
+        });
         if (doSave) localStorage.setItem("prefs", JSON.stringify(prefs));
 
         // Get a variable from localStorage
@@ -84,7 +82,9 @@
 
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
-        var elem, classes, classMatch, i = this.length - 1, hasClass = false;
+        var elem, classes, classMatch,
+            i = this.length - 1,
+            hasClass = false;
         for (; i >= 0; i--) {
             elem = this[i];
             if (typeof elem === "undefined") return false;
@@ -166,10 +166,10 @@
 //  View handling
 // ============================================================================
     function getView(id) {
+        var view;
         if (id) {
             return $(droppy.views[id]);
         } else {
-            var view;
             droppy.views.every(function (el) { // get first element not undefined
                 view = el;
             });
@@ -220,8 +220,10 @@
 
     // Switch the page content with an animation
     function loadPage(type, data) {
+        var newPage, oldPage;
         $("body").append('<div id="newpage">' + data + '</div>');
-        var newPage = $("#newpage"), oldPage = $("#page");
+        newPage = $("#newpage");
+        oldPage = $("#page");
         if (type === "main") {
             initMainPage();
             initEntryMenu();
@@ -304,13 +306,15 @@
         };
 
         droppy.socket.onmessage = function (event) {
-            if (event.data === "ping") // respond to server keepAlive
+            var view, msg, vId;
+
+            if (event.data === "ping") // respond to server keepalive
                 return droppy.socket.send("pong");
             else
                 droppy.socketWait = false;
-            var msg = JSON.parse(event.data),
-                vId = msg.vId,
-                view;
+
+            msg = JSON.parse(event.data);
+            vId = msg.vId;
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
@@ -544,18 +548,20 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
+            var files, path, name,
+                obj = {};
             if (droppy.detects.fileinputdirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
-                var files = event.target.files;
-                var obj = {};
+                files = event.target.files;
                 for (var i = 0; i < files.length; i++) {
-                    var path = files[i].webkitRelativePath, name = files[i].name;
+                    path = files[i].webkitRelativePath;
+                    name = files[i].name;
                     if (path) {
                         if (name === ".")
                             obj[path] = {};
                         else
                             obj[path] = files[i];
                     } else {
-                        obj[files[i].name] = files[i];
+                        obj[name] = files[i];
                     }
                 }
                 upload(getView(fileInput[0].targetView), obj); // TODO: view relative
@@ -595,7 +601,7 @@
 
         $("#create-folder-button").register("click", function () {
             var dummyFolder, wasEmpty,
-                view = getView(), // TODO: Create folder in last active view
+                view      = getView(), // TODO: Create folder in last active view
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
                                 '<span class="sprite sprite-folder-open"></span>' +
                                 '<a class="folder-link entry-link"></a>' +
@@ -691,8 +697,8 @@
         });
 
         seekbar.register("mousemove", debounce(function (event) {
-            if (!player.duration) return;
             var left = event.clientX;
+            if (!player.duration) return;
             tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
             tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
             tooltip.attr("class", "in");
@@ -756,15 +762,13 @@
             fullyLoaded;
 
         function updater() {
-            var cur  = player.currentTime,
-                max  = player.duration;
-
+            var cur = player.currentTime,
+                max = player.duration;
             if (player.buffered && !fullyLoaded) {
                 var loadProgress = player.buffered.end(0) / max * 100;
                 loaded.css("width", loadProgress  + "%");
                 if (loadProgress === 100) fullyLoaded = true;
             }
-
             if (!cur || !max) return;
             played.css("width", (cur  / max * 100)  + "%");
             $("#time-cur").text(secsToTime(cur));
@@ -808,14 +812,12 @@
     // ============================================================================
     //  Upload functions
     // ============================================================================
-    var numFiles, formLength;
     function upload(view, data) {
-        var formData = new FormData();
-
-        droppy.zeroFiles = [];
-        numFiles = 0;
-        formLength = 0;
+        var formData = new FormData(),
+            numFiles = 0,
+            formLength = 0;
         if (!data) return;
+        droppy.zeroFiles = [];
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
@@ -823,8 +825,8 @@
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
                 getView()[0].currentData[filename] = {
-                    size  : data[i].size,
-                    type  : "nf",
+                    size : data[i].size,
+                    type : "nf",
                     mtime : Date.now()
                 };
                 // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
@@ -835,39 +837,35 @@
                     formLength++;
                     formData.append(filename, data[i], filename);
                 }
-            }
+             }
         } else { // We got an object for recursive folder uploads
             var addedDirs = {};
-            for (var path in data) {
-                if (data.hasOwnProperty(path)) {
-                    formLength++;
-                    formData.append(path, data[path], encodeURIComponent(path));
-                    var name = (path.indexOf("/") > 1) ? path.substring(0, path.indexOf("/")) : path;
-                    switch (Object.prototype.toString.call(data[path])) {
-                    case "[object Object]":
-                        if (!addedDirs[name] && data.hasOwnProperty(path)) {
-                            view[0].currentData[name] = {
-                                size : 0,
-                                type : "nd",
-                                mtime : Date.now()
-                            };
-                            addedDirs[name] = true;
-                        }
-                        break;
-                    case "[object File]":
-                        if (isOverLimit(data[path].size)) return;
-                        numFiles++;
-                        if (!addedDirs[name]) {
-                            view[0].currentData[name] = {
-                                size  : data[path].size,
-                                type  : "nf",
-                                mtime : Date.now()
-                            };
-                        }
-                        break;
+            Object.keys(data).forEach(function (entry) {
+                var name = (entry.indexOf("/") > 1) ? entry.substring(0, entry.indexOf("/")) : entry,
+                    isFile = Object.prototype.toString.call(data[entry]) === "[object File]";
+                if (isFile) {
+                    if (isOverLimit(data[entry].size)) return;
+                    numFiles++;
+                    if (!addedDirs[name]) {
+                        view[0].currentData[name] = {
+                            size  : data[entry].size,
+                            type  : "nf",
+                            mtime : Date.now()
+                        };
+                    }
+                } else {
+                    if (!addedDirs[name] && data.hasOwnProperty(entry)) {
+                        view[0].currentData[name] = {
+                            size : 0,
+                            type : "nd",
+                            mtime : Date.now()
+                        };
+                        addedDirs[name] = true;
                     }
                 }
-            }
+                formLength++;
+                formData.append(entry, data[entry], encodeURIComponent(entry));
+            });
         }
 
         // Load the new files into view
@@ -1025,9 +1023,9 @@
         namer[0].focus();
 
         function submitEdit(view, skipInvalid, callback) {
-            var oldVal = namer.attr("placeholder"),
-                newVal = namer.val(),
-                success;
+            var success, oldPath, newPath,
+                oldVal = namer.attr("placeholder"),
+                newVal = namer.val();
             if (canSubmit) {
                 if (oldVal !== newVal) {
                     success = true;
@@ -1043,8 +1041,8 @@
                 stopEdit(view);
             }
             if (typeof success === "boolean" && typeof callback === "function") {
-                var oldPath = view[0].currentFolder === "/" ? "/" + oldVal : view[0].currentFolder + "/" + oldVal,
-                    newPath = view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal;
+                oldPath = view[0].currentFolder === "/" ? "/" + oldVal : view[0].currentFolder + "/" + oldVal;
+                newPath = view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal;
                 callback(success, oldPath, newPath);
             }
 
@@ -1073,9 +1071,11 @@
 
     // Update the page title and trim a path to its basename
     function updateTitle(text, isPath) {
-        var prefix = "", suffix = "droppy";
+        var parts,
+            prefix = "",
+            suffix = "droppy";
         if (isPath) {
-            var parts = text.match(/([^\/]+)/gm);
+            parts = text.match(/([^\/]+)/gm);
             prefix = parts ? parts[parts.length - 1] : "/";
         } else {
             prefix = text;
@@ -1105,8 +1105,8 @@
         function sendReq(view, viewDest, time) {
             (function queue(time) {
                 if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
-                    showSpinner(view);
                     var viewLoc = getViewLocation(view);
+                    showSpinner(view);
                     // Find the direction in which we should animate
                     if (viewDest.length > viewLoc.length) view[0].animDirection = "forward";
                     else if (viewDest.length === viewLoc.length) view[0].animDirection = "center";
@@ -1135,13 +1135,14 @@
 
     // Update the path indicator
     function updatePath(view) {
-        var parts, oldParts, pathStr = "", i = 0, len;
+        var parts, oldParts,
+            pathStr = "",
+            i = 1; // Skip the first element as it's always the same
         parts = normalizePath(fixRootPath(view[0].currentFolder)).split("/");
         if (parts[parts.length - 1] === "") parts.pop();
         if (view[0].currentFile !== null) parts.push(view[0].currentFile);
         parts[0] = droppy.svg.home; // Replace empty string with our home icon
         if (view[0].savedParts) {
-            i = 1; // Skip the first element as it's always the same
             oldParts = view[0].savedParts;
             while (true) {
                 pathStr += "/" + parts[i];
@@ -1160,7 +1161,7 @@
             finalize();
         } else {
             addPart(parts[0], "/");
-            for (i = 1, len = parts.length; i < len; i++) {
+            for (var len = parts.length; i < len; i++) {
                 pathStr += "/" + parts[i];
                 addPart(parts[i], pathStr);
             }
@@ -1173,8 +1174,8 @@
             var li = $("<li class='out'><a>" + name + "</a></li>");
             li.data("destination", path);
             li.register("click", function (event) {
-                if (droppy.socketWait) return;
                 var view = $(event.target).parents(".view");
+                if (droppy.socketWait) return;
                 if ($(this).is(":last-child")) {
                     if ($(this).parents(".view").data("type") === "directory") {
                         updateLocation(view, $(this).data("destination"));
@@ -1207,12 +1208,11 @@
     function checkPathOverflow(view) {
         var width = 40,
             space = view.width(),
-            pathElements = view.find(".path li.in");
+            parts = view.find(".path li.in");
 
-        for (var i = 0, l = pathElements.length; i < l; i++) {
-            width += pathElements[i].offsetWidth;
+        for (var i = 0, l = parts.length; i < l; i++) {
+            width += parts[i].offsetWidth;
         }
-
         if (width > space) {
             view.find(".path li").animate({"left": space - width + "px"}, {duration: 200});
         } else {
@@ -1229,8 +1229,8 @@
             sortAsc: false,
             clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : "",
             mimeByExt: droppy.mediaTypes
-        };
-        var content = contentWrap(view).html(t.views.directory(tdata));
+        },
+        content = contentWrap(view).html(t.views.directory(tdata));
         loadContent(view, content);
         // Upload button on empty page
         content.find(".empty").register("click", function (event) {
@@ -1244,8 +1244,7 @@
         content.find(".data-row[data-type='folder']").register("click", function (event) {
             event.preventDefault();
             if (droppy.socketWait) return;
-            var destination = $(this).data("id");
-            updateLocation(view, destination);
+            updateLocation(view, $(this).data("id"));
         });
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
@@ -1400,9 +1399,7 @@
         });
     }
     droppy.dragTimer = new (function () {
-        var dt = function () {
-
-        };
+        var dt = function () {};
         dt.prototype.timer = null;
         dt.prototype.data = "";
         dt.prototype.isInternal = false;
@@ -1436,8 +1433,8 @@
         var dropZone = view.find(".dropzone");
         view.register("dragenter", function (event) {
             event.stopPropagation();
-            var target = $(event.target),
-                row;
+            var row,
+                target = $(event.target);
             if (droppy.dragTimer.isInternal) { // internal source
                 if (target.hasClass("folder-link")) {
                     row = target.parent();
@@ -1462,9 +1459,8 @@
             }
         });
         view.register("dragleave", function (event) {
-            event.stopPropagation();
-            var target = $(event.target),
-                row;
+            var row,
+                target = $(event.target);
             if (droppy.dragTimer.isInternal) { // internal source
                 if (target.hasClass("folder-link")) {
                     row = target.parent();
@@ -1473,35 +1469,35 @@
                     }
                 }
             }
+            event.stopPropagation();
         });
     }
 
     function bindDropEvents(view) {
         view.find(".data-row").each(function () {
-            var row = $(this);
+            var from, to, row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.register("drop", function (event) {
                     event.preventDefault();
                     event.stopPropagation();
                     $(".drop-hover").removeClass("drop-hover");
                     $(".dropzone").removeClass("in");
-                    var from = event.dataTransfer.getData("text"),
-                        to = row.attr("data-id");
-                    to = fixRootPath(to + "/" + basename(from));
+                    from = event.dataTransfer.getData("text");
+                    to = fixRootPath(row.attr("data-id") + "/" + basename(from));
                     if (from) handleDrop(view, event, from, to);
-
                 });
             }
         });
         view.register("drop", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            $(".dropzone").removeClass("in");
             var view = $(event.target).parents(".view"),
                 items = event.dataTransfer.items,
                 fileItem = null,
                 entryFunc = null,
                 dragData = event.dataTransfer.getData("text");
+
+            event.preventDefault();
+            event.stopPropagation();
+            $(".dropzone").removeClass("in");
 
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
@@ -1533,8 +1529,11 @@
             }
 
             // We support GetAsEntry, go ahead and read recursively
-            var obj = {};
-            var cbCount = 0, cbFired = 0, dirCount = 0,
+            var obj = {},
+                cbCount = 0,
+                cbFired = 0,
+                dirCount = 0,
+                length = event.dataTransfer.items.length,
                 rootFileFunction = function (file) {
                     obj[file.name] = file;
                     cbFired++;
@@ -1545,23 +1544,22 @@
                         cbFired++;
                     };
                 },
-                increaseFired =  function () { cbFired++; },
+                increaseFired = function () { cbFired++; },
                 readDirectory = function (entry, path) {
                     if (!path) path = entry.name;
                     obj[path] = {};
                     entry.createReader().readEntries(function (entries) {
-                        for (var i = 0; i < entries.length; i++) {
-                            if (entries[i].isDirectory) {
+                        entries.forEach(function (entry) {
+                            if (entry.isDirectory) {
                                 dirCount++;
-                                readDirectory(entries[i], path + "/" + entries[i].name);
+                                readDirectory(entry, path + "/" + entry.name);
                             } else {
                                 cbCount++;
-                                entries[i].file(childFileFunction(path), increaseFired);
+                                entry.file(childFileFunction(path), increaseFired);
                             }
-                        }
+                        });
                     });
                 };
-            var length = event.dataTransfer.items.length;
             for (var i = 0; i < length; i++) {
                 var entry = event.dataTransfer.items[i][entryFunc]();
                 if (!entry) continue;
@@ -1594,17 +1592,16 @@
     function initEntryMenu() {
         // Rename a file/folder
         $("#entry-menu .rename").register("click", function (event) {
-            event.stopPropagation();
-            if (droppy.socketWait) return;
             var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view"),
-                vId = view[0].vId;
+                view  = entry.parents(".view");
+            if (droppy.socketWait) return;
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner(view);
-                    sendMessage(vId, "RENAME", { "old": oldVal, "new": newVal });
+                    sendMessage(view[0].vId, "RENAME", { "old": oldVal, "new": newVal });
                 }
             });
+            event.stopPropagation();
         });
 
         // Copy/cut a file/folder
@@ -1647,11 +1644,11 @@
         // Open a file/folder in browser
         $("#entry-menu .open").register("click", function (event) {
             event.stopPropagation();
-            var entry = $("#entry-menu").data("target"),
-                url = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
-                type = $("#entry-menu").attr("class").match(/type\-(\w+)/),
-                view = entry.parents(".view"),
-                win;
+            var win,
+                entry = $("#entry-menu").data("target"),
+                url   = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
+                type  = $("#entry-menu").attr("class").match(/type\-(\w+)/),
+                view  = entry.parents(".view");
             if (type) {
                 switch (type[1]) {
                 case "html":
@@ -1686,7 +1683,8 @@
     }
 
     function showEntryMenu(entry, x) {
-                var type = entry.find(".sprite").attr("class"),
+                var menuTop, menuMaxTop,
+                    type = entry.find(".sprite").attr("class"),
                     button = entry.find(".entry-menu"),
                     menu = $("#entry-menu");
 
@@ -1707,8 +1705,8 @@
                 else
                     menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
 
-                var menuMaxTop = $(document).height() - $("#entry-menu").height(),
-                    menuTop = entry.offset().top;
+                menuMaxTop = $(document).height() - $("#entry-menu").height();
+                menuTop = entry.offset().top;
                 if (menuTop > menuMaxTop) menuTop = menuMaxTop;
                 menu.css("top", menuTop + "px");
                 toggleCatcher();
@@ -1720,11 +1718,11 @@
             }
 
     function sortByHeader(view, header) {
+        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             $("[data-entryname='" + sortedEntries[index] + "']:first").css({
@@ -1768,7 +1766,6 @@
                 if (droppy.socketWait) return;
                 event.preventDefault();
                 updateLocation(view, fixRootPath(view[0].currentFolder + "/" + $(event.target).text()));
-
             });
         } else {
             $(".file-link").off("click");
@@ -1776,8 +1773,8 @@
     }
 
     function preparePlayback(playButton) {
-        if (droppy.socketWait) return;
         var source = playButton.parent().parent().find(".file-link").attr("href");
+        if (droppy.socketWait) return;
         play(source, playButton);
     }
 
@@ -1788,8 +1785,8 @@
     }
 
     function openFile(view) {
-        // Determine filetype and how to open it
         var ext = getExt(basename(getViewLocation(view)));
+        // Determine filetype and how to open it
         if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext) !== -1) {
             openMedia(view, "image");
         } else if (["mp4", "ogg"].indexOf(ext) !== -1) {
@@ -1799,20 +1796,18 @@
         }
     }
     function openMedia(view, type) {
-        view.attr("data-type", type);
-        var filename = view[0].currentFile,
+        var url, previewer,
+            filename  = view[0].currentFile,
             encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
             i = encodedId.length - 1;
+        view.attr("data-type", type);
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
-        var url = "/_" + encodedId.join("/"),
-            previewer = $(t.views.media({ type: type, caption: filename, src: url}));
+        url = "/_" + encodedId.join("/");
+        previewer = $(t.views.media({ type: type, caption: filename, src: url}));
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
-    }
-    function getCMView(cm) {
-        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
     }
     function openDoc(view) {
         view.attr("data-type", "document");
@@ -1869,8 +1864,10 @@
 
                 var called = false;
                 var loadDocument = function () {
-                    if (called) return;
-                    else called = true;
+                    if (called)
+                        return;
+                    else
+                        called = true;
                     editor.setValue(data);
                     editor.setOption("mode", request.getResponseHeader("Content-Type"));
                     editor.on("change", function (cm, change) {
@@ -1892,6 +1889,9 @@
                     editor.clearHistory();
                     editor.refresh();
                     hideSpinner(view);
+                    function getCMView(cm) {
+                        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
+                    }
                 };
                 if (droppy.detects.animation)
                     view.find(".content").one("transitionend webkitTransitionEnd", loadDocument);
@@ -1919,7 +1919,7 @@
     }
 
     function createUserList(users) {
-        var output = "<div class='list-user'><h1>User List</h1>";
+        var output = "<div class='list-user'>";
         output += "<ul>";
         Object.keys(users).forEach(function (user) {
             output += '<li><span class="username">' + user + "</span>" + droppy.svg.remove + '</li>';
@@ -1936,19 +1936,19 @@
     }
 
     function showOptions(userlist) {
-        var $box = $("#options-box");
-        $box.empty().append(createOptions);
+        var box = $("#options-box");
+        box.empty().append(createOptions);
         if (Object.keys(userlist).length > 0) {
-            $box.append(createUserList(userlist));
-            $box.replaceClass("single", "double");
+            box.append(createUserList(userlist));
+            box.replaceClass("single", "double");
         } else {
-            $box.replaceClass("double", "single");
+            box.replaceClass("double", "single");
         }
         bindUserlistEvents();
         $("#options-box").replaceClass("out", "in");
         toggleCatcher();
         $("#click-catcher").one("click", function () {
-            $box.find("select").each(function () {
+            box.find("select").each(function () {
                 var option = $(this).attr("class"), value  = $(this).val();
 
                 if (value === "true") value = true;
@@ -1988,7 +1988,7 @@
         var player = document.getElementById("audio-player");
 
         if (!player.canPlayType(droppy.mediaTypes[getExt(source)])) {
-            window.alert("Sorry, your browser can't play this file.");
+            showError("Sorry, your browser can't play this file.");
             return;
         }
 
@@ -2189,12 +2189,12 @@
 
     function timeDifference(previous) {
         var msPerMinute = 60 * 1000,
-            msPerHour = msPerMinute * 60,
-            msPerDay = msPerHour * 24,
-            msPerMonth = msPerDay * 30,
-            msPerYear = msPerDay * 365,
-            elapsed = Date.now() - previous,
-            retval = "";
+            msPerHour   = msPerMinute * 60,
+            msPerDay    = msPerHour * 24,
+            msPerMonth  = msPerDay * 30,
+            msPerYear   = msPerDay * 365,
+            elapsed     = Date.now() - previous,
+            retval      = "";
 
         if (elapsed < 0) elapsed = 0;
         if (elapsed < msPerMinute) {
@@ -2247,10 +2247,10 @@
     }, 5000);
 
     function reloadCSS(css) {
+        var i = 0;
         if (!droppy.debug) return;
         $('link[rel="stylesheet"]').remove();
 
-        var i = 0;
         while (document.styleSheets[i])
             document.styleSheets[i++].disabled = true;
 

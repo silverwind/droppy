@@ -1222,18 +1222,8 @@ input:-webkit-autofill {
     #options-box.double { width: 80%; left: 10%; }
     #options-box.single > div { width: 100%; }
     #options-box.double > div { width: 50%;  }
-    #options-box.double > div + div:before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 0  ;
-        width: 1px;
-        margin: .5em 0;
-        background: #bbb;
-        z-index: 0;
-        height: calc(100% - 1em);
-    }
 }
+
 @media all and (max-width: 799px) {
     #options-box.single { width: 80%; left: 10%; }
     #options-box.double { width: 80%; left: 10%; }
@@ -1244,14 +1234,6 @@ input:-webkit-autofill {
 #options-box > div {
     padding: 0 .25em;
     float: left;
-}
-
-#options-box h1 {
-    text-align: center;
-    margin-top: .5em;
-    font-size: 1.5em;
-    font-weight: 300;
-    color: #444;
 }
 
 #options-box .list-options label,

@@ -52,21 +52,22 @@
         Wss      = require("ws").Server,
         zlib     = require("zlib"),
         // Variables
-        version   = require("./package.json").version,
-        cmPath    = "node_modules/codemirror/",
+        version      = require("./package.json").version,
+        cmPath       = "node_modules/codemirror/",
         templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
-        cache     = {},
-        clients   = {},
-        db        = {},
-        dirs      = {},
-        watchers  = {},
-        config    = null,
-        cssCache  = null,
-        firstRun  = null,
-        ready     = false,
-        isCLI     = (process.argv.length > 2 && process.argv[2] !== "--color"),
-        mode      = {file: "644", dir: "755"},
-        resources = {
+        cache        = {},
+        clients      = {},
+        db           = {},
+        dirs         = {},
+        watchers     = {},
+        config       = null,
+        cssCache     = null,
+        firstRun     = null,
+        ready        = false,
+        cookieName   = "s",
+        isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
+        mode         = {file: "644", dir: "755"},
+        resources    = {
             css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
             js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
             html : ["src/base.html", "src/auth.html", "src/main.html"],
@@ -117,10 +118,11 @@
     //-----------------------------------------------------------------------------
     // Read JS/CSS/HTML client resources, minify them, and write them to /res
     function prepareContent() {
-        var out = { css : "", js  : "" },
+        var resourceList,
+            resourceData = {},
+            out = { css : "", js  : "" },
             compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-            matches = { resource: 0, compiled: 0 },
-            resourceList;
+            matches = { resource: 0, compiled: 0 };
 
         // Add Templates
         templateList.forEach(function (relPath) {
@@ -170,21 +172,18 @@
         }
 
         // Read resources
-        var resourceData = {};
-        for (var type in resources) {
-            if (resources.hasOwnProperty(type)) {
-                resourceData[type] = resources[type].map(function read(file) {
-                    var data;
-                    try {
-                        data = fs.readFileSync(file).toString("utf8");
-                    } catch (error) {
-                        log.error("Error reading " + file + ":\n", error);
-                        process.exit(1);
-                    }
-                    return data;
-                });
-            }
-        }
+        Object.keys(resources).forEach(function (type) {
+            resourceData[type] = resources[type].map(function read(file) {
+                var data;
+                try {
+                    data = fs.readFileSync(file).toString("utf8");
+                } catch (error) {
+                    log.error("Error reading " + file + ":\n", error);
+                    process.exit(1);
+                }
+                return data;
+            });
+        });
 
         // Concatenate CSS and JS
         log.simple("Minifying resources...");
@@ -322,28 +321,26 @@
     // Clean up our shortened links by removing links to nonexistant files
     function cleanupLinks() {
         var linkcount = 0, cbcount = 0;
-        for (var link in db.shortlinks) {
-            if (db.shortlinks.hasOwnProperty(link)) {
-                linkcount++;
-                (function (shortlink, location) {
-                    fs.stat(path.join(config.filesDir, location), function (error, stats) {
-                        cbcount++;
-                        if (!stats || error) {
-                            delete db.shortlinks[shortlink];
-                        }
-                        if (cbcount === linkcount) {
-                            writeDB();
-                        }
-                    });
-                })(link, db.shortlinks[link]);
-            }
-        }
+        Object.keys(db.shortlinks).forEach(function (link) {
+            linkcount++;
+            (function (shortlink, location) {
+                fs.stat(path.join(config.filesDir, location), function (error, stats) {
+                    cbcount++;
+                    if (!stats || error) {
+                        delete db.shortlinks[shortlink];
+                    }
+                    if (cbcount === linkcount) {
+                        writeDB();
+                    }
+                });
+            })(link, db.shortlinks[link]);
+        });
     }
 
     //-----------------------------------------------------------------------------
     // Bind to listening port
     function createListener() {
-        var server, key, cert, ca;
+        var server, key, cert, ca, tlsModule, options, sessions;
         if (!config.useTLS) {
             server = http.createServer(onRequest);
         } else {
@@ -362,11 +359,10 @@
                 process.exit(1);
             }
 
-            var mod = config.useSPDY ? require("spdy").server : require("tls");
+            tlsModule = config.useSPDY ? require("spdy").server : require("tls");
 
             // TLS options
-            // TODO: Harden the cipher suite
-            var options = {
+            options = {
                 key              : key,
                 cert             : cert,
                 ca               : ca,
@@ -376,12 +372,12 @@
                 NPNProtocols     : []
             };
 
-            mod.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
+            tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
 
             // Protocol-specific options
             if (config.useSPDY) options.windowSize = 1024 * 1024;
 
-            server = new mod.Server(options, http._connectionListener);
+            server = new tlsModule.Server(options, http._connectionListener);
             server.httpAllowHalfOpen = false;
             server.timeout = 120000;
 
@@ -396,7 +392,7 @@
             });
 
             // TLS session resumption
-            var sessions = {};
+            sessions = {};
 
             server.on("newSession", function (id, data) {
                 sessions[id] = data;
@@ -434,7 +430,7 @@
     function onRequest(req, res) {
         if (!ready) {
             res.statusCode = 503;
-            res.end("droppy starting up...");
+            res.end("Just a second! droppy is starting up...");
             return;
         }
         switch (req.method.toUpperCase()) {
@@ -446,12 +442,12 @@
             break;
         case "OPTIONS":
             res.setHeader("Allow", "GET,POST,OPTIONS");
-            res.end("\n");
+            res.end();
             log.info(req, res);
             break;
         default:
             res.statusCode = 405;
-            res.end("\n");
+            res.end();
             log.info(req, res);
         }
     }
@@ -462,9 +458,9 @@
         var wss = new Wss({server : server});
         if (config.keepAlive > 0) {
             setInterval(function () {
-                for (var client in wss.clients)
-                    if (wss.clients.hasOwnProperty(client))
-                        wss.clients[client].send("ping");
+                Object.keys(wss.clients).forEach(function (client) {
+                    wss.clients[client].send("ping");
+                });
             }, config.keepAlive);
         }
         wss.on("connection", function (ws) {
@@ -536,12 +532,11 @@
                     break;
                 case "REQUEST_SHORTLINK":
                     if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
+                    var link;
                     // Check if we already have a link for that file
-                    for (var link in db.shortlinks) {
-                        if (db.shortlinks[link] === msg.data) {
-                            sendLink(cookie, link);
-                            return;
-                        }
+                    if (msg.data in db.shortlinks) {
+                        sendLink(cookie, db.shortlinks[msg.data]);
+                        return;
                     }
                     // Get a pseudo-random n-character lowercase string. The characters
                     // "l", "1", "i", o", "0" characters are skipped for easier communication of links.
@@ -741,11 +736,9 @@
     function sendUsers(cookie) {
         if (!clients[cookie] || !clients[cookie].ws) return;
         var userlist = {};
-        for (var user in db.users) {
-            if (db.users.hasOwnProperty(user)) {
-                userlist[user] = db.users[user].privileged || false;
-            }
-        }
+        Object.keys(db.users).forEach(function (user) {
+            userlist[user] = db.users[user].privileged || false;
+        });
         send(clients[cookie].ws, JSON.stringify({
             type  : "USER_LIST",
             users : userlist
@@ -772,7 +765,7 @@
                 if (config.logLevel === 3) {
                     var debugData = JSON.parse(data);
                     if (debugData.type === "UPDATE_DIRECTORY")
-                        debugData.data = {"...": "..."};
+                        debugData.data = {"...": "..."}; // Remove directory data so logs aren't getting too spammy
                     log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
                 }
                 ws.send(data, function (error) {
@@ -859,21 +852,20 @@
     //-----------------------------------------------------------------------------
     // Watch the directory for changes and send them to the appropriate clients.
     function createWatcher(directory) {
-        var dir = removeFilePath(directory), watcher, clientsToUpdate, client;
+        var watcher, clientsToUpdate, client,
+            dir = removeFilePath(directory);
         log.debug(chalk.green("Adding Watcher: ") + dir);
         watcher = fs.watch(directory, utils.throttle(function () {
             log.debug("Watcher detected update for ", chalk.blue(dir));
             clientsToUpdate = [];
-            for (var cookie in clients) {
-                if (clients.hasOwnProperty(cookie)) {
-                    client = clients[cookie];
-                    client.views.forEach(function (view, vId) {
-                        if (view && view.directory === dir && view.file === null) {
-                            clientsToUpdate.push({cookie: cookie, vId: vId});
-                        }
-                    });
-                }
-            }
+            Object.keys(clients).forEach(function (cookie) {
+                client = clients[cookie];
+                client.views.forEach(function (view, vId) {
+                    if (view && view.directory === dir && view.file === null) {
+                        clientsToUpdate.push({cookie: cookie, vId: vId});
+                    }
+                });
+            });
             if (clientsToUpdate.length > 0) {
                 updateDirectory(dir, function (sizes) {
                     clientsToUpdate.forEach(function (cl) {
@@ -914,31 +906,31 @@
     // Check if we need the other active watchers
     function checkWatchedDirs() {
         var neededDirs = {};
-        for (var cookie in clients) {
-            if (clients.hasOwnProperty(cookie)) {
-                var client = clients[cookie];
-                client.views.forEach(function (view, vId) {
-                    if (view && view.directory && view.file === null) {
-                        neededDirs[client.views[vId].directory] = true;
-                    }
-                });
+        Object.keys(clients).forEach(function (cookie) {
+            var client = clients[cookie];
+            client.views.forEach(function (view, vId) {
+                if (view && view.directory && view.file === null) {
+                    neededDirs[client.views[vId].directory] = true;
+                }
+            });
+        });
+        Object.keys(watchers).forEach(function (watchedDir) {
+            if (!neededDirs[watchedDir]) {
+                log.debug(chalk.red("Removing Watcher: ") + watchedDir);
+                watchers[watchedDir].close();
+                delete watchers[watchedDir];
             }
-        }
-        for (var directory in watchers) {
-            if (!neededDirs[directory]) {
-                log.debug(chalk.red("Removing Watcher: ") + directory);
-                watchers[directory].close();
-                delete watchers[directory];
-            }
-        }
+        });
     }
 
     //-----------------------------------------------------------------------------
     // Read resources and store them in the cache object
     function cacheResources(dir, callback) {
-        var relPath, fileData, fileTime, cbCalled = 0, cbFired = 0;
-        cache.res = {};
+        var relPath, fileData, fileTime,
+            cbCalled = 0,
+            cbFired = 0;
 
+        cache.res = {};
         dir = dir.substring(0, dir.length - 1); // Strip trailing slash
         utils.walkDirectory(dir, false, function (error, results) {
             if (error) log.error(error);
@@ -973,10 +965,12 @@
 
     //-----------------------------------------------------------------------------
     function handleGET(req, res) {
-        var URI = decodeURIComponent(req.url), isAuth = false;
+        var URI = decodeURIComponent(req.url),
+        isAuth = false;
         req.time = Date.now();
 
-        if (config.noLogin && !getCookie(req.headers.cookie)) freeCookie(req, res);
+        if (config.noLogin && !getCookie(req.headers.cookie))
+            freeCookie(req, res);
         if (getCookie(req.headers.cookie) || config.noLogin)
             isAuth = true;
 
@@ -1102,7 +1096,6 @@
 
     //-----------------------------------------------------------------------------
     function handleResourceRequest(req, res, resourceName) {
-
         // Shortcut for CSS debugging when no Websocket is available
         if (config.debug && resourceName === "style.css") {
             res.statusCode = 200;
@@ -1225,7 +1218,10 @@
 
     //-----------------------------------------------------------------------------
     function handleUploadRequest(req, res) {
-        var busboy, opts, done = false, files = [], cookie = getCookie(req.headers.cookie);
+        var busboy, opts,
+            done = false,
+            files = [],
+            cookie = getCookie(req.headers.cookie);
 
         req.query = qs.parse(req.url.substring("/upload?".length));
         log.info(req, res, "Upload started");
@@ -1264,8 +1260,8 @@
         });
 
         busboy.on("finish", function () {
-            done = true;
             var names = Object.keys(files);
+            done = true;
             while (names.length > 0) {
                 (function (name) {
                     fs.stat(files[name].dst, function (error) {
@@ -1377,8 +1373,9 @@
         if (tmpDirs.length === 0) return;
 
         async.map(tmpDirs, du, function (err, results) {
-            for (var i = 0, l = results.length; i < l; i++)
-                dirs[root][path.basename(tmpDirs[i])].size = results[i];
+            results.forEach(function (result, i) {
+                dirs[root][path.basename(tmpDirs[i])].size = result;
+            });
             callback(true);
         });
     }
@@ -1472,8 +1469,8 @@
     //-----------------------------------------------------------------------------
     // Read and validate the user database
     function readDB() {
-        var dbString = "";
-        var doWrite = false;
+        var dbString = "",
+            doWrite  = false;
 
         try {
             dbString = String(fs.readFileSync(config.db));
@@ -1504,7 +1501,8 @@
     //-----------------------------------------------------------------------------
     // Add a user to the database
     function addOrUpdateUser(user, password, privileged) {
-        var salt = crypto.randomBytes(4).toString("hex"), isNew = !db.users[user];
+        var salt = crypto.randomBytes(4).toString("hex"),
+            isNew = !db.users[user];
         db.users[user] = {
             hash: utils.getHash(password + salt + user) + "$" + salt,
             privileged: privileged
@@ -1542,11 +1540,9 @@
 
     //-----------------------------------------------------------------------------
     // Cookie functions
-
-    var cookieName = "s", needToSave = false;
-
     function getCookie(cookie) {
-        var session = "", cookies;
+        var cookies,
+            session = "";
         if (cookie) {
             cookies = cookie.split("; ");
             cookies.forEach(function (c) {
@@ -1555,12 +1551,9 @@
                 }
             });
             for (var savedsession in db.sessions) {
-                if (db.sessions.hasOwnProperty(savedsession)) {
-                    if (savedsession === session) {
-                        db.sessions[session].lastSeen = Date.now();
-                        needToSave = true;
-                        return session;
-                    }
+                if (savedsession === session) {
+                    db.sessions[session].lastSeen = Date.now();
+                    return session;
                 }
             }
         }
@@ -1577,7 +1570,8 @@
     }
 
     function createCookie(req, res, postData) {
-        var sessionID = crypto.randomBytes(32).toString("base64"), priv, dateString;
+        var priv, dateString,
+            sessionID = crypto.randomBytes(32).toString("base64");
 
         priv = db.users[postData.username].privileged;
         if (postData.check === "on") {
@@ -1595,14 +1589,11 @@
     // Clean inactive sessions after 1 month of inactivity, and check their age hourly
     setInterval(cleanUpSessions, 3600000);
     function cleanUpSessions() {
-        for (var session in db.sessions) {
-            if (db.sessions.hasOwnProperty(session)) {
-                if (!db.sessions[session].lastSeen || (Date.now() - db.sessions[session].lastSeen >= 2678400000)) {
-                    delete db.sessions[session];
-                    needToSave = true;
-                }
+        Object.keys(db.sessions).forEach(function (session) {
+            if (!db.sessions[session].lastSeen || (Date.now() - db.sessions[session].lastSeen >= 2678400000)) {
+                delete db.sessions[session];
             }
-        }
+        });
     }
 
     //-----------------------------------------------------------------------------
@@ -1621,27 +1612,23 @@
             temp += fs.readFileSync(file).toString("utf8") + "\n";
         });
         cssCache = ap("last 2 versions").process(temp).css;
-        for (var cookie in clients) {
-            if (clients.hasOwnProperty(cookie)) {
-                var data = JSON.stringify({
-                    "type"  : "UPDATE_CSS",
-                    "css"   : cssCache
+        Object.keys(clients).forEach(function (cookie) {
+            var data = JSON.stringify({
+                "type"  : "UPDATE_CSS",
+                "css"   : cssCache
+            });
+            if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
+                clients[cookie].ws.send(data, function (error) {
+                    if (error) log.error(error);
                 });
-                if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
-                    clients[cookie].ws.send(data, function (error) {
-                        if (error) log.error(error);
-                    });
-                }
             }
-        }
+        });
     }
 
     //-----------------------------------------------------------------------------
     // Various helper functions
     function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
-
     function getResPath(name)  { return path.join(config.resDir, name); }
-
     // removeFilePath is intentionally not an inverse to the add function
     function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }
     function removeFilePath(p) { return utils.fixPath("/" + utils.fixPath(p).replace(utils.fixPath(config.filesDir), "")); }
@@ -1659,17 +1646,15 @@
 
     //-----------------------------------------------------------------------------
     function shutdown(signal) {
-        log.simple("Received " + signal + " - Shutting down...");
         var count = 0;
-        for (var client in clients) {
-            if (clients.hasOwnProperty(client)) {
-                if (!clients[client] || !clients[client].ws) continue;
-                if (clients[client].ws.readyState < 2) {
-                    count++;
-                    clients[client].ws.close(1001);
-                }
+        log.simple("Received " + signal + " - Shutting down...");
+        Object.keys(clients).forEach(function (client) {
+            if (!clients[client] || !clients[client].ws) return;
+            if (clients[client].ws.readyState < 2) {
+                count++;
+                clients[client].ws.close(1001);
             }
-        }
+        });
 
         if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
