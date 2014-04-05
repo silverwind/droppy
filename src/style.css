@@ -747,6 +747,7 @@ input:-webkit-autofill {
 #entry-menu.type-log>div>.edit,
 #entry-menu.type-markdown>div>.edit,
 #entry-menu.type-png>div>.show,
+#entry-menu.type-script>div>.edit,
 #entry-menu.type-text>div>.edit,
 #entry-menu.type-video>div>.play,
 #entry-menu.type-xml>div>.edit,
