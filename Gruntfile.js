@@ -32,17 +32,20 @@ module.exports = function (grunt) {
             modules: {
                 command: "rm -rf node_modules && npm install"
             },
-            deploy : {
+            jitsu : {
                 command: "jitsu login && jitsu deploy && jitsu logs tail"
+            },
+            heroku : {
+                command: "git push -u -f --tags heroku master"
             }
         }
     });
 
     grunt.registerTask("update",  ["shell:update", "shell:modules"]);
-    grunt.registerTask("release", ["bump", "shell:push", "shell:publish", "shell:deploy"]);
+    grunt.registerTask("release", ["bump", "shell:push", "shell:publish", "shell:heroku", "shell:jitsu"]);
     grunt.registerTask("minor",   ["bump:minor", "shell:push", "shell:publish"]);
     grunt.registerTask("major",   ["bump:major", "shell:push", "shell:publish"]);
-    grunt.registerTask("deploy",  ["shell:deploy"]);
+    grunt.registerTask("deploy",  ["shell:heroku", "shell:jitsu"]);
 
 
     grunt.loadNpmTasks("grunt-bump");
