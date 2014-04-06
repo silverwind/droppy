@@ -838,10 +838,6 @@
              }
         } else { // We got an object for recursive folder uploads
             var addedDirs = {};
-            console.dir(data);
-            console.log("JSON.stringify():", JSON.stringify(data));
-            console.log("Object.keys:", Object.keys(data));
-            console.log("Object.getOwnPropertyNames:", Object.getOwnPropertyNames(data));
             Object.keys(data).forEach(function (entry) {
                 var name = (entry.indexOf("/") > 1) ? entry.substring(0, entry.indexOf("/")) : entry,
                     isFile = Object.prototype.toString.call(data[entry]) === "[object File]";
@@ -1588,31 +1584,34 @@
                     dirCount++;
                     readDirectory(entry);
                 }
-            }
-
-            // Check if the upload contains any files
-            var foundFiles = false;
-            (function search(o) {
-                Object.keys(o).forEach(function (p) {
-                    if (typeof o[p] === "object")
-                        search(o[p]);
-                    else
-                        foundFiles = true;
-                });
-            })(obj);
-
-            // Give the callback some time to fire and send the upload
-            (function wait(timeout) {
-                if (timeout > 10000) {
-                    return;
-                } else {
-                    if ((cbCount > 0 && cbFired === cbCount) || !foundFiles) {
-                        upload(view, obj);
-                    } else {
-                        setTimeout(wait, timeout + 50, timeout + 50);
-                    }
+                if (i === (length - 1)) { // TODO: Rewrite this hackery
+                    setTimeout(function () {
+                        // Check if the upload contains any files
+                        var foundFiles = false;
+                        (function search(o) {
+                            for (var p in o) {
+                                if (typeof o[p] === "object")
+                                    search(o[p]);
+                                else {
+                                    foundFiles = true;
+                                }
+                            }
+                        })(obj);
+                        // Give the callbacks some time to fire and send the upload
+                        (function wait(timeout) {
+                            if (timeout > 10000) {
+                                return;
+                            } else {
+                                if ((cbCount > 0 && cbFired === cbCount) || !foundFiles) {
+                                    upload(view, obj);
+                                } else {
+                                    setTimeout(wait, timeout + 50, timeout + 50);
+                                }
+                            }
+                        })(100);
+                    }, 100);
                 }
-            })(50);
+            }
         });
     }
 
