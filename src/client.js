@@ -346,9 +346,10 @@
                 break;
             case "UPLOAD_DONE":
                 view = getView(vId);
-                if (droppy.zeroFiles.length) {
-                    sendMessage(vId, "CREATE_FILES", {isUpload: true, files: droppy.zeroFiles});
-                    droppy.zeroFiles = [];
+                if (droppy.emptyFiles.length) {
+                    sendEmptyFiles(view);
+                } else if (droppy.emptyFolders.length) {
+                    sendEmptyFolders(view);
                 } else {
                     view[0].isUploading = false;
                     updateTitle(getView(vId)[0].currentFolder, true);
@@ -813,14 +814,15 @@
             numFiles = 0,
             formLength = 0;
         if (!data) return;
-        droppy.zeroFiles = [];
+        droppy.emptyFiles   = [];
+        droppy.emptyFolders = [];
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
                 if (isOverLimit(data[i].size)) return;
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
-                getView()[0].currentData[filename] = {
+                view[0].currentData[filename] = {
                     size : data[i].size,
                     type : "nf",
                     mtime : Date.now()
@@ -828,7 +830,7 @@
                 // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
                 // https://github.com/silverwind/droppy/issues/10
                 if (data[i].size === 0) {
-                    droppy.zeroFiles.push((view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename);
+                    droppy.emptyFiles.push((view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename);
                 } else {
                     formLength++;
                     formData.append(filename, data[i], filename);
@@ -836,32 +838,32 @@
              }
         } else { // We got an object for recursive folder uploads
             var addedDirs = {};
+            console.dir(data);
+            console.log("JSON.stringify():", JSON.stringify(data));
+            console.log("Object.keys:", Object.keys(data));
+            console.log("Object.getOwnPropertyNames:", Object.getOwnPropertyNames(data));
             Object.keys(data).forEach(function (entry) {
                 var name = (entry.indexOf("/") > 1) ? entry.substring(0, entry.indexOf("/")) : entry,
                     isFile = Object.prototype.toString.call(data[entry]) === "[object File]";
                 if (isFile) {
                     if (isOverLimit(data[entry].size)) return;
                     numFiles++;
-                    if (!addedDirs[name]) {
-                        view[0].currentData[name] = {
-                            size  : data[entry].size,
-                            type  : "nf",
-                            mtime : Date.now()
-                        };
+                    if (!addedDirs[basename(name)]) {
+                        view[0].currentData[basename(name)] = {size: data[entry].size, type: "nf", mtime: Date.now()};
                     }
-                } else {
-                    if (!addedDirs[name] && data.hasOwnProperty(entry)) {
-                        view[0].currentData[name] = {
-                            size : 0,
-                            type : "nd",
-                            mtime : Date.now()
-                        };
-                        addedDirs[name] = true;
-                    }
-                }
-                if (!$.isEmptyObject(data[entry])) { // Drop uploads sends empty object for each folder, this skips over them
                     formLength++;
                     formData.append(entry, data[entry], encodeURIComponent(entry));
+                } else {
+                    if (!addedDirs[basename(name)]) {
+                        view[0].currentData[basename(name)] = {size: 0, type: "nd", mtime: Date.now()};
+                        addedDirs[name] = true;
+                    }
+                    if (!$.isEmptyObject(data[entry])) { // Drop uploads sends empty object for each folder, this skips over them
+                        formLength++;
+                        formData.append(entry, data[entry], encodeURIComponent(entry));
+                    } else {
+                        droppy.emptyFolders.push(entry);
+                    }
                 }
             });
         }
@@ -892,9 +894,9 @@
                 r   : droppy.get("renameExistingOnUpload")
             }));
             xhr.send(formData);
-        } else if (droppy.zeroFiles.length) {
-            sendMessage(view[0].vId, "CREATE_FILES", {isUpload: true, files: droppy.zeroFiles});
-            droppy.zeroFiles = [];
+        } else {
+            if (droppy.emptyFiles.length)   sendEmptyFiles(view);
+            if (droppy.emptyFolders.length) sendEmptyFolders(view);
         }
 
         function isOverLimit(size) {
@@ -905,6 +907,22 @@
             }
             return false;
         }
+    }
+
+    function sendEmptyFiles(view) {
+        droppy.emptyFiles = droppy.emptyFiles.map(function (path) {
+            return view[0].currentFolder === "/" ? "/" + path : view[0].currentFolder + "/" + path;
+        });
+        sendMessage(view[0].vId, "CREATE_FILES", {files: droppy.emptyFiles, isUpload: true});
+        droppy.emptyFiles = [];
+    }
+
+    function sendEmptyFolders(view) {
+        droppy.emptyFolders = droppy.emptyFolders.map(function (path) {
+            return view[0].currentFolder === "/" ? "/" + path : view[0].currentFolder + "/" + path;
+        });
+        sendMessage(view[0].vId, "CREATE_FOLDERS", {folders: droppy.emptyFolders, isUpload: true});
+        droppy.emptyFolders = [];
     }
 
     var start, lastUpdate;
@@ -1572,14 +1590,23 @@
                 }
             }
 
-            // TODO: Uploading just empty folders without any files runs into the timeout
-            // Possible solution would be to send the folder creations over the websocket
-            // as we can't send empty FormData.
+            // Check if the upload contains any files
+            var foundFiles = false;
+            (function search(o) {
+                Object.keys(o).forEach(function (p) {
+                    if (typeof o[p] === "object")
+                        search(o[p]);
+                    else
+                        foundFiles = true;
+                });
+            })(obj);
+
+            // Give the callback some time to fire and send the upload
             (function wait(timeout) {
                 if (timeout > 10000) {
                     return;
                 } else {
-                    if (cbCount > 0 && cbFired === cbCount) {
+                    if ((cbCount > 0 && cbFired === cbCount) || !foundFiles) {
                         upload(view, obj);
                     } else {
                         setTimeout(wait, timeout + 50, timeout + 50);
@@ -2038,7 +2065,8 @@
         droppy.socketWait = null;
         droppy.sorting = {col: "name", dir: "down"};
         droppy.views = [];
-        droppy.zeroFiles = null;
+        droppy.emptyFiles = null;
+        droppy.emptyFolders = null;
     }
 
     // Add directory sizes
@@ -2049,7 +2077,7 @@
                 droppy.sizeCache[folder] = {};
                 $(this).find(".folder-link").each(function () {
                     name = $(this).text();
-                    bytes = data[name].size;
+                    if (data) bytes = data[name].size;
                     if (bytes && bytes > 0) {
                         // cache the  size information
                         droppy.sizeCache[folder][name] = bytes;

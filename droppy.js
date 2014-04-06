@@ -651,12 +651,12 @@
                     if (db.sessions[cookie].privileged) sendUsers(cookie);
                     break;
                 case "CREATE_FILES":
-                    var isUpload  = msg.data.isUpload,
-                        files     = (typeof files === "string") ? [msg.data.files] : msg.data.files;
+                    var files = Array.isArray(msg.data.files) ? msg.data.files : [msg.data.files];
                     async.each(files,
                         function (file, callback) {
                             if (!utils.isPathSane(file)) callback(new Error("Invalid empty file creation request: " + file));
-                            mkdirp(path.dirname(addFilePath(file)), mode.dir, function () {
+                            mkdirp(path.dirname(addFilePath(file)), mode.dir, function (err) {
+                                if (err) callback(err);
                                 fs.writeFile(addFilePath(file), "", {mode: mode.file}, function () {
                                     log.info(ws, null, "Created: " + file.substring(1));
                                     callback();
@@ -664,8 +664,21 @@
                             });
                         }, function (err) {
                             if (err) log.error(ws, null, err);
-                            if (isUpload)
-                                send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                            if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                        }
+                    );
+                    break;
+                case "CREATE_FOLDERS":
+                    var folders = Array.isArray(msg.data.folders) ? msg.data.folders : [msg.data.folders];
+                    async.each(folders,
+                        function (folder, callback) {
+                            if (!utils.isPathSane(folder)) callback(new Error("Invalid empty file creation request: " + folder));
+                            mkdirp(addFilePath(folder), mode.dir, function (err) {
+                                callback(err);
+                            });
+                        }, function (err) {
+                            if (err) log.error(ws, null, err);
+                            if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
                         }
                     );
                     break;
