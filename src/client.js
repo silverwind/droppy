@@ -1755,17 +1755,17 @@
             }
 
     function sortByHeader(view, header) {
-        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
+        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             $("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index),
-            }).setAttribute("order", index);
+            }).attr("order", index);
         }
     }
     t.fn.compare = function (a, b) {
