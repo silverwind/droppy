@@ -1706,27 +1706,20 @@ input[type="checkbox"] { display: none }
 
 .dropzone {
     position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-    z-index: 2;
+    left: 0; right: 0; bottom: 0;
+    z-index: -1;
     opacity: 0 ;
     visibility: hidden;
     pointer-events: none;
+    background: #f81;
+    transition: opacity .2s ease;
 }
 
-.dropzone.in  { opacity: .75 ; visibility: visible }
+@media all and (min-width: 1024px) { .dropzone { top: 37px } }
+@media all and (max-width: 1023px) { .dropzone { top: 32px } }
+@media all and (max-width:  639px) { .dropzone { top: 27px } }
 
-.dropzone svg {
-    position: absolute;
-    left: 30%;
-    top: 35%;
-    height: 30%;
-    width: 40%;
-    fill: #aaa;
-    stroke: #888;
-    stroke-width: .25;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
+.dropzone.in  { opacity: .8 ; visibility: visible }
 
 #tooltip {
     color: #eee;

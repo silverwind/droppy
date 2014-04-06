@@ -177,11 +177,15 @@
         }
     }
 
+    function getOtherViews(id) {
+        return $(droppy.views.filter(function (el, index) { return index !== id; }));
+    }
+
     function newView(dest, vId) {
         var view = $("<div class=\"view\">" +
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content-container\"><div class=\"content\"></div></div>" +
-                        "<div class=\"dropzone\">" + droppy.svg["upload-cloud"] + "</div>" +
+                        "<div class=\"dropzone\"></div>" +
                     "</div>");
         destroyView(vId);
         view.appendTo("#view-container");
@@ -1472,13 +1476,13 @@
                     }
                 } else {
                     view.find(".drop-hover").removeClass("drop-hover");
+                    if (!dropZone.hasClass("in")) dropZone.addClass("in");
+                    getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
                 }
             } else { // external source
                 if (target.hasClass("content") || target.parents().hasClass("content")) {
-                    $(".dropzone").each(function () {
-                        if (this !== dropZone[0]) $(this).removeClass("in");
-                    });
-                    dropZone.addClass("in");
+                    if (!dropZone.hasClass("in")) dropZone.addClass("in");
+                    getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
                 }
             }
         });
