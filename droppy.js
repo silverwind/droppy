@@ -650,18 +650,24 @@
                     }
                     if (db.sessions[cookie].privileged) sendUsers(cookie);
                     break;
-                case "ZERO_FILES":
-                    msg.data.forEach(function (file) {
-                        var cbCalled = 0, cbFired = 0;
-                        if (!utils.isPathSane(file)) return log.info(ws, null, "Invalid empty file creation request: " + file);
-                        cbCalled++;
-                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function () {
-                            fs.writeFile(addFilePath(file), "", {mode: mode.file}, function () {
-                                log.info(ws, null, "Received: " + file.substring(1));
-                                if (++cbFired === cbCalled) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                case "CREATE_FILES":
+                    var isUpload  = msg.data.isUpload,
+                        files     = (typeof files === "string") ? [msg.data.files] : msg.data.files;
+                    async.each(files,
+                        function (file, callback) {
+                            if (!utils.isPathSane(file)) callback(new Error("Invalid empty file creation request: " + file));
+                            mkdirp(path.dirname(addFilePath(file)), mode.dir, function () {
+                                fs.writeFile(addFilePath(file), "", {mode: mode.file}, function () {
+                                    log.info(ws, null, "Created: " + file.substring(1));
+                                    callback();
+                                });
                             });
-                        });
-                    });
+                        }, function (err) {
+                            if (err) log.error(ws, null, err);
+                            if (isUpload)
+                                send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                        }
+                    );
                     break;
                 case "GET_URL":
                     log.info("Attempting to download " + msg.url + " to " + msg.to);
@@ -675,13 +681,6 @@
                                 log.info("Sucessfully saved " + dest);
                             });
                         }
-                    });
-                    break;
-                case "CREATE_FILE":
-                    if (!utils.isPathSane(msg.to)) return log.info(ws, null, "Invalid file creation request: " + msg.to);
-                    var dest = path.join(addFilePath(msg.to), msg.name);
-                    fs.writeFile(dest, "", {mode: mode.file}, function () {
-                        log.info("Created " + dest);
                     });
                     break;
                 }

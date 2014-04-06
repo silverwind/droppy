@@ -347,7 +347,7 @@
             case "UPLOAD_DONE":
                 view = getView(vId);
                 if (droppy.zeroFiles.length) {
-                    sendMessage(vId, "ZERO_FILES", droppy.zeroFiles);
+                    sendMessage(vId, "CREATE_FILES", {isUpload: true, files: droppy.zeroFiles});
                     droppy.zeroFiles = [];
                 } else {
                     view[0].isUploading = false;
@@ -859,8 +859,10 @@
                         addedDirs[name] = true;
                     }
                 }
-                formLength++;
-                formData.append(entry, data[entry], encodeURIComponent(entry));
+                if (!$.isEmptyObject(data[entry])) { // Drop uploads sends empty object for each folder, this skips over them
+                    formLength++;
+                    formData.append(entry, data[entry], encodeURIComponent(entry));
+                }
             });
         }
 
@@ -891,7 +893,8 @@
             }));
             xhr.send(formData);
         } else if (droppy.zeroFiles.length) {
-            sendMessage(view[0].vId, "ZERO_FILES", droppy.zeroFiles);
+            sendMessage(view[0].vId, "CREATE_FILES", {isUpload: true, files: droppy.zeroFiles});
+            droppy.zeroFiles = [];
         }
 
         function isOverLimit(size) {
