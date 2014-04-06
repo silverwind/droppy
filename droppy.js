@@ -987,8 +987,6 @@
                 res.setHeader("X-Page-Type", "auth");
                 handleResourceRequest(req, res, "auth.html");
             }
-        } else if (/^\/!\/svg/.test(URI)) {
-            handleResourceRequest(req, res, "svg");
         } else if (/^\/!\/null/.test(URI)) {
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -1140,9 +1138,6 @@
                     res.setHeader("Content-Type", cache.res[resourceName].mime + "; charset=utf-8");
                 else
                     res.setHeader("Content-Type", cache.res[resourceName].mime);
-
-                if (resourceName === "svg")
-                    res.setHeader("Content-Type", "text/plain" + "; charset=utf-8");
 
                 var acceptEncoding = req.headers["accept-encoding"] || "";
                 if (/\bgzip\b/.test(acceptEncoding) && cache.res[resourceName].gzipData !== undefined) {
