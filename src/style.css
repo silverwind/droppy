@@ -580,11 +580,10 @@ input:-webkit-autofill {
 }
 
 .empty svg {
-    fill: #000;
+    fill: #666;
     height: 60px;
     width: 66px;
-    transition: all .4s ease;
-    opacity: .7;
+    transition: all .3s ease;
     position: relative;
     bottom: -12px;
 }
@@ -594,13 +593,14 @@ input:-webkit-autofill {
     font-size: 20px;
     line-height: 20px;
     position: relative;
+    color: #666;
     top: -20px;
     opacity: 0;
-    transition: all .4s ease;
+    transition: all .3s ease;
 }
 
-.empty:hover svg { opacity: 1; bottom: 0; }
-.empty:hover .text { opacity: 1; top: 0; }
+.empty:hover svg   { opacity: 1; bottom: 0; fill:  #000 }
+.empty:hover .text { opacity: 1; top:    0; color: #000 }
 
 /* ================================= Icons ================================= */
 

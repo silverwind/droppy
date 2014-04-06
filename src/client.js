@@ -148,7 +148,7 @@
     }
 
     // Alias requestAnimationFrame
-    var requestAnimation = (function () {
+    var raf = (function () {
         return window.requestAnimationFrame ||
                window.mozRequestAnimationFrame ||
                window.webkitRequestAnimationFrame ||
@@ -227,13 +227,13 @@
         if (type === "main") {
             initMainPage();
             initEntryMenu();
-            requestAnimation(function () {
+            raf(function () {
                 oldPage.replaceClass("in", "out");
                 finalize();
             });
         } else if (type === "auth" || type === "firstrun") {
             initAuthPage(type === "firstrun");
-            requestAnimation(function () {
+            raf(function () {
                 oldPage.replaceClass("in", "out");
                 $("#center-box").removeClass("out");
                 if (type === "firstrun") {
@@ -652,7 +652,7 @@
         };
 
         $("#about-button").register("click", function () {
-            requestAnimation(function () {
+            raf(function () {
                 $("#about-box").attr("class", $("#about-box").attr("class") !== "in" ? "in" : "out");
                 toggleCatcher();
             });
@@ -1228,9 +1228,13 @@
             width += parts[i].offsetWidth;
         }
         if (width > space) {
-            view.find(".path li").animate({"left": space - width + "px"}, {duration: 200});
+            raf(function() {
+                view.find(".path li").animate({"left": space - width + "px"}, {duration: 200});
+            });
         } else {
-            view.find(".path li").animate({"left": 0}, {duration: 200});
+            raf(function(){
+                view.find(".path li").animate({"left": 0}, {duration: 200});
+            });
         }
     }
     // Convert the received data into HTML
@@ -1323,9 +1327,15 @@
             view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
-            setTimeout(function () {
-                finish();
-            }, 200);
+            if (droppy.detects.animation)
+                view.find(".new").one("transitionend webkitTransitionEnd", function (event) {
+                    if ($(event.target).hasClass("center")) finish();
+                });
+            else {
+                setTimeout(function () {
+                    finish();
+                }, 200);
+            }
         }
         view[0].animDirection = "center";
 
@@ -1546,7 +1556,6 @@
             var obj = {},
                 cbCount = 0,
                 cbFired = 0,
-                dirCount = 0,
                 length = event.dataTransfer.items.length,
                 rootFileFunction = function (file) {
                     obj[file.name] = file;
@@ -1565,7 +1574,6 @@
                     entry.createReader().readEntries(function (entries) {
                         entries.forEach(function (entry) {
                             if (entry.isDirectory) {
-                                dirCount++;
                                 readDirectory(entry, path + "/" + entry.name);
                             } else {
                                 cbCount++;
@@ -1581,7 +1589,6 @@
                     cbCount++;
                     entry.file(rootFileFunction, increaseFired);
                 } else if (entry.isDirectory) {
-                    dirCount++;
                     readDirectory(entry);
                 }
                 if (i === (length - 1)) { // TODO: Rewrite this hackery
