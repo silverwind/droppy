@@ -368,16 +368,8 @@
                 var box = $("#info-box");
                 box.attr("class", "info in");
                 box.children("h1").text("Shortlink");
-                box.children("span").text(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
+                box.children("input").text(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 toggleCatcher();
-                // Select the span for to user to copy
-                box.children("span").on("click", function () {
-                    var selection = window.getSelection(),
-                    range = document.createRange();
-                    range.selectNodeContents(box.children("span")[0]);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                });
                 break;
             case "USER_LIST":
                 if (!$("#options-box").hasClass("in"))

@@ -17,7 +17,7 @@
 
 /* ============================ Resets and relatives ============================= */
 
-body, div, header, input, label, li, nav, p, section, span, ul {
+body, div, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
     -webkit-touch-callout: none;
     -webkit-text-size-adjust: 100%;
     box-sizing: border-box;
@@ -757,31 +757,32 @@ input:-webkit-autofill {
 
 /* ============================ Image Previewer ============================ */
 .previewer {
-    position: absolute;
-    margin: .25em;
-    top: 0; left: 0;
-    width:100%; height:100%;
-    display:table;
+    position: relative;
     text-align: center;
-    overflow-y: auto;
+    height: 100%;
 }
 
 .previewer .media-container {
-    vertical-align: middle;
-    display: table-cell;
-}
-.previewer .media-container figcaption {
-    padding-top: .5em;
-    color: white;
+    height: 100%;
 }
 
 .previewer .media-container > img {
-    display: block;
-    margin: 0 auto;
+    position: absolute;
+    max-height: calc(100% - 1.5em);
     max-width: 100%;
-    max-height: 100%;
-    width:auto;
-    height:auto;
+    left: 50%; top: 50%;
+    transform: translate(-50%, calc(-50% - .75em));
+}
+
+.previewer .media-container figcaption {
+    color: white;
+    position: absolute;
+    bottom: 0;
+    line-height: 1.5em;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
 }
 
 /* ============================ Document Previewer ============================ */
