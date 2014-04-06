@@ -17,7 +17,7 @@
 
 /* ============================ Resets and relatives ============================= */
 
-body, div, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
+body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
     -webkit-touch-callout: none;
     -webkit-text-size-adjust: 100%;
     box-sizing: border-box;
@@ -1606,8 +1606,14 @@ input[type="checkbox"] { display: none }
     overflow-y: auto;
     opacity: 0;
     visibility: hidden;
-    padding: 1em;
+    padding: .5em;
 }
+
+@media all and (min-width: 1024px) { #info-box { font-size: .9em } }
+@media all and (max-width: 1023px) { #info-box { font-size: .8em } }
+@media all and (max-width:  799px) { #info-box { font-size: .7em } }
+@media all and (max-width:  639px) { #info-box { width: 50%; } }
+@media all and (max-width:  319px) { #info-box { width: 90%; } }
 
 #info-box.link {
     background: #eee;
@@ -1628,7 +1634,8 @@ input[type="checkbox"] { display: none }
 #info-box h1 {
     width: 100%;
     display: block;
-    font-size: 1.33em;
+    font-size: 1.2em;
+    font-weight: 400;
     text-align: center;
     margin: 0 0 .25em 0;
 }
@@ -1637,6 +1644,7 @@ input[type="checkbox"] { display: none }
     text-align: center;
     display: block;
     width: 100%;
+    padding: .25em .1em;
     box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .1);
     border: 1px solid #ccc;
     border-radius:  4px;

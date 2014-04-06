@@ -365,10 +365,14 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                var box = $("#info-box");
+                var box   = $("#info-box"),
+                    input = box.find("input");
                 box.attr("class", "link in");
                 box.children("h1").text("Shortlink");
-                box.find("input").val(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
+                input.val(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
+                input.register("focus", function () {
+                    this.select();
+                });
                 toggleCatcher();
                 break;
             case "USER_LIST":
