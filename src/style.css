@@ -53,12 +53,10 @@ html {
 ::selection      { background: #f81; color: #fff }
 ::-moz-selection { background: #f81; color: #fff }
 
-::-webkit-scrollbar             { background: transparent }
-::-webkit-scrollbar:vertical    { width: 4px }
-::-webkit-scrollbar:horizontal  { height: 4px }
-::-webkit-scrollbar-track       { background: transparent }
-::-webkit-scrollbar-thumb       { background: #ccc; border-radius: 2px }
-::-webkit-scrollbar-thumb:hover { background: #fff }
+::-webkit-scrollbar, ::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar:vertical   { width:  4px }
+::-webkit-scrollbar:horizontal { height: 4px }
+::-webkit-scrollbar-thumb      { background: #888 }
 
 input::-moz-placeholder                { color: #555; opacity: 1 }
 input:-ms-input-placeholder            { color: #555 }
