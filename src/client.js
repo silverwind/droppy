@@ -366,9 +366,9 @@
                 break;
             case "SHORTLINK":
                 var box = $("#info-box");
-                box.attr("class", "info in");
+                box.attr("class", "link in");
                 box.children("h1").text("Shortlink");
-                box.children("input").text(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
+                box.find("input").val(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
                 toggleCatcher();
                 break;
             case "USER_LIST":
@@ -464,7 +464,7 @@
 
         // Remove invalid class on user action
         $(".login-input").register("click keydown focus", function () {
-            $("#login-info-box").removeClass("info error");
+            $("#login-info-box").removeClass("link error");
             submit.removeClass("invalid");
             loginform.removeClass("invalid");
         });
@@ -994,6 +994,7 @@
         link.next().register("input", function () {
             inputText = namer.val();
             valid = !/[\\\*\{\}\/\?\|<>"]/.test(inputText);
+            if (inputText === "") valid = false;
             exists = false;
             for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
                 if (droppy.activeFiles[i] === inputText.toLowerCase()) { exists = true; break; }

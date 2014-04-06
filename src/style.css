@@ -1609,12 +1609,11 @@ input[type="checkbox"] { display: none }
     padding: 1em;
 }
 
-#info-box.info {
+#info-box.link {
     background: #eee;
     color: #444;
     box-shadow: 0 0 30px #111;
     transform: translate(-50%, -50%);
-
 }
 
 #info-box.error {
@@ -1634,11 +1633,19 @@ input[type="checkbox"] { display: none }
     margin: 0 0 .25em 0;
 }
 
-#info-box span {
+#info-box.link input {
     text-align: center;
     display: block;
     width: 100%;
+    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .1);
+    border: 1px solid #ccc;
+    border-radius:  4px;
 }
+
+#info-box.error input {
+    display: none;
+}
+
 /* =========================== Drop Select Menu ============================ */
 
 #drop-select {
