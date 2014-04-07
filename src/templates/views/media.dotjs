@@ -8,15 +8,17 @@ it = {
 </script>
 #}}
 <div class="previewer {{= it.type}}">
+    <div class="arrow-back"> {{= droppy.svg.arrow}} </div>
+    <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
     <figure class="media-container">
         {{? it.type === "video"}}
             <video autoplay controls>
                 <source src="{{= it.src }}" type="video/{{= it.src.match(/\.([^\\\/\.]+?)$/)[1] }}"/>
             </video>
         {{?? it.type === "image"}}
-            <img src="{{= it.src }}"></img>
+            <img src="{{= it.src }}">
         {{??}}
-            <img src="{{= it.src }}"></img>
+            <img src="{{= it.src }}">
         {{?}}
         {{? it.caption }}
             <figcaption>{{= it.caption}}</figcaption>

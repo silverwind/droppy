@@ -760,6 +760,41 @@ input:-webkit-autofill {
     position: relative;
     text-align: center;
     height: 100%;
+    overflow: hidden;
+}
+
+.previewer .arrow-back, .previewer .arrow-forward {
+    position: absolute;
+    fill: #aaa;
+    bottom: 0; top: 0;
+    cursor: pointer;
+    z-index: 1;
+
+}
+.previewer .arrow-back    { left: 0; right: 50% }
+.previewer .arrow-forward { left: 50%; right: 0 }
+
+.previewer svg {
+    height: 3em;
+    width: 3em;
+    position: absolute;
+    top: 50%;
+    transition: all .25s ease;
+}
+
+.previewer .arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
+.previewer .arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
+.previewer .arrow-back:hover svg {
+    height: 4em;
+    width: 4em;
+    left: -.5em;
+    fill: #eee;
+}
+.previewer .arrow-forward:hover svg {
+    height: 4em;
+    width: 4em;
+    right: -.5em;
+    fill: #eee;
 }
 
 .previewer .media-container {

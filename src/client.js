@@ -1601,7 +1601,6 @@
             }
             setTimeout(function () { // TODO: Remove this timeout
                 $.when.apply($, promises).done(function () {
-                    console.log(obj);
                     upload(view, obj);
                 });
             }, 200);
@@ -1814,19 +1813,49 @@
             openDoc(view);
         }
     }
-    function openMedia(view, type) {
-        var url, previewer,
+    function openMedia(view, type, arrowDirection) {
+        var previewer,
             filename  = view[0].currentFile,
             encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
             i = encodedId.length - 1;
         view.attr("data-type", type);
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
-        url = "/_" + encodedId.join("/");
-        previewer = $(t.views.media({ type: type, caption: filename, src: url}));
-        view[0].animDirection = "forward";
+        previewer = $(t.views.media({ type: type, caption: filename, src: "/_" + encodedId.join("/")}));
+
+        // Populate array with files in the directory for switching purpose
+        if (view[0].currentData) {
+            view[0].mediaFiles = [];
+            Object.keys(view[0].currentData).forEach(function (filename) {
+                if (["png", "jpg", "gif", "bmp", "apng"].indexOf(getExt(filename)) !== -1) {
+                    view[0].mediaFiles.push(filename);
+                }
+            });
+        }
+
+        view[0].animDirection = arrowDirection || "forward";
         loadContent(view, contentWrap(view).append(previewer));
         hideSpinner(view);
+
+        // Register arrow events
+        view.find(".arrow-back").register("click", function () {
+            var currentIndex = view[0].mediaFiles.indexOf(view[0].currentFile);
+            if (currentIndex > 0) {
+                view[0].currentFile = view[0].mediaFiles[currentIndex - 1];
+            } else { // Loop around
+                view[0].currentFile = view[0].mediaFiles[view[0].mediaFiles.length - 1];
+            }
+            openMedia(view, "image", "back");
+        });
+        view.find(".arrow-forward").register("click", function () {
+            var currentIndex = view[0].mediaFiles.indexOf(view[0].currentFile);
+            if (currentIndex < (view[0].mediaFiles.length - 1)) {
+                view[0].currentFile = view[0].mediaFiles[currentIndex + 1];
+            } else { // Loop around
+                view[0].currentFile = view[0].mediaFiles[0];
+            }
+            openMedia(view, "image", "forward");
+        });
     }
     function openDoc(view) {
         view.attr("data-type", "document");
