@@ -326,6 +326,7 @@
                 view[0].switchRequest = false;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
+                    view[0].currentData = msg.data;
                 } else {
                     showSpinner(view);
                     if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
