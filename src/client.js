@@ -641,13 +641,13 @@
                     else
                         dest = fixRootPath(first[0].currentFolder);
                 second = newView(dest, 1).addClass("right");
-                button.children(".button-text").text("Merge");
+                button.children("span").text("Merge");
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
                 window.history.replaceState(null, null, first[0].currentFolder); // removes the hash
                 getView(0).removeClass("left");
-                button.children(".button-text").text("Split");
+                button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
             }
             first.one("transitionend webkitTransitionEnd", function (event) {
