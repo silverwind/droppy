@@ -1559,71 +1559,52 @@
 
             // We support GetAsEntry, go ahead and read recursively
             var obj = {},
-                cbCount = 0,
-                cbFired = 0,
+                promises = [],
                 length = event.dataTransfer.items.length,
-                rootFileFunction = function (file) {
-                    obj[file.name] = file;
-                    cbFired++;
-                },
-                childFileFunction = function (path) {
-                    return function (file) {
-                        obj[path + "/" + file.name] = file;
-                        cbFired++;
-                    };
-                },
-                increaseFired = function () { cbFired++; },
-                readDirectory = function (entry, path) {
+                readDirectory = function (entry, path, promise) {
                     if (!path) path = entry.name;
                     obj[path] = {};
                     entry.createReader().readEntries(function (entries) {
                         entries.forEach(function (entry) {
                             if (entry.isDirectory) {
-                                readDirectory(entry, path + "/" + entry.name);
+                                readDirectory(entry, path + "/" + entry.name, promise);
                             } else {
-                                cbCount++;
-                                entry.file(childFileFunction(path), increaseFired);
+                                promise.resolve();
+                                var innerPromise = $.Deferred();
+                                promises.push(innerPromise);
+                                entry.file(function (file) {
+                                    obj[path + "/" + file.name] = file;
+                                    innerPromise.resolve();
+                                }, function () {
+                                    innerPromise.reject();
+                                });
                             }
                         });
                     });
                 };
             for (var i = 0; i < length; i++) {
-                var entry = event.dataTransfer.items[i][entryFunc]();
+                var promise = $.Deferred(),
+                    entry = event.dataTransfer.items[i][entryFunc]();
                 if (!entry) continue;
+
+                promises.push(promise);
                 if (entry.isFile) {
-                    cbCount++;
-                    entry.file(rootFileFunction, increaseFired);
+                    entry.file(function (file) {
+                        obj[file.name] = file;
+                        promise.resolve();
+                    }, function () {
+                        promise.reject();
+                    });
                 } else if (entry.isDirectory) {
-                    readDirectory(entry);
-                }
-                if (i === (length - 1)) { // TODO: Rewrite this hackery
-                    setTimeout(function () {
-                        // Check if the upload contains any files
-                        var foundFiles = false;
-                        (function search(o) {
-                            for (var p in o) {
-                                if (typeof o[p] === "object")
-                                    search(o[p]);
-                                else {
-                                    foundFiles = true;
-                                }
-                            }
-                        })(obj);
-                        // Give the callbacks some time to fire and send the upload
-                        (function wait(timeout) {
-                            if (timeout > 10000) {
-                                return;
-                            } else {
-                                if ((cbCount > 0 && cbFired === cbCount) || !foundFiles) {
-                                    upload(view, obj);
-                                } else {
-                                    setTimeout(wait, timeout + 50, timeout + 50);
-                                }
-                            }
-                        })(100);
-                    }, 100);
+                    readDirectory(entry, null, promise);
                 }
             }
+            setTimeout(function () { // TODO: Remove this timeout
+                $.when.apply($, promises).done(function () {
+                    console.log(obj);
+                    upload(view, obj);
+                });
+            }, 200);
         });
     }
 
