@@ -1354,14 +1354,14 @@
             view.find(".content:not(.new)").remove();
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
-            if ($(view).attr("data-type") === "directory") {
+            if (view.attr("data-type") === "directory") {
                 bindDragEvents(view);
                 bindHoverEvents(view);
                 bindDropEvents(view);
-            } else if ($(view).attr("data-type") === "document") {
+            } else if (view.attr("data-type") === "document") {
                 bindHoverEvents(view);
                 bindDropEvents(view);
-            } else if ($(view).attr("data-type") === "image") {
+            } else if (view.attr("data-type") === "image") {
                 bindHoverEvents(view);
                 bindDropEvents(view);
                 bindMediaArrows(view);
