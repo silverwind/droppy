@@ -769,6 +769,7 @@ input:-webkit-autofill {
     bottom: 0; top: 0;
     cursor: pointer;
     z-index: 1;
+    user-select: none;
 
 }
 .previewer .arrow-back    { left: 0; right: 50% }

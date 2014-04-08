@@ -539,7 +539,7 @@
                         return;
                     }
                     // Get a pseudo-random n-character lowercase string. The characters
-                    // "l", "1", "i", o", "0" characters are skipped for easier communication of links.
+                    // "l", "1", "i", "o", "0" characters are skipped for easier communication of links.
                     var chars = "abcdefghjkmnpqrstuvwxyz23456789";
                     do {
                         link = "";

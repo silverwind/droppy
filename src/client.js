@@ -323,24 +323,29 @@
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
                 if ((!view || view[0].isUploading) && !view[0].switchRequest) return;
-                view[0].switchRequest = false;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
                     view[0].currentData = msg.data;
                 } else {
-                    showSpinner(view);
-                    if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
-                        view[0].loaded = true; // Ensure to update path on the first load
-                        if (view[0].vId === 0)
-                            updateTitle(msg.folder, true);
-                        view[0].currentFile = null;
-                        view[0].currentFolder = msg.folder;
-                        updatePath(view);
+                    if (view.attr("data-type") === "image" && !view[0].switchRequest) {
+                        populateMediaList(view, msg.data);
+                        bindMediaArrows(view);
+                    } else {
+                        showSpinner(view);
+                        if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
+                            view[0].loaded = true; // Ensure to update path on the first load
+                            if (view[0].vId === 0)
+                                updateTitle(msg.folder, true);
+                            view[0].currentFile = null;
+                            view[0].currentFolder = msg.folder;
+                            updatePath(view);
+                        }
+                        view[0].currentData = msg.data;
+                        view.attr("data-type", "directory");
+                        openDirectory(view);
                     }
-                    view[0].currentData = msg.data;
-                    view.attr("data-type", "directory");
-                    openDirectory(view);
                 }
+                view[0].switchRequest = false;
                 break;
             case "UPDATE_BE_FILE":
                 view = getView(vId);
@@ -1233,11 +1238,11 @@
             width += parts[i].offsetWidth;
         }
         if (width > space) {
-            raf(function() {
+            raf(function () {
                 view.find(".path li").animate({"left": space - width + "px"}, {duration: 200});
             });
         } else {
-            raf(function(){
+            raf(function () {
                 view.find(".path li").animate({"left": 0}, {duration: 200});
             });
         }
@@ -1318,7 +1323,7 @@
     function loadContent(view, content) {
         var type = view.attr("data-type"),
             navRegex = /(forward|back|center)/;
-        if (view[0].animDirection === "center" && type !== "document") {
+        if (view[0].animDirection === "center" && type === "directory") {
             view.find(".content").replaceClass(navRegex, "center");
             view.find(".content").before(content);
             view.find(".new").attr("data-root", view[0].currentFolder);
@@ -1353,9 +1358,13 @@
                 bindDragEvents(view);
                 bindHoverEvents(view);
                 bindDropEvents(view);
-            } else if ($(view).attr("data-type") === "document" || $(view).attr("data-type") === "image") {
+            } else if ($(view).attr("data-type") === "document") {
                 bindHoverEvents(view);
                 bindDropEvents(view);
+            } else if ($(view).attr("data-type") === "image") {
+                bindHoverEvents(view);
+                bindDropEvents(view);
+                bindMediaArrows(view);
             }
             allowDrop(view);
         }
@@ -1813,31 +1822,17 @@
             openDoc(view);
         }
     }
-    function openMedia(view, type, arrowDirection) {
-        var previewer,
-            filename  = view[0].currentFile,
-            encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
-            i = encodedId.length - 1;
-        view.attr("data-type", type);
-        for (;i >= 0; i--)
-            encodedId[i] = encodeURIComponent(encodedId[i]);
-        previewer = $(t.views.media({ type: type, caption: filename, src: "/_" + encodedId.join("/")}));
 
-        // Populate array with files in the directory for switching purpose
-        if (view[0].currentData) {
-            view[0].mediaFiles = [];
-            Object.keys(view[0].currentData).forEach(function (filename) {
-                if (["png", "jpg", "gif", "bmp", "apng"].indexOf(getExt(filename)) !== -1) {
-                    view[0].mediaFiles.push(filename);
-                }
-            });
-        }
+    function populateMediaList(view, data) {
+        view[0].mediaFiles = [];
+        Object.keys(data).forEach(function (filename) {
+            if (["png", "jpg", "gif", "bmp", "apng"].indexOf(getExt(filename)) !== -1) {
+                view[0].mediaFiles.push(filename);
+            }
+        });
+    }
 
-        view[0].animDirection = arrowDirection || "forward";
-        loadContent(view, contentWrap(view).append(previewer));
-        hideSpinner(view);
-
-        // Register arrow events
+    function bindMediaArrows(view) {
         view.find(".arrow-back").register("click", function () {
             var currentIndex = view[0].mediaFiles.indexOf(view[0].currentFile);
             if (currentIndex > 0) {
@@ -1845,7 +1840,8 @@
             } else { // Loop around
                 view[0].currentFile = view[0].mediaFiles[view[0].mediaFiles.length - 1];
             }
-            openMedia(view, "image", "back");
+            swapImage(view, view[0].currentFile);
+
         });
         view.find(".arrow-forward").register("click", function () {
             var currentIndex = view[0].mediaFiles.indexOf(view[0].currentFile);
@@ -1854,8 +1850,44 @@
             } else { // Loop around
                 view[0].currentFile = view[0].mediaFiles[0];
             }
-            openMedia(view, "image", "forward");
+            swapImage(view, view[0].currentFile);
         });
+        function swapImage(view, filename) {
+            var img = view.find(".media-container img");
+            img.fadeOut(100, function () { // TODO: Use transitions
+                img.attr("src", getImgSrc(view, filename)).fadeIn(100);
+                view.find(".media-container figcaption").text(filename);
+                if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
+                updatePath(view);
+            });
+        }
+    }
+
+    function getImgSrc(view, filename) {
+        var encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
+            i = encodedId.length - 1;
+        for (;i >= 0; i--)
+            encodedId[i] = encodeURIComponent(encodedId[i]);
+        return "/_" + encodedId.join("/");
+    }
+
+    function openMedia(view, type, arrowDirection) {
+        var previewer,
+            filename  = view[0].currentFile;
+        view.attr("data-type", type);
+        previewer = $(t.views.media({ type: type, caption: filename, src: getImgSrc(view, filename)}));
+
+        // Populate array with files in the directory for switching purpose
+        if (view[0].currentData) {
+            populateMediaList(view, view[0].currentData);
+        } else {
+            sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
+        }
+
+        view[0].animDirection = arrowDirection || "forward";
+        loadContent(view, contentWrap(view).append(previewer));
+        if (view[0].vId === 0) updateTitle(filename);
+        hideSpinner(view);
     }
     function openDoc(view) {
         view.attr("data-type", "document");
