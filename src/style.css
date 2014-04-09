@@ -806,7 +806,8 @@ input:-webkit-autofill {
     height: 100%;
 }
 
-.previewer .media-container > img {
+.previewer .media-container > img,
+.previewer .media-container > video {
     position: absolute;
     max-height: calc(100% - 1.5em);
     max-width: 100%;

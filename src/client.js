@@ -327,7 +327,7 @@
                     addSizes(view, msg.folder, msg.data);
                     view[0].currentData = msg.data;
                 } else {
-                    if (view.attr("data-type") === "image" && !view[0].switchRequest) {
+                    if ((view.attr("data-type") === "image" || view.attr("data-type") === "video") && !view[0].switchRequest) {
                         populateMediaList(view, msg.data);
                         bindMediaArrows(view);
                     } else {
@@ -1138,12 +1138,7 @@
                     sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
                     // Skip the push if we're already navigating through history
-                    if (!skipPush) {
-                        var newDest;
-                        if (view[0].vId === 0) newDest = viewDest + window.location.hash;
-                        else newDest = window.location.pathname + "#" + viewDest;
-                        window.history.pushState(null, null, newDest);
-                    }
+                    if (!skipPush) updateHistory(view, viewDest);
                 } else
                     setTimeout(queue, 50, time + 50);
             })(time);
@@ -1155,6 +1150,13 @@
                     sendReq(getView(i), destination[i], 0);
             }
         } else if (droppy.views[view[0].vId]) sendReq(view, destination, 0);
+    }
+
+    function updateHistory(view, dest) {
+        var newDest;
+        if (view[0].vId === 0) newDest = dest + window.location.hash;
+        else newDest = window.location.pathname + "#" + dest;
+        window.history.pushState(null, null, newDest);
     }
 
     // Update the path indicator
@@ -1361,7 +1363,7 @@
             } else if (view.attr("data-type") === "document") {
                 bindHoverEvents(view);
                 bindDropEvents(view);
-            } else if (view.attr("data-type") === "image") {
+            } else if (view.attr("data-type") === "image" || view.attr("data-type") === "video") {
                 bindHoverEvents(view);
                 bindDropEvents(view);
                 bindMediaArrows(view);
@@ -1540,7 +1542,7 @@
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
-                } else if (view.attr("data-type") === "document" || view.attr("data-type") === "image") { // dropping into a document view
+                } else { // dropping into a document view
                     updateLocation(view, dragData);
                 }
                 return;
@@ -1814,9 +1816,9 @@
     function openFile(view) {
         var ext = getExt(basename(getViewLocation(view)));
         // Determine filetype and how to open it
-        if (["png", "jpg", "gif", "bmp", "apng"].indexOf(ext) !== -1) {
+        if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) {
             openMedia(view, "image");
-        } else if (["mp4", "ogg"].indexOf(ext) !== -1) {
+        } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) {
             openMedia(view, "video");
         } else {
             openDoc(view);
@@ -1824,9 +1826,10 @@
     }
 
     function populateMediaList(view, data) {
+        var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
-            if (["png", "jpg", "gif", "bmp", "apng"].indexOf(getExt(filename)) !== -1) {
+            if (extensions.indexOf(getExt(filename)) !== -1) {
                 view[0].mediaFiles.push(filename);
             }
         });
@@ -1840,7 +1843,7 @@
             } else { // Loop around
                 view[0].currentFile = view[0].mediaFiles[view[0].mediaFiles.length - 1];
             }
-            swapImage(view, view[0].currentFile);
+            swapMedia(view, view[0].currentFile);
 
         });
         view.find(".arrow-forward").register("click", function () {
@@ -1850,20 +1853,27 @@
             } else { // Loop around
                 view[0].currentFile = view[0].mediaFiles[0];
             }
-            swapImage(view, view[0].currentFile);
+            swapMedia(view, view[0].currentFile);
         });
-        function swapImage(view, filename) {
-            var img = view.find(".media-container img");
-            img.fadeOut(100, function () { // TODO: Use transitions
-                img.attr("src", getImgSrc(view, filename)).fadeIn(100);
-                view.find(".media-container figcaption").text(filename);
-                if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
-                updatePath(view);
-            });
+        function swapMedia(view, filename) {
+            var newElement,
+                mediaElement = view.find(".media-container img, .media-container video");
+            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
+                newElement = $("<img>");
+            else
+                newElement = $("<video autoplay controls loop>");
+            mediaElement.remove();
+            newElement.attr("src", getMediaSrc(view, filename));
+            newElement.prependTo(view.find(".media-container"));
+            view.find(".media-container figcaption").text(filename);
+            view[0].currentFile = filename;
+            updatePath(view);
+            updateHistory(view, normalizePath(fixRootPath(view[0].currentFolder)) + "/" + filename);
+            if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }
     }
 
-    function getImgSrc(view, filename) {
+    function getMediaSrc(view, filename) {
         var encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
             i = encodedId.length - 1;
         for (;i >= 0; i--)
@@ -1875,7 +1885,7 @@
         var previewer,
             filename  = view[0].currentFile;
         view.attr("data-type", type);
-        previewer = $(t.views.media({ type: type, caption: filename, src: getImgSrc(view, filename)}));
+        previewer = $(t.views.media({ type: type, caption: filename, src: getMediaSrc(view, filename)}));
 
         // Populate array with files in the directory for switching purpose
         if (view[0].currentData) {
@@ -2191,8 +2201,8 @@
 
     // Find the corrects class for an icon sprite
     function getSpriteClass(extension) {
-        for (var type in iconmap) {
-            if (iconmap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
+        for (var type in droppy.iconMap) {
+            if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
                 return "sprite sprite-" + type;
             }
         }
@@ -2201,7 +2211,7 @@
     t.fn.getSpriteClass = getSpriteClass;
 
     // Extension to Icon mappings
-    var iconmap = {
+    droppy.iconMap = {
         "archive":  ["bz2", "gz", "tgz"],
         "audio":    ["aif", "flac", "m4a", "mid", "mp3", "mpa", "ra", "ogg", "wav", "wma"],
         "authors":  ["authors"],
@@ -2254,9 +2264,40 @@
         "text":     ["text", "txt"],
         "tiff":     ["tiff"],
         "vcal":     ["vcal"],
-        "video":    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "rm", "swf", "vob", "wmv"],
+        "video":    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "rm", "swf", "vob", "wmv", "webm"],
         "xml":      ["xml"],
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
+    };
+
+    droppy.audioTypes = {
+        "aac":  "audio/aac",
+        "m4a":  "audio/mp4",
+        "mp1":  "audio/mpeg",
+        "mp2":  "audio/mpeg",
+        "mp3":  "audio/mpeg",
+        "mpg":  "audio/mpeg",
+        "mpeg": "audio/mpeg",
+        "ogg":  "audio/ogg",
+        "oga":  "audio/ogg",
+        "wav":  "audio/wav"
+    };
+
+    droppy.videoTypes = {
+        "mp4":  "video/mp4",  // can be audio/mp4 too
+        "m4v":  "video/mp4",
+        "ogv":  "video/ogg",
+        "webm": "video/webm" // can be audio/webm too
+    };
+
+    droppy.imageTypes = {
+        "jpg":  "image/jpeg",
+        "jpeg": "image/jpeg",
+        "gif":  "image/gif",
+        "png":  "image/png",
+        "apng": "image/png",
+        "svg":  "image/svg+xml",
+        "bmp":  "image/bmp",
+        "ico":  "image/x-icon"
     };
 
     function getHeaderHTML() {
