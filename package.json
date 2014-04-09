@@ -13,7 +13,7 @@
   "main": "droppy.js",
   "dependencies": {
     "archiver": "~0.8.1",
-    "async": "~0.6.2",
+    "async": "~0.7.0",
     "autoprefixer": "~1.1.20140403",
     "busboy": "~0.2.3",
     "chalk": "~0.4.0",
