@@ -5,14 +5,18 @@
     font-family: "Open Sans";
     font-style: normal;
     font-weight: 300;
-    src: url("/!/OpenSans-Light.woff") format("woff");
+    src: local("Open Sans Light"),
+         local("OpenSans-Light"),
+         url("/!/OpenSans-Light.woff") format("woff");
 }
 
 @font-face {
     font-family: "Open Sans";
     font-style: normal;
     font-weight: 400;
-    src: url("/!/OpenSans-Regular.woff") format("woff");
+    src: local("Open Sans"),
+         local("OpenSans"),
+         url("/!/OpenSans-Regular.woff") format("woff");
 }
 
 /* ============================ Resets and relatives ============================= */
