@@ -13,10 +13,10 @@ A personal cloud storage solution with a speedy HTML5 interface, running on [nod
 * Realtime updating of all connected clients via WebSockets.
 * Asynchronous multi-file uploads. Recursive directory uploads in Chrome.
 * Download directories as ZIPs.
-* Edit text files in CodeMirror, a feature-rich editor.
+* Edit text-based files in CodeMirror, a feature-rich editor.
 * Basic file system operations: Cut, Copy, Rename, Delete, Create directory.
-* Drag and Drop support for uploads and filesystem operations. CTRL/CMD to copy, Shift to move.
-* Playback of audio files supported by the [`<audio>` API](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+* Drag and Drop support for uploads and filesystem operations. Hold CMD/CTRL to copy, Shift to move.
+* Playback of audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the `<audio>` and `<video>` elements.
 * Support for shortened links to share file downloads with your friends without them needing to log in.
 
 ##Installation
