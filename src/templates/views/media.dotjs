@@ -12,7 +12,7 @@ it = {
     <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
     <figure class="media-container">
         {{? it.type === "video"}}
-            <video autoplay controls loop src="{{= it.src }}"></video>
+            <video autoplay loop src="{{= it.src }}"></video>
         {{?? it.type === "image"}}
             <img src="{{= it.src }}">
         {{??}}
