@@ -1858,7 +1858,6 @@
             swapMedia(view, view[0].currentFile);
         });
 
-        droppy.arrowsTimeouts = [];
         droppy.arrowsTimeouts[view[0].vId] = null;
         view.find(".content").register("mousemove", debounce(function () {
             if (droppy.arrowsTimeouts[view[0].vId] !== null) {
@@ -2135,6 +2134,7 @@
 
     function initVariables() {
         droppy.activeFiles = [];
+        droppy.arrowsTimeouts = [];
         droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.demoMode = null;
