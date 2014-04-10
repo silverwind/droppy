@@ -845,7 +845,7 @@
                     formLength++;
                     formData.append(filename, data[i], filename);
                 }
-             }
+            }
         } else { // We got an object for recursive folder uploads
             var addedDirs = {};
             Object.keys(data).forEach(function (entry) {
