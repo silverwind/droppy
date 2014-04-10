@@ -1156,6 +1156,7 @@
         var newDest;
         if (view[0].vId === 0) newDest = dest + window.location.hash;
         else newDest = window.location.pathname + "#" + dest;
+        console.log(newDest);
         window.history.pushState(null, null, newDest);
     }
 
