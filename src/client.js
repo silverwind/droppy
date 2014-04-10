@@ -1857,19 +1857,18 @@
             swapMedia(view, view[0].currentFile);
         });
 
-        view[0].arrowsShown = false;
-        view.find(".media-container").register("mousemove", debounce(function () {
-            if (!view[0].arrowsShown) {
-                view[0].arrowsShown = true;
-                view.find(".arrow-back, .arrow-forward").addClass("in");
-            } else {
-                if (view[0].arrowTimeout) clearTimeout(view[0].arrowTimeout);
+        droppy.arrowsTimeouts = [];
+        droppy.arrowsTimeouts[view[0].vId] = null;
+        view.find(".content").register("mousemove", debounce(function () {
+            if (droppy.arrowsTimeouts[view[0].vId] !== null) {
+                clearTimeout(droppy.arrowsTimeouts[view[0].vId]);
+                if (!view.find(".arrow-back").hasClass("in")) view.find(".arrow-back, .arrow-forward").addClass("in");
             }
-            view[0].arrowTimeout = setTimeout(function () {
-                view[0].arrowsShown = false;
+            droppy.arrowsTimeouts[view[0].vId] = setTimeout(function () {
+                droppy.arrowsTimeouts[view[0].vId] = null;
                 view.find(".arrow-back, .arrow-forward").removeClass("in");
-            }, 1200);
-        }), 50);
+            }, 2000);
+        }), 100);
 
         function swapMedia(view, filename) {
             var newElement,
