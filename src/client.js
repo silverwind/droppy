@@ -1543,7 +1543,8 @@
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
                 } else { // dropping into a document view
-                    updateLocation(view, dragData);
+                    if (joinPath(view[0].currentFolder, view[0].currentFile) !== dragData)
+                        updateLocation(view, dragData);
                 }
                 return;
             }
@@ -2452,5 +2453,18 @@
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
+    }
+
+    // Join paths and clean them up in process
+    function joinPath() {
+        var parts = [],
+            newParts = [];
+        for (var i = 0, l = arguments.length; i < l; i++)
+            parts = parts.concat(arguments[i].split("/"));
+        for (i = 0, l = parts.length; i < l; i++) {
+            if ((i === 0 && parts[i] === "") || parts[i] !== "")
+                newParts.push(parts[i]);
+        }
+        return newParts.join("/");
     }
 }(jQuery, window, document));
