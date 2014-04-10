@@ -1857,14 +1857,25 @@
         });
         function swapMedia(view, filename) {
             var newElement,
-                mediaElement = view.find(".media-container img, .media-container video");
-            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
-                newElement = $("<img>");
-            else
-                newElement = $("<video autoplay controls loop>");
-            mediaElement.remove();
-            newElement.attr("src", getMediaSrc(view, filename));
-            newElement.prependTo(view.find(".media-container"));
+                oldElement = view.find(".media-container img, .media-container video");
+            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
+                newElement = document.createElement("img");
+                newElement.addEventListener("load", function () {
+                    oldElement.remove();
+                    $(newElement).prependTo(view.find(".media-container"));
+                }, false);
+            } else {
+                newElement = document.createElement("video");
+                newElement.autoplay = true;
+                newElement.controls = true;
+                newElement.loop = true;
+                newElement.addEventListener("canplay", function () {
+                    oldElement.remove();
+                    $(newElement).prependTo(view.find(".media-container"));
+                    $(newElement)[0].play();
+                }, false);
+            }
+            newElement.src = getMediaSrc(view, filename); // Set source path
             view.find(".media-container figcaption").text(filename);
             view[0].currentFile = filename;
             updatePath(view);
@@ -2213,7 +2224,7 @@
     // Extension to Icon mappings
     droppy.iconMap = {
         "archive":  ["bz2", "gz", "tgz"],
-        "audio":    ["aif", "flac", "m4a", "mid", "mp3", "mpa", "ra", "ogg", "wav", "wma"],
+        "audio":    ["aac", "aif", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "mpg", "mpeg", "ra", "ogg", "oga", "wav", "wma"],
         "authors":  ["authors"],
         "bin":      ["class", "o", "so"],
         "bmp":      ["bmp"],
@@ -2247,7 +2258,7 @@
         "pdf":      ["pdf"],
         "php":      ["php"],
         "playlist": ["m3u", "m3u8", "pls"],
-        "png":      ["png"],
+        "png":      ["png", "apng"],
         "pres":     ["odp", "otp", "pps", "ppt", "pptx"],
         "ps":       ["ps", "ttf", "otf", "woff", "eot"],
         "psd":      ["psd"],
@@ -2264,7 +2275,7 @@
         "text":     ["text", "txt"],
         "tiff":     ["tiff"],
         "vcal":     ["vcal"],
-        "video":    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "rm", "swf", "vob", "wmv", "webm"],
+        "video":    ["avi", "flv", "mkv", "mov", "mp4", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
         "xml":      ["xml"],
         "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
@@ -2275,6 +2286,7 @@
         "mp1":  "audio/mpeg",
         "mp2":  "audio/mpeg",
         "mp3":  "audio/mpeg",
+        "mpa":  "audio/mpeg",
         "mpg":  "audio/mpeg",
         "mpeg": "audio/mpeg",
         "ogg":  "audio/ogg",
