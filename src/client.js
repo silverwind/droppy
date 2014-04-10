@@ -1876,20 +1876,15 @@
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
                 newElement = document.createElement("img");
                 newElement.addEventListener("load", function () {
-                    oldElement.remove();
-                    $(newElement).prependTo(view.find(".media-container"));
+                    oldElement.replaceWith(newElement);
                 }, false);
             } else {
                 newElement = document.createElement("video");
                 newElement.autoplay = true;
                 newElement.loop = true;
-                newElement.addEventListener("canplay", function () {
-                    oldElement.remove();
-                    $(newElement).prependTo(view.find(".media-container"));
-                    $(newElement)[0].play();
-                }, false);
+                oldElement.replaceWith(newElement);
             }
-            newElement.src = getMediaSrc(view, filename); // Set source path
+            newElement.src = getMediaSrc(view, filename);
             view.find(".media-container figcaption").text(filename);
             view[0].currentFile = filename;
             updatePath(view);

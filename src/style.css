@@ -774,18 +774,17 @@ input:-webkit-autofill {
     cursor: pointer;
     z-index: 1;
     user-select: none;
-    transition: opacity .2s ease, visibility .2s ease;
-    visibility: hidden;
+    transition: opacity .2s ease;
     opacity: 0;
 }
 .previewer .arrow-back    { left: 0; right: 50% }
 .previewer .arrow-forward { left: 50%; right: 0 }
-.previewer .arrow-back.in    { visibility: visible; opacity: 1 }
-.previewer .arrow-forward.in { visibility: visible; opacity: 1 }
+.previewer .arrow-back.in    { opacity: 1 }
+.previewer .arrow-forward.in { opacity: 1 }
 
 .previewer svg {
-    height: 3em;
-    width: 3em;
+    height: 2em;
+    width: 2em;
     position: absolute;
     top: 50%;
     transition: all .25s ease;
@@ -796,13 +795,13 @@ input:-webkit-autofill {
 .previewer .arrow-back:hover svg {
     height: 4em;
     width: 4em;
-    left: -.5em;
+    left: -.75em;
     fill: #eee;
 }
 .previewer .arrow-forward:hover svg {
     height: 4em;
     width: 4em;
-    right: -.5em;
+    right: -.75em;
     fill: #eee;
 }
 
