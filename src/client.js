@@ -29,6 +29,22 @@
             }
             return false;
         })(),
+        audioTypes : (function () {
+            var types = {},
+                el    = document.createElement("audio");
+            Object.keys(droppy.audioTypes).forEach(function (type) {
+                types[droppy.audioTypes[type]] = Boolean(el.canPlayType(droppy.audioTypes[type]).replace(/no/, ""));
+            });
+            return types;
+        })(),
+        videoTypes : (function () {
+            var types = {},
+                el    = document.createElement("video");
+            Object.keys(droppy.videoTypes).forEach(function (type) {
+                types[droppy.videoTypes[type]] = Boolean(el.canPlayType(droppy.videoTypes[type]).replace(/no/, ""));
+            });
+            return types;
+        })(),
         mobile : (function () {
             return "ontouchstart" in document.documentElement;
         })()
@@ -348,11 +364,7 @@
                 view[0].switchRequest = false;
                 break;
             case "UPDATE_BE_FILE":
-                view = getView(vId);
-                view[0].currentFolder = msg.folder;
-                view[0].currentFile = msg.file;
-                updatePath(view);
-                openFile(view);
+                openFile(getView(vId), msg.folder, msg.file);
                 break;
             case "UPLOAD_DONE":
                 view = getView(vId);
@@ -376,14 +388,7 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                var box   = $("#info-box"),
-                    input = box.find("input");
-                box.attr("class", "link in");
-                box.children("h1").text("Shortlink");
-                input.val(window.location.protocol + "//" + window.location.host + "/$/" +  msg.link);
-                input.register("focus", function () {
-                    this.select();
-                });
+                showLinkBox(msg.link);
                 toggleCatcher();
                 break;
             case "USER_LIST":
@@ -1804,24 +1809,37 @@
         updateLocation(view, view[0].currentFolder);
     }
 
-    function openFile(view) {
-        var ext = getExt(basename(getViewLocation(view)));
+    function openFile(view, folder, file) {
+        var ext = getExt(file);
+        view[0].currentFolder = folder;
         // Determine filetype and how to open it
         if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) {
+            view[0].currentFile = file;
             openMedia(view, "image");
         } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) {
-            openMedia(view, "video");
+            if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
+                showError("Sorry, your browser can't play this file.");
+                updateLocation(view, view[0].currentFolder);
+                return;
+            } else {
+                view[0].currentFile = file;
+                openMedia(view, "video");
+            }
         } else {
+            view[0].currentFile = file;
             openDoc(view);
         }
+        updatePath(view);
     }
 
     function populateMediaList(view, data) {
         var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
+            var ext = getExt(filename);
             if (data[filename].type !== "f") return;
-            if (extensions.indexOf(getExt(filename)) !== -1) {
+            if (extensions.indexOf(ext) !== -1) {
+                if (droppy.videoTypes[ext] && !droppy.detects.videoTypes[droppy.videoTypes[ext]]) return;
                 view[0].mediaFiles.push(filename);
             }
         });
@@ -2143,6 +2161,97 @@
         droppy.views = [];
         droppy.emptyFiles = null;
         droppy.emptyFolders = null;
+
+        // Extension to icon mappings
+        droppy.iconMap = {
+            "archive":  ["bz2", "gz", "tgz"],
+            "audio":    ["aac", "aif", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "mpg", "mpeg", "ra", "ogg", "oga", "wav", "wma"],
+            "authors":  ["authors"],
+            "bin":      ["class", "o", "so"],
+            "bmp":      ["bmp"],
+            "c":        ["c"],
+            "calc":     ["ods", "ots", "xlr", "xls", "xlsx"],
+            "cd":       ["cue", "iso"],
+            "copying":  ["copying", "license"],
+            "cpp":      ["cpp"],
+            "css":      ["css", "less", "scss", "sass"],
+            "deb":      ["deb"],
+            "diff":     ["diff", "patch"],
+            "doc":      ["doc", "docx", "odm", "odt", "ott"],
+            "draw":     ["drw"],
+            "eps":      ["eps"],
+            "exe":      ["bat", "cmd", "exe"],
+            "gif":      ["gif"],
+            "gzip":     ["gz"],
+            "h":        ["h"],
+            "hpp":      ["hpp"],
+            "html":     ["htm", "html", "shtml"],
+            "ico":      ["ico"],
+            "image":    ["svg", "xpm"],
+            "install":  ["install", "msi"],
+            "java":     ["java"],
+            "jpg":      ["jpg", "jpeg"],
+            "js":       ["js"],
+            "json":     ["json"],
+            "log":      ["log", "changelog"],
+            "makefile": ["makefile", "pom"],
+            "markdown": ["markdown", "md"],
+            "pdf":      ["pdf"],
+            "php":      ["php"],
+            "playlist": ["m3u", "m3u8", "pls"],
+            "png":      ["png", "apng"],
+            "pres":     ["odp", "otp", "pps", "ppt", "pptx"],
+            "ps":       ["ps", "ttf", "otf", "woff", "eot"],
+            "psd":      ["psd"],
+            "py":       ["py"],
+            "rar":      ["rar"],
+            "rb":       ["rb"],
+            "readme":   ["readme"],
+            "rpm":      ["rpm"],
+            "rss":      ["rss"],
+            "rtf":      ["rtf"],
+            "script":   ["conf", "csh", "ini", "ksh", "sh", "shar", "tcl"],
+            "tar":      ["tar"],
+            "tex":      ["tex"],
+            "text":     ["text", "txt"],
+            "tiff":     ["tiff"],
+            "vcal":     ["vcal"],
+            "video":    ["avi", "flv", "mkv", "mov", "mp4", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
+            "xml":      ["xml"],
+            "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
+        };
+
+        droppy.audioTypes = {
+            "aac":  "audio/aac",
+            "m4a":  "audio/mp4",
+            "mp1":  "audio/mpeg",
+            "mp2":  "audio/mpeg",
+            "mp3":  "audio/mpeg",
+            "mpa":  "audio/mpeg",
+            "mpg":  "audio/mpeg",
+            "mpeg": "audio/mpeg",
+            "ogg":  "audio/ogg",
+            "oga":  "audio/ogg",
+            "wav":  "audio/wav"
+        };
+
+        droppy.videoTypes = {
+            "mp4":  "video/mp4",  // can be audio/mp4 too
+            "m4v":  "video/mp4",
+            "ogv":  "video/ogg",
+            "webm": "video/webm" // can be audio/webm too
+        };
+
+        droppy.imageTypes = {
+            "jpg":  "image/jpeg",
+            "jpeg": "image/jpeg",
+            "gif":  "image/gif",
+            "png":  "image/png",
+            "apng": "image/png",
+            "svg":  "image/svg+xml",
+            "bmp":  "image/bmp",
+            "ico":  "image/x-icon"
+        };
     }
 
     // Add directory sizes
@@ -2222,97 +2331,6 @@
         return "sprite sprite-bin";
     }
     t.fn.getSpriteClass = getSpriteClass;
-
-    // Extension to Icon mappings
-    droppy.iconMap = {
-        "archive":  ["bz2", "gz", "tgz"],
-        "audio":    ["aac", "aif", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "mpg", "mpeg", "ra", "ogg", "oga", "wav", "wma"],
-        "authors":  ["authors"],
-        "bin":      ["class", "o", "so"],
-        "bmp":      ["bmp"],
-        "c":        ["c"],
-        "calc":     ["ods", "ots", "xlr", "xls", "xlsx"],
-        "cd":       ["cue", "iso"],
-        "copying":  ["copying", "license"],
-        "cpp":      ["cpp"],
-        "css":      ["css", "less", "scss", "sass"],
-        "deb":      ["deb"],
-        "diff":     ["diff", "patch"],
-        "doc":      ["doc", "docx", "odm", "odt", "ott"],
-        "draw":     ["drw"],
-        "eps":      ["eps"],
-        "exe":      ["bat", "cmd", "exe"],
-        "gif":      ["gif"],
-        "gzip":     ["gz"],
-        "h":        ["h"],
-        "hpp":      ["hpp"],
-        "html":     ["htm", "html", "shtml"],
-        "ico":      ["ico"],
-        "image":    ["svg", "xpm"],
-        "install":  ["install", "msi"],
-        "java":     ["java"],
-        "jpg":      ["jpg", "jpeg"],
-        "js":       ["js"],
-        "json":     ["json"],
-        "log":      ["log", "changelog"],
-        "makefile": ["makefile", "pom"],
-        "markdown": ["markdown", "md"],
-        "pdf":      ["pdf"],
-        "php":      ["php"],
-        "playlist": ["m3u", "m3u8", "pls"],
-        "png":      ["png", "apng"],
-        "pres":     ["odp", "otp", "pps", "ppt", "pptx"],
-        "ps":       ["ps", "ttf", "otf", "woff", "eot"],
-        "psd":      ["psd"],
-        "py":       ["py"],
-        "rar":      ["rar"],
-        "rb":       ["rb"],
-        "readme":   ["readme"],
-        "rpm":      ["rpm"],
-        "rss":      ["rss"],
-        "rtf":      ["rtf"],
-        "script":   ["conf", "csh", "ini", "ksh", "sh", "shar", "tcl"],
-        "tar":      ["tar"],
-        "tex":      ["tex"],
-        "text":     ["text", "txt"],
-        "tiff":     ["tiff"],
-        "vcal":     ["vcal"],
-        "video":    ["avi", "flv", "mkv", "mov", "mp4", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
-        "xml":      ["xml"],
-        "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
-    };
-
-    droppy.audioTypes = {
-        "aac":  "audio/aac",
-        "m4a":  "audio/mp4",
-        "mp1":  "audio/mpeg",
-        "mp2":  "audio/mpeg",
-        "mp3":  "audio/mpeg",
-        "mpa":  "audio/mpeg",
-        "mpg":  "audio/mpeg",
-        "mpeg": "audio/mpeg",
-        "ogg":  "audio/ogg",
-        "oga":  "audio/ogg",
-        "wav":  "audio/wav"
-    };
-
-    droppy.videoTypes = {
-        "mp4":  "video/mp4",  // can be audio/mp4 too
-        "m4v":  "video/mp4",
-        "ogv":  "video/ogg",
-        "webm": "video/webm" // can be audio/webm too
-    };
-
-    droppy.imageTypes = {
-        "jpg":  "image/jpeg",
-        "jpeg": "image/jpeg",
-        "gif":  "image/gif",
-        "png":  "image/png",
-        "apng": "image/png",
-        "svg":  "image/svg+xml",
-        "bmp":  "image/bmp",
-        "ico":  "image/x-icon"
-    };
 
     function getHeaderHTML() {
         return '<div class="file-header">' +
@@ -2418,13 +2436,24 @@
     }
 
     function showError(text) {
-        var infobox = $("#info-box");
-        infobox.attr("class", "error in");
-        infobox.children("h1").text("Error");
-        infobox.children("span").text(text);
+        var box = $("#info-box");
+        box.find("svg").replaceWith(droppy.svg.exclamation);
+        box.children("span").text(text);
+        box.attr("class", "error in");
         setTimeout(function () {
-            infobox.removeAttr("class");
-        }, 4000);
+            box.removeAttr("class");
+        }, 3000);
+    }
+
+    function showLinkBox(link) {
+        var box   = $("#info-box"),
+            input = box.find("input");
+        box.find("svg").replaceWith(droppy.svg.link);
+        box.attr("class", "link in");
+        input.val(window.location.protocol + "//" + window.location.host + "/$/" +  link);
+        input.register("focus", function () {
+            this.select();
+        });
     }
 
     function debounce(func, wait) {
