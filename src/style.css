@@ -734,9 +734,10 @@ input:-webkit-autofill {
     vertical-align: top;
 }
 
-#entry-menu .open, #entry-menu .edit, #entry-menu .download {
+#entry-menu .open, #entry-menu .edit {
     display: none;
 }
+
 #entry-menu.type-audio>div>.play,
 #entry-menu.type-bin>div>.edit,
 #entry-menu.type-css>div>.edit,
@@ -754,8 +755,7 @@ input:-webkit-autofill {
 #entry-menu.type-script>div>.edit,
 #entry-menu.type-text>div>.edit,
 #entry-menu.type-video>div>.play,
-#entry-menu.type-xml>div>.edit,
-#entry-menu.type-download .download {
+#entry-menu.type-xml>div>.edit {
     display: block;
 }
 

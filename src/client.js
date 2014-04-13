@@ -285,9 +285,9 @@
                 sendMessage();
             else {
                 // Create new view with initiallizing
-                newView(normalizePath(decodeURIComponent(window.location.pathname)), 0);
+                newView(join(decodeURIComponent(window.location.pathname)), 0);
                 if (window.location.hash.length)
-                    droppy.split(normalizePath(decodeURIComponent(window.location.hash.slice(1))));
+                    droppy.split(join(decodeURIComponent(window.location.hash.slice(1))));
             }
         };
 
@@ -641,10 +641,7 @@
             if (droppy.views.length === 1) {
                 first.addClass("left");
                 if (typeof dest !== "string")
-                    if (first[0].currentFile)
-                        dest = fixRootPath(first[0].currentFolder + "/" + first[0].currentFile);
-                    else
-                        dest = fixRootPath(first[0].currentFolder);
+                    dest = join(first[0].currentFolder, first[0].currentFile);
                 second = newView(dest, 1).addClass("right");
                 button.children("span").text("Merge");
                 button.attr("title", "Merge views back into a single one");
@@ -840,7 +837,7 @@
                 // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
                 // https://github.com/silverwind/droppy/issues/10
                 if (data[i].size === 0) {
-                    droppy.emptyFiles.push((view[0].currentFolder === "/") ? "/" + filename : view[0].currentFolder + "/" + filename);
+                    droppy.emptyFiles.push(join(view[0].currentFolder, data[i].name));
                 } else {
                     formLength++;
                     formData.append(filename, data[i], filename);
@@ -916,17 +913,11 @@
     }
 
     function sendEmptyFiles(view) {
-        droppy.emptyFiles = droppy.emptyFiles.map(function (path) {
-            return view[0].currentFolder === "/" ? "/" + path : view[0].currentFolder + "/" + path;
-        });
         sendMessage(view[0].vId, "CREATE_FILES", {files: droppy.emptyFiles, isUpload: true});
         droppy.emptyFiles = [];
     }
 
     function sendEmptyFolders(view) {
-        droppy.emptyFolders = droppy.emptyFolders.map(function (path) {
-            return view[0].currentFolder === "/" ? "/" + path : view[0].currentFolder + "/" + path;
-        });
         sendMessage(view[0].vId, "CREATE_FOLDERS", {folders: droppy.emptyFolders, isUpload: true});
         droppy.emptyFolders = [];
     }
@@ -1047,7 +1038,7 @@
         namer[0].focus();
 
         function submitEdit(view, skipInvalid, callback) {
-            var success, oldPath, newPath,
+            var success,
                 oldVal = namer.attr("placeholder"),
                 newVal = namer.val();
             if (canSubmit) {
@@ -1065,11 +1056,8 @@
                 stopEdit(view);
             }
             if (typeof success === "boolean" && typeof callback === "function") {
-                oldPath = view[0].currentFolder === "/" ? "/" + oldVal : view[0].currentFolder + "/" + oldVal;
-                newPath = view[0].currentFolder === "/" ? "/" + newVal : view[0].currentFolder + "/" + newVal;
-                callback(success, oldPath, newPath);
+                callback(success, join(view[0].currentFolder, oldVal), join(view[0].currentFolder, newVal));
             }
-
         }
         function stopEdit(view) {
             view.find(".inline-namer").remove();
@@ -1119,7 +1107,7 @@
         if (view[0].currentFolder === undefined)
             return ""; // return an empty string so animDirection gets always set to 'forward' on launch
         else
-            return fixRootPath(view[0].currentFolder + (view[0].currentFile ? "/" + view[0].currentFile : ""));
+            return join(view[0].currentFolder, view[0].currentFile);
     }
 
     // Update our current location and change the URL to it
@@ -1164,7 +1152,7 @@
         var parts, oldParts,
             pathStr = "",
             i = 1; // Skip the first element as it's always the same
-        parts = normalizePath(fixRootPath(view[0].currentFolder)).split("/");
+        parts = join(view[0].currentFolder).split("/");
         if (parts[parts.length - 1] === "") parts.pop();
         if (view[0].currentFile !== null) parts.push(view[0].currentFile);
         parts[0] = droppy.svg.home; // Replace empty string with our home icon
@@ -1523,7 +1511,7 @@
                     $(".drop-hover").removeClass("drop-hover");
                     $(".dropzone").removeClass("in");
                     from = event.dataTransfer.getData("text");
-                    to = fixRootPath(row.attr("data-id") + "/" + basename(from));
+                    to = join(row.attr("data-id"), basename(from));
                     if (from) handleDrop(view, event, from, to);
                 });
             }
@@ -1541,9 +1529,9 @@
 
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
-                    handleDrop(view, event, dragData, fixRootPath(view[0].currentFolder + "/" + basename(dragData)), true);
+                    handleDrop(view, event, dragData, join(view[0].currentFolder, basename(dragData)), true);
                 } else { // dropping into a document view
-                    if (joinPath(view[0].currentFolder, view[0].currentFile) !== dragData)
+                    if (join(view[0].currentFolder, view[0].currentFile) !== dragData)
                         updateLocation(view, dragData);
                 }
                 return;
@@ -1654,7 +1642,7 @@
                         if (droppy.socketWait) return;
                         if (droppy.clipboard) {
                             showSpinner(view);
-                            droppy.clipboard.to = fixRootPath(view[0].currentFolder + "/" + basename(droppy.clipboard.from));
+                            droppy.clipboard.to = join(view[0].currentFolder, basename(droppy.clipboard.from));
                             sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
                         } else {
                             throw "Clipboard was empty!";
@@ -1688,7 +1676,7 @@
                     play(url);
                     break;
                 default:
-                    updateLocation(view, fixRootPath(view[0].currentFolder + "/" + entry.find(".file-link").text()));
+                    updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
                 }
             }
             $("#click-catcher").trigger("click");
@@ -1701,7 +1689,7 @@
             $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
                 view = entry.parents(".view");
-            updateLocation(view, fixRootPath(view[0].currentFolder + "/" + entry.find(".file-link").text()));
+            updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
         });
 
         // Delete a file/folder
@@ -1721,11 +1709,13 @@
                 type = type.match(/sprite\-(\w+)/);
                 if (type) type = type[1];
 
-                // Show a download entry when the click action is not download
-                if (droppy.get("clickAction") !== "download" && entry.attr("data-type") === "file") {
-                    type = "download";
-                    menu.find(".download").attr("download", entry.children(".file-link").attr("download"));
-                    menu.find(".download").attr("href", entry.children(".file-link").attr("href"));
+                // Set download link and filename
+                if (entry.attr("data-type") === "file") {
+                    menu.find(".download").attr("download", entry.find(".file-link").attr("download"));
+                    menu.find(".download").attr("href", entry.find(".file-link").attr("href"));
+                } else {
+                    menu.find(".download").attr("download", entry.find(".zip").attr("download"));
+                    menu.find(".download").attr("href", entry.find(".zip").attr("href"));
                 }
 
                 menu.attr("class", "in").data("target", entry).addClass("type-" + type);
@@ -1795,7 +1785,7 @@
                 var view = $(event.target).parents(".view");
                 if (droppy.socketWait) return;
                 event.preventDefault();
-                updateLocation(view, fixRootPath(view[0].currentFolder + "/" + $(event.target).text()));
+                updateLocation(view, join(view[0].currentFolder, $(event.target).text()));
             });
         } else {
             $(".file-link").off("click");
@@ -1830,6 +1820,7 @@
         var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
+            if (data[filename].type !== "f") return;
             if (extensions.indexOf(getExt(filename)) !== -1) {
                 view[0].mediaFiles.push(filename);
             }
@@ -1887,13 +1878,13 @@
             view.find(".media-container figcaption").text(filename);
             view[0].currentFile = filename;
             updatePath(view);
-            updateHistory(view, normalizePath(fixRootPath(view[0].currentFolder)) + "/" + filename);
+            updateHistory(view, join(view[0].currentFolder, filename));
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }
     }
 
     function getMediaSrc(view, filename) {
-        var encodedId = fixRootPath(view[0].currentFolder + "/" + filename).split("/"),
+        var encodedId = join(view[0].currentFolder, filename).split("/"),
             i = encodedId.length - 1;
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
@@ -1921,7 +1912,7 @@
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
-            entryId = view[0].currentFolder === "/" ? "/" + filename : view[0].currentFolder + "/" + filename,
+            entryId = join(view[0].currentFolder, filename),
             readOnly = false, // Check if not readonly
             editor = null,
             doc = $(t.views.document({readOnly: readOnly}));
@@ -2124,7 +2115,9 @@
 
     // Extract the extension from a file name
     function getExt(filename) {
-        return (filename.match(/[^.\\\/]+$/) || [""])[0];
+        var parts = filename.split(".");
+        if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
+        return parts.pop().toLowerCase();
     }
 
     function deleteCookie(name) {
@@ -2447,32 +2440,24 @@
         };
     }
 
-    // removes starting "//" or prepends "/"
-    function fixRootPath(p) {
-        return p.replace(/^\/*(.*)$/g, "/$1").replace("//", "/");
-    }
-
-    // Normalize path from /dir/ to /dir, stripping a trailing slash
-    function normalizePath(p) {
-        if (p[p.length - 1] === "/") p = p.substring(0, p.length - 1);
-        return p || "/";
-    }
-
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
     }
 
-    // Join paths and clean them up in process
-    function joinPath() {
+    // Join and clean up paths (can also take a single argument to just clean it up)
+    function join() {
         var parts = [],
             newParts = [];
-        for (var i = 0, l = arguments.length; i < l; i++)
-            parts = parts.concat(arguments[i].split("/"));
+        for (var i = 0, l = arguments.length; i < l; i++) {
+            if (typeof arguments[i] === "string") {
+                parts = parts.concat(arguments[i].split("/"));
+            }
+        }
         for (i = 0, l = parts.length; i < l; i++) {
             if ((i === 0 && parts[i] === "") || parts[i] !== "")
                 newParts.push(parts[i]);
         }
-        return newParts.join("/");
+        return newParts.join("/") || "/";
     }
 }(jQuery, window, document));
