@@ -1334,7 +1334,7 @@
             else {
                 setTimeout(function () {
                     finish();
-                }, 200);
+                }, 175);
             }
         }
         view[0].animDirection = "center";
@@ -1857,7 +1857,7 @@
             droppy.arrowsTimeouts[view[0].vId] = setTimeout(function () {
                 droppy.arrowsTimeouts[view[0].vId] = null;
                 view.find(".arrow-back, .arrow-forward").removeClass("in");
-            }, 2000);
+            }, 1000);
         }), 100);
 
         function swapMedia(view, filename) {

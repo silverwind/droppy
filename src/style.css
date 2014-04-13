@@ -201,9 +201,13 @@ input:-webkit-autofill {
     left: 0;
     width:100%;
     padding: .25em;
-    transition: left .2s ease-in;
+    transition: left .175s ease-in;
     position: absolute;
     overflow-y: auto;
+}
+
+.content.image, .content.video {
+    padding: 0;
 }
 
 /* Bottom padding fix for Firefox, see https://bugzilla.mozilla.org/show_bug.cgi?id=878058 */
@@ -777,8 +781,8 @@ input:-webkit-autofill {
     transition: opacity .2s ease;
     opacity: 0;
 }
-.previewer .arrow-back    { left: 0; right: 50% }
-.previewer .arrow-forward { left: 50%; right: 0 }
+.previewer .arrow-back    { left: 0; right: 85% }
+.previewer .arrow-forward { left: 85%; right: 0 }
 .previewer .arrow-back.in    { opacity: 1 }
 .previewer .arrow-forward.in { opacity: 1 }
 
