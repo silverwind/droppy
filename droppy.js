@@ -40,13 +40,15 @@ var
     chalk    = require("chalk"),
     crypto   = require("crypto"),
     fs       = require("graceful-fs"),
-    got      = require("got"),
     http     = require("http"),
     mime     = require("mime"),
     mkdirp   = require("mkdirp"),
     path     = require("path"),
     qs       = require("querystring"),
+    request  = require("request"),
     rimraf   = require("rimraf"),
+    stream   = require("stream"),
+    unzip    = require("unzip"),
     util     = require("util"),
     Wss      = require("ws").Server,
     zlib     = require("zlib"),
@@ -269,7 +271,7 @@ function setupDirectories(callback) {
         if (config.demoMode) {
             cleanupForDemo(function schedule() {
                 callback();
-                setTimeout(cleanupForDemo, 60 * 60 * 1000, schedule);
+                setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
             });
         } else {
             callback();
@@ -279,7 +281,7 @@ function setupDirectories(callback) {
 
 //-----------------------------------------------------------------------------
 // Restore the files directory to an initial state for the demo mode
-function cleanupForDemo(callback) {
+function cleanupForDemo(doneCallback) {
     var oldWatched, currentWatched;
     oldWatched = [];
     currentWatched = Object.keys(watchers);
@@ -290,17 +292,35 @@ function cleanupForDemo(callback) {
             delete watchers[dir];
         });
     }
-    log.simple("Cleaning up files and adding samples...");
-    cpr(__dirname, config.filesDir, {
-        deleteFirst: true,
-        overwrite: true,
-        filter: /(files|db\.json|config\.json|\.git|temp)/
-    }, function (err) {
-        if (err) log.error(err);
-        log.simple("Cleaning done.");
-        callback();
-    });
 
+    async.series([
+        function (callback) {
+            log.simple("Cleaning up...");
+            rimraf(config.filesDir, function () {
+                mkdirp(config.filesDir, mode.dir, function () {
+                    callback(null);
+                });
+            });
+        },
+        function (callback) {
+            log.simple("Adding samples...");
+            cpr(path.join(__dirname, "src"), path.join(config.filesDir, "Sources"), function () {
+                cpr(path.join(__dirname, "node_modules"), path.join(config.filesDir, "Modules"), function () {
+                    callback(null);
+                });
+            });
+        },
+        function (callback) {
+            var dest = path.join(config.filesDir, "Images"),
+                url  = "https://doc-0c-88-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/bv5r6dgdqf1nggb1ubarqavj5d29r5jj/1397498400000/03601182787835027669/*/0B11lCzVjWy9NZEpNWC1taDBNMnc?h=16653014193614665626&e=download";
+            log.simple("Downloading image samples...");
+            mkdirp(dest, mode.dir, function () {
+                request(url).pipe(unzip.Extract({path: dest})).on("close", function () {
+                    callback(null);
+                });
+            });
+        }
+    ], doneCallback);
 }
 //-----------------------------------------------------------------------------
 // Clean up the directory for incoming files
@@ -683,7 +703,7 @@ function setupSocket(server) {
                 break;
             case "GET_URL":
                 log.info("Attempting to download " + msg.url + " to " + msg.to);
-                got(msg.url, function (err, data) {
+                request(msg.url, function (err, data) {
                     if (err) {
                         log.error("Error requesting " + msg.url);
                         log.error(err);
