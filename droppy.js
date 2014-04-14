@@ -429,7 +429,7 @@ function createListener() {
 function onRequest(req, res) {
     if (!ready) {
         res.statusCode = 503;
-        res.end("Just a second! droppy is starting up...");
+        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
         return;
     }
     switch (req.method.toUpperCase()) {
