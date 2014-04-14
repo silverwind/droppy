@@ -1850,6 +1850,16 @@
     }
 
     function populateMediaCache(view) {
+        var cache = [getNextMedia(view), getPrevMedia(view)];
+        cache.forEach(function (filename) {
+            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
+                var img = document.createElement("img");
+                img.src = getMediaSrc(view, filename);
+            } else {
+                var vid = document.createElement("video");
+                vid.src = getMediaSrc(view, filename);
+            }
+        });
     }
 
     function getNextMedia(view) {
