@@ -96,6 +96,12 @@
         return this.off(events).on(events, callback);
     };
 
+    // Shorthand for transitionend
+    // TODO: Fallback
+    $.fn.end = function (callback) {
+        return this.one("transitionend webkitTransitionEnd", callback);
+    };
+
     // Class swapping helper
     $.fn.replaceClass = function (match, replacement) {
         var elem, classes, classMatch,
@@ -657,7 +663,7 @@
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
             }
-            first.one("transitionend webkitTransitionEnd", function (event) {
+            first.end(function (event) {
                 button.register("click", split);
                 event.stopPropagation();
             });
@@ -1212,7 +1218,7 @@
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
             toRemove.setTransitionClass("in", "out gone");
-            toRemove.one("transitionend webkitTransitionEnd", function () {
+            toRemove.end(function () {
                 $(this).remove();
             });
         }
@@ -1333,7 +1339,7 @@
             view.find(".new").setTransitionClass(navRegex, "center");
             view.find(".new").addClass(type); // Add view type class for styling purposes
             if (droppy.detects.animation)
-                view.find(".new").one("transitionend webkitTransitionEnd", function (event) {
+                view.find(".new").end(function (event) {
                     if ($(event.target).hasClass("center")) finish();
                 });
             else {
@@ -1853,7 +1859,7 @@
             } else { // Loop around
                 view[0].currentFile = view[0].mediaFiles[view[0].mediaFiles.length - 1];
             }
-            swapMedia(view, view[0].currentFile);
+            swapMedia(view, view[0].currentFile, "left");
 
         });
         view.find(".arrow-forward").register("click", function () {
@@ -1863,7 +1869,7 @@
             } else { // Loop around
                 view[0].currentFile = view[0].mediaFiles[0];
             }
-            swapMedia(view, view[0].currentFile);
+            swapMedia(view, view[0].currentFile, "right");
         });
 
         if (droppy.detects.mobile) { // Always show arrows on mobile
@@ -1878,26 +1884,37 @@
             });
         }
 
-        function swapMedia(view, filename) {
-            var newElement,
-                oldElement = view.find(".media-container img, .media-container video");
+        function swapMedia(view, filename, dir) {
+            var newEl,
+                oldEl   = view.find(".media-container > img, .media-container > video"),
+                caption = view.find(".media-container figcaption");
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
-                newElement = document.createElement("img");
-                newElement.addEventListener("load", function () {
-                    oldElement.replaceWith(newElement);
-                }, false);
+                newEl = $("<img>").attr("class", dir);
+                newEl.one("load", function () {
+                    swap(view, oldEl, newEl, dir);
+                });
             } else {
-                newElement = document.createElement("video");
-                newElement.autoplay = true;
-                newElement.loop = true;
-                oldElement.replaceWith(newElement);
+                newEl = $("<video>").attr({"class": dir, "autoplay": "autoplay", "loop": "loop"});
+                swap(view, oldEl, newEl, dir);
             }
-            newElement.src = getMediaSrc(view, filename);
-            view.find(".media-container figcaption").text(filename);
+            newEl.attr("src", getMediaSrc(view, filename));
+            caption.attr("class", "out").end(function () {
+                $(this).text(filename).removeAttr("class");
+            });
             view[0].currentFile = filename;
             updatePath(view);
             updateHistory(view, join(view[0].currentFolder, filename));
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
+            function swap(view, oldEl, newEl, dir) {
+                if (droppy.detects.animation) {
+                    oldEl.attr("class", dir === "left" ? "right" : "left").end(function () {
+                        $(this).remove();
+                    });
+                    newEl.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "");
+                } else {
+                    oldEl.replaceWith(newEl);
+                }
+            }
         }
     }
 
@@ -1927,6 +1944,7 @@
         if (view[0].vId === 0) updateTitle(filename);
         hideSpinner(view);
     }
+
     function openDoc(view) {
         view.attr("data-type", "document");
         var filename = view[0].currentFile,
@@ -2012,7 +2030,7 @@
                     }
                 };
                 if (droppy.detects.animation)
-                    view.find(".content").one("transitionend webkitTransitionEnd", loadDocument);
+                    view.find(".content").end(loadDocument);
                 else
                     loadDocument("No animations");
             },

@@ -814,20 +814,27 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     fill: #eee;
 }
 
-.previewer .media-container {
+.media-container {
+    position: relative;
     height: 100%;
 }
 
-.previewer .media-container > img,
-.previewer .media-container > video {
+.media-container > img.left    { left: -150% }
+.media-container > img.right   { left:  150% }
+.media-container > video.left  { left: -150% }
+.media-container > video.right { left:  150% }
+
+.media-container > img,
+.media-container > video {
     position: absolute;
     max-height: calc(100% - 1.5em);
     max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, calc(-50% - .75em));
+    transition: all .3s ease;
 }
 
-.previewer .media-container figcaption {
+.media-container figcaption {
     color: white;
     position: absolute;
     bottom: 0;
@@ -836,6 +843,10 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     text-overflow: ellipsis;
     overflow-x: hidden;
     white-space: nowrap;
+    transition: bottom .15s ease;
+}
+.media-container figcaption.out {
+    bottom: -1.5em;
 }
 
 /* ============================ Document Previewer ============================ */
