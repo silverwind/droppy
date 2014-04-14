@@ -5,12 +5,10 @@
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
   ],
-  "description": "A personal cloud storage solution with a speedy HTML5 interface.",
+  "description": "Personal cloud storage with a speedy HTML5 interface.",
   "homepage": "https://github.com/silverwind/droppy",
-  "bugs": {
-    "url": "https://github.com/silverwind/droppy/issues"
-  },
-  "main": "droppy.js",
+  "bugs": "https://github.com/silverwind/droppy/issues",
+  "license": "BSD-2-Clause",
   "dependencies": {
     "archiver": "~0.8.1",
     "async": "~0.7.0",
@@ -32,36 +30,39 @@
     "unzip": "~0.1.9",
     "ws": "~0.4.31"
   },
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-bump": "~0.0.13",
+    "grunt-shell": "~0.6.4"
+  },
   "directories": {
-    "src": "src",
-    "res": "res",
+    "files": "files",
     "lib": "lib",
-    "temp": "temp",
-    "keys": "keys"
+    "res": "res",
+    "src": "src",
+    "temp": "temp"
   },
   "engines": {
     "node": "~0.10.0"
   },
   "keywords": [
-    "html5",
+    "personal",
     "cloud",
     "storage",
-    "file",
     "server",
-    "websocket"
+    "fileserver",
+    "file",
+    "media",
+    "websocket",
+    "html5",
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/silverwind/droppy.git"
   },
+  "main": "droppy.js",
   "bin": {
     "droppy": "./droppy.js"
-  },
-  "license": "BSD-2-Clause",
-  "devDependencies": {
-    "grunt": "~0.4.4",
-    "grunt-bump": "~0.0.13",
-    "grunt-shell": "~0.6.4"
   },
   "subdomain": "droppy",
   "scripts": {
