@@ -351,6 +351,7 @@
                 } else {
                     if ((view.attr("data-type") === "image" || view.attr("data-type") === "video") && !view[0].switchRequest) {
                         populateMediaList(view, msg.data);
+                        populateMediaCache(view);
                         bindMediaArrows(view);
                     } else {
                         showSpinner(view);
@@ -1766,11 +1767,7 @@
         if (typeof a === "number" && typeof b === "number") {
             return b - a;
         } else {
-            try {
-                return a.toString().toUpperCase().localeCompare(b.toString().toUpperCase());
-            } catch (undefError) {
-                return -1;
-            }
+            return naturalSort(a, b);
         }
     };
     // Compare by property, then by key
@@ -1849,27 +1846,34 @@
                 view[0].mediaFiles.push(filename);
             }
         });
+        view[0].mediaFiles = view[0].mediaFiles.sort(naturalSort);
+    }
+
+    function populateMediaCache(view) {
+    }
+
+    function getNextMedia(view) {
+        var curr = view[0].mediaFiles.indexOf(view[0].currentFile);
+        if (curr > 0)
+            return view[0].mediaFiles[curr - 1];
+        else
+            return view[0].mediaFiles[view[0].mediaFiles.length - 1];
+    }
+
+    function getPrevMedia(view) {
+        var curr = view[0].mediaFiles.indexOf(view[0].currentFile);
+        if (curr < (view[0].mediaFiles.length - 1))
+            return view[0].mediaFiles[curr + 1];
+        else
+            return view[0].mediaFiles[0];
     }
 
     function bindMediaArrows(view) {
         view.find(".arrow-back").register("click", function () {
-            var currentIndex = view[0].mediaFiles.indexOf(view[0].currentFile);
-            if (currentIndex > 0) {
-                view[0].currentFile = view[0].mediaFiles[currentIndex - 1];
-            } else { // Loop around
-                view[0].currentFile = view[0].mediaFiles[view[0].mediaFiles.length - 1];
-            }
-            swapMedia(view, view[0].currentFile, "left");
-
+            swapMedia(view, getNextMedia(view), "left");
         });
         view.find(".arrow-forward").register("click", function () {
-            var currentIndex = view[0].mediaFiles.indexOf(view[0].currentFile);
-            if (currentIndex < (view[0].mediaFiles.length - 1)) {
-                view[0].currentFile = view[0].mediaFiles[currentIndex + 1];
-            } else { // Loop around
-                view[0].currentFile = view[0].mediaFiles[0];
-            }
-            swapMedia(view, view[0].currentFile, "right");
+            swapMedia(view, getPrevMedia(view), "right");
         });
 
         if (droppy.detects.mobile) { // Always show arrows on mobile
@@ -1902,6 +1906,7 @@
                 $(this).text(filename).removeAttr("class");
             });
             view[0].currentFile = filename;
+            populateMediaCache(view);
             updatePath(view);
             updateHistory(view, join(view[0].currentFolder, filename));
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
@@ -1935,6 +1940,7 @@
         // Populate array with files in the directory for switching purpose
         if (view[0].currentData) {
             populateMediaList(view, view[0].currentData);
+            populateMediaCache(view);
         } else {
             sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
         }
@@ -2484,6 +2490,23 @@
             }, wait);
             return result;
         };
+    }
+
+    function naturalSort(a, b) {
+        var x = [],
+            y = [];
+        function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
+        a.replace(/(\d+)|(\D+)/g, function ($0, $1, $2) { x.push([$1 || 0, $2]); });
+        b.replace(/(\d+)|(\D+)/g, function ($0, $1, $2) { y.push([$1 || 0, $2]); });
+        while (x.length && y.length) {
+            var xx = x.shift();
+            var yy = y.shift();
+            var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
+            if (nn) return nn;
+        }
+        if (x.length) return -1;
+        if (y.length) return +1;
+        return 0;
     }
 
     // turn /path/to/file to file
