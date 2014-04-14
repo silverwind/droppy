@@ -60,7 +60,7 @@
             indentUnit : 4,
             lineWrapping: false,
             hasLoggedOut : false,
-            clickAction: "download",
+            clickAction: "view",
             renameExistingOnUpload: false
         };
         // Load prefs and set missing ones to their default
@@ -1912,9 +1912,10 @@
                 swap(view, oldEl, newEl, dir);
             }
             newEl.attr("src", getMediaSrc(view, filename));
-            caption.attr("class", "out").end(function () {
-                $(this).text(filename).removeAttr("class");
-            });
+            caption.attr("class", "out");
+            setTimeout(function () {
+                caption.text(filename).removeAttr("class");
+            }, 150);
             view[0].currentFile = filename;
             populateMediaCache(view);
             updatePath(view);
