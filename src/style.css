@@ -781,8 +781,12 @@ input:-webkit-autofill {
     transition: opacity .2s ease;
     opacity: 0;
 }
-.previewer .arrow-back    { left: 0; right: 85% }
-.previewer .arrow-forward { left: 85%; right: 0 }
+.mobile .previewer .arrow-back, .mobile .previewer .arrow-forward {
+    fill: #eee;
+}
+
+.previewer .arrow-back    { left: 0; right: 80% }
+.previewer .arrow-forward { left: 80%; right: 0 }
 .previewer .arrow-back.in    { opacity: 1 }
 .previewer .arrow-forward.in { opacity: 1 }
 
@@ -796,13 +800,14 @@ input:-webkit-autofill {
 
 .previewer .arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
 .previewer .arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
-.previewer .arrow-back:hover svg {
+
+html:not(.mobile) .previewer .arrow-back:hover svg {
     height: 4em;
     width: 4em;
     left: -.75em;
     fill: #eee;
 }
-.previewer .arrow-forward:hover svg {
+html:not(.mobile) .previewer .arrow-forward:hover svg {
     height: 4em;
     width: 4em;
     right: -.75em;

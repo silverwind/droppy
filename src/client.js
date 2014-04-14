@@ -1535,9 +1535,9 @@
             if (dragData) { // It's a drag between views
                 if (view.attr("data-type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, join(view[0].currentFolder, basename(dragData)), true);
-                } else { // dropping into a document view
+                } else { // dropping into a document/media view
                     if (join(view[0].currentFolder, view[0].currentFile) !== dragData)
-                        updateLocation(view, dragData);
+                        openFile(view, dirname(dragData), basename(dragData));
                 }
                 return;
             }
@@ -1866,17 +1866,17 @@
             swapMedia(view, view[0].currentFile);
         });
 
-        droppy.arrowsTimeouts[view[0].vId] = null;
-        view.find(".content").register("mousemove", debounce(function () {
-            if (droppy.arrowsTimeouts[view[0].vId] !== null) {
-                clearTimeout(droppy.arrowsTimeouts[view[0].vId]);
-                if (!view.find(".arrow-back").hasClass("in")) view.find(".arrow-back, .arrow-forward").addClass("in");
-            }
-            droppy.arrowsTimeouts[view[0].vId] = setTimeout(function () {
-                droppy.arrowsTimeouts[view[0].vId] = null;
-                view.find(".arrow-back, .arrow-forward").removeClass("in");
-            }, 1000);
-        }), 100);
+        if (droppy.detects.mobile) { // Always show arrows on mobile
+            if (!view.find(".arrow-back").hasClass("in"))
+                view.find(".arrow-back, .arrow-forward").addClass("in");
+        } else {  // Show arrows on hover on desktops
+            view.find(".arrow-back, .arrow-forward").register("mouseenter", function () {
+                if (!$(this).hasClass("in")) $(this).addClass("in");
+            });
+            view.find(".arrow-back, .arrow-forward").register("mouseleave", function () {
+                $(this).removeClass("in");
+            });
+        }
 
         function swapMedia(view, filename) {
             var newElement,
@@ -2144,7 +2144,6 @@
 
     function initVariables() {
         droppy.activeFiles = [];
-        droppy.arrowsTimeouts = [];
         droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.demoMode = null;
@@ -2472,6 +2471,11 @@
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
+    }
+
+    // turn /path/to to file
+    function dirname(path) {
+        return path.replace(/\\/g, "/").replace(/\/[^\/]*$/, "");
     }
 
     // Join and clean up paths (can also take a single argument to just clean it up)
