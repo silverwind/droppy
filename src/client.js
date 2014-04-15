@@ -1563,7 +1563,7 @@
             // At this point, it's a file drop
 
             // Don't allow dropping external files into a media view. We might allow this in the future, but it
-            // needs some additional logic to request the uploaded file, and would only work intuitively single files.
+            // needs some additional logic to request the uploaded file, and would only work intuitively for single files.
             if (view.attr("data-type") !== "directory") return;
 
             // Try to find the supported getAsEntry function
