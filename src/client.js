@@ -1563,52 +1563,48 @@
             }
 
             // We support GetAsEntry, go ahead and read recursively
-            var obj = {},
-                promises = [],
-                length = event.dataTransfer.items.length,
-                readDirectory = function (entry, path, promise) {
-                    if (!path) path = entry.name;
-                    obj[path] = {};
-                    entry.createReader().readEntries(function (entries) {
-                        entries.forEach(function (entry) {
-                            if (entry.isDirectory) {
-                                readDirectory(entry, path + "/" + entry.name, promise);
-                            } else {
+            var obj = {};
+            function readDirectory(entry, path, dirPromise) {
+                if (!path) path = entry.name;
+                obj[path] = {};
+                entry.createReader().readEntries(function (entries) {
+                    var promises = []; // Create a new set of promises for each directory
+                    entries.forEach(function (entry) {
+                        var promise = $.Deferred();
+                        promises.push(promise);
+                        if (entry.isFile) {
+                            entry.file(function (file) {
+                                obj[path + "/" + file.name] = file;
                                 promise.resolve();
-                                var innerPromise = $.Deferred();
-                                promises.push(innerPromise);
-                                entry.file(function (file) {
-                                    obj[path + "/" + file.name] = file;
-                                    innerPromise.resolve();
-                                }, function () {
-                                    innerPromise.reject();
-                                });
-                            }
-                        });
+                            }, function () { promise.resolve(); });
+                        } else {
+                            readDirectory(entry, path + "/" + entry.name, promise);
+                        }
                     });
-                };
-            for (var i = 0; i < length; i++) {
-                var promise = $.Deferred(),
-                    entry = event.dataTransfer.items[i][entryFunc]();
-                if (!entry) continue;
+                    $.when.apply($, promises).done(function () { // Level is done
+                        dirPromise.resolve();
+                    });
+                });
+            }
 
-                promises.push(promise);
+            var rootPromises = [];
+            for (var i = 0; i < event.dataTransfer.items.length; i++) {
+                var entry = event.dataTransfer.items[i][entryFunc](),
+                    promise = $.Deferred();
+                if (!entry) continue;
+                rootPromises.push(promise);
                 if (entry.isFile) {
                     entry.file(function (file) {
                         obj[file.name] = file;
                         promise.resolve();
-                    }, function () {
-                        promise.reject();
-                    });
+                    }, function () { promise.resolve(); });
                 } else if (entry.isDirectory) {
                     readDirectory(entry, null, promise);
                 }
             }
-            setTimeout(function () { // TODO: Remove this timeout
-                $.when.apply($, promises).done(function () {
-                    upload(view, obj);
-                });
-            }, 200);
+            $.when.apply($, rootPromises).done(function () {
+                upload(view, obj);
+            });
         });
     }
 
