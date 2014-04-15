@@ -891,7 +891,7 @@ function createWatcher(directory) {
         Object.keys(clients).forEach(function (cookie) {
             client = clients[cookie];
             client.views.forEach(function (view, vId) {
-                if (view && view.directory === dir && view.file === null) {
+                if (view && view.directory === dir) {
                     clientsToUpdate.push({cookie: cookie, vId: vId});
                 }
             });

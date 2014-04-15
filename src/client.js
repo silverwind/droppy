@@ -368,15 +368,18 @@
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
-                if ((!view || view[0].isUploading) && !view[0].switchRequest) return;
+                if (typeof view.data("type") === "undefined") view.data("type", "directory"); // For initial loading
+                if (!view || view[0].isUploading) return;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
                     view[0].currentData = msg.data;
                 } else {
-                    if ((view.attr("data-type") === "image" || view.attr("data-type") === "video") && !view[0].switchRequest) {
-                        populateMediaList(view, msg.data);
-                        populateMediaCache(view);
-                        bindMediaArrows(view);
+                    if (view.data("type") !== "directory" && !view[0].switchRequest) {
+                        if (view.data("type") !== "image" || view.data("type") !== "video") {
+                            populateMediaList(view, msg.data);
+                            populateMediaCache(view);
+                            bindMediaArrows(view);
+                        }
                     } else {
                         showSpinner(view);
                         if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
@@ -1863,13 +1866,9 @@
     function populateMediaCache(view) {
         var cache = [getNextMedia(view), getPrevMedia(view)];
         cache.forEach(function (filename) {
-            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
-                var img = document.createElement("img");
-                img.src = getMediaSrc(view, filename);
-            } else {
-                var vid = document.createElement("video");
-                vid.src = getMediaSrc(view, filename);
-            }
+            var el = (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) ? "img" : "video",
+                src = getMediaSrc(view, filename);
+            if (src) el.src = src;
         });
     }
 
