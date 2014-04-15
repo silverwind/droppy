@@ -1866,7 +1866,7 @@
     function populateMediaCache(view) {
         var cache = [getNextMedia(view), getPrevMedia(view)];
         cache.forEach(function (filename) {
-            var el = (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) ? "img" : "video",
+            var el = document.createElement((Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) ? "img" : "video"),
                 src = getMediaSrc(view, filename);
             if (src) el.src = src;
         });
