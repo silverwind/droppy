@@ -1179,7 +1179,7 @@
                     } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
                         addPart(parts[i], pathStr);
                     } else { // rename part
-                        $(view.find(".path li")[i]).html(parts[i] + droppy.svg.triangle);
+                        $(view.find(".path li")[i]).html(parts[i] + droppy.svg.triangle).data("destination", pathStr);
                     }
                 }
                 i++;
@@ -1321,19 +1321,17 @@
         hideSpinner(view);
     }
 
-    // Load generated list into view with an animation
+    // Load new view content
     function loadContent(view, content) {
         var type = view.attr("data-type"),
             navRegex = /(forward|back|center)/;
         if (view[0].animDirection === "center" && type === "directory") {
-            view.find(".content").replaceClass(navRegex, "center");
-            view.find(".content").before(content);
-            view.find(".new").attr("data-root", view[0].currentFolder);
-            view.find(".new").addClass(type);
+            view.find(".content").replaceClass(navRegex, "center").before(content);
+            view.find(".new").addClass(type).data("root", view[0].currentFolder);
             finish();
         } else {
             view.children(".content-container").append(content);
-            view.find(".new").attr("data-root", view[0].currentFolder);
+            view.find(".new").data("root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
             view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
@@ -1358,16 +1356,11 @@
             view.find(".data-row").removeClass("animating");
             if (view.attr("data-type") === "directory") {
                 bindDragEvents(view);
-                bindHoverEvents(view);
-                bindDropEvents(view);
-            } else if (view.attr("data-type") === "document") {
-                bindHoverEvents(view);
-                bindDropEvents(view);
             } else if (view.attr("data-type") === "image" || view.attr("data-type") === "video") {
-                bindHoverEvents(view);
-                bindDropEvents(view);
                 bindMediaArrows(view);
             }
+            bindHoverEvents(view);
+            bindDropEvents(view);
             allowDrop(view);
         }
     }
@@ -1428,7 +1421,7 @@
 
     // Set drag properties for internal drag sources
     function bindDragEvents(view) {
-        view.find(".data-row").attr("draggable", "true");
+        view.find(".data-row .entry-link").attr("draggable", "true");
         view.register("dragstart", function (event) {
             var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
             droppy.dragTimer.refresh(row.data("id"));
@@ -1812,13 +1805,14 @@
         updateLocation(view, view[0].currentFolder);
     }
 
-    function openFile(view, folder, file) {
-        var ext = getExt(file);
-        view[0].currentFolder = folder;
+    function openFile(view, newFolder, file) {
+        var ext = getExt(file),
+            oldFolder = view[0].currentFolder;
+        view[0].currentFolder = newFolder;
         // Determine filetype and how to open it
         if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) {
             view[0].currentFile = file;
-            openMedia(view, "image");
+            openMedia(view, "image", oldFolder === newFolder);
         } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) {
             if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
                 showError("Sorry, your browser can't play this file.");
@@ -1826,13 +1820,14 @@
                 return;
             } else {
                 view[0].currentFile = file;
-                openMedia(view, "video");
+                openMedia(view, "video", oldFolder === newFolder);
             }
         } else {
             view[0].currentFile = file;
             openDoc(view);
         }
         updatePath(view);
+        updateHistory(view, join(newFolder, file));
     }
 
     function populateMediaList(view, data) {
@@ -1942,21 +1937,18 @@
         return "/_" + encodedId.join("/");
     }
 
-    function openMedia(view, type, arrowDirection) {
+    function openMedia(view, type, sameFolder) {
         var previewer,
             filename  = view[0].currentFile;
         view.attr("data-type", type);
         previewer = $(t.views.media({ type: type, caption: filename, src: getMediaSrc(view, filename)}));
-
-        // Populate array with files in the directory for switching purpose
-        if (view[0].currentData) {
+        if (sameFolder && view[0].currentData) {
             populateMediaList(view, view[0].currentData);
             populateMediaCache(view);
-        } else {
+        } else { // In case we switch into an unknown folder, request its files
             sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
         }
-
-        view[0].animDirection = arrowDirection || "forward";
+        view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         if (view[0].vId === 0) updateTitle(filename);
         hideSpinner(view);
@@ -1964,6 +1956,7 @@
 
     function openDoc(view) {
         view.attr("data-type", "document");
+        view[0].animDirection = "forward";
         var filename = view[0].currentFile,
             entryId = join(view[0].currentFolder, filename),
             readOnly = false, // Check if not readonly
@@ -2139,7 +2132,6 @@
 
     function play(source, playButton) {
         var player = document.getElementById("audio-player");
-
         if (!player.canPlayType(droppy.mediaTypes[getExt(source)])) {
             showError("Sorry, your browser can't play this file.");
             return;
@@ -2168,6 +2160,7 @@
 
     // Extract the extension from a file name
     function getExt(filename) {
+        if (!filename) return "";
         var parts = filename.split(".");
         if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
         return parts.pop().toLowerCase();
