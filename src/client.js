@@ -1499,9 +1499,11 @@
                     getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
                 }
             } else { // external source
-                if (target.hasClass("content") || target.parents().hasClass("content")) {
+                if (target.hasClass("directory") || target.parents().hasClass("directory")) {
                     if (!dropZone.hasClass("in")) dropZone.addClass("in");
                     getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
+                } else {
+                    $(".dropzone").removeClass("in");
                 }
             }
         });
@@ -1556,6 +1558,10 @@
                 return;
             }
             // At this point, it's a file drop
+
+            // Don't allow dropping external files into a media view. We might allow this in the future, but it
+            // needs some additional logic to request the uploaded file, and would only work intuitively single files.
+            if (view.attr("data-type") !== "directory") return;
 
             // Try to find the supported getAsEntry function
             if (items && items[0]) {
