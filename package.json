@@ -54,7 +54,7 @@
     "file",
     "media",
     "websocket",
-    "html5",
+    "html5"
   ],
   "repository": {
     "type": "git",
