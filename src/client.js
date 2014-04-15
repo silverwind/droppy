@@ -2165,6 +2165,10 @@
         }
     }
 
+    t.fn.safe = function (str) {
+        return str.replace(/[^\w\d_\-\s]+/g, "").replace(/\s+/g, "-").toLowerCase();
+    }
+
     // Extract the extension from a file name
     function getExt(filename) {
         if (!filename) return "";

@@ -1,0 +1,44 @@
+{{##def.data:
+<script>
+it = {
+    order: [
+        0:String first or pass
+        1:String second or pass
+    ]
+    // Actions specific to this view (unspecified actions not populated)
+    actions: {
+        "Create": [
+            "Download"
+            "View"
+        ]
+        "Download file" : false
+    }
+}
+</script>
+#}}
+{{##def.actionButton:
+<li>
+    {{? typeof it.actions[actionName].forEach === "function" }}
+        <div class="action-bar dropdown action-{{= t.fn.safe(actionName) }}">
+            <span>{{= actionName }}</span>
+        </div>
+        {{~it.actions[actionName] :dropDownPart}}
+            <div class="{{= t.fn.safe(dropDownPart) }}">
+                <span>{{= dropDownPart }}</span>
+            </div>
+        {{~}}
+    {{??}}
+        <div class="action-bar action-{{= t.fn.safe(actionName) }}">
+            <span>{{= actionName }}</span>
+        </div>
+    {{?}}
+</li>
+#}}
+<ul class="view-actions">
+{{~it.order :actionName}}
+    {{? it.actions.hasOwnProperty(actionName) }}
+        {{#def.actionButton }}
+    {{?}}
+    }
+{{~}}
+</ul>
