@@ -312,7 +312,7 @@ function cleanupForDemo(doneCallback) {
         },
         function (callback) {
             var dest = path.join(config.filesDir, "Images"),
-                url  = "https://doc-0c-88-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/bv5r6dgdqf1nggb1ubarqavj5d29r5jj/1397498400000/03601182787835027669/*/0B11lCzVjWy9NZEpNWC1taDBNMnc?h=16653014193614665626&e=download";
+                url  = "http://gdurl.com/lWOY/download";
             log.simple("Downloading image samples...");
             mkdirp(dest, mode.dir, function () {
                 request(url).pipe(unzip.Extract({path: dest})).on("close", function () {
