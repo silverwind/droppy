@@ -819,10 +819,8 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     height: 100%;
 }
 
-.media-container > img.left    { left: -150% }
-.media-container > img.right   { left:  150% }
-.media-container > video.left  { left: -150% }
-.media-container > video.right { left:  150% }
+.media-container > img.left, .media-container > video.left    { transform: translate(-100%, -50%); opacity: 0 }
+.media-container > img.right, .media-container > video.right  { transform: translate( 100%, -50%); opacity: 0 }
 
 .media-container > img,
 .media-container > video {
