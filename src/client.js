@@ -2227,7 +2227,7 @@
             "hpp":      ["hpp"],
             "html":     ["htm", "html", "shtml"],
             "ico":      ["ico"],
-            "image":    ["svg", "xpm"],
+            "image":    ["svg", "xpm", "webp"],
             "install":  ["install", "msi"],
             "java":     ["java"],
             "jpg":      ["jpg", "jpeg"],
