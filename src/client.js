@@ -368,34 +368,29 @@
             switch (msg.type) {
             case "UPDATE_DIRECTORY":
                 view = getView(vId);
-                if (typeof view.data("type") === "undefined") view.data("type", "directory"); // For initial loading
+                if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.data("type", "directory"); // For initial loading
                 if (!view || view[0].isUploading) return;
                 if (msg.sizes) {
                     addSizes(view, msg.folder, msg.data);
                     view[0].currentData = msg.data;
                 } else {
-                    if (view.data("type") !== "directory" && !view[0].switchRequest) {
-                        if (view.data("type") !== "image" || view.data("type") !== "video") {
-                            populateMediaList(view, msg.data);
-                            populateMediaCache(view);
-                            bindMediaArrows(view);
-                        }
-                    } else {
-                        showSpinner(view);
+                    if (view.data("type") === "directory") {
                         if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
                             view[0].loaded = true; // Ensure to update path on the first load
-                            if (view[0].vId === 0)
-                                updateTitle(msg.folder, true);
+                            if (view[0].vId === 0) updateTitle(msg.folder, true);
                             view[0].currentFile = null;
                             view[0].currentFolder = msg.folder;
                             updatePath(view);
                         }
+                        view[0].switchRequest = false;
                         view[0].currentData = msg.data;
-                        view.attr("data-type", "directory");
                         openDirectory(view);
+                    } else if (view.data("type") === "image" || view.data("type") === "video") {
+                        populateMediaList(view, msg.data);
+                        populateMediaCache(view);
+                        bindMediaArrows(view);
                     }
                 }
-                view[0].switchRequest = false;
                 break;
             case "UPDATE_BE_FILE":
                 openFile(getView(vId), msg.folder, msg.file);
@@ -1348,7 +1343,7 @@
 
     // Load new view content
     function loadContent(view, content) {
-        var type = view.attr("data-type"),
+        var type = view.data("type"),
             navRegex = /(forward|back|center)/;
         if (view[0].animDirection === "center" && type === "directory") {
             view.find(".content").replaceClass(navRegex, "center").before(content);
@@ -1371,9 +1366,9 @@
             view.find(".content:not(.new)").remove();
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
-            if (view.attr("data-type") === "directory") {
+            if (view.data("type") === "directory") {
                 bindDragEvents(view);
-            } else if (view.attr("data-type") === "image" || view.attr("data-type") === "video") {
+            } else if (view.data("type") === "image" || view.data("type") === "video") {
                 bindMediaArrows(view);
             }
             bindHoverEvents(view);
@@ -1552,7 +1547,7 @@
             $(".dropzone").removeClass("in");
 
             if (dragData) { // It's a drag between views
-                if (view.attr("data-type") === "directory") { // dropping into a directory view
+                if (view.data("type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData, join(view[0].currentFolder, basename(dragData)), true);
                 } else { // dropping into a document/media view
                     if (join(view[0].currentFolder, view[0].currentFile) !== dragData)
@@ -1564,7 +1559,7 @@
 
             // Don't allow dropping external files into a media view. We might allow this in the future, but it
             // needs some additional logic to request the uploaded file, and would only work intuitively for single files.
-            if (view.attr("data-type") !== "directory") return;
+            if (view.data("type") !== "directory") return;
 
             // Try to find the supported getAsEntry function
             if (items && items[0]) {
@@ -1950,7 +1945,7 @@
     function openMedia(view, type, sameFolder) {
         var previewer,
             filename  = view[0].currentFile;
-        view.attr("data-type", type);
+        view.data("type", type);
         previewer = $(t.views.media({ type: type, caption: filename, src: getMediaSrc(view, filename)}));
         if (sameFolder && view[0].currentData) {
             populateMediaList(view, view[0].currentData);
@@ -1965,7 +1960,7 @@
     }
 
     function openDoc(view) {
-        view.attr("data-type", "document");
+        view.data("type", "document");
         view[0].animDirection = "forward";
         var filename = view[0].currentFile,
             entryId = join(view[0].currentFolder, filename),
@@ -2454,7 +2449,7 @@
         if (spinner.hasClass("out")) spinner.removeClass("out");
 
         // HACK: Safeguard so a view won't get stuck in loading state
-        if (view.attr("data-type") === "directory") {
+        if (view.data("type") === "directory") {
             clearTimeout(view[0].stuckTimeout);
             view[0].stuckTimeout = setTimeout(function () {
                 sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
