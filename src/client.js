@@ -53,6 +53,13 @@
                 if (prop in window.getComputedStyle(el)) return prop;
             }
         })(),
+        webp: (function () {
+            var img = new Image();
+            img.onload = img.onerror = function () {
+                if (img.height === 2) droppy.imageTypes.webp = "image/webp";
+            };
+            img.src = "data:image/webp;base64,UklGRi4AAABXRUJQVlA4TCEAAAAvAUAAEB8wAiMwAgSSNtse/cXjxyCCmrYNWPwmHRH9jwMA";
+        })(),
         mobile : (function () {
             return "ontouchstart" in document.documentElement;
         })()
@@ -1591,10 +1598,12 @@
                         var promise = $.Deferred();
                         promises.push(promise);
                         if (entry.isFile) {
-                            entry.file(function (file) {
-                                obj[path + "/" + file.name] = file;
-                                promise.resolve();
-                            }, function () { promise.resolve(); });
+                            (function (entry, promise, path) {
+                                entry.file(function (file) {
+                                    obj[path + "/" + file.name] = file;
+                                    promise.resolve();
+                                }, function () { promise.resolve(); });
+                            })(entry, promise, path);
                         } else {
                             readDirectory(entry, path + "/" + entry.name, promise);
                         }
@@ -1612,10 +1621,12 @@
                 if (!entry) continue;
                 rootPromises.push(promise);
                 if (entry.isFile) {
-                    entry.file(function (file) {
-                        obj[file.name] = file;
-                        promise.resolve();
-                    }, function () { promise.resolve(); });
+                    (function (entry, promise) {
+                        entry.file(function (file) {
+                            obj[file.name] = file;
+                            promise.resolve();
+                        }, function () { promise.resolve(); });
+                    })(entry, promise);
                 } else if (entry.isDirectory) {
                     readDirectory(entry, null, promise);
                 }
