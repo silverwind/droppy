@@ -1305,7 +1305,7 @@
                 targetRow = target;
             else
                 targetRow = target.parents(".data-row");
-            showEntryMenu(targetRow, event.clientX);
+            showEntryMenu(targetRow, event.clientX, event.clientY);
             event.preventDefault();
             event.stopPropagation();
         });
@@ -1719,11 +1719,12 @@
         });
     }
 
-    function showEntryMenu(entry, x) {
+    function showEntryMenu(entry, x, y) {
                 var menuTop, menuMaxTop,
                     type = entry.find(".sprite").attr("class"),
                     button = entry.find(".entry-menu"),
-                    menu = $("#entry-menu");
+                    menu = $("#entry-menu"),
+                    emWidth = parseFloat($("#entry-menu").css("font-size")); // width of 1em
 
                 type = type.match(/sprite\-(\w+)/);
                 if (type) type = type[1];
@@ -1740,7 +1741,7 @@
                 menu.attr("class", "in").data("target", entry).addClass("type-" + type);
 
                 if (x)
-                    menu.css("left", (x - menu.width() / 2) + "px");
+                    menu.css("left", (x + emWidth - menu.width()) + "px");
                 else
                     menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
 
@@ -2478,10 +2479,9 @@
         var box   = $("#info-box"),
             input = box.find("input");
         box.find("svg").replaceWith(droppy.svg.link);
-        box.attr("class", "link in");
         input.val(window.location.protocol + "//" + window.location.host + "/$/" +  link);
-        input.register("focus", function () {
-            this.select();
+        box.attr("class", "link in").end(function () {
+            input[0].select();
         });
     }
 
