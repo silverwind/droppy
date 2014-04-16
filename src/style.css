@@ -775,7 +775,8 @@ input:-webkit-autofill {
     fill: #aaa;
     bottom: 0; top: 0;
     cursor: pointer;
-    z-index: 1;
+    background: rgba(0,0,0,.2);
+    z-index: 33;
     user-select: none;
     transition: opacity .2s ease;
     opacity: 0;
@@ -784,8 +785,8 @@ input:-webkit-autofill {
     fill: #eee;
 }
 
-.previewer .arrow-back    { left: 0; right: 80% }
-.previewer .arrow-forward { left: 80%; right: 0 }
+.previewer .arrow-back    { left: 0; right: 85% }
+.previewer .arrow-forward { left: 85%; right: 0 }
 .previewer .arrow-back.in    { opacity: 1 }
 .previewer .arrow-forward.in { opacity: 1 }
 
@@ -826,10 +827,13 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 .media-container > img,
 .media-container > video {
     position: absolute;
+    display: inline-block;
     max-height: calc(100% - 1.5em);
     max-width: 100%;
-    left: 50%; top: 50%;
-    transform: translate(-50%, calc(-50% - .75em));
+    width: auto;
+    left: 50%;
+    top: calc(50% - .75em);
+    transform: translate(-50%, -50%);
     transition: all .3s ease;
 }
 
@@ -1266,10 +1270,9 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     box-shadow: 0 0 30px rgba(0,0,0,.5);
     color: #444;
     max-height: 80%;
-    top: 50%;
     transform: translateY(-50%);
     position: fixed;
-    transition: transform .3s ease, opacity .3s ease, visibility .3s ease;
+    transition: all .3s ease, opacity .3s ease, visibility .3s ease;
     z-index: 32;
     padding: .5em;
     overflow-y: auto;
@@ -1279,8 +1282,8 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 @media all and (max-width: 1023px) { #options-box { font-size: .7em } }
 @media all and (max-width:  799px) { #options-box { font-size: .6em } }
 
-#options-box.in  { transform: translateY(-50%);  opacity: 1; }
-#options-box.out { transform: translateY(calc(-50% + 100px)); opacity: 0; visibility: hidden }
+#options-box.in  { top: 50%; opacity: 1; visibility: visible }
+#options-box.out { top: 60%; opacity: 0; visibility: hidden }
 
 @media all and (min-width: 800px) {
     #options-box.single { width: 40%; left: 30%; }
