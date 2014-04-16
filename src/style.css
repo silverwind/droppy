@@ -1297,7 +1297,6 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 }
 
 #options-box > div {
-    padding: 0 .25em;
     float: left;
 }
 
@@ -1305,6 +1304,7 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 #options-box .list-options select {
     display: inline-block;
     margin: .125em;
+    white-space: nowrap;
 }
 #options-box .list-options li:hover select {
     color: #000;
@@ -1312,13 +1312,14 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 
 #options-box .list-options label {
     text-align: left;
-    width: calc(50% - .25em);
+    width: calc(50% - .5em);
     font-weight: 400;
 }
 
 @media all and (max-width: 319px) {
     #options-box .list-options label {
         width: 100%;
+        font-size: .8em;
     }
 }
 
@@ -1328,11 +1329,12 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 }
 #options-box .list-options div {
     display: inline-block;
-    width: calc(50% - .25em);
+    width: calc(50% - .5em);
 }
 
 @media all and (max-width: 319px) {
     #options-box .list-options div {
+        margin-bottom: .25em;
         width: 100%;
     }
 }
@@ -1378,17 +1380,25 @@ html:not(.ie) #options-box .list-options div:before {
 }
 
 #options-box .list-user li {
-    margin: .25em 3em;
     padding: .25em .5em;
     line-height: 1.5em;
     border-radius: 4px;
     font-weight: 400;
     background: #fff;
 }
-@media all and (max-width: 319px) {
-    #options-box .list-user li {
-        width: 90%;
-        margin-left: 5%;
+
+#options-box .list-user h4 {
+    display: none;
+}
+
+@media all and (max-width: 799px) {
+    #options-box .list-user h4 {
+        display: block;
+        font-weight: 400;
+        width: 100%;
+        text-align: center;
+        font-size: 1.5em;
+        margin: .25em 0;
     }
 }
 
@@ -1412,19 +1422,9 @@ html:not(.ie) #options-box .list-options div:before {
     background: #fff;
     text-align: center;
     border-radius: 6px;
-    width: 40%;
-    margin-left: 30%;
     margin-top: .5em;
     cursor: pointer;
     font-weight: 400;
-    margin-bottom: .5em;
-}
-
-@media all and (max-width: 319px) {
-    #options-box .add-user {
-        width: 80%;
-        margin-left: 10%;
-    }
 }
 
 #options-box .list-user .add-user:hover {

@@ -2078,7 +2078,7 @@
     }
 
     function createUserList(users) {
-        var output = "<div class='list-user'>";
+        var output = "<div class='list-user'><h4>Users</h4>";
         output += "<ul>";
         Object.keys(users).forEach(function (user) {
             output += '<li><span class="username">' + user + "</span>" + droppy.svg.remove + '</li>';
