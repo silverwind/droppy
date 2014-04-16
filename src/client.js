@@ -1291,10 +1291,10 @@
             fileInput.click();
         });
         // Switch into a folder
-        content.find(".data-row[data-type='folder']").register("click", function (event) {
+        content.find(".folder-link").register("click", function (event) {
             event.preventDefault();
             if (droppy.socketWait) return;
-            updateLocation(view, $(this).data("id"));
+            updateLocation(view, $(this).parents(".data-row").data("id"));
         });
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
@@ -1305,7 +1305,7 @@
                 targetRow = target;
             else
                 targetRow = target.parents(".data-row");
-            showEntryMenu(targetRow, event.clientX, event.clientY);
+            showEntryMenu(targetRow, event.clientX);
             event.preventDefault();
             event.stopPropagation();
         });
@@ -1719,7 +1719,7 @@
         });
     }
 
-    function showEntryMenu(entry, x, y) {
+    function showEntryMenu(entry, x) {
                 var menuTop, menuMaxTop,
                     type = entry.find(".sprite").attr("class"),
                     button = entry.find(".entry-menu"),
@@ -1739,7 +1739,6 @@
                 }
 
                 menu.attr("class", "in").data("target", entry).addClass("type-" + type);
-
                 if (x)
                     menu.css("left", (x + emWidth - menu.width()) + "px");
                 else
