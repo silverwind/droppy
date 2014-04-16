@@ -1798,9 +1798,14 @@
         };
     };
     t.fn.sortKeysByProperty = function (entries, by) {
-        var objs = Object.keys(entries);
-        objs = objs.sort(t.fn.compare2(entries, by));
-        return objs;
+        var filenames = Object.keys(entries);
+        if (by === "type") { // Treat new files from uploads equally for sorting purpose
+            filenames.forEach(function (entry) {
+                if (entries[entry].type === "nf") entries[entry].type = "f";
+                if (entries[entry].type === "nd") entries[entry].type = "d";
+            });
+        }
+        return filenames.sort(t.fn.compare2(entries, by));
     };
 
     // Click on a file link
