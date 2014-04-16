@@ -328,7 +328,7 @@
     var retries = 5, retryTimeout = 4000;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-        droppy.socket = new WebSocket(protocol + document.location.host + "/websocket");
+        droppy.socket = new WebSocket(protocol + document.location.host + "/?");
         droppy.socket.onopen = function () {
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
