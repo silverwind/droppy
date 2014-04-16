@@ -13,7 +13,7 @@
 //  Feature Detects
 // ============================================================================
     droppy.detects = {
-        animation : (function () {
+        animation: (function () {
             var props = ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
                 el    = document.createElement("div");
             while (props.length) {
@@ -21,7 +21,7 @@
             }
             return false;
         })(),
-        inputDirectory : (function () {
+        inputDirectory: (function () {
             var props = ["directory", "mozdirectory", "webkitdirectory", "msdirectory"],
                 el    = document.createElement("input");
             while (props.length) {
@@ -29,7 +29,7 @@
             }
             return false;
         })(),
-        audioTypes : (function () {
+        audioTypes: (function () {
             var types = {},
                 el    = document.createElement("audio");
             Object.keys(droppy.audioTypes).forEach(function (type) {
@@ -37,7 +37,7 @@
             });
             return types;
         })(),
-        videoTypes : (function () {
+        videoTypes: (function () {
             var types = {},
                 el    = document.createElement("video");
             Object.keys(droppy.videoTypes).forEach(function (type) {
@@ -45,7 +45,7 @@
             });
             return types;
         })(),
-        transDurationProp : (function () {
+        transDurationProp: (function () {
             var props = ["transitionDuration", "MozTransitionDuration", "webkitTransitionDuration", "msTransitionDuration"],
                 el    = document.createElement("div");
             while (props.length) {
@@ -60,7 +60,7 @@
             };
             img.src = "data:image/webp;base64,UklGRi4AAABXRUJQVlA4TCEAAAAvAUAAEB8wAiMwAgSSNtse/cXjxyCCmrYNWPwmHRH9jwMA";
         })(),
-        mobile : (function () {
+        mobile: (function () {
             return "ontouchstart" in document.documentElement;
         })()
     };
@@ -75,7 +75,7 @@
         return this.off(events).on(events, callback);
     };
 
-    // Shorthand for transitionend
+    // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
     $.fn.end = function (callback) {
         var duration,
             called = false,
