@@ -825,7 +825,6 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 .media-container > img,
 .media-container > video {
     position: absolute;
-    display: inline-block;
     max-height: calc(100% - 1.5em);
     max-width: 100%;
     width: auto;

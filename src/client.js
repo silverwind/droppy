@@ -583,6 +583,7 @@
                         checkPathOverflow($(this));
                     });
                 }, 100);
+                aspectScale();
             })
             // Bind escape for hiding modals
             .register("keyup", function (event) {
@@ -1924,15 +1925,16 @@
                 oldEl   = view.find(".media-container > img, .media-container > video"),
                 caption = view.find(".media-container figcaption");
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
-                newEl = $("<img>").attr("class", dir);
+                newEl = $("<img>").attr("class", dir).one("load", aspectScale);
             else
-                newEl = $("<video>").attr({"class": dir, "autoplay": "autoplay", "loop": "loop"});
+                newEl = $("<video>").attr({"class": dir, "autoplay": "autoplay", "loop": "loop"}).one("loadedmetadata", aspectScale);
             (function swap(a, b) {
                 b.attr("src", getMediaSrc(view, filename));
                 if (droppy.detects.animation) {
                     a.attr("class", dir === "left" ? "right" : "left");
-                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
+                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "current").end(function () {
                         a.remove();
+
                     });
                 } else {
                     a.replaceWith(b);
@@ -1948,6 +1950,27 @@
             updateHistory(view, join(view[0].currentFolder, filename));
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }
+    }
+
+    // Media upscaling while maintaining aspect ratio. Unfortunately, this isn't possible purely in CSS for both dimensions at
+    // the same time (Thought we'll let CSS can handle the downscaling part, which it does fine).
+    function aspectScale() {
+        $(".media-container").each(function () {
+            var container = this;
+            $(container).children("img, video").each(function () {
+                var dims  = {w: this.naturalWidth, h: this.naturalHeight},
+                    space = {w: $(container).width(), h: $(container).height() - $(container).children("figcaption").height()};
+                if (dims.w > space.w || dims.h > space.h) {
+                    $(this).removeAttr("style"); // Let CSS handle the downscale
+                } else {
+                    if (dims.w / dims.h > space.w / space.h) {
+                        $(this).css({width: "100%", height: "auto"});
+                    } else {
+                        $(this).css({width: "auto", height: "100%"});
+                    }
+                }
+            });
+        });
     }
 
     function getMediaSrc(view, filename) {
@@ -1972,6 +1995,10 @@
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
         if (view[0].vId === 0) updateTitle(filename);
+
+        // Hopefully, these aren't bound too late
+        view.find(".media-container img").one("load", aspectScale);
+        view.find(".media-container video").one("loadedmetadata", aspectScale);
         hideSpinner(view);
     }
 
