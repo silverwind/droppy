@@ -689,7 +689,7 @@
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
-                window.history.replaceState(null, null, first[0].currentFolder); // removes the hash
+                window.history.replaceState(null, null, join(first[0].currentFolder, first[0].currentFile)); // removes the hash
                 getView(0).removeClass("left");
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
