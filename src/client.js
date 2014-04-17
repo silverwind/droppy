@@ -1932,7 +1932,7 @@
                 b.attr("src", getMediaSrc(view, filename));
                 if (droppy.detects.animation) {
                     a.attr("class", dir === "left" ? "right" : "left");
-                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "current").end(function () {
+                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
                         a.remove();
 
                     });
@@ -2237,7 +2237,7 @@
         // Extension to icon mappings
         droppy.iconMap = {
             "archive":  ["bz2", "gz", "tgz"],
-            "audio":    ["aac", "aif", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "mpg", "mpeg", "ra", "ogg", "oga", "wav", "wma"],
+            "audio":    ["aac", "aif", "aiff", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "wav", "wma"],
             "authors":  ["authors"],
             "bin":      ["class", "o", "so"],
             "bmp":      ["bmp"],
@@ -2283,12 +2283,13 @@
             "rss":      ["rss"],
             "rtf":      ["rtf"],
             "script":   ["conf", "csh", "ini", "ksh", "sh", "shar", "tcl"],
+            "sql":      ["sql", "dump"],
             "tar":      ["tar"],
             "tex":      ["tex"],
             "text":     ["text", "txt"],
             "tiff":     ["tiff"],
             "vcal":     ["vcal"],
-            "video":    ["avi", "flv", "mkv", "mov", "mp4", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
+            "video":    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
             "xml":      ["xml"],
             "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
         };

@@ -610,6 +610,8 @@ input:-webkit-autofill {
     background-repeat: no-repeat;
     flex: 0 0 24px;
     display: inline-block;
+    width: 24px; height: 24px;
+    background-size: 240px 216px;
 }
 
 @media all and (min-width: 1024px) { .sprite { transform: scale(.95) } }
