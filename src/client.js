@@ -266,12 +266,8 @@
 
     // Load HTML and replace SVG placeholders
     function getPage() {
-        $.ajax({
-            type: "GET",
-            url: "/!/content/" + Math.random().toString(36).substr(2, 4),
-            success : function (data, textStatus, request) {
-                loadPage(request.getResponseHeader("X-Page-Type"), prepareSVG(data));
-            }
+        $.get("/!/content/" + Math.random().toString(36).substr(2, 4)).then(function (data, textStatus, xhr) {
+            loadPage(xhr.getResponseHeader("X-Page-Type"), prepareSVG(data));
         });
     }
 
@@ -541,28 +537,22 @@
 
         submit.register("click", function () { form.submit(); });
         form.register("submit", function () {
-            $.ajax({
-                type: "POST",
-                url: (firstrun ? "/adduser" : "/login"),
-                dataType: "json",
-                data: form.serialize(),
-                complete: function (response) {
-                    if (response.status  === 202) {
-                        requestPage(true);
-                    } else if (response.status === 401) {
-                        submit.addClass("invalid");
-                        loginform.addClass("invalid");
-                        $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
-                        if (!firstrun) $("#pass").val("").focus();
-                        if ($("#login-info-box").hasClass("error")) {
-                            $("#login-info").addClass("shake");
-                            setTimeout(function () {
-                                $("#login-info").removeClass("shake");
-                            }, 500);
-                        }
-                        $("#login-info-box").attr("class", "error");
+            $.post(firstrun ? "/adduser" : "/login", form.serialize(), null, "json").always(function (xhr) {
+                if (xhr.status  === 202) {
+                    requestPage(true);
+                } else if (xhr.status === 401) {
+                    submit.addClass("invalid");
+                    loginform.addClass("invalid");
+                    $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
+                    if (!firstrun) $("#pass").val("").focus();
+                    if ($("#login-info-box").hasClass("error")) {
+                        $("#login-info").addClass("shake");
+                        setTimeout(function () {
+                            $("#login-info").removeClass("shake");
+                        }, 500);
                     }
-                },
+                    $("#login-info-box").attr("class", "error");
+                }
             });
         });
     }
@@ -2008,87 +1998,81 @@
             editor = null,
             doc = $(t.views.document({readOnly: readOnly}));
         showSpinner(view);
+
+
         $.ajax({
             type: "GET",
             url: "/_" + entryId,
-            dataType: "text",
-            success : function (data, textStatus, request) {
-                loadContent(view, contentWrap(view).append(doc));
-                view[0].editorEntryId = entryId;
-                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-                    autofocus: true,
-                    dragDrop: false,
-                    indentUnit: droppy.get("indentUnit"),
-                    indentWithTabs: droppy.get("indentWithTabs"),
-                    keyMap: "sublime",
-                    lineNumbers: true,
-                    lineWrapping: droppy.get("lineWrapping"),
-                    readOnly: readOnly,
-                    showCursorWhenSelecting: true,
-                    styleSelectedText: true,
-                    theme: droppy.get("theme"),
-                    mode: "text/plain"
+            dataType: "text"
+        }).done(function (data, textStatus, request) {
+            loadContent(view, contentWrap(view).append(doc));
+            view[0].editorEntryId = entryId;
+            view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                autofocus: true,
+                dragDrop: false,
+                indentUnit: droppy.get("indentUnit"),
+                indentWithTabs: droppy.get("indentWithTabs"),
+                keyMap: "sublime",
+                lineNumbers: true,
+                lineWrapping: droppy.get("lineWrapping"),
+                readOnly: readOnly,
+                showCursorWhenSelecting: true,
+                styleSelectedText: true,
+                theme: droppy.get("theme"),
+                mode: "text/plain"
+            });
+            $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+            doc.find(".exit").register("click", function () {
+                closeDoc($(this).parents(".view"));
+                editor = null;
+            });
+            doc.find(".save").register("click", function () {
+                var view = $(this).parents(".view");
+                showSpinner(view);
+                sendMessage(view[0].vId, "SAVE_FILE", {
+                    "to": entryId,
+                    "value": editor.getValue()
                 });
-                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
-                doc.find(".exit").register("click", function () {
-                    closeDoc($(this).parents(".view"));
-                    editor = null;
-                });
-                doc.find(".save").register("click", function () {
-                    var view = $(this).parents(".view");
-                    showSpinner(view);
-                    sendMessage(view[0].vId, "SAVE_FILE", {
-                        "to": entryId,
-                        "value": editor.getValue()
-                    });
-                });
-                doc.find(".ww").register("click", function () {
-                    if (editor.options.lineWrapping) {
-                        editor.setOption("lineWrapping", false);
-                        droppy.set("lineWrapping", false);
+            });
+            doc.find(".ww").register("click", function () {
+                editor.setOption("lineWrapping", !editor.options.lineWrapping);
+                droppy.set("lineWrapping", !editor.options.lineWrapping);
+            });
 
-                    } else {
-                        editor.setOption("lineWrapping", true);
-                        droppy.set("lineWrapping", true);
-                    }
+            var called = false;
+            var loadDocument = function () {
+                if (called)
+                    return;
+                else
+                    called = true;
+                editor.setValue(data);
+                editor.setOption("mode", request.getResponseHeader("Content-Type"));
+                editor.on("change", function (cm, change) {
+                    var view = getCMView(cm);
+                    if (change.origin !== "setValue")
+                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                 });
-
-                var called = false;
-                var loadDocument = function () {
-                    if (called)
-                        return;
-                    else
-                        called = true;
-                    editor.setValue(data);
-                    editor.setOption("mode", request.getResponseHeader("Content-Type"));
-                    editor.on("change", function (cm, change) {
+                editor.on("keyup", function (cm, e) { // Keyboard shortcuts
+                    if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
                         var view = getCMView(cm);
-                        if (change.origin !== "setValue")
-                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                    });
-                    editor.on("keyup", function (cm, e) { // Keyboard shortcuts
-                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
-                            var view = getCMView(cm);
-                            e.preventDefault();
-                            showSpinner(view);
-                            sendMessage(view[0].vId, "SAVE_FILE", {
-                                "to": view[0].editorEntryId,
-                                "value": cm.getValue()
-                            });
-                        }
-                    });
-                    editor.clearHistory();
-                    editor.refresh();
-                    hideSpinner(view);
-                    function getCMView(cm) {
-                        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
+                        e.preventDefault();
+                        showSpinner(view);
+                        sendMessage(view[0].vId, "SAVE_FILE", {
+                            "to": view[0].editorEntryId,
+                            "value": cm.getValue()
+                        });
                     }
-                };
-                view.find(".content").end(loadDocument);
-            },
-            error : function () {
-                closeDoc(view);
-            }
+                });
+                editor.clearHistory();
+                editor.refresh();
+                hideSpinner(view);
+                function getCMView(cm) {
+                    return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
+                }
+            };
+            view.find(".content").end(loadDocument);
+        }).fail(function () {
+            closeDoc(view);
         });
     }
 
