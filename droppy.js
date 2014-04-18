@@ -47,7 +47,6 @@ var
     qs       = require("querystring"),
     request  = require("request"),
     rimraf   = require("rimraf"),
-    stream   = require("stream"),
     unzip    = require("unzip"),
     util     = require("util"),
     Wss      = require("ws").Server,
@@ -1188,7 +1187,7 @@ function handleFileRequest(req, res, download) {
     var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo, filepath;
 
     // Safety check
-    if (!utils.isPathSane(URI)) return log.info(ws, null, "Invalid file request: " + msg.data);
+    if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
     if (/^\/\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
@@ -1209,7 +1208,7 @@ function handleFileRequest(req, res, download) {
         res.end();
         log.info(req, res);
         return;
-    };
+    }
 
     filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
 

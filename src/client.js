@@ -1363,9 +1363,7 @@
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
             view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
-            view.find(".new").addClass(type).setTransitionClass(navRegex, "center").end(function () {
-                if ($(this).hasClass("center")) finish();
-            });
+            view.find(".new").addClass(type).setTransitionClass(navRegex, "center").end(finish);
         }
         view[0].animDirection = "center";
 

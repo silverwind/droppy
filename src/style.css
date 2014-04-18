@@ -784,7 +784,11 @@ input:-webkit-autofill {
     opacity: 0;
 }
 .mobile .previewer .arrow-back, .mobile .previewer .arrow-forward {
-    fill: #eee;
+    background: transparent;
+    opacity: 1;
+    fill: #333;
+    stroke: #fff;
+    stroke-width: 20;
 }
 
 .previewer .arrow-back    { left: 0; right: 85% }
