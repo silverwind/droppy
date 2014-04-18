@@ -61,7 +61,7 @@
             img.src = "data:image/webp;base64,UklGRi4AAABXRUJQVlA4TCEAAAAvAUAAEB8wAiMwAgSSNtse/cXjxyCCmrYNWPwmHRH9jwMA";
         })(),
         mobile: (function () {
-            return "ontouchstart" in document.documentElement;
+            return ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
         })()
     };
 // ============================================================================
