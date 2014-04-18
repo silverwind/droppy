@@ -1309,9 +1309,15 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
 #options-box .list-options label,
 #options-box .list-options select {
     display: inline-block;
-    margin: .125em;
+    padding: .125em;
     white-space: nowrap;
 }
+
+#options-box .list-options li {
+    height: 1.5em;
+    margin-bottom: .5em;
+}
+
 #options-box .list-options li:hover select {
     color: #000;
 }
@@ -1386,11 +1392,15 @@ html:not(.ie) #options-box .list-options div:before {
 }
 
 #options-box .list-user li {
-    padding: .25em .5em;
+    padding: .125em .5em;
     line-height: 1.5em;
     border-radius: 4px;
     font-weight: 400;
     background: #fff;
+}
+
+#options-box .list-user li +  li {
+    margin-top: .25em;
 }
 
 #options-box .list-user h4 {
@@ -1428,7 +1438,7 @@ html:not(.ie) #options-box .list-options div:before {
     background: #fff;
     text-align: center;
     border-radius: 6px;
-    margin-top: .5em;
+    margin-top: .25em;
     cursor: pointer;
     font-weight: 400;
 }
