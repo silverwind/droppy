@@ -874,8 +874,22 @@ function deleteFile(file) {
 //-----------------------------------------------------------------------------
 // Delete a directory recursively
 function deleteDirectory(directory) {
-    rimraf.sync(directory);
-    checkWatchedDirs();
+    var retries = 10;
+    try {
+        del(directory);
+    } catch(err) {
+        if (retries > 0) {
+            retries--;
+            del(directory);
+        } else {
+            log.error("Unable to delete " + directory + " after 10 retries.");
+            log.error(err);
+        }
+    }
+    function del (dir) {
+        rimraf.sync(dir);
+        checkWatchedDirs();
+    };
 }
 
 //-----------------------------------------------------------------------------
