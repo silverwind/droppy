@@ -1876,8 +1876,7 @@
     }
 
     function populateMediaCache(view) {
-        var cache = [getNextMedia(view), getPrevMedia(view)];
-        cache.forEach(function (filename) {
+        [getNextMedia(view), getPrevMedia(view)].forEach(function (filename) {
             var el = document.createElement((Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) ? "img" : "video"),
                 src = getMediaSrc(view, filename);
             if (src) el.src = src;
@@ -1961,7 +1960,7 @@
                 var dims  = {w: this.naturalWidth, h: this.naturalHeight},
                     space = {w: $(container).width(), h: $(container).height() - $(container).children("figcaption").height()};
                 if (dims.w > space.w || dims.h > space.h) {
-                    $(this).removeAttr("style"); // Let CSS handle the downscale
+                    $(this).css({width: "", height: ""}); // Let CSS handle the downscale
                 } else {
                     if (dims.w / dims.h > space.w / space.h) {
                         $(this).css({width: "100%", height: "auto"});

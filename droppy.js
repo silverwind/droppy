@@ -56,7 +56,7 @@ var
     version      = require("./package.json").version,
     cmPath       = "node_modules/codemirror/",
     templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
-    cache        = {},
+    cache        = { res: {}, files: {} },
     clients      = {},
     db           = {},
     dirs         = {},
@@ -960,7 +960,6 @@ function cacheResources(dir, callback) {
         cbCalled = 0,
         cbFired = 0;
 
-    cache.res = {};
     dir = dir.substring(0, dir.length - 1); // Strip trailing slash
     utils.walkDirectory(dir, false, function (error, results) {
         if (error) log.error(error);
@@ -1188,6 +1187,9 @@ function handleResourceRequest(req, res, resourceName) {
 function handleFileRequest(req, res, download) {
     var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo, filepath;
 
+    // Safety check
+    if (!utils.isPathSane(URI)) return log.info(ws, null, "Invalid file request: " + msg.data);
+
     // Check for a shortlink
     if (/^\/\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
         shortLink = db.shortlinks[URI];
@@ -1201,44 +1203,58 @@ function handleFileRequest(req, res, download) {
         return;
     }
 
+    // 304 response when Etag matches
+    if (!download && (req.headers["if-none-match"] || "" === cache.files[filepath])) {
+        res.statusCode = 304;
+        res.end();
+        log.info(req, res);
+        return;
+    };
+
     filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
 
-    if (filepath) {
-        var mimeType = mime.lookup(filepath);
+    fs.stat(filepath, function (error, stats) {
+        if (!error && stats) {
+            res.statusCode = 200;
 
-        fs.stat(filepath, function (error, stats) {
-            if (!error && stats) {
-                res.statusCode = 200;
-                if (download) {
-                    if (shortLink) {
-                        // IE 10/11 can't handle an UTF-8 Content-Dispotsition header, so we encode it
-                        if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                            dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
-                        else
-                            dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
-                    } else {
-                        dispo = "attachment";
-                    }
-                    res.setHeader("Content-Disposition", dispo);
+            // Set disposition headers for downloads
+            if (download) {
+                if (shortLink) {
+                    // IE 10/11 can't handle an UTF-8 Content-Dispotsition header, so we encode it
+                    if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+                        dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
+                    else
+                        dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
+                } else {
+                    dispo = "attachment";
                 }
-                res.setHeader("Content-Type", mimeType);
-                res.setHeader("Content-Length", stats.size);
-                log.info(req, res);
-                fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
-            } else {
-                if (error.code === "ENOENT")
-                    res.statusCode = 404;
-                else if (error.code === "EACCES")
-                    res.statusCode = 403;
-                else
-                    res.statusCode = 500;
-                res.end();
-                log.info(req, res);
-                if (error)
-                    log.error(error);
+                res.setHeader("Content-Disposition", dispo);
             }
-        });
-    }
+
+            // Set short caching headers for non-downloads
+            if (!download) {
+                res.setHeader("Cache-Control", "private, max-age=30");
+                cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
+                res.setHeader("Etag", cache.files[filepath]);
+            }
+
+            res.setHeader("Content-Type", mime.lookup(filepath));
+            res.setHeader("Content-Length", stats.size);
+
+            fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+        } else {
+            if (error.code === "ENOENT")
+                res.statusCode = 404;
+            else if (error.code === "EACCES")
+                res.statusCode = 403;
+            else
+                res.statusCode = 500;
+            res.end();
+            if (error) log.error(error);
+        }
+    });
+
+    log.info(req, res);
 }
 
 //-----------------------------------------------------------------------------
@@ -1612,13 +1628,19 @@ function createCookie(req, res, postData) {
 }
 
 // Clean inactive sessions after 1 month of inactivity, and check their age hourly
-setInterval(cleanUpSessions, 3600000);
+setInterval(cleanUpSessions, 60 * 60 * 1000);
 function cleanUpSessions() {
     Object.keys(db.sessions).forEach(function (session) {
         if (!db.sessions[session].lastSeen || (Date.now() - db.sessions[session].lastSeen >= 2678400000)) {
             delete db.sessions[session];
         }
     });
+}
+
+// Clean up Etag cache hourly
+setInterval(cleanUpEtags, 60 * 60 * 1000);
+function cleanUpEtags() {
+    cache.files = null;
 }
 
 //-----------------------------------------------------------------------------
