@@ -55,7 +55,7 @@ var
     // Variables
     version      = require("./package.json").version,
     cmPath       = "node_modules/codemirror/",
-    templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
+    templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs", "actions.dotjs"],
     cache        = {},
     clients      = {},
     db           = {},
