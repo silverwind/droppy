@@ -446,11 +446,18 @@ function createListener() {
 //-----------------------------------------------------------------------------
 // GET/POST handler
 function onRequest(req, res) {
+    // Show a simple self-reloading loading page during startup
     if (!ready) {
         res.statusCode = 503;
         res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
         return;
     }
+
+    // Strip all null-bytes from the url
+    while(req.url.indexOf("%00") !== -1) {
+      req.url = req.url.replace(/\%00/g, "");
+    }
+
     switch (req.method.toUpperCase()) {
     case "GET":
         handleGET(req, res);
