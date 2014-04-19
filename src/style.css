@@ -1274,7 +1274,7 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     max-height: 80%;
     transform: translateY(-50%);
     position: fixed;
-    transition: all .3s ease, opacity .3s ease, visibility .3s ease;
+    transition: opacity .3s ease, visibility .3s ease;
     z-index: 32;
     padding: .25em .5em ;
     overflow-y: auto;
