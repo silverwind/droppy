@@ -1473,14 +1473,15 @@ function streamArchive(req, res, type) {
             res.setHeader("Content-Type", mime.lookup(type));
             res.setHeader("Content-Disposition", dispo);
             res.setHeader("Transfer-Encoding", "chunked");
-            log.info(req, res, "Creating zip of /", req.url.substring(4));
+            log.info(req, res);
+            log.info("Streaming zip of /", req.url.substring(4));
 
             archive = archiver(type, {zlib: { level: config.zipLevel }});
             archive.on("error", function (error) { log.error(error); });
             archive.pipe(res);
             archive.append(null, { name: path.basename(zipPath) + '/' });
             archive.bulk([
-                { expand: true, cwd: zipPath, src: ["**"], dest: path.basename(zipPath) }
+                { expand: true, cwd: zipPath, src: ["**/*", "**/.*", "**/.*/**"], dest: path.basename(zipPath) }
             ]);
             archive.finalize();
         } else {
