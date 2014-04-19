@@ -1999,7 +1999,6 @@
             doc = $(t.views.document({readOnly: readOnly}));
         showSpinner(view);
 
-
         $.ajax({
             type: "GET",
             url: "/_" + entryId,
