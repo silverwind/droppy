@@ -1271,13 +1271,13 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px rgba(0,0,0,.5);
-    color: #444;
+    color: #666;
     max-height: 80%;
     transform: translateY(-50%);
     position: fixed;
     transition: all .3s ease, opacity .3s ease, visibility .3s ease;
     z-index: 32;
-    padding: .5em;
+    padding: .25em .5em ;
     overflow-y: auto;
 }
 
@@ -1306,101 +1306,69 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     float: left;
 }
 
-#options-box .list-options label,
-#options-box .list-options select {
-    display: inline-block;
-    padding: .125em;
-    white-space: nowrap;
-}
-
-#options-box .list-options li {
-    height: 1.5em;
-    margin-bottom: .5em;
-}
-
-#options-box .list-options li:hover select {
-    color: #000;
+#options-box .list-options ul li {
+    display: flex;
+    margin: .375em .25em;
+    height: 1.75em;
 }
 
 #options-box .list-options label {
+    display: inline-block;
+    white-space: nowrap;
     text-align: left;
-    width: calc(50% - .5em);
+    line-height: 1.75em;
+    flex: 1;
     font-weight: 400;
+    transition: color .25s ease;
 }
+#options-box .list-options li:hover label  { color: #111 }
 
 @media all and (max-width: 319px) {
+    #options-box .list-options ul li {
+        flex-direction: column;
+        height: auto;
+    }
     #options-box .list-options label {
         width: 100%;
-        font-size: .8em;
+        font-size: .9em;
+        margin-bottom: .5em;
+        text-align: center;
+        line-height: 1em;
     }
-}
-
-#options-box .list-options select {
-    text-align: center;
-    width: 100%;
-}
-#options-box .list-options div {
-    display: inline-block;
-    width: calc(50% - .5em);
-}
-
-@media all and (max-width: 319px) {
-    #options-box .list-options div {
-        margin-bottom: .25em;
+    #options-box .list-options select {
         width: 100%;
+        padding: .25em 0;
     }
 }
 
 #options-box .list-options select {
     border-radius: 4px;
+    border: 1px solid #ccc;
     background: #fff;
+    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .1), 0 0 .125em rgba(0,0,0,0.15);
     color: #666;
-    border: none;
+    flex: 1 1;
     outline: none;
     display: inline-block;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    text-indent: 1px;
+    text-indent: .25em;
     text-overflow: "";
+    transition: border-color .25s ease, color .25s ease;
 }
-
-#options-box .list-options div { position:relative }
-html:not(.ie) #options-box .list-options div:after {
-    content: "";
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cG9seWdvbiBwb2ludHM9IjEwLDE2IDIyLDE2IDE2LDI0IiBmaWxsPSIjNjY2Ii8+PHBvbHlnb24gcG9pbnRzPSIxMCwxNCAyMiwxNCAxNiw2IiBmaWxsPSIjNjY2Ii8+PC9zdmc+Cg==), linear-gradient(#fff,#fff);
-    background-size: contain;
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
-    width: 1.5em;
-    color: #666;
-    right: -1px;
-    top: 2px;
-    bottom: 2px;
-    border-radius: 3px;
-    position: absolute;
-    pointer-events: none;
-}
-
-html:not(.ie) #options-box .list-options div:before {
-    content: "";
-    position: absolute;
-    top: 0; bottom: 0; left: 0; right: -2px;
-    box-shadow: inset 0 0 0 1px #eee;
-    border-radius: 4px;
-    z-index: 5;
-    pointer-events: none;
-}
+#options-box .list-options li:hover select { color: #111; border-color: #888 }
 
 #options-box .list-user li {
-    padding: .125em .5em;
-    line-height: 1.5em;
+    padding: 0 .25em;
+    margin: .375em .25em;
+    height: 1.75em;
+    box-shadow: 0 0 .125em rgba(0,0,0,0.15);
+    line-height: 1.75em;
+    border: 1px solid #ccc;
     border-radius: 4px;
     font-weight: 400;
     background: #fff;
-}
-
-#options-box .list-user li +  li {
-    margin-top: .25em;
 }
 
 #options-box .list-user h4 {
@@ -1414,18 +1382,30 @@ html:not(.ie) #options-box .list-options div:before {
         width: 100%;
         text-align: center;
         font-size: 1.5em;
-        margin: .25em 0;
+        margin: .5em 0;
     }
+    #options-box .list-user li {
+        padding: .25em .5em;
+        height: auto;
+    }
+
+    .firefox .list-user:after {
+        bottom: 0;
+        content: "";
+        display: block;
+        height: .5em;
+    }
+
 }
 
 #options-box .list-user li svg.remove {
     position: relative;
-    top: .125em;
+    top: .25em;
     right: 0;
-    height: 1.25em;
-    width: 1.25em;
+    height: 1em;
+    width: 1em;
     float: right;
-    fill: #666;
+    fill: #888;
     cursor: pointer;
 }
 
@@ -1435,21 +1415,17 @@ html:not(.ie) #options-box .list-options div:before {
 
 #options-box .add-user {
     line-height: 2em;
-    background: #fff;
+    background: #ddd;
+    box-shadow: inset 0 -1px 3px rgba(0,0,0,.15);
     text-align: center;
-    border-radius: 6px;
-    margin-top: .25em;
+    border-radius: 4px;
+    margin: 0 .25em;
     cursor: pointer;
     font-weight: 400;
+    margin: 0 .25em;
 }
-
-#options-box .list-user .add-user:hover {
-    background: #f81;
-    color: #fff;
-}
-#options-box .list-user .add-user:hover svg {
-    fill: #fff;
-}
+#options-box .list-user .add-user:hover { background: #f81; color: #fff }
+#options-box .list-user .add-user:hover svg { fill: #fff }
 
 #options-box .list-user .add-user svg {
     height: 1.25em;
@@ -1734,6 +1710,10 @@ input[type="checkbox"] { display: none }
     box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .1);
     border: 1px solid #ccc;
     border-radius:  4px;
+}
+
+#info-box.link input:focus {
+    border-color: #f81;
 }
 
 #info-box.error input {

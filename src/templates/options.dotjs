@@ -22,15 +22,13 @@ it = {
 
 <li>
     <label>{{= label }}</label>
-    <div>
-        <select class="{{= option }}">
-            {{~values :value:index}}
-                <option value="{{= value }}" {{? it.droppy.get(option) === value }}selected{{?}}>
-                    {{= valueNames[index] }}
-                </option>
-            {{~}}
-        </select>
-    </div>
+    <select class="{{= option }}">
+        {{~values :value:index}}
+            <option value="{{= value }}" {{? it.droppy.get(option) === value }}selected{{?}}>
+                {{= valueNames[index] }}
+            </option>
+        {{~}}
+    </select>
 </li>
 #}}
 <ul>
