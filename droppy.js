@@ -41,6 +41,7 @@ var
     crypto   = require("crypto"),
     fs       = require("graceful-fs"),
     http     = require("http"),
+    _        = require("lodash"),
     mime     = require("mime"),
     mkdirp   = require("mkdirp"),
     path     = require("path"),
@@ -896,7 +897,7 @@ function deleteDirectory(directory) {
     function del (dir) {
         rimraf.sync(dir);
         checkWatchedDirs();
-    };
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -905,7 +906,8 @@ function createWatcher(directory) {
     var watcher, clientsToUpdate, client,
         dir = removeFilePath(directory);
     log.debug(chalk.green("Adding Watcher: ") + dir);
-    watcher = fs.watch(directory, utils.throttle(function () {
+    watcher = fs.watch(directory, _.throttle(function () {
+        console.log("U");
         log.debug("Watcher detected update for ", chalk.blue(dir));
         clientsToUpdate = [];
         Object.keys(clients).forEach(function (cookie) {
@@ -923,7 +925,7 @@ function createWatcher(directory) {
                 });
             });
         }
-    }, config.readInterval, { leading: true, trailing: true }));
+    }, config.readInterval, { leading: false, trailing: true }));
     watcher.on("error", function (error) {
         log.error("Error trying to watch ", dir, "\n", error);
     });
@@ -1668,7 +1670,7 @@ function cleanUpEtags() {
 // Watch the CSS files for debugging
 function watchCSS() {
     resources.css.forEach(function (file) {
-        fs.watch(path.join(__dirname, file), utils.debounce(updateCSS), config.readInterval);
+        fs.watch(path.join(__dirname, file), updateCSS);
     });
 }
 

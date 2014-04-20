@@ -993,6 +993,7 @@
         view.find(".upload-bar-inner").css("width", "0");
         view.find(".upload-title").text("Aborting");
         $(".uploading").remove(); // Remove preview elements
+        sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
 
     function uploadProgress(view, event) {
@@ -1655,8 +1656,8 @@
                                 (droppy.clipboard ? basename(droppy.clipboard.from) : "") +
                             '</span></span>' +
                             droppy.svg.triangle +
-                        '</div>'
-                    ).register("click", function (event) {
+                        '</div>');
+                    view.find(".paste-button").one("click", function (event) {
                         event.stopPropagation();
                         if (droppy.socketWait) return;
                         if (droppy.clipboard) {
@@ -1705,16 +1706,19 @@
         // Edit a file/folder in a text editor
         $("#entry-menu .edit").register("click", function (event) {
             event.stopPropagation();
-            $("#click-catcher").trigger("click");
             var entry = $("#entry-menu").data("target"),
                 view = entry.parents(".view");
             updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
+            $("#click-catcher").trigger("click");
         });
 
         // Delete a file/folder
-        $("#entry-menu .delete").register("click", function () {
+        $("#entry-menu .delete").register("click", function (event) {
+            event.stopPropagation();
             if (droppy.socketWait) return;
-            sendMessage(null, "DELETE_FILE", $("#entry-menu").data("target").data("id"));
+            var entry = $("#entry-menu").data("target");
+            showSpinner(entry.parents(".view"));
+            sendMessage(null, "DELETE_FILE", entry.data("id"));
             $("#click-catcher").trigger("click");
         });
     }
