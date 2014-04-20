@@ -907,7 +907,6 @@ function createWatcher(directory) {
         dir = removeFilePath(directory);
     log.debug(chalk.green("Adding Watcher: ") + dir);
     watcher = fs.watch(directory, _.throttle(function () {
-        console.log("U");
         log.debug("Watcher detected update for ", chalk.blue(dir));
         clientsToUpdate = [];
         Object.keys(clients).forEach(function (cookie) {
