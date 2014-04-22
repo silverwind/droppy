@@ -94,7 +94,7 @@ input:-webkit-autofill {
 #page.out { opacity: 0 }
 
 #navigation {
-    background-image: linear-gradient(#222, #111);
+    background: #181818;
     z-index: 1;
     text-align: center;
     order: 1;
@@ -107,19 +107,17 @@ input:-webkit-autofill {
     display: flex;
     white-space: nowrap;
     user-select: none;
+    align-items: center;
+    height: 1.5rem;
 }
-
-@media all and (min-width: 1024px) { #buttons { line-height: 35px } }
-@media all and (max-width: 1023px) { #buttons { line-height: 30px } }
-@media all and (max-width:  639px) { #buttons { line-height: 25px } }
 
 .button {
-    border-bottom: 2px solid #333;
-    color: #ddd;
+    color: #aaa;
     cursor: pointer;
-    flex: 1 1;
+    flex: 1;
     display: inline-block;
 }
+.button:hover { color: #fff; text-shadow: 0 0 1px #888 }
 
 .button span {
     vertical-align: middle;
@@ -131,28 +129,15 @@ input:-webkit-autofill {
 @media all and (max-width:  750px) { #buttons span { display: none } }
 
 .button svg {
-    fill: #ccc;
+    fill: #aaa;
     display: inline-block;
     vertical-align: middle;
 }
-
-@media all and (max-width: 639px) { .button svg { vertical-align: baseline } }
-
-.button svg {
-    transition: fill .25s ease;
-}
+.button svg { transition: fill .25s ease }
 
 @media all and (min-width: 1024px) { .button svg { height: 24px } }
 @media all and (max-width: 1023px) { .button svg { height: 20px } }
-@media all and (max-width: 639px)  { .button svg { height: 16px; margin-right: 0 } }
-
-#upload-file-button:hover   { color: #29f; border-bottom: 2px solid #29f }
-#upload-folder-button:hover { color: #f1a; border-bottom: 2px solid #f1a }
-#create-folder-button:hover { color: #ae5; border-bottom: 2px solid #ae5 }
-#about-button:hover         { color: #f71; border-bottom: 2px solid #f71 }
-#options-button:hover       { color: #ff5; border-bottom: 2px solid #ff5 }
-#logout-button:hover        { color: #e33; border-bottom: 2px solid #e33 }
-#split-button:hover         { color: #f5f; border-bottom: 2px solid #f5f }
+@media all and (max-width: 639px)  { .button svg { height: 16px; margin-right: 0; vertical-align: baseline } }
 
 #upload-file-button:hover svg        { fill: #29f }
 #upload-folder-button:hover svg      { fill: #f1a }
@@ -163,10 +148,9 @@ input:-webkit-autofill {
 #split-button:hover svg.split .left  { fill: #f22 }
 #split-button:hover svg.split .right { fill: #28f }
 
-.button.disabled { color: #666 !important; cursor: not-allowed !important }
-.button.disabled svg { fill: #666 !important }
-.button.disabled:hover { color: #666!important ; border-bottom: 2px solid #666 !important }
-
+.button.disabled       { color: #666 !important; cursor: not-allowed !important }
+.button.disabled:hover { color: #666 !important }
+.button.disabled svg   { fill:  #666 !important }
 #view-container {
     flex: 1 1;
     order: 2;
@@ -180,6 +164,7 @@ input:-webkit-autofill {
     bottom: 0;
     left:0;
     right:0;
+    top: 1.5rem;
     transition: left .2s ease, right .2s ease;
 }
 .content-container {
@@ -189,21 +174,23 @@ input:-webkit-autofill {
     position: relative;
 }
 
-@media all and (min-width: 1024px) { .view { top: 39px } }
-@media all and (max-width: 1023px) { .view { top: 34px } }
-@media all and (max-width:  639px) { .view { top: 27px } }
-
 .view.left  { left:0; right:50%; }
 .view.right { left:50%; right:0; }
 
 .content {
     left: 0;
-    width:100%;
+    width: 100%;
     padding: .25em;
     transition: left .175s ease-in;
     position: absolute;
     overflow-y: auto;
+    top: 1.5rem;
+    height: calc(100% - 1.5rem);
 }
+
+@media all and (min-width: 1024px) { .content { font-size:  1em } }
+@media all and (max-width: 1023px) { .content { font-size: .9em } }
+@media all and (max-width:  639px) { .content { font-size: .8em; top: 1.25rem; } }
 
 .content.image, .content.video {
     padding: 0;
@@ -216,10 +203,6 @@ input:-webkit-autofill {
     display: block;
     height: .25em;
 }
-
-@media all and (min-width: 1024px) { .content { top: 37px; height: calc(100% - 37px); font-size:  1em } }
-@media all and (max-width: 1023px) { .content { top: 32px; height: calc(100% - 32px); font-size: .9em } }
-@media all and (max-width:  639px) { .content { top: 27px; height: calc(100% - 27px); font-size: .8em } }
 
 .content.center  { left: 0 }
 .content.back    { left: -100% }
@@ -238,39 +221,44 @@ input:-webkit-autofill {
 /* ================================== Path ================================= */
 
 .path {
-   background: linear-gradient(#111,#222);
-   border-bottom: 2px solid #444;
+   background: #181818;
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
    text-align: left;
    position: absolute;
-   z-index: 1;
    box-shadow: 0 0 1em rgba(0, 0, 0, 0.6);
+   height: 1.5rem;
+   border-top: 1px solid #333;
+   border-bottom: 1px solid #333;
 }
 
-.view.right .path { border-left: 2px solid #444}
+.view.right .path { border-left: 1px solid #333}
 
-@media all and (min-width: 1024px) { .path { height: 37px; font-size: .9em } }
-@media all and (max-width: 1023px) { .path { height: 32px; font-size: .8em } }
-@media all and (max-width:  639px) { .path { height: 27px; font-size: .7em } }
+@media all and (min-width: 1024px) { .path {font-size: .9em } }
+@media all and (max-width: 1023px) { .path {font-size: .8em } }
+@media all and (max-width:  639px) { .path {font-size: .7em; height: 1.25rem; } }
 
 .path li {
     cursor: pointer;
     display: inline-block;
     position: relative;
     height: 100%;
+    line-height: 1.5rem;
 }
 
-@media all and (min-width: 1024px) { .path li { line-height: 35px; padding: 0 .4em 0 1.6em } }
-@media all and (max-width: 1023px) { .path li { line-height: 30px; padding: 0 .2em 0 1.4em } }
-@media all and (max-width:  639px) { .path li { line-height: 25px; padding: 0 .1em 0 1.2em } }
+@media all and (min-width: 1024px) { .path li { padding: 0 .4em 0 1.6em } }
+@media all and (max-width: 1023px) { .path li { padding: 0 .2em 0 1.4em } }
+@media all and (max-width:  639px) { .path li { padding: 0 .2em 0 1.4em; line-height: 1.25rem; } }
 
-.path .triangle { position: absolute }
+.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: calc(-1.5rem + .5px) }
+@media all and (max-width:  639px) {
+    .path .triangle { height: 1.25rem; width: 1.25rem; right: calc(-1.25rem + .5px) }
+}
 
 .path .home {
     fill: #ddd;
-    height: 1em;
+    height: 50%;
     display: inline-block;
     vertical-align: middle;
     position: relative;
@@ -307,10 +295,6 @@ input:-webkit-autofill {
 .path li:nth-child(15) { z-index: 2 }
 .path li:nth-child(16) { z-index: 1 }
 
-@media all and (min-width: 1024px) { .path .triangle { height: 35px; width: 35px; right: -34.5px } }
-@media all and (max-width: 1023px) { .path .triangle { height: 30px; width: 30px; right: -29.5px } }
-@media all and (max-width:  639px) { .path .triangle { height: 25px; width: 25px; right: -24.5px } }
-
 /* ========================= File/Folder Display =========================== */
 
 .paste-button {
@@ -326,35 +310,40 @@ input:-webkit-autofill {
     cursor: pointer;
     transition: opacity .4s ease, visibility .4s ease;
     user-select: none;
+    line-height: 1.5rem;
 }
 
 .paste-button.in  { opacity: 1; visibility: visible; }
 .paste-button.out { opacity: .5; visibility: hidden; }
 
-@media all and (min-width: 1024px) { .paste-button { font-size:  1em; line-height: 35px } }
-@media all and (max-width: 1023px) { .paste-button { font-size: .9em; line-height: 30px } }
-@media all and (max-width:  639px) { .paste-button { font-size: .8em; line-height: 25px } }
+@media all and (min-width: 1024px) { .paste-button { font-size: .9em; } }
+@media all and (max-width: 1023px) { .paste-button { font-size: .8em; } }
+@media all and (max-width:  639px) { .paste-button { font-size: .7em; line-height: 1.25rem } }
 
 .paste-button .triangle {
     position: absolute;
     transform: rotate(180deg);
     fill: #333;
 }
-@media all and (min-width: 1024px) { .paste-button .triangle { height: 35px; width: 35px; left: -34.5px } }
-@media all and (max-width: 1023px) { .paste-button .triangle { height: 30px; width: 30px; left: -29.5px } }
-@media all and (max-width:  639px) { .paste-button .triangle { height: 25px; width: 25px; left: -24.5px } }
 
-.paste-button:hover svg.paste {fill: #fff }
+.paste-button .triangle { position: absolute; height: 1.5rem; width: 1.5rem; left: calc(-1.5rem + .5px) }
+@media all and (max-width:  639px) {
+    .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: calc(-1.25rem + .5px) }
+}
+
+.paste-button svg.paste {
+    fill: #ccc;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    top: -.05em;
+    height: 1em;
+    width: 1em;
+    margin-right: .25em;
+}
 .paste-button:hover svg.triangle {fill: #a51 }
 .paste-button:hover { background: #a51; color: #fff; }
 .paste-button .filename { color: #fff; }
-
-.paste-button svg {
-    height: 1em;
-    width: 1em;
-    fill: #aaa;
-    margin-right: .25em;
-}
 
 #click-catcher {
     background: #000;
