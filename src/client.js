@@ -239,6 +239,7 @@
                         "<ul class=\"path\"></ul>" +
                         "<div class=\"content-container\"><div class=\"content\"></div></div>" +
                         "<div class=\"dropzone\"></div>" +
+                        "<div class=\"info-box\"><div class=\"box-icon\"><svg></svg></div><span><input></span></div>" +
                     "</div>");
         destroyView(vId);
         view.appendTo("#view-container");
@@ -420,7 +421,7 @@
                 reloadCSS(msg.css);
                 break;
             case "SHORTLINK":
-                showLinkBox(msg.link);
+                showLinkBox(getView(vId), msg.link);
                 toggleCatcher();
                 break;
             case "USER_LIST":
@@ -452,8 +453,9 @@
                     });
                 break;
             case "ERROR":
-                showError(msg.text);
-                hideSpinner(getView(vId));
+                view = getView(vId);
+                showError(view, msg.text);
+                hideSpinner(view);
                 break;
             }
         };
@@ -706,7 +708,7 @@
             $("#about-box").replaceClass("in", "out");
             $("#entry-menu").replaceClass("in", "out");
             $("#drop-select").removeAttr("class");
-            $("#info-box").removeAttr("class");
+            $(".info-box").replaceClass("in", "out");
             toggleCatcher();
         });
 
@@ -857,7 +859,7 @@
         if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
-                if (isOverLimit(data[i].size)) return;
+                if (isOverLimit(view, data[i].size)) return;
                 var filename = encodeURIComponent(data[i].name);
                 numFiles++;
                 view[0].currentData[filename] = {
@@ -880,7 +882,7 @@
                 var name = (entry.indexOf("/") > 1) ? entry.substring(0, entry.indexOf("/")) : entry,
                     isFile = Object.prototype.toString.call(data[entry]) === "[object File]";
                 if (isFile) {
-                    if (isOverLimit(data[entry].size)) return;
+                    if (isOverLimit(view, data[entry].size)) return;
                     numFiles++;
                     if (!addedDirs[basename(name)]) {
                         view[0].currentData[basename(name)] = {size: data[entry].size, type: "nf", mtime: Date.now()};
@@ -936,7 +938,7 @@
         function isOverLimit(size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
                 var si = convertToSI(droppy.maxFileSize);
-                showError("Maximum file size for uploads is " + si.size + si.unit);
+                showError(view, "Maximum file size for uploads is " + si.size + si.unit);
                 return true;
             }
             return false;
@@ -1103,7 +1105,7 @@
     function toggleCatcher() {
         if ($("#about-box").hasClass("in") ||
             $("#options-box").hasClass("in") ||
-            $("#info-box").hasClass("in") ||
+            $(".info-box").hasClass("in") ||
             $("#entry-menu").hasClass("in") ||
             $("#drop-select").hasClass("in")
         ) {
@@ -1276,8 +1278,7 @@
             isUpload: isUpload,
             sortBy: "name",
             sortAsc: false,
-            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : "",
-            mimeByExt: droppy.mediaTypes
+            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
         },
         content = contentWrap(view).html(t.views.directory(tdata));
         loadContent(view, content);
@@ -1693,7 +1694,7 @@
                     win = window.open(url, "_blank");
                     break;
                 case "audio":
-                    play(url);
+                    play(url, entry.find(".icon-play"));
                     break;
                 default:
                     updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
@@ -1817,7 +1818,7 @@
     }
 
     function preparePlayback(playButton) {
-        var source = playButton.parent().parent().find(".file-link").attr("href");
+        var source = playButton.parents(".data-row").children(".file-link").attr("href");
         if (droppy.socketWait) return;
         play(source, playButton);
     }
@@ -1838,7 +1839,7 @@
             openMedia(view, "image", oldFolder === newFolder);
         } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) {
             if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
-                showError("Sorry, your browser can't play this file.");
+                showError(view, "Sorry, your browser can't play this file.");
                 updateLocation(view, view[0].currentFolder);
                 return;
             } else {
@@ -2161,8 +2162,8 @@
 
     function play(source, playButton) {
         var player = document.getElementById("audio-player");
-        if (!player.canPlayType(droppy.mediaTypes[getExt(source)])) {
-            showError("Sorry, your browser can't play this file.");
+        if (!player.canPlayType(droppy.audioTypes[getExt(source)])) {
+            showError(playButton.parents(".view"), "Sorry, your browser can't play this file.");
             return;
         }
 
@@ -2205,7 +2206,6 @@
         droppy.debug = null;
         droppy.demoMode = null;
         droppy.isPlaying = null;
-        droppy.mediaTypes = {};
         droppy.noLogin = null;
         droppy.queuedData = null;
         droppy.reopen = null;
@@ -2492,22 +2492,22 @@
         if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
     }
 
-    function showError(text) {
-        var box = $("#info-box");
+    function showError(view, text) {
+        var box = view.find(".info-box");
         box.find("svg").replaceWith(droppy.svg.exclamation);
         box.children("span").text(text);
-        box.attr("class", "error in");
+        box.attr("class", "info-box error in");
         setTimeout(function () {
             box.removeAttr("class");
         }, 3000);
     }
 
-    function showLinkBox(link) {
-        var box   = $("#info-box"),
+    function showLinkBox(view, link) {
+        var box   = view.find(".info-box"),
             input = box.find("input");
         box.find("svg").replaceWith(droppy.svg.link);
         input.val(window.location.protocol + "//" + window.location.host + "/$/" +  link);
-        box.attr("class", "link in").end(function () {
+        box.attr("class", "info-box link in").end(function () {
             input[0].select();
         });
     }

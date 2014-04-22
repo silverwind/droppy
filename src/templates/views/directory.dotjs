@@ -13,7 +13,6 @@ it = {
             size: Number // Size in bytes
         }
     }
-    mimeByExt: Object // Map of extensions to mime-types to populate
 }
 </script>
 #}}
@@ -70,13 +69,12 @@ it = {
                     temp.id = folder + entryname;
                     temp.spriteClass = t.fn.getSpriteClass(entryExt);
                     temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;
-                    it.mimeByExt[entryExt] = obj.mime;
                 if (obj.type === "nd" || obj.type === "nf") {
                     temp.classes = " uploading";
                     temp.svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
                 } else if (Object.keys(droppy.audioTypes).indexOf(getExt(entryname)) !== -1) {
                     temp.classes = " playable";
-                    temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';;
+                    temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
                 } else {
                     temp.classes = "";
                     temp.svgIcon = "";
