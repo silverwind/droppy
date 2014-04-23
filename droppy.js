@@ -1662,7 +1662,7 @@ function cleanUpSessions() {
 // Clean up Etag cache hourly
 setInterval(cleanUpEtags, 60 * 60 * 1000);
 function cleanUpEtags() {
-    cache.files = null;
+    cache.files = {};
 }
 
 //-----------------------------------------------------------------------------
