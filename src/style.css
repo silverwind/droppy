@@ -648,19 +648,18 @@ input:-webkit-autofill {
     border-left-color   : #222;
     border-right-color  : #222;
     border-top-color    : #f1a;
-    margin-top: 3px;
-    margin-right: 3px;
+    margin-top: .15rem;
+    margin-right: .15rem;
     border-style: solid;
     border-radius: 100%;
+    border-width: 3px
     z-index: 32;
+    height: 1.1rem;
+    width: 1.1rem;
 }
-.spinner.out {
-    display: none;
-}
+.spinner.out { display: none }
 
-@media all and (min-width: 1024px) { .spinner { height: 29px; width: 29px; border-width: 4px } }
-@media all and (max-width: 1023px) { .spinner { height: 24px; width: 24px; border-width: 4px } }
-@media all and (max-width:  639px) { .spinner { height: 19px; width: 19px; border-width: 3px } }
+@media all and (max-width:  639px) { .spinner { height: 0.9rem; width: 0.9rem; border-width: 2.5px } }
 
 @keyframes spin {
  from { transform: rotate(0deg)   }
