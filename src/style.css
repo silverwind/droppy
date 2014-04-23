@@ -349,13 +349,13 @@ input:-webkit-autofill {
     background: #000;
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.15s ease;
     z-index: 31;
     user-select: none;
 }
 
 #click-catcher.out { opacity: 0  ; visibility: hidden }
-#click-catcher.in  { opacity: .5 ; visibility: visible }
+#click-catcher.in  { opacity: .4 ; visibility: visible }
 
 .file-header {
     display: flex;
