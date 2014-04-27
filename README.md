@@ -90,7 +90,7 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 
 - `tlsKey`: Path to your private key.
 - `tlsCert`: Path to your certificate.
-- `tlsCA`: An optional array of paths to your intermediate (CA) certificates.
+- `tlsCA`: An optional intermediate (CA) certificate.
 
 ##Supported Browsers
 - Firefox (last 2 versions)
