@@ -53,7 +53,6 @@ var
     zlib         = require("zlib"),
     // Variables
     version      = require("./package.json").version,
-    cmPath       = "node_modules/codemirror/",
     templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
     cache        = { res: {}, files: {} },
     clients      = {},
@@ -68,9 +67,37 @@ var
     isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
     mode         = {file: "644", dir: "755"},
     resources    = {
-        css  : [cmPath + "lib/codemirror.css", "src/style.css", "src/sprites.css"],
-        js   : ["node_modules/jquery/dist/jquery.js", "src/client.js", cmPath + "lib/codemirror.js"],
-        html : ["src/base.html", "src/auth.html", "src/main.html"],
+        css  : [
+            "node_modules/codemirror/lib/codemirror.css",
+            "src/style.css",
+            "src/sprites.css",
+            "node_modules/codemirror/theme/mdn-like.css",
+            "node_modules/codemirror/theme/xq-light.css",
+            "node_modules/codemirror/theme/base16-dark.css"
+        ],
+        js   : [
+            "node_modules/jquery/dist/jquery.js",
+            "src/client.js",
+            "node_modules/codemirror/lib/codemirror.js",
+            "node_modules/codemirror/addon/selection/active-line.js",
+            "node_modules/codemirror/addon/selection/mark-selection.js",
+            "node_modules/codemirror/addon/search/searchcursor.js",
+            "node_modules/codemirror/addon/edit/matchbrackets.js",
+            "node_modules/codemirror/mode/css/css.js",
+            "node_modules/codemirror/mode/coffeescript/coffeescript.js",
+            "node_modules/codemirror/mode/javascript/javascript.js",
+            "node_modules/codemirror/mode/xml/xml.js",
+            "node_modules/codemirror/mode/htmlmixed/htmlmixed.js",
+            "node_modules/codemirror/mode/jade/jade.js",
+            "node_modules/codemirror/mode/markdown/markdown.js",
+            "node_modules/codemirror/mode/php/php.js",
+            "node_modules/codemirror/keymap/sublime.js"
+        ],
+        html : [
+            "src/base.html",
+            "src/auth.html",
+            "src/main.html"
+        ],
         templates : []
     };
 
@@ -106,7 +133,7 @@ var droppy = module.exports = function (options) {
 
 //-----------------------------------------------------------------------------
 // Start up our own listener when not used as a module
-if(!module.parent) {
+if (!module.parent) {
     // Argument handler
     if (isCLI) handleArguments();
 
@@ -130,8 +157,9 @@ if(!module.parent) {
 //-----------------------------------------------------------------------------
 // Init everything
 function init(options) {
-    config = cfg(options, path.join(process.cwd(), "config.json"));
+    config = cfg(options, path.join(__dirname, "config.json"));
     log.init(config);
+
     fs.MAX_OPEN = config.maxOpen;
     log.useTimestamp = config.timestamps;
 
@@ -141,7 +169,7 @@ function init(options) {
     prepareContent();
 
     // Prepare to get up and running
-    cacheResources(config.resDir, function () {
+    cacheResources(path.join(__dirname + "/res/"), function () {
         setupDirectories(function () {
             cleanupLinks(function() {
                 ready = true;
@@ -164,31 +192,15 @@ function prepareContent() {
     templateList.forEach(function (relPath) {
         resources.templates.push("src/templates/" + relPath);
     });
-    // CodeMirror Addons
-    ["selection/active-line.js", "selection/mark-selection.js", "search/searchcursor.js", "edit/matchbrackets.js"].forEach(function (relPath) {
-        resources.js.push(cmPath + "addon/" + relPath);
-    });
-    // CodeMirror Modes
-    ["css/css.js", "coffeescript/coffeescript.js", "javascript/javascript.js", "xml/xml.js", "htmlmixed/htmlmixed.js", "jade/jade.js",
-     "markdown/markdown.js", "php/php.js"].forEach(function (relPath) {
-        resources.js.push(cmPath + "mode/" + relPath);
-    });
-    // CodeMirror Keymaps
-    resources.js.push(cmPath + "keymap/sublime.js");
-    // CodeMirror Themes
-    ["mdn-like.css", "xq-light.css", "base16-dark.css"].forEach(function (relPath) {
-        resources.css.push(cmPath + "theme/" + relPath);
-    });
 
     resourceList = utils.flatten(resources);
-
     // Intialize the CSS cache when debugging
     if (config.debug) updateCSS();
 
     // Check if we to actually need to recompile resources
     resourceList.forEach(function (file) {
         try {
-            if (crypto.createHash("md5").update(fs.readFileSync(file)).digest("base64") === db.resourceHashes[file])
+            if (crypto.createHash("md5").update(fs.readFileSync(path.join(__dirname, file))).digest("base64") === db.resourceHashes[file])
                 matches.resource++;
             else return;
         } catch (error) { return; }
@@ -212,7 +224,7 @@ function prepareContent() {
         resourceData[type] = resources[type].map(function read(file) {
             var data;
             try {
-                data = fs.readFileSync(file).toString("utf8");
+                data = fs.readFileSync(path.join(__dirname, file)).toString("utf8");
             } catch (error) {
                 log.error("Error reading " + file + ":\n", error);
                 process.exit(1);
@@ -235,8 +247,8 @@ function prepareContent() {
     });
 
     // Add SVG object
-    var svgDir = config.srcDir + "svg/", svgData = {};
-    fs.readdirSync(config.srcDir + "svg/").forEach(function (name) {
+    var svgDir = path.join(__dirname,"/src/svg/"), svgData = {};
+    fs.readdirSync(svgDir).forEach(function (name) {
         svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
     });
     out.js = out.js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
@@ -284,7 +296,7 @@ function prepareContent() {
     // Save the hashes of all compiled files
     resourceList.forEach(function (file) {
         if (!db.resourceHashes) db.resourceHashes = {};
-        db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(file)).digest("base64");
+        db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(path.join(__dirname, file))).digest("base64");
         db.resourceDebug = config.debug; // Save the state of the last resource compilation
     });
     writeDB();
@@ -296,7 +308,7 @@ function setupDirectories(callback) {
     cleanupTemp(true, function () {
         try {
             mkdirp.sync(config.filesDir, mode.dir);
-            mkdirp.sync(config.incomingDir, mode.dir);
+            mkdirp.sync(config.tempDir, mode.dir);
         } catch (error) {
             log.error("Unable to create directories:");
             log.error(error);
@@ -360,7 +372,7 @@ function cleanupForDemo(doneCallback) {
 //-----------------------------------------------------------------------------
 // Clean up the directory for incoming files
 function cleanupTemp(initial, callback) {
-    rimraf(config.incomingDir, function (error) {
+    rimraf(config.tempDir, function (error) {
         if (!initial) return callback();
         if (error) {
             log.simple("Error cleaning up temporary directories:");
@@ -375,21 +387,26 @@ function cleanupTemp(initial, callback) {
 // Clean up our shortened links by removing links to nonexistant files
 function cleanupLinks(callback) {
     var linkcount = 0, cbcount = 0;
-    Object.keys(db.shortlinks).forEach(function (link) {
-        linkcount++;
-        (function (shortlink, location) {
-            fs.stat(path.join(config.filesDir, location), function (error, stats) {
-                cbcount++;
-                if (!stats || error) {
-                    delete db.shortlinks[shortlink];
-                }
-                if (cbcount === linkcount) {
-                    writeDB();
-                    callback();
-                }
-            });
-        })(link, db.shortlinks[link]);
-    });
+    var links = Object.keys(db.shortlinks);
+    if (links.length === 0)
+        callback();
+    else {
+        links.forEach(function (link) {
+            linkcount++;
+            (function (shortlink, location) {
+                fs.stat(path.join(config.filesDir, location), function (error, stats) {
+                    cbcount++;
+                    if (!stats || error) {
+                        delete db.shortlinks[shortlink];
+                    }
+                    if (cbcount === linkcount) {
+                        writeDB();
+                        callback();
+                    }
+                });
+            })(link, db.shortlinks[link]);
+        });
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -401,17 +418,11 @@ function createListener(handler) {
         server = http.createServer(handler);
     } else {
         try {
-            key = fs.readFileSync(config.tls.key);
-            cert = fs.readFileSync(config.tls.cert);
-            if (config.tls.ca.length) {
-                if (Array.isArray(config.tls.ca))
-                    ca = config.tls.ca;
-                else if (typeof config.tls.ca === "string")
-                    ca = [config.tls.ca];
-                ca = ca.map(function read(file) { return fs.readFileSync(file); });
-            }
+            key = fs.readFileSync(config.tlsKey);
+            cert = fs.readFileSync(config.tlsCert);
+            if (config.tls.ca.length) ca = fs.readFileSync(config.tlsCA);
         } catch (error) {
-            log.error("Couldn't read required TLS keys or certificates. See `tls` section of config.json.\n\n", util.inspect(error));
+            log.error("Couldn't read required TLS keys or certificates.", util.inspect(error));
             process.exit(1);
         }
 
@@ -1308,7 +1319,7 @@ function handleUploadRequest(req, res) {
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
             dst = path.join(config.filesDir, req.query.to, dstRelative),
-            tmp = path.join(config.incomingDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
+            tmp = path.join(config.tempDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
         log.info(req, res, "Receiving: " + dstRelative);
         files[dstRelative] = {
@@ -1506,7 +1517,7 @@ function streamArchive(req, res, type) {
 // Argument handler
 function handleArguments() {
     var args = process.argv.slice(2), option = args[0];
-    config = cfg(path.join(process.cwd(), "config.json"));
+    config = cfg(path.join(__dirname, "config.json"));
 
     if (option === "list" && args.length === 1) {
         readDB();
@@ -1536,7 +1547,6 @@ function handleArguments() {
 function readDB() {
     var dbString = "",
         doWrite  = false;
-
     try {
         dbString = String(fs.readFileSync(config.db));
         db = JSON.parse(dbString);
@@ -1554,7 +1564,7 @@ function readDB() {
             log.simple("Creating ", chalk.magenta(path.basename(config.db)), "...");
             doWrite = true;
         } else {
-            log.error("Error reading ", config.db, "\n", util.inspect(error));
+            log.error("Error readinxg ", config.db, "\n", util.inspect(error));
             process.exit(1);
         }
     }
@@ -1702,7 +1712,7 @@ function updateCSS() {
 //-----------------------------------------------------------------------------
 // Various helper functions
 function writeDB()         { fs.writeFileSync(config.db, JSON.stringify(db, null, 4)); }
-function getResPath(name)  { return path.join(config.resDir, name); }
+function getResPath(name)  { return path.join(__dirname + "/res/", name); }
 // removeFilePath is intentionally not an inverse to the add function
 function addFilePath(p)    { return utils.fixPath(config.filesDir + p); }
 function removeFilePath(p) { return utils.fixPath("/" + utils.fixPath(p).replace(utils.fixPath(config.filesDir), "")); }

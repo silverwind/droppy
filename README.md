@@ -56,14 +56,10 @@ Configuration is done through `config.json`, which is created on the first run, 
     "timestamps"   : true,
     "db"           : "./db.json",
     "filesDir"     : "./files/",
-    "incomingDir"  : "./temp/incoming/",
-    "resDir"       : "./res/",
-    "srcDir"       : "./src/",
-    "tls" : {
-        "key"      : "./key.pem",
-        "cert"     : "./cert.pem",
-        "ca"       : []
-    }
+    "tempDir"      : "./temp/",
+    "tlsKey"       : "./key.pem",
+    "tlsCert"      : "./cert.pem",
+    "tlsCA"        : "./ca.pem"
 }
 ````
 ###General options
@@ -87,17 +83,14 @@ Configuration is done through `config.json`, which is created on the first run, 
 ###Path options
 - `db`: Location of the database file.
 - `filesDir`: The directory which serves as the server's root.
-- `incomingDir`: The directory for temporary files during uploads.
-- `resDir`: The directory which contains the compiled resources and images.
-- `srcDir`: The directory which contains the html/js/css sources.
-- `tls`: See TLS options below.
+- `tempDir`: The directory for temporary files during uploads.
 
 ###TLS options
 These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when `useTLS` is enabled. All files are required in PEM format.
 
-- `key`: Path to your private key.
-- `cert`: Path to your certificate.
-- `ca`: An optional array of paths to your intermediate (CA) certificates.
+- `tlsKey`: Path to your private key.
+- `tlsCert`: Path to your certificate.
+- `tlsCA`: An optional array of paths to your intermediate (CA) certificates.
 
 ##Supported Browsers
 - Firefox (last 2 versions)
