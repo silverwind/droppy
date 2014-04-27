@@ -27,31 +27,30 @@
 
 var
     // Libraries
-    utils    = require("./lib/utils.js"),
-    log      = require("./lib/log.js"),
-    cfg      = require("./lib/config.js"),
-    tpls     = require("./lib/dottemplates.js"),
+    utils        = require("./lib/utils.js"),
+    log          = require("./lib/log.js"),
+    cfg          = require("./lib/config.js"),
+    tpls         = require("./lib/dottemplates.js"),
     // Modules
-    archiver = require("archiver"),
-    async    = require("async"),
-    ap       = require("autoprefixer"),
-    cpr      = require("cpr"),
-    Busboy   = require("busboy"),
-    chalk    = require("chalk"),
-    crypto   = require("crypto"),
-    fs       = require("graceful-fs"),
-    http     = require("http"),
-    _        = require("lodash"),
-    mime     = require("mime"),
-    mkdirp   = require("mkdirp"),
-    path     = require("path"),
-    qs       = require("querystring"),
-    request  = require("request"),
-    rimraf   = require("rimraf"),
-    unzip    = require("unzip"),
-    util     = require("util"),
-    Wss      = require("ws").Server,
-    zlib     = require("zlib"),
+    archiver     = require("archiver"),
+    async        = require("async"),
+    ap           = require("autoprefixer"),
+    cpr          = require("cpr"),
+    Busboy       = require("busboy"),
+    chalk        = require("chalk"),
+    crypto       = require("crypto"),
+    fs           = require("graceful-fs"),
+    _            = require("lodash"),
+    mime         = require("mime"),
+    mkdirp       = require("mkdirp"),
+    path         = require("path"),
+    qs           = require("querystring"),
+    request      = require("request"),
+    rimraf       = require("rimraf"),
+    unzip        = require("unzip"),
+    util         = require("util"),
+    Wss          = require("ws").Server,
+    zlib         = require("zlib"),
     // Variables
     version      = require("./package.json").version,
     cmPath       = "node_modules/codemirror/",
@@ -75,46 +74,82 @@ var
         templates : []
     };
 
-// Argument handler
-if (isCLI) handleArguments();
+//-----------------------------------------------------------------------------
+// Exported function, takes a optional options object
+var droppy = module.exports = function (options) {
+    init(options);
+    return function (req, res, next) {
+        var method = req.method.toUpperCase();
+        if (!ready) { // Show a simple self-reloading loading page during startup
+            res.statusCode = 503;
+            res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
+        } else {
+            while(req.url.indexOf("%00") !== -1) // Strip all null-bytes from the url
+                req.url = req.url.replace(/\%00/g, "");
 
-console.log([
-        "....__..............................\n",
-        ".--|  |----.-----.-----.-----.--.--.\n",
-        "|  _  |   _|  _  |  _  |  _  |  |  |\n",
-        "|_____|__| |_____|   __|   __|___  |\n",
-        ".................|__|..|__|..|_____|\n",
-    ].join("").replace(/\./gm, chalk.black("."))
-              .replace(/\_/gm, chalk.magenta("_"))
-              .replace(/\-/gm, chalk.magenta("-"))
-              .replace(/\|/gm, chalk.magenta("|"))
-);
-log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
-           chalk.blue("node "), chalk.green(process.version.substring(1), "\n"));
+            if (method === "GET") {
+                handleGET(req, res);
+            } else if (method === "POST") {
+                handlePOST(req, res);
+            } else if (method === "OPTIONS") {
+                res.setHeader("Allow", "GET,POST,OPTIONS");
+                res.end();
+                log.info(req, res);
+            } else {
+                res.statusCode = 405;
+                res.end();
+                log.info(req, res);
+            }
+        }
+    };
+};
 
-config = cfg(path.join(process.cwd(), "config.json"));
-log.init(config);
-fs.MAX_OPEN = config.maxOpen;
-log.useTimestamp = config.timestamps;
+//-----------------------------------------------------------------------------
+// Start up our own listener when not used as a module
+if(!module.parent) {
+    // Argument handler
+    if (isCLI) handleArguments();
 
-// Read user/sessions from DB and check if its the first run
-readDB();
-firstRun = Object.keys(db.users).length < 1;
+    console.log([
+            "....__..............................\n",
+            ".--|  |----.-----.-----.-----.--.--.\n",
+            "|  _  |   _|  _  |  _  |  _  |  |  |\n",
+            "|_____|__| |_____|   __|   __|___  |\n",
+            ".................|__|..|__|..|_____|\n",
+        ].join("").replace(/\./gm, chalk.black("."))
+                  .replace(/\_/gm, chalk.magenta("_"))
+                  .replace(/\-/gm, chalk.magenta("-"))
+                  .replace(/\|/gm, chalk.magenta("|"))
+    );
+    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
+               chalk.blue("node "), chalk.green(process.version.substring(1), "\n"));
 
-// Listen but show an loading page until ready
-createListener();
+    createListener(droppy());
+}
 
-// Copy/Minify JS, CSS and HTML content
-prepareContent();
+//-----------------------------------------------------------------------------
+// Init everything
+function init(options) {
+    config = cfg(options, path.join(process.cwd(), "config.json"));
+    log.init(config);
+    fs.MAX_OPEN = config.maxOpen;
+    log.useTimestamp = config.timestamps;
 
-// Prepare to get up and running
-cacheResources(config.resDir, function () {
-    setupDirectories(function () {
-        cleanupLinks();
-        ready = true;
-        log.simple("Ready for requests!");
+    // Read user/sessions from DB and check if its the first run
+    readDB();
+    // Copy/Minify JS, CSS and HTML content
+    prepareContent();
+
+    // Prepare to get up and running
+    cacheResources(config.resDir, function () {
+        setupDirectories(function () {
+            cleanupLinks(function() {
+                ready = true;
+                log.simple("Ready for requests!");
+            });
+        });
     });
-});
+}
 
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
@@ -338,7 +373,7 @@ function cleanupTemp(initial, callback) {
 
 //-----------------------------------------------------------------------------
 // Clean up our shortened links by removing links to nonexistant files
-function cleanupLinks() {
+function cleanupLinks(callback) {
     var linkcount = 0, cbcount = 0;
     Object.keys(db.shortlinks).forEach(function (link) {
         linkcount++;
@@ -350,6 +385,7 @@ function cleanupLinks() {
                 }
                 if (cbcount === linkcount) {
                     writeDB();
+                    callback();
                 }
             });
         })(link, db.shortlinks[link]);
@@ -358,10 +394,11 @@ function cleanupLinks() {
 
 //-----------------------------------------------------------------------------
 // Bind to listening port
-function createListener() {
-    var server, key, cert, ca, tlsModule, options, sessions;
+function createListener(handler) {
+    var server, key, cert, ca, tlsModule, options, sessions,
+        http = require("http");
     if (!config.useTLS) {
-        server = http.createServer(onRequest);
+        server = http.createServer(handler);
     } else {
         try {
             key = fs.readFileSync(config.tls.key);
@@ -401,9 +438,8 @@ function createListener() {
         server.timeout = 120000;
 
         server.on("request", function (req, res) {
-            if (config.useHSTS)
-                res.setHeader("Strict-Transport-Security", "max-age=31536000");
-            onRequest(req, res);
+            if (config.useHSTS) res.setHeader("Strict-Transport-Security", "max-age=31536000");
+            handler(req, res);
         });
 
         server.on("clientError", function (err, conn) {
@@ -442,40 +478,6 @@ function createListener() {
     });
 
     server.listen(config.listenPort);
-}
-
-//-----------------------------------------------------------------------------
-// GET/POST handler
-function onRequest(req, res) {
-    // Show a simple self-reloading loading page during startup
-    if (!ready) {
-        res.statusCode = 503;
-        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
-        return;
-    }
-
-    // Strip all null-bytes from the url
-    while(req.url.indexOf("%00") !== -1) {
-      req.url = req.url.replace(/\%00/g, "");
-    }
-
-    switch (req.method.toUpperCase()) {
-    case "GET":
-        handleGET(req, res);
-        break;
-    case "POST":
-        handlePOST(req, res);
-        break;
-    case "OPTIONS":
-        res.setHeader("Allow", "GET,POST,OPTIONS");
-        res.end();
-        log.info(req, res);
-        break;
-    default:
-        res.statusCode = 405;
-        res.end();
-        log.info(req, res);
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -1559,6 +1561,9 @@ function readDB() {
 
     // Write a new DB if necessary
     if (doWrite) writeDB();
+
+    // Allow user creation when no users exist.
+    firstRun = Object.keys(db.users).length < 1;
 }
 
 //-----------------------------------------------------------------------------
