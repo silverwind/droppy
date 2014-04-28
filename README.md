@@ -38,12 +38,12 @@ By default, the server will listen on [port 8989](http://localhost:8989/). On fi
 Configuration is done through `config.json`, which is created on the first run, with these defaults:
 ````javascript
 {
+    "port"         : 8989,
+    "host"         : "0.0.0.0",
     "debug"        : false,
     "useTLS"       : false,
     "useSPDY"      : false,
     "useHSTS"      : false,
-    "listenHost"   : "0.0.0.0",
-    "listenPort"   : 8989,
     "readInterval" : 250,
     "keepAlive"    : 20000,
     "linkLength"   : 3,
@@ -63,12 +63,12 @@ Configuration is done through `config.json`, which is created on the first run, 
 }
 ````
 ###General options
+- `port`: The port to listen on.
+- `host`: The host address to listen on.
 - `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
 - `useTLS`: Whether the server should use SSL/TLS encryption.
 - `useSPDY`: Enables the SPDYv3 protocol. Depends on `useTLS`.
 - `useHSTS`: Enables the [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header with 1 year caching time. Depends on `useTLS`.
-- `listenHost`: The host address to listen on.
-- `listenPort`: The port to listen on.
 - `readInterval`: The minimum time gap in milliseconds in which updates to a single directory are sent.
 - `keepAlive`: The interval in milliseconds in which the server sends keepalive message over the websocket. This obviously adds some overhead, but may be needed to keep clients connected when proxies are involved. Set to `0` to disable keepalive messages.
 - `linkLength`: The amount of characters in a shortlink.

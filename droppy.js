@@ -478,17 +478,17 @@ function createListener(handler) {
 
     server.on("error", function (error) {
         if (error.code === "EADDRINUSE")
-            log.simple("Failed to bind to ", chalk.cyan(config.listenHost), chalk.red(":"),
-                      chalk.blue(config.listenPort), chalk.red(". Address already in use.\n"));
+            log.simple("Failed to bind to ", chalk.cyan(config.host), chalk.red(":"),
+                      chalk.blue(config.port), chalk.red(". Address already in use.\n"));
         else if (error.code === "EACCES")
-            log.simple("Failed to bind to ", chalk.cyan(config.listenHost), chalk.red(":"),
-                      chalk.blue(config.listenPort), chalk.red(". Need permission to bind to ports < 1024.\n"));
+            log.simple("Failed to bind to ", chalk.cyan(config.host), chalk.red(":"),
+                      chalk.blue(config.port), chalk.red(". Need permission to bind to ports < 1024.\n"));
         else
             log.error(error);
         process.exit(1);
     });
 
-    server.listen(config.listenPort);
+    server.listen(config.port);
 }
 
 //-----------------------------------------------------------------------------
