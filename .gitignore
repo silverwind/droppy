@@ -7,3 +7,4 @@ db.json
 config.json
 droppy*.tgz
 *.sublime-project
+*.sublime-workspace
