@@ -1238,7 +1238,7 @@ function handleFileRequest(req, res, download) {
     //if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
-    filepath = req.url.match(/\?([\$~_])\/([\s\S]+)$/)
+    filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/)
     if (filepath[1] === "$") {
         filepath = addFilePath(db.shortlinks[filepath[2]]);
     } else if (filepath[1] === "~"
