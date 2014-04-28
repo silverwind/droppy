@@ -1146,15 +1146,17 @@
 
     function getLocationsFromHash() {
         var hash = document.location.hash.split("#!");
-        if (hash.length !== 1)
-            hash.shift();
+        hash.shift();
+        if (hash.length === 0)
+            hash.push("")
         return hash;
     }
 
     function getHashLocationsFromViews(modview, dest) {
         var hash = "";
         droppy.views.forEach(function (view) {
-            if (modview && modview === view)
+            view = $(view);
+            if (modview && modview.is(view))
                 hash += "#!" + dest;
             else
                 hash += "#!" + getViewLocation(view);
