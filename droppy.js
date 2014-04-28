@@ -1104,7 +1104,8 @@ function handleGET(req, res, next) {
 //-----------------------------------------------------------------------------
 var blocked = [];
 function handlePOST(req, res) {
-    var URI = decodeURIComponent(req.url), body = "";
+    var URI = decodeURIComponent(req.url)
+      , body = "";
     if (/\/upload/.test(URI)) {
         if (!getCookie(req.headers.cookie)) {
             res.statusCode = 401;
@@ -1139,6 +1140,7 @@ function handlePOST(req, res) {
             }
         });
     } else if (/\/adduser/.test(URI) && firstRun) {
+        console.log(req.body)
         req.on("data", function (data) { body += data; });
         req.on("end", function () {
             var postData = qs.parse(body);

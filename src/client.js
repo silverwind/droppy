@@ -336,7 +336,12 @@
             else {
                 // Create new view with initiallizing
                 getLocationsFromHash().forEach(function (string, index) {
-                    newView(join(decodeURIComponent(string)), index);
+                    var dest = join(decodeURIComponent(string));
+                    if (index === 0)
+                        newView(dest, index);
+                    else if (index === 1) {
+                        droppy.split(dest);
+                    }
                 })
             }
         };
@@ -539,7 +544,7 @@
 
         submit.register("click", function () { form.submit(); });
         form.register("submit", function () {
-            $.post(firstrun ? "adduser" : "login", form.serialize(), null, "json").always(function (xhr) {
+            $.post(window.location.pathname + (firstrun ? "/adduser" : "/login"), form.serialize(), null, "json").always(function (xhr) {
                 if (xhr.status  === 202) {
                     requestPage(true);
                 } else if (xhr.status === 401) {
@@ -556,6 +561,7 @@
                     $("#login-info-box").attr("class", "error");
                 }
             });
+            return false;
         });
     }
 // ============================================================================
