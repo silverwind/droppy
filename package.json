@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
@@ -26,7 +26,7 @@
     "mkdirp": "~0.4.0",
     "request": "~2.34.0",
     "rimraf": "~2.2.6",
-    "spdy": "~1.25.4",
+    "spdy": "~1.25.5",
     "uglify-js": "~2.4.13",
     "unzip": "~0.1.9",
     "ws": "~0.4.31"
@@ -34,7 +34,7 @@
   "devDependencies": {
     "grunt": "~0.4.4",
     "grunt-bump": "~0.0.13",
-    "grunt-shell": "~0.6.4"
+    "grunt-shell": "~0.7.0"
   },
   "directories": {
     "files": "files",

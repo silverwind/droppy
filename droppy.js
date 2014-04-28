@@ -102,13 +102,14 @@ var
     };
 
 //-----------------------------------------------------------------------------
-// Exported function, takes a optional options object
+// Exported function, takes a option object which overrides config.json
 var droppy = module.exports = function (options) {
     var droppyWSPort = 89
     init(options);
     setupSocket({port:droppyWSPort});
     return function (req, res, next) {
         var method = req.method.toUpperCase();
+        //if (!hasServer && req.socket.server) setupSocket(req.socket.server); // May not be compatible with Express
         if (!ready) { // Show a simple self-reloading loading page during startup
             res.statusCode = 503;
             res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
@@ -132,6 +133,7 @@ var droppy = module.exports = function (options) {
         }
     };
 };
+
 
 //-----------------------------------------------------------------------------
 // Start up our own listener when not used as a module
@@ -160,6 +162,7 @@ if (!module.parent) {
 // Init everything
 function init(options) {
     config = cfg(options, path.join(__dirname, "config.json"));
+
     log.init(config);
 
     fs.MAX_OPEN = config.maxOpen;
@@ -1733,6 +1736,7 @@ process
 //-----------------------------------------------------------------------------
 function shutdown(signal) {
     var count = 0;
+    if (!ready) process.exit(0);
     log.simple("Received " + signal + " - Shutting down...");
     Object.keys(clients).forEach(function (client) {
         if (!clients[client] || !clients[client].ws) return;
