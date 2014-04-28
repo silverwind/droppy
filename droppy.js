@@ -1238,10 +1238,11 @@ function handleFileRequest(req, res, download) {
     //if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
-    filepath = req.url.match(/\?([\$~])\/([\s\S]+)$/)
+    filepath = req.url.match(/\?([\$~_])\/([\s\S]+)$/)
     if (filepath[1] === "$") {
         filepath = addFilePath(db.shortlinks[filepath[2]]);
-    } else if (filepath[1] === "~") {
+    } else if (filepath[1] === "~"
+            || filepath[1] === "_") {
         filepath = addFilePath("/" + filepath[2]);
     }
 
