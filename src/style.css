@@ -229,8 +229,6 @@ input:-webkit-autofill {
    position: absolute;
    box-shadow: 0 0 1em rgba(0, 0, 0, 0.6);
    height: 1.5rem;
-   border-top: 1px solid #333;
-   border-bottom: 1px solid #333;
 }
 
 .view.right .path { border-left: 1px solid #333}
@@ -242,9 +240,8 @@ input:-webkit-autofill {
 .path li {
     cursor: pointer;
     display: inline-block;
-    position: relative;
-    height: 100%;
     line-height: 1.5rem;
+    position: relative;
 }
 
 @media all and (min-width: 1024px) { .path li { padding: 0 .4em 0 1.6em } }
@@ -257,15 +254,15 @@ input:-webkit-autofill {
 }
 
 .path .home {
-    fill: #ddd;
-    height: 50%;
-    display: inline-block;
+    fill: #ccc;
+    height: .8rem;
+    width: .8rem;
     vertical-align: middle;
-    position: relative;
 }
+.path li:hover .home { fill: #fff }
 
-.path li.in  { opacity: 1; transform: translateX(0);}
-.path li.out { opacity: 0; transform: translateX(-100px) !important;}
+.path li.in  { opacity: 1; transform: translateX(0) }
+.path li.out { opacity: 0; transform: translateX(-100px) !important }
 .path li:first-of-type { padding-left: .5em }
 .path li { color: #ccc; transition: transform .4s ease, opacity .4s ease }
 
@@ -648,8 +645,8 @@ input:-webkit-autofill {
     border-left-color   : #222;
     border-right-color  : #222;
     border-top-color    : #f1a;
-    margin-top: .15rem;
-    margin-right: .15rem;
+    margin-top: .2rem;
+    margin-right: .2rem;
     border-style: solid;
     border-radius: 100%;
     border-width: 3px
