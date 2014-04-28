@@ -1144,6 +1144,21 @@
             return join(view[0].currentFolder, view[0].currentFile);
     }
 
+    function getLocationsFromHash() {
+        var hash = document.location.hash.split("#!");
+        if (hash.length !== 1)
+            hash.shift();
+        return hash;
+    }
+
+    function getHashLocationsFromViews() {
+        var hash = "";
+        droppy.views.forEach(function () {
+            hash += "#" + getViewLocation(this);
+        });
+        return hash;
+    }
+
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
         if (typeof destination.length !== "number") throw "Destination needs to be string or array";
