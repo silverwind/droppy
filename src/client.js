@@ -335,9 +335,9 @@
                 sendMessage();
             else {
                 // Create new view with initiallizing
-                newView(join(decodeURIComponent(window.location.pathname)), 0);
-                if (window.location.hash.length)
-                    droppy.split(join(decodeURIComponent(window.location.hash.slice(1))));
+                getLocationsFromHash().forEach(function (string, index) {
+                    newView(join(decodeURIComponent(string)), index);
+                })
             }
         };
 
@@ -924,7 +924,7 @@
         view[0].isUploading = true;
 
         if (formLength) {
-            xhr.open("POST", "/upload?" + $.param({
+            xhr.open("POST", document.location.pathname + "/upload?" + $.param({
                 vId : view[0].vId,
                 to  : encodeURIComponent(view[0].currentFolder),
                 r   : droppy.get("renameExistingOnUpload")
@@ -1134,7 +1134,7 @@
     $(window).register("popstate", function () {
         // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
-        updateLocation(null, [decodeURIComponent(window.location.pathname), decodeURIComponent(window.location.hash.slice(1))], true);
+        updateLocation(null, getLocationsFromHash(), true);
     });
 
     function getViewLocation(view) {
@@ -1151,10 +1151,13 @@
         return hash;
     }
 
-    function getHashLocationsFromViews() {
+    function getHashLocationsFromViews(modview, dest) {
         var hash = "";
-        droppy.views.forEach(function () {
-            hash += "#" + getViewLocation(this);
+        droppy.views.forEach(function (view) {
+            if (modview && modview === view)
+                hash += "#!" + dest;
+            else
+                hash += "#!" + getViewLocation(view);
         });
         return hash;
     }
@@ -1190,10 +1193,7 @@
     }
 
     function updateHistory(view, dest) {
-        var newDest;
-        if (view[0].vId === 0) newDest = dest + window.location.hash;
-        else newDest = window.location.pathname + "#" + dest;
-        window.history.pushState(null, null, newDest);
+        window.history.pushState(null, null, getHashLocationsFromViews(view, dest));
     }
 
     // Update the path indicator
@@ -2521,7 +2521,7 @@
         var box   = view.find(".info-box"),
             input = box.find("input");
         box.find("svg").replaceWith(droppy.svg.link);
-        input.val(window.location.protocol + "//" + window.location.host + "/$/" +  link);
+        input.val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link);
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
         });
