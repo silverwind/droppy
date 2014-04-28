@@ -267,7 +267,7 @@
 
     // Load HTML and replace SVG placeholders
     function getPage() {
-        $.get("/!/content/" + Math.random().toString(36).substr(2, 4)).then(function (data, textStatus, xhr) {
+        $.get("?!/content/" + Math.random().toString(36).substr(2, 4)).then(function (data, textStatus, xhr) {
             loadPage(xhr.getResponseHeader("X-Page-Type"), prepareSVG(data));
         });
     }
@@ -325,7 +325,7 @@
     var retries = 5, retryTimeout = 4000;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-        droppy.socket = new WebSocket(protocol + document.location.host + "/?");
+        droppy.socket = new WebSocket(protocol + document.location.hostname + ":89");
         droppy.socket.onopen = function () {
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
@@ -539,7 +539,7 @@
 
         submit.register("click", function () { form.submit(); });
         form.register("submit", function () {
-            $.post(firstrun ? "/adduser" : "/login", form.serialize(), null, "json").always(function (xhr) {
+            $.post(firstrun ? "adduser" : "login", form.serialize(), null, "json").always(function (xhr) {
                 if (xhr.status  === 202) {
                     requestPage(true);
                 } else if (xhr.status === 401) {
@@ -1685,7 +1685,7 @@
             event.stopPropagation();
             var win,
                 entry = $("#entry-menu").data("target"),
-                url   = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
+                url   = entry.find(".file-link").attr("href").replace(/\?~\//, "?_/"),
                 type  = $("#entry-menu").attr("class").match(/type\-(\w+)/),
                 view  = entry.parents(".view");
             if (type) {
@@ -1970,7 +1970,7 @@
             i = encodedId.length - 1;
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
-        return "/_" + encodedId.join("/");
+        return "?_" + encodedId.join("/");
     }
 
     function openMedia(view, type, sameFolder) {
@@ -2006,7 +2006,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/_" + entryId,
+            url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
             loadContent(view, contentWrap(view).append(doc));
