@@ -63,6 +63,7 @@ var
     cssCache     = null,
     firstRun     = null,
     ready        = false,
+    hasServer    = null,
     cookieName   = "s",
     isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
     mode         = {file: "644", dir: "755"},
@@ -102,11 +103,13 @@ var
     };
 
 //-----------------------------------------------------------------------------
-// Exported function, takes a optional options object
+// Exported function, takes a option object which overrides config.json
 var droppy = module.exports = function (options) {
     init(options);
+
     return function (req, res, next) {
         var method = req.method.toUpperCase();
+        if (!hasServer && req.socket.server) setupSocket(req.socket.server); // May not be compatible with Express
         if (!ready) { // Show a simple self-reloading loading page during startup
             res.statusCode = 503;
             res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
@@ -130,6 +133,7 @@ var droppy = module.exports = function (options) {
         }
     };
 };
+
 
 //-----------------------------------------------------------------------------
 // Start up our own listener when not used as a module
@@ -158,6 +162,7 @@ if (!module.parent) {
 // Init everything
 function init(options) {
     config = cfg(options, path.join(__dirname, "config.json"));
+
     log.init(config);
 
     fs.MAX_OPEN = config.maxOpen;
@@ -470,7 +475,6 @@ function createListener(handler) {
     }
 
     server.on("listening", function () {
-        setupSocket(server);
         if (config.debug) watchCSS();
         log.simple("Listening on ", chalk.cyan(server.address().address),
                    ":", chalk.blue(server.address().port));
@@ -494,7 +498,8 @@ function createListener(handler) {
 //-----------------------------------------------------------------------------
 // WebSocket functions
 function setupSocket(server) {
-    var wss = new Wss({server : server});
+    hasServer = true;
+    var wss = new Wss({server: server});
     if (config.keepAlive > 0) {
         setInterval(function () {
             Object.keys(wss.clients).forEach(function (client) {
@@ -1731,6 +1736,7 @@ process
 //-----------------------------------------------------------------------------
 function shutdown(signal) {
     var count = 0;
+    if (!ready) process.exit(0);
     log.simple("Received " + signal + " - Shutting down...");
     Object.keys(clients).forEach(function (client) {
         if (!clients[client] || !clients[client].ws) return;
