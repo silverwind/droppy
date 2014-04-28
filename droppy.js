@@ -104,7 +104,9 @@ var
 //-----------------------------------------------------------------------------
 // Exported function, takes a optional options object
 var droppy = module.exports = function (options) {
+    var droppyWSPort = 89
     init(options);
+    setupSocket({port:droppyWSPort});
     return function (req, res, next) {
         var method = req.method.toUpperCase();
         if (!ready) { // Show a simple self-reloading loading page during startup
@@ -418,9 +420,9 @@ function createListener(handler) {
         server = http.createServer(handler);
     } else {
         try {
-            key = fs.readFileSync(config.tlsKey);
+            key = fs.readFileSync(path.join(__dirname, config.tlsKey));
             cert = fs.readFileSync(config.tlsCert);
-            if (config.tls.ca.length) ca = fs.readFileSync(config.tlsCA);
+            if (config.tls.ca.length) ca = fs.readFileSync(path.join(__dirname, config.tlsCA));
         } catch (error) {
             log.error("Couldn't read required TLS keys or certificates.", util.inspect(error));
             process.exit(1);
@@ -470,7 +472,7 @@ function createListener(handler) {
     }
 
     server.on("listening", function () {
-        setupSocket(server);
+        setupSocket({server : server});
         if (config.debug) watchCSS();
         log.simple("Listening on ", chalk.cyan(server.address().address),
                    ":", chalk.blue(server.address().port));
@@ -493,8 +495,8 @@ function createListener(handler) {
 
 //-----------------------------------------------------------------------------
 // WebSocket functions
-function setupSocket(server) {
-    var wss = new Wss({server : server});
+function setupSocket(options) {
+    var wss = new Wss(options);
     if (config.keepAlive > 0) {
         setInterval(function () {
             Object.keys(wss.clients).forEach(function (client) {
@@ -1027,7 +1029,7 @@ function cacheResources(dir, callback) {
 }
 
 //-----------------------------------------------------------------------------
-function handleGET(req, res) {
+function handleGET(req, res, next) {
     var URI = decodeURIComponent(req.url),
     isAuth = false;
     req.time = Date.now();
@@ -1037,9 +1039,7 @@ function handleGET(req, res) {
     if (getCookie(req.headers.cookie) || config.noLogin)
         isAuth = true;
 
-    if (URI === "/" || URI === "//") {
-        handleResourceRequest(req, res, "base.html");
-    } else if (/^\/!\/content/.test(URI)) {
+    if (/\?!\/content/.test(URI)) {
         if (isAuth) {
             res.setHeader("X-Page-Type", "main");
             handleResourceRequest(req, res, "main.html");
@@ -1050,27 +1050,29 @@ function handleGET(req, res) {
             res.setHeader("X-Page-Type", "auth");
             handleResourceRequest(req, res, "auth.html");
         }
-    } else if (/^\/!\/null/.test(URI)) {
+    } else if (/\?!\/null/.test(URI)) {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("Content-Length", 0);
         res.end();
         log.info(req, res);
         return;
-    } else if (/^\/!\//.test(URI)) {
-        handleResourceRequest(req, res, req.url.substring(3));
-    } else if (/^\/~\//.test(URI) || /^\/\$\//.test(URI)) {
+    } else if (/\?!\//.test(URI)) {
+        handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
+    } else if (/\?~\//.test(URI) || /\?\/\$\//.test(URI)) {
         handleFileRequest(req, res, true);
-    } else if (/^\/_\//.test(URI)) {
+    } else if (/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
-    } else if (/^\/~~\//.test(URI)) {
+    } else if (/\?~~\//.test(URI)) {
         streamArchive(req, res, "zip");
-    } else if (URI === "/favicon.ico") {
+    } else if (/\?favicon.ico/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
+    /*} else if (URI === "/" || URI === "//") {*/
     } else {
-        if (!isAuth) {
+        handleResourceRequest(req, res, "base.html");
+        /*if (!isAuth) {
             res.statusCode = 301;
-            res.setHeader("Location", "/");
+            res.setHeader("Location", "");
             res.end();
             log.info(req, res);
             return;
@@ -1087,7 +1089,7 @@ function handleGET(req, res) {
                 res.end();
                 log.info(req, res);
             }
-        });
+        });*/
     }
 }
 
@@ -1095,14 +1097,14 @@ function handleGET(req, res) {
 var blocked = [];
 function handlePOST(req, res) {
     var URI = decodeURIComponent(req.url), body = "";
-    if (/^\/upload/.test(URI)) {
+    if (/\/upload/.test(URI)) {
         if (!getCookie(req.headers.cookie)) {
             res.statusCode = 401;
             res.end();
             log.info(req, res);
         }
         handleUploadRequest(req, res);
-    } else if (URI === "/login") {
+    } else if (/\/login/.test(URI)) {
         // Throttle login attempts to 1 per second
         if (blocked.indexOf(req.socket.remoteAddress) >= 0) {
             res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -1128,7 +1130,7 @@ function handlePOST(req, res) {
                 log.info(req, res, "User ", postData.username, chalk.red(" unauthorized"));
             }
         });
-    } else if (URI === "/adduser" && firstRun) {
+    } else if (/\/adduser/.test(URI) && firstRun) {
         req.on("data", function (data) { body += data; });
         req.on("end", function () {
             var postData = qs.parse(body);
@@ -1186,7 +1188,7 @@ function handleResourceRequest(req, res, resourceName) {
                 // Set the IE10 compatibility mode
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
-            } else if (/^\/content\//.test(req.url)) {
+            } else if (/\?\/content\//.test(req.url)) {
                 // Don't ever cache /content since its data is dynamic
                 res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
             } else if (resourceName === "favicon.ico") {
@@ -1225,7 +1227,7 @@ function handleFileRequest(req, res, download) {
     if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
-    if (/^\/\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
+    if (/\?\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
         shortLink = db.shortlinks[URI];
 
     // Validate the cookie for the remaining requests
@@ -1693,7 +1695,7 @@ function watchCSS() {
 function updateCSS() {
     var temp = "";
     resources.css.forEach(function (file) {
-        temp += fs.readFileSync(file).toString("utf8") + "\n";
+        temp += fs.readFileSync(path.join(__dirname, file)).toString("utf8") + "\n";
     });
     cssCache = ap("last 2 versions").process(temp).css;
     Object.keys(clients).forEach(function (cookie) {
