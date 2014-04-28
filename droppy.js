@@ -1067,7 +1067,8 @@ function handleGET(req, res, next) {
         return;
     } else if (/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
-    } else if (/\?~\//.test(URI) || /\?\/\$\//.test(URI)) {
+    } else if (/\?~\//.test(URI)
+            || /\?\$\//.test(URI)) {
         handleFileRequest(req, res, true);
     } else if (/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
@@ -1231,14 +1232,18 @@ function handleResourceRequest(req, res, resourceName) {
 
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res, download) {
-    var URI = decodeURIComponent(req.url).substring(3), shortLink, dispo, filepath;
+    var URI = decodeURIComponent(req.url), shortLink, dispo, filepath;
 
     // Safety check
-    if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
+    //if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
-    if (/\?\$\//.test(req.url) && db.shortlinks[URI] && URI.length  === config.linkLength)
-        shortLink = db.shortlinks[URI];
+    filepath = req.url.match(/\?([\$~])\/([\s\S]+)$/)
+    if (filepath[1] === "$") {
+        filepath = addFilePath(db.shortlinks[filepath[2]]);
+    } else if (filepath[1] === "~") {
+        filepath = addFilePath("/" + filepath[2]);
+    }
 
     // Validate the cookie for the remaining requests
     if (!getCookie(req.headers.cookie) && !shortLink) {
@@ -1256,8 +1261,6 @@ function handleFileRequest(req, res, download) {
         log.info(req, res);
         return;
     }
-
-    filepath = shortLink ? addFilePath(shortLink) : addFilePath("/" + URI);
 
     fs.stat(filepath, function (error, stats) {
         if (!error && stats) {
