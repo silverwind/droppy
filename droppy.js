@@ -1055,7 +1055,7 @@ function handleGET(req, res, next) {
         }
     } else if (/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
-    } else if (/\?~\//.test(URI) || /\?\$\//.test(URI)) {
+    } else if (/\?[~\$]\//.test(URI)) {
         handleFileRequest(req, res, true);
     } else if (/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
