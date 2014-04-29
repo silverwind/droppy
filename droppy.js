@@ -472,7 +472,7 @@ function createListener(handler) {
     }
 
     server.on("listening", function () {
-        setupSocket({server : server});
+        setupSocket(server);
         if (config.debug) watchCSS();
         log.simple("Listening on ", chalk.cyan(server.address().address),
                    ":", chalk.blue(server.address().port));

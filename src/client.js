@@ -326,7 +326,7 @@
             if (droppy.queuedData)
                 sendMessage();
             else {
-                // Create new view with initiallizing
+                // Create new view with initializing
                 getLocationsFromHash().forEach(function (string, index) {
                     var dest = join(decodeURIComponent(string));
                     if (index === 0)
@@ -680,7 +680,7 @@
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
-                window.history.replaceState(null, null, join(first[0].currentFolder, first[0].currentFile)); // removes the hash
+                window.history.replaceState(null, null, getHashLocationsFromViews(first, join(first[0].currentFolder, first[0].currentFile)));
                 getView(0).removeClass("left");
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
@@ -1131,7 +1131,6 @@
 
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
-        // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
         updateLocation(null, getLocationsFromHash(), true);
     });
