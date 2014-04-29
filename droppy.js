@@ -62,6 +62,7 @@ var
     config       = null,
     cssCache     = null,
     firstRun     = null,
+    hasServer    = null,
     ready        = false,
     cookieName   = "s",
     isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
@@ -104,23 +105,19 @@ var
 //-----------------------------------------------------------------------------
 // Exported function, takes a option object which overrides config.json
 var droppy = module.exports = function (options) {
-    var droppyWSPort = 89
     init(options);
-    setupSocket({port:droppyWSPort});
     return function (req, res, next) {
         var method = req.method.toUpperCase();
-        //if (!hasServer && req.socket.server) setupSocket(req.socket.server); // May not be compatible with Express
+        if (!hasServer && req.socket.server) setupSocket(req.socket.server);
         if (!ready) { // Show a simple self-reloading loading page during startup
             res.statusCode = 503;
             res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
         } else {
-            while(req.url.indexOf("%00") !== -1) // Strip all null-bytes from the url
-                req.url = req.url.replace(/\%00/g, "");
-
+            while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
             if (method === "GET") {
-                handleGET(req, res);
+                handleGET(req, res, next);
             } else if (method === "POST") {
-                handlePOST(req, res);
+                handlePOST(req, res, next);
             } else if (method === "OPTIONS") {
                 res.setHeader("Allow", "GET,POST,OPTIONS");
                 res.end();
@@ -423,9 +420,9 @@ function createListener(handler) {
         server = http.createServer(handler);
     } else {
         try {
-            key = fs.readFileSync(path.join(__dirname, config.tlsKey));
+            key = fs.readFileSync(config.tlsKey);
             cert = fs.readFileSync(config.tlsCert);
-            if (config.tls.ca.length) ca = fs.readFileSync(path.join(__dirname, config.tlsCA));
+            if (config.tls.ca.length) ca = fs.readFileSync(config.tlsCA);
         } catch (error) {
             log.error("Couldn't read required TLS keys or certificates.", util.inspect(error));
             process.exit(1);
@@ -498,8 +495,9 @@ function createListener(handler) {
 
 //-----------------------------------------------------------------------------
 // WebSocket functions
-function setupSocket(options) {
-    var wss = new Wss(options);
+function setupSocket(server) {
+    hasServer = true;
+    var wss = new Wss({server: server});
     if (config.keepAlive > 0) {
         setInterval(function () {
             Object.keys(wss.clients).forEach(function (client) {
@@ -1091,7 +1089,7 @@ function handleGET(req, res, next) {
 
 //-----------------------------------------------------------------------------
 var blocked = [];
-function handlePOST(req, res) {
+function handlePOST(req, res, next) {
     var URI = decodeURIComponent(req.url)
       , body = "";
     if (/\/upload/.test(URI)) {
