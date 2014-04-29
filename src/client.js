@@ -45,14 +45,6 @@
             });
             return types;
         })(),
-        transDurationProp: (function () {
-            var props = ["transitionDuration", "MozTransitionDuration", "webkitTransitionDuration", "msTransitionDuration"],
-                el    = document.createElement("div");
-            while (props.length) {
-                var prop = props.pop();
-                if (prop in window.getComputedStyle(el)) return prop;
-            }
-        })(),
         webp: (function () {
             var img = new Image();
             img.onload = img.onerror = function () {
@@ -87,7 +79,7 @@
             callback.apply(el, event);
         }
 
-        duration = window.getComputedStyle(this[0])[droppy.detects.transDurationProp];
+        duration = window.getComputedStyle(this[0]).transitionDuration;
         duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
         setTimeout(function () { // Call back if "transitionend" hasn't fired in duration + 30
@@ -454,6 +446,7 @@
                         deleteCookie("session");
                         initVariables(); // Reset vars to their init state
                         droppy.set("hasLoggedOut", true);
+                        window.history.pushState(null, null, "/");
                         requestPage();
                     });
                 break;
@@ -544,7 +537,7 @@
 
         submit.register("click", function () { form.submit(); });
         form.register("submit", function () {
-            $.post(window.location.pathname + (firstrun ? "/adduser" : "/login"), form.serialize(), null, "json").always(function (xhr) {
+            $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
                 if (xhr.status  === 202) {
                     requestPage(true);
                 } else if (xhr.status === 401) {
@@ -930,7 +923,7 @@
         view[0].isUploading = true;
 
         if (formLength) {
-            xhr.open("POST", document.location.pathname + "/upload?" + $.param({
+            xhr.open("POST", getRootPath() + "upload?" + $.param({
                 vId : view[0].vId,
                 to  : encodeURIComponent(view[0].currentFolder),
                 r   : droppy.get("renameExistingOnUpload")
@@ -2563,6 +2556,12 @@
         if (x.length) return -1;
         if (y.length) return +1;
         return 0;
+    }
+
+    // Get the path to droppy's root, ensuring a trailing slash
+    function getRootPath() {
+        var p = window.location.pathname;
+        return p[p.length -1] === "/" ? p : p + "/";
     }
 
     // turn /path/to/file to file

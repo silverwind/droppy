@@ -1058,17 +1058,9 @@ function handleGET(req, res, next) {
             res.setHeader("X-Page-Type", "auth");
             handleResourceRequest(req, res, "auth.html");
         }
-    } else if (/\?!\/null/.test(URI)) {
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
-        res.setHeader("Content-Length", 0);
-        res.end();
-        log.info(req, res);
-        return;
     } else if (/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
-    } else if (/\?~\//.test(URI)
-            || /\?\$\//.test(URI)) {
+    } else if (/\?~\//.test(URI) || /\?\$\//.test(URI)) {
         handleFileRequest(req, res, true);
     } else if (/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
@@ -1141,7 +1133,6 @@ function handlePOST(req, res) {
             }
         });
     } else if (/\/adduser/.test(URI) && firstRun) {
-        console.log(req.body)
         req.on("data", function (data) { body += data; });
         req.on("end", function () {
             var postData = qs.parse(body);
