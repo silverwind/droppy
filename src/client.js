@@ -446,7 +446,7 @@
                         deleteCookie("session");
                         initVariables(); // Reset vars to their init state
                         droppy.set("hasLoggedOut", true);
-                        window.history.pushState(null, null, "/");
+                        window.history.pushState(null, null, getRootPath());
                         requestPage();
                     });
                 break;
@@ -1147,7 +1147,7 @@
         var hash = document.location.hash.split("#!");
         hash.shift();
         if (hash.length === 0)
-            hash.push("")
+            hash.push("");
         return hash;
     }
 
@@ -1194,7 +1194,9 @@
     }
 
     function updateHistory(view, dest) {
-        window.history.pushState(null, null, getHashLocationsFromViews(view, dest));
+        var path = getHashLocationsFromViews(view, dest);
+        if (!/\/$/.test(window.location.pathname)) path = window.location.pathname + "/" + path;
+        window.history.pushState(null, null, path);
     }
 
     // Update the path indicator
