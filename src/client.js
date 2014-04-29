@@ -1329,7 +1329,7 @@
         // Request a shortlink
         content.find(".data-row .shortlink").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage(null, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
+            sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
         });
         content.find(".icon-play").register("click", function () {
             preparePlayback($(this));

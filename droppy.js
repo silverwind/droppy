@@ -579,7 +579,7 @@ function setupSocket(server) {
                 var link;
                 // Check if we already have a link for that file
                 if (msg.data in db.shortlinks) {
-                    sendLink(cookie, db.shortlinks[msg.data]);
+                    sendLink(cookie, db.shortlinks[msg.data], vId);
                     return;
                 }
                 // Get a pseudo-random n-character lowercase string. The characters
@@ -592,7 +592,7 @@ function setupSocket(server) {
                 } while (db.shortlinks[link]); // In case the RNG generates an existing link, go again
                 log.info(ws, null, "Shortlink created: " + link + " -> " + msg.data);
                 db.shortlinks[link] = msg.data;
-                sendLink(cookie, link);
+                sendLink(cookie, link, vId);
                 writeDB();
                 break;
             case "DELETE_FILE":
@@ -778,9 +778,10 @@ function sendFiles(cookie, vId, eventType, sizes) {
 
 //-----------------------------------------------------------------------------
 // Send a file link to a client
-function sendLink(cookie, link) {
+function sendLink(cookie, link, vId) {
     if (!clients[cookie] || !clients[cookie].ws) return;
     send(clients[cookie].ws, JSON.stringify({
+        vId  : vId,
         type : "SHORTLINK",
         link : link
     }));
