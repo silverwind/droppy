@@ -82,7 +82,7 @@ input:-webkit-autofill {
 
 /* ============================ Main Page Layout =========================== */
 #flex-container {
-    position: fixed;
+    position: absolute;
     left: 0;
     right: 0;
     top: 0;
@@ -344,7 +344,7 @@ input:-webkit-autofill {
 
 #click-catcher {
     background: #000;
-    position: fixed;
+    position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
     transition: opacity 0.15s ease;
     z-index: 31;
@@ -1697,7 +1697,6 @@ input[type="checkbox"] { display: none }
     border-radius:  4px;
 }
 
-.info-box.link input:focus { border-color: #f81 }
 .info-box.error input { display: none }
 
 /* =========================== Drop Select Menu ============================ */
