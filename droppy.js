@@ -47,7 +47,6 @@ var
     qs           = require("querystring"),
     request      = require("request"),
     rimraf       = require("rimraf"),
-    unzip        = require("unzip"),
     util         = require("util"),
     Wss          = require("ws").Server,
     zlib         = require("zlib"),
@@ -323,7 +322,7 @@ function setupDirectories(callback) {
         if (config.demoMode) {
             cleanupForDemo(function schedule() {
                 callback();
-                setTimeout(cleanupForDemo, 10 * 60 * 1000, schedule);
+                setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
             });
         } else {
             callback();
