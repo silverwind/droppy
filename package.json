@@ -28,7 +28,7 @@
     "rimraf": "~2.2.6",
     "spdy": "~1.25.6",
     "uglify-js": "~2.4.13",
-    "unzip": "~0.1.9",
+    "decompress-zip": "~0.0.6",
     "ws": "~0.4.31"
   },
   "devDependencies": {

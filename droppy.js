@@ -323,7 +323,7 @@ function setupDirectories(callback) {
         if (config.demoMode) {
             cleanupForDemo(function schedule() {
                 callback();
-                setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
+                setTimeout(cleanupForDemo, 10 * 60 * 1000, schedule);
             });
         } else {
             callback();
@@ -363,12 +363,17 @@ function cleanupForDemo(doneCallback) {
             });
         },
         function (callback) {
-            var dest = path.join(config.filesDir, "Images"),
-                url  = "http://gdurl.com/lWOY/download";
+            var temp = path.join(config.tempDir + "img.zip"),
+                DecompressZip = require("decompress-zip"),
+                unzipper = new DecompressZip(temp),
+                dest = path.join(config.filesDir, "Images");
             log.simple("Downloading image samples...");
             mkdirp(dest, mode.dir, function () {
-                request(url).pipe(unzip.Extract({path: dest})).on("close", function () {
-                    callback(null);
+                request("http://gdurl.com/lWOY/download").pipe(fs.createWriteStream(temp)).on("close", function() {
+                    unzipper.on("extract", function () {
+                        callback(null);
+                    });
+                    unzipper.extract({path: dest});
                 });
             });
         }
