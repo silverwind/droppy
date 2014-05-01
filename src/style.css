@@ -181,7 +181,7 @@ input:-webkit-autofill {
     left: 0;
     width: 100%;
     padding: .25em;
-    transition: left .175s ease-in;
+    transition: transform .175s ease-in;
     position: absolute;
     overflow-y: auto;
     top: 1.5rem;
@@ -204,9 +204,9 @@ input:-webkit-autofill {
     height: .25em;
 }
 
-.content.center  { left: 0 }
-.content.back    { left: -100% }
-.content.forward { left: 100% }
+.content.center  { transform: translate3d(0,0,0)     }
+.content.back    { transform: translate3d(-100%,0,0) }
+.content.forward { transform: translate3d(100%,0,0)  }
 
 .view .directory.content .empty,
 .view .directory.content ul {
@@ -761,22 +761,17 @@ input:-webkit-autofill {
 
 .previewer .arrow-back, .previewer .arrow-forward {
     position: absolute;
-    fill: #aaa;
     bottom: 0; top: 0;
     cursor: pointer;
-    background: rgba(0,0,0,.2);
     z-index: 33;
     user-select: none;
-    transition: opacity .2s ease;
+    fill: #222;
+    stroke: #eee;
+    stroke-width: 15;
     opacity: 0;
+    transition: opacity .3s ease;
 }
-.mobile .previewer .arrow-back, .mobile .previewer .arrow-forward {
-    background: transparent;
-    opacity: 1;
-    fill: #333;
-    stroke: #fff;
-    stroke-width: 20;
-}
+.mobile .previewer .arrow-back, .mobile .previewer .arrow-forward { opacity: 1; transition: none }
 
 .previewer .arrow-back    { left: 0; right: 85% }
 .previewer .arrow-forward { left: 85%; right: 0 }
@@ -793,27 +788,16 @@ input:-webkit-autofill {
 
 .previewer .arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
 .previewer .arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
-
-html:not(.mobile) .previewer .arrow-back:hover svg {
-    height: 4em;
-    width: 4em;
-    left: -.75em;
-    fill: #eee;
-}
-html:not(.mobile) .previewer .arrow-forward:hover svg {
-    height: 4em;
-    width: 4em;
-    right: -.75em;
-    fill: #eee;
-}
+.previewer .arrow-back:hover svg    { height: 3em; width: 3em; left:  -.25em }
+.previewer .arrow-forward:hover svg { height: 3em; width: 3em; right: -.25em }
 
 .media-container {
     position: relative;
     height: 100%;
 }
 
-.media-container > img.left, .media-container > video.left    { transform: translate(-100%, -50%); opacity: 0 }
-.media-container > img.right, .media-container > video.right  { transform: translate( 100%, -50%); opacity: 0 }
+.media-container > img.left, .media-container > video.left    { transform: translate3d(-100%, -50%, 0); opacity: 0 }
+.media-container > img.right, .media-container > video.right  { transform: translate3d( 100%, -50%, 0); opacity: 0 }
 
 .media-container > img,
 .media-container > video {
@@ -824,7 +808,7 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     left: 50%;
     top: calc(50% - .75em);
     transform: translate(-50%, -50%);
-    transition: all .3s ease;
+    transition: transform .3s ease, opacity .3s ease;
 }
 
 .media-container figcaption {
@@ -1124,7 +1108,6 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
     right: 10em;
     font-weight: 400;
     line-height: 2em;
-    animation: flash 1s ease-out infinite;
     z-index: 1;
 }
 
@@ -1134,12 +1117,6 @@ html:not(.mobile) .previewer .arrow-forward:hover svg {
         right: 6em;
         text-align: left;
     }
-}
-
-@keyframes flash {
-  0%   { color: #ccc }
-  50%  { color: #fff }
-  100% { color: #ccc }
 }
 
 #seekbar {
