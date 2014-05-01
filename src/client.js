@@ -1658,23 +1658,23 @@
                             '</span></span>' +
                             droppy.svg.triangle +
                         '</div>');
-                    view.find(".paste-button").one("click", function (event) {
-                        event.stopPropagation();
-                        if (droppy.socketWait) return;
-                        if (droppy.clipboard) {
-                            showSpinner(view);
-                            droppy.clipboard.to = join(view[0].currentFolder, basename(droppy.clipboard.from));
-                            sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
-                        } else {
-                            throw "Clipboard was empty!";
-                        }
-                        droppy.clipboard = null;
-                        $("#click-catcher").trigger("click");
-                        $(".paste-button").replaceClass("in", "out");
-                    });
                 } else {
                     $(".paste-button .filename").text(basename(droppy.clipboard.from));
                 }
+                view.find(".paste-button").one("click", function (event) {
+                    event.stopPropagation();
+                    if (droppy.socketWait) return;
+                    if (droppy.clipboard) {
+                        showSpinner(view);
+                        droppy.clipboard.to = join(view[0].currentFolder, basename(droppy.clipboard.from));
+                        sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
+                    } else {
+                        throw "Clipboard was empty!";
+                    }
+                    droppy.clipboard = null;
+                    $("#click-catcher").trigger("click");
+                    $(".paste-button").replaceClass("in", "out");
+                });
                 $(".paste-button").setTransitionClass("out", "in");
             });
             event.stopPropagation();
