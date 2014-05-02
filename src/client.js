@@ -588,7 +588,7 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
-            var files, path, name,
+            var files, path, name, rootAdded,
                 obj = {};
             if (droppy.detects.inputDirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
                 files = event.target.files;
@@ -596,10 +596,15 @@
                     path = files[i].webkitRelativePath;
                     name = files[i].name;
                     if (path) {
-                        if (name === ".")
-                            obj[path] = {};
-                        else
+                        if (!rootAdded) { // Add the root folder for preview purpose
+                            var split = path.split("/");
+                            if (split.length > 1) {
+                                obj[split[0]] = {};
+                                rootAdded = true;
+                            }
+                        } else {
                             obj[path] = files[i];
+                        }
                     } else {
                         obj[name] = files[i];
                     }
@@ -1359,7 +1364,7 @@
     }
 
     // Load new view content
-    function loadContent(view, content) {
+    function loadContent(view, content, callback) {
         var type = view.data("type"),
             navRegex = /(forward|back|center)/;
         if (view[0].animDirection === "center" && type === "directory") {
@@ -1389,6 +1394,7 @@
             bindHoverEvents(view);
             bindDropEvents(view);
             allowDrop(view);
+            if (callback) callback();
         }
     }
 
@@ -2026,72 +2032,73 @@
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
-            loadContent(view, contentWrap(view).append(doc));
-            view[0].editorEntryId = entryId;
-            view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-                autofocus: true,
-                dragDrop: false,
-                indentUnit: droppy.get("indentUnit"),
-                indentWithTabs: droppy.get("indentWithTabs"),
-                keyMap: "sublime",
-                lineNumbers: true,
-                lineWrapping: droppy.get("lineWrapping"),
-                readOnly: readOnly,
-                showCursorWhenSelecting: true,
-                styleSelectedText: true,
-                theme: droppy.get("theme"),
-                mode: "text/plain"
-            });
-            $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
-            doc.find(".exit").register("click", function () {
-                closeDoc($(this).parents(".view"));
-                editor = null;
-            });
-            doc.find(".save").register("click", function () {
-                var view = $(this).parents(".view");
-                showSpinner(view);
-                sendMessage(view[0].vId, "SAVE_FILE", {
-                    "to": entryId,
-                    "value": editor.getValue()
+            loadContent(view, contentWrap(view).append(doc), function() {
+                view[0].editorEntryId = entryId;
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                    autofocus: true,
+                    dragDrop: false,
+                    indentUnit: droppy.get("indentUnit"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    keyMap: "sublime",
+                    lineNumbers: true,
+                    lineWrapping: droppy.get("lineWrapping"),
+                    readOnly: readOnly,
+                    showCursorWhenSelecting: true,
+                    styleSelectedText: true,
+                    theme: droppy.get("theme"),
+                    mode: "text/plain"
                 });
-            });
-            doc.find(".ww").register("click", function () {
-                editor.setOption("lineWrapping", !editor.options.lineWrapping);
-                droppy.set("lineWrapping", !editor.options.lineWrapping);
-            });
+                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+                doc.find(".exit").register("click", function () {
+                    closeDoc($(this).parents(".view"));
+                    editor = null;
+                });
+                doc.find(".save").register("click", function () {
+                    var view = $(this).parents(".view");
+                    showSpinner(view);
+                    sendMessage(view[0].vId, "SAVE_FILE", {
+                        "to": entryId,
+                        "value": editor.getValue()
+                    });
+                });
+                doc.find(".ww").register("click", function () {
+                    editor.setOption("lineWrapping", !editor.options.lineWrapping);
+                    droppy.set("lineWrapping", !editor.options.lineWrapping);
+                });
 
-            var called = false;
-            var loadDocument = function () {
-                if (called)
-                    return;
-                else
-                    called = true;
-                editor.setValue(data);
-                editor.setOption("mode", request.getResponseHeader("Content-Type"));
-                editor.on("change", function (cm, change) {
-                    var view = getCMView(cm);
-                    if (change.origin !== "setValue")
-                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                });
-                editor.on("keyup", function (cm, e) { // Keyboard shortcuts
-                    if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                var called = false;
+                var loadDocument = function () {
+                    if (called)
+                        return;
+                    else
+                        called = true;
+                    editor.setValue(data);
+                    editor.setOption("mode", request.getResponseHeader("Content-Type"));
+                    editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
-                        e.preventDefault();
-                        showSpinner(view);
-                        sendMessage(view[0].vId, "SAVE_FILE", {
-                            "to": view[0].editorEntryId,
-                            "value": cm.getValue()
-                        });
+                        if (change.origin !== "setValue")
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                    });
+                    editor.on("keyup", function (cm, e) { // Keyboard shortcuts
+                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                            var view = getCMView(cm);
+                            e.preventDefault();
+                            showSpinner(view);
+                            sendMessage(view[0].vId, "SAVE_FILE", {
+                                "to": view[0].editorEntryId,
+                                "value": cm.getValue()
+                            });
+                        }
+                    });
+                    editor.clearHistory();
+                    editor.refresh();
+                    hideSpinner(view);
+                    function getCMView(cm) {
+                        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
                     }
-                });
-                editor.clearHistory();
-                editor.refresh();
-                hideSpinner(view);
-                function getCMView(cm) {
-                    return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
-                }
-            };
-            view.find(".content").end(loadDocument);
+                };
+                view.find(".content").end(loadDocument);
+            });
         }).fail(function () {
             closeDoc(view);
         });

@@ -1040,6 +1040,8 @@ function handleGET(req, res, next) {
     isAuth = false;
     req.time = Date.now();
 
+    if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid GET: " + req.url);
+
     if (config.noLogin && !getCookie(req.headers.cookie))
         freeCookie(req, res);
     if (getCookie(req.headers.cookie) || config.noLogin)
@@ -1095,8 +1097,11 @@ function handleGET(req, res, next) {
 //-----------------------------------------------------------------------------
 var blocked = [];
 function handlePOST(req, res, next) {
-    var URI = decodeURIComponent(req.url)
-      , body = "";
+    var URI = decodeURIComponent(req.url),
+        body = "";
+
+    if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid POST: " + req.url);
+
     if (/\/upload/.test(URI)) {
         if (!getCookie(req.headers.cookie)) {
             res.statusCode = 401;
@@ -1222,9 +1227,6 @@ function handleResourceRequest(req, res, resourceName) {
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res, download) {
     var URI = decodeURIComponent(req.url), shortLink, dispo, filepath;
-
-    // Safety check
-    //if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
     filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
