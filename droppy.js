@@ -1228,11 +1228,11 @@ function handleFileRequest(req, res, download) {
     //if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid file request: " + req.url);
 
     // Check for a shortlink
-    filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/)
+    filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
     if (filepath[1] === "$") {
+        shortLink = true;
         filepath = addFilePath(db.shortlinks[filepath[2]]);
-    } else if (filepath[1] === "~"
-            || filepath[1] === "_") {
+    } else if (filepath[1] === "~" || filepath[1] === "_") {
         filepath = addFilePath("/" + filepath[2]);
     }
 
@@ -1269,10 +1269,7 @@ function handleFileRequest(req, res, download) {
                     dispo = "attachment";
                 }
                 res.setHeader("Content-Disposition", dispo);
-            }
-
-            // Set short caching headers for non-downloads
-            if (!download) {
+            } else { // Set short caching headers for non-downloads
                 res.setHeader("Cache-Control", "private, max-age=30");
                 cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
                 res.setHeader("Etag", cache.files[filepath]);
