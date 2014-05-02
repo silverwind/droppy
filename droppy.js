@@ -63,7 +63,6 @@ var
     firstRun     = null,
     hasServer    = null,
     ready        = false,
-    hasServer    = null,
     cookieName   = "s",
     isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
     mode         = {file: "644", dir: "755"},
@@ -1233,6 +1232,7 @@ function handleFileRequest(req, res, download) {
         shortLink = true;
         filepath = addFilePath(db.shortlinks[filepath[2]]);
     } else if (filepath[1] === "~" || filepath[1] === "_") {
+
         filepath = addFilePath("/" + filepath[2]);
     }
 
