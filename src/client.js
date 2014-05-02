@@ -45,14 +45,6 @@
             });
             return types;
         })(),
-        transDurationProp: (function () {
-            var props = ["transitionDuration", "MozTransitionDuration", "webkitTransitionDuration", "msTransitionDuration"],
-                el    = document.createElement("div");
-            while (props.length) {
-                var prop = props.pop();
-                if (prop in window.getComputedStyle(el)) return prop;
-            }
-        })(),
         webp: (function () {
             var img = new Image();
             img.onload = img.onerror = function () {
@@ -87,7 +79,7 @@
             callback.apply(el, event);
         }
 
-        duration = window.getComputedStyle(this[0])[droppy.detects.transDurationProp];
+        duration = window.getComputedStyle(this[0]).transitionDuration;
         duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
         setTimeout(function () { // Call back if "transitionend" hasn't fired in duration + 30
@@ -267,7 +259,7 @@
 
     // Load HTML and replace SVG placeholders
     function getPage() {
-        $.get("/!/content/" + Math.random().toString(36).substr(2, 4)).then(function (data, textStatus, xhr) {
+        $.get("?!/content/" + Math.random().toString(36).substr(2, 4)).then(function (data, textStatus, xhr) {
             loadPage(xhr.getResponseHeader("X-Page-Type"), prepareSVG(data));
         });
     }
@@ -325,7 +317,7 @@
     var retries = 5, retryTimeout = 4000;
     function openSocket() {
         var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-        droppy.socket = new WebSocket(protocol + document.location.host + "/?");
+        droppy.socket = new WebSocket(protocol + document.location.hostname + "?");
         droppy.socket.onopen = function () {
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
@@ -334,10 +326,15 @@
             if (droppy.queuedData)
                 sendMessage();
             else {
-                // Create new view with initiallizing
-                newView(join(decodeURIComponent(window.location.pathname)), 0);
-                if (window.location.hash.length)
-                    droppy.split(join(decodeURIComponent(window.location.hash.slice(1))));
+                // Create new view with initializing
+                getLocationsFromHash().forEach(function (string, index) {
+                    var dest = join(decodeURIComponent(string));
+                    if (index === 0)
+                        newView(dest, index);
+                    else if (index === 1) {
+                        droppy.split(dest);
+                    }
+                })
             }
         };
 
@@ -449,6 +446,7 @@
                         deleteCookie("session");
                         initVariables(); // Reset vars to their init state
                         droppy.set("hasLoggedOut", true);
+                        window.history.pushState(null, null, getRootPath());
                         requestPage();
                     });
                 break;
@@ -539,7 +537,7 @@
 
         submit.register("click", function () { form.submit(); });
         form.register("submit", function () {
-            $.post(firstrun ? "/adduser" : "/login", form.serialize(), null, "json").always(function (xhr) {
+            $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
                 if (xhr.status  === 202) {
                     requestPage(true);
                 } else if (xhr.status === 401) {
@@ -556,6 +554,7 @@
                     $("#login-info-box").attr("class", "error");
                 }
             });
+            return false;
         });
     }
 // ============================================================================
@@ -589,7 +588,7 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
-            var files, path, name,
+            var files, path, name, rootAdded,
                 obj = {};
             if (droppy.detects.inputDirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
                 files = event.target.files;
@@ -597,10 +596,15 @@
                     path = files[i].webkitRelativePath;
                     name = files[i].name;
                     if (path) {
-                        if (name === ".")
-                            obj[path] = {};
-                        else
+                        if (!rootAdded) { // Add the root folder for preview purpose
+                            var split = path.split("/");
+                            if (split.length > 1) {
+                                obj[split[0]] = {};
+                                rootAdded = true;
+                            }
+                        } else {
                             obj[path] = files[i];
+                        }
                     } else {
                         obj[name] = files[i];
                     }
@@ -681,7 +685,7 @@
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
-                window.history.replaceState(null, null, join(first[0].currentFolder, first[0].currentFile)); // removes the hash
+                window.history.replaceState(null, null, getHashLocationsFromViews(first, join(first[0].currentFolder, first[0].currentFile)));
                 getView(0).removeClass("left");
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
@@ -924,7 +928,7 @@
         view[0].isUploading = true;
 
         if (formLength) {
-            xhr.open("POST", "/upload?" + $.param({
+            xhr.open("POST", getRootPath() + "upload?" + $.param({
                 vId : view[0].vId,
                 to  : encodeURIComponent(view[0].currentFolder),
                 r   : droppy.get("renameExistingOnUpload")
@@ -1132,9 +1136,8 @@
 
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
-        // In recent Chromium builds, this can fire on first page-load, before we even have our socket connected.
         if (!droppy.socket) return;
-        updateLocation(null, [decodeURIComponent(window.location.pathname), decodeURIComponent(window.location.hash.slice(1))], true);
+        updateLocation(null, getLocationsFromHash(), true);
     });
 
     function getViewLocation(view) {
@@ -1142,6 +1145,26 @@
             return ""; // return an empty string so animDirection gets always set to 'forward' on launch
         else
             return join(view[0].currentFolder, view[0].currentFile);
+    }
+
+    function getLocationsFromHash() {
+        var hash = document.location.hash.split("#!");
+        hash.shift();
+        if (hash.length === 0)
+            hash.push("");
+        return hash;
+    }
+
+    function getHashLocationsFromViews(modview, dest) {
+        var hash = "";
+        droppy.views.forEach(function (view) {
+            view = $(view);
+            if (modview && modview.is(view))
+                hash += "#!" + dest;
+            else
+                hash += "#!" + getViewLocation(view);
+        });
+        return hash;
     }
 
     // Update our current location and change the URL to it
@@ -1175,10 +1198,9 @@
     }
 
     function updateHistory(view, dest) {
-        var newDest;
-        if (view[0].vId === 0) newDest = dest + window.location.hash;
-        else newDest = window.location.pathname + "#" + dest;
-        window.history.pushState(null, null, newDest);
+        var path = getHashLocationsFromViews(view, dest);
+        if (!/\/$/.test(window.location.pathname)) path = window.location.pathname + "/" + path;
+        window.history.pushState(null, null, path);
     }
 
     // Update the path indicator
@@ -1342,7 +1364,7 @@
     }
 
     // Load new view content
-    function loadContent(view, content) {
+    function loadContent(view, content, callback) {
         var type = view.data("type"),
             navRegex = /(forward|back|center)/;
         if (view[0].animDirection === "center" && type === "directory") {
@@ -1372,6 +1394,7 @@
             bindHoverEvents(view);
             bindDropEvents(view);
             allowDrop(view);
+            if (callback) callback();
         }
     }
 
@@ -1685,7 +1708,7 @@
             event.stopPropagation();
             var win,
                 entry = $("#entry-menu").data("target"),
-                url   = entry.find(".file-link").attr("href").replace(/^\/~\//, "/_/"),
+                url   = entry.find(".file-link").attr("href").replace(/\?~\//, "?_/"),
                 type  = $("#entry-menu").attr("class").match(/type\-(\w+)/),
                 view  = entry.parents(".view");
             if (type) {
@@ -1970,7 +1993,7 @@
             i = encodedId.length - 1;
         for (;i >= 0; i--)
             encodedId[i] = encodeURIComponent(encodedId[i]);
-        return "/_" + encodedId.join("/");
+        return "?_" + encodedId.join("/");
     }
 
     function openMedia(view, type, sameFolder) {
@@ -2006,75 +2029,76 @@
 
         $.ajax({
             type: "GET",
-            url: "/_" + entryId,
+            url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
-            loadContent(view, contentWrap(view).append(doc));
-            view[0].editorEntryId = entryId;
-            view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
-                autofocus: true,
-                dragDrop: false,
-                indentUnit: droppy.get("indentUnit"),
-                indentWithTabs: droppy.get("indentWithTabs"),
-                keyMap: "sublime",
-                lineNumbers: true,
-                lineWrapping: droppy.get("lineWrapping"),
-                readOnly: readOnly,
-                showCursorWhenSelecting: true,
-                styleSelectedText: true,
-                theme: droppy.get("theme"),
-                mode: "text/plain"
-            });
-            $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
-            doc.find(".exit").register("click", function () {
-                closeDoc($(this).parents(".view"));
-                editor = null;
-            });
-            doc.find(".save").register("click", function () {
-                var view = $(this).parents(".view");
-                showSpinner(view);
-                sendMessage(view[0].vId, "SAVE_FILE", {
-                    "to": entryId,
-                    "value": editor.getValue()
+            loadContent(view, contentWrap(view).append(doc), function() {
+                view[0].editorEntryId = entryId;
+                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                    autofocus: true,
+                    dragDrop: false,
+                    indentUnit: droppy.get("indentUnit"),
+                    indentWithTabs: droppy.get("indentWithTabs"),
+                    keyMap: "sublime",
+                    lineNumbers: true,
+                    lineWrapping: droppy.get("lineWrapping"),
+                    readOnly: readOnly,
+                    showCursorWhenSelecting: true,
+                    styleSelectedText: true,
+                    theme: droppy.get("theme"),
+                    mode: "text/plain"
                 });
-            });
-            doc.find(".ww").register("click", function () {
-                editor.setOption("lineWrapping", !editor.options.lineWrapping);
-                droppy.set("lineWrapping", !editor.options.lineWrapping);
-            });
+                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+                doc.find(".exit").register("click", function () {
+                    closeDoc($(this).parents(".view"));
+                    editor = null;
+                });
+                doc.find(".save").register("click", function () {
+                    var view = $(this).parents(".view");
+                    showSpinner(view);
+                    sendMessage(view[0].vId, "SAVE_FILE", {
+                        "to": entryId,
+                        "value": editor.getValue()
+                    });
+                });
+                doc.find(".ww").register("click", function () {
+                    editor.setOption("lineWrapping", !editor.options.lineWrapping);
+                    droppy.set("lineWrapping", !editor.options.lineWrapping);
+                });
 
-            var called = false;
-            var loadDocument = function () {
-                if (called)
-                    return;
-                else
-                    called = true;
-                editor.setValue(data);
-                editor.setOption("mode", request.getResponseHeader("Content-Type"));
-                editor.on("change", function (cm, change) {
-                    var view = getCMView(cm);
-                    if (change.origin !== "setValue")
-                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                });
-                editor.on("keyup", function (cm, e) { // Keyboard shortcuts
-                    if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                var called = false;
+                var loadDocument = function () {
+                    if (called)
+                        return;
+                    else
+                        called = true;
+                    editor.setValue(data);
+                    editor.setOption("mode", request.getResponseHeader("Content-Type"));
+                    editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
-                        e.preventDefault();
-                        showSpinner(view);
-                        sendMessage(view[0].vId, "SAVE_FILE", {
-                            "to": view[0].editorEntryId,
-                            "value": cm.getValue()
-                        });
+                        if (change.origin !== "setValue")
+                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                    });
+                    editor.on("keyup", function (cm, e) { // Keyboard shortcuts
+                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                            var view = getCMView(cm);
+                            e.preventDefault();
+                            showSpinner(view);
+                            sendMessage(view[0].vId, "SAVE_FILE", {
+                                "to": view[0].editorEntryId,
+                                "value": cm.getValue()
+                            });
+                        }
+                    });
+                    editor.clearHistory();
+                    editor.refresh();
+                    hideSpinner(view);
+                    function getCMView(cm) {
+                        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
                     }
-                });
-                editor.clearHistory();
-                editor.refresh();
-                hideSpinner(view);
-                function getCMView(cm) {
-                    return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
-                }
-            };
-            view.find(".content").end(loadDocument);
+                };
+                view.find(".content").end(loadDocument);
+            });
         }).fail(function () {
             closeDoc(view);
         });
@@ -2506,7 +2530,7 @@
         var box   = view.find(".info-box"),
             input = box.find("input");
         box.find("svg").replaceWith(droppy.svg.link);
-        input.val(window.location.protocol + "//" + window.location.host + "/$/" +  link);
+        input.val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link);
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
         });
@@ -2540,6 +2564,12 @@
         if (x.length) return -1;
         if (y.length) return +1;
         return 0;
+    }
+
+    // Get the path to droppy's root, ensuring a trailing slash
+    function getRootPath() {
+        var p = window.location.pathname;
+        return p[p.length -1] === "/" ? p : p + "/";
     }
 
     // turn /path/to/file to file

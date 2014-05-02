@@ -31,14 +31,14 @@ it = {
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
         <span class="size-unit">{{= temp.sizeUnit }}</span>
-        <span><a class="zip" title="Create Zip" href="/~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= droppy.svg.zip }}</a></span>
+        <span><a class="zip" title="Create Zip" href="?~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= droppy.svg.zip }}</a></span>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </li>
 #}}
 {{##def.fileLink:
     <li class="data-row{{= temp.classes }}" data-type="file" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
         <span class="sprite {{= temp.spriteClass}}">{{= temp.svgIcon }}</span>
-        <a class="file-link entry-link" href="/~{{= temp.id }}" target="nope" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
+        <a class="file-link entry-link" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
         <span class="size-unit">{{= temp.sizeUnit }}</span>
