@@ -1,38 +1,40 @@
 #droppy <a href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a>
-Personal cloud storage, running on node.js. [Demo](http://droppy-demo.silverwind.io/#/).
-
-![Main View](http://i.imgur.com/izxnfAN.png)
-![Editor](http://i.imgur.com/Ziv79rJ.png)
-![Images](http://i.imgur.com/ISlCyuw.png)
+Personal cloud storage, running on node.js. Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>.
 
 ###Features
 * Lightweight. Performs great, even on a Raspberry Pi.
 * Fully responsive, mobile-ready CSS.
 * Realtime updating of all connected clients via WebSockets.
 * Asynchronous multi-file uploads. Recursive directory uploads in Chrome.
-* Download directories as ZIPs.
-* Edit text-based files in CodeMirror, a feature-rich editor.
+* Download directories as zips.
+* Edit plaintext files in CodeMirror, a feature-rich editor.
 * Basic file system operations: Cut, Copy, Rename, Delete, Create directory.
 * Drag and Drop support for uploads and filesystem operations. Hold CMD/CTRL to copy, Shift to move.
 * Playback of audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the `<audio>` and `<video>` elements.
 * Support for shortened links to share file downloads with your friends without them needing to log in.
 
-##Installation
-You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy) like:
+##Usage
+###Standalone
+You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy):
 ````bash
 npm install droppy && mv node_modules/droppy . && rm -rf node_modules && cd droppy
-````
-Or get the latest development version through git:
-````bash
-git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
-````
-
-##Running the server
-Inside droppy's directory run:
-````bash
 node droppy
 ````
-By default, the server will listen on [port 8989](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the configuration dialog or see `node droppy help`.
+By default, the standalone web server will listen on [localhost:8989](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the options dialog or see `node droppy help`.
+
+###Express
+You can use droppy as an [express](http://expressjs.com/) middleware:
+````js
+var express = require("express"),
+    droppy  = require("droppy"),
+    app     = express();
+
+app.use("/droppy", droppy(/* options */));
+app.listen(80, function() {
+    console.log("Listening on 0.0.0.0:80.");
+});
+````
+A custom **options** object can be passed in, see the **Configuration** section below on valid options.
 
 ##Configuration
 Configuration is done through `config.json`, which is created on the first run, with these defaults:
@@ -99,8 +101,13 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 
 In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
 
+###Screenshots
+![Directory](http://i.imgur.com/izxnfAN.png)
+![Editor](http://i.imgur.com/Ziv79rJ.png)
+![Media](http://i.imgur.com/ISlCyuw.png)
+
 ##Systemd
-If you'd like to run droppy as a systemd service, you can use this sample service file:
+If you'd like to run droppy as a systemd service, you can use this sample service file as a start:
 
 ````ini
 # systemd service file for droppy
