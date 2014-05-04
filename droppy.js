@@ -1234,7 +1234,6 @@ function handleFileRequest(req, res, download) {
         shortLink = true;
         filepath = addFilePath(db.shortlinks[filepath[2]]);
     } else if (filepath[1] === "~" || filepath[1] === "_") {
-
         filepath = addFilePath("/" + filepath[2]);
     }
 
@@ -1288,12 +1287,11 @@ function handleFileRequest(req, res, download) {
                 res.statusCode = 403;
             else
                 res.statusCode = 500;
-            res.end();
-            if (error) log.error(error);
+            log.error(error);
         }
+        res.end();
+        log.info(req, res);
     });
-
-    log.info(req, res);
 }
 
 //-----------------------------------------------------------------------------
