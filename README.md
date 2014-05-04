@@ -8,9 +8,10 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 * Asynchronous multi-file uploads. Recursive directory uploads in Chrome.
 * Download directories as zips.
 * Edit plaintext files in CodeMirror, a feature-rich editor.
+* View media (images, video) in a gallery, play audio in it's own player.
 * Basic file system operations: Cut, Copy, Rename, Delete, Create directory.
 * Drag and Drop support for uploads and filesystem operations. Hold CMD/CTRL to copy, Shift to move.
-* Playback of audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the `<audio>` and `<video>` elements.
+* Supported_media_formats#Browser_compatibility) by the `<audio>` and `<video>` elements.
 * Support for shortened links to share file downloads with your friends without them needing to log in.
 
 ##Usage
@@ -95,14 +96,16 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 - `tlsCert`: Path to your certificate.
 - `tlsCA`: An optional intermediate (CA) certificate.
 
-##Supported Browsers
+##Notes
+- Playback of audio and video depends on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
+- Shortlinks are compatible with `wget` with `--content-disposition`, or `disposition = on` is set in `~/.wgetrc`.
+
+###Supported Browsers
 - Firefox (last 2 versions)
 - Chrome (last 2 versions)
 - Internet Explorer 10 or higher (not regularly tested)
 
-In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
-
-##Systemd
+###Systemd
 If you'd like to run droppy as a systemd service, you can use this sample service file as a start:
 
 ````ini
