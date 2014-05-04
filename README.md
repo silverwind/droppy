@@ -1,5 +1,5 @@
 #droppy <a href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a>
-Personal cloud storage, running on node.js. Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>.
+Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>. Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>.
 
 ###Features
 * Lightweight. Performs great, even on a Raspberry Pi.
@@ -64,6 +64,7 @@ Configuration is done through `config.json`, which is created on the first run, 
     "tlsCA"        : "./ca.pem"
 }
 ````
+
 ###General options
 - `port`: The port to listen on.
 - `host`: The host address to listen on.
@@ -100,11 +101,6 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 - Internet Explorer 10 or higher (not regularly tested)
 
 In case of Firefox and Chrome older version may still work, but I'm not targeting CSS code at them.
-
-##Screenshots
-![Directory](http://i.imgur.com/izxnfAN.png)
-![Editor](http://i.imgur.com/Ziv79rJ.png)
-![Media](http://i.imgur.com/ISlCyuw.png)
 
 ##Systemd
 If you'd like to run droppy as a systemd service, you can use this sample service file as a start:
