@@ -16,9 +16,16 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 
 ##Usage
 ###Standalone
-You can install droppy's self-contained directory from [npm](https://npmjs.org/package/droppy):
+droppy's self-contained directory can be installed from [npm](https://npmjs.org/package/droppy):
 ````bash
 npm install droppy && mv node_modules/droppy . && rm -rf node_modules && cd droppy
+````
+Alternatively, direct installation from git goes like this:
+````bash
+git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
+````
+Then, start the server with:
+````
 node droppy
 ````
 By default, the standalone web server will listen on [localhost:8989](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the options dialog or see `node droppy help`.

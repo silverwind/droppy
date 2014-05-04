@@ -1042,8 +1042,6 @@ function handleGET(req, res, next) {
     isAuth = false;
     req.time = Date.now();
 
-    console.log(URI);
-
     if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid GET: " + req.url);
 
     if (config.noLogin && !getCookie(req.headers.cookie))
