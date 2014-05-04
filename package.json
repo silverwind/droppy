@@ -10,7 +10,7 @@
   "bugs": "https://github.com/silverwind/droppy/issues",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "archiver": "~0.9.0",
+    "archiver": "~0.9.1",
     "async": "~0.8.0",
     "autoprefixer": "~1.1.20140430",
     "busboy": "~0.2.5",
@@ -23,7 +23,7 @@
     "jquery": "~2.1.1",
     "lodash": "~2.4.1",
     "mime": "~1.2.11",
-    "mkdirp": "~0.4.0",
+    "mkdirp": "~0.4.1",
     "request": "~2.34.0",
     "rimraf": "~2.2.6",
     "spdy": "~1.25.6",
