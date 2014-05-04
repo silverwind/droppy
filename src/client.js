@@ -1409,8 +1409,7 @@
 
     function handleDrop(view, event, from, to, spinner) {
         var catcher = $("#click-catcher"),
-            dropSelect = $("#drop-select"),
-            dragData = event.dataTransfer.getData("text");
+            dropSelect = $("#drop-select");
         droppy.dragTimer.clear();
         $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
@@ -1443,7 +1442,7 @@
                 catcher.off("mousemove").trigger("click");
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
-                updateLocation(view, dragData);
+                updateLocation(view, JSON.parse(event.dataTransfer.getData("text")).path);
                 catcher.off("mousemove").trigger("click");
             });
             return;
@@ -1467,7 +1466,10 @@
         view.register("dragstart", function (event) {
             var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
             droppy.dragTimer.refresh(row.data("id"));
-            event.dataTransfer.setData("text", row.data("id"));
+            event.dataTransfer.setData("text", JSON.stringify({
+                type: row.attr("data-type"),
+                path: row.data("id")
+            }));
             event.dataTransfer.effectAllowed = "copyMove";
             if ("setDragImage" in event.dataTransfer)
                 event.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
@@ -1559,7 +1561,7 @@
                     event.stopPropagation();
                     $(".drop-hover").removeClass("drop-hover");
                     $(".dropzone").removeClass("in");
-                    from = event.dataTransfer.getData("text");
+                    from = JSON.parse(event.dataTransfer.getData("text")).path;
                     to = join(row.attr("data-id"), basename(from));
                     if (from) handleDrop(view, event, from, to);
                 });
@@ -1568,9 +1570,7 @@
         view.register("drop", function (event) {
             var view = $(event.target).parents(".view"),
                 items = event.dataTransfer.items,
-                fileItem = null,
-                entryFunc = null,
-                dragData = event.dataTransfer.getData("text");
+                dragData = JSON.parse(event.dataTransfer.getData("text"));
 
             event.preventDefault();
             event.stopPropagation();
@@ -1578,14 +1578,21 @@
 
             if (dragData) { // It's a drag between views
                 if (view.data("type") === "directory") { // dropping into a directory view
-                    handleDrop(view, event, dragData, join(view[0].currentFolder, basename(dragData)), true);
+                    handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
                 } else { // dropping into a document/media view
-                    if (join(view[0].currentFolder, view[0].currentFile) !== dragData)
-                        openFile(view, dirname(dragData), basename(dragData));
+                    if (dragData.type === "folder") {
+                        view.data("type", "directory");
+                        updateLocation(view, dragData.path);
+                    } else {
+                        if (join(view[0].currentFolder, view[0].currentFile) !== dragData.path)
+                            openFile(view, dirname(dragData.path), basename(dragData.path));
+                    }
                 }
                 return;
             }
-            // At this point, it's a file drop
+
+            // At this point, it's a external file drop
+            var fileItem = null, entryFunc = null;
 
             // Don't allow dropping external files into a media view. We might allow this in the future, but it
             // needs some additional logic to request the uploaded file, and would only work intuitively for single files.
