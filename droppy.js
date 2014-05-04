@@ -494,7 +494,9 @@ function createListener(handler) {
         process.exit(1);
     });
 
-    server.listen(config.port);
+    (Array.isArray(config.host) ? config.host : [config.host]).forEach(function(host) {
+        server.listen(config.port, host);
+    });
 }
 
 //-----------------------------------------------------------------------------
