@@ -2261,7 +2261,7 @@
         // Extension to icon mappings
         droppy.iconMap = {
             "archive":  ["bz2", "gz", "tgz"],
-            "audio":    ["aac", "aif", "aiff", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "wav", "wma"],
+            "audio":    ["aac", "aif", "aiff", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
             "authors":  ["authors"],
             "bin":      ["class", "o", "so"],
             "bmp":      ["bmp"],
@@ -2319,35 +2319,36 @@
         };
 
         droppy.audioTypes = {
-            "aac":  "audio/aac",
-            "m4a":  "audio/mp4",
-            "mp1":  "audio/mpeg",
-            "mp2":  "audio/mpeg",
-            "mp3":  "audio/mpeg",
-            "mpa":  "audio/mpeg",
-            "mpg":  "audio/mpeg",
+            "aac" : "audio/aac",
+            "m4a" : "audio/mp4",
+            "mp1" : "audio/mpeg",
+            "mp2" : "audio/mpeg",
+            "mp3" : "audio/mpeg",
+            "mpa" : "audio/mpeg",
+            "mpg" : "audio/mpeg",
             "mpeg": "audio/mpeg",
-            "ogg":  "audio/ogg",
-            "oga":  "audio/ogg",
-            "wav":  "audio/wav"
+            "ogg" : "audio/ogg",
+            "oga" : "audio/ogg",
+            "opus": "audio/ogg",
+            "wav" : "audio/wav"
         };
 
         droppy.videoTypes = {
-            "mp4":  "video/mp4",  // can be audio/mp4 too
-            "m4v":  "video/mp4",
-            "ogv":  "video/ogg",
+            "mp4" : "video/mp4", // can be audio/mp4 too
+            "m4v" : "video/mp4",
+            "ogv" : "video/ogg",
             "webm": "video/webm" // can be audio/webm too
         };
 
         droppy.imageTypes = {
-            "jpg":  "image/jpeg",
+            "jpg" : "image/jpeg",
             "jpeg": "image/jpeg",
-            "gif":  "image/gif",
-            "png":  "image/png",
+            "gif" : "image/gif",
+            "png" : "image/png",
             "apng": "image/png",
-            "svg":  "image/svg+xml",
-            "bmp":  "image/bmp",
-            "ico":  "image/x-icon"
+            "svg" : "image/svg+xml",
+            "bmp" : "image/bmp",
+            "ico" : "image/x-icon"
         };
     }
 
