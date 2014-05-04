@@ -1728,7 +1728,7 @@ input[type="checkbox"] { display: none }
 
 .dropzone {
     position: absolute;
-    left: 0; right: 0; bottom: 0;
+    left: 0; right: 0; bottom: 0; top: 1.5rem;
     z-index: -1;
     opacity: 0;
     visibility: hidden;
@@ -1737,9 +1737,7 @@ input[type="checkbox"] { display: none }
     transition: opacity .2s ease;
 }
 
-@media all and (min-width: 1024px) { .dropzone { top: 37px } }
-@media all and (max-width: 1023px) { .dropzone { top: 32px } }
-@media all and (max-width:  639px) { .dropzone { top: 27px } }
+@media all and (max-width:  639px) { .dropzone { top: 1.25rem; } }
 
 .dropzone.in  { opacity: .8 ; visibility: visible }
 
