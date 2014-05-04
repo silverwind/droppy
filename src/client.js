@@ -376,11 +376,8 @@
                     view[0].currentData = msg.data;
                 } else {
                     if (view.data("type") === "directory") {
-                        var loaded = getViewLocation(view) !== "";
-                        if ((msg.folder !== getViewLocation(view)) || !loaded) {
-                            if (!loaded) { // Ensure to update path on the first load
-                                window.history.replaceState(null, null, getHashPaths(view, msg.folder));
-                            }
+                        if (msg.folder !== getViewLocation(view)) {
+                            window.history.replaceState(null, null, getHashPaths(view, msg.folder));
                             if (view[0].vId === 0) updateTitle(msg.folder, true);
                             view[0].currentFile = null;
                             view[0].currentFolder = msg.folder;
