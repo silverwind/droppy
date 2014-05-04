@@ -864,9 +864,8 @@
             if (data.length === 0) return;
             for (var i = 0, len = data.length; i < len; i++) {
                 if (isOverLimit(view, data[i].size)) return;
-                var filename = encodeURIComponent(data[i].name);
                 numFiles++;
-                view[0].currentData[filename] = {
+                view[0].currentData[data[i].name] = {
                     size : data[i].size,
                     type : "nf",
                     mtime : Date.now()
@@ -877,7 +876,7 @@
                     droppy.emptyFiles.push(join(view[0].currentFolder, data[i].name));
                 } else {
                     formLength++;
-                    formData.append(filename, data[i], filename);
+                    formData.append(data[i].name, data[i], encodeURIComponent(data[i].name));
                 }
             }
         } else { // We got an object for recursive folder uploads
@@ -1294,16 +1293,26 @@
     }
     // Convert the received data into HTML
     function openDirectory(view, isUpload) {
-        var tdata = {
-            entries: view[0].currentData,
-            folder: view[0].currentFolder,
-            isUpload: isUpload,
-            sortBy: "name",
-            sortAsc: false,
+        // Apply directory size cache
+        if (droppy.sizeCache[view[0].currentFolder]) {
+             Object.keys(view[0].currentData).forEach(function(name) {
+                 var currentEntry = view[0].currentData[name];
+                 if (currentEntry.type === "d" && currentEntry.size === 0 && droppy.sizeCache[view[0].currentFolder][name])
+                     view[0].currentData[name].size = droppy.sizeCache[view[0].currentFolder][name];
+             });
+        }
+        // Create HTML from template
+        var content = contentWrap(view).html(t.views.directory({
+            entries  : view[0].currentData,
+            folder   : view[0].currentFolder,
+            isUpload : isUpload,
+            sortBy   : "name",
+            sortAsc  : false,
             clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
-        },
-        content = contentWrap(view).html(t.views.directory(tdata));
+        }));
+        // Load it
         loadContent(view, content);
+
         // Upload button on empty page
         content.find(".empty").register("click", function (event) {
             var view = $(event.target).parents(".view"), fileInput = $("#file");
