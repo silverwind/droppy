@@ -376,8 +376,12 @@
                     view[0].currentData = msg.data;
                 } else {
                     if (view.data("type") === "directory") {
-                        if ((msg.folder !== getViewLocation(view)) || !view[0].loaded) {
-                            view[0].loaded = true; // Ensure to update path on the first load
+                        var loaded = getViewLocation(view) !== "";
+                        console.log(msg.folder, getViewLocation(view));
+                        if ((msg.folder !== getViewLocation(view)) || !loaded) {
+                            if (!loaded) { // Ensure to update path on the first load
+                                window.history.replaceState(null, null, getHashPaths(view, msg.folder));
+                            }
                             if (view[0].vId === 0) updateTitle(msg.folder, true);
                             view[0].currentFile = null;
                             view[0].currentFolder = msg.folder;
@@ -685,7 +689,7 @@
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
-                window.history.replaceState(null, null, getHashLocationsFromViews(first, join(first[0].currentFolder, first[0].currentFile)));
+                window.history.replaceState(null, null, getHashPaths(first, join(first[0].currentFolder, first[0].currentFile)));
                 getView(0).removeClass("left");
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
@@ -901,7 +905,7 @@
                         formLength++;
                         formData.append(entry, data[entry], encodeURIComponent(entry));
                     } else {
-                        droppy.emptyFolders.push(entry);
+                        droppy.emptyFolders.push(join(view[0].currentFolder, entry));
                     }
                 }
             });
@@ -1154,7 +1158,7 @@
         return hash;
     }
 
-    function getHashLocationsFromViews(modview, dest) {
+    function getHashPaths(modview, dest) {
         var hash = "";
         droppy.views.forEach(function (view) {
             view = $(view);
@@ -1163,6 +1167,8 @@
             else
                 hash += "#!" + getViewLocation(view);
         });
+        // Ensure slash before the first hashbang
+        if (!/\/$/.test(window.location.pathname)) hash = window.location.pathname + "/" + hash;
         return hash;
     }
 
@@ -1197,9 +1203,7 @@
     }
 
     function updateHistory(view, dest) {
-        var path = getHashLocationsFromViews(view, dest);
-        if (!/\/$/.test(window.location.pathname)) path = window.location.pathname + "/" + path;
-        window.history.pushState(null, null, path);
+        window.history.pushState(null, null, getHashPaths(view, dest));
     }
 
     // Update the path indicator

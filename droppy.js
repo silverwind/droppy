@@ -542,11 +542,12 @@ function setupSocket(server) {
                 if (!clients[cookie]) clients[cookie] = { views: [], ws: ws }; // This can happen when the server restarts
                 readPath(msg.data, function (error, info) {
                     if (error) {
-                        return log.info(ws, null, "Non-existing update request: " + msg.data);
+                        // Send client back to root when the requested path doesn't exist
+                        log.info(ws, null, "Non-existing update request, sending client to / : " + msg.data);
+                        sendToRoot(cookie, vId);
+                        return;
                     } else if (info.type === "f") {
-                        clients[cookie].views[vId] = {};
-                        clients[cookie].views[vId].file = path.basename(msg.data);
-                        clients[cookie].views[vId].directory = path.dirname(msg.data);
+                        clients[cookie].views[vId] = { file: path.basename(msg.data), directory: path.dirname(msg.data) };
                         send(clients[cookie].ws, JSON.stringify({
                             type: "UPDATE_BE_FILE",
                             file: clients[cookie].views[vId].file,
@@ -555,20 +556,21 @@ function setupSocket(server) {
                             vId: vId,
                         }));
                     } else {
-                        clients[cookie].views[vId] = {};
-                        clients[cookie].views[vId].file = null;
-                        clients[cookie].views[vId].directory = msg.data;
+                        clients[cookie].views[vId] = { file: null, directory: msg.data };
                         updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                         });
                         updateWatchers(clients[cookie].views[vId].directory, function (success) {
                             // Send client back to / in case the directory can't be read
-                            if (!success) {
-                                updateDirectory("/", function (sizes) {
-                                    sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
-                                });
-                            }
+                            if (!success) sendToRoot(cookie, vId);
                         });
+                    }
+                    function sendToRoot(cookie, vId) {
+                        clients[cookie].views[vId] = { file: null, directory: "/" };
+                        updateDirectory("/", function (sizes) {
+                            sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
+                        });
+                        updateWatchers("/");
                     }
                 });
                 break;
@@ -1068,29 +1070,8 @@ function handleGET(req, res, next) {
         streamArchive(req, res, "zip");
     } else if (/\?favicon.ico/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
-    /*} else if (URI === "/" || URI === "//") {*/
     } else {
         handleResourceRequest(req, res, "base.html");
-        /*if (!isAuth) {
-            res.statusCode = 301;
-            res.setHeader("Location", "");
-            res.end();
-            log.info(req, res);
-            return;
-        }
-
-        // Check if client is going to a path directly
-        fs.stat(path.join(config.filesDir, URI), function (error) {
-            if (!error) {
-                handleResourceRequest(req, res, "base.html");
-            } else {
-                log.error(error);
-                res.statusCode = 301;
-                res.setHeader("Location", "/");
-                res.end();
-                log.info(req, res);
-            }
-        });*/
     }
 }
 
@@ -1278,7 +1259,6 @@ function handleFileRequest(req, res, download) {
 
             res.setHeader("Content-Type", mime.lookup(filepath));
             res.setHeader("Content-Length", stats.size);
-
             fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
         } else {
             if (error.code === "ENOENT")
@@ -1288,8 +1268,8 @@ function handleFileRequest(req, res, download) {
             else
                 res.statusCode = 500;
             log.error(error);
+            res.end();
         }
-        res.end();
         log.info(req, res);
     });
 }
