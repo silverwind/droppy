@@ -74,8 +74,8 @@ Configuration is done through `config.json`, which is created on the first run, 
 ````
 
 ###General options
-- `port`: The port to listen on.
-- `host`: The host address to listen on. Can take an Array of hosts.
+- `port`: The port to listen on. Can take an array of ports.
+- `host`: The host address to listen on. Can take an array of hosts.
 - `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
 - `useTLS`: Whether the server should use SSL/TLS encryption.
 - `useSPDY`: Enables the SPDYv3 protocol. Depends on `useTLS`.

@@ -151,7 +151,15 @@ if (!module.parent) {
     log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
                chalk.blue("node "), chalk.green(process.version.substring(1), "\n"));
 
-    createListener(droppy());
+    var onreq = droppy(),
+        hosts = Array.isArray(config.host) ? config.host : [config.host],
+        ports = Array.isArray(config.port) ? config.port : [config.port];
+
+    hosts.forEach(function(host) {
+        ports.forEach(function(port) {
+            createListener(onreq).listen(port, host);
+        });
+    });
 }
 
 //-----------------------------------------------------------------------------
@@ -494,9 +502,7 @@ function createListener(handler) {
         process.exit(1);
     });
 
-    (Array.isArray(config.host) ? config.host : [config.host]).forEach(function(host) {
-        server.listen(config.port, host);
-    });
+    return server;
 }
 
 //-----------------------------------------------------------------------------
