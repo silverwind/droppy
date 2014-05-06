@@ -99,6 +99,7 @@ input:-webkit-autofill {
     text-align: center;
     order: 1;
     flex: 0 0 auto;
+    z-index: 2;
 }
 
 /* ============================= Header Buttons ============================ */
@@ -151,6 +152,7 @@ input:-webkit-autofill {
 .button.disabled       { color: #666 !important; cursor: not-allowed !important }
 .button.disabled:hover { color: #666 !important }
 .button.disabled svg   { fill:  #666 !important }
+
 #view-container {
     flex: 1 1;
     order: 2;
@@ -229,6 +231,7 @@ input:-webkit-autofill {
    position: absolute;
    box-shadow: 0 0 1em rgba(0, 0, 0, 0.6);
    height: 1.5rem;
+   z-index: 1;
 }
 
 .view.right .path { border-left: 1px solid #333}
