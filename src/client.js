@@ -1568,15 +1568,16 @@
             }
         });
         view.register("drop", function (event) {
-            var view = $(event.target).parents(".view"),
-                items = event.dataTransfer.items,
-                dragData = JSON.parse(event.dataTransfer.getData("text"));
+            var dragData,
+                view = $(event.target).parents(".view"),
+                items = event.dataTransfer.items;
 
             event.preventDefault();
             event.stopPropagation();
             $(".dropzone").removeClass("in");
 
-            if (dragData) { // It's a drag between views
+            if (event.dataTransfer.getData("text".length)) { // It's a drag between views
+                dragData = JSON.parse(event.dataTransfer.getData("text"));
                 if (view.data("type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
                 } else { // dropping into a document/media view
