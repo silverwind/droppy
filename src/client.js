@@ -53,7 +53,7 @@
             img.src = "data:image/webp;base64,UklGRi4AAABXRUJQVlA4TCEAAAAvAUAAEB8wAiMwAgSSNtse/cXjxyCCmrYNWPwmHRH9jwMA";
         })(),
         mobile: (function () {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent);
         })()
     };
 // ============================================================================
@@ -334,7 +334,7 @@
                     else if (index === 1) {
                         droppy.split(dest);
                     }
-                })
+                });
             }
         };
 
@@ -2587,7 +2587,7 @@
     // Get the path to droppy's root, ensuring a trailing slash
     function getRootPath() {
         var p = window.location.pathname;
-        return p[p.length -1] === "/" ? p : p + "/";
+        return p[p.length - 1] === "/" ? p : p + "/";
     }
 
     // turn /path/to/file to file
