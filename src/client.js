@@ -1909,9 +1909,16 @@
 
     function populateMediaCache(view) {
         [getNextMedia(view), getPrevMedia(view)].forEach(function (filename) {
-            var el = document.createElement((Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) ? "img" : "video"),
+            var el,
                 src = getMediaSrc(view, filename);
-            if (src) el.src = src;
+            if (!src) return;
+            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
+                el = document.createElement("img");
+            } else {
+                el = document.createElement("video");
+                el.setAttribute("preload", "auto");
+            }
+            el.src = src;
         });
     }
 
