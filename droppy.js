@@ -1,4 +1,4 @@
-#!/bin/env node
+#!/usr/bin/env node
 /* ----------------------------------------------------------------------------
                           droppy - file server on node
                       https://github.com/silverwind/droppy
@@ -180,7 +180,7 @@ function init(options) {
     // Prepare to get up and running
     cacheResources(path.join(__dirname + "/res/"), function () {
         setupDirectories(function () {
-            cleanupLinks(function() {
+            cleanupLinks(function () {
                 ready = true;
                 log.simple("Ready for requests!");
             });
@@ -256,7 +256,7 @@ function prepareContent() {
     });
 
     // Add SVG object
-    var svgDir = path.join(__dirname,"/src/svg/"), svgData = {};
+    var svgDir = path.join(__dirname, "/src/svg/"), svgData = {};
     fs.readdirSync(svgDir).forEach(function (name) {
         svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
     });
@@ -916,7 +916,7 @@ function deleteDirectory(directory) {
     var retries = 10;
     try {
         del(directory);
-    } catch(err) {
+    } catch (err) {
         if (retries > 0) {
             retries--;
             del(directory);
@@ -925,7 +925,7 @@ function deleteDirectory(directory) {
             log.error(err);
         }
     }
-    function del (dir) {
+    function del(dir) {
         rimraf.sync(dir);
         checkWatchedDirs();
     }
