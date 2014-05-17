@@ -360,8 +360,10 @@ function cleanupForDemo(doneCallback) {
         },
         function (callback) {
             log.simple("Adding samples...");
-            cpr(path.join(__dirname, "src"), path.join(config.filesDir, "Sources"), function () {
-                cpr(path.join(__dirname, "node_modules"), path.join(config.filesDir, "Modules"), function () {
+            cpr(path.join(__dirname, "src"), path.join(config.filesDir, "Sources"), function (err) {
+                if (err) log.error(err);
+                cpr(path.join(__dirname, "node_modules"), path.join(config.filesDir, "Modules"), function (err) {
+                    if (err) log.error(err);
                     callback(null);
                 });
             });

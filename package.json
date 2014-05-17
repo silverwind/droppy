@@ -10,14 +10,14 @@
   "bugs": "https://github.com/silverwind/droppy/issues",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "archiver": "~0.9.1",
-    "async": "~0.8.0",
-    "autoprefixer": "~1.1.20140430",
+    "archiver": "~0.10.0-alpha",
+    "async": "~0.9.0",
+    "autoprefixer": "~1.1.20140512",
     "busboy": "~0.2.6",
     "chalk": "~0.4.0",
     "clean-css": "~2.1.8",
     "codemirror": "~4.1.0",
-    "cpr": "~0.1.1",
+    "cpr": "~0.2.0",
     "dot": "~1.0.2",
     "graceful-fs": "~2.0.3",
     "jquery": "~2.1.1",
@@ -26,14 +26,14 @@
     "mkdirp": "~0.5.0",
     "request": "~2.34.0",
     "rimraf": "~2.2.8",
-    "spdy": "~1.25.6",
+    "spdy": "~1.26.0",
     "uglify-js": "~2.4.13",
     "decompress-zip": "~0.0.6",
     "ws": "~0.4.31"
   },
   "devDependencies": {
-    "grunt": "~0.4.4",
-    "grunt-bump": "~0.0.13",
+    "grunt": "~0.4.5",
+    "grunt-bump": "~0.0.14",
     "grunt-shell": "~0.7.0"
   },
   "directories": {
