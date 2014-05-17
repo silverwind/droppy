@@ -1136,6 +1136,10 @@
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         if (!droppy.socket) return;
+        droppy.views.forEach(function(view) {
+            view.switchRequest = true;
+            setTimeout(function(){ view.switchRequest = false; }, 1000);
+        });
         updateLocation(null, getLocationsFromHash(), true);
     });
 
@@ -1891,7 +1895,6 @@
             openDoc(view);
         }
         updatePath(view);
-        updateHistory(view, join(newFolder, file));
     }
 
     function populateMediaList(view, data) {
@@ -1986,7 +1989,6 @@
             view[0].currentFile = filename;
             populateMediaCache(view);
             updatePath(view);
-            updateHistory(view, join(view[0].currentFolder, filename));
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }
     }
