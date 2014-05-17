@@ -1249,7 +1249,8 @@ function handleFileRequest(req, res, download) {
 
             // Set disposition headers for downloads
             if (download) {
-                // IE 10/11 can't handle an UTF-8 Content-Dispotsition header, so we encode it
+                // IE 10/11 can't handle an UTF-8 Content-Disposition header, so we encode it
+                // Note: We can't encode all URLs as Firefox/Chrome won't decode them
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                     dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
                 else
