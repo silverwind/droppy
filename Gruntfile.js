@@ -7,11 +7,11 @@ module.exports = function (grunt) {
                 files: ["package.json"],
                 commit: true,
                 commitMessage: "Release %VERSION%",
-                commitFiles: ["-a"],
+                commitFiles: ["package.json"],
                 createTag: true,
                 tagName: "%VERSION%",
                 tagMessage: "Version %VERSION%",
-                push: false,
+                push: false
             }
         },
         shell: {
