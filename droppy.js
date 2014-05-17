@@ -1249,15 +1249,11 @@ function handleFileRequest(req, res, download) {
 
             // Set disposition headers for downloads
             if (download) {
-                if (shortLink) {
-                    // IE 10/11 can't handle an UTF-8 Content-Dispotsition header, so we encode it
-                    if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                        dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
-                    else
-                        dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
-                } else {
-                    dispo = "attachment";
-                }
+                // IE 10/11 can't handle an UTF-8 Content-Dispotsition header, so we encode it
+                if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+                    dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
+                else
+                    dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
                 res.setHeader("Content-Disposition", dispo);
             } else { // Set short caching headers for non-downloads
                 res.setHeader("Cache-Control", "private, max-age=30");
