@@ -1299,11 +1299,11 @@
     function openDirectory(view, isUpload) {
         // Apply directory size cache
         if (droppy.sizeCache[view[0].currentFolder]) {
-             Object.keys(view[0].currentData).forEach(function(name) {
-                 var currentEntry = view[0].currentData[name];
-                 if (currentEntry.type === "d" && currentEntry.size === 0 && droppy.sizeCache[view[0].currentFolder][name])
-                     view[0].currentData[name].size = droppy.sizeCache[view[0].currentFolder][name];
-             });
+            Object.keys(view[0].currentData).forEach(function (name) {
+                var currentEntry = view[0].currentData[name];
+                if (currentEntry.type === "d" && currentEntry.size === 0 && droppy.sizeCache[view[0].currentFolder][name])
+                    view[0].currentData[name].size = droppy.sizeCache[view[0].currentFolder][name];
+            });
         }
         // Create HTML from template
         var content = contentWrap(view).html(t.views.directory({
@@ -2058,7 +2058,7 @@
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
-            loadContent(view, contentWrap(view).append(doc), function() {
+            loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
                     autofocus: true,

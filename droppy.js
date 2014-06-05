@@ -641,6 +641,7 @@ function setupSocket(server) {
                                 log.error(error);
                                 sendSaveStatus(cookie, vId, 1); // Save failed
                             } else {
+                                delete cache.files[msg.data.to];
                                 sendSaveStatus(cookie, vId, 0); // Save successful
                             }
                         });
@@ -1238,7 +1239,7 @@ function handleFileRequest(req, res, download) {
     }
 
     // 304 response when Etag matches
-    if (!download && (req.headers["if-none-match"] || "" === cache.files[filepath])) {
+    if (!download && ((req.headers["if-none-match"] || "") === cache.files[filepath])) {
         res.statusCode = 304;
         res.end();
         log.info(req, res);
@@ -1258,8 +1259,7 @@ function handleFileRequest(req, res, download) {
                 else
                     dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
                 res.setHeader("Content-Disposition", dispo);
-            } else { // Set short caching headers for non-downloads
-                res.setHeader("Cache-Control", "private, max-age=30");
+            } else {
                 cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
                 res.setHeader("Etag", cache.files[filepath]);
             }
