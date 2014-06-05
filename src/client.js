@@ -1378,6 +1378,7 @@
 
     // Load new view content
     function loadContent(view, content, callback) {
+        if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
         var type = view.data("type"),
             navRegex = /(forward|back|center)/;
         if (view[0].animDirection === "center" && type === "directory") {
