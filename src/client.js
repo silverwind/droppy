@@ -1989,6 +1989,7 @@
             }, 150);
             view[0].currentFile = filename;
             populateMediaCache(view);
+            window.history.replaceState(null, null, getHashPaths(view, join(view[0].currentFolder, view[0].currentFile)));
             updatePath(view);
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }
