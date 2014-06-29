@@ -1,4 +1,4 @@
-#droppy <a target="_blank" href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy@2x.png" alt="NPM version" height="18"></a> <a target="_blank" href="https://david-dm.org/silverwind/droppy"><img src="https://david-dm.org/silverwind/droppy@2x.png" alt="Dependency Status" height="18"></a>
+#droppy <a target="_blank" href="https://npmjs.org/package/droppy"><img src="https://badge.fury.io/js/droppy.svg" alt="NPM version" height="18"></a> <a target="_blank" href="https://david-dm.org/silverwind/droppy"><img src="https://david-dm.org/silverwind/droppy.svg" alt="Dependency Status" height="18"></a>
 Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>. Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>.
 
 ###Features
