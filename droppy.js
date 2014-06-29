@@ -66,6 +66,7 @@ var
     cookieName   = "s",
     isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
     mode         = {file: "644", dir: "755"},
+    mkdirpOpts   = {fs: fs, mode: mode.dir},
     resources    = {
         css  : [
             "node_modules/codemirror/lib/codemirror.css",
@@ -316,8 +317,8 @@ function prepareContent() {
 function setupDirectories(callback) {
     cleanupTemp(true, function () {
         try {
-            mkdirp.sync(config.filesDir, mode.dir);
-            mkdirp.sync(config.tempDir, mode.dir);
+            mkdirp.sync(config.filesDir, mkdirpOpts);
+            mkdirp.sync(config.tempDir, mkdirpOpts);
         } catch (error) {
             log.error("Unable to create directories:");
             log.error(error);
@@ -353,7 +354,7 @@ function cleanupForDemo(doneCallback) {
         function (callback) {
             log.simple("Cleaning up...");
             rimraf(config.filesDir, function () {
-                mkdirp(config.filesDir, mode.dir, function () {
+                mkdirp(config.filesDir, mkdirpOpts, function () {
                     callback(null);
                 });
             });
@@ -374,7 +375,7 @@ function cleanupForDemo(doneCallback) {
                 unzipper = new DecompressZip(temp),
                 dest = path.join(config.filesDir, "Images");
             log.simple("Downloading image samples...");
-            mkdirp(dest, mode.dir, function () {
+            mkdirp(dest, mkdirpOpts, function () {
                 request("http://gdurl.com/lWOY/download").pipe(fs.createWriteStream(temp)).on("close", function() {
                     unzipper.on("extract", function () {
                         callback(null);
@@ -665,7 +666,7 @@ function setupSocket(server) {
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                mkdirp(addFilePath(msg.data), mode.dir, function (error) {
+                mkdirp(addFilePath(msg.data), mkdirpOpts, function (error) {
                     if (error) log.error(error);
                     log.info(ws, null, "Created: ", msg.data);
                 });
@@ -714,7 +715,7 @@ function setupSocket(server) {
                 async.each(files,
                     function (file, callback) {
                         if (!utils.isPathSane(file)) return callback(new Error("Invalid empty file creation request: " + file));
-                        mkdirp(path.dirname(addFilePath(file)), mode.dir, function (err) {
+                        mkdirp(path.dirname(addFilePath(file)), mkdirpOpts, function (err) {
                             if (err) callback(err);
                             fs.writeFile(addFilePath(file), "", {mode: mode.file}, function (err) {
                                 if (err) return callback(err);
@@ -733,7 +734,7 @@ function setupSocket(server) {
                 async.each(folders,
                     function (folder, callback) {
                         if (!utils.isPathSane(folder)) return callback(new Error("Invalid empty file creation request: " + folder));
-                        mkdirp(addFilePath(folder), mode.dir, callback);
+                        mkdirp(addFilePath(folder), mkdirpOpts, callback);
                     }, function (err) {
                         if (err) log.error(ws, null, err);
                         if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
@@ -870,7 +871,7 @@ function doClipboard(type, from, to) {
             log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
         else  {
             if (error === "no files to copy") {
-                mkdirp(to);
+                mkdirp(to, mkdirpOpts);
             } else {
                 log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
             }
@@ -1333,7 +1334,7 @@ function handleUploadRequest(req, res) {
                     if (error) { // File doesn't exist
                         fs.stat(path.dirname(files[name].dst), function (error) {
                             if (error) { // Dir doesn't exist
-                                mkdirp.sync(path.dirname(files[name].dst), mode.dir);
+                                mkdirp.sync(path.dirname(files[name].dst), mkdirpOpts);
                             }
                             moveFile(files[name].src, files[name].dst);
                         });
