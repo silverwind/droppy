@@ -805,28 +805,13 @@ input:-webkit-autofill {
 .media-container > img,
 .media-container > video {
     position: absolute;
-    max-height: calc(100% - 1.5em);
+    max-height: 100%;
     max-width: 100%;
     width: auto;
     left: 50%;
-    top: calc(50% - .75em);
+    top: 50%;
     transform: translate(-50%, -50%);
     transition: transform .3s ease, opacity .3s ease;
-}
-
-.media-container figcaption {
-    color: white;
-    position: absolute;
-    bottom: 0;
-    line-height: 1.5em;
-    width: 100%;
-    text-overflow: ellipsis;
-    overflow-x: hidden;
-    white-space: nowrap;
-    transition: bottom .15s ease;
-}
-.media-container figcaption.out {
-    bottom: -1.5em;
 }
 
 /* ============================ Document Previewer ============================ */

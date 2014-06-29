@@ -1965,8 +1965,7 @@
 
         function swapMedia(view, filename, dir) {
             var newEl,
-                oldEl   = view.find(".media-container > img, .media-container > video"),
-                caption = view.find(".media-container figcaption");
+                oldEl   = view.find(".media-container > img, .media-container > video");
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
                 newEl = $("<img>").attr("class", dir).one("load", aspectScale);
             else
@@ -1983,10 +1982,6 @@
                     a.replaceWith(b);
                 }
             })(oldEl, newEl);
-            caption.attr("class", "out");
-            setTimeout(function () {
-                caption.text(filename).removeAttr("class");
-            }, 150);
             view[0].currentFile = filename;
             populateMediaCache(view);
             window.history.replaceState(null, null, getHashPaths(view, join(view[0].currentFolder, view[0].currentFile)));
@@ -2002,7 +1997,7 @@
             var container = this;
             $(container).children("img, video").each(function () {
                 var dims  = {w: this.naturalWidth, h: this.naturalHeight},
-                    space = {w: $(container).width(), h: $(container).height() - $(container).children("figcaption").height()};
+                    space = {w: $(container).width(), h: $(container).height()};
                 if (dims.w > space.w || dims.h > space.h) {
                     $(this).css({width: "", height: ""}); // Let CSS handle the downscale
                 } else {
@@ -2028,7 +2023,7 @@
         var previewer,
             filename  = view[0].currentFile;
         view.data("type", type);
-        previewer = $(t.views.media({ type: type, caption: filename, src: getMediaSrc(view, filename)}));
+        previewer = $(t.views.media({ type: type, src: getMediaSrc(view, filename)}));
         if (sameFolder && view[0].currentData) {
             populateMediaList(view, view[0].currentData);
             populateMediaCache(view);

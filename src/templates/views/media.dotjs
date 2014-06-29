@@ -3,7 +3,6 @@
 it = {
     type: String // Type of media, appended to previewer classes
     src: String // url src for image or media
-    caption: String // Caption for our media
 }
 </script>
 #}}
@@ -17,9 +16,6 @@ it = {
             <img src="{{= it.src }}">
         {{??}}
             <img src="{{= it.src }}">
-        {{?}}
-        {{? it.caption }}
-            <figcaption>{{= it.caption}}</figcaption>
         {{?}}
     </figure>
 </div>
