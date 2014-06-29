@@ -12,7 +12,7 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 * View media (images, video) in a gallery, play audio in it's own player.
 * Basic file system operations: Cut, Copy, Rename, Delete, Create directory.
 * Drag and Drop support for uploads and filesystem operations. Hold CMD/CTRL to copy, Shift to move.
-* Supported_media_formats#Browser_compatibility) by the `<audio>` and `<video>` elements.
+* Playback of all audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the browser.
 * Support for shortened links to share file downloads with your friends without them needing to log in.
 
 ##Usage
