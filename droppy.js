@@ -362,6 +362,7 @@ function cleanupForDemo(doneCallback) {
         }
     ], doneCallback);
 }
+
 //-----------------------------------------------------------------------------
 // Clean up the directory for incoming files
 function cleanupTemp(initial, callback) {
@@ -1052,6 +1053,8 @@ function handleGET(req, res, next) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
     } else if (/\?[~\$]\//.test(URI)) {
         handleFileRequest(req, res, true);
+    } else if (/\?\?\//.test(URI)) {
+        handleTypeRequest(req, res);
     } else if (/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
     } else if (/\?~~\//.test(URI)) {
@@ -1255,6 +1258,21 @@ function handleFileRequest(req, res, download) {
             res.end();
         }
         log.info(req, res);
+    });
+}
+
+//-----------------------------------------------------------------------------
+function handleTypeRequest(req, res) {
+    utils.isBinary(addFilePath(decodeURIComponent(req.url).substring(4)), function (error, result) {
+        if (error) {
+            res.statusCode = 500;
+            res.end();
+            log.error(error);
+        } else {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/plain");
+            res.end(result ? "binary" : "text");
+        }
     });
 }
 

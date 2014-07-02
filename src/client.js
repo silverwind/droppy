@@ -1849,7 +1849,7 @@
 
     // Click on a file link
     function setClickAction() {
-        if (droppy.get("clickAction") !== "download") {
+        if (droppy.get("clickAction") === "view") {
             // TODO: Use a common function with the entry menu
             $(".file-link").register("click", function (event) {
                 var view = $(event.target).parents(".view");
@@ -1875,27 +1875,48 @@
     }
 
     function openFile(view, newFolder, file) {
+        return;
         var ext = getExt(file),
             oldFolder = view[0].currentFolder;
-        view[0].currentFolder = newFolder;
         // Determine filetype and how to open it
-        if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) {
+        if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) { // Image
             view[0].currentFile = file;
+            view[0].currentFolder = newFolder;
             openMedia(view, "image", oldFolder === newFolder);
-        } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) {
+            updatePath(view);
+        } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) { // Video
             if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
                 showError(view, "Sorry, your browser can't play this file.");
                 updateLocation(view, view[0].currentFolder);
-                return;
             } else {
                 view[0].currentFile = file;
+                view[0].currentFolder = newFolder;
                 openMedia(view, "video", oldFolder === newFolder);
+                updatePath(view);
             }
-        } else {
-            view[0].currentFile = file;
-            openDoc(view);
+        } else { // Generic file, ask the server if the file has binary contents
+            var entryId = join(newFolder, file);
+            $.ajax({
+                type: "GET",
+                url: "??" + entryId,
+                dataType: "text"
+            }).done(function (data, textStatus, request) {
+                if (request.status !== 200) {
+                    showError(view, "Couldn't open/read the file.");
+                    hideSpinner(view);
+                } else if (data === "text") { // Non-Binary content
+                    view[0].currentFile = file;
+                    view[0].currentFolder = newFolder;
+                    openDoc(view, entryId);
+                } else { // Binary content - download it
+                    // Downloading into an iframe to avoid navigation
+                    $("<iframe class='dl'>").css("display", "none").appendTo("body").attr("src", "?~" + entryId);
+                    setTimeout(function () { $("iframe.dl").remove(); }, 1000);
+                    hideSpinner(view);
+                }
+            });
         }
-        updatePath(view);
+
     }
 
     function populateMediaList(view, data) {
@@ -2040,21 +2061,26 @@
         hideSpinner(view);
     }
 
-    function openDoc(view) {
+    function openDoc(view, entryId) {
+        showSpinner(view);
         view.data("type", "document");
         view[0].animDirection = "forward";
-        var filename = view[0].currentFile,
-            entryId = join(view[0].currentFolder, filename),
+
+        var editor,
             readOnly = false, // Check if not readonly
-            editor = null,
-            doc = $(t.views.document({readOnly: readOnly}));
-        showSpinner(view);
+            doc      = $(t.views.document({readOnly: readOnly}));
 
         $.ajax({
             type: "GET",
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
+            loadCM(data, request.getResponseHeader("Content-Type"));
+        }).fail(function () {
+            closeDoc(view);
+        });
+
+        function loadCM(data, type) {
             loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
@@ -2096,7 +2122,7 @@
                     else
                         called = true;
                     editor.setValue(data);
-                    editor.setOption("mode", request.getResponseHeader("Content-Type"));
+                    editor.setOption("mode", type);
                     editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
                         if (change.origin !== "setValue")
@@ -2122,9 +2148,7 @@
                 };
                 view.find(".content").end(loadDocument);
             });
-        }).fail(function () {
-            closeDoc(view);
-        });
+        }
     }
 
     function createOptions() {
