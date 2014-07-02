@@ -1875,9 +1875,9 @@
     }
 
     function openFile(view, newFolder, file) {
-        return;
         var ext = getExt(file),
             oldFolder = view[0].currentFolder;
+
         // Determine filetype and how to open it
         if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) { // Image
             view[0].currentFile = file;
@@ -1916,7 +1916,6 @@
                 }
             });
         }
-
     }
 
     function populateMediaList(view, data) {
