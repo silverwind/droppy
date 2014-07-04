@@ -1333,14 +1333,14 @@
         });
 
         // Click on a file link
-        content.find(".file-link, .openfile").register("click", function (event) {
+        content.find(".file-link").register("click", function (event) {
             if (droppy.socketWait) return;
             var view = $(event.target).parents(".view");
             event.preventDefault();
             updateLocation(view, join(view[0].currentFolder, $(event.target).text()));
         });
 
-        // Click on a file link
+        // Click on a "open" link
         content.find(".openfile").register("click", function (event) {
             if (droppy.socketWait) return;
             var view = $(event.target).parents(".view");
@@ -1904,6 +1904,7 @@
                     $("<iframe class='dl'>").css("display", "none").appendTo("body").attr("src", "?~" + entryId);
                     setTimeout(function () { $("iframe.dl").remove(); }, 1000);
                     hideSpinner(view);
+                    updateLocation(view, view[0].currentFolder);
                 }
             });
         }
@@ -2565,7 +2566,7 @@
     function showLinkBox(view, link) {
         var box   = view.find(".info-box"),
             input = box.find("input");
-        box.find("svg").replaceWith(droppy.svg.share);
+        box.find("svg").replaceWith(droppy.svg.link);
         input.val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link);
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
