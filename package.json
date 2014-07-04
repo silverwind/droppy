@@ -38,11 +38,9 @@
     "grunt-shell": "~0.7.0"
   },
   "directories": {
-    "files": "files",
     "lib": "lib",
     "res": "res",
-    "src": "src",
-    "temp": "temp"
+    "src": "src"
   },
   "engines": {
     "node": "~0.10.0"
@@ -66,7 +64,6 @@
   "bin": {
     "droppy": "./droppy.js"
   },
-  "subdomain": "droppy",
   "scripts": {
     "start": "droppy.js"
   }
