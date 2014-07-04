@@ -133,6 +133,8 @@ input:-webkit-autofill {
     fill: #aaa;
     display: inline-block;
     vertical-align: middle;
+    width: 32px;
+    height: 32px;
 }
 .button svg { transition: fill .25s ease }
 
@@ -415,7 +417,7 @@ input:-webkit-autofill {
 }
 
 .header-spacer {
-    flex: 0 0 2.667em;
+    flex: 0 0 5.25em;
     display: inline-block;
 }
 
@@ -724,33 +726,17 @@ input:-webkit-autofill {
 #entry-menu div {
     width: 100%;
 }
+
 #entry-menu div > span {
     display: inline-block;
     vertical-align: top;
 }
 
-#entry-menu .open, #entry-menu .edit {
+#entry-menu a.play, #entry-menu.type-folder a.edit {
     display: none;
 }
 
-#entry-menu.type-audio>div>.play,
-#entry-menu.type-bin>div>.edit,
-#entry-menu.type-css>div>.edit,
-#entry-menu.type-gif>div>.show,
-#entry-menu.type-html>div>.edit,
-#entry-menu.type-html>div>.show,
-#entry-menu.type-image>div>.edit,
-#entry-menu.type-image>div>.show,
-#entry-menu.type-jpg>div>.show,
-#entry-menu.type-js>div>.edit,
-#entry-menu.type-json>div>.edit,
-#entry-menu.type-log>div>.edit,
-#entry-menu.type-markdown>div>.edit,
-#entry-menu.type-png>div>.show,
-#entry-menu.type-script>div>.edit,
-#entry-menu.type-text>div>.edit,
-#entry-menu.type-video>div>.play,
-#entry-menu.type-xml>div>.edit {
+#entry-menu.type-audio > div > .play {
     display: block;
 }
 
@@ -1163,15 +1149,6 @@ input:-webkit-autofill {
 #about-box.in  { top: 50%; opacity: 1; }
 #about-box.out { top: 60%; opacity: 0; visibility: hidden }
 
-#about-box .droplet {
-    fill: #fff;
-    position: absolute;
-    left: 75px;
-    height: 100%;
-    width: 150px;
-    z-index: -1;
-}
-
 #about-content {
     margin-left: 5%;
     width: 90%;
@@ -1446,7 +1423,7 @@ input:-webkit-autofill {
     width: 100%;
 }
 
-#center-box .droplet {
+#center-box .info {
     fill: #282828;
     margin-top: 20px;
     height: 250px;
@@ -1454,7 +1431,7 @@ input:-webkit-autofill {
 }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
-    #center-box .droplet {
+    #center-box .info {
         height: calc(100% - 60px);
         width: 100%;
     }

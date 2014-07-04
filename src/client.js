@@ -182,7 +182,6 @@
             indentUnit : 4,
             lineWrapping: false,
             hasLoggedOut : false,
-            clickAction: "view",
             renameExistingOnUpload: false
         };
         // Load prefs and set missing ones to their default
@@ -1136,9 +1135,9 @@
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         if (!droppy.socket) return;
-        droppy.views.forEach(function(view) {
+        droppy.views.forEach(function (view) {
             view.switchRequest = true;
-            setTimeout(function(){ view.switchRequest = false; }, 1000);
+            setTimeout(function () { view.switchRequest = false; }, 1000);
         });
         updateLocation(null, getLocationsFromHash(), true);
     });
@@ -1325,15 +1324,34 @@
                 fileInput.removeAttr("directory mozdirectory webkitdirectory msdirectory");
             fileInput.click();
         });
+
         // Switch into a folder
         content.find(".folder-link").register("click", function (event) {
-            event.preventDefault();
             if (droppy.socketWait) return;
+            event.preventDefault();
             updateLocation(view, $(this).parents(".data-row").data("id"));
         });
+
+        // Click on a file link
+        content.find(".file-link, .openfile").register("click", function (event) {
+            if (droppy.socketWait) return;
+            var view = $(event.target).parents(".view");
+            event.preventDefault();
+            updateLocation(view, join(view[0].currentFolder, $(event.target).text()));
+        });
+
+        // Click on a file link
+        content.find(".openfile").register("click", function (event) {
+            if (droppy.socketWait) return;
+            var view = $(event.target).parents(".view");
+            event.preventDefault();
+            updateLocation(view, join(view[0].currentFolder, $(event.target).parents(".data-row").children(".file-link").text()));
+        });
+
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
+
         content.find(".data-row").register("contextmenu", function (event) {
             var target = $(event.target), targetRow;
             if (target.attr("class") === ".data-row")
@@ -1344,13 +1362,15 @@
             event.preventDefault();
             event.stopPropagation();
         });
+
         content.find(".data-row .entry-menu").register("click", function (event) {
             showEntryMenu($(event.target).parents(".data-row"));
             event.preventDefault();
             event.stopPropagation();
         });
+
         // Stop navigation when clicking on an <a>
-        content.find(".data-row .zip, .entry-link.file").register("click", function (event) {
+        content.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
 
@@ -1361,18 +1381,21 @@
                 droppy.reopen = false;
             }, 2000);
         });
+
         // Request a shortlink
-        content.find(".data-row .shortlink").register("click", function () {
+        content.find(".shortlink").register("click", function () {
             if (droppy.socketWait) return;
             sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
         });
+
         content.find(".icon-play").register("click", function () {
             preparePlayback($(this));
         });
+
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
             sortByHeader(view, $(this));
         });
-        setClickAction();
+
         hideSpinner(view);
     }
 
@@ -1674,6 +1697,30 @@
     }
 
     function initEntryMenu() {
+        // Play an audio file
+        $("#entry-menu .play").register("click", function (event) {
+            var entry = $("#entry-menu").data("target"),
+                url   = entry.find(".file-link").attr("href").replace(/\?~\//, "?_/");
+            event.stopPropagation();
+            play(url, entry.find(".icon-play"));
+            $("#click-catcher").trigger("click");
+        });
+
+        $("#entry-menu .edit").register("click", function (event) {
+            event.stopPropagation();
+            var location,
+                entry    = $("#entry-menu").data("target"),
+                view     = entry.parents(".view");
+
+            $("#click-catcher").trigger("click");
+
+            view[0].currentFile = entry.find(".file-link").text();
+            location = join(view[0].currentFolder, view[0].currentFile);
+            updateHistory(view, location);
+            updatePath(view);
+            openDoc(view, location);
+        });
+
         // Rename a file/folder
         $("#entry-menu .rename").register("click", function (event) {
             var entry = $("#entry-menu").data("target"),
@@ -1725,39 +1772,6 @@
             event.stopPropagation();
         });
 
-        // Open a file/folder in browser
-        $("#entry-menu .open").register("click", function (event) {
-            event.stopPropagation();
-            var win,
-                entry = $("#entry-menu").data("target"),
-                url   = entry.find(".file-link").attr("href").replace(/\?~\//, "?_/"),
-                type  = $("#entry-menu").attr("class").match(/type\-(\w+)/),
-                view  = entry.parents(".view");
-            if (type) {
-                switch (type[1]) {
-                case "html":
-                    win = window.open(url, "_blank");
-                    break;
-                case "audio":
-                    play(url, entry.find(".icon-play"));
-                    break;
-                default:
-                    updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
-                }
-            }
-            $("#click-catcher").trigger("click");
-            if (win) win.focus();
-        });
-
-        // Edit a file/folder in a text editor
-        $("#entry-menu .edit").register("click", function (event) {
-            event.stopPropagation();
-            var entry = $("#entry-menu").data("target"),
-                view = entry.parents(".view");
-            updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
-            $("#click-catcher").trigger("click");
-        });
-
         // Delete a file/folder
         $("#entry-menu .delete").register("click", function (event) {
             event.stopPropagation();
@@ -1778,15 +1792,6 @@
 
                 type = type.match(/sprite\-(\w+)/);
                 if (type) type = type[1];
-
-                // Set download link and filename
-                if (entry.attr("data-type") === "file") {
-                    menu.find(".download").attr("download", entry.find(".file-link").attr("download"));
-                    menu.find(".download").attr("href", entry.find(".file-link").attr("href"));
-                } else {
-                    menu.find(".download").attr("download", entry.find(".zip").attr("download"));
-                    menu.find(".download").attr("href", entry.find(".zip").attr("href"));
-                }
 
                 menu.attr("class", "in").data("target", entry).addClass("type-" + type);
                 if (x)
@@ -1847,21 +1852,6 @@
         return filenames.sort(t.fn.compare2(entries, by));
     };
 
-    // Click on a file link
-    function setClickAction() {
-        if (droppy.get("clickAction") === "view") {
-            // TODO: Use a common function with the entry menu
-            $(".file-link").register("click", function (event) {
-                var view = $(event.target).parents(".view");
-                if (droppy.socketWait) return;
-                event.preventDefault();
-                updateLocation(view, join(view[0].currentFolder, $(event.target).text()));
-            });
-        } else {
-            $(".file-link").off("click");
-        }
-    }
-
     function preparePlayback(playButton) {
         var source = playButton.parents(".data-row").children(".file-link").attr("href");
         if (droppy.socketWait) return;
@@ -1907,6 +1897,7 @@
                 } else if (data === "text") { // Non-Binary content
                     view[0].currentFile = file;
                     view[0].currentFolder = newFolder;
+                    updatePath(view);
                     openDoc(view, entryId);
                 } else { // Binary content - download it
                     // Downloading into an iframe to avoid navigation
@@ -2158,7 +2149,6 @@
                 ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
                 ["theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]],
                 ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
-                ["clickAction", "File Click Action", ["download", "view"], ["Download", "View"]],
                 ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
             ]
         }));
@@ -2206,7 +2196,6 @@
                     if (this.editor) this.editor.setOption(option, value);
                 });
             });
-            setClickAction(); // Set click actions here so it applies immediately after a change
         });
     }
 
@@ -2576,7 +2565,7 @@
     function showLinkBox(view, link) {
         var box   = view.find(".info-box"),
             input = box.find("input");
-        box.find("svg").replaceWith(droppy.svg.link);
+        box.find("svg").replaceWith(droppy.svg.share);
         input.val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link);
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
