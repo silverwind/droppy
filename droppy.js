@@ -834,11 +834,8 @@ function doClipboard(type, from, to) {
             if (type === "cut") {
                 fs.rename(from, to, logError);
             } else {
-                if (stats.isFile()) {
-                    copyFile(from, to, logError);
-                } else if (stats.isDirectory()) {
-                    cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
-                }
+                if (stats.isFile()) to = path.dirname(to); // cpr expects `to` to be the directory
+                cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
             }
         }
     });
@@ -854,32 +851,6 @@ function doClipboard(type, from, to) {
             }
         }
         log.error(error);
-    }
-}
-//-----------------------------------------------------------------------------
-// Copy a file from one location to another quickly
-// snippet from: http://stackoverflow.com/a/14387791/2096729
-function copyFile(from, to, cb) {
-    var cbCalled = false;
-    from = fs.createReadStream(from);
-    from.on("error", function (err) {
-        done(err);
-    });
-
-    to = fs.createWriteStream(to);
-    to.on("error", function (err) {
-        done(err);
-    });
-    to.on("close", function () {
-        done();
-    });
-    from.pipe(to);
-
-    function done(err) {
-        if (!cbCalled) {
-            cb(err);
-            cbCalled = true;
-        }
     }
 }
 
