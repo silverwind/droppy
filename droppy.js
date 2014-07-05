@@ -28,8 +28,7 @@ var _            = require("lodash"),
     Wss          = require("ws").Server,
     zlib         = require("zlib");
 
-var templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
-    cache        = { res: {}, files: {} },
+var cache        = { res: {}, files: {} },
     clients      = {},
     db           = {},
     dirs         = {},
@@ -74,7 +73,12 @@ var templateList = ["views/directory.dotjs", "views/document.dotjs", "views/medi
             "src/auth.html",
             "src/main.html"
         ],
-        templates : []
+        templates : [
+            "src/templates/views/directory.dotjs",
+            "src/templates/views/document.dotjs",
+            "src/templates/views/media.dotjs",
+            "src/templates/options.dotjs"
+        ]
     };
 
 //-----------------------------------------------------------------------------
@@ -113,7 +117,7 @@ if (!module.parent) {
     // Argument handler
     if (isCLI) handleArguments();
 
-    console.log([
+    log.plain([
             "....__..............................\n",
             ".--|  |----.-----.-----.-----.--.--.\n",
             "|  _  |   _|  _  |  _  |  _  |  |  |\n",
@@ -150,6 +154,10 @@ function init(options) {
 
     // Read user/sessions from DB and check if its the first run
     readDB();
+
+    // Intialize the CSS cache when debugging
+    if (config.debug) updateCSS();
+
     // Copy/Minify JS, CSS and HTML content
     prepareContent();
 
@@ -167,31 +175,24 @@ function init(options) {
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
 function prepareContent() {
-    var resourceList,
-        resourceData = {},
-        out = { css : "", js  : "" },
-        compiledList = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
-        matches = { resource: 0, compiled: 0 };
-
-    // Add Templates
-    templateList.forEach(function (relPath) {
-        resources.templates.push("src/templates/" + relPath);
-    });
-
-    resourceList = utils.flatten(resources);
-    // Intialize the CSS cache when debugging
-    if (config.debug) updateCSS();
+    var resList  = utils.flatten(resources),
+        resData  = {},
+        out      = { css : "", js  : "" },
+        compiled = ["base.html", "auth.html", "main.html", "client.js", "style.css"],
+        matches  = { resource: 0, compiled: 0 };
 
     // Check if we to actually need to recompile resources
-    resourceList.forEach(function (file) {
+    resList.forEach(function (file) {
         try {
             if (crypto.createHash("md5").update(fs.readFileSync(path.join(__dirname, file))).digest("base64") === db.resourceHashes[file])
                 matches.resource++;
             else return;
-        } catch (error) { return; }
+        } catch (error) {
+            return;
+        }
     });
 
-    compiledList.forEach(function (file) {
+    compiled.forEach(function (file) {
         try {
             if (fs.statSync(getResPath(file)))
                 matches.compiled++;
@@ -199,8 +200,8 @@ function prepareContent() {
         } catch (error) { return; }
     });
 
-    if (matches.resource === resourceList.length &&
-        matches.compiled === compiledList.length &&
+    if (matches.resource === resList.length &&
+        matches.compiled === compiled.length &&
         db.resourceDebug !== undefined &&
         db.resourceDebug === config.debug) {
         return;
@@ -208,7 +209,7 @@ function prepareContent() {
 
     // Read resources
     Object.keys(resources).forEach(function (type) {
-        resourceData[type] = resources[type].map(function read(file) {
+        resData[type] = resources[type].map(function read(file) {
             var data;
             try {
                 data = fs.readFileSync(path.join(__dirname, file)).toString("utf8");
@@ -222,13 +223,13 @@ function prepareContent() {
 
     // Concatenate CSS and JS
     log.simple("Minifying resources...");
-    resourceData.css.forEach(function (data) {
+    resData.css.forEach(function (data) {
         out.css += data + "\n";
     });
 
     // Append a semicolon to each javascript file to make sure it's properly terminated. The minifier
     // afterwards will take care of any double-semicolons and whitespace.
-    resourceData.js.forEach(function (data) {
+    resData.js.forEach(function (data) {
         out.js += data + ";\n";
     });
 
@@ -241,9 +242,9 @@ function prepareContent() {
 
     // Insert Templates Code
     var templateCode = "var t = {fn:{},views:{}};";
-    resourceData.templates.forEach(function (data, index) {
+    resData.templates.forEach(function (data, index) {
         // Produce the doT functions
-        templateCode += tpls.produceFunction("t." + templateList[index].replace(/\.dotjs$/, "").replace(/[\\\/]/, "."), data);
+        templateCode += tpls.produceFunction("t." + resources.templates[index].replace(/\.dotjs$/, "").split("/").slice(2).join("."), data);
     });
     templateCode += ";";
     out.js = out.js.replace("/* {{ templates }} */", templateCode);
@@ -268,7 +269,7 @@ function prepareContent() {
     try {
         while (resources.html.length) {
             var name = resources.html.pop(),
-                data = resourceData.html.pop();
+                data = resData.html.pop();
 
             // Prepare HTML by removing tabs, CRs and LFs
             fs.writeFileSync(getResPath(path.basename(name)), data.replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version));
@@ -281,7 +282,7 @@ function prepareContent() {
     }
 
     // Save the hashes of all compiled files
-    resourceList.forEach(function (file) {
+    resList.forEach(function (file) {
         if (!db.resourceHashes) db.resourceHashes = {};
         db.resourceHashes[file] = crypto.createHash("md5").update(fs.readFileSync(path.join(__dirname, file))).digest("base64");
         db.resourceDebug = config.debug; // Save the state of the last resource compilation
@@ -297,8 +298,7 @@ function setupDirectories(callback) {
             mkdirp.sync(config.filesDir, mkdirpOpts);
             mkdirp.sync(config.tempDir, mkdirpOpts);
         } catch (error) {
-            log.error("Unable to create directories:");
-            log.error(error);
+            log.error("Unable to create directories.", error);
             process.exit(1);
         }
 
