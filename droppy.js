@@ -1,22 +1,23 @@
 #!/usr/bin/env node
 "use strict";
 
-var
-    // Libraries
+var pkg          = require("./package.json"),
     utils        = require("./lib/utils.js"),
     log          = require("./lib/log.js"),
     cfg          = require("./lib/config.js"),
-    tpls         = require("./lib/dottemplates.js"),
-    // Modules
+    tpls         = require("./lib/dottemplates.js");
+
+process.title = pkg.name;
+
+var _            = require("lodash"),
+    ap           = require("autoprefixer"),
     archiver     = require("archiver"),
     async        = require("async"),
-    ap           = require("autoprefixer"),
-    cpr          = require("cpr"),
     Busboy       = require("busboy"),
     chalk        = require("chalk"),
+    cpr          = require("cpr"),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
-    _            = require("lodash"),
     mime         = require("mime"),
     mkdirp       = require("mkdirp"),
     path         = require("path"),
@@ -25,10 +26,9 @@ var
     rimraf       = require("rimraf"),
     util         = require("util"),
     Wss          = require("ws").Server,
-    zlib         = require("zlib"),
-    // Variables
-    version      = require("./package.json").version,
-    templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
+    zlib         = require("zlib");
+
+var templateList = ["views/directory.dotjs", "views/document.dotjs", "views/media.dotjs", "options.dotjs"],
     cache        = { res: {}, files: {} },
     clients      = {},
     db           = {},
@@ -39,7 +39,6 @@ var
     firstRun     = null,
     hasServer    = null,
     ready        = false,
-    cookieName   = "s",
     isCLI        = (process.argv.length > 2 && process.argv[2] !== "--color"),
     mode         = {file: "644", dir: "755"},
     mkdirpOpts   = {fs: fs, mode: mode.dir},
@@ -125,7 +124,7 @@ if (!module.parent) {
                   .replace(/\-/gm, chalk.magenta("-"))
                   .replace(/\|/gm, chalk.magenta("|"))
     );
-    log.simple(chalk.blue("droppy "), chalk.green(version), " running on ",
+    log.simple(chalk.blue("droppy "), chalk.green(pkg.version), " running on ",
                chalk.blue("node "), chalk.green(process.version.substring(1), "\n"));
 
     var onreq = droppy(),
@@ -191,6 +190,7 @@ function prepareContent() {
             else return;
         } catch (error) { return; }
     });
+
     compiledList.forEach(function (file) {
         try {
             if (fs.statSync(getResPath(file)))
@@ -198,6 +198,7 @@ function prepareContent() {
             else return;
         } catch (error) { return; }
     });
+
     if (matches.resource === resourceList.length &&
         matches.compiled === compiledList.length &&
         db.resourceDebug !== undefined &&
@@ -225,10 +226,9 @@ function prepareContent() {
         out.css += data + "\n";
     });
 
+    // Append a semicolon to each javascript file to make sure it's properly terminated. The minifier
+    // afterwards will take care of any double-semicolons and whitespace.
     resourceData.js.forEach(function (data) {
-        // Append a semicolon to each javascript file to make sure it's
-        // properly terminated. The minifier afterwards will take care of
-        // any double-semicolons and whitespace.
         out.js += data + ";\n";
     });
 
@@ -248,11 +248,12 @@ function prepareContent() {
     templateCode += ";";
     out.js = out.js.replace("/* {{ templates }} */", templateCode);
 
-
     // Add CSS vendor prefixes
     out.css = ap("last 2 versions").process(out.css).css;
+
     // Minify CSS
     out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
+
     // Minify JS
     if (!config.debug)
         out.js = require("uglify-js").minify(out.js, {
@@ -263,15 +264,15 @@ function prepareContent() {
             }
         }).code;
 
-    // Prepare HTML
+    // Save compiled resources
     try {
-        var index = 0;
-        resourceData.html.forEach(function (data) {
-            var name = path.basename(resources.html[index]);
-            // Minify HTML by removing tabs, CRs and LFs
-            fs.writeFileSync(getResPath(path.basename(name)), data.replace(/\n^\s*/gm, "").replace("{{version}}", version));
-            index++;
-        });
+        while (resources.html.length) {
+            var name = resources.html.pop(),
+                data = resourceData.html.pop();
+
+            // Prepare HTML by removing tabs, CRs and LFs
+            fs.writeFileSync(getResPath(path.basename(name)), data.replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version));
+        }
         fs.writeFileSync(getResPath("client.js"), out.js);
         fs.writeFileSync(getResPath("style.css"), out.css);
     } catch (error) {
@@ -1169,7 +1170,7 @@ function handleResourceRequest(req, res, resourceName) {
 
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res, download) {
-    var URI = decodeURIComponent(req.url), shortLink, dispo, filepath;
+    var URI = decodeURIComponent(req.url), shortLink, filename, filepath;
 
     // Check for a shortlink
     filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
@@ -1204,12 +1205,12 @@ function handleFileRequest(req, res, download) {
             // Set disposition headers for downloads
             if (download) {
                 // IE 10/11 can't handle an UTF-8 Content-Disposition header, so we encode it
-                // Note: We can't encode all URLs as Firefox/Chrome won't decode them
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                    dispo = ['attachment; filename="', encodeURIComponent(path.basename(filepath)), '"'].join("");
+                    filename = encodeURIComponent(path.basename(filepath));
                 else
-                    dispo = ['attachment; filename="', path.basename(filepath), '"'].join("");
-                res.setHeader("Content-Disposition", dispo);
+                    filename = path.basename(filepath);
+
+                res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(filepath) + '"');
             } else {
                 cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
                 res.setHeader("Etag", cache.files[filepath]);
@@ -1486,7 +1487,7 @@ function handleArguments() {
         readDB();
         process.exit(delUser(args[1]));
     } else if (option === "version" || option === "-v" || option === "--version") {
-        log.simple(version);
+        log.simple(pkg.version);
         process.exit(0);
     } else {
         printUsage(1);
@@ -1580,8 +1581,8 @@ function getCookie(cookie) {
     if (cookie) {
         cookies = cookie.split("; ");
         cookies.forEach(function (c) {
-            if (new RegExp("^" + cookieName + ".*").test(c)) {
-                session = c.substring(cookieName.length + 1);
+            if (new RegExp("^s.*").test(c)) {
+                session = c.substring(2);
             }
         });
         for (var savedsession in db.sessions) {
@@ -1598,7 +1599,7 @@ function freeCookie(req, res) {
     var dateString = new Date(Date.now() + 31536000000).toUTCString(),
         sessionID  = crypto.randomBytes(32).toString("base64");
 
-    res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";expires=" + dateString + ";path=/");
+    res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + dateString + ";path=/");
     db.sessions[sessionID] = {privileged : true, lastSeen : Date.now()};
     writeDB();
 }
@@ -1611,10 +1612,10 @@ function createCookie(req, res, postData) {
     if (postData.check === "on") {
         // Create a semi-permanent cookie
         dateString = new Date(Date.now() + 31536000000).toUTCString();
-        res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";expires=" + dateString + ";path=/");
+        res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + dateString + ";path=/");
     } else {
         // Create a single-session cookie
-        res.setHeader("Set-Cookie", cookieName + "=" + sessionID + ";path=/");
+        res.setHeader("Set-Cookie", "s=" + sessionID + ";path=/");
     }
     db.sessions[sessionID] = {privileged : priv, lastSeen : Date.now()};
     writeDB();
