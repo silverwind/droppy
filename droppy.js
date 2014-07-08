@@ -415,7 +415,7 @@ function createListener(handler) {
         try {
             key = fs.readFileSync(config.tlsKey);
             cert = fs.readFileSync(config.tlsCert);
-            if (config.tls.ca.length) ca = fs.readFileSync(config.tlsCA);
+            if (fs.existsSync(config.tlsCA)) ca = fs.readFileSync(config.tlsCA);
         } catch (error) {
             log.error("Couldn't read required TLS keys or certificates.", util.inspect(error));
             process.exit(1);
