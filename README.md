@@ -106,7 +106,7 @@ These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#t
 
 ##Notes
 - Playback of audio and video depends on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
-- For shortlinks to be compatible with `wget`, set `disposition = on` in `~/.wgetrc`.
+- For shortlinks to be compatible with `wget`: `echo "content_disposition = on" >> ~/.wgetrc`.
 
 ###Supported Browsers
 - Firefox (last 2 versions)
