@@ -92,7 +92,7 @@ var droppy = module.exports = function (options) {
             res.statusCode = 503;
             res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
         } else {
-            while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
+            req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
             if (method === "GET") {
                 handleGET(req, res, next);
             } else if (method === "POST") {
