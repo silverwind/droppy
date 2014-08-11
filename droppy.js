@@ -20,6 +20,7 @@ var _            = require("lodash"),
     fs           = require("graceful-fs"),
     mime         = require("mime"),
     mkdirp       = require("mkdirp"),
+    mv           = require("mv"),
     path         = require("path"),
     qs           = require("querystring"),
     request      = require("request"),
@@ -833,7 +834,7 @@ function doClipboard(type, from, to) {
         if (error) logError(error);
         if (stats && !error) {
             if (type === "cut") {
-                fs.rename(from, to, logError);
+                mv(from, to, logError);
             } else {
                 if (stats.isFile()) to = path.dirname(to); // cpr expects `to` to be the directory
                 cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
@@ -1322,7 +1323,7 @@ function handleUploadRequest(req, res) {
         closeConnection();
 
         function moveFile(src, dst) {
-            fs.rename(src, dst, function (err) {
+            mv(src, dst, function (err) {
                 if (err) log.error(err);
             });
         }
