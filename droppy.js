@@ -358,7 +358,7 @@ function prepareContent() {
     out.js = out.js.replace("/* {{ templates }} */", templateCode);
 
     // Add CSS vendor prefixes
-    out.css = ap("last 2 versions").process(out.css).css;
+    out.css = ap({browsers: "last 2 versions"}).process(out.css).css;
 
     // Minify CSS
     out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
@@ -1653,7 +1653,7 @@ function updateCSS() {
     resources.css.forEach(function (file) {
         temp += fs.readFileSync(path.join(__dirname, file)).toString("utf8") + "\n";
     });
-    cache.css = ap("last 2 versions").process(temp).css;
+    cache.css = ap({browsers: "last 2 versions"}).process(temp).css;
     Object.keys(clients).forEach(function (cookie) {
         var data = JSON.stringify({
             "type"  : "UPDATE_CSS",

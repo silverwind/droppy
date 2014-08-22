@@ -12,11 +12,11 @@
   "dependencies": {
     "archiver": "~0.10.1",
     "async": "~0.9.0",
-    "autoprefixer": "~2.1.0",
-    "busboy": "~0.2.7",
-    "chalk": "~0.5.0",
-    "clean-css": "~2.2.6",
-    "codemirror": "~4.3.0",
+    "autoprefixer": "~3.0.0",
+    "busboy": "~0.2.8",
+    "chalk": "~0.5.1",
+    "clean-css": "~2.2.13",
+    "codemirror": "~4.5.0",
     "cpr": "~0.3.2",
     "decompress-zip": "~0.0.8",
     "dot": "~1.0.2",
@@ -27,16 +27,16 @@
     "mime": "~1.2.11",
     "mkdirp": "~0.5.0",
     "mv": "~2.0.3",
-    "request": "~2.37.0",
+    "request": "~2.40.0",
     "rimraf": "~2.2.8",
-    "spdy": "~1.27.0",
-    "uglify-js": "~2.4.14",
-    "ws": "~0.4.31"
+    "spdy": "~1.28.1",
+    "uglify-js": "~2.4.15",
+    "ws": "~0.4.32"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
-    "grunt-bump": "~0.0.14",
-    "grunt-shell": "~0.7.0"
+    "grunt-bump": "~0.0.15",
+    "grunt-shell": "~1.0.1"
   },
   "directories": {
     "lib": "lib",
