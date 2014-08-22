@@ -8,49 +8,43 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 * Realtime updating of all connected clients via WebSockets.
 * Asynchronous multi-file uploads. Recursive directory uploads in Chrome.
 * Download directories as zips.
-* Edit plaintext files in CodeMirror, a feature-rich editor.
+* Edit text files in CodeMirror, a feature-rich editor.
+* Support for shortened links to share file downloads with your friends without them needing to log in.
 * View media (images, video) in a gallery, play audio in it's own player.
 * Basic file system operations: Cut, Copy, Rename, Delete, Create directory.
 * Drag and Drop support for uploads and filesystem operations. Hold CMD/CTRL to copy, Shift to move.
-* Playback of all audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the browser.
-* Support for shortened links to share file downloads with your friends without them needing to log in.
+* Playback of audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the browser.
 
-##Usage
-###Standalone
-droppy's self-contained directory can be installed from [npm](https://npmjs.org/package/droppy):
+###Standalone Installation
+First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
 ````bash
-npm install droppy && mv node_modules/droppy . && rm -rf node_modules && cd droppy
+npm install -g droppy
+droppy install ~/droppy
+droppy start ~/droppy
 ````
-Alternatively, direct installation from git goes like this:
-````bash
-git clone https://github.com/silverwind/droppy.git && cd droppy && npm install
-````
-Then, start the server with:
-````
-node droppy
-````
-By default, the standalone web server will listen on [localhost:8989](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To list, add or remove accounts, either use the options dialog or see `node droppy help`.
+By default, the web server will listen on [0.0.0.0:8989](http://localhost:8989/) (changable in the config). On first startup, you'll be prompted for a username and password for your first account.
 
-###Express
+###Module Usage - Express
 You can use droppy as an [express](http://expressjs.com/) middleware:
 ````js
 var express = require("express"),
     droppy  = require("droppy"),
     app     = express();
 
-app.use("/droppy", droppy(/* options */));
+app.use("/", droppy(home, [options]));
 app.listen(80, function() {
     console.log("Listening on 0.0.0.0:80.");
 });
 ````
-A custom **options** object can be passed in, see the **Configuration** section below on valid options.
+- `home`: The path to the home folder, containing `config.json`, `db.json` and the `root` folder.
+- `options`: An optional [options](#options) object.
 
 ##Configuration
-Configuration is done through `config.json`, which is created on the first run, with these defaults:
+`config.json` is created in the home folder with these defaults:
 ````javascript
 {
-    "port"         : 8989,
     "host"         : "0.0.0.0",
+    "port"         : 8989,
     "debug"        : false,
     "useTLS"       : false,
     "useSPDY"      : false,
@@ -65,12 +59,9 @@ Configuration is done through `config.json`, which is created on the first run, 
     "noLogin"      : false,
     "demoMode"     : false,
     "timestamps"   : true,
-    "db"           : "./db.json",
-    "filesDir"     : "./files/",
-    "tempDir"      : "./temp/",
-    "tlsKey"       : "./key.pem",
-    "tlsCert"      : "./cert.pem",
-    "tlsCA"        : "./ca.pem"
+    "tlsKey"       : "domain.key",
+    "tlsCert"      : "domain.crt",
+    "tlsCA"        : "domain.ca"
 }
 ````
 
@@ -78,7 +69,7 @@ Configuration is done through `config.json`, which is created on the first run, 
 - `port`: The port to listen on. Can take an array of ports.
 - `host`: The host address to listen on. Can take an array of hosts.
 - `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
-- `useTLS`: Whether the server should use SSL/TLS encryption.
+- `useTLS`: Whether the server should use SSL/TLS encryption. See TLS options below.
 - `useSPDY`: Enables the SPDYv3 protocol. Depends on `useTLS`.
 - `useHSTS`: Enables the [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header with 1 year caching time. Depends on `useTLS`.
 - `readInterval`: The minimum time gap in milliseconds in which updates to a single directory are sent.
@@ -92,21 +83,15 @@ Configuration is done through `config.json`, which is created on the first run, 
 - `demoMode`: When enabled, the server will regularly clean out all files and restore samples.
 - `timestamps`: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
-###Path options
-- `db`: Location of the database file.
-- `filesDir`: The directory which serves as the server's root.
-- `tempDir`: The directory for temporary files during uploads.
-
 ###TLS options
-These paths are passed directly to [node's tls](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) when `useTLS` is enabled. All files are required in PEM format.
+When `useTLS` is set, these options specify TLS certificates. You can either pass in the certificate directly as a string, or specify a path to a file. Relative paths resolve to the home folder. All files are required in PEM format (Starting with `-----`).
 
-- `tlsKey`: Path to your private key.
-- `tlsCert`: Path to your certificate.
+- `tlsKey`: The private key for the domain.
+- `tlsCert`: The certificate for the domain.
 - `tlsCA`: An optional intermediate (CA) certificate.
 
 ##Notes
-- Playback of audio and video depends on [browser format support](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility).
-- For shortlinks to be compatible with `wget`: `echo "content_disposition = on" >> ~/.wgetrc`.
+- For shortlinks to be compatible with `wget`, set `disposition = on` in `~/.wgetrc`.
 
 ###Supported Browsers
 - Firefox (last 2 versions)
@@ -124,8 +109,7 @@ Description=droppy
 After=network.target
 
 [Service]
-ExecStart=/bin/env node /path/to/droppy/droppy.js --color
-WorkingDirectory=/path/to/droppy/
+ExecStart=/bin/env droppy start /path/to/home/
 Restart=always
 StandardOutput=syslog
 User=http
