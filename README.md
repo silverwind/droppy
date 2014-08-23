@@ -15,15 +15,17 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 * Drag and Drop support uploads and filesystem operations.
 * Playback of common audio and video files directly in the browser.
 
-###Standalone Installation
+###Standalone Usage
 First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
 ````bash
 sudo npm install -g droppy
 droppy install ~/droppy
 droppy start ~/droppy
 ````
-By default, the web server will listen on [0.0.0.0:8989](http://localhost:8989/) (changable in the config). On first startup, you'll be prompted for a username and password for your first account.
-
+By default, the web server will listen on [0.0.0.0:8989](http://localhost:8989/) (changable in the config). On first startup, you'll be prompted for a username and password for your first account. To update, run:
+````bash
+sudo droppy update
+````
 ###Module Usage - Express
 You can use droppy as an [express](http://expressjs.com/) middleware:
 ````js
