@@ -18,7 +18,7 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 ###Standalone Installation
 First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
 ````bash
-npm install -g droppy
+sudo npm install -g droppy
 droppy install ~/droppy
 droppy start ~/droppy
 ````
