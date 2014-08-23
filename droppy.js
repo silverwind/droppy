@@ -28,8 +28,7 @@ var _          = require("lodash"),
 var crypto     = require("crypto"),
     path       = require("path"),
     qs         = require("querystring"),
-    os         = require("os"),
-    zlib       = require("zlib");
+    os         = require("os");
 
 var cache      = { res: {}, files: {}, css: null },
     clients    = {},
@@ -275,9 +274,8 @@ function init(home, options, isStandalone) {
 
         // Prepare to get up and running
         async.series([
-            function (callback) { // Copy/Minify JS, CSS and HTML content
-                prepareContent();
-                callback(null);
+            function (callback) {
+                prepareContent(callback);
             },
             function (callback) {
                 cacheResources(path.join(__dirname + "/res/"), function () {
@@ -311,7 +309,7 @@ function init(home, options, isStandalone) {
 
 //-----------------------------------------------------------------------------
 // Read JS/CSS/HTML client resources, minify them, and write them to /res
-function prepareContent() {
+function prepareContent(callback) {
     var resData  = {},
         out      = { css : "", js  : "" };
 
@@ -360,11 +358,8 @@ function prepareContent() {
     // Add CSS vendor prefixes
     out.css = ap({browsers: "last 2 versions"}).process(out.css).css;
 
-    // Minify CSS
-    out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
-
-    // Minify JS
-    if (!config.debug)
+    if (!config.debug) {
+        // Minify JS
         out.js = require("uglify-js").minify(out.js, {
             fromString: true,
             compress: {
@@ -373,21 +368,42 @@ function prepareContent() {
             }
         }).code;
 
-    // Save compiled resources
-    try {
-        while (resources.html.length) {
-            var name = resources.html.pop(),
-                data = resData.html.pop();
-
-            // Prepare HTML by removing tabs, CRs and LFs
-            fs.writeFileSync(getResPath(path.basename(name)), data.replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version));
-        }
-        fs.writeFileSync(getResPath("client.js"), out.js);
-        fs.writeFileSync(getResPath("style.css"), out.css);
-    } catch (error) {
-        log.error("Error writing resources:\n", error);
-        process.exit(1);
+        // Minify CSS
+        out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
     }
+
+    // Save compiled resources
+    var gzips = {},
+        etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
+
+    while (resources.html.length) {
+        var name = path.basename(resources.html.pop()),
+            data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version); // Prepare HTML by removing tabs, CRs and LFs
+
+        (function (name, data) { // Needed closure so data doesn't get read from the wrong scope
+            cache.res[name] = {data: data, etag: etag, mime: mime.lookup(".html")};
+            gzips[name] = function (callback) { utils.createGzip(data, callback); };
+        })(name, data);
+    }
+
+    cache.res["client.js"] = {data: out.js, etag: etag, mime: mime.lookup(".js")};
+    gzips["client.js"] = function (callback) { utils.createGzip(out.js, callback); };
+    cache.res["style.css"] = {data: out.css, etag: etag, mime: mime.lookup(".css")};
+    gzips["style.css"] = function (callback) { utils.createGzip(out.css, callback); };
+
+    // Remove leftover compiled resources from previous versions if possible
+    Object.keys(cache.res).forEach(function (file) {
+        try { fs.unlinkSync(path.join(__dirname, "/res/", file)); } catch (err) {}
+    });
+
+    async.series(gzips, function (err, results) {
+        if (err) return callback(err);
+        Object.keys(results).forEach(function (file) {
+            cache.res[file].gzipData = results[file];
+        });
+        callback(null);
+    });
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1059,9 +1075,7 @@ function checkWatchedDirs() {
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
 function cacheResources(dir, callback) {
-    var relPath, fileData, fileTime,
-        cbCalled = 0,
-        cbFired = 0;
+    var relPath, fileData, fileTime;
 
     dir = dir.substring(0, dir.length - 1); // Strip trailing slash
     utils.walkDirectory(dir, false, function (error, results) {
@@ -1072,7 +1086,7 @@ function cacheResources(dir, callback) {
                 fileData = fs.readFileSync(fullPath);
                 fileTime = fs.statSync(fullPath).mtime;
             } catch (error) {
-                log.error("Unable to read resource", error);
+                log.error("Unable to read resource\n", error.stack);
                 process.exit(1);
             }
 
@@ -1080,18 +1094,8 @@ function cacheResources(dir, callback) {
             cache.res[relPath].data = fileData;
             cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
             cache.res[relPath].mime = mime.lookup(fullPath);
-            if (/.*(js|css|html)$/.test(path.basename(fullPath))) {
-                (function (filePath, data) {
-                    cbCalled++;
-                    zlib.gzip(data, function (error, gzipped) {
-                        if (error) log.error(error);
-                        cache.res[filePath].gzipData = gzipped;
-                        if (++cbFired === cbCalled)
-                            callback();
-                    });
-                })(relPath, cache.res[relPath].data);
-            }
         });
+        callback();
     });
 }
 
@@ -1229,7 +1233,8 @@ function handleResourceRequest(req, res, resourceName) {
             res.statusCode = 200;
 
             // Disallow framing except when debugging
-            if (!config.debug) res.setHeader("X-Frame-Options", "DENY");
+            if (/.+\.html$/.test(resourceName) && !config.debug)
+                res.setHeader("X-Frame-Options", "DENY");
 
             if (req.url === "/") {
                 // Set the IE10 compatibility mode
