@@ -17,18 +17,18 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 
 ###Standalone Usage
 First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
-````bash
+```bash
 sudo npm install -g droppy
 droppy install ~/droppy
 droppy start ~/droppy
-````
+```
 By default, the web server will listen on [0.0.0.0:8989](http://localhost:8989/) (changable in the config). On first startup, you'll be prompted for a username and password for your first account. To update, run:
-````bash
+```bash
 sudo droppy update
-````
+```
 ###Module Usage - Express
 You can use droppy as an [express](http://expressjs.com/) middleware:
-````js
+```js
 var express = require("express"),
     droppy  = require("droppy"),
     app     = express();
@@ -37,20 +37,20 @@ app.use("/", droppy(home, [options]));
 app.listen(80, function() {
     console.log("Listening on 0.0.0.0:80.");
 });
-````
+```
 - `home`: The path to the home folder, containing `config.json`, `db.json` and the `root` folder.
 - `options`: An optional [options](#options) object.
 
 ##Configuration
 `config.json` is created in the home folder with these defaults:
-````javascript
+```javascript
 {
-    "host"         : "0.0.0.0",
-    "port"         : 8989,
+    "host"         : "0.0.0.0",         // [1]
+    "port"         : 8989,              // [1]
     "debug"        : false,
-    "useTLS"       : false,
-    "useSPDY"      : false,
-    "useHSTS"      : false,
+    "useTLS"       : false,             // [1]
+    "useSPDY"      : false,             // [1]
+    "useHSTS"      : false,             // [1]
     "readInterval" : 250,
     "keepAlive"    : 20000,
     "linkLength"   : 3,
@@ -61,11 +61,12 @@ app.listen(80, function() {
     "noLogin"      : false,
     "demoMode"     : false,
     "timestamps"   : true,
-    "tlsKey"       : "domain.key",
-    "tlsCert"      : "domain.crt",
-    "tlsCA"        : "domain.ca"
+    "tlsKey"       : "domain.key",      // [1]
+    "tlsCert"      : "domain.crt",      // [1]
+    "tlsCA"        : "domain.ca"        // [1]
 }
-````
+```
+Note: Options marked with [1] are not used when used as a module.
 
 ###General options
 - `port`: The port to listen on. Can take an array of ports.
@@ -103,7 +104,7 @@ When `useTLS` is set, these options specify TLS certificates. You can either pas
 ###Systemd
 If you'd like to run droppy as a systemd service, you can use this sample service file as a start:
 
-````ini
+```ini
 # systemd service file for droppy
 # replace /path/to/droppy with your actual path and User/Group with the intended user to run as
 [Unit]
@@ -120,4 +121,4 @@ SyslogIdentifier=droppy
 
 [Install]
 WantedBy=multi-user.target
-````
+```
