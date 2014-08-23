@@ -94,7 +94,7 @@ When `useTLS` is set, these options specify TLS certificates. You can either pas
 - `tlsCA`: An optional intermediate (CA) certificate.
 
 ##Notes
-- For shortlinks to be compatible with `wget`, set `disposition = on` in `~/.wgetrc`.
+- For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
 
 ###Supported Browsers
 - Firefox (last 2 versions)
