@@ -9,11 +9,11 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 * Asynchronous multi-file uploads. Recursive directory uploads in Chrome.
 * Download directories as zips.
 * Edit text files in CodeMirror, a feature-rich editor.
-* Support for shortened links to share file downloads with your friends without them needing to log in.
+* Share shortened links to files with your friends, without them needing to log in.
 * View media (images, video) in a gallery, play audio in it's own player.
-* Basic file system operations: Cut, Copy, Rename, Delete, Create directory.
-* Drag and Drop support for uploads and filesystem operations. Hold CMD/CTRL to copy, Shift to move.
-* Playback of audio and video files [supported](https://developer.mozilla.org/en-US/docs/HTML/Supported_media_formats#Browser_compatibility) by the browser.
+* File system operations: Cut, Copy, Rename, Delete, Create directory.
+* Drag and Drop support uploads and filesystem operations.
+* Playback of common audio and video files directly in the browser.
 
 ###Standalone Installation
 First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
