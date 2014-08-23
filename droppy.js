@@ -125,39 +125,8 @@ if (!module.parent) {
     if (!cmd) printUsage(1);
 
     if (cmd === "install") {
-        var exists;
         if (args.length !== 1) printUsage(1);
-
-        paths = utils.resolvePaths(args[0], paths);
-        exists = checkExistance(paths);
-
-        // Abort when a fs error other than ENOENT occured during stat()
-        Object.keys(exists).forEach(function (p) {
-            if (exists[p] instanceof Error) {
-                log.error(exists[p]);
-                process.exit(1);
-            }
-        });
-
-        // Create missing files/dirs
-        async.series([
-            function (cb) {
-                if (exists.home) return cb();
-                mkdirp(paths.home, mkdirpOpts, cb);
-            },
-            function (cb) {
-                if (exists.root) return cb();
-                mkdirp(paths.root, mkdirpOpts, cb);
-            },
-            function (cb) {
-                if (exists.cfg) return cb();
-                cfg.create(paths.cfg, cb);
-            },
-            function (cb) {
-                if (exists.db) return cb();
-                db.create(paths.db, cb);
-            }
-        ], function (err) {
+        install(args[0], function (err) {
             if (err) {
                 log.error(err);
                 process.exit(1);
@@ -170,12 +139,8 @@ if (!module.parent) {
         if (args.length !== 1) printUsage(1);
         paths = utils.resolvePaths(args[0], paths);
         async.series([
-            function (cb) {
-                cfg.parse(paths.cfg, cb);
-            },
-            function (cb) {
-                db.parse(paths.db, cb);
-            }
+            function (cb) { cfg.parse(paths.cfg, cb); },
+            function (cb) { db.parse(paths.db, cb); }
         ], function (err, results) {
             if (err) {
                 log.error(err);
@@ -200,6 +165,24 @@ if (!module.parent) {
     } else {
         printUsage(1);
     }
+}
+
+function install(to, callback) {
+    paths = utils.resolvePaths(to, paths);
+    var exists = checkExistance(paths);
+
+    // Abort when a fs error other than ENOENT occured during stat()
+    Object.keys(exists).forEach(function (p) {
+        if (exists[p] instanceof Error) callback(exists[p]);
+    });
+
+    // Create missing files/dirs
+    async.series([
+        function (cb) { if (exists.home) return cb(); mkdirp(paths.home, mkdirpOpts, cb); },
+        function (cb) { if (exists.root) return cb(); mkdirp(paths.root, mkdirpOpts, cb); },
+        function (cb) { if (exists.cfg) return cb(); cfg.create(paths.cfg, cb); },
+        function (cb) { if (exists.db) return cb(); db.create(paths.db, cb); }
+    ], callback);
 }
 
 function printUsage(exitCode) {
@@ -260,50 +243,61 @@ function init(home, options, isStandalone) {
         if (isStandalone) {
             printLogo();
             startListener();
+            continueInit();
+        } else {
+            install(home, function (err) {
+                if (err) log.error(err); // TODO: Propagate for module usage
+                db.parse(paths.db, function (err) {
+                    if (err) log.error(err); // TODO: Propagate for module usage
+                    continueInit();
+                });
+            });
         }
+    });
+}
 
-        log.init({logLevel: config.logLevel, timestamps: config.timestamps});
+function continueInit() {
+    log.init({logLevel: config.logLevel, timestamps: config.timestamps});
 
-        fs.MAX_OPEN = config.maxOpen;
+    fs.MAX_OPEN = config.maxOpen;
 
-        // Allow user creation when no users exist.
-        firstRun = Object.keys(db.get("users")).length === 0;
+    // Allow user creation when no users exist.
+    firstRun = Object.keys(db.get("users")).length === 0;
 
-        // Intialize the CSS cache when debugging
-        if (config.debug) updateCSS();
+    // Intialize the CSS cache when debugging
+    if (config.debug) updateCSS();
 
-        // Prepare to get up and running
-        async.series([
-            function (callback) {
-                prepareContent(callback);
-            },
-            function (callback) {
-                cacheResources(path.join(__dirname + "/res/"), function () {
-                    callback(null);
-                });
-            },
-            function (callback) {
-                cleanupTemp(callback);
-            },
-            function (callback) {
-                if (config.demoMode) {
-                    cleanupForDemo(function schedule() {
-                        callback();
-                        setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
-                    });
-                } else {
+    // Prepare to get up and running
+    async.series([
+        function (callback) {
+            prepareContent(callback);
+        },
+        function (callback) {
+            cacheResources(path.join(__dirname + "/res/"), function () {
+                callback(null);
+            });
+        },
+        function (callback) {
+            cleanupTemp(callback);
+        },
+        function (callback) {
+            if (config.demoMode) {
+                cleanupForDemo(function schedule() {
                     callback();
-                }
-            },
-            function (callback) {
-                cleanupLinks(function () {
-                    callback();
+                    setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
                 });
-            },
-        ], function (err, results) {
-            ready = true;
-            log.simple("Ready for requests!");
-        });
+            } else {
+                callback();
+            }
+        },
+        function (callback) {
+            cleanupLinks(function () {
+                callback();
+            });
+        },
+    ], function (err, results) {
+        ready = true;
+        log.simple("Ready for requests!");
     });
 }
 
