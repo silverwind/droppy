@@ -1,11 +1,3 @@
-files/
-images/
-temp/
-res/*.js
-res/*.css
-res/*.html
-db.json
-config.json
 droppy*.tgz
 .editorconfig
 .npmignore
