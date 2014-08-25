@@ -300,16 +300,6 @@
         }
     }
 
-    function requestPage(reload) {
-        // This page reload on login should be removed at some point in the future, it's here for these reasons:
-        //  - Chrome won't offer password saving without it
-        //  - There's a bug with the view not getting properly re-initialized after a logout/login, this works around it
-        if (reload)
-            window.location.reload(false);
-        else
-            getPage();
-    }
-
 // ============================================================================
 //  WebSocket functions
 // ============================================================================
@@ -441,12 +431,11 @@
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
                     $("#logout-button").register("click", function () {
+                        droppy.set("hasLoggedOut", true);
                         if (droppy.socket) droppy.socket.close(4001);
                         deleteCookie("session");
-                        initVariables(); // Reset vars to their init state
-                        droppy.set("hasLoggedOut", true);
                         window.history.pushState(null, null, getRootPath());
-                        requestPage();
+                        window.location.reload(true);
                     });
                 break;
             case "ERROR":
@@ -538,7 +527,7 @@
         form.register("submit", function () {
             $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
                 if (xhr.status  === 202) {
-                    requestPage(true);
+                    window.location.reload(true);
                 } else if (xhr.status === 401) {
                     submit.addClass("invalid");
                     loginform.addClass("invalid");
