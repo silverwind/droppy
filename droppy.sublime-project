@@ -3,19 +3,19 @@
 	[
 		{
 			"follow_symlinks": true,
-			"path": ".\\src",
+			"path": ".\\client",
 			"name": "Client Files"
 		},
 		{
 			"follow_symlinks": true,
-			"path": ".\\lib",
+			"path": ".\\server",
 			"name": "Server Files"
 		},
 		{
 			"follow_symlinks": true,
 			"path": ".\\",
 			"name": "droppy",
-			"folder_exclude_patterns": ["res", "node_modules", "temp", "files", "lib", "src"]
+			"folder_exclude_patterns": ["node_modules", "server", "client"]
 		},
 	],
     "settings":
