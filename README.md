@@ -1,26 +1,25 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg)](https://david-dm.org/silverwind/droppy)
-
-Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>. Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>.
+> Personal cloud storage server with a speedy web interface
 
 ###Features
 * Lightweight. Performs great, even on a Raspberry Pi.
 * Fully responsive, mobile-ready CSS.
 * Realtime updating of all connected clients via WebSockets.
-* Asynchronous multi-file uploads. Recursive directory uploads in Chrome.
+* Asynchronous multi-file uploads. Directory uploads in Chrome.
 * Download directories as zips.
-* Edit text files in CodeMirror, a feature-rich editor.
+* Edit text files in CodeMirror, a full-featured editor.
 * Share shortened links to files with your friends, without them needing to log in.
 * View media (images, video) in a gallery, play audio in it's own player.
 * File system operations: Cut, Copy, Rename, Delete, Create directory.
 * Drag and Drop support uploads and filesystem operations.
-* Playback of common audio and video files directly in the browser.
+
+Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>. Also check out this <a target="_blank" href="http://droppy-demo.silverwind.io/#!/#!/">demo</a>.
 
 ###Standalone Usage
 First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
 ```bash
 sudo npm install -g droppy
-droppy install ~/droppy
-droppy start ~/droppy
+droppy
 ```
 By default, the web server will listen on [0.0.0.0:8989](http://localhost:8989/) (changable in the config). On first startup, you'll be prompted for a username and password for your first account. To update, run:
 ```bash

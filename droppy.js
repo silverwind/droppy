@@ -41,12 +41,7 @@ var cache      = { res: {}, files: {}, css: null },
     mode       = {file: "644", dir: "755"},
     mkdirpOpts = {fs: fs, mode: mode.dir},
     tmpDir     = path.join(os.tmpdir(), pkg.name),
-    paths      = {
-        home: "/",               // e.g. ~/droppy
-        root: "/root/",          // e.g. ~/droppy/root/
-        cfg:  "/config.json",    // e.g. ~/droppy/config.json
-        db:   "/db.json"         // e.g. ~/droppy/db.json
-    },
+    paths      = {},
     resources  = {
         css: [
             "node_modules/codemirror/lib/codemirror.css",
@@ -87,6 +82,11 @@ var cache      = { res: {}, files: {}, css: null },
         ]
     };
 
+paths.home = utils.resolve("~/.droppy");
+paths.root = utils.resolve("~/.droppy/root");
+paths.cfg  = utils.resolve("~/.droppy/config.json");
+paths.db   = utils.resolve("~/.droppy/db.json");
+
 //-----------------------------------------------------------------------------
 // Exported function, takes a option object which overrides config.json
 var droppy = module.exports = function (home, options) {
@@ -117,59 +117,98 @@ var droppy = module.exports = function (home, options) {
 };
 
 //-----------------------------------------------------------------------------
-// Start up our own listener when not used as a module
+// CLI handler
 if (!module.parent) {
     var cmd   = process.argv[2],
         args  = process.argv.slice(3);
 
-    if (!cmd) printUsage(1);
+    var cmds = {
+        start: { desc: "Start the server", action: function (cb) {
 
-    if (cmd === "install") {
-        if (args.length !== 1) printUsage(1);
-        install(args[0], function (err) {
-            if (err) {
-                log.error(err);
-                process.exit(1);
-            } else {
-                log.info("Home folder successfully installed to " + paths.home);
-                process.exit(0);
-            }
+        }},
+        update: { desc: "Update the server", exit: true, action: function (cb) {
+
+        }},
+        config: { desc: "Edit the config", exit: true, action: function (cb) {
+            require("child_process").spawn([process.env.EDITOR, paths.cfg], {stdio: "inherit"});
+        }},
+        list: { desc: "List users", exit: true, action: function (cb) {
+
+        }},
+        add: { desc: "Add a user", exit: true, action: function (cb) {
+
+        }},
+        remove: { desc: "Remove a user", exit: true, action: function (cb) {
+
+        }},
+        version: { desc: "Print version", exit: true, action: function (cb) {
+            log.plain(pkg.version);
+            cb();
+        }}
+    };
+
+    if (cmds[cmd]) {
+        cmds[cmd].action(function () {
+            if (cmds[cmd].exit) process.exit(0);
         });
-    } else if (cmd === "start") {
-        if (args.length !== 1) printUsage(1);
-        paths = utils.resolvePaths(args[0], paths);
-        async.series([
-            function (cb) { cfg.parse(paths.cfg, cb); },
-            function (cb) { db.parse(paths.db, cb); }
-        ], function (err, results) {
-            if (err) {
-                log.error(err);
-                process.exit(1);
-            }
-            init(paths.home, results[0], true);
-        });
-    } else if (cmd === "update") {
-        require("./lib/update.js")(pkg, function (err, message) {
-            if (err) {
-                log.error(err);
-                process.exit(1);
-            }
-            if (message) {
-                log.info(message);
-                process.exit(0);
-            }
-        });
-    } else if (cmd === "version") {
-        log.simple(pkg.version);
-        process.exit(0);
     } else {
-        printUsage(1);
+        var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: droppy [command] [options]\n\n Commands:";
+
+        Object.keys(cmds).forEach(function (command) {
+            help += "\n   " + command + new Array(15 - command.length).join(" ") + cmds[command].desc;
+        });
+        log.plain(help);
+        process.exit();
     }
+
+
+    // if (!cmd) printUsage(1);
+
+    // if (cmd === "install") {
+    //     if (args.length !== 1) printUsage(1);
+    //     install(args[0], function (err) {
+    //         if (err) {
+    //             log.error(err);
+    //             process.exit(1);
+    //         } else {
+    //             log.info("Home folder successfully installed to " + paths.home);
+    //             process.exit(0);
+    //         }
+    //     });
+    // } else if (cmd === "start") {
+    //     if (args.length !== 1) printUsage(1);
+    //     paths = utils.resolvePaths(args[0], paths);
+    //     async.series([
+    //         function (cb) { cfg.parse(paths.cfg, cb); },
+    //         function (cb) { db.parse(paths.db, cb); }
+    //     ], function (err, results) {
+    //         if (err) {
+    //             log.error(err);
+    //             process.exit(1);
+    //         }
+    //         init(paths.home, results[0], true);
+    //     });
+    // } else if (cmd === "update") {
+    //     require("./lib/update.js")(pkg, function (err, message) {
+    //         if (err) {
+    //             log.error(err);
+    //             process.exit(1);
+    //         }
+    //         if (message) {
+    //             log.info(message);
+    //             process.exit(0);
+    //         }
+    //     });
+    // } else if (cmd === "version") {
+    //     log.simple(pkg.version);
+    //     process.exit(0);
+    // } else {
+    //     printUsage(1);
+    // }
 }
 
-function install(to, callback) {
-    paths = utils.resolvePaths(to, paths);
-    var exists = checkExistance(paths);
+function install(callback) {
+    var exists = utils.checkExistance(paths);
 
     // Abort when a fs error other than ENOENT occured during stat()
     Object.keys(exists).forEach(function (p) {
@@ -183,27 +222,6 @@ function install(to, callback) {
         function (cb) { if (exists.cfg) return cb(); cfg.create(paths.cfg, cb); },
         function (cb) { if (exists.db) return cb(); db.create(paths.db, cb); }
     ], callback);
-}
-
-function printUsage(exitCode) {
-    log.simple(log.usage);
-    process.exit(exitCode);
-}
-
-function checkExistance(paths) {
-    var result = {};
-    Object.keys(paths).forEach(function (name) {
-        var method = (name === "home" || name === "root") ? "isDirectory" : "isFile";
-        try {
-            result[name] = fs.statSync(paths[name])[method]();
-        } catch (err) {
-            if (err.code === "ENOENT")
-                result[name] = false;
-            else
-                result[name] = err;
-        }
-    });
-    return result;
 }
 
 function printLogo() {
