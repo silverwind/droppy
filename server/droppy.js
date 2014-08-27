@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 "use strict";
 
 var pkg        = require("./package.json"),
@@ -82,10 +81,6 @@ var cache      = { res: {}, files: {}, css: null },
         ]
     };
 
-paths.home = utils.resolve("~/.droppy");
-paths.root = utils.resolve("~/.droppy/root");
-paths.cfg  = utils.resolve("~/.droppy/config.json");
-paths.db   = utils.resolve("~/.droppy/db.json");
 
 //-----------------------------------------------------------------------------
 // Exported function, takes a option object which overrides config.json
@@ -119,47 +114,7 @@ var droppy = module.exports = function (home, options) {
 //-----------------------------------------------------------------------------
 // CLI handler
 if (!module.parent) {
-    var cmd   = process.argv[2],
-        args  = process.argv.slice(3);
 
-    var cmds = {
-        start: { desc: "Start the server", action: function (cb) {
-
-        }},
-        update: { desc: "Update the server", exit: true, action: function (cb) {
-
-        }},
-        config: { desc: "Edit the config", exit: true, action: function (cb) {
-            require("child_process").spawn([process.env.EDITOR, paths.cfg], {stdio: "inherit"});
-        }},
-        list: { desc: "List users", exit: true, action: function (cb) {
-
-        }},
-        add: { desc: "Add a user", exit: true, action: function (cb) {
-
-        }},
-        remove: { desc: "Remove a user", exit: true, action: function (cb) {
-
-        }},
-        version: { desc: "Print version", exit: true, action: function (cb) {
-            log.plain(pkg.version);
-            cb();
-        }}
-    };
-
-    if (cmds[cmd]) {
-        cmds[cmd].action(function () {
-            if (cmds[cmd].exit) process.exit(0);
-        });
-    } else {
-        var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: droppy [command] [options]\n\n Commands:";
-
-        Object.keys(cmds).forEach(function (command) {
-            help += "\n   " + command + new Array(15 - command.length).join(" ") + cmds[command].desc;
-        });
-        log.plain(help);
-        process.exit();
-    }
 
 
     // if (!cmd) printUsage(1);
@@ -218,7 +173,7 @@ function install(callback) {
     // Create missing files/dirs
     async.series([
         function (cb) { if (exists.home) return cb(); mkdirp(paths.home, mkdirpOpts, cb); },
-        function (cb) { if (exists.root) return cb(); mkdirp(paths.root, mkdirpOpts, cb); },
+        function (cb) { if (exists.files) return cb(); mkdirp(paths.files, mkdirpOpts, cb); },
         function (cb) { if (exists.cfg) return cb(); cfg.create(paths.cfg, cb); },
         function (cb) { if (exists.db) return cb(); db.create(paths.db, cb); }
     ], callback);
@@ -435,17 +390,17 @@ function cleanupForDemo(doneCallback) {
     async.series([
         function (callback) {
             log.simple("Cleaning up...");
-            rimraf(paths.root, function () {
-                mkdirp(paths.root, mkdirpOpts, function () {
+            rimraf(paths.files, function () {
+                mkdirp(paths.files, mkdirpOpts, function () {
                     callback(null);
                 });
             });
         },
         function (callback) {
             log.simple("Adding samples...");
-            cpr(path.join(__dirname, "src"), path.join(paths.root, "Sources"), function (err) {
+            cpr(path.join(__dirname, "src"), path.join(paths.files, "Sources"), function (err) {
                 if (err) log.error(err);
-                cpr(path.join(__dirname, "node_modules"), path.join(paths.root, "Modules"), function (err) {
+                cpr(path.join(__dirname, "node_modules"), path.join(paths.files, "Modules"), function (err) {
                     if (err) log.error(err);
                     callback(null);
                 });
@@ -454,7 +409,7 @@ function cleanupForDemo(doneCallback) {
         function (callback) {
             var temp     = path.join(tmpDir, "img.zip"),
                 unzipper = new require("decompress-zip")(temp),
-                dest     = path.join(paths.root, "Images");
+                dest     = path.join(paths.files, "Images");
 
             log.simple("Downloading image samples...");
             mkdirp(dest, mkdirpOpts, function () {
@@ -492,7 +447,7 @@ function cleanupLinks(callback) {
         Object.keys(links).forEach(function (link) {
             linkcount++;
             (function (shortlink, location) {
-                fs.stat(path.join(paths.root, location), function (error, stats) {
+                fs.stat(path.join(paths.files, location), function (error, stats) {
                     cbcount++;
                     if (!stats || error) {
                         delete links[shortlink];
@@ -711,7 +666,7 @@ function setupSocket(server) {
             case "DELETE_FILE":
                 log.info(ws, null, "Deleting: " + msg.data);
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
-                msg.data = addRootPath(msg.data);
+                msg.data = addFilesPath(msg.data);
                 fs.stat(msg.data, function (error, stats) {
                     if (error) {
                         log.error("Error getting stats to delete " + msg.data);
@@ -727,7 +682,7 @@ function setupSocket(server) {
             case "SAVE_FILE":
                 log.info(ws, null, "Saving: " + msg.data.to);
                 if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
-                msg.data.to = addRootPath(msg.data.to);
+                msg.data.to = addFilesPath(msg.data.to);
                 fs.stat(msg.data.to, function (error) {
                     if (error && error.code !== "ENOENT") {
                         log.error("Error saving " + msg.data.to);
@@ -755,8 +710,8 @@ function setupSocket(server) {
                     send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Can't copy directory into itself."}));
                     return;
                 }
-                msg.data.from = addRootPath(msg.data.from);
-                msg.data.to = addRootPath(msg.data.to);
+                msg.data.from = addFilesPath(msg.data.from);
+                msg.data.to = addFilesPath(msg.data.to);
                 // In case source and destination are the same, append a number to the file/foldername
                 utils.getNewPath(msg.data.to, function (newPath) {
                     doClipboard(msg.data.type, msg.data.from, newPath);
@@ -764,7 +719,7 @@ function setupSocket(server) {
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                mkdirp(addRootPath(msg.data), mkdirpOpts, function (error) {
+                mkdirp(addFilesPath(msg.data), mkdirpOpts, function (error) {
                     if (error) log.error(error);
                     log.info(ws, null, "Created: ", msg.data);
                 });
@@ -776,7 +731,7 @@ function setupSocket(server) {
                     send(clients[cookie].ws, JSON.stringify({ type: "ERROR", text: "Invalid rename request"}));
                     return;
                 }
-                fs.rename(addRootPath(msg.data.old), addRootPath(msg.data.new), function (error) {
+                fs.rename(addFilesPath(msg.data.old), addFilesPath(msg.data.new), function (error) {
                     if (error) log.error(error);
                     log.info(ws, null, "Renamed: ", msg.data.old, " -> ", msg.data.new);
                 });
@@ -815,9 +770,9 @@ function setupSocket(server) {
                 async.each(files,
                     function (file, callback) {
                         if (!utils.isPathSane(file)) return callback(new Error("Invalid empty file creation request: " + file));
-                        mkdirp(path.dirname(addRootPath(file)), mkdirpOpts, function (err) {
+                        mkdirp(path.dirname(addFilesPath(file)), mkdirpOpts, function (err) {
                             if (err) callback(err);
-                            fs.writeFile(addRootPath(file), "", {mode: mode.file}, function (err) {
+                            fs.writeFile(addFilesPath(file), "", {mode: mode.file}, function (err) {
                                 if (err) return callback(err);
                                 log.info(ws, null, "Created: " + file.substring(1));
                                 callback();
@@ -834,7 +789,7 @@ function setupSocket(server) {
                 async.each(folders,
                     function (folder, callback) {
                         if (!utils.isPathSane(folder)) return callback(new Error("Invalid empty file creation request: " + folder));
-                        mkdirp(addRootPath(folder), mkdirpOpts, callback);
+                        mkdirp(addFilesPath(folder), mkdirpOpts, callback);
                     }, function (err) {
                         if (err) log.error(ws, null, err);
                         if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
@@ -1014,7 +969,7 @@ function deleteDirectory(directory) {
 // Watch the directory for changes and send them to the appropriate clients.
 function createWatcher(directory) {
     var watcher, clientsToUpdate, client,
-        dir = removeRootPath(directory);
+        dir = removeFilesPath(directory);
     log.debug(chalk.green("Adding Watcher: ") + dir);
     watcher = fs.watch(directory, _.throttle(function () {
         log.debug("Watcher detected update for ", chalk.blue(dir));
@@ -1045,7 +1000,7 @@ function createWatcher(directory) {
 // Watch given directory
 function updateWatchers(newDir, callback) {
     if (!watchers[newDir]) {
-        newDir = addRootPath(newDir);
+        newDir = addFilesPath(newDir);
         fs.stat(newDir, function (error, stats) {
             if (error || !stats) {
                 // Requested Directory can't be read
@@ -1291,9 +1246,9 @@ function handleFileRequest(req, res, download) {
     filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
     if (filepath[1] === "$") {
         shortLink = true;
-        filepath = addRootPath(db.get("shortlinks")[filepath[2]]);
+        filepath = addFilesPath(db.get("shortlinks")[filepath[2]]);
     } else if (filepath[1] === "~" || filepath[1] === "_") {
-        filepath = addRootPath("/" + filepath[2]);
+        filepath = addFilesPath("/" + filepath[2]);
     }
 
     // Validate the cookie for the remaining requests
@@ -1350,7 +1305,7 @@ function handleFileRequest(req, res, download) {
 
 //-----------------------------------------------------------------------------
 function handleTypeRequest(req, res) {
-    utils.isBinary(addRootPath(decodeURIComponent(req.url).substring(4)), function (error, result) {
+    utils.isBinary(addFilesPath(decodeURIComponent(req.url).substring(4)), function (error, result) {
         if (error) {
             res.statusCode = 500;
             res.end();
@@ -1390,7 +1345,7 @@ function handleUploadRequest(req, res) {
 
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-            dst = path.join(paths.root, req.query.to, dstRelative),
+            dst = path.join(paths.files, req.query.to, dstRelative),
             tmp = path.join(tmpDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
         log.info(req, res, "Receiving: " + dstRelative);
@@ -1463,7 +1418,7 @@ function handleUploadRequest(req, res) {
 // Read a path, return type and info
 // @callback : function (error, info)
 function readPath(root, callback) {
-    fs.stat(addRootPath(root), function (error, stats) {
+    fs.stat(addFilesPath(root), function (error, stats) {
         if (error) {
             callback(error);
         } else if (stats.isFile()) {
@@ -1487,7 +1442,7 @@ function readPath(root, callback) {
 //-----------------------------------------------------------------------------
 // Update a directory's content
 function updateDirectory(root, callback) {
-    fs.readdir(addRootPath(root), function (error, files) {
+    fs.readdir(addFilesPath(root), function (error, files) {
         var dirContents = {}, fileNames;
         if (error) log.error(error);
         if (!files || files.length === 0) {
@@ -1515,7 +1470,7 @@ function updateDirectory(root, callback) {
 function generateDirSizes(root, dirContents, callback) {
     var tmpDirs = [];
     Object.keys(dirContents).forEach(function (dir) {
-        if (dirContents[dir].type === "d") tmpDirs.push(addRootPath(root + "/" + dir));
+        if (dirContents[dir].type === "d") tmpDirs.push(addFilesPath(root + "/" + dir));
     });
     if (tmpDirs.length === 0) return;
 
@@ -1551,7 +1506,7 @@ function du(dir, callback) {
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, type) {
-    var zipPath = addRootPath(decodeURIComponent(req.url.substring(4))), archive, dispo;
+    var zipPath = addFilesPath(decodeURIComponent(req.url.substring(4))), archive, dispo;
     fs.stat(zipPath, function (err, stats) {
         if (err) {
             log.error(err);
@@ -1686,21 +1641,17 @@ function updateCSS() {
 
 //-----------------------------------------------------------------------------
 // Path helpers, TODO: Refactor
-function getResPath(name)  {
-    return path.join(__dirname + "/res/", name);
-}
-
 function fixPath(p) {
     return p.replace(/[\\|\/]+/g, "/");
 }
 
-function addRootPath(p) {
-    return fixPath(paths.root + p);
+function addFilesPath(p) {
+    return fixPath(paths.files + p);
 }
 
-// removeFilePath is intentionally not an inverse to the add function
-function removeRootPath(p) {
-    return fixPath("/" + fixPath(p).replace(fixPath(paths.root), ""));
+// removeFilesPath is intentionally not an inverse to the add function
+function removeFilesPath(p) {
+    return fixPath("/" + fixPath(p).replace(fixPath(paths.files), ""));
 }
 
 //-----------------------------------------------------------------------------

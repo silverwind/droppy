@@ -1,35 +1,38 @@
 "use strict";
 
-var database, dbFile,
+var database,
     db       = {},
     _        = require("lodash"),
     fs       = require("graceful-fs"),
     crypto   = require("crypto"),
+    mkdirp   = require("mkdirp"),
+    path     = require("path"),
+    dbFile   = require("./paths.js").db,
     defaults = {users: {}, sessions: {}, shortlinks: {}};
 
-db.create = function (path, callback) {
-    fs.writeFile(path, JSON.stringify(defaults, null, 4), function (err) {
-        callback(err);
-    });
-};
-
-db.parse = function (path, callback) {
-    dbFile = path;
-
-    fs.readFile(dbFile, function (err, data) {
+db.init = function (callback) {
+    fs.stat(dbFile, function (err) {
         if (err) {
-            return callback(err);
-        } else {
-            try {
-                database = JSON.parse(String(data));
-            } catch (error) {
-                return callback(err);
+            if (err.code === "ENOENT") {
+                database = defaults;
+                mkdirp(path.dirname(dbFile), function () {
+                    write(callback);
+                });
+            } else {
+                callback(err);
             }
+        } else {
+            fs.readFile(dbFile, function (err, data) {
+                if (err) return callback(err);
+                try {
+                    database = JSON.parse(String(data));
+                } catch (error) {
+                    return callback(err);
+                }
+                database = _.defaults(database, defaults); // Add missing entries
+                write(callback);
+            });
         }
-        database = _.defaults(database, defaults); // Add missing entries
-        db.write(function () {
-            callback(err, database);
-        });
     });
 };
 
@@ -39,13 +42,7 @@ db.get = function (key) {
 
 db.set = function (key, value, callback) {
     database[key] = value;
-    db.write(callback);
-};
-
-db.write = function (callback) {
-    fs.writeFile(dbFile, JSON.stringify(database, null, 4), function (err) {
-        if (callback) callback(err);
-    });
+    write(callback);
 };
 
 db.addOrUpdateUser = function (user, password, privileged, callback) {
@@ -56,13 +53,13 @@ db.addOrUpdateUser = function (user, password, privileged, callback) {
         privileged: privileged
     };
 
-    db.write(callback);
+    write(callback);
 };
 
 db.delUser = function (user, callback) {
     if (database.users[user]) {
         delete database.users[user];
-        db.write(function (err) {
+        write(function (err) {
             callback(err, true);
         });
     } else {
@@ -81,6 +78,10 @@ db.authUser = function (user, pass) {
 
     return false;
 };
+
+function write(callback) {
+    fs.writeFile(dbFile, JSON.stringify(database, null, 4), callback);
+}
 
 function getHash(string) {
     return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
