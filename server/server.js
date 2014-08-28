@@ -84,7 +84,7 @@ var cache      = { res: {}, files: {}, css: null },
 
 //-----------------------------------------------------------------------------
 // Exported function, takes a option object which overrides config.json
-var droppy = module.exports = function (home, options) {
+var droppy = function (home, options) {
     init(home, options);
     return function (req, res, next) {
         var method = req.method.toUpperCase();
@@ -111,73 +111,43 @@ var droppy = module.exports = function (home, options) {
     };
 };
 
-//-----------------------------------------------------------------------------
-// CLI handler
-if (!module.parent) {
+function init(home, options, isStandalone) {
+    // var exists = utils.checkExistance(paths);
 
+    // // Abort when a fs error other than ENOENT occured during stat()
+    // Object.keys(exists).forEach(function (p) {
+    //     if (exists[p] instanceof Error) callback(exists[p]);
+    // });
 
+    // // Create missing files/dirs
+    // async.series([
+    //     function (cb) { if (exists.home) return cb(); mkdirp(paths.home, mkdirpOpts, cb); },
+    //     function (cb) { if (exists.files) return cb(); mkdirp(paths.files, mkdirpOpts, cb); },
+    //     function (cb) { if (exists.cfg) return cb(); cfg.create(paths.cfg, cb); },
+    //     function (cb) { if (exists.db) return cb(); db.create(paths.db, cb); }
+    // ], callback);
 
-    // if (!cmd) printUsage(1);
+    cfg.init(options, function (err, parsedConfig) {
+        config = parsedConfig;
 
-    // if (cmd === "install") {
-    //     if (args.length !== 1) printUsage(1);
-    //     install(args[0], function (err) {
-    //         if (err) {
-    //             log.error(err);
-    //             process.exit(1);
-    //         } else {
-    //             log.info("Home folder successfully installed to " + paths.home);
-    //             process.exit(0);
-    //         }
-    //     });
-    // } else if (cmd === "start") {
-    //     if (args.length !== 1) printUsage(1);
-    //     paths = utils.resolvePaths(args[0], paths);
-    //     async.series([
-    //         function (cb) { cfg.parse(paths.cfg, cb); },
-    //         function (cb) { db.parse(paths.db, cb); }
-    //     ], function (err, results) {
-    //         if (err) {
-    //             log.error(err);
-    //             process.exit(1);
-    //         }
-    //         init(paths.home, results[0], true);
-    //     });
-    // } else if (cmd === "update") {
-    //     require("./lib/update.js")(pkg, function (err, message) {
-    //         if (err) {
-    //             log.error(err);
-    //             process.exit(1);
-    //         }
-    //         if (message) {
-    //             log.info(message);
-    //             process.exit(0);
-    //         }
-    //     });
-    // } else if (cmd === "version") {
-    //     log.simple(pkg.version);
-    //     process.exit(0);
-    // } else {
-    //     printUsage(1);
-    // }
-}
-
-function install(callback) {
-    var exists = utils.checkExistance(paths);
-
-    // Abort when a fs error other than ENOENT occured during stat()
-    Object.keys(exists).forEach(function (p) {
-        if (exists[p] instanceof Error) callback(exists[p]);
+        if (isStandalone) {
+            printLogo();
+            startListener();
+            continueInit();
+        } else {
+            install(home, function (err) {
+                if (err) log.error(err); // TODO: Propagate for module usage
+                db.parse(paths.db, function (err) {
+                    if (err) log.error(err); // TODO: Propagate for module usage
+                    continueInit();
+                });
+            });
+        }
     });
-
-    // Create missing files/dirs
-    async.series([
-        function (cb) { if (exists.home) return cb(); mkdirp(paths.home, mkdirpOpts, cb); },
-        function (cb) { if (exists.files) return cb(); mkdirp(paths.files, mkdirpOpts, cb); },
-        function (cb) { if (exists.cfg) return cb(); cfg.create(paths.cfg, cb); },
-        function (cb) { if (exists.db) return cb(); db.create(paths.db, cb); }
-    ], callback);
 }
+
+droppy._init = init;
+exports = module.exports = droppy;
 
 function printLogo() {
     log.plain([
@@ -204,28 +174,6 @@ function startListener() {
         ports.forEach(function (port) {
             createListener(onreq).listen(port, host);
         });
-    });
-}
-
-//-----------------------------------------------------------------------------
-// Init everything
-function init(home, options, isStandalone) {
-    cfg.parse(options, function (err, parsedConfig) {
-        config = parsedConfig;
-
-        if (isStandalone) {
-            printLogo();
-            startListener();
-            continueInit();
-        } else {
-            install(home, function (err) {
-                if (err) log.error(err); // TODO: Propagate for module usage
-                db.parse(paths.db, function (err) {
-                    if (err) log.error(err); // TODO: Propagate for module usage
-                    continueInit();
-                });
-            });
-        }
     });
 }
 

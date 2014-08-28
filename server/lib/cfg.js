@@ -1,9 +1,12 @@
 "use strict";
 
-var cfg   = {},
-    _     = require("lodash"),
-    fs    = require("graceful-fs"),
-    defaults = [
+var cfg        = {},
+    _          = require("lodash"),
+    fs         = require("graceful-fs"),
+    mkdirp     = require("mkdirp"),
+    path       = require("path"),
+    configFile = require("./paths.js").cfg,
+    defaults   = [
         '{',
         '    "host"         : "0.0.0.0",',
         '    "port"         : 8989,',
@@ -27,31 +30,8 @@ var cfg   = {},
         '}'
     ].join("\n");
 
-cfg.create = function (configFile, callback) {
-    fs.writeFile(configFile, defaults, function (err) {
-        callback(err);
-    });
-};
-
-cfg.parse = function (configFile, callback) {
-    var config;
-
-    if (typeof configFile === "string") {
-        try {
-            config = JSON.parse(fs.readFileSync(configFile));
-        } catch (err) {
-            return callback(err);
-        }
-
-        if (!config)
-            config = {};
-
-        config = _.defaults(config, JSON.parse(defaults)); // Add missing options
-        fs.writeFile(configFile, JSON.stringify(config, null, 4), function (err) {
-            callback(err || null, config);
-        });
-    } else if (typeof configFile === "object") {
-        config = configFile;
+cfg.init = function (config, callback) {
+    if (typeof configFile === "object") {
         config = _.defaults(config, JSON.parse(defaults)); // Add missing options
         callback(null, config);
     } else if (process.env.NODE_ENV === "droppydemo") {
@@ -64,7 +44,36 @@ cfg.parse = function (configFile, callback) {
             "timestamps"   : false
         }, JSON.parse(defaults));
         callback(null, config);
+    } else {
+        fs.stat(configFile, function (err) {
+            if (err) {
+                if (err.code === "ENOENT") {
+                    config = defaults;
+                    mkdirp(path.dirname(configFile), function () {
+                        write(config, callback);
+                    });
+                } else {
+                    callback(err);
+                }
+            } else {
+                fs.readFile(configFile, function (err, data) {
+                    if (err) return callback(err);
+                    try {
+                        config = JSON.parse(String(data));
+                    } catch (error) {
+                        return callback(err);
+                    }
+                    if (!config) config = {};
+                    config = _.defaults(config, defaults);
+                    write(config, callback);
+                });
+            }
+        });
     }
 };
+
+function write(config, callback) {
+    fs.writeFile(configFile, JSON.stringify(config, null, 4), callback);
+}
 
 exports = module.exports = cfg;

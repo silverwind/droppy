@@ -1,15 +1,26 @@
 {
   "name": "droppy",
+  "description": "File server with a speedy web interface",
   "version": "1.2.3",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
   ],
-  "description": "Personal cloud storage server with a speedy web interface",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": "https://github.com/silverwind/droppy/issues",
   "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/silverwind/droppy.git"
+  },
+  "main": "server/server.js",
   "preferGlobal": true,
+  "bin": {
+    "droppy": "./cli.js"
+  },
+  "scripts": {
+    "start": "node cli.js start"
+  },
   "dependencies": {
     "archiver": "~0.11.0",
     "async": "~0.9.0",
@@ -48,23 +59,10 @@
     "node": "~0.10.0"
   },
   "keywords": [
-    "personal",
-    "cloud",
-    "storage",
-    "server",
-    "fileserver",
     "file",
+    "server",
+    "web",
+    "interface",
     "media"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/silverwind/droppy.git"
-  },
-  "main": "droppy.js",
-  "bin": {
-    "droppy": "./droppy.js"
-  },
-  "scripts": {
-    "start": "droppy.js"
-  }
+  ]
 }

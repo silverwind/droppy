@@ -29,7 +29,7 @@ db.init = function (callback) {
                 } catch (error) {
                     return callback(err);
                 }
-                database = _.defaults(database, defaults); // Add missing entries
+                database = _.defaults(database, defaults);
                 write(callback);
             });
         }

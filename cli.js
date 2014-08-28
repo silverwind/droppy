@@ -16,22 +16,12 @@ var cmds = {
     version : "version                Print version"
 };
 
-function printHelp() {
-    var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: droppy [command] [options]\n\n Commands:";
-
-    Object.keys(cmds).forEach(function (command) {
-        help += "\n   " + cmds[command];
-    });
-    console.info(help);
-}
 if (cmds[cmd]) {
     switch (cmd) {
+    case "start":
+        break;
     case "version":
         console.info(pkg.version);
-        break;
-    case "config":
-        var paths = require("./server/lib/paths.js");
-        require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfg], {stdio: "inherit"});
         break;
     case "update":
         require("./server/lib/update.js")(pkg, function (err, message) {
@@ -39,10 +29,14 @@ if (cmds[cmd]) {
             if (message) { console.info(message); process.exit(0); }
         });
         break;
+    case "config":
+        var paths = require("./server/lib/paths.js");
+        require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfg], {stdio: "inherit"});
+        break;
     case "list":
         var db = require("./server/lib/db.js");
         db.init(function () {
-            console.log("Current Users: " + Object.keys(db.get("users")).join(", "));
+            printUsers(db.get("users"));
         });
         break;
     case "add":
@@ -50,7 +44,7 @@ if (cmds[cmd]) {
         var db = require("./server/lib/db.js");
         db.init(function () {
             db.addOrUpdateUser(args[0], args[1], true, function () {
-                console.log("Current Users: " + Object.keys(db.get("users")).join(", "));
+                printUsers(db.get("users"));
             });
         });
         break;
@@ -59,12 +53,25 @@ if (cmds[cmd]) {
         var db = require("./server/lib/db.js");
         db.init(function () {
             db.delUser(args[0], function () {
-                console.log("Current Users: " + Object.keys(db.get("users")).join(", "));
+                printUsers(db.get("users"));
             });
         });
         break;
     }
-
 } else {
     printHelp();
+}
+
+
+function printHelp() {
+    var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: droppy [command] [options]\n\n Commands:";
+
+    Object.keys(cmds).forEach(function (command) {
+        help += "\n   " + cmds[command];
+    });
+    console.info(help);
+}
+
+function printUsers(users) {
+    console.info("Current Users: " + Object.keys(users).join(", "));
 }
