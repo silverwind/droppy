@@ -133,10 +133,12 @@ function init(home, options, isStandalone, callback) {
         function (cb) { mkdirp(paths.files, mkdirpOpts, cb); },
         function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
         function (cb) { cfg.init(options, function (err, cfg) { config = cfg; cb(err); }); },
-        function (cb) { db.init(cb); }
-    ], function (err) {
+        function (cb) { db.init(cb); },
+        function (cb) { utils.tlsInit(paths.tlsKey, paths.tlsCert, paths.tlsCA, cb); },
+
+    ], function (err, result) {
         if (err) return callback(err);
-        if (isStandalone) startListener();
+        if (isStandalone) startListener(config.useTLS && result[4]);
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    //Allow user creation when no users exist.
@@ -182,13 +184,13 @@ function printLogo() {
                chalk.blue("node"), " ", chalk.green(process.version.substring(1), "\n"));
 }
 
-function startListener() {
+function startListener(tlsData) {
     var hosts = Array.isArray(config.host) ? config.host : [config.host],
         ports = Array.isArray(config.port) ? config.port : [config.port];
 
     hosts.forEach(function (host) {
         ports.forEach(function (port) {
-            createListener(onRequest).listen(port, host);
+            createListener(onRequest, tlsData).listen(port, host);
         });
     });
 }
@@ -377,24 +379,19 @@ function cleanupLinks(callback) {
 
 //-----------------------------------------------------------------------------
 // Bind to listening port
-function createListener(handler) {
-    var server, key, cert, ca, tlsModule, options, sessions,
+function createListener(handler, tlsData) {
+    var server, tlsModule, options, sessions,
         http = require("http");
     if (!config.useTLS) {
         server = http.createServer(handler);
     } else {
-        // Read Certificates
-        key = fs.readFileSync(paths.tlsKey);
-        cert = fs.readFileSync(paths.tlsCert);
-        ca = fs.readFileSync(paths.tlsCA);
-
         tlsModule = config.useSPDY ? require("spdy").server : require("tls");
 
         // TLS options
         options = {
-            key              : key,
-            cert             : cert,
-            ca               : ca,
+            key              : tlsData[0],
+            cert             : tlsData[1],
+            ca               : tlsData[2] !== "" ? tlsData[2] : undefined,
             honorCipherOrder : true,
             ciphers          : "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
             secureProtocol   : "SSLv23_server_method",

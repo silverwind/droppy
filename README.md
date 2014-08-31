@@ -16,14 +16,19 @@
 Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>. Also check out this <a target="_blank" href="http://droppy-demo.silverwind.io/#!/#!/">demo</a>.
 
 ###Standalone Usage
-First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
 ```bash
 $ [sudo] npm install -g droppy
-$ droppy
+$ droppy start
 ```
-Once running, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To update, run:
+This will install droppy's home folder to `~/.droppy`. Once the server is ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
+
+There's a few more CLI commands available, see
 ```bash
-$ [sudo] sudo droppy update
+$ droppy help
+```
+To update droppy, run
+```bash
+$ [sudo] droppy update
 ```
 ###Module Usage - Express
 You can use droppy as an [express](http://expressjs.com/) middleware:
@@ -37,9 +42,8 @@ app.listen(80, function() {
     console.log("Listening on 0.0.0.0:80.");
 });
 ```
-- `home`: The path to the home folder, containing `config.json`, `db.json` and the `root` folder.
+- `home`: The path to droppy's home folder. Will be created if necessary.
 - `options`: An optional [options](#options) object.
-
 ##Configuration
 `config.json` is created in the home folder with these defaults:
 ```javascript
@@ -59,10 +63,7 @@ app.listen(80, function() {
     "zipLevel"     : 1,
     "noLogin"      : false,
     "demoMode"     : false,
-    "timestamps"   : true,
-    "tlsKey"       : "domain.key",      // [1]
-    "tlsCert"      : "domain.crt",      // [1]
-    "tlsCA"        : "domain.ca"        // [1]
+    "timestamps"   : true
 }
 ```
 Note: Options marked with [1] are not used when used as a module.
@@ -71,7 +72,7 @@ Note: Options marked with [1] are not used when used as a module.
 - `port`: The port to listen on. Can take an array of ports.
 - `host`: The host address to listen on. Can take an array of hosts.
 - `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
-- `useTLS`: Whether the server should use SSL/TLS encryption. See TLS options below.
+- `useTLS`: Whether the server should use SSL/TLS encryption. When set, droppy uses certificate files in `~/.droppy/config`, `tls.key`, `tls.cert`, `tls.ca`. Replace them with your real ones if you want to run TLS or SPDY.
 - `useSPDY`: Enables the SPDYv3 protocol. Depends on `useTLS`.
 - `useHSTS`: Enables the [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header with 1 year caching time. Depends on `useTLS`.
 - `readInterval`: The minimum time gap in milliseconds in which updates to a single directory are sent.
@@ -84,13 +85,6 @@ Note: Options marked with [1] are not used when used as a module.
 - `noLogin`: When enabled, the client skips the login page, making the server essentially public.
 - `demoMode`: When enabled, the server will regularly clean out all files and restore samples.
 - `timestamps`: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
-
-###TLS options
-When `useTLS` is set, these options specify TLS certificates. You can either pass in the certificate directly as a string, or specify a path to a file. Relative paths resolve to the home folder. All files are required in PEM format (Starting with `-----`).
-
-- `tlsKey`: The private key for the domain.
-- `tlsCert`: The certificate for the domain.
-- `tlsCA`: An optional intermediate (CA) certificate.
 
 ##Notes
 - For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.

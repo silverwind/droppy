@@ -1,6 +1,6 @@
 "use strict";
 
-var utils     = require("./utils.js");
+var utils = require("./utils.js");
 
 exports = module.exports = {
     home      : utils.resolve("~/.droppy"),
@@ -8,7 +8,7 @@ exports = module.exports = {
     cfg       : utils.resolve("~/.droppy/config/config.json"),
     db        : utils.resolve("~/.droppy/config/db.json"),
     tlsKey    : utils.resolve("~/.droppy/config/tls.key"),
-    tlsCert   : utils.resolve("~/.droppy/config/tls.crt"),
+    tlsCert   : utils.resolve("~/.droppy/config/tls.cert"),
     tlsCA     : utils.resolve("~/.droppy/config/tls.ca"),
     module    : utils.resolve(__dirname + "/../.."),
     server    : utils.resolve(__dirname + "/../../server"),
