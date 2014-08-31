@@ -5,6 +5,5 @@ droppy*.tgz
 .gitattributes
 .jshintrc
 *.sublime-project
-*.pem
 Gruntfile.js
 Procfile
