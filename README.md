@@ -1,5 +1,5 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg)](https://david-dm.org/silverwind/droppy)
-> Personal cloud storage server with a speedy web interface
+> File server with a speedy web interface
 
 ###Features
 * Lightweight. Performs great, even on a Raspberry Pi.
@@ -18,12 +18,12 @@ Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a 
 ###Standalone Usage
 First, install droppy from npm, then install droppy's home folder to a location of your choice, and finally start the server by providing the same folder as an argument:
 ```bash
-sudo npm install -g droppy
-droppy
+$ [sudo] npm install -g droppy
+$ droppy
 ```
-By default, the web server will listen on [0.0.0.0:8989](http://localhost:8989/) (changable in the config). On first startup, you'll be prompted for a username and password for your first account. To update, run:
+Once running, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account. To update, run:
 ```bash
-sudo droppy update
+$ [sudo] sudo droppy update
 ```
 ###Module Usage - Express
 You can use droppy as an [express](http://expressjs.com/) middleware:
