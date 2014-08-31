@@ -7,18 +7,22 @@ var cmd   = process.argv[2],
     pkg   = require("./package.json");
 
 var cmds = {
-    start   : "start                  Start the server",
-    update  : "update                 Update the server",
-    config  : "config                 Edit the config",
-    list    : "list                   List users",
-    add     : "add <user> <pass>      Add a user",
-    del     : "del <user>             Delete a user",
-    version : "version                Print version"
+    start   : "start                Start the server",
+    update  : "update               Update the server",
+    config  : "config               Edit the config",
+    list    : "list                 List users",
+    add     : "add <user> <pass>    Add a user",
+    del     : "del <user>           Delete a user",
+    version : "version              Print version"
 };
 
 if (cmds[cmd]) {
     switch (cmd) {
     case "start":
+        var server = require("./server/server.js");
+        server._init(null, null, true, function (err) {
+            if (err) console.error(err);
+        });
         break;
     case "version":
         console.info(pkg.version);
@@ -62,9 +66,8 @@ if (cmds[cmd]) {
     printHelp();
 }
 
-
 function printHelp() {
-    var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: droppy [command] [options]\n\n Commands:";
+    var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: " + pkg.name + " [command] [options]\n\n Commands:";
 
     Object.keys(cmds).forEach(function (command) {
         help += "\n   " + cmds[command];

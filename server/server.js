@@ -1,7 +1,8 @@
 "use strict";
 
-var pkg        = require("./package.json"),
+var pkg        = require("./../package.json"),
     utils      = require("./lib/utils.js"),
+    paths      = require("./lib/paths"),
     log        = require("./lib/log.js"),
     cfg        = require("./lib/cfg.js"),
     db         = require("./lib/db.js"),
@@ -40,19 +41,18 @@ var cache      = { res: {}, files: {}, css: null },
     mode       = {file: "644", dir: "755"},
     mkdirpOpts = {fs: fs, mode: mode.dir},
     tmpDir     = path.join(os.tmpdir(), pkg.name),
-    paths      = {},
     resources  = {
         css: [
             "node_modules/codemirror/lib/codemirror.css",
-            "src/style.css",
-            "src/sprites.css",
+            "client/style.css",
+            "client/sprites.css",
             "node_modules/codemirror/theme/mdn-like.css",
             "node_modules/codemirror/theme/xq-light.css",
             "node_modules/codemirror/theme/base16-dark.css"
         ],
         js: [
             "node_modules/jquery/dist/jquery.js",
-            "src/client.js",
+            "client/client.js",
             "node_modules/codemirror/lib/codemirror.js",
             "node_modules/codemirror/addon/selection/active-line.js",
             "node_modules/codemirror/addon/selection/mark-selection.js",
@@ -69,85 +69,102 @@ var cache      = { res: {}, files: {}, css: null },
             "node_modules/codemirror/keymap/sublime.js"
         ],
         html: [
-            "src/base.html",
-            "src/auth.html",
-            "src/main.html"
+            "client/base.html",
+            "client/auth.html",
+            "client/main.html"
         ],
         templates: [
-            "src/templates/views/directory.dotjs",
-            "src/templates/views/document.dotjs",
-            "src/templates/views/media.dotjs",
-            "src/templates/options.dotjs"
+            "client/templates/views/directory.dotjs",
+            "client/templates/views/document.dotjs",
+            "client/templates/views/media.dotjs",
+            "client/templates/options.dotjs"
         ]
     };
 
-
-//-----------------------------------------------------------------------------
-// Exported function, takes a option object which overrides config.json
 var droppy = function (home, options) {
-    init(home, options);
-    return function (req, res, next) {
-        var method = req.method.toUpperCase();
-        if (!hasServer && req.socket.server) setupSocket(req.socket.server);
-        if (!ready) { // Show a simple self-reloading loading page during startup
-            res.statusCode = 503;
-            res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
+    init(home, options, false, function (err) {
+        if (err) {
+            return err;
         } else {
-            while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
-            if (method === "GET") {
-                handleGET(req, res, next);
-            } else if (method === "POST") {
-                handlePOST(req, res, next);
-            } else if (method === "OPTIONS") {
-                res.setHeader("Allow", "GET,POST,OPTIONS");
-                res.end();
-                log.info(req, res);
-            } else {
-                res.statusCode = 405;
-                res.end();
-                log.info(req, res);
-            }
-        }
-    };
-};
-
-function init(home, options, isStandalone) {
-    // var exists = utils.checkExistance(paths);
-
-    // // Abort when a fs error other than ENOENT occured during stat()
-    // Object.keys(exists).forEach(function (p) {
-    //     if (exists[p] instanceof Error) callback(exists[p]);
-    // });
-
-    // // Create missing files/dirs
-    // async.series([
-    //     function (cb) { if (exists.home) return cb(); mkdirp(paths.home, mkdirpOpts, cb); },
-    //     function (cb) { if (exists.files) return cb(); mkdirp(paths.files, mkdirpOpts, cb); },
-    //     function (cb) { if (exists.cfg) return cb(); cfg.create(paths.cfg, cb); },
-    //     function (cb) { if (exists.db) return cb(); db.create(paths.db, cb); }
-    // ], callback);
-
-    cfg.init(options, function (err, parsedConfig) {
-        config = parsedConfig;
-
-        if (isStandalone) {
-            printLogo();
-            startListener();
-            continueInit();
-        } else {
-            install(home, function (err) {
-                if (err) log.error(err); // TODO: Propagate for module usage
-                db.parse(paths.db, function (err) {
-                    if (err) log.error(err); // TODO: Propagate for module usage
-                    continueInit();
-                });
-            });
+            return onRequest;
         }
     });
-}
+};
 
 droppy._init = init;
 exports = module.exports = droppy;
+
+
+function onRequest(req, res, next) {
+    var method = req.method.toUpperCase();
+    if (!hasServer && req.socket.server) setupSocket(req.socket.server);
+    if (!ready) { // Show a simple self-reloading loading page during startup
+        res.statusCode = 503;
+        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
+    } else {
+        while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
+        if (method === "GET") {
+            handleGET(req, res, next);
+        } else if (method === "POST") {
+            handlePOST(req, res, next);
+        } else if (method === "OPTIONS") {
+            res.setHeader("Allow", "GET,POST,OPTIONS");
+            res.end();
+            log.info(req, res);
+        } else {
+            res.statusCode = 405;
+            res.end();
+            log.info(req, res);
+        }
+    }
+}
+
+function init(home, options, isStandalone, callback) {
+    if (isStandalone) printLogo();
+
+    if (typeof home === "string") {
+        paths.home  = utils.resolve(home);
+        paths.files = utils.resolve(home + "/files");
+        paths.cfg   = utils.resolve(home + "/config/config.json");
+        paths.db    = utils.resolve(home + "/config/db.json");
+    }
+
+    async.series([
+        function (cb) { mkdirp(paths.files, mkdirpOpts, cb); },
+        function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
+        function (cb) { cfg.init(options, function (err, cfg) { config = cfg; cb(err); }); },
+        function (cb) { db.init(cb); }
+    ], function (err) {
+        if (err) return callback(err);
+        if (isStandalone) startListener();
+        log.init({logLevel: config.logLevel, timestamps: config.timestamps});
+        fs.MAX_OPEN = config.maxOpen;
+        firstRun = Object.keys(db.get("users")).length === 0;    //Allow user creation when no users exist.
+        if (config.debug) updateCSS();                           // Intialize the CSS cache when debugging
+        log.simple("Preparing resources...");
+        async.series([
+            function (cb) { cacheResources(cb); },
+            function (cb) { prepareContent(cb); },
+            function (cb) { cleanupTemp(cb); },
+            function (cb) { cleanupLinks(cb); },
+            function (cb) {
+                if (config.demoMode) {
+                    cleanupForDemo(function schedule() {
+                        cb();
+                        setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
+                    });
+                } else {
+                    cb();
+                }
+            }
+        ], function (err) {
+            if (err) return callback(err);
+            ready = true;
+            if (isStandalone) log.simple("Ready for requests!");
+            callback();
+        });
+    });
+}
 
 function printLogo() {
     log.plain([
@@ -162,68 +179,22 @@ function printLogo() {
                   .replace(/\|/gm, chalk.magenta("|"))
     );
     log.simple(chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-               chalk.blue(process.argv[0]), " ", chalk.green(process.version.substring(1), "\n"));
+               chalk.blue("node"), " ", chalk.green(process.version.substring(1), "\n"));
 }
 
 function startListener() {
-    var onreq = droppy(),
-        hosts = Array.isArray(config.host) ? config.host : [config.host],
+    var hosts = Array.isArray(config.host) ? config.host : [config.host],
         ports = Array.isArray(config.port) ? config.port : [config.port];
 
     hosts.forEach(function (host) {
         ports.forEach(function (port) {
-            createListener(onreq).listen(port, host);
+            createListener(onRequest).listen(port, host);
         });
     });
 }
 
-function continueInit() {
-    log.init({logLevel: config.logLevel, timestamps: config.timestamps});
-
-    fs.MAX_OPEN = config.maxOpen;
-
-    // Allow user creation when no users exist.
-    firstRun = Object.keys(db.get("users")).length === 0;
-
-    // Intialize the CSS cache when debugging
-    if (config.debug) updateCSS();
-
-    // Prepare to get up and running
-    async.series([
-        function (callback) {
-            prepareContent(callback);
-        },
-        function (callback) {
-            cacheResources(path.join(__dirname + "/res/"), function () {
-                callback(null);
-            });
-        },
-        function (callback) {
-            cleanupTemp(callback);
-        },
-        function (callback) {
-            if (config.demoMode) {
-                cleanupForDemo(function schedule() {
-                    callback();
-                    setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
-                });
-            } else {
-                callback();
-            }
-        },
-        function (callback) {
-            cleanupLinks(function () {
-                callback();
-            });
-        },
-    ], function (err, results) {
-        ready = true;
-        log.simple("Ready for requests!");
-    });
-}
-
 //-----------------------------------------------------------------------------
-// Read JS/CSS/HTML client resources, minify them, and write them to /res
+// Read JS/CSS/HTML client resources, minify them and cache them in memory
 function prepareContent(callback) {
     var resData  = {},
         out      = { css : "", js  : "" };
@@ -233,17 +204,15 @@ function prepareContent(callback) {
         resData[type] = resources[type].map(function read(file) {
             var data;
             try {
-                data = fs.readFileSync(path.join(__dirname, file)).toString("utf8");
+                data = fs.readFileSync(path.join(paths.module, file)).toString("utf8");
             } catch (error) {
-                log.error("Error reading " + file + ":\n", error);
-                process.exit(1);
+                return callback(error);
             }
             return data;
         });
     });
 
     // Concatenate CSS and JS
-    log.simple("Minifying resources...");
     resData.css.forEach(function (data) {
         out.css += data + "\n";
     });
@@ -255,7 +224,7 @@ function prepareContent(callback) {
     });
 
     // Add SVG object
-    var svgDir = path.join(__dirname, "/src/svg/"), svgData = {};
+    var svgDir = paths.svg, svgData = {};
     fs.readdirSync(svgDir).forEach(function (name) {
         svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
     });
@@ -306,17 +275,12 @@ function prepareContent(callback) {
     cache.res["style.css"] = {data: out.css, etag: etag, mime: mime.lookup(".css")};
     gzips["style.css"] = function (callback) { utils.createGzip(out.css, callback); };
 
-    // Remove leftover compiled resources from previous versions if possible
-    Object.keys(cache.res).forEach(function (file) {
-        try { fs.unlinkSync(path.join(__dirname, "/res/", file)); } catch (err) {}
-    });
-
     async.series(gzips, function (err, results) {
         if (err) return callback(err);
         Object.keys(results).forEach(function (file) {
             cache.res[file].gzipData = results[file];
         });
-        callback(null);
+        callback();
     });
 
 }
@@ -346,7 +310,7 @@ function cleanupForDemo(doneCallback) {
         },
         function (callback) {
             log.simple("Adding samples...");
-            cpr(path.join(__dirname, "src"), path.join(paths.files, "Sources"), function (err) {
+            cpr(paths.client, path.join(paths.files, "Sources"), function (err) {
                 if (err) log.error(err);
                 cpr(path.join(__dirname, "node_modules"), path.join(paths.files, "Modules"), function (err) {
                     if (err) log.error(err);
@@ -379,7 +343,7 @@ function cleanupTemp(callback) {
         if (err && callback) return callback(err);
         mkdirp(tmpDir, mkdirpOpts, function (err) {
             if (err && callback) return callback(err);
-            callback(null);
+            callback();
         });
     });
 }
@@ -419,28 +383,10 @@ function createListener(handler) {
     if (!config.useTLS) {
         server = http.createServer(handler);
     } else {
-        // Read Certificates - If path isn't absolute, resolve to the home folder
-        if (config.tlsKey.substring(0, 5) === "-----") {
-            key  = config.tlsKey;
-        } else {
-            try {
-                key = fs.readFileSync(utils.isAbsolute(config.tlsKey)  ? config.tlsKey  : path.join(paths.home, config.tlsKey));
-            } catch (err) { log.error(err); process.exit(1); }
-        }
-        if (config.tlsCert.substring(0, 5) === "-----") {
-            cert = config.tlsCert;
-        } else {
-            try {
-                cert = fs.readFileSync(utils.isAbsolute(config.tlsCert) ? config.tlsCert : path.join(paths.home, config.tlsCert));
-            } catch (err) { log.error(err); process.exit(1); }
-        }
-        if (config.tlsCA && config.tlsCA.substring(0, 5) === "-----") {
-            ca = config.tlsCA;
-        } else {
-            try {
-                ca = fs.readFileSync(utils.isAbsolute(config.tlsCert) ? config.tlsCert : path.join(paths.home, config.tlsCert));
-            } catch (err) {}
-        }
+        // Read Certificates
+        key = fs.readFileSync(paths.tlsKey);
+        cert = fs.readFileSync(paths.tlsCert);
+        ca = fs.readFileSync(paths.tlsCA);
 
         tlsModule = config.useSPDY ? require("spdy").server : require("tls");
 
@@ -989,29 +935,30 @@ function checkWatchedDirs() {
 
 //-----------------------------------------------------------------------------
 // Read resources and store them in the cache object
-function cacheResources(dir, callback) {
-    var relPath, fileData, fileTime;
+function cacheResources(callback) {
+    var staticFiles = [
+        "OpenSans-Light.woff",
+        "OpenSans-Regular.woff",
+        "favicon.ico",
+    ];
 
-    dir = dir.substring(0, dir.length - 1); // Strip trailing slash
-    utils.walkDirectory(dir, false, function (error, results) {
-        if (error) log.error(error);
-        results.forEach(function (fullPath) {
-            relPath = fullPath.substring(dir.length + 1);
-            try {
-                fileData = fs.readFileSync(fullPath);
-                fileTime = fs.statSync(fullPath).mtime;
-            } catch (error) {
-                log.error("Unable to read resource\n", error.stack);
-                process.exit(1);
-            }
+    staticFiles.forEach(function (file) {
+        var fileData, fileTime,
+            fullPath = path.join(paths.client, file);
 
-            cache.res[relPath] = {};
-            cache.res[relPath].data = fileData;
-            cache.res[relPath].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
-            cache.res[relPath].mime = mime.lookup(fullPath);
-        });
-        callback();
+        try {
+            fileData = fs.readFileSync(fullPath);
+            fileTime = fs.statSync(fullPath).mtime;
+        } catch (error) {
+            callback(new Error("Unable to read " + fullPath));
+        }
+
+        cache.res[file] = {};
+        cache.res[file].data = fileData;
+        cache.res[file].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
+        cache.res[file].mime = mime.lookup(fullPath);
     });
+    callback();
 }
 
 //-----------------------------------------------------------------------------
@@ -1562,7 +1509,7 @@ function cleanUpEtags() {
 // Watch the CSS files for debugging
 function watchCSS() {
     resources.css.forEach(function (file) {
-        fs.watch(path.join(__dirname, file), updateCSS);
+        fs.watch(path.join(paths.module, file), updateCSS);
     });
 }
 
@@ -1571,7 +1518,7 @@ function watchCSS() {
 function updateCSS() {
     var temp = "";
     resources.css.forEach(function (file) {
-        temp += fs.readFileSync(path.join(__dirname, file)).toString("utf8") + "\n";
+        temp += fs.readFileSync(path.join(paths.module, file)).toString("utf8") + "\n";
     });
     cache.css = ap({browsers: "last 2 versions"}).process(temp).css;
     Object.keys(clients).forEach(function (cookie) {

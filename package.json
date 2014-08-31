@@ -16,10 +16,10 @@
   "main": "server/server.js",
   "preferGlobal": true,
   "bin": {
-    "droppy": "./cli.js"
+    "droppy": "./droppy.js"
   },
   "scripts": {
-    "start": "node cli.js start"
+    "start": "node droppy.js start"
   },
   "dependencies": {
     "archiver": "~0.11.0",

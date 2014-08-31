@@ -6,33 +6,31 @@ var cfg        = {},
     mkdirp     = require("mkdirp"),
     path       = require("path"),
     configFile = require("./paths.js").cfg,
-    defaults   = [
-        '{',
-        '    "host"         : "0.0.0.0",',
-        '    "port"         : 8989,',
-        '    "debug"        : false,',
-        '    "useTLS"       : false,',
-        '    "useSPDY"      : false,',
-        '    "useHSTS"      : false,',
-        '    "readInterval" : 250,',
-        '    "keepAlive"    : 20000,',
-        '    "linkLength"   : 3,',
-        '    "logLevel"     : 2,',
-        '    "maxOpen"      : 256,',
-        '    "maxFileSize"  : 0,',
-        '    "zipLevel"     : 1,',
-        '    "noLogin"      : false,',
-        '    "demoMode"     : false,',
-        '    "timestamps"   : true,',
-        '    "tlsKey"       : "domain.key",',
-        '    "tlsCert"      : "domain.crt",',
-        '    "tlsCA"        : "domain.ca"',
-        '}'
-    ].join("\n");
+    defaults   = {
+        "host"         : "0.0.0.0",
+        "port"         : 8989,
+        "debug"        : false,
+        "useTLS"       : false,
+        "useSPDY"      : false,
+        "useHSTS"      : false,
+        "readInterval" : 250,
+        "keepAlive"    : 20000,
+        "linkLength"   : 3,
+        "logLevel"     : 2,
+        "maxOpen"      : 256,
+        "maxFileSize"  : 0,
+        "zipLevel"     : 1,
+        "noLogin"      : false,
+        "demoMode"     : false,
+        "timestamps"   : true,
+        "tlsKey"       : "tls.key",
+        "tlsCert"      : "tls.crt",
+        "tlsCA"        : "tls.ca"
+    };
 
 cfg.init = function (config, callback) {
-    if (typeof configFile === "object") {
-        config = _.defaults(config, JSON.parse(defaults)); // Add missing options
+    if (typeof config === "object" && config !== null) {
+        config = _.defaults(config, defaults); // Add missing options
         callback(null, config);
     } else if (process.env.NODE_ENV === "droppydemo") {
         config = _.defaults(config, {
@@ -42,7 +40,7 @@ cfg.init = function (config, callback) {
             "demoMode"     : true,
             "noLogin"      : true,
             "timestamps"   : false
-        }, JSON.parse(defaults));
+        }, defaults);
         callback(null, config);
     } else {
         fs.stat(configFile, function (err) {
@@ -50,7 +48,9 @@ cfg.init = function (config, callback) {
                 if (err.code === "ENOENT") {
                     config = defaults;
                     mkdirp(path.dirname(configFile), function () {
-                        write(config, callback);
+                        write(config, function (err) {
+                            callback(err || null, config);
+                        });
                     });
                 } else {
                     callback(err);
@@ -65,7 +65,9 @@ cfg.init = function (config, callback) {
                     }
                     if (!config) config = {};
                     config = _.defaults(config, defaults);
-                    write(config, callback);
+                    write(config, function (err) {
+                        callback(err || null, config);
+                    });
                 });
             }
         });

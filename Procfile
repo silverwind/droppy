@@ -1,2 +1,2 @@
-web: node cli.js start
+web: node droppy.js start
 heroku config:set NODE_ENV=droppydemo

@@ -99,20 +99,4 @@ utils.isAbsolute = function isAbsolute(p) {
     return path.resolve(p) === path.normalize(p);
 };
 
-utils.checkExistance = function checkExistance(paths) {
-    var result = {};
-    Object.keys(paths).forEach(function (name) {
-        var method = (name === "home" || name === "root") ? "isDirectory" : "isFile";
-        try {
-            result[name] = fs.statSync(paths[name])[method]();
-        } catch (err) {
-            if (err.code === "ENOENT")
-                result[name] = false;
-            else
-                result[name] = err;
-        }
-    });
-    return result;
-};
-
 exports = module.exports = utils;
