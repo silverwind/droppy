@@ -177,7 +177,7 @@
     $(function () {
         var prefs, doSave, defaults = {
             volume : 0.5,
-            theme: "mdn-like",
+            theme: "xq-light",
             indentWithTabs : false,
             indentUnit : 4,
             lineWrapping: false,

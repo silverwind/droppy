@@ -45,7 +45,7 @@ button, input { line-height: normal }
 /* ============================ Global styles / fonts ============================= */
 
 html {
-    background: #181818;
+    background: #ddd;
     font: 1.5em/1 "Open Sans", Helvetica, sans-serif;
     font-weight: 300;
     letter-spacing: -.25px;
@@ -215,7 +215,8 @@ input:-webkit-autofill {
 .view .directory.content .empty,
 .view .directory.content ul {
     background: #eee;
-    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    border-radius: 2px;
 }
 .view .directory.content ul {
     display: flex;
@@ -231,7 +232,6 @@ input:-webkit-autofill {
    width: 100%;
    text-align: left;
    position: absolute;
-   box-shadow: 0 0 1em rgba(0, 0, 0, 0.6);
    height: 1.5rem;
    z-index: 1;
 }
@@ -367,15 +367,12 @@ input:-webkit-autofill {
 }
 
 .file-header span {
-    border-bottom: 1px solid #bbb;
-    background: #dadada;
     position: relative;
     cursor: pointer;
     white-space: nowrap;
     line-height: 1.1em;
 }
-.file-header span:first-of-type { border-top-left-radius: 4px }
-.file-header span:last-of-type { border-top-right-radius: 4px }
+
 .file-header .triangle {
     position: relative;
     height: .6em;
@@ -532,7 +529,7 @@ input:-webkit-autofill {
 /* Hide certain list elements when width gets too small */
 @media all and (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .125em } }
 @media all and (max-width: 639px) { .view .header-mtime                    { display: none     } }
-@media all and (max-width: 639px) { .view .header-spacer                   { flex: 0 0 2.567em } }
+@media all and (max-width: 639px) { .view .header-spacer                   { flex: 0 0 2.5em   } }
 @media all and (max-width: 639px) { .view .data-row                        { padding: 0 .1em   } }
 @media all and (max-width: 319px) { .view .header-size                     { display: none     } }
 @media all and (max-width: 639px) { .view .data-row .mtime                 { display: none     } }
@@ -547,14 +544,14 @@ input:-webkit-autofill {
         padding: 0 .125em;
     }
 }
-@media all and (max-width: 1279px) { .view.left .header-mtime,        .view.right .header-mtime        { display: none     } }
-@media all and (max-width: 1279px) { .view.left .header-spacer,       .view.right .header-spacer       { flex: 0 0 2.567em } }
-@media all and (max-width: 1279px) { .view.left .data-row,            .view.right .data-row            { padding: 0 .1em   } }
-@media all and (max-width: 639px)  { .view.left .header-size,         .view.right .header-size         { display: none     } }
-@media all and (max-width: 1279px) { .view.left .data-row .mtime,     .view.right .data-row .mtime     { display: none     } }
-@media all and (max-width: 639px)  { .view.left .data-row .size,      .view.right .data-row .size      { display: none     } }
-@media all and (max-width: 639px)  { .view.left .data-row .size-unit, .view.right .data-row .size-unit { display: none     } }
-@media all and (max-width: 639px)  { .view.left .data-row svg,        .view.right .data-row svg        { width: 1.1em      } }
+@media all and (max-width: 1279px) { .view.left .header-mtime,        .view.right .header-mtime        { display: none   } }
+@media all and (max-width: 1279px) { .view.left .header-spacer,       .view.right .header-spacer       { flex: 0 0 5em   } }
+@media all and (max-width: 1279px) { .view.left .data-row,            .view.right .data-row            { padding: 0 .1em } }
+@media all and (max-width: 639px)  { .view.left .header-size,         .view.right .header-size         { display: none   } }
+@media all and (max-width: 1279px) { .view.left .data-row .mtime,     .view.right .data-row .mtime     { display: none   } }
+@media all and (max-width: 639px)  { .view.left .data-row .size,      .view.right .data-row .size      { display: none   } }
+@media all and (max-width: 639px)  { .view.left .data-row .size-unit, .view.right .data-row .size-unit { display: none   } }
+@media all and (max-width: 639px)  { .view.left .data-row svg,        .view.right .data-row svg        { width: 1.1em    } }
 
 
 .data-row .shortlink, .data-row .edit, .data-row .delete, .data-row .zip, .data-row span {
@@ -632,11 +629,11 @@ input:-webkit-autofill {
     position: absolute;
     animation: spin 1s infinite linear;
     border-bottom : 5px solid #18f;
-    border-left   : 5px solid #000;
-    border-right  : 5px solid #000;
+    border-left   : 5px solid #333;
+    border-right  : 5px solid #333;
     border-top    : 5px solid #f1a;
     border-radius: 100%;
-    box-shadow: 0 0 20px #111, inset 0 0 20px #111;
+    box-shadow: 0 0 20px rgba(0,0,0,.4);
     height: 200px;
     width: 200px;
     left: calc(50% - 100px);
@@ -746,6 +743,7 @@ input:-webkit-autofill {
     text-align: center;
     height: 100%;
     overflow: hidden;
+    background: #181818;
 }
 
 .previewer .arrow-back, .previewer .arrow-forward {

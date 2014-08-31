@@ -2,8 +2,7 @@
 
 var npm,
     async = require("async"),
-    chalk = require("chalk"),
-    log   = require("./log.js");
+    chalk = require("chalk");
 
 function updateSelf(pkg, callback) {
     function loadNPM(cb) {
@@ -33,7 +32,7 @@ function updateSelf(pkg, callback) {
         async.parallel([getInstalledVersion, getNPMVersion], function (err, versions) {
             if (err) return callback(err);
             if (versions[0] !== versions[1]) {
-                log.info("Updating " + pkg.name + " from " + chalk.green(versions[0]) + " to " + chalk.green(versions[1]) + " ...");
+                console.info("Updating " + pkg.name + " from " + chalk.green(versions[0]) + " to " + chalk.green(versions[1]) + " ...");
                 npm.commands.install([pkg.name + "@" + versions[1]], function (err)  {
                     if (err) return callback(err);
                     callback(null, "Successfully updated to " + chalk.green(versions[1]) + "!");
