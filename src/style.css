@@ -62,12 +62,9 @@ html {
 ::-webkit-scrollbar:horizontal { height: 4px }
 ::-webkit-scrollbar-thumb      { background: #888 }
 
-input::-moz-placeholder                { color: #555; opacity: 1 }
-input:-ms-input-placeholder            { color: #555 }
-input::-webkit-input-placeholder       { color: #555 }
-input:hover::-moz-placeholder          { color: #888; opacity: 1 }
-input:hover:-ms-input-placeholder      { color: #888 }
-input:hover::-webkit-input-placeholder { color: #888 }
+input::-moz-placeholder                { color: #999; opacity: 1 }
+input:-ms-input-placeholder            { color: #999 }
+input::-webkit-input-placeholder       { color: #999 }
 input:-webkit-autofill {
   background-color: #221 !important;
   background-image: none !important;
@@ -1269,7 +1266,7 @@ input:-webkit-autofill {
 }
 
 #options-box .list-options select {
-    border-radius: 4px;
+    border-radius: 2px;
     border: 1px solid #ccc;
     background: #fff;
     color: #666;
@@ -1360,10 +1357,10 @@ input:-webkit-autofill {
 /* ============================== Login Form =============================== */
 
 #center-box {
-    background: #222;
+    background: #f8f8f8;
     border-radius: 6px;
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
-    color: #888;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    color: #666;
     height: 350px;
     left: 50%;
     margin-left: -300px;
@@ -1377,7 +1374,6 @@ input:-webkit-autofill {
     z-index: 0;
 }
 
-#center-box.invalid { box-shadow: 0 0 0 2px #f55 }
 #center-box.out { opacity: 0; top: 60% }
 
 @media all and (max-width: 639px), all and (max-height: 399px) {
@@ -1449,17 +1445,14 @@ input:-webkit-autofill {
 }
 
 .login-input {
-    background: linear-gradient(#000,#111);
-    border-radius: 6px;
-    border: 2px solid #333;
-    color: #ccc;
+    background: #eee;
+    border-radius: 2px;
+    color: #333;
     padding: 0 10px;
     height: 45px;
     margin: 5px 0;
-    transition: border .35s ease, color .35s ease;
     width: 80%;
 }
-.login-input:focus { border: 2px solid #999; color: #ddd}
 
 #remember {
     height:  45px;
@@ -1475,21 +1468,19 @@ input:-webkit-autofill {
     position: absolute;
     width: 10em;
 }
-#remember:hover span { color: #fff }
 
 #remember label {
-    background: #000;
+    background: #eee;
     border-radius: 3px;
     cursor: pointer;
     height: 20px;
     position: absolute;
     width: 20px;
-    box-shadow: 0 0 0 2px #333;
 }
 
 #remember label:after {
-    border-bottom: 3px solid #fff;
-    border-left: 3px solid #fff;
+    border-bottom: 3px solid #333;
+    border-left: 3px solid #333;
     content: "";
     height: 5px;
     left: 4px;
@@ -1502,7 +1493,6 @@ input:-webkit-autofill {
 }
 
 input[type="checkbox"] { display: none }
-#remember:focus label, #remember:hover label { box-shadow: 0 0 0 2px #999 }
 #check:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
