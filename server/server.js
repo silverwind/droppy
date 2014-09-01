@@ -1238,7 +1238,6 @@ function handleUploadRequest(req, res) {
             tmp = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
         log.info(req, res, "Receiving: " + dstRelative);
-        console.log("----- ADD :", tmp);
 
         var writeStream = fs.createWriteStream(tmp, { mode: mode.file});
 
