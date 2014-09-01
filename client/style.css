@@ -54,8 +54,8 @@ html {
     -webkit-backface-visibility: hidden;
 }
 
-::selection      { background: #f81; color: #fff }
-::-moz-selection { background: #f81; color: #fff }
+::selection      { background: #18f; color: #fff }
+::-moz-selection { background: #18f; color: #fff }
 
 ::-webkit-scrollbar, ::-webkit-scrollbar-track { background: transparent }
 ::-webkit-scrollbar:vertical   { width:  4px }
@@ -1443,14 +1443,18 @@ input:-webkit-autofill {
 }
 
 .login-input {
-    background: #1a1;
+    background: #eee;
     border-radius: 2px;
-    border: 1px solid #f1a;
-    color: #333;
+    border: 2px solid #aaa;
     padding: 0 10px;
     height: 45px;
     margin: 5px 0;
     width: 80%;
+}
+
+.login-input:focus {
+    border: 2px solid #18f;
+    background: #eef;
 }
 
 #remember {
