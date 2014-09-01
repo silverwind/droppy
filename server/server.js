@@ -136,7 +136,7 @@ function init(home, options, isStandalone, callback) {
         function (cb) { utils.tlsInit(paths.tlsKey, paths.tlsCert, paths.tlsCA, cb); },
     ], function (err, result) {
         if (err) return callback(err);
-        if (isStandalone) startListener(config.useTLS && result[4]);
+        if (isStandalone) startListener(config.useTLS && result[5]);
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    //Allow user creation when no users exist.
