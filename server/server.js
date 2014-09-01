@@ -27,8 +27,7 @@ var _          = require("lodash"),
 
 var crypto     = require("crypto"),
     path       = require("path"),
-    qs         = require("querystring"),
-    os         = require("os");
+    qs         = require("querystring");
 
 var cache      = { res: {}, files: {}, css: null },
     clients    = {},
@@ -40,7 +39,6 @@ var cache      = { res: {}, files: {}, css: null },
     ready      = false,
     mode       = {file: "644", dir: "755"},
     mkdirpOpts = {fs: fs, mode: mode.dir},
-    tmpDir     = path.join(os.tmpdir(), pkg.name),
     resources  = {
         css: [
             "node_modules/codemirror/lib/codemirror.css",
@@ -131,11 +129,11 @@ function init(home, options, isStandalone, callback) {
 
     async.series([
         function (cb) { mkdirp(paths.files, mkdirpOpts, cb); },
+        function (cb) { mkdirp(paths.temp, mkdirpOpts, cb); },
         function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
         function (cb) { cfg.init(options, function (err, cfg) { config = cfg; cb(err); }); },
         function (cb) { db.init(cb); },
         function (cb) { utils.tlsInit(paths.tlsKey, paths.tlsCert, paths.tlsCA, cb); },
-
     ], function (err, result) {
         if (err) return callback(err);
         if (isStandalone) startListener(config.useTLS && result[4]);
@@ -321,7 +319,7 @@ function cleanupForDemo(doneCallback) {
             });
         },
         function (callback) {
-            var temp     = path.join(tmpDir, "img.zip"),
+            var temp     = path.join(paths.temp, "img.zip"),
                 unzipper = new require("decompress-zip")(temp),
                 dest     = path.join(paths.files, "Images");
 
@@ -341,9 +339,9 @@ function cleanupForDemo(doneCallback) {
 //-----------------------------------------------------------------------------
 // Clean up the directory for incoming files
 function cleanupTemp(callback) {
-    rimraf(tmpDir, function (err) {
-        if (err && callback) return callback(err);
-        mkdirp(tmpDir, mkdirpOpts, function (err) {
+    rimraf(paths.temp, function (err) {
+        if (err && err.code !== "ENOENT" && callback) return callback(err);
+        mkdirp(paths.temp, mkdirpOpts, function (err) {
             if (err && callback) return callback(err);
             callback();
         });
@@ -1213,8 +1211,8 @@ function handleTypeRequest(req, res) {
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
     var busboy, opts,
-        done = false,
-        files = [],
+        done   = false,
+        files  = {},
         cookie = getCookie(req.headers.cookie);
 
     req.query = qs.parse(req.url.substring("/upload?".length));
@@ -1234,19 +1232,23 @@ function handleUploadRequest(req, res) {
     if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
     busboy = new Busboy(opts);
 
-
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
             dst = path.join(paths.files, req.query.to, dstRelative),
-            tmp = path.join(tmpDir, crypto.createHash("md5").update(String(dst)).digest("hex"));
+            tmp = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
         log.info(req, res, "Receiving: " + dstRelative);
+        console.log("----- ADD :", tmp);
+
+        var writeStream = fs.createWriteStream(tmp, { mode: mode.file});
+
         files[dstRelative] = {
-            src: tmp,
-            dst: decodeURIComponent(dst)
+            src : tmp,
+            dst : decodeURIComponent(dst),
+            ws  : writeStream
         };
 
-        file.pipe(fs.createWriteStream(tmp, { mode: mode.file}));
+        file.pipe(writeStream);
     });
 
     busboy.on("filesLimit", function () {
@@ -1293,6 +1295,16 @@ function handleUploadRequest(req, res) {
     req.on("close", function () {
         if (!done) log.info(req, res, "Upload cancelled");
         closeConnection();
+
+        // Clean up the temp files
+        Object.keys(files).forEach(function (relPath) {
+            var ws = files[relPath].ws;
+            fs.unlink(files[relPath].src, function () {});
+            ws.on("finish", function () { // Wait for a possible stream to close before deleting
+                fs.unlink(files[relPath].src, function () {});
+            });
+            ws.end();
+        });
     });
 
     req.pipe(busboy);

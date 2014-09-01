@@ -5,6 +5,7 @@ var utils = require("./utils.js");
 exports = module.exports = {
     home      : utils.resolve("~/.droppy"),
     files     : utils.resolve("~/.droppy/files"),
+    temp      : utils.resolve("~/.droppy/temp"),
     cfg       : utils.resolve("~/.droppy/config/config.json"),
     db        : utils.resolve("~/.droppy/config/db.json"),
     tlsKey    : utils.resolve("~/.droppy/config/tls.key"),
