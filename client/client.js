@@ -1808,7 +1808,7 @@
         var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            $("[data-entryname='" + sortedEntries[index] + "']:first").css({
+            view.find("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index),
             }).attr("order", index);
