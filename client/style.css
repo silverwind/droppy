@@ -1443,8 +1443,9 @@ input:-webkit-autofill {
 }
 
 .login-input {
-    background: #eee;
+    background: #1a1;
     border-radius: 2px;
+    border: 1px solid #f1a;
     color: #333;
     padding: 0 10px;
     height: 45px;

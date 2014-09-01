@@ -22,10 +22,7 @@ var cfg        = {},
         "zipLevel"     : 1,
         "noLogin"      : false,
         "demoMode"     : false,
-        "timestamps"   : true,
-        "tlsKey"       : "tls.key",
-        "tlsCert"      : "tls.crt",
-        "tlsCA"        : "tls.ca"
+        "timestamps"   : true
     };
 
 cfg.init = function (config, callback) {
@@ -58,13 +55,23 @@ cfg.init = function (config, callback) {
             } else {
                 fs.readFile(configFile, function (err, data) {
                     if (err) return callback(err);
+
                     try {
                         config = JSON.parse(String(data));
                     } catch (error) {
                         return callback(err);
                     }
+
                     if (!config) config = {};
                     config = _.defaults(config, defaults);
+
+                    // Remove options no longer present
+                    Object.keys(config).forEach(function (key) {
+                        if (typeof defaults[key] === "undefined") {
+                            delete config[key];
+                        }
+                    });
+
                     write(config, function (err) {
                         callback(err || null, config);
                     });
