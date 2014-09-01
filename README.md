@@ -105,7 +105,7 @@ Description=droppy
 After=network.target
 
 [Service]
-ExecStart=/bin/env droppy start /path/to/home/
+ExecStart=/bin/env droppy start
 Restart=always
 StandardOutput=syslog
 User=http
