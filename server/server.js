@@ -8,8 +8,6 @@ var pkg        = require("./../package.json"),
     db         = require("./lib/db.js"),
     tpls       = require("./lib/dottemplates.js");
 
-process.title = pkg.name;
-
 var _          = require("lodash"),
     ap         = require("autoprefixer"),
     archiver   = require("archiver"),
