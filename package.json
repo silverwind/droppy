@@ -27,7 +27,7 @@
     "autoprefixer": "~3.0.0",
     "busboy": "~0.2.8",
     "chalk": "~0.5.1",
-    "clean-css": "~2.2.14",
+    "clean-css": "~2.2.15",
     "codemirror": "~4.5.0",
     "cpr": "~0.3.2",
     "decompress-zip": "~0.0.8",
