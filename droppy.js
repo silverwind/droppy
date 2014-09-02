@@ -34,8 +34,24 @@ if (cmds[cmd]) {
         });
         break;
     case "config":
-        var paths = require("./server/lib/paths.js");
-        require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfg], {stdio: "inherit"});
+        var paths = require("./server/lib/paths.js"),
+            cfg   = require("./server/lib/cfg.js"),
+            edit  = function () {
+                require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfg], {stdio: "inherit"});
+            };
+
+        require("graceful-fs").stat(paths.cfg, function (err) {
+            if (err && err.code === "ENOENT") {
+                require("mkdirp")(require("path").dirname(paths.cfg), function () {
+                    cfg.init(null, function (err) {
+                        if (err) return console.error(err);
+                        edit();
+                    });
+                });
+            } else {
+                edit();
+            }
+        });
         break;
     case "list":
         var db = require("./server/lib/db.js");
