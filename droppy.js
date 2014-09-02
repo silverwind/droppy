@@ -6,6 +6,8 @@ var cmd   = process.argv[2],
     args  = process.argv.slice(3),
     pkg   = require("./package.json");
 
+process.title = pkg.name;
+
 var cmds = {
     start   : "start                Start the server",
     update  : "update               Update the server",

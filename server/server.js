@@ -8,8 +8,6 @@ var pkg        = require("./../package.json"),
     db         = require("./lib/db.js"),
     tpls       = require("./lib/dottemplates.js");
 
-process.title = pkg.name;
-
 var _          = require("lodash"),
     ap         = require("autoprefixer"),
     archiver   = require("archiver"),
@@ -136,7 +134,7 @@ function init(home, options, isStandalone, callback) {
         function (cb) { utils.tlsInit(paths.tlsKey, paths.tlsCert, paths.tlsCA, cb); },
     ], function (err, result) {
         if (err) return callback(err);
-        if (isStandalone) startListener(config.useTLS && result[4]);
+        if (isStandalone) startListener(config.useTLS && result[5]);
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    //Allow user creation when no users exist.
@@ -1238,7 +1236,6 @@ function handleUploadRequest(req, res) {
             tmp = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
 
         log.info(req, res, "Receiving: " + dstRelative);
-        console.log("----- ADD :", tmp);
 
         var writeStream = fs.createWriteStream(tmp, { mode: mode.file});
 
