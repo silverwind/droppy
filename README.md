@@ -86,32 +86,15 @@ Note: Options marked with [1] are not used when used as a module.
 - `demoMode`: When enabled, the server will regularly clean out all files and restore samples.
 - `timestamps`: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
-##Notes
-- For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
-
 ###Supported Browsers
 - Firefox (last 2 versions)
 - Chrome (last 2 versions)
 - Internet Explorer 10 or higher (not regularly tested)
 
-###Systemd
-If you'd like to run droppy as a systemd service, you can use this sample service file as a start:
+###Installation as a daemon/service
+- [Debian](//github.com/silverwind/droppy/wiki/Debian-Installation)
+- [Systemd](//github.com/silverwind/droppy/wiki/Systemd-Installation)
 
-```ini
-# systemd service file for droppy
-# replace /path/to/droppy with your actual path and User/Group with the intended user to run as
-[Unit]
-Description=droppy
-After=network.target
-
-[Service]
-ExecStart=/bin/env droppy start
-Restart=always
-StandardOutput=syslog
-User=http
-Group=http
-SyslogIdentifier=droppy
-
-[Install]
-WantedBy=multi-user.target
-```
+###ProTips
+- For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
+- Listen on ports < 1024 as regular user `setcap 'cap_net_bind_service=+ep' $(which node)`
