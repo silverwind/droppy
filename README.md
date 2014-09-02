@@ -92,8 +92,8 @@ Note: Options marked with [1] are not used when used as a module.
 - Internet Explorer 10 or higher (not regularly tested)
 
 ###Installation as a daemon/service
-- [Debian](//github.com/silverwind/droppy/wiki/Debian-Installation)
-- [Systemd](//github.com/silverwind/droppy/wiki/Systemd-Installation)
+- [Debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)
+- [Systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 
 ###ProTips
 - For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
