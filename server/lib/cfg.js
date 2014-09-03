@@ -30,7 +30,7 @@ cfg.init = function (config, callback) {
         config = _.defaults(config, defaults); // Add missing options
         callback(null, config);
     } else if (process.env.NODE_ENV === "droppydemo") {
-        config = _.defaults(config, {
+        config = _.defaults({
             "port"         : process.env.PORT,
             "demoMode"     : true,
             "noLogin"      : true,

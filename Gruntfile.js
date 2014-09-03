@@ -36,7 +36,7 @@ module.exports = function (grunt) {
                 command: "jitsu login && jitsu deploy && jitsu logs tail"
             },
             heroku : {
-                command: "git push -u -f --tags heroku master"
+                command: "git push -u -f --tags heroku master && heroku logs -t"
             }
         }
     });

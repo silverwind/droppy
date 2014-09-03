@@ -129,7 +129,7 @@ function init(home, options, isStandalone, callback) {
         function (cb) { mkdirp(paths.files, mkdirpOpts, cb); },
         function (cb) { mkdirp(paths.temp, mkdirpOpts, cb); },
         function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
-        function (cb) { cfg.init(options, function (err, cfg) { config = cfg; cb(err); }); },
+        function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
         function (cb) { utils.tlsInit(paths.tlsKey, paths.tlsCert, paths.tlsCA, cb); },
     ], function (err, result) {
