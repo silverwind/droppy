@@ -425,9 +425,9 @@
             case "SETTINGS":
                 droppy.debug = msg.settings.debug;
                 droppy.demoMode = msg.settings.demoMode;
-                droppy.noLogin = msg.settings.noLogin;
+                droppy.public = msg.settings.public;
                 droppy.maxFileSize = msg.settings.maxFileSize;
-                if (droppy.demoMode || droppy.noLogin)
+                if (droppy.demoMode || droppy.public)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
                     $("#logout-button").register("click", function () {
@@ -2255,7 +2255,7 @@
         droppy.debug = null;
         droppy.demoMode = null;
         droppy.isPlaying = null;
-        droppy.noLogin = null;
+        droppy.public = null;
         droppy.queuedData = null;
         droppy.reopen = null;
         droppy.resizeTimer = null;

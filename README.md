@@ -62,7 +62,7 @@ droppy stores all its files and configuration in `~/.droppy`. `config.json` is c
     "maxOpen"      : 256,
     "maxFileSize"  : 0,
     "zipLevel"     : 1,
-    "noLogin"      : false,
+    "public"       : false,
     "demoMode"     : false,
     "timestamps"   : true
 }
@@ -72,8 +72,8 @@ Note: Options marked with [1] are not used when used as a module.
 ###Options
 - `host`: The host address to listen on. Can take an array of hosts.
 - `port`: The port to listen on. Can take an array of ports.
-- `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
-- `useTLS`: Whether the server should use SSL/TLS encryption. When set, droppy uses certificate files in `~/.droppy/config`, `tls.key`, `tls.cert`, `tls.ca`. Replace them with your real ones if you want to run TLS or SPDY.
+- `debug`: When enabled, skips resource minification and enables automatic CSS reloading when the source files change.
+- `useTLS`: When enabled, the server should use SSL/TLS encryption. When set, droppy uses certificate files in `~/.droppy/config`, `tls.key`, `tls.cert`, `tls.ca`. Replace them with your real ones if you want to run TLS or SPDY.
 - `useSPDY`: Enables the SPDYv3 protocol. Depends on `useTLS`.
 - `useHSTS`: Enables the [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header with 1 year caching time. Depends on `useTLS`.
 - `readInterval`: The minimum time gap in milliseconds in which updates to a single directory are sent.
@@ -83,9 +83,9 @@ Note: Options marked with [1] are not used when used as a module.
 - `maxOpen`: The maximum number of concurrently opened files. This number is primarily of concern for Windows servers.
 - `maxFileSize`: The maximum file size in bytes a user can upload in a single file.
 - `zipLevel`: The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
-- `noLogin`: When enabled, the client skips the login page, making the server essentially public.
+- `public`: When enabled, the client skips the user authentication.
 - `demoMode`: When enabled, the server will regularly clean out all files and restore samples.
-- `timestamps`: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
+- `timestamps`: When enabled, adds timestamps to log output.
 
 ###Installation as a daemon
 - [Debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)

@@ -20,7 +20,7 @@ var cfg        = {},
         "maxOpen"      : 256,
         "maxFileSize"  : 0,
         "zipLevel"     : 1,
-        "noLogin"      : false,
+        "public"       : false,
         "demoMode"     : false,
         "timestamps"   : true
     };
@@ -31,10 +31,10 @@ cfg.init = function (config, callback) {
         callback(null, config);
     } else if (process.env.NODE_ENV === "droppydemo") {
         config = _.defaults({
-            "port"         : process.env.PORT,
-            "demoMode"     : true,
-            "noLogin"      : true,
-            "timestamps"   : false
+            "port"       : process.env.PORT,
+            "demoMode"   : true,
+            "public"     : true,
+            "timestamps" : false
         }, defaults);
         callback(null, config);
     } else {

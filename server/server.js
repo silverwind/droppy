@@ -459,7 +459,7 @@ function setupSocket(server) {
     wss.on("connection", function (ws) {
         var cookie = getCookie(ws.upgradeReq.headers.cookie);
 
-        if (!cookie && !config.noLogin) {
+        if (!cookie && !config.public) {
             ws.close(4000);
             log.info(ws, null, "Unauthorized WebSocket connection closed.");
             return;
@@ -478,10 +478,10 @@ function setupSocket(server) {
             switch (msg.type) {
             case "REQUEST_SETTINGS":
                 send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
-                    debug: config.debug,
-                    demoMode: config.demoMode,
-                    noLogin: config.noLogin,
-                    maxFileSize: config.maxFileSize
+                    "debug"       : config.debug,
+                    "demoMode"    : config.demoMode,
+                    "public"      : config.public,
+                    "maxFileSize" : config.maxFileSize
                 }}));
                 break;
             case "REQUEST_UPDATE":
@@ -960,9 +960,9 @@ function handleGET(req, res) {
 
     if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid GET: " + req.url);
 
-    if (config.noLogin && !getCookie(req.headers.cookie))
+    if (config.public && !getCookie(req.headers.cookie))
         freeCookie(req, res);
-    if (getCookie(req.headers.cookie) || config.noLogin)
+    if (getCookie(req.headers.cookie) || config.public)
         isAuth = true;
 
     if (/\?!\/content/.test(URI)) {
@@ -1215,7 +1215,7 @@ function handleUploadRequest(req, res) {
     log.info(req, res, "Upload started");
 
     // FEATURE: Check permissions
-    if (!clients[cookie] && !config.noLogin) {
+    if (!clients[cookie] && !config.public) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();
