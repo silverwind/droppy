@@ -18,11 +18,22 @@ var cmds = {
     version : "version              Print version"
 };
 
+var opts = {
+    color   : "--color              Force colored logging"
+};
+
+// --color needs no further handling, chalk does it
+if (cmd === "--color")
+    cmd = args.splice(0, 1)[0];
+
+var index = args.indexOf("--color");
+if (index !== -1)
+    args.splice(index);
+
 if (cmds[cmd]) {
     switch (cmd) {
     case "start":
-        var server = require("./server/server.js");
-        server._init(null, null, true, function (err) {
+        require("./server/server.js")._init(null, null, true, function (err) {
             if (err) console.error(err);
         });
         break;
@@ -90,6 +101,13 @@ function printHelp() {
     Object.keys(cmds).forEach(function (command) {
         help += "\n   " + cmds[command];
     });
+
+    help += "\n\n Options";
+
+    Object.keys(opts).forEach(function (option) {
+        help += "\n   " + opts[option];
+    });
+
     console.info(help);
 }
 
