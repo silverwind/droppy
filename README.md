@@ -2,16 +2,15 @@
 > File server with a speedy web interface
 
 ###Features
-* Lightweight. Performs great, even on a Raspberry Pi.
-* Fully responsive, mobile-ready CSS.
-* Realtime updating of all connected clients via WebSockets.
-* Asynchronous multi-file uploads. Directory uploads in Chrome.
-* Download directories as zips.
-* Edit text files in CodeMirror, a full-featured editor.
-* Share shortened links to files with your friends, without them needing to log in.
-* View media (images, video) in a gallery, play audio in it's own player.
-* File system operations: Cut, Copy, Rename, Delete, Create directory.
-* Drag and Drop support uploads and filesystem operations.
+* Lightweight
+* Responsive Layout
+* Realtime updating of all clients
+* Asynchronous uploads. Directory uploads in Chrome
+* Zip download of directories
+* Edit text files in CodeMirror
+* Share public shortlinks to files
+* Media gallery, audio player
+* Drag and Drop support
 
 Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>. Also check out this <a target="_blank" href="http://droppy-demo.silverwind.io/#!/#!/">demo</a>.
 
@@ -20,7 +19,7 @@ Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a 
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
-This will install droppy's home folder to `~/.droppy`. Once the server is ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
+Once ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
 
 There's a few more CLI commands available, see
 ```bash
@@ -30,6 +29,7 @@ To update droppy, run
 ```bash
 $ [sudo] droppy update
 ```
+
 ###Module Usage - Express
 You can use droppy as an [express](http://expressjs.com/) middleware:
 ```js
@@ -44,8 +44,9 @@ app.listen(80, function() {
 ```
 - `home`: The path to droppy's home folder. Will be created if necessary.
 - `options`: An optional [options](#options) object.
+
 ##Configuration
-`config.json` is created in the home folder with these defaults:
+droppy stores all its files and configuration in `~/.droppy`. `config.json` is created in `~/.droppy/config` with these defaults:
 ```javascript
 {
     "host"         : "0.0.0.0",         // [1]
@@ -68,9 +69,9 @@ app.listen(80, function() {
 ```
 Note: Options marked with [1] are not used when used as a module.
 
-###General options
-- `port`: The port to listen on. Can take an array of ports.
+###Options
 - `host`: The host address to listen on. Can take an array of hosts.
+- `port`: The port to listen on. Can take an array of ports.
 - `debug`: Skip resource minification and enable automatic CSS reloading when the source files change.
 - `useTLS`: Whether the server should use SSL/TLS encryption. When set, droppy uses certificate files in `~/.droppy/config`, `tls.key`, `tls.cert`, `tls.ca`. Replace them with your real ones if you want to run TLS or SPDY.
 - `useSPDY`: Enables the SPDYv3 protocol. Depends on `useTLS`.
@@ -86,14 +87,14 @@ Note: Options marked with [1] are not used when used as a module.
 - `demoMode`: When enabled, the server will regularly clean out all files and restore samples.
 - `timestamps`: Adds timestamps to log output. Useful if your logging facility does not provide timestamps.
 
+###Installation as a daemon
+- [Debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)
+- [Systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+
 ###Supported Browsers
 - Firefox (last 2 versions)
 - Chrome (last 2 versions)
-- Internet Explorer 10 or higher (not regularly tested)
-
-###Installation as a daemon/service
-- [Debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)
-- [Systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+- Internet Explorer 10+ (not regularly tested)
 
 ###ProTips
 - For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
