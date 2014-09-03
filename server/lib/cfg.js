@@ -32,8 +32,6 @@ cfg.init = function (config, callback) {
     } else if (process.env.NODE_ENV === "droppydemo") {
         config = _.defaults(config, {
             "port"         : process.env.PORT,
-            "logLevel"     : 3,
-            "zipLevel"     : 1,
             "demoMode"     : true,
             "noLogin"      : true,
             "timestamps"   : false

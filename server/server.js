@@ -308,27 +308,25 @@ function cleanupForDemo(doneCallback) {
         },
         function (callback) {
             log.simple("Adding samples...");
-            cpr(paths.client, path.join(paths.files, "Sources"), function (err) {
+            async.parallel([
+                function (cb) { cpr(paths.client, path.join(paths.files, "/client"), cb); },
+                function (cb) { cpr(paths.server, path.join(paths.files, "/server"), cb); }
+            ], function (err) {
                 if (err) log.error(err);
-                cpr(path.join(__dirname, "node_modules"), path.join(paths.files, "Modules"), function (err) {
-                    if (err) log.error(err);
-                    callback(null);
-                });
+                callback(null);
             });
         },
         function (callback) {
-            var temp     = path.join(paths.temp, "img.zip"),
-                unzipper = new require("decompress-zip")(temp),
-                dest     = path.join(paths.files, "Images");
+            var dest = path.join(paths.files, "/sample-images"),
+                unzip = require("unzip");
 
             log.simple("Downloading image samples...");
             mkdirp(dest, mkdirpOpts, function () {
-                request("http://gdurl.com/lWOY/download").pipe(fs.createWriteStream(temp)).on("close", function () {
-                    unzipper.on("extract", function () {
-                        callback(null);
-                    });
-                    unzipper.extract({path: dest});
-                });
+                var output = unzip.Extract({ path: dest });
+
+                output.on("error", function (err) { log.error(err); });
+                output.on("close", callback);
+                request("http://gdurl.com/lWOY/download").pipe(output);
             });
         }
     ], doneCallback);

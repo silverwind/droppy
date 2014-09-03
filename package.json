@@ -30,7 +30,6 @@
     "clean-css": "~2.2.15",
     "codemirror": "~4.5.0",
     "cpr": "~0.3.2",
-    "decompress-zip": "~0.0.8",
     "dot": "~1.0.2",
     "graceful-fs": "~3.0.2",
     "isbinaryfile": "~2.0.1",
@@ -43,6 +42,7 @@
     "rimraf": "~2.2.8",
     "spdy": "~1.28.1",
     "uglify-js": "~2.4.15",
+    "unzip": "~0.1.9",
     "ws": "~0.4.32"
   },
   "devDependencies": {
@@ -61,6 +61,8 @@
   "keywords": [
     "file",
     "server",
+    "http",
+    "https",
     "web",
     "interface",
     "media"
