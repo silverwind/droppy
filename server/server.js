@@ -551,7 +551,7 @@ function setupSocket(server) {
             case "DELETE_FILE":
                 log.info(ws, null, "Deleting: " + msg.data);
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
-                msg.data = addFilesPath(msg.data);
+                msg.data = utils.addFilesPath(msg.data);
                 fs.stat(msg.data, function (error, stats) {
                     if (error) {
                         log.error("Error getting stats to delete " + msg.data);
@@ -567,7 +567,7 @@ function setupSocket(server) {
             case "SAVE_FILE":
                 log.info(ws, null, "Saving: " + msg.data.to);
                 if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
-                msg.data.to = addFilesPath(msg.data.to);
+                msg.data.to = utils.addFilesPath(msg.data.to);
                 fs.stat(msg.data.to, function (error) {
                     if (error && error.code !== "ENOENT") {
                         log.error("Error saving " + msg.data.to);
@@ -595,8 +595,8 @@ function setupSocket(server) {
                     send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Can't copy directory into itself."}));
                     return;
                 }
-                msg.data.from = addFilesPath(msg.data.from);
-                msg.data.to = addFilesPath(msg.data.to);
+                msg.data.from = utils.addFilesPath(msg.data.from);
+                msg.data.to = utils.addFilesPath(msg.data.to);
                 // In case source and destination are the same, append a number to the file/foldername
                 utils.getNewPath(msg.data.to, function (newPath) {
                     doClipboard(msg.data.type, msg.data.from, newPath);
@@ -604,7 +604,7 @@ function setupSocket(server) {
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                mkdirp(addFilesPath(msg.data), mkdirpOpts, function (error) {
+                mkdirp(utils.addFilesPath(msg.data), mkdirpOpts, function (error) {
                     if (error) log.error(error);
                     log.info(ws, null, "Created: ", msg.data);
                 });
@@ -616,7 +616,7 @@ function setupSocket(server) {
                     send(clients[cookie].ws, JSON.stringify({ type: "ERROR", text: "Invalid rename request"}));
                     return;
                 }
-                fs.rename(addFilesPath(msg.data.old), addFilesPath(msg.data.new), function (error) {
+                fs.rename(utils.addFilesPath(msg.data.old), utils.addFilesPath(msg.data.new), function (error) {
                     if (error) log.error(error);
                     log.info(ws, null, "Renamed: ", msg.data.old, " -> ", msg.data.new);
                 });
@@ -655,9 +655,9 @@ function setupSocket(server) {
                 async.each(files,
                     function (file, callback) {
                         if (!utils.isPathSane(file)) return callback(new Error("Invalid empty file creation request: " + file));
-                        mkdirp(path.dirname(addFilesPath(file)), mkdirpOpts, function (err) {
+                        mkdirp(path.dirname(utils.addFilesPath(file)), mkdirpOpts, function (err) {
                             if (err) callback(err);
-                            fs.writeFile(addFilesPath(file), "", {mode: mode.file}, function (err) {
+                            fs.writeFile(utils.addFilesPath(file), "", {mode: mode.file}, function (err) {
                                 if (err) return callback(err);
                                 log.info(ws, null, "Created: " + file.substring(1));
                                 callback();
@@ -674,7 +674,7 @@ function setupSocket(server) {
                 async.each(folders,
                     function (folder, callback) {
                         if (!utils.isPathSane(folder)) return callback(new Error("Invalid empty file creation request: " + folder));
-                        mkdirp(addFilesPath(folder), mkdirpOpts, callback);
+                        mkdirp(utils.addFilesPath(folder), mkdirpOpts, callback);
                     }, function (err) {
                         if (err) log.error(ws, null, err);
                         if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
@@ -854,7 +854,7 @@ function deleteDirectory(directory) {
 // Watch the directory for changes and send them to the appropriate clients.
 function createWatcher(directory) {
     var watcher, clientsToUpdate, client,
-        dir = removeFilesPath(directory);
+        dir = utils.removeFilesPath(directory);
     log.debug(chalk.green("Adding Watcher: ") + dir);
     watcher = fs.watch(directory, _.throttle(function () {
         log.debug("Watcher detected update for ", chalk.blue(dir));
@@ -885,7 +885,7 @@ function createWatcher(directory) {
 // Watch given directory
 function updateWatchers(newDir, callback) {
     if (!watchers[newDir]) {
-        newDir = addFilesPath(newDir);
+        newDir = utils.addFilesPath(newDir);
         fs.stat(newDir, function (error, stats) {
             if (error || !stats) {
                 // Requested Directory can't be read
@@ -1132,9 +1132,9 @@ function handleFileRequest(req, res, download) {
     filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
     if (filepath[1] === "$") {
         shortLink = true;
-        filepath = addFilesPath(db.get("shortlinks")[filepath[2]]);
+        filepath = utils.addFilesPath(db.get("shortlinks")[filepath[2]]);
     } else if (filepath[1] === "~" || filepath[1] === "_") {
-        filepath = addFilesPath("/" + filepath[2]);
+        filepath = utils.addFilesPath("/" + filepath[2]);
     }
 
     // Validate the cookie for the remaining requests
@@ -1191,7 +1191,7 @@ function handleFileRequest(req, res, download) {
 
 //-----------------------------------------------------------------------------
 function handleTypeRequest(req, res) {
-    utils.isBinary(addFilesPath(decodeURIComponent(req.url).substring(4)), function (error, result) {
+    utils.isBinary(utils.addFilesPath(decodeURIComponent(req.url).substring(4)), function (error, result) {
         if (error) {
             res.statusCode = 500;
             res.end();
@@ -1317,7 +1317,7 @@ function handleUploadRequest(req, res) {
 // Read a path, return type and info
 // @callback : function (error, info)
 function readPath(root, callback) {
-    fs.stat(addFilesPath(root), function (error, stats) {
+    fs.stat(utils.addFilesPath(root), function (error, stats) {
         if (error) {
             callback(error);
         } else if (stats.isFile()) {
@@ -1341,7 +1341,7 @@ function readPath(root, callback) {
 //-----------------------------------------------------------------------------
 // Update a directory's content
 function updateDirectory(root, callback) {
-    fs.readdir(addFilesPath(root), function (error, files) {
+    fs.readdir(utils.addFilesPath(root), function (error, files) {
         var dirContents = {}, fileNames;
         if (error) log.error(error);
         if (!files || files.length === 0) {
@@ -1369,7 +1369,7 @@ function updateDirectory(root, callback) {
 function generateDirSizes(root, dirContents, callback) {
     var tmpDirs = [];
     Object.keys(dirContents).forEach(function (dir) {
-        if (dirContents[dir].type === "d") tmpDirs.push(addFilesPath(root + "/" + dir));
+        if (dirContents[dir].type === "d") tmpDirs.push(utils.addFilesPath(root + "/" + dir));
     });
     if (tmpDirs.length === 0) return;
 
@@ -1405,7 +1405,7 @@ function du(dir, callback) {
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, type) {
-    var zipPath = addFilesPath(decodeURIComponent(req.url.substring(4))), archive, dispo;
+    var zipPath = utils.addFilesPath(decodeURIComponent(req.url.substring(4))), archive, dispo;
     fs.stat(zipPath, function (err, stats) {
         if (err) {
             log.error(err);
@@ -1536,21 +1536,6 @@ function updateCSS() {
             });
         }
     });
-}
-
-//-----------------------------------------------------------------------------
-// Path helpers, TODO: Refactor
-function fixPath(p) {
-    return p.replace(/[\\|\/]+/g, "/");
-}
-
-function addFilesPath(p) {
-    return fixPath(paths.files + p);
-}
-
-// removeFilesPath is intentionally not an inverse to the add function
-function removeFilesPath(p) {
-    return fixPath("/" + fixPath(p).replace(fixPath(paths.files), ""));
 }
 
 //-----------------------------------------------------------------------------

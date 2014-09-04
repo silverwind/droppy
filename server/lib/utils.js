@@ -1,6 +1,6 @@
 "use strict";
 
-var utils = {},
+var utils = {}, paths,
     fs    = require("graceful-fs"),
     path  = require("path"),
     isBin = require("isbinaryfile"),
@@ -65,6 +65,16 @@ utils.getNewPath = function getNewPath(origPath, callback) {
         }
     });
 };
+
+utils.addFilesPath = function addFilesPath(p) {
+    if (!paths) paths = require("./paths.js"); // delayed loading to avoid circular reference
+    return path.join(paths.files + "/" + p);
+}
+
+utils.removeFilesPath = function removeFilesPath(p) {
+    if (!paths) paths = require("./paths.js"); // delayed loading to avoid circular reference
+    return "/" + path.relative(paths.files, p);
+}
 
 utils.isPathSane = function isPathSane(name) {
     if (/[\/\\]\.\./.test(name)) return false;      // Navigating down the tree (prefix)
