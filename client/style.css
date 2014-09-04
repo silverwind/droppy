@@ -228,9 +228,7 @@ input:-webkit-autofill {
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
-   text-align: left;
    position: absolute;
-   height: 1.5rem;
    z-index: 1;
 }
 
@@ -260,6 +258,8 @@ input:-webkit-autofill {
     fill: #ccc;
     height: .8rem;
     width: .8rem;
+    position: relative;
+    top: -2px;
     vertical-align: middle;
 }
 .path li:hover .home { fill: #fff }
@@ -355,7 +355,7 @@ input:-webkit-autofill {
 }
 
 #click-catcher.out { opacity: 0  ; visibility: hidden }
-#click-catcher.in  { opacity: .4 ; visibility: visible }
+#click-catcher.in  { opacity: .25 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -739,7 +739,6 @@ input:-webkit-autofill {
     text-align: center;
     height: 100%;
     overflow: hidden;
-    background: #181818;
 }
 
 .previewer .arrow-back, .previewer .arrow-forward {

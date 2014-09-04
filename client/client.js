@@ -1773,32 +1773,32 @@
     }
 
     function showEntryMenu(entry, x) {
-                var menuTop, menuMaxTop,
-                    type = entry.find(".sprite").attr("class"),
-                    button = entry.find(".entry-menu"),
-                    menu = $("#entry-menu"),
-                    emWidth = parseFloat($("#entry-menu").css("font-size")); // width of 1em
+        var menuTop, menuMaxTop,
+            type = entry.find(".sprite").attr("class"),
+            button = entry.find(".entry-menu"),
+            menu = $("#entry-menu"),
+            emWidth = parseFloat($("#entry-menu").css("font-size")); // width of 1em
 
-                type = type.match(/sprite\-(\w+)/);
-                if (type) type = type[1];
+        type = type.match(/sprite\-(\w+)/);
+        if (type) type = type[1];
 
-                menu.attr("class", "in").data("target", entry).addClass("type-" + type);
-                if (x)
-                    menu.css("left", (x + emWidth - menu.width()) + "px");
-                else
-                    menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
+        menu.attr("class", "in").data("target", entry).addClass("type-" + type);
+        if (x)
+            menu.css("left", (x + emWidth - menu.width()) + "px");
+        else
+            menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
 
-                menuMaxTop = $(document).height() - $("#entry-menu").height();
-                menuTop = entry.offset().top;
-                if (menuTop > menuMaxTop) menuTop = menuMaxTop;
-                menu.css("top", menuTop + "px");
-                toggleCatcher();
+        menuMaxTop = $(document).height() - $("#entry-menu").height();
+        menuTop = entry.offset().top;
+        if (menuTop > menuMaxTop) menuTop = menuMaxTop;
+        menu.css("top", menuTop + "px");
+        toggleCatcher();
 
-                $("#click-catcher").one("mousemove", function () {
-                    menu.attr("class", "out");
-                    toggleCatcher();
-                });
-            }
+        $("#click-catcher").one("click", function () {
+            menu.attr("class", "out");
+            toggleCatcher();
+        });
+    }
 
     function sortByHeader(view, header) {
         droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
