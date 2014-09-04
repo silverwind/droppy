@@ -69,12 +69,12 @@ utils.getNewPath = function getNewPath(origPath, callback) {
 utils.addFilesPath = function addFilesPath(p) {
     if (!paths) paths = require("./paths.js"); // delayed loading to avoid circular reference
     return path.join(paths.files + "/" + p);
-}
+};
 
 utils.removeFilesPath = function removeFilesPath(p) {
     if (!paths) paths = require("./paths.js"); // delayed loading to avoid circular reference
-    return "/" + path.relative(paths.files, p);
-}
+    return "/" + path.relative(paths.files, p).replace(/[\\|\/]+/g, "/");
+};
 
 utils.isPathSane = function isPathSane(name) {
     if (/[\/\\]\.\./.test(name)) return false;      // Navigating down the tree (prefix)
