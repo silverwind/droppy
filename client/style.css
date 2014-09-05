@@ -806,7 +806,6 @@ input:-webkit-autofill {
 .content.document > .sidebar {
     position: absolute;
     top: .75em;
-    width: 2.5em;
     bottom: 1em;
     right: .75em;
     user-select: none;

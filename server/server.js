@@ -5,6 +5,7 @@ var pkg        = require("./../package.json"),
     paths      = require("./lib/paths"),
     log        = require("./lib/log.js"),
     cfg        = require("./lib/cfg.js"),
+    cm         = require("./lib/cm.js"),
     db         = require("./lib/db.js"),
     tpls       = require("./lib/dottemplates.js");
 
@@ -41,10 +42,7 @@ var cache      = { res: {}, files: {}, css: null },
         css: [
             "node_modules/codemirror/lib/codemirror.css",
             "client/style.css",
-            "client/sprites.css",
-            "node_modules/codemirror/theme/mdn-like.css",
-            "node_modules/codemirror/theme/xq-light.css",
-            "node_modules/codemirror/theme/base16-dark.css"
+            "client/sprites.css"
         ],
         js: [
             "node_modules/jquery/dist/jquery.js",
@@ -949,7 +947,17 @@ function cacheResources(callback) {
         cache.res[file].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
         cache.res[file].mime = mime.lookup(fullPath);
     });
-    callback();
+
+    cm.init(function (err, themes) {
+        if (err) return callback(err);
+        Object.keys(themes).forEach(function (theme) {
+            cache.res[theme] = {};
+            cache.res[theme].data = themes[theme];
+            cache.res[theme].etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
+            cache.res[theme].mime = mime.lookup(".css");
+        });
+        callback();
+    });
 }
 
 //-----------------------------------------------------------------------------
@@ -976,6 +984,8 @@ function handleGET(req, res) {
             res.setHeader("X-Page-Type", "auth");
             handleResourceRequest(req, res, "auth.html");
         }
+    } else if (/\?!\/theme\//.test(req.url)) {
+        handleResourceRequest(req, res, req.url.substring("/?!/theme/".length) + ".css");
     } else if (/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
     } else if (/\?[~\$]\//.test(URI)) {
@@ -986,7 +996,7 @@ function handleGET(req, res) {
         handleFileRequest(req, res, false);
     } else if (/\?~~\//.test(URI)) {
         streamArchive(req, res, "zip");
-    } else if (/\?favicon.ico/.test(URI)) {
+    } else if (/favicon.ico/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
     } else {
         handleResourceRequest(req, res, "base.html");

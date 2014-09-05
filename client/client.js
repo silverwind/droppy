@@ -2055,7 +2055,9 @@
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
-            loadCM(data, request.getResponseHeader("Content-Type"));
+            setTheme(droppy.get("theme"), function () {
+                loadCM(data, request.getResponseHeader("Content-Type"));
+            });
         }).fail(function () {
             closeDoc(view);
         });
@@ -2132,12 +2134,17 @@
     }
 
     function createOptions() {
+        var cmThemes = ["3024-day", "3024-night", "ambiance", "ambiance-mobile", "base16-dark", "base16-light", "blackboard",
+                        "cobalt", "eclipse", "elegant", "erlang-dark", "lesser-dark", "mbo", "mdn-like", "midnight", "monokai",
+                        "neat", "neo", "night", "paraiso-dark", "paraiso-light", "pastel-on-dark", "rubyblue", "solarized",
+                        "the-matrix", "tomorrow-night-eighties", "twilight", "vibrant-ink", "xq-dark", "xq-light"];
+
         return $("<div class='list-options'>").append(t.options({
             droppy: droppy,
             options: [
                 ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
                 ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
-                ["theme", "Editor Theme", ["mdn-like", "base16-dark", "xq-light"], ["mdn-like", "base16-dark", "xq-light"]],
+                ["theme", "Editor Theme", cmThemes, cmThemes],
                 ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
                 ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
             ]
@@ -2171,21 +2178,40 @@
             box.replaceClass("double", "single");
         }
         bindUserlistEvents();
+
+        $("select.theme").register("change", function () {
+            var theme = $(this).val();
+            setTheme(theme);
+            $(".view").each(function () {
+                if (this.editor) this.editor.setOption("theme", theme);
+            });
+        });
+
         $("#options-box").replaceClass("out", "in");
         toggleCatcher();
         $("#click-catcher").one("click", function () {
             box.find("select").each(function () {
-                var option = $(this).attr("class"), value  = $(this).val();
+                var option = $(this).attr("class"),
+                    value = $(this).val();
 
                 if (value === "true") value = true;
                 else if (value === "false") value = false;
                 else value = parseFloat(value) || value;
 
                 droppy.set(option, value);
+
                 $(".view").each(function () {
                     if (this.editor) this.editor.setOption(option, value);
                 });
             });
+        });
+    }
+
+    function setTheme(theme, callback) {
+        $.get("?!/theme/" + theme).then(function (data) {
+            $("#cmTheme").text(data);
+            droppy.set("theme", theme);
+            if (callback) callback();
         });
     }
 
