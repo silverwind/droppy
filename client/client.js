@@ -2105,11 +2105,10 @@
                     else
                         called = true;
                     editor.setValue(data);
-                    console.log("modes before load", Object.keys(CodeMirror.modes));
+                    console.log("CodeMirror.modes before", Object.keys(CodeMirror.modes));
                     getMode(type, function (js) {
-                        $("#cmMode").replaceWith("<script id='cmMode'>" + js + "</script>");
                         $("#cmMode").text(js);
-                        console.log("modes after load", Object.keys(CodeMirror.modes));
+                        console.log("CodeMirror.modes after", Object.keys(CodeMirror.modes));
                         editor.setOption("mode", type);
                     });
                     editor.on("change", function (cm, change) {
