@@ -808,6 +808,7 @@ input:-webkit-autofill {
     top: .75em;
     bottom: 1em;
     right: .75em;
+    width: 2.5em;
     user-select: none;
 }
 .content.document > .sidebar > li {
@@ -817,7 +818,7 @@ input:-webkit-autofill {
 }
 
 .content.document > .sidebar svg {
-    fill: #555;
+    fill: #777;
     height: 1em;
     width: 1em;
     margin-left: .75em;

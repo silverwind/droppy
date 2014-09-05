@@ -2055,7 +2055,7 @@
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
-            setTheme(droppy.get("theme"), function () {
+            getTheme(droppy.get("theme"), function () {
                 loadCM(data, request.getResponseHeader("Content-Type"));
             });
         }).fail(function () {
@@ -2079,7 +2079,8 @@
                     theme: droppy.get("theme"),
                     mode: "text/plain"
                 });
-                $(".sidebar").css("right", "calc(.75em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+
+                $(".sidebar").css("right", "calc(.25em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc($(this).parents(".view"));
                     editor = null;
@@ -2104,7 +2105,13 @@
                     else
                         called = true;
                     editor.setValue(data);
-                    editor.setOption("mode", type);
+                    console.log("modes before load", Object.keys(CodeMirror.modes));
+                    getMode(type, function (js) {
+                        $("#cmMode").replaceWith("<script id='cmMode'>" + js + "</script>");
+                        $("#cmMode").text(js);
+                        console.log("modes after load", Object.keys(CodeMirror.modes));
+                        editor.setOption("mode", type);
+                    });
                     editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
                         if (change.origin !== "setValue")
@@ -2181,7 +2188,7 @@
 
         $("select.theme").register("change", function () {
             var theme = $(this).val();
-            setTheme(theme);
+            getTheme(theme);
             $(".view").each(function () {
                 if (this.editor) this.editor.setOption("theme", theme);
             });
@@ -2207,11 +2214,17 @@
         });
     }
 
-    function setTheme(theme, callback) {
+    function getTheme(theme, callback) {
         $.get("?!/theme/" + theme).then(function (data) {
             $("#cmTheme").text(data);
             droppy.set("theme", theme);
             if (callback) callback();
+        });
+    }
+
+    function getMode(mode, callback) {
+        $.get("?!/mode/" + mode.replace("/", "-")).then(function (data) {
+            callback(data);
         });
     }
 

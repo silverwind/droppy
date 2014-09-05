@@ -52,14 +52,6 @@ var cache      = { res: {}, files: {}, css: null },
             "node_modules/codemirror/addon/selection/mark-selection.js",
             "node_modules/codemirror/addon/search/searchcursor.js",
             "node_modules/codemirror/addon/edit/matchbrackets.js",
-            "node_modules/codemirror/mode/css/css.js",
-            "node_modules/codemirror/mode/coffeescript/coffeescript.js",
-            "node_modules/codemirror/mode/javascript/javascript.js",
-            "node_modules/codemirror/mode/xml/xml.js",
-            "node_modules/codemirror/mode/htmlmixed/htmlmixed.js",
-            "node_modules/codemirror/mode/jade/jade.js",
-            "node_modules/codemirror/mode/markdown/markdown.js",
-            "node_modules/codemirror/mode/php/php.js",
             "node_modules/codemirror/keymap/sublime.js"
         ],
         html: [
@@ -94,7 +86,7 @@ function onRequest(req, res, next) {
     if (!hasServer && req.socket.server) setupSocket(req.socket.server);
     if (!ready) { // Show a simple self-reloading loading page during startup
         res.statusCode = 503;
-        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
+        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
     } else {
         while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
         if (method === "GET") {
@@ -137,9 +129,9 @@ function init(home, options, isStandalone, callback) {
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    //Allow user creation when no users exist.
         if (config.debug) updateCSS();                           // Intialize the CSS cache when debugging
-        log.simple("Preparing resources...");
         async.series([
-            function (cb) { cacheResources(cb); },
+            function (cb) { log.simple("Preparing resources ..."); cacheResources(cb); },
+            function (cb) { log.simple("Preparing codemirror ..."); prepareCM(cb); },
             function (cb) { prepareContent(cb); },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
@@ -266,9 +258,9 @@ function prepareContent(callback) {
         })(name, data);
     }
 
-    cache.res["client.js"] = {data: out.js, etag: etag, mime: mime.lookup(".js")};
+    cache.res["client.js"] = {data: out.js, etag: etag, mime: mime.lookup("js")};
     gzips["client.js"] = function (callback) { utils.createGzip(out.js, callback); };
-    cache.res["style.css"] = {data: out.css, etag: etag, mime: mime.lookup(".css")};
+    cache.res["style.css"] = {data: out.css, etag: etag, mime: mime.lookup("css")};
     gzips["style.css"] = function (callback) { utils.createGzip(out.css, callback); };
 
     async.series(gzips, function (err, results) {
@@ -297,7 +289,7 @@ function cleanupForDemo(doneCallback) {
 
     async.series([
         function (callback) {
-            log.simple("Cleaning up...");
+            log.simple("Cleaning up ...");
             rimraf(paths.files, function () {
                 mkdirp(paths.files, mkdirpOpts, function () {
                     callback(null);
@@ -305,7 +297,7 @@ function cleanupForDemo(doneCallback) {
             });
         },
         function (callback) {
-            log.simple("Adding samples...");
+            log.simple("Adding samples ...");
             async.parallel([
                 function (cb) { cpr(paths.client, path.join(paths.files, "/client"), cb); },
                 function (cb) { cpr(paths.server, path.join(paths.files, "/server"), cb); }
@@ -318,7 +310,7 @@ function cleanupForDemo(doneCallback) {
             var dest = path.join(paths.files, "/sample-images"),
                 unzip = require("unzip");
 
-            log.simple("Downloading image samples...");
+            log.simple("Downloading image samples ...");
             mkdirp(dest, mkdirpOpts, function () {
                 var output = unzip.Extract({ path: dest });
 
@@ -947,19 +939,33 @@ function cacheResources(callback) {
         cache.res[file].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
         cache.res[file].mime = mime.lookup(fullPath);
     });
+    callback();
+}
 
-    cm.init(function (err, themes) {
+//-----------------------------------------------------------------------------
+// Read CM modes/themes
+function prepareCM(callback) {
+    cm.init(function (err, cm) {
         if (err) return callback(err);
-        Object.keys(themes).forEach(function (theme) {
-            cache.res[theme] = {};
-            cache.res[theme].data = themes[theme];
-            cache.res[theme].etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
-            cache.res[theme].mime = mime.lookup(".css");
+
+        var etag    = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
+            cssMime = mime.lookup("css"),
+            jsMime  = mime.lookup("js");
+
+
+        cache.themes = {};
+        Object.keys(cm.themes).forEach(function (theme) {
+            cache.themes[theme] = {data: cm.themes[theme], etag: etag, mime: cssMime};
         });
+
+        cache.modes = {};
+        Object.keys(cm.modes).forEach(function (mode) {
+            cache.modes[mode] = {data: cm.modes[mode], etag: etag, mime: jsMime};
+        });
+
         callback();
     });
 }
-
 //-----------------------------------------------------------------------------
 function handleGET(req, res) {
     var URI = decodeURIComponent(req.url),
@@ -984,8 +990,28 @@ function handleGET(req, res) {
             res.setHeader("X-Page-Type", "auth");
             handleResourceRequest(req, res, "auth.html");
         }
-    } else if (/\?!\/theme\//.test(req.url)) {
-        handleResourceRequest(req, res, req.url.substring("/?!/theme/".length) + ".css");
+    } else if (/^\/\?!\/theme\//.test(req.url)) { // TODO: ETags
+        var themeData = cache.themes[req.url.substring("/?!/theme/".length)].data;
+        if (themeData) {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/css; charset=utf-8");
+            res.setHeader("Content-Length", themeData.length);
+            res.end(themeData);
+        } else {
+            res.statusCode = 404;
+            res.end();
+        }
+    } else if (/^\/\?!\/mode\//.test(req.url)) { // TODO: ETags
+        var modeData = cache.modes[req.url.replace("-", "/").substring("/?!/mode/".length)].data;
+        if (modeData) {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/javascript; charset=utf-8");
+            res.setHeader("Content-Length", modeData.length);
+            res.end(modeData);
+        } else {
+            res.statusCode = 404;
+            res.end();
+        }
     } else if (/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
     } else if (/\?[~\$]\//.test(URI)) {
@@ -1095,11 +1121,9 @@ function handleResourceRequest(req, res, resourceName) {
         } else {
             res.statusCode = 200;
 
-            // Disallow framing except when debugging
-            if (/.+\.html$/.test(resourceName) && !config.debug)
-                res.setHeader("X-Frame-Options", "DENY");
-
             if (req.url === "/") {
+                // Disallow framing except when debugging
+                if (!config.debug) res.setHeader("X-Frame-Options", "DENY");
                 // Set the IE10 compatibility mode
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
@@ -1563,7 +1587,7 @@ process
 function shutdown(signal) {
     var count = 0;
     if (!ready) process.exit(0);
-    log.simple("Received " + signal + " - Shutting down...");
+    log.simple("Received " + signal + " - Shutting down ...");
     Object.keys(clients).forEach(function (client) {
         if (!clients[client] || !clients[client].ws) return;
         if (clients[client].ws.readyState < 2) {
