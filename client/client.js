@@ -2108,8 +2108,10 @@
 
                     // Lazy mode loading
                     if (!CodeMirror.autoLoadMode) initModeLoad();
-                    CodeMirror.autoLoadMode(editor, droppy.mimeModes[type]);
-                    editor.setOption("mode", droppy.mimeModes[type]);
+                    if (droppy.mimeModes[type]) {
+                        CodeMirror.autoLoadMode(editor, droppy.mimeModes[type]);
+                        editor.setOption("mode", droppy.mimeModes[type]);
+                    }
 
                     editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
