@@ -945,7 +945,8 @@ function cacheResources(callback) {
 //-----------------------------------------------------------------------------
 // Read CM modes/themes
 function prepareCM(callback) {
-    cm.init(function (err, cm) {
+    var minify = !config.debug;
+    cm.init(minify, function (err, cm) {
         if (err) return callback(err);
 
         var etag    = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
@@ -1002,7 +1003,7 @@ function handleGET(req, res) {
             res.end();
         }
     } else if (/^\/\?!\/mode\//.test(req.url)) { // TODO: ETags
-        var modeData = cache.modes[req.url.replace("-", "/").substring("/?!/mode/".length)].data;
+        var modeData = cache.modes[req.url.substring("/?!/mode/".length)].data;
         if (modeData) {
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/javascript; charset=utf-8");

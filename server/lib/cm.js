@@ -1,6 +1,7 @@
 "use strict";
 
-var cm         = {},
+var doMinify,
+    cm         = {},
     themes     = {},
     paths      = require("./paths.js"),
     async      = require("async"),
@@ -109,7 +110,8 @@ var modesByMime = {
     "text/x-z80": "z80"
 };
 
-cm.init = function init(callback) {
+cm.init = function init(minify, callback) {
+    doMinify = minify || false;
     async.series([initThemes, initModes], function (err, results) {
         if (err) return callback(err);
         callback(null, {
@@ -131,7 +133,10 @@ function initThemes(callback) {
             if (err) return callback(err);
 
             filenames.forEach(function (name, index) {
-                themes[name.replace(".css", "")] = cleanCSS.minify(data[index].toString());
+                if (doMinify)
+                    themes[name.replace(".css", "")] = cleanCSS.minify(data[index].toString());
+                else
+                    themes[name.replace(".css", "")] = data[index].toString();
             });
 
             callback(err, themes);
@@ -146,22 +151,19 @@ function initModes(callback) {
         if (!modes[mode]) modes[mode] = "";
     });
 
-    var cbDue = 0, cbFired = 0;
+    var cbDue = 0, cbFired = 0, ret = {};
     Object.keys(modes).forEach(function (mode) {
         cbDue++;
         fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
             if (err) callback(err);
             cbFired++;
-            // modes[mode] = uglify(data.toString(), {fromString: true, compress: {unsafe: true, screw_ie8: true}}).code;
-            modes[mode] = data.toString();
-            if (cbFired === cbDue) {
-                Object.keys(modesByMime).forEach(function (mime) {
-                    if (modes[modesByMime[mime]]) {
-                        modesByMime[mime] = modes[modesByMime[mime]];
-                    }
-                });
-                callback(null, modesByMime);
-            }
+
+            if (doMinify)
+                ret[mode] = uglify(data.toString(), {fromString: true, compress: {unsafe: true, screw_ie8: true}}).code;
+            else
+                ret[mode] = data.toString();
+
+            if (cbFired === cbDue) callback(null, ret);
         });
     });
 }

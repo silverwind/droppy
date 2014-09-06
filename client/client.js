@@ -2105,12 +2105,12 @@
                     else
                         called = true;
                     editor.setValue(data);
-                    console.log("CodeMirror.modes before", Object.keys(CodeMirror.modes));
-                    getMode(type, function (js) {
-                        $("#cmMode").text(js);
-                        console.log("CodeMirror.modes after", Object.keys(CodeMirror.modes));
-                        editor.setOption("mode", type);
-                    });
+
+                    // Lazy mode loading
+                    if (!CodeMirror.autoLoadMode) initModeLoad();
+                    CodeMirror.autoLoadMode(editor, droppy.mimeModes[type]);
+                    editor.setOption("mode", droppy.mimeModes[type]);
+
                     editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
                         if (change.origin !== "setValue")
@@ -2221,10 +2221,55 @@
         });
     }
 
-    function getMode(mode, callback) {
-        $.get("?!/mode/" + mode.replace("/", "-")).then(function (data) {
-            callback(data);
-        });
+    function initModeLoad() {
+        var loading = {};
+        function splitCallback(cont, n) {
+            var countDown = n;
+            return function () { if (--countDown === 0) cont(); };
+        }
+        function ensureDeps(mode, cont) {
+            var deps = CodeMirror.modes[mode].dependencies;
+            if (!deps) return cont();
+            var missing = [];
+            for (var i = 0; i < deps.length; ++i) {
+                if (!CodeMirror.modes.hasOwnProperty(deps[i]))
+                    missing.push(deps[i]);
+            }
+            if (!missing.length) return cont();
+            var split = splitCallback(cont, missing.length);
+            for (var j = 0; j < missing.length; ++j)
+                CodeMirror.requireMode(missing[j], split);
+        }
+
+        CodeMirror.requireMode = function (mode, cont) {
+            if (typeof mode !== "string") mode = mode.name;
+            if (CodeMirror.modes.hasOwnProperty(mode)) return ensureDeps(mode, cont);
+            if (loading.hasOwnProperty(mode)) return loading[mode].push(cont);
+
+            var script = document.createElement("script");
+            script.src = "?!/mode/" + mode;
+            var others = document.getElementsByTagName("script")[0];
+            others.parentNode.insertBefore(script, others);
+            var list = loading[mode] = [cont];
+            var count = 0, poll = setInterval(function () {
+                if (++count > 100) return clearInterval(poll);
+                if (CodeMirror.modes.hasOwnProperty(mode)) {
+                    clearInterval(poll);
+                    loading[mode] = null;
+                    ensureDeps(mode, function () {
+                        for (var i = 0; i < list.length; ++i) list[i]();
+                    });
+                }
+            }, 200);
+        };
+
+        CodeMirror.autoLoadMode = function (instance, mode) {
+            if (!CodeMirror.modes.hasOwnProperty(mode)) {
+                CodeMirror.requireMode(mode, function () {
+                    instance.setOption("mode", instance.getOption("mode"));
+                });
+            }
+        };
     }
 
     function bindUserlistEvents() {
@@ -2396,6 +2441,103 @@
             "svg" : "image/svg+xml",
             "bmp" : "image/bmp",
             "ico" : "image/x-icon"
+        };
+
+        droppy.mimeModes = {
+            "application/javascript": "javascript",
+            "application/json": "javascript",
+            "application/ld+json": "javascript",
+            "application/sieve": "sieve",
+            "application/typescript": "javascript",
+            "application/x-aspx": "htmlembedded",
+            "application/x-cypher-query": "cypher",
+            "application/x-ejs": "htmlembedded",
+            "application/x-httpd-php": "php",
+            "application/x-json": "javascript",
+            "application/x-jsp": "htmlembedded",
+            "application/x-sparql-query": "sparql",
+            "application/xml": "xml",
+            "application/xml-dtd": "dtd",
+            "application/xquery": "xquery",
+            "message/http": "http",
+            "text/apl": "apl",
+            "text/css": "css",
+            "text/html": "htmlmixed",
+            "text/javascript": "javascript",
+            "text/mirc": "mirc",
+            "text/n-triples": "ntriples",
+            "text/tiki": "tiki",
+            "text/turtle": "turtle",
+            "text/vbscript": "vbscript",
+            "text/velocity": "velocity",
+            "text/x-asterisk": "asterisk",
+            "text/x-c++src": "clike",
+            "text/x-clojure": "clojure",
+            "text/x-cobol": "cobol",
+            "text/x-coffeescript": "coffeescript",
+            "text/x-common-lisp": "commonlisp",
+            "text/x-csharp": "clike",
+            "text/x-csrc": "clike",
+            "text/x-cython": "python",
+            "text/x-d": "d",
+            "text/x-diff": "diff",
+            "text/x-dylan": "dylan",
+            "text/x-ecl": "ecl",
+            "text/x-eiffel": "eiffel",
+            "text/x-erlang": "erlang",
+            "text/x-feature": "gherkin",
+            "text/x-fortran": "fortran",
+            "text/x-fsharp": "mllike",
+            "text/x-gas": "gas",
+            "text/x-gfm": "gfm",
+            "text/x-go": "go",
+            "text/x-groovy": "groovy",
+            "text/x-haml": "haml",
+            "text/x-haskell": "haskell",
+            "text/x-haxe": "haxe",
+            "text/x-jade": "jade",
+            "text/x-java": "clike",
+            "text/x-julia": "julia",
+            "text/x-kotlin": "kotlin",
+            "text/x-latex": "stex",
+            "text/x-less": "css",
+            "text/x-livescript": "livescript",
+            "text/x-lua": "lua",
+            "text/x-mariadb": "sql",
+            "text/x-markdown": "markdown",
+            "text/x-nginx-conf": "nginx",
+            "text/x-ocaml": "mllike",
+            "text/x-octave": "octave",
+            "text/x-pascal": "pascal",
+            "text/x-perl": "perl",
+            "text/x-php": "php",
+            "text/x-pig": "pig",
+            "text/x-properties": "properties",
+            "text/x-puppet": "puppet",
+            "text/x-python": "python",
+            "text/x-rsrc": "r",
+            "text/x-rst": "rst",
+            "text/x-ruby": "ruby",
+            "text/x-rustsrc": "rust",
+            "text/x-sass": "sass",
+            "text/x-scala": "clike",
+            "text/x-scheme": "scheme",
+            "text/x-scss": "css",
+            "text/x-sh": "shell",
+            "text/x-slim": "slim",
+            "text/x-smarty": "smarty",
+            "text/x-solr": "solr",
+            "text/x-sql": "sql",
+            "text/x-stex": "stex",
+            "text/x-stsrc": "smalltalk",
+            "text/x-systemverilog": "verilog",
+            "text/x-tcl": "tcl",
+            "text/x-tiddlywiki": "tiddlywiki",
+            "text/x-toml": "toml",
+            "text/x-vb": "vb",
+            "text/x-verilog": "verilog",
+            "text/x-yaml": "yaml",
+            "text/x-z80": "z80"
         };
     }
 
