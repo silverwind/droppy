@@ -5,9 +5,8 @@ var pkg        = require("./../package.json"),
     paths      = require("./lib/paths"),
     log        = require("./lib/log.js"),
     cfg        = require("./lib/cfg.js"),
-    cm         = require("./lib/cm.js"),
-    db         = require("./lib/db.js"),
-    tpls       = require("./lib/dottemplates.js");
+    caching    = require("./lib/caching.js"),
+    db         = require("./lib/db.js");
 
 var _          = require("lodash"),
     ap         = require("autoprefixer"),
@@ -28,7 +27,7 @@ var crypto     = require("crypto"),
     path       = require("path"),
     qs         = require("querystring");
 
-var cache      = { res: {}, files: {}, css: null },
+var cache      = {},
     clients    = {},
     dirs       = {},
     watchers   = {},
@@ -37,35 +36,7 @@ var cache      = { res: {}, files: {}, css: null },
     hasServer  = null,
     ready      = false,
     mode       = {file: "644", dir: "755"},
-    mkdirpOpts = {fs: fs, mode: mode.dir},
-    resources  = {
-        css: [
-            "node_modules/codemirror/lib/codemirror.css",
-            "client/style.css",
-            "client/sprites.css"
-        ],
-        js: [
-            "node_modules/jquery/dist/jquery.js",
-            "client/client.js",
-            "node_modules/codemirror/lib/codemirror.js",
-            "node_modules/codemirror/addon/selection/active-line.js",
-            "node_modules/codemirror/addon/selection/mark-selection.js",
-            "node_modules/codemirror/addon/search/searchcursor.js",
-            "node_modules/codemirror/addon/edit/matchbrackets.js",
-            "node_modules/codemirror/keymap/sublime.js"
-        ],
-        html: [
-            "client/base.html",
-            "client/auth.html",
-            "client/main.html"
-        ],
-        templates: [
-            "client/templates/views/directory.dotjs",
-            "client/templates/views/document.dotjs",
-            "client/templates/views/media.dotjs",
-            "client/templates/options.dotjs"
-        ]
-    };
+    mkdirpOpts = {fs: fs, mode: mode.dir};
 
 var droppy = function (home, options) {
     init(home, options, false, function (err) {
@@ -121,30 +92,28 @@ function init(home, options, isStandalone, callback) {
         function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
-        function (cb) { utils.tlsInit(paths.tlsKey, paths.tlsCert, paths.tlsCA, cb); },
+        function (cb) { if (config.useTLS) utils.tlsInit(cb); else cb(); }
     ], function (err, result) {
         if (err) return callback(err);
         if (isStandalone) startListener(config.useTLS && result[5]);
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
         fs.MAX_OPEN = config.maxOpen;
-        firstRun = Object.keys(db.get("users")).length === 0;    //Allow user creation when no users exist.
+        firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
         if (config.debug) updateCSS();                           // Intialize the CSS cache when debugging
+        log.simple("Preparing resources ...");
         async.series([
-            function (cb) { log.simple("Preparing resources ..."); cacheResources(cb); },
-            function (cb) { log.simple("Preparing codemirror ..."); prepareCM(cb); },
-            function (cb) { prepareContent(cb); },
+            function (cb) {
+                caching.init(!config.debug, function (err, c) {
+                    if (err) return callback(err);
+                    cache = c;
+                    cache.files = {};
+                    cache.css = cache.res["style.css"].data;
+                    cb(err);
+                });
+            },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) {
-                if (config.demoMode) {
-                    cleanupForDemo(function schedule() {
-                        cb();
-                        setTimeout(cleanupForDemo, 30 * 60 * 1000, schedule);
-                    });
-                } else {
-                    cb();
-                }
-            }
+            function (cb) { if (config.demoMode) cleanupForDemo(cb); else cb(); }
         ], function (err) {
             if (err) return callback(err);
             ready = true;
@@ -182,98 +151,6 @@ function startListener(tlsData) {
 }
 
 //-----------------------------------------------------------------------------
-// Read JS/CSS/HTML client resources, minify them and cache them in memory
-function prepareContent(callback) {
-    var resData  = {},
-        out      = { css : "", js  : "" };
-
-    // Read resources
-    Object.keys(resources).forEach(function (type) {
-        resData[type] = resources[type].map(function read(file) {
-            var data;
-            try {
-                data = fs.readFileSync(path.join(paths.module, file)).toString("utf8");
-            } catch (error) {
-                return callback(error);
-            }
-            return data;
-        });
-    });
-
-    // Concatenate CSS and JS
-    resData.css.forEach(function (data) {
-        out.css += data + "\n";
-    });
-
-    // Append a semicolon to each javascript file to make sure it's properly terminated. The minifier
-    // afterwards will take care of any double-semicolons and whitespace.
-    resData.js.forEach(function (data) {
-        out.js += data + ";\n";
-    });
-
-    // Add SVG object
-    var svgDir = paths.svg, svgData = {};
-    fs.readdirSync(svgDir).forEach(function (name) {
-        svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
-    });
-    out.js = out.js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
-
-    // Insert Templates Code
-    var templateCode = "var t = {fn:{},views:{}};";
-    resData.templates.forEach(function (data, index) {
-        // Produce the doT functions
-        templateCode += tpls.produceFunction("t." + resources.templates[index].replace(/\.dotjs$/, "").split("/").slice(2).join("."), data);
-    });
-    templateCode += ";";
-    out.js = out.js.replace("/* {{ templates }} */", templateCode);
-
-    // Add CSS vendor prefixes
-    out.css = ap({browsers: "last 2 versions"}).process(out.css).css;
-
-    if (!config.debug) {
-        // Minify JS
-        out.js = require("uglify-js").minify(out.js, {
-            fromString: true,
-            compress: {
-                unsafe: true,
-                screw_ie8: true
-            }
-        }).code;
-
-        // Minify CSS
-        out.css = new require("clean-css")({keepSpecialComments : 0}).minify(out.css);
-    }
-
-    // Save compiled resources
-    var gzips = {},
-        etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
-
-    while (resources.html.length) {
-        var name = path.basename(resources.html.pop()),
-            data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version); // Prepare HTML by removing tabs, CRs and LFs
-
-        (function (name, data) { // Needed closure so data doesn't get read from the wrong scope
-            cache.res[name] = {data: data, etag: etag, mime: mime.lookup(".html")};
-            gzips[name] = function (callback) { utils.createGzip(data, callback); };
-        })(name, data);
-    }
-
-    cache.res["client.js"] = {data: out.js, etag: etag, mime: mime.lookup("js")};
-    gzips["client.js"] = function (callback) { utils.createGzip(out.js, callback); };
-    cache.res["style.css"] = {data: out.css, etag: etag, mime: mime.lookup("css")};
-    gzips["style.css"] = function (callback) { utils.createGzip(out.css, callback); };
-
-    async.series(gzips, function (err, results) {
-        if (err) return callback(err);
-        Object.keys(results).forEach(function (file) {
-            cache.res[file].gzipData = results[file];
-        });
-        callback();
-    });
-
-}
-
-//-----------------------------------------------------------------------------
 // Restore the files directory to an initial state for the demo mode
 function cleanupForDemo(doneCallback) {
     var oldWatched, currentWatched;
@@ -286,6 +163,8 @@ function cleanupForDemo(doneCallback) {
             delete watchers[dir];
         });
     }
+
+    setInterval(cleanupForDemo, 30 * 60 * 1000);
 
     async.series([
         function (callback) {
@@ -915,59 +794,6 @@ function checkWatchedDirs() {
 }
 
 //-----------------------------------------------------------------------------
-// Read resources and store them in the cache object
-function cacheResources(callback) {
-    var staticFiles = [
-        "OpenSans-Light.woff",
-        "OpenSans-Regular.woff",
-        "favicon.ico",
-    ];
-
-    staticFiles.forEach(function (file) {
-        var fileData, fileTime,
-            fullPath = path.join(paths.client, file);
-
-        try {
-            fileData = fs.readFileSync(fullPath);
-            fileTime = fs.statSync(fullPath).mtime;
-        } catch (error) {
-            callback(new Error("Unable to read " + fullPath));
-        }
-
-        cache.res[file] = {};
-        cache.res[file].data = fileData;
-        cache.res[file].etag = crypto.createHash("md5").update(String(fileTime)).digest("hex");
-        cache.res[file].mime = mime.lookup(fullPath);
-    });
-    callback();
-}
-
-//-----------------------------------------------------------------------------
-// Read CM modes/themes
-function prepareCM(callback) {
-    var minify = !config.debug;
-    cm.init(minify, function (err, cm) {
-        if (err) return callback(err);
-
-        var etag    = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
-            cssMime = mime.lookup("css"),
-            jsMime  = mime.lookup("js");
-
-
-        cache.themes = {};
-        Object.keys(cm.themes).forEach(function (theme) {
-            cache.themes[theme] = {data: cm.themes[theme], etag: etag, mime: cssMime};
-        });
-
-        cache.modes = {};
-        Object.keys(cm.modes).forEach(function (mode) {
-            cache.modes[mode] = {data: cm.modes[mode], etag: etag, mime: jsMime};
-        });
-
-        callback();
-    });
-}
-//-----------------------------------------------------------------------------
 function handleGET(req, res) {
     var URI = decodeURIComponent(req.url),
     isAuth = false;
@@ -990,28 +816,6 @@ function handleGET(req, res) {
         } else {
             res.setHeader("X-Page-Type", "auth");
             handleResourceRequest(req, res, "auth.html");
-        }
-    } else if (/^\/\?!\/theme\//.test(req.url)) { // TODO: ETags
-        var themeData = cache.themes[req.url.substring("/?!/theme/".length)].data;
-        if (themeData) {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/css; charset=utf-8");
-            res.setHeader("Content-Length", themeData.length);
-            res.end(themeData);
-        } else {
-            res.statusCode = 404;
-            res.end();
-        }
-    } else if (/^\/\?!\/mode\//.test(req.url)) { // TODO: ETags
-        var modeData = cache.modes[req.url.substring("/?!/mode/".length)].data;
-        if (modeData) {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "text/javascript; charset=utf-8");
-            res.setHeader("Content-Length", modeData.length);
-            res.end(modeData);
-        } else {
-            res.statusCode = 404;
-            res.end();
         }
     } else if (/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
@@ -1100,6 +904,8 @@ function handlePOST(req, res) {
 
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
+    var resource;
+
     // Shortcut for CSS debugging when no Websocket is available
     if (config.debug && resourceName === "style.css") {
         res.statusCode = 200;
@@ -1111,48 +917,51 @@ function handleResourceRequest(req, res, resourceName) {
         return;
     }
 
+    if (/^\/\?!\/theme\//.test(req.url))
+        resource = cache.themes[req.url.substring("/?!/theme/".length)];
+    else if (/^\/\?!\/mode\//.test(req.url))
+        resource = cache.modes[req.url.substring("/?!/mode/".length)];
+    else
+        resource = cache.res[resourceName];
+
     // Regular resource handling
-    if (cache.res[resourceName] === undefined) {
+    if (resource === undefined) {
         res.statusCode = 404;
         res.end();
     } else {
-        if ((req.headers["if-none-match"] || "") === cache.res[resourceName].etag) {
+        if ((req.headers["if-none-match"] || "") === resource.etag) {
             res.statusCode = 304;
             res.end();
         } else {
             res.statusCode = 200;
 
             if (req.url === "/") {
-                // Disallow framing except when debugging
-                if (!config.debug) res.setHeader("X-Frame-Options", "DENY");
-                // Set the IE10 compatibility mode
+                if (!config.debug)
+                    res.setHeader("X-Frame-Options", "DENY");
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
-            } else if (/\?\/content\//.test(req.url)) {
-                // Don't ever cache /content since its data is dynamic
+            } else if (/\?\/content\//.test(req.url)) { // Don't ever cache /content
                 res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
-            } else if (resourceName === "favicon.ico") {
-                // Set a long cache on the favicon, as some browsers seem to request them constantly
+            } else if (resourceName === "favicon.ico") { // Set a long cache on the favicon
                 res.setHeader("Cache-Control", "max-age=7257600");
-            } else {
-                // All other content can be cached
-                res.setHeader("ETag", cache.res[resourceName].etag);
+            } else if (resource.etag) { // All other content can be cached
+                res.setHeader("ETag", resource.etag);
             }
 
             if (/.+\.(js|css|html)$/.test(resourceName))
-                res.setHeader("Content-Type", cache.res[resourceName].mime + "; charset=utf-8");
+                res.setHeader("Content-Type", resource.mime + "; charset=utf-8");
             else
-                res.setHeader("Content-Type", cache.res[resourceName].mime);
+                res.setHeader("Content-Type", resource.mime);
 
             var acceptEncoding = req.headers["accept-encoding"] || "";
-            if (/\bgzip\b/.test(acceptEncoding) && cache.res[resourceName].gzipData !== undefined) {
+            if (/\bgzip\b/.test(acceptEncoding) && resource.gzip !== undefined) {
                 res.setHeader("Content-Encoding", "gzip");
-                res.setHeader("Content-Length", cache.res[resourceName].gzipData.length);
+                res.setHeader("Content-Length", resource.gzip.length);
                 res.setHeader("Vary", "Accept-Encoding");
-                res.end(cache.res[resourceName].gzipData);
+                res.end(resource.gzip);
             } else {
-                res.setHeader("Content-Length", cache.res[resourceName].data.length);
-                res.end(cache.res[resourceName].data);
+                res.setHeader("Content-Length", resource.data.length);
+                res.end(resource.data);
             }
         }
     }
@@ -1547,7 +1356,7 @@ function cleanUpEtags() {
 //-----------------------------------------------------------------------------
 // Watch the CSS files for debugging
 function watchCSS() {
-    resources.css.forEach(function (file) {
+    ["client/style.css", "client/sprites.css"].forEach(function (file) {
         fs.watch(path.join(paths.module, file), updateCSS);
     });
 }
@@ -1556,7 +1365,7 @@ function watchCSS() {
 // Update the debug CSS cache and send it to the client(s)
 function updateCSS() {
     var temp = "";
-    resources.css.forEach(function (file) {
+    ["client/style.css", "client/sprites.css"].forEach(function (file) {
         temp += fs.readFileSync(path.join(paths.module, file)).toString("utf8") + "\n";
     });
     cache.css = ap({browsers: "last 2 versions"}).process(temp).css;
