@@ -2,7 +2,7 @@
 
 var pkg        = require("./../package.json"),
     utils      = require("./lib/utils.js"),
-    paths      = require("./lib/paths")(),
+    paths      = require("./lib/paths.js").get(),
     log        = require("./lib/log.js"),
     cfg        = require("./lib/cfg.js"),
     caching    = require("./lib/caching.js"),
@@ -41,7 +41,7 @@ var cache      = {},
 var droppy = function (home, options) {
     if (typeof home !== "string") throw new Error("Home directory is required for module usage");
 
-    paths.seed(home);
+    require("./lib/paths.js").seed(home);
 
     return init(home, options, false, function (err) {
         if (err) {

@@ -1,9 +1,10 @@
 "use strict";
 
-var path  = require("path"),
+var paths = {},
+    path  = require("path"),
     root  = "~/.droppy";
 
-var paths = function () {
+paths.get = function get() {
     return {
         home      : resolve(root),
         files     : resolve(root + "/files"),
@@ -21,7 +22,7 @@ var paths = function () {
     };
 };
 
-paths.seed = function (home) {
+paths.seed = function seed(home) {
     root = home;
 };
 

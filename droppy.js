@@ -56,7 +56,7 @@ if (cmds[cmd]) {
         });
         break;
     case "config":
-        var paths = require("./server/lib/paths.js"),
+        var paths = require("./server/lib/paths.js").get(),
             cfg   = require("./server/lib/cfg.js"),
             edit  = function () {
                 require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfg], {stdio: "inherit"});

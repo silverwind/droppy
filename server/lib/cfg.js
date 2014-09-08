@@ -5,7 +5,7 @@ var cfg        = {},
     fs         = require("graceful-fs"),
     mkdirp     = require("mkdirp"),
     path       = require("path"),
-    configFile = require("./paths.js")().cfg,
+    configFile = require("./paths.js").get().cfg,
     defaults   = {
         "host"         : "0.0.0.0",
         "port"         : 8989,

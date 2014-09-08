@@ -4,7 +4,7 @@ var caching      = {};
 
 var dottemplates = require("./dottemplates.js"),
     pkg          = require("./../../package.json"),
-    paths        = require("./paths.js")();
+    paths        = require("./paths.js").get();
 
 var async        = require("async"),
     autoprefixer = require("autoprefixer"),

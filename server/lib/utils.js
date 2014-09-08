@@ -5,7 +5,7 @@ var utils = {},
     fs    = require("graceful-fs"),
     isBin = require("isbinaryfile"),
     path  = require("path"),
-    paths = require("./paths.js")();
+    paths = require("./paths.js").get();
 
 // Recursively walk a directory and return file paths in an array
 utils.walkDirectory = function walkDirectory(dir, includeEmptyDirs, callback) {
