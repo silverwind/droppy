@@ -19,16 +19,25 @@ var cmds = {
 };
 
 var opts = {
-    color   : "--color              Force colored logging"
+    color   : "--color              Force colored logging",
+    home    : "--home <home>        Home directory, defaults to ~/.droppy"
 };
 
-// --color needs no further handling, chalk does it
-if (cmd === "--color")
-    cmd = args.splice(0, 1)[0];
+if (args) {
+    var indexOfHome  = args.indexOf("--home"),
+        indexOfColor = args.indexOf("--color");
+    if (indexOfHome !== -1) {
+        if (args[indexOfHome + 1]) {
+            require("./server/lib/paths.js").seed(args.splice(indexOfHome, 2)[1]);
+        } else {
+            printHelp();
+        }
+    }
+    if (indexOfColor !== -1) {
+        args.splice(indexOfColor, 1);
+    }
+}
 
-var index = args.indexOf("--color");
-if (index !== -1)
-    args.splice(index);
 
 if (cmds[cmd]) {
     switch (cmd) {

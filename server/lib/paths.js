@@ -1,19 +1,43 @@
 "use strict";
 
-var utils = require("./utils.js");
+var path  = require("path"),
+    root  = "~/.droppy";
 
-exports = module.exports = {
-    home      : utils.resolve("~/.droppy"),
-    files     : utils.resolve("~/.droppy/files"),
-    temp      : utils.resolve("~/.droppy/temp"),
-    cfg       : utils.resolve("~/.droppy/config/config.json"),
-    db        : utils.resolve("~/.droppy/config/db.json"),
-    tlsKey    : utils.resolve("~/.droppy/config/tls.key"),
-    tlsCert   : utils.resolve("~/.droppy/config/tls.cert"),
-    tlsCA     : utils.resolve("~/.droppy/config/tls.ca"),
-    module    : utils.resolve(__dirname + "/../.."),
-    server    : utils.resolve(__dirname + "/../../server"),
-    client    : utils.resolve(__dirname + "/../../client"),
-    templates : utils.resolve(__dirname + "/../../client/templates"),
-    svg       : utils.resolve(__dirname + "/../../client/svg")
+var paths = function () {
+    return {
+        home      : resolve(root),
+        files     : resolve(root + "/files"),
+        temp      : resolve(root + "/temp"),
+        cfg       : resolve(root + "/config/config.json"),
+        db        : resolve(root + "/config/db.json"),
+        tlsKey    : resolve(root + "/config/tls.key"),
+        tlsCert   : resolve(root + "/config/tls.cert"),
+        tlsCA     : resolve(root + "/config/tls.ca"),
+        module    : resolve(__dirname + "/../.."),
+        server    : resolve(__dirname + "/../../server"),
+        client    : resolve(__dirname + "/../../client"),
+        templates : resolve(__dirname + "/../../client/templates"),
+        svg       : resolve(__dirname + "/../../client/svg")
+    };
 };
+
+paths.seed = function (home) {
+    root = home;
+};
+
+exports = module.exports = paths;
+
+function resolve(str) {
+    if (/^~/.test(str)) {
+        var home;
+        if (process.platform === "win32") {
+            home = process.env.USERPROFILE || process.env.HOMEDRIVE + process.env.HOMEPATH;
+            return path.resolve(path.join(home, str.replace(/^~[\\\/]?/, "")));
+        } else {
+            home = process.env.HOME;
+            return path.resolve(path.join(home, str.replace(/^~[\/]?/, "")));
+        }
+    } else {
+        return path.resolve(str);
+    }
+}

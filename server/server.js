@@ -2,7 +2,7 @@
 
 var pkg        = require("./../package.json"),
     utils      = require("./lib/utils.js"),
-    paths      = require("./lib/paths"),
+    paths      = require("./lib/paths")(),
     log        = require("./lib/log.js"),
     cfg        = require("./lib/cfg.js"),
     caching    = require("./lib/caching.js"),
@@ -39,7 +39,11 @@ var cache      = {},
     mkdirpOpts = {fs: fs, mode: mode.dir};
 
 var droppy = function (home, options) {
-    init(home, options, false, function (err) {
+    if (typeof home !== "string") throw new Error("Home directory is required for module usage");
+
+    paths.seed(home);
+
+    return init(home, options, false, function (err) {
         if (err) {
             return err;
         } else {
@@ -50,7 +54,6 @@ var droppy = function (home, options) {
 
 droppy._init = init;
 exports = module.exports = droppy;
-
 
 function onRequest(req, res, next) {
     var method = req.method.toUpperCase();
@@ -78,13 +81,6 @@ function onRequest(req, res, next) {
 
 function init(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
-
-    if (typeof home === "string") {
-        paths.home  = utils.resolve(home);
-        paths.files = utils.resolve(home + "/files");
-        paths.cfg   = utils.resolve(home + "/config/config.json");
-        paths.db    = utils.resolve(home + "/config/db.json");
-    }
 
     async.series([
         function (cb) { mkdirp(paths.files, mkdirpOpts, cb); },
@@ -136,7 +132,8 @@ function printLogo() {
                   .replace(/\|/gm, chalk.magenta("|"))
     );
     log.simple(chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-               chalk.blue("node"), " ", chalk.green(process.version.substring(1), "\n"));
+               chalk.blue("node"), " ", chalk.green(process.version.substring(1)));
+    log.simple(chalk.blue("home"), " is at ", chalk.green(paths.home), "\n");
 }
 
 function startListener(tlsData) {

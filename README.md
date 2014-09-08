@@ -19,7 +19,7 @@ Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a 
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
-Once ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
+This will install droppy's home folder to `~/.droppy`. Append `--home <home>` to the command to define this path yourself. Once ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
 
 There's a few more CLI commands available, see
 ```bash
@@ -46,7 +46,7 @@ app.listen(80, function() {
 - `options`: An optional [options](#options) object.
 
 ##Configuration
-droppy stores all its files and configuration in `~/.droppy`. `config.json` is created in `~/.droppy/config` with these defaults:
+`config.json` inside `~/.droppy/config` can be edited with `droppy config` or by hand and is created with these defaults:
 ```javascript
 {
     "host"         : "0.0.0.0",         // [1]

@@ -7,7 +7,7 @@ var database,
     crypto   = require("crypto"),
     mkdirp   = require("mkdirp"),
     path     = require("path"),
-    dbFile   = require("./paths.js").db,
+    dbFile   = require("./paths.js")().db,
     defaults = {users: {}, sessions: {}, shortlinks: {}};
 
 db.init = function (callback) {
