@@ -24,7 +24,7 @@
   "dependencies": {
     "archiver": "~0.11.0",
     "async": "~0.9.0",
-    "autoprefixer": "~3.0.0",
+    "autoprefixer-core": "~3.0.1",
     "busboy": "~0.2.8",
     "chalk": "~0.5.1",
     "clean-css": "~2.2.15",

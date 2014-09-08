@@ -9,7 +9,7 @@ var pkg        = require("./../package.json"),
     db         = require("./lib/db.js");
 
 var _          = require("lodash"),
-    ap         = require("autoprefixer"),
+    ap         = require("autoprefixer-core"),
     archiver   = require("archiver"),
     async      = require("async"),
     Busboy     = require("busboy"),

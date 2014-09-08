@@ -7,7 +7,7 @@ var dottemplates = require("./dottemplates.js"),
     paths        = require("./paths.js").get();
 
 var async        = require("async"),
-    autoprefixer = require("autoprefixer"),
+    autoprefixer = require("autoprefixer-core"),
     cleanCSS     = new require("clean-css")({keepSpecialComments : 0}),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
