@@ -2080,7 +2080,7 @@
                     mode: "text/plain"
                 });
 
-                $(".sidebar").css("right", "calc(.25em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
+                // $(".sidebar").css("right", "calc(.25em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc($(this).parents(".view"));
                     editor = null;
@@ -2690,14 +2690,14 @@
     }, 5000);
 
     function reloadCSS(css) {
-        var i = 0;
         if (!droppy.debug) return;
-        $('link[rel="stylesheet"]').remove();
+        var i = 0;
+        $("#css").remove();
 
         while (document.styleSheets[i])
             document.styleSheets[i++].disabled = true;
 
-        $("<style></style>").text(css).appendTo($("head"));
+        $("<style id='css'></style>").text(css).appendTo($("head"));
     }
 
     function showSpinner(view) {

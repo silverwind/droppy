@@ -193,8 +193,9 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .content { font-size: .9em } }
 @media all and (max-width:  639px) { .content { font-size: .8em; top: 1.25rem; } }
 
-.content.image, .content.video {
+.content.image, .content.video, .content.document {
     padding: 0;
+    border-radius: 0;
 }
 
 /* Bottom padding fix for Firefox, see https://bugzilla.mozilla.org/show_bug.cgi?id=878058 */
@@ -525,7 +526,7 @@ input:-webkit-autofill {
 /* Hide certain list elements when width gets too small */
 @media all and (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .125em } }
 @media all and (max-width: 639px) { .view .header-mtime                    { display: none     } }
-@media all and (max-width: 639px) { .view .header-spacer                   { flex: 0 0 2.5em   } }
+@media all and (max-width: 639px) { .view .header-spacer                   { flex: 0 0 5em     } }
 @media all and (max-width: 639px) { .view .data-row                        { padding: 0 .1em   } }
 @media all and (max-width: 319px) { .view .header-size                     { display: none     } }
 @media all and (max-width: 639px) { .view .data-row .mtime                 { display: none     } }
@@ -846,10 +847,9 @@ input:-webkit-autofill {
 /* ============================ Text Editor ============================ */
 
 .doc > .text-editor > .CodeMirror {
-    border-radius: 4px;
     font-size: .65em;
     font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
-    line-height: 1.3em;
+    line-height: 1.2em;
     height: 100%;
     width: 100%;
     position: relative;

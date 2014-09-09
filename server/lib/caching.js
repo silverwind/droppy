@@ -316,11 +316,12 @@ function compileResources(callback) {
     // Save compiled resources
     var etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
 
+    // Prepare HTML by removing tabs, CRs and LFs
     while (files.html.length) {
         var name = path.basename(files.html.pop()),
-            data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version); // Prepare HTML by removing tabs, CRs and LFs
+            data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version);
 
-        resCache[name] = {data: data, etag: etag, mime: mime.lookup(".html")};
+        resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
     }
 
     resCache["client.js"] = {data: out.js, etag: etag, mime: mime.lookup("js")};

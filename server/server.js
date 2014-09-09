@@ -103,7 +103,6 @@ function init(home, options, isStandalone, callback) {
                     if (err) return callback(err);
                     cache = c;
                     cache.files = {};
-                    cache.css = cache.res["style.css"].data;
                     cb(err);
                 });
             },
@@ -646,8 +645,8 @@ function send(ws, data) {
         if (ws && ws.readyState === 1) {
             if (config.logLevel === 3) {
                 var debugData = JSON.parse(data);
-                if (debugData.type === "UPDATE_DIRECTORY")
-                    debugData.data = {"...": "..."}; // Remove directory data so logs aren't getting too spammy
+                if (debugData.type === "UPDATE_DIRECTORY" || debugData.type === "UPDATE_CSS")
+                    debugData.data = {"...": "..."}; // Remove some spammy logging
                 log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
             }
             ws.send(data, function (error) {
@@ -902,17 +901,6 @@ function handlePOST(req, res) {
 //-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
     var resource;
-
-    // Shortcut for CSS debugging when no Websocket is available
-    if (config.debug && resourceName === "style.css") {
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "text/css; charset=utf-8");
-        res.setHeader("Cache-Control", "private, no-cache, no-transform, no-store");
-        res.setHeader("Content-Length", Buffer.byteLength(cache.css, "utf8"));
-        res.end(cache.css);
-        log.info(req, res);
-        return;
-    }
 
     if (/^\/\?!\/theme\//.test(req.url))
         resource = cache.themes[req.url.substring("/?!/theme/".length)];
@@ -1365,17 +1353,11 @@ function updateCSS() {
     ["client/style.css", "client/sprites.css"].forEach(function (file) {
         temp += fs.readFileSync(path.join(paths.module, file)).toString("utf8") + "\n";
     });
-    cache.css = ap({browsers: "last 2 versions"}).process(temp).css;
     Object.keys(clients).forEach(function (cookie) {
-        var data = JSON.stringify({
+        send(clients[cookie].ws, JSON.stringify({
             "type"  : "UPDATE_CSS",
-            "css"   : cache.css
-        });
-        if (clients[cookie].ws && clients[cookie].ws.readyState === 1) {
-            clients[cookie].ws.send(data, function (error) {
-                if (error) log.error(error);
-            });
-        }
+            "css"   : ap({browsers: "last 2 versions"}).process(temp).css
+        }));
     });
 }
 
