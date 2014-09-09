@@ -46,19 +46,19 @@ if (cmd === "--home") {
     if (args.length > 1) {
         seedPath(args.splice(0, 1)[0]);
         cmd = args.splice(0, 1)[0];
-    } else { printHelp(); }
+    } else { return printHelp(); }
 }
 if (cmd === "--color") {
     if (args.length > 0) {
         cmd = args.splice(0, 1)[0];
-    } else { printHelp(); }
+    } else { return printHelp(); }
 }
 
 
 if (cmds[cmd]) {
     switch (cmd) {
     case "start":
-        require("./server/server.js")._init(null, null, true, function (err) {
+        require("./server/server.js")(null, null, true, function (err) {
             if (err) console.error(err);
         });
         break;

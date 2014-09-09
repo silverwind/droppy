@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/silverwind/droppy.git"
   },
-  "main": "server/server.js",
+  "main": "exports.js",
   "preferGlobal": true,
   "bin": {
     "droppy": "./droppy.js"

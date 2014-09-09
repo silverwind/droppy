@@ -21,31 +21,24 @@ $ droppy start
 ```
 This will install droppy's home folder to `~/.droppy`. Append `--home <home>` to the command to define this path yourself. Once ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
 
-There's a few more CLI commands available, see
-```bash
-$ droppy help
-```
-To update droppy, run
-```bash
-$ [sudo] droppy update
-```
-
 ###Module Usage - Express
-You can use droppy as an [express](http://expressjs.com/) middleware:
+droppy can be used with [express](http://expressjs.com/):
 ```js
 var express = require("express"),
     droppy  = require("droppy"),
     app     = express();
 
-app.use("/", droppy(home, [options]));
-app.listen(80, function() {
-    console.log("Listening on 0.0.0.0:80.");
-});
+app.use("/", droppy("/srv/droppy", { linkLength: 8 }));
+app.listen(80);
 ```
-- `home`: The path to droppy's home folder. Will be created if necessary.
-- `options`: An optional [options](#options) object.
+####API
+``droppy(home, options)``
+Returns an `onRequest` function, taking `req` and `res`. All arguments are optional.
 
-##Configuration
+- `home`: The path to droppy's home folder. Defaults to `~/.droppy` if unspecified.
+- `options`: The [options](#options) object. Defaults to the object listed below.
+
+###Configuration
 `config.json` inside `~/.droppy/config` can be edited with `droppy config` or by hand and is created with these defaults:
 ```javascript
 {
@@ -95,6 +88,16 @@ Note: Options marked with [1] are not used when used as a module.
 - Firefox (last 2 versions)
 - Chrome (last 2 versions)
 - Internet Explorer 10+ (not regularly tested)
+
+###CLI
+For available CLI commands see
+```bash
+$ droppy help
+```
+To update droppy, run
+```bash
+$ [sudo] droppy update
+```
 
 ###ProTips
 - For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.

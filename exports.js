@@ -1,0 +1,24 @@
+"use strict";
+
+exports = module.exports = function droppy(home, options) {
+    if (arguments.length === 1) {
+        options = home;
+        home    = undefined;
+    }
+
+    if (!options) {
+        options = {};
+    }
+
+    if (typeof home === "string") {
+        require("./server/lib/paths.js").seed(home);
+    }
+
+    var server = require("./server/server.js");
+
+    server(home, options, false, function (err) {
+        if (err) throw err;
+    });
+
+    return server._onRequest;
+};

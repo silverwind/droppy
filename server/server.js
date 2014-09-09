@@ -38,48 +38,7 @@ var cache      = {},
     mode       = {file: "644", dir: "755"},
     mkdirpOpts = {fs: fs, mode: mode.dir};
 
-var droppy = function (home, options) {
-    if (typeof home !== "string") throw new Error("Home directory is required for module usage");
-
-    require("./lib/paths.js").seed(home);
-
-    return init(home, options, false, function (err) {
-        if (err) {
-            return err;
-        } else {
-            return onRequest;
-        }
-    });
-};
-
-droppy._init = init;
-exports = module.exports = droppy;
-
-function onRequest(req, res, next) {
-    var method = req.method.toUpperCase();
-    if (!hasServer && req.socket.server) setupSocket(req.socket.server);
-    if (!ready) { // Show a simple self-reloading loading page during startup
-        res.statusCode = 503;
-        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
-    } else {
-        while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
-        if (method === "GET") {
-            handleGET(req, res, next);
-        } else if (method === "POST") {
-            handlePOST(req, res, next);
-        } else if (method === "OPTIONS") {
-            res.setHeader("Allow", "GET,POST,OPTIONS");
-            res.end();
-            log.info(req, res);
-        } else {
-            res.statusCode = 405;
-            res.end();
-            log.info(req, res);
-        }
-    }
-}
-
-function init(home, options, isStandalone, callback) {
+var server =  function init(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
 
     async.series([
@@ -112,11 +71,38 @@ function init(home, options, isStandalone, callback) {
         ], function (err) {
             if (err) return callback(err);
             ready = true;
-            if (isStandalone) log.simple("Ready for requests!");
+            log.simple("Ready for requests!");
             callback();
         });
     });
+};
+
+function onRequest(req, res, next) {
+    var method = req.method.toUpperCase();
+    if (!hasServer && req.socket.server) setupSocket(req.socket.server);
+    if (!ready) { // Show a simple self-reloading loading page during startup
+        res.statusCode = 503;
+        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
+    } else {
+        while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
+        if (method === "GET") {
+            handleGET(req, res, next);
+        } else if (method === "POST") {
+            handlePOST(req, res, next);
+        } else if (method === "OPTIONS") {
+            res.setHeader("Allow", "GET,POST,OPTIONS");
+            res.end();
+            log.info(req, res);
+        } else {
+            res.statusCode = 405;
+            res.end();
+            log.info(req, res);
+        }
+    }
 }
+
+server._onRequest = onRequest;
+exports = module.exports = server;
 
 function printLogo() {
     log.plain([

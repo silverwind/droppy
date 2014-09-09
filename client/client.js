@@ -1706,7 +1706,6 @@
         $("#entry-menu .openfile").register("click", function (event) {
             var entry  = $("#entry-menu").data("target"),
                 view   = entry.parents(".view");
-            console.log(view[0].currentFolder, view);
             $("#click-catcher").trigger("click");
             updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
             event.stopPropagation();
