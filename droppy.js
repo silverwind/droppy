@@ -23,19 +23,35 @@ var opts = {
     home    : "--home <home>        Home directory, defaults to ~/.droppy"
 };
 
+function seedPath(home) {
+    require("./server/lib/paths.js").seed(home);
+}
+
+// Postfix options
 if (args) {
     var indexOfHome  = args.indexOf("--home"),
         indexOfColor = args.indexOf("--color");
     if (indexOfHome !== -1) {
         if (args[indexOfHome + 1]) {
-            require("./server/lib/paths.js").seed(args.splice(indexOfHome, 2)[1]);
-        } else {
-            printHelp();
-        }
+            seedPath(args.splice(indexOfHome, 2)[1]);
+        } else { printHelp(); }
     }
     if (indexOfColor !== -1) {
         args.splice(indexOfColor, 1);
     }
+}
+
+// Prefix options
+if (cmd === "--home") {
+    if (args.length > 1) {
+        seedPath(args.splice(0, 1)[0]);
+        cmd = args.splice(0, 1)[0];
+    } else { printHelp(); }
+}
+if (cmd === "--color") {
+    if (args.length > 0) {
+        cmd = args.splice(0, 1)[0];
+    } else { printHelp(); }
 }
 
 
