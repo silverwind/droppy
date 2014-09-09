@@ -21,6 +21,7 @@ $ droppy start
 ```
 This will install droppy's home folder to `~/.droppy`. Append `--home <home>` to the command to define this path yourself. Once ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
 
+If you want to install a permanent server, follow the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
 ###Module Usage - Express
 droppy can be used with [express](http://expressjs.com/):
 ```js
@@ -31,13 +32,6 @@ var express = require("express"),
 app.use("/", droppy("/srv/droppy", { linkLength: 8 }));
 app.listen(80);
 ```
-####API
-``droppy(home, options)``
-Returns an `onRequest` function, taking `req` and `res`. All arguments are optional.
-
-- `home`: The path to droppy's home folder. Defaults to `~/.droppy` if unspecified.
-- `options`: The [options](#options) object. Defaults to the object listed below.
-
 ###Configuration
 `config.json` inside `~/.droppy/config` can be edited with `droppy config` or by hand and is created with these defaults:
 ```javascript
@@ -80,14 +74,13 @@ Note: Options marked with [1] are not used when used as a module.
 - `demoMode`: When enabled, the server will regularly clean out all files and restore samples.
 - `timestamps`: When enabled, adds timestamps to log output.
 
-###Installation as a daemon
-- [Debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)
-- [Systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+###API
+####droppy([home], [options])
 
-###Supported Browsers
-- Firefox (last 2 versions)
-- Chrome (last 2 versions)
-- Internet Explorer 10+ (not regularly tested)
+Returns an `onRequest` function, taking `req` and `res`. All arguments are optional.
+
+- `home`: The path to droppy's home folder. Defaults to `~/.droppy` if unspecified.
+- `options`: The [options](#options) object. Defaults to the object listed below.
 
 ###CLI
 For available CLI commands see
@@ -98,6 +91,11 @@ To update droppy, run
 ```bash
 $ [sudo] droppy update
 ```
+
+###Supported Browsers
+- Firefox (last 2 versions)
+- Chrome (last 2 versions)
+- Internet Explorer 10+ (not regularly tested)
 
 ###ProTips
 - For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
