@@ -1329,14 +1329,6 @@
             updateLocation(view, join(view[0].currentFolder, $(event.target).text()));
         });
 
-        // Click on a "open" link
-        content.find(".openfile").register("click", function (event) {
-            if (droppy.socketWait) return;
-            var view = $(event.target).parents(".view");
-            event.preventDefault();
-            updateLocation(view, join(view[0].currentFolder, $(event.target).parents(".data-row").children(".file-link").text()));
-        });
-
         content.find(".data-row").each(function (index) {
             this.setAttribute("order", index);
         });
@@ -1696,7 +1688,6 @@
         });
 
         $("#entry-menu .edit").register("click", function (event) {
-            event.stopPropagation();
             var location,
                 entry    = $("#entry-menu").data("target"),
                 view     = entry.parents(".view");
@@ -1708,6 +1699,17 @@
             updateHistory(view, location);
             updatePath(view);
             openDoc(view, location);
+            event.stopPropagation();
+        });
+
+        // Click on a "open" link
+        $("#entry-menu .openfile").register("click", function (event) {
+            var entry  = $("#entry-menu").data("target"),
+                view   = entry.parents(".view");
+            console.log(view[0].currentFolder, view);
+            $("#click-catcher").trigger("click");
+            updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
+            event.stopPropagation();
         });
 
         // Rename a file/folder
@@ -1715,6 +1717,7 @@
             var entry = $("#entry-menu").data("target"),
                 view  = entry.parents(".view");
             if (droppy.socketWait) return;
+            $("#click-catcher").trigger("click");
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner(view);

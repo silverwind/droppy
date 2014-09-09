@@ -645,8 +645,9 @@ function send(ws, data) {
         if (ws && ws.readyState === 1) {
             if (config.logLevel === 3) {
                 var debugData = JSON.parse(data);
-                if (debugData.type === "UPDATE_DIRECTORY" || debugData.type === "UPDATE_CSS")
-                    debugData.data = {"...": "..."}; // Remove some spammy logging
+                // Remove some spammy logging
+                if (debugData.type === "UPDATE_DIRECTORY") debugData.data = {"...": "..."};
+                if (debugData.type === "UPDATE_CSS") debugData.css = {"...": "..."};
                 log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
             }
             ws.send(data, function (error) {
