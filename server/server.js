@@ -70,6 +70,7 @@ var server =  function init(home, options, isStandalone, callback) {
             function (cb) { if (config.demoMode) cleanupForDemo(cb); else cb(); }
         ], function (err) {
             if (err) return callback(err);
+            if (config.demoMode) setInterval(cleanupForDemo, 30 * 60 * 1000);
             ready = true;
             log.simple("Ready for requests!");
             callback();
@@ -146,8 +147,6 @@ function cleanupForDemo(doneCallback) {
         });
     }
 
-    setInterval(cleanupForDemo, 30 * 60 * 1000);
-
     async.series([
         function (callback) {
             log.simple("Cleaning up ...");
@@ -168,16 +167,26 @@ function cleanupForDemo(doneCallback) {
             });
         },
         function (callback) {
-            var dest = path.join(paths.files, "/sample-images"),
-                unzip = require("unzip");
+            var dest   = path.join(paths.files, "/sample-images"),
+                temp   = path.join(paths.temp, "/img.zip"),
+                output = require("unzip").Extract({ path: dest });
 
-            log.simple("Downloading image samples ...");
+            output.on("error", callback);
+            output.on("close", callback);
+
             mkdirp(dest, mkdirpOpts, function () {
-                var output = unzip.Extract({ path: dest });
-
-                output.on("error", function (err) { log.error(err); });
-                output.on("close", callback);
-                request("http://gdurl.com/lWOY/download").pipe(output);
+                fs.exists(temp, function (exists) {
+                    if (!exists) {
+                        log.simple("Downloading image samples ...");
+                        var ws = fs.createWriteStream(temp);
+                        ws.on("finish", function () {
+                            fs.createReadStream(temp).pipe(output);
+                        });
+                        request("http://goo.gl/O7sCU1").pipe(ws);
+                    } else {
+                        fs.createReadStream(temp).pipe(output);
+                    }
+                });
             });
         }
     ], doneCallback);
