@@ -1,5 +1,5 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg)](https://david-dm.org/silverwind/droppy)
-> File server with a speedy web interface
+> File server with a modern web interface
 
 ###Features
 * Lightweight
