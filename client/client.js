@@ -576,7 +576,7 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
-            var files, path, name, rootAdded,
+            var files, path, name,
                 obj = {};
             if (droppy.detects.inputDirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
                 files = event.target.files;
@@ -584,15 +584,7 @@
                     path = files[i].webkitRelativePath;
                     name = files[i].name;
                     if (path) {
-                        if (!rootAdded) { // Add the root folder for preview purpose
-                            var split = path.split("/");
-                            if (split.length > 1) {
-                                obj[split[0]] = {};
-                                rootAdded = true;
-                            }
-                        } else {
-                            obj[path] = files[i];
-                        }
+                        obj[path] = files[i];
                     } else {
                         obj[name] = files[i];
                     }
@@ -853,11 +845,6 @@
             for (var i = 0, len = data.length; i < len; i++) {
                 if (isOverLimit(view, data[i].size)) return;
                 numFiles++;
-                view[0].currentData[data[i].name] = {
-                    size : data[i].size,
-                    type : "nf",
-                    mtime : Date.now()
-                };
                 // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
                 // https://github.com/silverwind/droppy/issues/10
                 if (data[i].size === 0) {
@@ -868,35 +855,28 @@
                 }
             }
         } else { // We got an object for recursive folder uploads
-            var addedDirs = {};
             Object.keys(data).forEach(function (entry) {
-                var name = (entry.indexOf("/") > 1) ? entry.substring(0, entry.indexOf("/")) : entry,
-                    isFile = Object.prototype.toString.call(data[entry]) === "[object File]";
-                if (isFile) {
+                if (Object.prototype.toString.call(data[entry]) === "[object File]") {
                     if (isOverLimit(view, data[entry].size)) return;
                     numFiles++;
-                    if (!addedDirs[basename(name)]) {
-                        view[0].currentData[basename(name)] = {size: data[entry].size, type: "nf", mtime: Date.now()};
-                    }
                     formLength++;
                     formData.append(entry, data[entry], encodeURIComponent(entry));
                 } else {
-                    if (!addedDirs[basename(name)]) {
-                        view[0].currentData[basename(name)] = {size: 0, type: "nd", mtime: Date.now()};
-                        addedDirs[name] = true;
-                    }
-                    if (!$.isEmptyObject(data[entry])) { // Drop uploads sends empty object for each folder, this skips over them
+                    // All folders are empty object, filter them
+                    if (!$.isEmptyObject(data[entry])) {
                         formLength++;
                         formData.append(entry, data[entry], encodeURIComponent(entry));
                     } else {
-                        droppy.emptyFolders.push(join(view[0].currentFolder, entry));
+                        var skip = Object.keys(data).some(function (el) {
+                            return new RegExp(entry + "\/").test(el);
+                        });
+                        if (!skip) {
+                            droppy.emptyFolders.push(join(view[0].currentFolder, entry));
+                        }
                     }
                 }
             });
         }
-
-        // Load the new files into view
-        openDirectory(view, true);
 
         // Create the XHR2 and bind the progress events
         var xhr = new XMLHttpRequest();
@@ -979,12 +959,12 @@
 
     function uploadDone(view) {
         view.find(".upload-bar-inner").css("width", "100%");
-        view.find(".upload-title").text("Processing");
+        view.find(".upload-title").text("Processing ...");
     }
 
     function uploadCancel(view) {
         view.find(".upload-bar-inner").css("width", "0");
-        view.find(".upload-title").text("Aborting");
+        view.find(".upload-title").text("Aborting ...");
         $(".uploading").remove(); // Remove preview elements
         sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }

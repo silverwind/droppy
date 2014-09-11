@@ -1032,9 +1032,9 @@ function handleTypeRequest(req, res) {
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
     var busboy, opts,
-        done   = false,
-        files  = {},
-        cookie = getCookie(req.headers.cookie);
+        done     = false,
+        files    = {},
+        cookie   = getCookie(req.headers.cookie);
 
     req.query = qs.parse(req.url.substring("/upload?".length));
     log.info(req, res, "Upload started");
@@ -1055,12 +1055,9 @@ function handleUploadRequest(req, res) {
 
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-            dst = path.join(paths.files, req.query.to, dstRelative),
-            tmp = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
-
-        log.info(req, res, "Receiving: " + dstRelative);
-
-        var writeStream = fs.createWriteStream(tmp, { mode: mode.file});
+            dst         = path.join(paths.files, req.query.to, dstRelative),
+            tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
+            writeStream = fs.createWriteStream(tmp, { mode: mode.file});
 
         files[dstRelative] = {
             src : tmp,
@@ -1072,11 +1069,13 @@ function handleUploadRequest(req, res) {
     });
 
     busboy.on("filesLimit", function () {
+        log.info(req, res, "Maximum files limit reached, cancelling upload");
         closeConnection();
     });
 
     busboy.on("finish", function () {
         var names = Object.keys(files);
+        log.info(req, res, "Received " + names.length + " files");
         done = true;
         while (names.length > 0) {
             (function (name) {
@@ -1084,9 +1083,12 @@ function handleUploadRequest(req, res) {
                     if (error) { // File doesn't exist
                         fs.stat(path.dirname(files[name].dst), function (error) {
                             if (error) { // Dir doesn't exist
-                                mkdirp.sync(path.dirname(files[name].dst), mkdirpOpts);
+                                mkdirp(path.dirname(files[name].dst), mkdirpOpts, function () {
+                                    moveFile(files[name].src, files[name].dst);
+                                });
+                            } else {
+                                moveFile(files[name].src, files[name].dst);
                             }
-                            moveFile(files[name].src, files[name].dst);
                         });
                     } else {
                         if (req.query.r === "true") { // Rename option from the client
@@ -1134,7 +1136,7 @@ function handleUploadRequest(req, res) {
         res.setHeader("Content-Type", "text/plain");
         res.setHeader("Connection", "close");
         res.end();
-        send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : req.query.vId }));
+        send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : parseInt(req.query.vId, 10) }));
     }
 }
 

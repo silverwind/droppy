@@ -869,7 +869,6 @@ input:-webkit-autofill {
     bottom: 0;
     transition: all .2s ease;
     width: 100%;
-    box-shadow: -2px 0 0 2px #444;
     display: flex;
     align-items: stretch;
     justify-content: space-between;
@@ -883,7 +882,6 @@ input:-webkit-autofill {
 
 .upload-info.in {
     height: 2em;
-    box-shadow: 0 0 0 .125em #111;
     padding-top: .25em;
 }
 .upload-info.out { height: 0; box-shadow: none; }
