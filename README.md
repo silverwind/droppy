@@ -8,7 +8,7 @@
 * Asynchronous uploads. Directory uploads in Chrome
 * Zip download of directories
 * Edit text files in CodeMirror
-* Share public shortlinks to files
+* Share public shortlinks to files/folders
 * Media gallery, audio player
 * Drag and Drop support
 
