@@ -818,7 +818,7 @@ function handleGET(req, res) {
     } else if (/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
     } else if (/\?~~\//.test(URI)) {
-        streamArchive(req, res, "zip");
+        streamArchive(req, res, utils.addFilesPath(decodeURIComponent(req.url.substring("/~~/".length))));
     } else if (/favicon.ico/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
     } else {
@@ -982,24 +982,25 @@ function handleFileRequest(req, res, download) {
     fs.stat(filepath, function (error, stats) {
         if (!error && stats) {
             res.statusCode = 200;
-
-            // Set disposition headers for downloads
-            if (download) {
-                // IE 10/11 can't handle an UTF-8 Content-Disposition header, so we encode it
-                if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                    filename = encodeURIComponent(path.basename(filepath));
-                else
-                    filename = path.basename(filepath);
-
-                res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(filepath) + '"');
+            if (stats.isDirectory() && shortLink) {
+                streamArchive(req, res, filepath);
             } else {
-                cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
-                res.setHeader("Etag", cache.files[filepath]);
-            }
+                if (download) {
+                    // IE 10/11 can't handle an UTF-8 Content-Disposition header, so we encode it
+                    if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+                        filename = encodeURIComponent(path.basename(filepath));
+                    else
+                        filename = path.basename(filepath);
 
-            res.setHeader("Content-Type", mime.lookup(filepath));
-            res.setHeader("Content-Length", stats.size);
-            fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+                    res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(filepath) + '"');
+                } else {
+                    cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
+                    res.setHeader("Etag", cache.files[filepath]);
+                }
+                res.setHeader("Content-Type", mime.lookup(filepath));
+                res.setHeader("Content-Length", stats.size);
+                fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+            }
         } else {
             if (error.code === "ENOENT")
                 res.statusCode = 404;
@@ -1231,8 +1232,8 @@ function du(dir, callback) {
 
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
-function streamArchive(req, res, type) {
-    var zipPath = utils.addFilesPath(decodeURIComponent(req.url.substring(4))), archive, dispo;
+function streamArchive(req, res, zipPath) {
+    var archive, dispo;
     fs.stat(zipPath, function (err, stats) {
         if (err) {
             log.error(err);
@@ -1244,13 +1245,13 @@ function streamArchive(req, res, type) {
             else
                 dispo = ['attachment; filename="', path.basename(zipPath), '.zip"'].join("");
 
-            res.setHeader("Content-Type", mime.lookup(type));
+            res.setHeader("Content-Type", mime.lookup("zip"));
             res.setHeader("Content-Disposition", dispo);
             res.setHeader("Transfer-Encoding", "chunked");
             log.info(req, res);
             log.info("Streaming zip of /", req.url.substring(4));
 
-            archive = archiver(type, {zlib: { level: config.zipLevel }});
+            archive = archiver("zip", {zlib: { level: config.zipLevel }});
             archive.on("error", function (error) { log.error(error); });
             archive.pipe(res);
             archive.append(null, { name: path.basename(zipPath) + '/' });
