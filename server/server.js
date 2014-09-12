@@ -390,11 +390,15 @@ function setupSocket(server) {
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
                 var link,
                     links = db.get("shortlinks");
+
                 // Check if we already have a link for that file
-                if (msg.data in Object.keys(links)) {
-                    sendLink(cookie, links[msg.data], vId);
-                    return;
+                for (var l in links) {
+                    if (msg.data === links[l]) {
+                        sendLink(cookie, l, vId);
+                        return;
+                    }
                 }
+
                 // Get a pseudo-random n-character lowercase string. The characters
                 // "l", "1", "i", "o", "0" characters are skipped for easier communication of links.
                 var chars = "abcdefghjkmnpqrstuvwxyz23456789";
