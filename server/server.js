@@ -968,8 +968,7 @@ function handleFileRequest(req, res, download) {
 
     // Validate the cookie for the remaining requests
     if (!getCookie(req.headers.cookie) && !shortLink) {
-        res.statusCode = 301;
-        res.setHeader("Location", "/");
+        res.writeHead(301, {"Location": "/"});
         res.end();
         log.info(req, res);
         return;
@@ -988,42 +987,38 @@ function handleFileRequest(req, res, download) {
             if (stats.isDirectory() && shortLink) {
                 streamArchive(req, res, filepath);
             } else {
+                var headers = {"Content-Type": mime.lookup(filepath)}, status = 200;
                 if (download) {
-                    // IE 10/11 can't handle an UTF-8 Content-Disposition header, so we encode it
                     if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                        filename = encodeURIComponent(path.basename(filepath));
+                        filename = encodeURIComponent(path.basename(filepath)); // Encode Content-Disposition for IE 10/11
                     else
                         filename = path.basename(filepath);
 
-                    res.setHeader("Content-Disposition", 'attachment; filename="' + path.basename(filepath) + '"');
+                    headers["Content-Length"] = stats.size;
+                    headers["Content-Disposition"] = "attachment; filename=\"" + path.basename(filepath) + "\"";
+                    res.writeHead(status, headers);
+                    fs.createReadStream(filepath).pipe(res);
                 } else {
                     cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
-                    res.setHeader("Etag", cache.files[filepath]);
-                }
+                    headers["Accept-Ranges"] = "bytes"; // advertise ranges support
+                    headers["Etag"] = cache.files[filepath];
+                    if (req.headers.range) {
+                        var total        = stats.size,
+                            range        = req.headers.range,
+                            parts        = range.replace(/bytes=/, "").split("-"),
+                            partialstart = parts[0],
+                            partialend   = parts[1],
+                            start        = parseInt(partialstart, 10),
+                            end          = partialend ? parseInt(partialend, 10) : total - 1;
 
-                if (!download && req.headers.range) {
-                    var total        = stats.size,
-                        range        = req.headers.range,
-                        parts        = range.replace(/bytes=/, "").split("-"),
-                        partialstart = parts[0],
-                        partialend   = parts[1],
-                        start        = parseInt(partialstart, 10),
-                        end          = partialend ? parseInt(partialend, 10) : total - 1,
-                        chunksize    = (end - start) + 1;
-
-                    res.writeHead(206, {
-                        "Content-Type"  : mime.lookup(filepath),
-                        "Content-Length": chunksize,
-                        "Content-Range" : "bytes " + start + "-" + end + "/" + total,
-                        "Accept-Ranges" : "bytes",
-                    });
-                    fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
-                } else {
-                    res.writeHead(200, {
-                        "Content-Type"  : mime.lookup(filepath),
-                        "Content-Length": stats.size
-                    });
-                    fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+                        status = 206;
+                        headers["Content-Length"] = (end - start) + 1;
+                        headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + total;
+                        res.writeHead(status, headers);
+                        fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
+                    } else {
+                        fs.createReadStream(filepath).pipe(res);
+                    }
                 }
             }
         } else {

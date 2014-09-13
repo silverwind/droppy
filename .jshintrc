@@ -21,7 +21,7 @@
     "quotmark": false,
     "regexdash": true,
     "strict": true,
-    "sub": false,
+    "sub": true,
     "trailing": false,
     "undef": true,
     "unused": true,
