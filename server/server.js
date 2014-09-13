@@ -1222,13 +1222,17 @@ function updateDirectory(root, callback) {
 function generateDirSizes(root, dirContents, callback) {
     var tmpDirs = [];
     Object.keys(dirContents).forEach(function (dir) {
-        if (dirContents[dir].type === "d") tmpDirs.push(utils.addFilesPath(root + "/" + dir));
+        if (dirContents[dir].type === "d")
+            tmpDirs.push(utils.addFilesPath(path.join(root, "/", dir)));
     });
     if (tmpDirs.length === 0) return;
 
     async.map(tmpDirs, du, function (err, results) {
         results.forEach(function (result, i) {
-            dirs[root][path.basename(tmpDirs[i])].size = result;
+            if (dirs[root][path.basename(tmpDirs[i])])
+                dirs[root][path.basename(tmpDirs[i])].size = result;
+            else
+                log.error("Directory not cached", root, path.basename(tmpDirs[i]));
         });
         callback(true);
     });
