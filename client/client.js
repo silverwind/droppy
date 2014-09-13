@@ -1985,7 +1985,13 @@
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
                 newEl = $("<img>").attr("class", dir).one("load", aspectScale);
             else
-                newEl = $("<video>").attr({"class": dir, "autoplay": "autoplay", "loop": "loop"}).one("loadedmetadata", aspectScale);
+                newEl = $("<video>").attr({
+                    "class"   : dir,
+                    "autoplay": "autoplay",
+                    "loop"    : "loop",
+                    "controls": "controls",
+                    "preload" : "auto"
+                }).one("loadedmetadata", aspectScale);
             (function swap(a, b) {
                 b.attr("src", getMediaSrc(view, filename));
                 if (droppy.detects.animation) {
