@@ -985,7 +985,6 @@ function handleFileRequest(req, res, download) {
 
     fs.stat(filepath, function (error, stats) {
         if (!error && stats) {
-            res.statusCode = 200;
             if (stats.isDirectory() && shortLink) {
                 streamArchive(req, res, filepath);
             } else {
@@ -1001,9 +1000,31 @@ function handleFileRequest(req, res, download) {
                     cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
                     res.setHeader("Etag", cache.files[filepath]);
                 }
-                res.setHeader("Content-Type", mime.lookup(filepath));
-                res.setHeader("Content-Length", stats.size);
-                fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+
+                if (!download && req.headers.range) {
+                    var total        = stats.size,
+                        range        = req.headers.range,
+                        parts        = range.replace(/bytes=/, "").split("-"),
+                        partialstart = parts[0],
+                        partialend   = parts[1],
+                        start        = parseInt(partialstart, 10),
+                        end          = partialend ? parseInt(partialend, 10) : total - 1,
+                        chunksize    = (end - start) + 1;
+
+                    res.writeHead(206, {
+                        "Content-Type"  : mime.lookup(filepath),
+                        "Content-Length": chunksize,
+                        "Content-Range" : "bytes " + start + "-" + end + "/" + total,
+                        "Accept-Ranges" : "bytes",
+                    });
+                    fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
+                } else {
+                    res.writeHead(200, {
+                        "Content-Type"  : mime.lookup(filepath),
+                        "Content-Length": stats.size
+                    });
+                    fs.createReadStream(filepath, {bufferSize: 4096}).pipe(res);
+                }
             }
         } else {
             if (error.code === "ENOENT")

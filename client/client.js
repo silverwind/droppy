@@ -1984,21 +1984,21 @@
                 oldEl   = view.find(".media-container > img, .media-container > video");
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
                 newEl = $("<img>").attr("class", dir).one("load", aspectScale);
-            else
+            else {
                 newEl = $("<video>").attr({
                     "class"   : dir,
                     "autoplay": "autoplay",
                     "loop"    : "loop",
                     "controls": "controls",
                     "preload" : "auto"
-                }).one("loadedmetadata", aspectScale);
+                }).one("loadedmetadata", aspectScale)[0].addEventListener("error", aspectScale);
+            }
             (function swap(a, b) {
                 b.attr("src", getMediaSrc(view, filename));
                 if (droppy.detects.animation) {
                     a.attr("class", dir === "left" ? "right" : "left");
                     b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
                         a.remove();
-
                     });
                 } else {
                     a.replaceWith(b);
@@ -2054,11 +2054,9 @@
         }
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
-        if (view[0].vId === 0) updateTitle(filename);
-
-        // Hopefully, these aren't bound too late
         view.find(".media-container img").one("load", aspectScale);
-        view.find(".media-container video").one("loadedmetadata", aspectScale);
+        view.find(".media-container video").one("loadedmetadata", aspectScale)[0].addEventListener("error", aspectScale);
+        if (view[0].vId === 0) updateTitle(filename);
         hideSpinner(view);
     }
 
