@@ -1305,9 +1305,6 @@
                     view[0].currentData[name].size = droppy.sizeCache[view[0].currentFolder][name];
             });
         }
-        Object.keys(view[0].currentData).forEach(function (k) {
-            console.log(view[0].currentData[k].type);
-        });
         // Create HTML from template
         var content = contentWrap(view).html(t.views.directory({
             entries  : view[0].currentData,
@@ -1991,7 +1988,8 @@
                     "loop"    : "loop",
                     "controls": "controls",
                     "preload" : "auto"
-                }).one("loadedmetadata", aspectScale)[0].addEventListener("error", aspectScale);
+                }).one("loadedmetadata", aspectScale);
+                newEl[0].addEventListener("error", aspectScale);
             }
             (function swap(a, b) {
                 b.attr("src", getMediaSrc(view, filename));
