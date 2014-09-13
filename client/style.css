@@ -740,11 +740,12 @@ input:-webkit-autofill {
     text-align: center;
     height: 100%;
     overflow: hidden;
+    background: #181818;
 }
 
 .previewer .arrow-back, .previewer .arrow-forward {
     position: absolute;
-    bottom: 0; top: 0;
+    bottom: 15%; top: 15%;
     cursor: pointer;
     z-index: 33;
     user-select: none;
@@ -783,7 +784,7 @@ input:-webkit-autofill {
 .media-container > img.right, .media-container > video.right  { transform: translate3d( 100%, -50%, 0); opacity: 0 }
 
 .media-container > img,
-.media-container > video {
+.media-container > video:not(:fullscreen):not(:-webkit-full-screen):not(:-moz-full-screen):not(:-ms-fullscreen) {
     position: absolute;
     max-height: 100%;
     max-width: 100%;
