@@ -2655,11 +2655,28 @@
     }
 
     function setFullscreen(el) {
-        ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"].some(function (prop) {
+        var req = ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
+            chg = ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange"],
+            elm = ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
+            listener = function (e) {
+                if (e.keyCode === 32) {
+                    $(el).parents(".view").find(e.shiftKey ? ".arrow-back" : ".arrow-forward").click();
+                }
+            };
+
+        req.some(function (prop) {
             if (prop in el) {
                 el[prop]();
                 return true;
             }
+        });
+        chg.forEach(function (eventName) {
+            $(document).register(eventName, function () {
+                var isFullScreen = elm.some(function (prop) {
+                    if (prop in document) return Boolean(document[prop]);
+                });
+                document[isFullScreen ? "addEventListener" : "removeEventListener"]("keydown", listener);
+            });
         });
     }
 
