@@ -107,7 +107,10 @@
                 else return true;
             });
             if (!hasClass) classes.push(replacement);
-            elem.className = classes.join(" ");
+            if (classes.length === 0 || (classes.length === 1 && classes[0] === ""))
+                elem.removeAttribute("class");
+            else
+                elem.className = classes.join(" ");
         }
         return this;
     };
@@ -559,10 +562,11 @@
                 clearTimeout(droppy.resizeTimer);
                 droppy.resizeTimer = setTimeout(function () {
                     $(".view").each(function () {
-                        checkPathOverflow($(this));
+                        var view = $(this);
+                        checkPathOverflow(view);
+                        aspectScale();
                     });
                 }, 100);
-                aspectScale();
             })
             // Bind escape for hiding modals
             .register("keyup", function (event) {
@@ -1978,7 +1982,7 @@
 
         function swapMedia(view, filename, dir) {
             var newEl,
-                oldEl   = view.find(".media-container > img, .media-container > video");
+                oldEl = view.find(".media-container > img, .media-container > video");
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
                 newEl = $("<img>").attr("class", dir).one("load", aspectScale);
             else {
@@ -2010,14 +2014,19 @@
         }
     }
 
-    // Media upscaling while maintaining aspect ratio. Unfortunately, this isn't possible purely in CSS for both dimensions at
-    // the same time (Thought we'll let CSS can handle the downscaling part, which it does fine).
+    // Media up/down-scaling while maintaining aspect ratio.
     function aspectScale() {
         $(".media-container").each(function () {
             var container = this;
             $(container).children("img, video").each(function () {
-                var dims  = {w: this.naturalWidth, h: this.naturalHeight},
-                    space = {w: $(container).width(), h: $(container).height()};
+                var dims  = {
+                        w: this.naturalWidth || this.videoWidth || this.clientWidth,
+                        h: this.naturalHeight || this.videoHeight || this.clientHeight
+                    },
+                    space = {
+                        w: $(container).width(),
+                        h: $(container).height()
+                    };
                 if (dims.w > space.w || dims.h > space.h) {
                     $(this).css({width: "", height: ""}); // Let CSS handle the downscale
                 } else {
@@ -2052,8 +2061,16 @@
         }
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
-        view.find(".media-container img").one("load", aspectScale);
-        view.find(".media-container video").one("loadedmetadata", aspectScale)[0].addEventListener("error", aspectScale);
+
+        view.find(".media-container img").each(function () {
+            $(this).one("load", aspectScale);
+        });
+
+        view.find(".media-container video").each(function () {
+            $(this).one("loadedmetadata", aspectScale);
+            this.addEventListener("error", aspectScale);
+        });
+
         if (view[0].vId === 0) updateTitle(filename);
         hideSpinner(view);
     }

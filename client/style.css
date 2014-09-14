@@ -48,7 +48,6 @@ html {
     background: #ddd;
     font: 1.5em/1 "Open Sans", Helvetica, sans-serif;
     font-weight: 300;
-    letter-spacing: -.25px;
     overflow: hidden;
     text-rendering: geometricPrecision;
     -webkit-backface-visibility: hidden;
@@ -408,13 +407,13 @@ input:-webkit-autofill {
     text-align: right;
 }
 .header-size {
-    flex: 0 0 3.75em;
+    flex: 0 0 3.25em;
     display: inline-block;
     text-align: right;
 }
 
 .header-spacer {
-    flex: 0 0 3.75em;
+    flex: 0 0 4.25em;
     display: inline-block;
 }
 
@@ -526,7 +525,7 @@ input:-webkit-autofill {
 /* Hide certain list elements when width gets too small */
 @media all and (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .125em } }
 @media all and (max-width: 639px) { .view .header-mtime                    { display: none     } }
-@media all and (max-width: 639px) { .view .header-spacer                   { flex: 0 0 3.75em   } }
+@media all and (max-width: 639px) { .view .header-spacer                   { flex: 0 0 4em     } }
 @media all and (max-width: 639px) { .view .data-row                        { padding: 0 .1em   } }
 @media all and (max-width: 319px) { .view .header-size                     { display: none     } }
 @media all and (max-width: 639px) { .view .data-row .mtime                 { display: none     } }
@@ -542,14 +541,13 @@ input:-webkit-autofill {
     }
 }
 @media all and (max-width: 1279px) { .view.left .header-mtime,        .view.right .header-mtime        { display: none   } }
-@media all and (max-width: 1279px) { .view.left .header-spacer,       .view.right .header-spacer       { flex: 0 0 3.75em} }
+@media all and (max-width: 1279px) { .view.left .header-spacer,       .view.right .header-spacer       { flex: 0 0 4em   } }
 @media all and (max-width: 1279px) { .view.left .data-row,            .view.right .data-row            { padding: 0 .1em } }
 @media all and (max-width: 639px)  { .view.left .header-size,         .view.right .header-size         { display: none   } }
 @media all and (max-width: 1279px) { .view.left .data-row .mtime,     .view.right .data-row .mtime     { display: none   } }
 @media all and (max-width: 639px)  { .view.left .data-row .size,      .view.right .data-row .size      { display: none   } }
 @media all and (max-width: 639px)  { .view.left .data-row .size-unit, .view.right .data-row .size-unit { display: none   } }
 @media all and (max-width: 639px)  { .view.left .data-row svg,        .view.right .data-row svg        { width: 1.1em    } }
-
 
 .data-row .shortlink, .data-row .edit, .data-row .delete, .data-row .zip, .data-row span {
     display: block;
@@ -783,16 +781,37 @@ input:-webkit-autofill {
 .media-container > img.left, .media-container > video.left    { transform: translate3d(-100%, -50%, 0); opacity: 0 }
 .media-container > img.right, .media-container > video.right  { transform: translate3d( 100%, -50%, 0); opacity: 0 }
 
-.media-container > img,
-.media-container > video:not(:fullscreen):not(:-webkit-full-screen):not(:-moz-full-screen):not(:-ms-fullscreen) {
-    position: absolute;
-    max-height: 100%;
-    max-width: 100%;
-    width: auto;
-    left: 50%;
-    top: 50%;
+/* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
+.media-container > img {
+    position: absolute; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%;
     transform: translate(-50%, -50%);
     transition: transform .3s ease, opacity .3s ease;
+}
+.media-container > video:not(:fullscreen) {
+    position: absolute; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+}
+.media-container > video:not(:-webkit-full-screen) {
+    position: absolute; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+}
+.media-container > video:not(:-moz-full-screen) {
+    position: absolute; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+}
+.media-container > video:not(:-ms-fullscreen) {
+    position: absolute; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /* ============================ Document Previewer ============================ */
@@ -1445,9 +1464,9 @@ input:-webkit-autofill {
 }
 
 .login-input {
-    background: #eee;
-    border-radius: 2px;
-    border: 2px solid #aaa;
+    background: #f0f0f0;
+    border-radius: 3px;
+    border: 1px solid #ccc;
     padding: 0 10px;
     height: 45px;
     margin: 5px 0;
@@ -1455,14 +1474,15 @@ input:-webkit-autofill {
 }
 
 .login-input:focus {
-    border: 2px solid #18f;
-    background: #eef;
+    border: 1px solid #18f;
+    background: #eeeef8;
 }
 
 #remember {
-    height:  45px;
+    height: 1.45em;
+    border-radius: 3px;
     text-align: left;
-    margin: 10px 10% 0 10%;
+    margin: 5px 10% 0 10%;
 }
 
 #remember span {
@@ -1477,10 +1497,17 @@ input:-webkit-autofill {
 #remember label {
     background: #eee;
     border-radius: 3px;
+    box-shadow: 0 0 0 1px #ccc;
     cursor: pointer;
     height: 20px;
     position: absolute;
     width: 20px;
+    user-select: none;
+}
+
+#remember:focus label {
+    box-shadow: 0 0 0 1px #18f;
+    background: #eeeef8;
 }
 
 #remember label:after {
