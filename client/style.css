@@ -190,7 +190,7 @@ input:-webkit-autofill {
 
 @media all and (min-width: 1024px) { .content { font-size:  1em } }
 @media all and (max-width: 1023px) { .content { font-size: .9em } }
-@media all and (max-width:  639px) { .content { font-size: .8em; top: 1.25rem; } }
+@media all and (max-width:  639px) { .content { font-size: .8em; top: 1.25rem; height: calc(100% - 1.25rem);} }
 
 .content.image, .content.video, .content.document {
     padding: 0;
