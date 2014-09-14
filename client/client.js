@@ -370,7 +370,7 @@
                     if (view.data("type") === "directory") {
                         if (msg.folder !== getViewLocation(view)) {
                             window.history.replaceState(null, null, getHashPaths(view, msg.folder));
-                            if (view[0].vId === 0) updateTitle(msg.folder, true);
+                            if (view[0].vId === 0) updateTitle(basename(msg.folder));
                             view[0].currentFile = null;
                             view[0].currentFolder = msg.folder;
                             updatePath(view);
@@ -396,7 +396,7 @@
                     sendEmptyFolders(view);
                 } else {
                     view[0].isUploading = false;
-                    updateTitle(getView(vId)[0].currentFolder, true);
+                    updateTitle(basename(getView(vId)[0].currentFolder));
                     view.find(".upload-info").setTransitionClass("in", "out");
                     view.find(".data-row.uploading").removeClass("uploading");
                     setTimeout(function () {
@@ -562,8 +562,7 @@
                 clearTimeout(droppy.resizeTimer);
                 droppy.resizeTimer = setTimeout(function () {
                     $(".view").each(function () {
-                        var view = $(this);
-                        checkPathOverflow(view);
+                        checkPathOverflow($(this));
                         aspectScale();
                     });
                 }, 100);
@@ -813,10 +812,11 @@
         }
 
         function playing() {
-            var matches = $(player).attr("src").match(/(.+)\/(.+)\./);
+            var matches = $(player).attr("src").match(/(.+)\/(.+)\./),
+                title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
             droppy.isPlaying = true;
-            updateTitle(getView()[0].currentFolder, true);
-            $("#audio-title").text(matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " "));
+            updateTitle(title);
+            $("#audio-title").text(title);
             controls.attr("class", "in");
             fullyLoaded = false;
             droppy.audioUpdater = setInterval(updater, 100);
@@ -825,7 +825,7 @@
         function stop(event) {
             if (event.type === "ended") {
                 var next = $(".playing").next();
-                preparePlayback($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
+                play($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
             }
             $("#audio-title").html("");
             if (droppy.audioUpdater) {
@@ -833,7 +833,7 @@
                 droppy.audioUpdater = null;
             }
             droppy.isPlaying = false;
-            updateTitle(getView()[0].currentFolder, true);
+            updateTitle(basename(getView()[0].currentFolder));
             setTimeout(function () {
                 if (!droppy.isPlaying) {
                     controls.attr("class", "out");
@@ -1123,18 +1123,9 @@
     }
 
     // Update the page title and trim a path to its basename
-    function updateTitle(text, isPath) {
-        var parts,
-            prefix = "",
-            suffix = "droppy";
-        if (isPath) {
-            parts = text.match(/([^\/]+)/gm);
-            prefix = parts ? parts[parts.length - 1] : "/";
-        } else {
-            prefix = text;
-        }
-        if (droppy.isPlaying) prefix = "\u266B " + prefix; // Unicode audio note to indicate playback in a tab
-        document.title = [prefix, suffix].join(" - ");
+    function updateTitle(text) {
+        if (text === "") text = "/";
+        document.title = text + " - droppy";
     }
 
     // Listen for popstate events, which indicate the user navigated back
@@ -1386,7 +1377,7 @@
         });
 
         content.find(".icon-play").register("click", function () {
-            preparePlayback($(this));
+            play($(this));
         });
 
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
@@ -1702,7 +1693,7 @@
             var entry = $("#entry-menu").data("target"),
                 url   = entry.find(".file-link").attr("href").replace(/\?~\//, "?_/");
             event.stopPropagation();
-            play(url, entry.find(".icon-play"));
+            play(entry.find(".icon-play"), url);
             $("#click-catcher").trigger("click");
         });
 
@@ -1861,12 +1852,6 @@
         }
         return filenames.sort(t.fn.compare2(entries, by));
     };
-
-    function preparePlayback(playButton) {
-        var source = playButton.parents(".data-row").children(".file-link").attr("href");
-        if (droppy.socketWait) return;
-        play(source, playButton);
-    }
 
     function closeDoc(view) {
         view[0].switchRequest = true;
@@ -2328,12 +2313,14 @@
         });
     }
 
-    function play(source, playButton) {
+    function play(playButton, source) {
         var player = document.getElementById("audio-player");
-        if (!player.canPlayType(droppy.audioTypes[getExt(source)])) {
-            showError(playButton.parents(".view"), "Sorry, your browser can't play this file.");
-            return;
-        }
+
+        if (!source)
+            source = playButton.parents(".data-row").children(".file-link").attr("href");
+
+        if (!player.canPlayType(droppy.audioTypes[getExt(source)]))
+            return showError(playButton.parents(".view"), "Sorry, your browser can't play this file.");
 
         $(".file-link").parent().removeClass("playing").removeClass("paused");
         $(".icon-play").html(droppy.svg.play);

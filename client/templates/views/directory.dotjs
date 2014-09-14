@@ -18,9 +18,9 @@ it = {
 #}}
 {{##def.directoryHeader:
     <div class="file-header">
-        <span data-sort="type" class="header-name" class="down">Name {{= droppy.svg.triangle }}</span>
-        <span data-sort="mtime" class="header-mtime" class="up">Modified {{= droppy.svg.triangle }}</span>
-        <span data-sort="size" class="header-size" class="up">Size {{= droppy.svg.triangle }}</span>
+        <span data-sort="type" class="header-name down active">Name {{= droppy.svg.triangle }}</span>
+        <span data-sort="mtime" class="header-mtime">Modified {{= droppy.svg.triangle }}</span>
+        <span data-sort="size" class="header-size">Size {{= droppy.svg.triangle }}</span>
         <span class="header-spacer"></span>
     </div>
 #}}
