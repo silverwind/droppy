@@ -2099,7 +2099,6 @@
                     mode: "text/plain"
                 });
 
-                // $(".sidebar").css("right", "calc(.25em + " + (view.find(".CodeMirror-vscrollbar").width()) + "px)");
                 doc.find(".exit").register("click", function () {
                     closeDoc($(this).parents(".view"));
                     editor = null;

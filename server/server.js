@@ -459,12 +459,19 @@ function setupSocket(server) {
                     send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Can't copy directory into itself."}));
                     return;
                 }
-                msg.data.from = utils.addFilesPath(msg.data.from);
-                msg.data.to = utils.addFilesPath(msg.data.to);
+
+                var from = utils.addFilesPath(msg.data.from),
+                    to   = utils.addFilesPath(msg.data.to),
+                    type = msg.data.type;
+
                 // In case source and destination are the same, append a number to the file/foldername
-                utils.getNewPath(msg.data.to, function (newPath) {
-                    doClipboard(msg.data.type, msg.data.from, newPath);
-                });
+                if (from === to) {
+                    utils.getNewPath(to, function (newTo) {
+                        doClipboard(type, from, newTo);
+                    });
+                } else {
+                    doClipboard(type, from, to);
+                }
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
@@ -666,8 +673,11 @@ function doClipboard(type, from, to) {
             if (type === "cut") {
                 mv(from, to, logError);
             } else {
-                if (stats.isFile()) to = path.dirname(to); // cpr expects `to` to be the directory
-                cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
+                if (stats.isFile()) {
+                    utils.copyFile(from, to, logError);
+                } else {
+                    cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
+                }
             }
         }
     });
@@ -1017,6 +1027,7 @@ function handleFileRequest(req, res, download) {
                         res.writeHead(status, headers);
                         fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
                     } else {
+                        res.writeHead(status, headers);
                         fs.createReadStream(filepath).pipe(res);
                     }
                 }
