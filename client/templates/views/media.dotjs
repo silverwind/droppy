@@ -6,6 +6,11 @@ it = {
 }
 </script>
 #}}
+{{? it.type === "image"}}
+<ul class="sidebar">
+    <li class="fs">{{= droppy.svg.fullscreen}}</li>
+</ul>
+{{?}}
 <div class="previewer {{= it.type}}">
     <div class="arrow-back"> {{= droppy.svg.arrow}} </div>
     <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>

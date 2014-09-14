@@ -824,28 +824,28 @@ input:-webkit-autofill {
     box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
-.content.document > .sidebar {
+.content > .sidebar {
     position: absolute;
-    top: .75em;
+    top: .5em;
     bottom: 1em;
-    right: .75em;
+    right: 0;
     width: 2.5em;
     user-select: none;
 }
-.content.document > .sidebar > li {
+.content > .sidebar > li {
     position: relative;
     z-index: 5;
     margin-bottom: .25em;
 }
 
-.content.document > .sidebar svg {
+.content > .sidebar svg {
     fill: #777;
     height: 1em;
     width: 1em;
     margin-left: .75em;
 }
 
-.content.document > .sidebar span {
+.content > .sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
@@ -853,13 +853,20 @@ input:-webkit-autofill {
     font-weight: 400;
 }
 
-.content.document > .sidebar > li:hover         { cursor: pointer }
-.content.document > .sidebar > .exit:hover svg  { fill: #c33 }
-.content.document > .sidebar > .exit:hover span { color: #c33; opacity: 1 }
-.content.document > .sidebar > .save:hover svg  { fill: #169 }
-.content.document > .sidebar > .save:hover span { color: #169; opacity: 1 }
-.content.document > .sidebar > .ww:hover svg    { fill: #940 }
-.content.document > .sidebar > .ww:hover span   { color: #940; opacity: 1 }
+.content > .sidebar > li:hover         { cursor: pointer }
+.content > .sidebar > .exit:hover svg  { fill:  #c33 }
+.content > .sidebar > .exit:hover span { color: #c33; opacity: 1 }
+.content > .sidebar > .save:hover svg  { fill:  #169 }
+.content > .sidebar > .save:hover span { color: #169; opacity: 1 }
+.content > .sidebar > .ww:hover svg    { fill:  #940 }
+.content > .sidebar > .ww:hover span   { color: #940; opacity: 1 }
+.content > .sidebar > .fs:hover svg    { fill:  #fff }
+
+.content:fullscreen .sidebar           { visibility: hidden; }
+.content::-webkit-full-screen .sidebar { visibility: hidden; }
+.content::-moz-full-screen .sidebar    { visibility: hidden; }
+.content::-ms-fullscreen .sidebar      { visibility: hidden; }
+
 .doc.readonly > .sidebar > .save { display: none }
 
 .cm-s-mdn-like .CodeMirror-linenumber { margin-left: 0 !important }

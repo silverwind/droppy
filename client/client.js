@@ -2047,6 +2047,10 @@
         view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer));
 
+        view.find(".fs").register("click", function () {
+            setFullscreen($(this).parents(".content")[0]);
+        });
+
         view.find(".media-container img").each(function () {
             $(this).one("load", aspectScale);
         });
@@ -2303,7 +2307,7 @@
                 priv: true
             });
         });
-        $(".list-user .remove").on("click", function (event) {
+        $(".list-user .remove").register("click", function (event) {
             event.stopPropagation();
             sendMessage(null, "UPDATE_USER", {
                 name: $(this).parents("li").children(".username").text(),
@@ -2648,6 +2652,15 @@
                     '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
                     '<span class="header-spacer"></span>' +
                 '</div>';
+    }
+
+    function setFullscreen(el) {
+        ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"].some(function (prop) {
+            if (prop in el) {
+                el[prop]();
+                return true;
+            }
+        });
     }
 
     function timeDifference(previous) {
