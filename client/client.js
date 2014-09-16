@@ -14,20 +14,16 @@
 // ============================================================================
     droppy.detects = {
         animation: (function () {
-            var props = ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
-                el    = document.createElement("div");
-            while (props.length) {
-                if (props.pop() in el.style) return true;
-            }
-            return false;
+            var el = document.createElement("div");
+            return droppy.prefixes.animation.some(function (prop) {
+                if (prop in el.style) return true;
+            });
         })(),
         inputDirectory: (function () {
-            var props = ["directory", "mozdirectory", "webkitdirectory", "msdirectory"],
-                el    = document.createElement("input");
-            while (props.length) {
-                if (props.pop() in el) return true;
-            }
-            return false;
+            var el = document.createElement("input");
+            return droppy.prefixes.directory.some(function (prop) {
+                if (prop in el) return true;
+            });
         })(),
         audioTypes: (function () {
             var types = {},
@@ -154,7 +150,7 @@
             }
         };
         // Listen for the animation event for our pseudo-animation
-        ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"].forEach(function (eventName) {
+        droppy.prefixes.animationstart.forEach(function (eventName) {
             document.addEventListener(eventName, animStart);
         });
     }
@@ -1620,10 +1616,10 @@
             // Try to find the supported getAsEntry function
             if (items && items[0]) {
                 fileItem = (items[0].type === "text/uri-list") ? items[1] : items[0];
-                var funcs = ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"];
-                for (var f = 0; f < funcs.length; f++) {
-                    if (fileItem[funcs[f]]) {
-                        entryFunc = funcs[f];
+                for (var f = 0; f < droppy.prefixes.getAsEntry.length; f++) {
+                    var func = droppy.prefixes.getAsEntry[f];
+                    if (fileItem[func]) {
+                        entryFunc = func;
                         break;
                     }
                 }
@@ -2376,6 +2372,16 @@
         droppy.emptyFiles = null;
         droppy.emptyFolders = null;
 
+        droppy.prefixes = {
+            animation         : ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
+            directory         : ["directory", "mozdirectory", "webkitdirectory", "msdirectory"],
+            animationstart    : ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"],
+            getAsEntry        : ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"],
+            requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
+            fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange" ],
+            fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"]
+        };
+
         // Extension to icon mappings
         droppy.iconMap = {
             "archive":  ["bz2", "gz", "tgz"],
@@ -2655,19 +2661,15 @@
     }
 
     function setFullscreen(el) {
-        var req = ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
-            chg = ["fullscreenchange",  "mozfullscreenchange",  "webkitfullscreenchange",  "msfullscreenchange" ],
-            elm = ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"];
-
-        req.some(function (prop) {
+        droppy.prefixes.requestFullscreen.some(function (prop) {
             if (prop in el) {
                 el[prop]();
                 return true;
             }
         });
-        chg.forEach(function (eventName) {
+        droppy.prefixes.fullscreenchange.forEach(function (eventName) {
             $(document).register(eventName, function () {
-                var isFullScreen = elm.some(function (prop) {
+                var isFullScreen = droppy.prefixes.fullscreenElement.some(function (prop) {
                     if (prop in document) return Boolean(document[prop]);
                 });
                 if (isFullScreen) {
