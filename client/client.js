@@ -2656,13 +2656,8 @@
 
     function setFullscreen(el) {
         var req = ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
-            chg = ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange"],
-            elm = ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
-            listener = function (e) {
-                if (e.keyCode === 32) {
-                    $(el).parents(".view").find(e.shiftKey ? ".arrow-back" : ".arrow-forward").click();
-                }
-            };
+            chg = ["fullscreenchange",  "mozfullscreenchange",  "webkitfullscreenchange",  "msfullscreenchange" ],
+            elm = ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"];
 
         req.some(function (prop) {
             if (prop in el) {
@@ -2675,10 +2670,35 @@
                 var isFullScreen = elm.some(function (prop) {
                     if (prop in document) return Boolean(document[prop]);
                 });
-                document[isFullScreen ? "addEventListener" : "removeEventListener"]("keydown", listener);
+                if (isFullScreen) {
+                    addKey(32, function (e) { $(el).parents(".view").find(e.shiftKey ? ".arrow-back" : ".arrow-forward").click(); });
+                    addKey([37, 38], function () { $(el).parents(".view").find(".arrow-back").click(); });
+                    addKey([39, 40], function () { $(el).parents(".view").find(".arrow-forward").click(); });
+                } else {
+                    removeKey([32, 37, 38, 39, 40]);
+                }
             });
         });
     }
+
+    var bindings = {};
+    function addKey(keyCode, callback) {
+        keyCode = Array.isArray(keyCode) ? keyCode : [keyCode];
+        keyCode.forEach(function (key) { bindings[key] = callback; });
+        setBindings();
+    }
+    function removeKey(keyCode) {
+        keyCode = Array.isArray(keyCode) ? keyCode : [keyCode];
+        keyCode.forEach(function (key) { delete bindings[key]; });
+        setBindings();
+    }
+    function setBindings() {
+        document[Object.keys(bindings) > 0 ? "addEventListener" : "removeEventListener"]("keydown", function (e) {
+            var func = bindings[e.keyCode];
+            if (func) func(e);
+        });
+    }
+
 
     function timeDifference(previous) {
         var msPerMinute = 60 * 1000,
