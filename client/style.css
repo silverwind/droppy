@@ -1141,12 +1141,13 @@ input:-webkit-autofill {
     border-radius: 6px;
     box-shadow: 0 0 30px rgba(0,0,0,.4);
     color: #666;
-    height: 200px;
+    height: 120px;
     left: 50%;
     position: fixed;
     transform: translate(-50%, -50%);
     transition: all .3s ease;
-    width: 320px;
+    width: 300px;
+    text-align: center;
     z-index: 32;
 }
 
@@ -1158,25 +1159,13 @@ input:-webkit-autofill {
     width: 90%;
 }
 
-#about-box a {
-    color: #333;
-}
-
-#about-box a:hover {
-    color: #f55;
-}
-
 #about-title {
     color: #333;
-    font-size: 1.4em;
-    line-height: 1.8em;
+    font-size: 1.5em;
+    margin-top: .75em;
+    margin-bottom: .25em;
     width: 100%;
     text-align: center;
-}
-
-#about-text {
-    font-size: .7em;
-    line-height: 1.25em;
 }
 
 #about-copy {
@@ -1188,12 +1177,21 @@ input:-webkit-autofill {
 
 #about-box .github {
     fill: #333;
-    bottom: 0;
-    padding: 6px 5%;
-    position: absolute;
-    right: 0;
+    display: inline-block;
+    vertical-align: middle;
+    height: 1em;
+    margin-bottom: 0.25em;
 }
-#about-box .github:hover { fill: #f55 }
+#about-box #about-copy a { color: #555 }
+#about-box #about-copy a:hover { text-decoration: underline; }
+
+#about-fork {
+    font-size: .66em;
+    color: #333;
+    padding: .1em .5em .1em 0;
+    border-radius: .5em;
+}
+#about-fork:hover { background: #ddd }
 
 /* =============================== Options ============================== */
 
