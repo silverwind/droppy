@@ -54,7 +54,8 @@ var server =  function init(home, options, isStandalone, callback) {
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
-        if (config.debug) updateCSS();                           // Intialize the CSS cache when debugging
+        if (config.debug) updateCSS();
+        if (config.debug) watchCSS();
         log.simple("Preparing resources ...");
         async.series([
             function (cb) {
@@ -284,7 +285,6 @@ function createListener(handler, tlsData) {
 
     server.on("listening", function () {
         setupSocket(server);
-        if (config.debug) watchCSS();
         log.simple("Listening on ", chalk.cyan(server.address().address),
                    ":", chalk.blue(server.address().port));
     });
@@ -1373,26 +1373,28 @@ function cleanUpEtags() {
 }
 
 //-----------------------------------------------------------------------------
-// Watch the CSS files for debugging
+// Watch and update style.css for debugging
 function watchCSS() {
-    ["client/style.css", "client/sprites.css"].forEach(function (file) {
-        fs.watch(path.join(paths.module, file), updateCSS);
-    });
+    fs.watch(path.join(paths.client, "/style.css"), updateCSS);
 }
 
-//-----------------------------------------------------------------------------
-// Update the debug CSS cache and send it to the client(s)
-function updateCSS() {
-    var temp = "";
-    ["client/style.css", "client/sprites.css"].forEach(function (file) {
-        temp += fs.readFileSync(path.join(paths.module, file)).toString("utf8") + "\n";
-    });
-    Object.keys(clients).forEach(function (cookie) {
-        send(clients[cookie].ws, JSON.stringify({
-            "type"  : "UPDATE_CSS",
-            "css"   : ap({browsers: "last 2 versions"}).process(temp).css
-        }));
-    });
+var lastUpdates = {};
+function updateCSS(event, filename) {
+    if (!lastUpdates[filename] || Date.now() - lastUpdates[filename] > 1000) {
+        lastUpdates[filename] = Date.now();
+        setTimeout(function () { // Short timeout in case Windows still has the file locked
+            var css = "";
+            css += fs.readFileSync(path.join(paths.client, "/style.css")).toString("utf8");
+            css += fs.readFileSync(path.join(paths.client, "/sprites.css")).toString("utf8");
+            css = ap({browsers: "last 2 versions"}).process(css).css;
+            Object.keys(clients).forEach(function (cookie) {
+                send(clients[cookie].ws, JSON.stringify({
+                    "type"  : "UPDATE_CSS",
+                    "css"   : css
+                }));
+            });
+        }, 200);
+    }
 }
 
 //-----------------------------------------------------------------------------

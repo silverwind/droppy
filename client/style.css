@@ -2,32 +2,24 @@
 /* ================================= Fonts ================================= */
 
 @font-face {
-    font-family: "Open Sans";
-    font-style: normal;
-    font-weight: 300;
-    src: local("Open Sans Light"),
-         local("OpenSans-Light"),
-         url("?!/OpenSans-Light.woff") format("woff");
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 300;
+  src: local("Roboto Light"), local("Roboto-Light"), url("?!/Roboto.woff") format("woff");
 }
 
-@font-face {
-    font-family: "Open Sans";
-    font-style: normal;
-    font-weight: 400;
-    src: local("Open Sans"),
-         local("OpenSans"),
-         url("?!/OpenSans-Regular.woff") format("woff");
-}
-
-/* ============================ Resets and relatives ============================= */
+/* ================================= Reset ================================= */
 
 body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
-    -webkit-touch-callout: none;
     -webkit-text-size-adjust: 100%;
+    -webkit-touch-callout: none;
+    border: 0;
     box-sizing: border-box;
+    font-size: 100%;
     font-weight: inherit;
     margin: 0;
     padding: 0;
+    vertical-align: baseline;
 }
 
 li { list-style: none }
@@ -46,7 +38,7 @@ button, input { line-height: normal }
 
 html {
     background: #ddd;
-    font: 1.5em/1 "Open Sans", Helvetica, sans-serif;
+    font: 1.5em/1 "Roboto", Helvetica, sans-serif;
     font-weight: 300;
     overflow: hidden;
     text-rendering: geometricPrecision;
@@ -68,12 +60,6 @@ input:-webkit-autofill {
   background-color: #221 !important;
   background-image: none !important;
   color: #fff !important;
-}
-
-/* bolder font */
-#login-info-box, #about-title, #about-copy, .submit {
-    font-weight: 400;
-    letter-spacing: 0;
 }
 
 /* ============================ Main Page Layout =========================== */
@@ -478,7 +464,6 @@ input:-webkit-autofill {
 
 .playing a.entry-link {
     color: #16a;
-    font-weight: 400;
 }
 
 .playing svg.pause {
@@ -575,7 +560,6 @@ input:-webkit-autofill {
 }
 
 .empty .text {
-    font-weight: 400;
     font-size: 20px;
     line-height: 20px;
     position: relative;
@@ -850,7 +834,6 @@ input:-webkit-autofill {
     text-align: center;
     opacity: 0;
     font-size: .8em;
-    font-weight: 400;
 }
 
 .content > .sidebar > li:hover         { cursor: pointer }
@@ -1103,7 +1086,6 @@ input:-webkit-autofill {
     white-space: nowrap;
     left: 10em;
     right: 10em;
-    font-weight: 400;
     line-height: 2em;
     z-index: 1;
 }
@@ -1159,7 +1141,6 @@ input:-webkit-autofill {
     border-radius: 6px;
     box-shadow: 0 0 30px rgba(0,0,0,.4);
     color: #666;
-    font-weight: 300;
     height: 200px;
     left: 50%;
     position: fixed;
@@ -1179,7 +1160,6 @@ input:-webkit-autofill {
 
 #about-box a {
     color: #333;
-    font-weight: 400;
 }
 
 #about-box a:hover {
@@ -1268,7 +1248,6 @@ input:-webkit-autofill {
     text-align: left;
     line-height: 1.75em;
     flex: 1;
-    font-weight: 400;
     transition: color .25s ease;
 }
 #options-box .list-options li:hover label  { color: #111 }
@@ -1315,7 +1294,6 @@ input:-webkit-autofill {
     line-height: 1.75em;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-weight: 400;
     background: #fff;
 }
 
@@ -1326,7 +1304,6 @@ input:-webkit-autofill {
 @media all and (max-width: 799px) {
     #options-box .list-user h4 {
         display: block;
-        font-weight: 400;
         width: 100%;
         text-align: center;
         font-size: 1.5em;
@@ -1365,7 +1342,6 @@ input:-webkit-autofill {
     border-radius: 4px;
     margin: 0 .25em;
     cursor: pointer;
-    font-weight: 400;
     margin: 0 .25em;
 }
 #options-box .list-user .add-user:hover {color: #000 }
@@ -1658,7 +1634,6 @@ input[type="checkbox"] { display: none }
     border-radius: 6px;
     visibility: hidden;
     transition: visibilty .3s ease, opacity .3s ease;
-    font-weight: 400;
     opacity: 0;
     display: flex;
     flex-direction: row;
@@ -1712,7 +1687,6 @@ input[type="checkbox"] { display: none }
     color: #eee;
     position: fixed;
     font-size: .75em;
-    font-weight: 400;
     visibility: hidden;
     opacity: 0;
     width: 80px;

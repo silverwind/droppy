@@ -48,8 +48,7 @@ var files = {
             "client/templates/options.dotjs"
         ],
         other: [
-            "client/OpenSans-Light.woff",
-            "client/OpenSans-Regular.woff",
+            "client/Roboto.woff",
             "client/favicon.ico"
         ]
     };
