@@ -25,9 +25,8 @@ If you want to install a permanent server, follow the guides for [debian](https:
 ###Module Usage - Express
 droppy can be used with [express](http://expressjs.com/):
 ```js
-var express = require("express"),
-    droppy  = require("droppy"),
-    app     = express();
+var droppy = require("droppy"),
+    app = require("express")();
 
 app.use("/", droppy("/srv/droppy", { linkLength: 8 }));
 app.listen(80);
