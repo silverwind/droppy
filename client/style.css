@@ -346,8 +346,10 @@ input:-webkit-autofill {
 .file-header {
     display: flex;
     order: -1;
-    color: #444;
-    border-bottom: 1px solid #ddd;
+    color: #666;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: .1em;
+    margin-bottom: .1em;
     user-select: none;
 }
 
@@ -360,22 +362,26 @@ input:-webkit-autofill {
 
 .file-header .triangle {
     position: relative;
-    height: .6em;
-    width: .6em;
+    height: .5em;
+    width: .5em;
     margin-left: .25em;
     transition: all .2s ease;
     fill: #666;
     z-index: 2;
+    top: -.1em;
+    left: -.2em;
 }
 
 .file-header .down .triangle {
     transform: rotate(90deg);
-    top: .15em;
+    top: 0;
+    left: -.3em;
 }
 
 .file-header .up .triangle {
     transform: rotate(270deg);
-    top: -.15em;
+    top: -.2em;
+    left: -.3em;
 }
 
 .file-header .active  { color: #000; }
