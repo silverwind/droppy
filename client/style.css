@@ -37,7 +37,7 @@ button, input { line-height: normal }
 /* ============================ Global styles / fonts ============================= */
 
 html {
-    background: #ddd;
+    background: #181818;
     font: 1.5em/1 "Roboto", Helvetica, sans-serif;
     font-weight: 300;
     overflow: hidden;
@@ -199,8 +199,7 @@ input:-webkit-autofill {
 .view .directory.content ul {
     background: #eee;
     padding: .25em;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    border-radius: 2px;
+    border-radius: 3px;
 }
 .view .directory.content ul {
     display: flex;
@@ -614,11 +613,11 @@ input:-webkit-autofill {
     position: absolute;
     animation: spin 1s infinite linear;
     border-bottom : 5px solid #18f;
-    border-left   : 5px solid #333;
-    border-right  : 5px solid #333;
+    border-left   : 5px solid #000;
+    border-right  : 5px solid #000;
     border-top    : 5px solid #f1a;
     border-radius: 100%;
-    box-shadow: 0 0 20px rgba(0,0,0,.4);
+    box-shadow: 0 0 10px #000, inset 0 0 10px #000;
     height: 200px;
     width: 200px;
     left: calc(50% - 100px);
@@ -1365,7 +1364,6 @@ input:-webkit-autofill {
 #center-box {
     background: #f8f8f8;
     border-radius: 6px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.3);
     color: #666;
     height: 350px;
     left: 50%;
