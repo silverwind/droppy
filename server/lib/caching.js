@@ -116,6 +116,7 @@ var modesByMime = {
     "text/x-lua": "lua",
     "text/x-mariadb": "sql",
     "text/x-markdown": "markdown",
+    "text/x-modelica": "modelica",
     "text/x-nginx-conf": "nginx",
     "text/x-ocaml": "mllike",
     "text/x-octave": "octave",

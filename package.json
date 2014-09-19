@@ -28,7 +28,7 @@
     "busboy": "~0.2.8",
     "chalk": "~0.5.1",
     "clean-css": "~2.2.16",
-    "codemirror": "~4.5.0",
+    "codemirror": "~4.6.0",
     "cpr": "~0.3.2",
     "dot": "~1.0.2",
     "graceful-fs": "~3.0.2",
