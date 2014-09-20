@@ -1,4 +1,4 @@
-/*global CodeMirror, t */
+/*global CodeMirror, t, Notification */
 
 (function ($, window, document) {
     "use strict";
@@ -53,10 +53,14 @@
             };
             img.src = "data:image/webp;base64,UklGRi4AAABXRUJQVlA4TCEAAAAvAUAAEB8wAiMwAgSSNtse/cXjxyCCmrYNWPwmHRH9jwMA";
         })(),
+        notification: (function () {
+            return "Notification" in window;
+        })(),
         mobile: (function () {
             return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent);
         })()
     };
+
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
@@ -394,21 +398,12 @@
                 break;
             case "UPLOAD_DONE":
                 view = getView(vId);
-                if (droppy.emptyFiles.length) {
+                if (droppy.emptyFiles.length)
                     sendEmptyFiles(view);
-                } else if (droppy.emptyFolders.length) {
+                else if (droppy.emptyFolders.length)
                     sendEmptyFolders(view);
-                } else {
-                    view[0].isUploading = false;
-                    updateTitle(basename(getView(vId)[0].currentFolder));
-                    view.find(".upload-info").setTransitionClass("in", "out");
-                    view.find(".data-row.uploading").removeClass("uploading");
-                    setTimeout(function () {
-                        view.find(".upload-bar-inner").removeAttr("style");
-                    }, 200);
-                    view.find(".icon-uploading").remove();
-                    hideSpinner(view);
-                }
+                else
+                    uploadFinish(view);
                 break;
             case "UPDATE_CSS":
                 reloadCSS(msg.css);
@@ -915,26 +910,26 @@
         // Load the new files into view
         openDirectory(view, true);
 
-        var start = Date.now();
-
         // Create the XHR2 and bind the progress events
         var xhr = new XMLHttpRequest();
-        xhr.upload.addEventListener("progress", function (event) { uploadProgress(view, start, event); });
+        xhr.upload.addEventListener("progress", function (event) { uploadProgress(view, event); });
         xhr.upload.addEventListener("load", function () { uploadDone(view); });
         xhr.upload.addEventListener("error", function (event) {
             if (event && event.message) console.info(event.message);
+            showError(view, event.message);
             uploadDone(view);
         });
-
-        view.find(".upload-title").text("Uploading " + numFiles + " file" + (numFiles > 1 ? "s" : ""));
 
         $(".upload-cancel").register("click", function () {
             xhr.abort();
             uploadCancel(view);
         });
 
-        // And send the files
-        view[0].isUploading = true;
+        view[0].isUploading   = true;
+        view[0].uploadStart   = Date.now();
+        view[0].uploadText    = numFiles + " file" + (numFiles > 1 ? "s" : "");
+        view[0].uploadSuccess = false;
+        view.find(".upload-title").text("Uploading " + view[0].uploadText);
 
         if (formLength) {
             xhr.open("POST", getRootPath() + "upload?" + $.param({
@@ -999,17 +994,33 @@
     function uploadDone(view) {
         view.find(".upload-bar-inner").css("width", "100%");
         view.find(".upload-title").text("Processing ...");
+        view[0].uploadSuccess = true;
     }
 
     function uploadCancel(view) {
-        view.find(".upload-bar-inner").css("width", "0");
-        view.find(".upload-title").text("Aborting ...");
         $(".uploading").remove(); // Remove preview elements
+        uploadFinish(view);
         sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
 
+    function uploadFinish(view) {
+        view[0].isUploading = false;
+        hideSpinner(view);
+        updateTitle(basename(view[0].currentFolder));
+        view.find(".upload-info").setTransitionClass("in", "out");
+        view.find(".data-row.uploading").removeClass("uploading");
+        view.find(".icon-uploading").remove();
+        if (view[0].uploadSuccess) {
+            showNotification("Upload finished", "Uploaded " + view[0].uploadText + " to " + view[0].currentFolder);
+            view[0].uploadSuccess = false;
+        }
+        setTimeout(function () {
+            view.find(".upload-bar-inner").removeAttr("style");
+        }, 200);
+    }
+
     var lastUpdate;
-    function uploadProgress(view, start, event) {
+    function uploadProgress(view, event) {
         if (!event.lengthComputable) return;
 
         // Update progress every 250ms at most
@@ -1017,7 +1028,7 @@
             var bytesSent  = event.loaded,
                 bytesTotal = event.total,
                 progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                speed      = convertToSI(bytesSent / ((Date.now() - start) / 1000), 2),
+                speed      = convertToSI(bytesSent / ((Date.now() - view[0].uploadStart) / 1000), 2),
                 elapsed, secs;
 
             updateTitle(progress);
@@ -1025,7 +1036,7 @@
             view.find(".upload-speed > span").text(speed.size + " " + speed.unit + "/s");
 
             // Calculate estimated time left
-            elapsed = Date.now() - start;
+            elapsed = Date.now() - view[0].uploadStart;
             secs = ((bytesTotal / (bytesSent / elapsed)) - elapsed) / 1000;
 
             if (secs > 60)
@@ -2824,6 +2835,28 @@
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
         });
+    }
+
+    function showNotification(msg, body) {
+        if (droppy.detects.notification) {
+            var show = function (msg, body) {
+                var opts = {icon: "?!/logo.svg"};
+                if (body) opts.body = body;
+                var n = new Notification(msg, opts);
+                n.onshow = function () { // Compat: Chrome
+                    var self = this;
+                    setTimeout(function () { self.close(); }, 4000);
+                };
+            };
+            if (Notification.permission === "granted") {
+                show(msg, body);
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission(function (permission) {
+                    if (!("permission" in Notification)) Notification.permission = permission;
+                    if (permission === "granted") show(msg, body);
+                });
+            }
+        }
     }
 
     function debounce(func, wait) {

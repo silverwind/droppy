@@ -49,6 +49,7 @@ var files = {
         ],
         other: [
             "client/Roboto.woff",
+            "client/logo.svg",
             "client/favicon.ico"
         ]
     };
