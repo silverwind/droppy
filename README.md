@@ -91,11 +91,8 @@ To update droppy, run
 $ [sudo] droppy update
 ```
 
-###Supported Browsers
-- Firefox (last 2 versions)
-- Chrome (last 2 versions)
-- Internet Explorer 10+ (not regularly tested)
+###Browser Support
+Regular testing is done on Firefox, Chrome and Safari on Desktops as well as Chrome and Firefox on Android. IE receives very limited testing, and 10 is required for basic functionality. IOS Safari is largely untested, but should work reasonably well.
 
 ###ProTips
 - For shortlinks to be compatible with `wget`, set `content-disposition = on` in `~/.wgetrc`.
-- Listen on ports < 1024 as regular user `setcap 'cap_net_bind_service=+ep' $(which node)`
