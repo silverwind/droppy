@@ -2841,7 +2841,7 @@
     function showNotification(msg, body) {
         if (droppy.detects.notification) {
             var show = function (msg, body) {
-                var opts = {icon: "?!/logo.svg"};
+                var opts = {icon: "?!/logo192.png"};
                 if (body) opts.body = body;
                 var n = new Notification(msg, opts);
                 n.onshow = function () { // Compat: Chrome
