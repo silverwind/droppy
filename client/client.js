@@ -25,6 +25,11 @@
                 if (prop in el) return true;
             });
         })(),
+        fullscreen: (function () {
+            return droppy.prefixes.fullscreenEnabled.some(function (prop) {
+                if (prop in document) return true;
+            });
+        })(),
         audioTypes: (function () {
             var types = {},
                 el    = document.createElement("audio");
@@ -168,8 +173,11 @@
         $("html").addClass("firefox"); // https://bugzilla.mozilla.org/show_bug.cgi?id=878058
     else if (navigator.userAgent.toLowerCase().indexOf("msie") > -1)
         $("html").addClass("ie");
+
     if (droppy.detects.mobile)
         $("html").addClass("mobile");
+    if (!droppy.detects.fullscreen)
+        $("html").addClass("nofullscreen");
 // ============================================================================
 //  localStorage wrapper functions
 // ============================================================================
@@ -2379,7 +2387,8 @@
             getAsEntry        : ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"],
             requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
             fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange" ],
-            fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"]
+            fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
+            fullscreenEnabled : ["fullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled", "msFullscreenEnabled"]
         };
 
         // Extension to icon mappings

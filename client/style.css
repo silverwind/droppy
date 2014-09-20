@@ -778,6 +778,12 @@ input:-webkit-autofill {
     transform: translate(-50%, -50%);
     transition: transform .3s ease, opacity .3s ease;
 }
+.nofullscreen .media-container > video {
+    position: absolute; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+}
 .media-container > video:not(:fullscreen) {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
@@ -813,7 +819,7 @@ input:-webkit-autofill {
     box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
-.content > .sidebar {
+.sidebar {
     position: absolute;
     top: .5em;
     bottom: 1em;
@@ -821,34 +827,36 @@ input:-webkit-autofill {
     width: 2.5em;
     user-select: none;
 }
-.content > .sidebar > li {
+.sidebar > li {
     position: relative;
     z-index: 5;
     margin-bottom: .25em;
 }
 
-.content > .sidebar svg {
+.sidebar svg {
     fill: #777;
     height: 1em;
     width: 1em;
     margin-left: .75em;
 }
 
-.content > .sidebar span {
+.sidebar span {
     display: block;
     text-align: center;
     opacity: 0;
     font-size: .8em;
 }
 
-.content > .sidebar > li:hover         { cursor: pointer }
-.content > .sidebar > .exit:hover svg  { fill:  #c33 }
-.content > .sidebar > .exit:hover span { color: #c33; opacity: 1 }
-.content > .sidebar > .save:hover svg  { fill:  #169 }
-.content > .sidebar > .save:hover span { color: #169; opacity: 1 }
-.content > .sidebar > .ww:hover svg    { fill:  #940 }
-.content > .sidebar > .ww:hover span   { color: #940; opacity: 1 }
-.content > .sidebar > .fs:hover svg    { fill:  #fff }
+.sidebar > li:hover         { cursor: pointer }
+.sidebar > .exit:hover svg  { fill:  #c33 }
+.sidebar > .exit:hover span { color: #c33; opacity: 1 }
+.sidebar > .save:hover svg  { fill:  #169 }
+.sidebar > .save:hover span { color: #169; opacity: 1 }
+.sidebar > .ww:hover svg    { fill:  #940 }
+.sidebar > .ww:hover span   { color: #940; opacity: 1 }
+.sidebar > .fs:hover svg    { fill:  #fff }
+
+.nofullscreen .sidebar > .fs { display: none }
 
 .content:fullscreen .sidebar           { visibility: hidden; }
 .content::-webkit-full-screen .sidebar { visibility: hidden; }
