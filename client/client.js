@@ -2254,6 +2254,7 @@
 
     function getTheme(theme, callback) {
         $.get("?!/theme/" + theme).then(function (data) {
+            if (!$("#cmTheme").length) $('<style id="cmTheme"></style>').appendTo("head");
             $("#cmTheme").text(data);
             droppy.set("theme", theme);
             if (callback) callback();
