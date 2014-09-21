@@ -624,6 +624,17 @@ input:-webkit-autofill {
     top:  calc(50% - 100px);
 }
 
+.loading-logo {
+    position: absolute;
+    fill: #eee;
+    stroke: #888;
+    stroke-width: 8;
+    width: 200px;
+    height: 200px;
+    left: calc(50% - 100px);
+    top:  calc(50% - 100px);
+}
+
 .spinner {
     float: right;
     animation: spin .75s infinite linear;
@@ -1175,7 +1186,7 @@ input:-webkit-autofill {
 #about-title {
     color: #333;
     font-size: 1.5em;
-    margin-top: .75em;
+    margin-top: .6em;
     margin-bottom: .25em;
     width: 100%;
     text-align: center;
