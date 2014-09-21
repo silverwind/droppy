@@ -1,11 +1,11 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg)](https://david-dm.org/silverwind/droppy)
 > Personal file server with a modern web interface
 
-###Features
-* Lightweight
+###Features 
+* Lightweight node.js backend, HTML5 frontend <img src="https://silverwind.github.io/droppy/logo.svg" width="240" height="240" align="right">
 * Responsive Layout
-* Realtime updating of all clients
-* Asynchronous uploads. Directory uploads in Chrome
+* Realtime updating of all clients 
+* Asynchronous uploads. Directory uploads in Chrome 
 * Zip download of directories
 * Edit text files in CodeMirror
 * Share public shortlinks to files/folders
