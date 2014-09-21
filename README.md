@@ -1,5 +1,5 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg)](https://david-dm.org/silverwind/droppy)
-> File server with a modern web interface
+> Personal file server with a modern web interface
 
 ###Features
 * Lightweight
@@ -9,7 +9,7 @@
 * Zip download of directories
 * Edit text files in CodeMirror
 * Share public shortlinks to files/folders
-* Media gallery, audio player
+* Picture gallery, Video streaming, Audio player
 * Drag and Drop support
 
 Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>. Also check out this <a target="_blank" href="http://droppy-demo.silverwind.io/#!/#!/">demo</a>.
