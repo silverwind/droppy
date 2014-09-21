@@ -1,4 +1,4 @@
-#droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg)](https://david-dm.org/silverwind/droppy)
+#droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat-square)](https://www.npmjs.org/package/droppy) [![Dependency Status](https://david-dm.org/silverwind/droppy.svg?style=flat-square)](https://david-dm.org/silverwind/droppy)
 > Personal file server with a modern web interface
 
 ###Features 
