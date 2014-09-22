@@ -68,7 +68,7 @@ var server =  function init(home, options, isStandalone, callback) {
             },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) { if (config.demoMode) cleanupForDemo(cb); else cb(); }
+            function (cb) { if (config.demoMode) cleanupForDemo(function (err) { if (err) log.error(err); cb(); }); else cb(); }
         ], function (err) {
             if (err) return callback(err);
             if (config.demoMode) setInterval(cleanupForDemo, 30 * 60 * 1000);
