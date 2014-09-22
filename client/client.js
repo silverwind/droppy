@@ -269,7 +269,7 @@
 
     // Load HTML and replace SVG placeholders
     function getPage() {
-        $.get("?!/content/" + Math.random().toString(36).substr(2, 4)).then(function (data, textStatus, xhr) {
+        $.get("?!/content").then(function (data, textStatus, xhr) {
             loadPage(xhr.getResponseHeader("X-Page-Type"), prepareSVG(data));
         });
     }
