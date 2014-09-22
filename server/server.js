@@ -183,7 +183,7 @@ function cleanupForDemo(doneCallback) {
                         ws.on("finish", function () {
                             fs.createReadStream(temp).pipe(output);
                         });
-                        request("http://goo.gl/O7sCU1").pipe(ws);
+                        request("http://goo.gl/ZC0IcZ?gdriveurl").pipe(ws);
                     } else {
                         fs.createReadStream(temp).pipe(output);
                     }
