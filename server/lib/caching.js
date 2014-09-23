@@ -50,7 +50,8 @@ var files = {
         other: [
             "client/Roboto.woff",
             "client/logo.svg",
-            "client/logo120.png",
+            "client/logo16.png",
+            "client/logo32.png",
             "client/logo128.png",
             "client/logo152.png",
             "client/logo180.png",
