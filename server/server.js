@@ -183,7 +183,7 @@ function cleanupForDemo(doneCallback) {
                         ws.on("finish", function () {
                             fs.createReadStream(zipDest).pipe(output);
                         });
-                        request("http://goo.gl/hhe7IE").pipe(ws);
+                        request("https://silverwind.io/droppy-samples.zip").pipe(ws);
                     } else {
                         fs.createReadStream(zipDest).pipe(output);
                     }
