@@ -168,24 +168,24 @@ function cleanupForDemo(doneCallback) {
             });
         },
         function (callback) {
-            var dest   = path.join(paths.files, "/sample-images"),
-                temp   = path.join(paths.temp, "/img.zip"),
-                output = require("unzip").Extract({ path: dest });
+            var dest    = path.join(paths.files, "/sample-images"),
+                zipDest = path.join(paths.home, "/img.zip"),
+                output  = require("unzip").Extract({ path: dest });
 
             output.on("error", callback);
             output.on("close", callback);
 
             mkdirp(dest, mkdirpOpts, function () {
-                fs.exists(temp, function (exists) {
+                fs.exists(zipDest, function (exists) {
                     if (!exists) {
                         log.simple("Downloading image samples ...");
-                        var ws = fs.createWriteStream(temp);
+                        var ws = fs.createWriteStream(zipDest);
                         ws.on("finish", function () {
-                            fs.createReadStream(temp).pipe(output);
+                            fs.createReadStream(zipDest).pipe(output);
                         });
-                        request("http://goo.gl/ZC0IcZ?gdriveurl").pipe(ws);
+                        request("https://silverwind.io/droppy-samples.zip").pipe(ws);
                     } else {
-                        fs.createReadStream(temp).pipe(output);
+                        fs.createReadStream(zipDest).pipe(output);
                     }
                 });
             });
