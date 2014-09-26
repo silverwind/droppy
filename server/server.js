@@ -1003,13 +1003,8 @@ function handleFileRequest(req, res, download) {
             } else {
                 var headers = {"Content-Type": mime.lookup(filepath)}, status = 200;
                 if (download) {
-                    if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                        filename = encodeURIComponent(path.basename(filepath)); // Encode Content-Disposition for IE 10/11
-                    else
-                        filename = path.basename(filepath);
-
                     headers["Content-Length"] = stats.size;
-                    headers["Content-Disposition"] = "attachment; filename=\"" + path.basename(filepath) + "\"";
+                    headers["Content-Disposition"] = utils.getDispo(filepath);
                     res.writeHead(status, headers);
                     fs.createReadStream(filepath).pipe(res);
                 } else {
@@ -1272,23 +1267,17 @@ function du(dir, callback) {
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, zipPath) {
-    var archive, dispo;
+    var archive;
     fs.stat(zipPath, function (err, stats) {
         if (err) {
             log.error(err);
         } else if (stats.isDirectory()) {
             res.statusCode = 200;
-
-            if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                dispo = ['attachment; filename="', encodeURIComponent(path.basename(zipPath)), '.zip"'].join("");
-            else
-                dispo = ['attachment; filename="', path.basename(zipPath), '.zip"'].join("");
-
             res.setHeader("Content-Type", mime.lookup("zip"));
-            res.setHeader("Content-Disposition", dispo);
+            res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
             res.setHeader("Transfer-Encoding", "chunked");
             log.info(req, res);
-            log.info("Streaming zip of /", req.url.substring(4));
+            log.info("Streaming zip of ", req.url.substring(4));
 
             archive = archiver("zip", {zlib: { level: config.zipLevel }});
             archive.on("error", function (error) { log.error(error); });
