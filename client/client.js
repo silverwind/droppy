@@ -284,14 +284,17 @@
             initMainPage();
             initEntryMenu();
             raf(function () {
-                oldPage.replaceClass("in", "out");
+                oldPage.replaceClass("in", "out").end(function () {
+                    $("#navigation").removeAttr("class"); // remove out class
+                });
                 finalize();
             });
         } else if (type === "auth" || type === "firstrun") {
             initAuthPage(type === "firstrun");
             raf(function () {
-                oldPage.replaceClass("in", "out");
-                $("#center-box").removeClass("out");
+                oldPage.replaceClass("in", "out").end(function () {
+                    $("#center-box").removeAttr("class"); // remove out class
+                });
                 if (type === "firstrun") {
                     $("#login-info").text("Hello! Choose your creditentials.");
                     $("#login-info-box").addClass("info");
