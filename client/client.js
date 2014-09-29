@@ -390,8 +390,8 @@
                         view[0].currentData = msg.data;
                         openDirectory(view);
                     } else if (view.data("type") === "image" || view.data("type") === "video") {
-                        populateMediaList(view, msg.data);
-                        populateMediaCache(view);
+                        view[0].currentData = msg.data;
+                        populateMediaCache(view, msg.data);
                         bindMediaArrows(view);
                     }
                 }
@@ -1923,7 +1923,7 @@
         }
     }
 
-    function populateMediaList(view, data) {
+    function populateMediaCache(view, data) {
         var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
@@ -1935,10 +1935,7 @@
             }
         });
         view[0].mediaFiles = view[0].mediaFiles.sort(naturalSort);
-    }
-
-    function populateMediaCache(view) {
-        [getNextMedia(view), getPrevMedia(view)].forEach(function (filename) {
+        [getPrevMedia(view), getNextMedia(view)].forEach(function (filename) {
             var src = getMediaSrc(view, filename);
             if (!src) return;
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
@@ -1947,7 +1944,7 @@
         });
     }
 
-    function getNextMedia(view) {
+    function getPrevMedia(view) {
         var curr = view[0].mediaFiles.indexOf(view[0].currentFile);
         if (curr > 0)
             return view[0].mediaFiles[curr - 1];
@@ -1955,7 +1952,7 @@
             return view[0].mediaFiles[view[0].mediaFiles.length - 1];
     }
 
-    function getPrevMedia(view) {
+    function getNextMedia(view) {
         var curr = view[0].mediaFiles.indexOf(view[0].currentFile);
         if (curr < (view[0].mediaFiles.length - 1))
             return view[0].mediaFiles[curr + 1];
@@ -1965,10 +1962,10 @@
 
     function bindMediaArrows(view) {
         view.find(".arrow-back").register("click", function () {
-            swapMedia(view, getNextMedia(view), "left");
+            swapMedia(view, getPrevMedia(view), "left");
         });
         view.find(".arrow-forward").register("click", function () {
-            swapMedia(view, getPrevMedia(view), "right");
+            swapMedia(view, getNextMedia(view), "right");
         });
 
         if (droppy.detects.mobile) { // Always show arrows on mobile
@@ -2010,7 +2007,7 @@
                 }
             })(oldEl, newEl);
             view[0].currentFile = filename;
-            populateMediaCache(view);
+            populateMediaCache(view, view[0].currentData);
             window.history.replaceState(null, null, getHashPaths(view, join(view[0].currentFolder, view[0].currentFile)));
             updatePath(view);
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
@@ -2057,8 +2054,7 @@
         view.data("type", type);
         previewer = $(t.views.media({ type: type, src: getMediaSrc(view, filename)}));
         if (sameFolder && view[0].currentData) {
-            populateMediaList(view, view[0].currentData);
-            populateMediaCache(view);
+            populateMediaCache(view, view[0].currentData);
         } else { // In case we switch into an unknown folder, request its files
             sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
         }
