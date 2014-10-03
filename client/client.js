@@ -2240,7 +2240,7 @@
 
                 if (value === "true") value = true;
                 else if (value === "false") value = false;
-                else value = parseFloat(value) || value;
+                else if (/^-?\d*(\.\d+)?$/.test(value)) value = parseFloat(value);
 
                 droppy.set(option, value);
 
