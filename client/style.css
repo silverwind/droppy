@@ -875,8 +875,6 @@ input:-webkit-autofill {
 
 .doc.readonly > .sidebar > .save { display: none }
 
-.cm-s-mdn-like .CodeMirror-linenumber { margin-left: 0 !important }
-.cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
 /* ============================ Text Editor ============================ */
 
 .doc > .text-editor > .CodeMirror {
@@ -887,6 +885,11 @@ input:-webkit-autofill {
     width: 100%;
     position: relative;
 }
+
+/* CM tweaks */
+.cm-s-mdn-like .CodeMirror-linenumber { margin-left: 0 !important }
+.cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
+.CodeMirror-scrollbar-filler { background: transparent }
 
 .path li.dirty { color: #f71 !important}
 .path li.saved { color: #7f1 !important}
