@@ -833,7 +833,7 @@ input:-webkit-autofill {
     position: absolute;
     top: .5em;
     bottom: 1em;
-    right: 0;
+    right: .5em;
     width: 2.5em;
     user-select: none;
 }
@@ -855,15 +855,18 @@ input:-webkit-autofill {
     text-align: center;
     opacity: 0;
     font-size: .8em;
+    padding: 2px 0 ;
+    border-radius: 3px;
 }
 
-.sidebar > li:hover         { cursor: pointer }
+.sidebar > li:hover         { cursor: pointer; }
+.sidebar > li:hover span    { color: #fff }
 .sidebar > .exit:hover svg  { fill:  #c33 }
-.sidebar > .exit:hover span { color: #c33; opacity: 1 }
+.sidebar > .exit:hover span { background: #c33; opacity: 1 }
 .sidebar > .save:hover svg  { fill:  #169 }
-.sidebar > .save:hover span { color: #169; opacity: 1 }
-.sidebar > .ww:hover svg    { fill:  #940 }
-.sidebar > .ww:hover span   { color: #940; opacity: 1 }
+.sidebar > .save:hover span { background: #169; opacity: 1 }
+.sidebar > .ww:hover svg    { fill:  #5c5 }
+.sidebar > .ww:hover span   { background: #5c5; opacity: 1 }
 .sidebar > .fs:hover svg    { fill:  #fff }
 
 .nofullscreen .sidebar > .fs { display: none }
@@ -1269,12 +1272,13 @@ input:-webkit-autofill {
 #options-box .list-options label {
     display: inline-block;
     white-space: nowrap;
-    text-align: left;
+    text-align: right;
     line-height: 1.75em;
+    margin-right: .5em;
     flex: 1;
-    transition: color .25s ease;
 }
-#options-box .list-options li:hover label  { color: #111 }
+
+#options-box .list-options li:hover label { color: #111; text-decoration: underline }
 
 @media all and (max-width: 319px) {
     #options-box .list-options ul li {
@@ -1294,22 +1298,23 @@ input:-webkit-autofill {
     }
 }
 
-#options-box .list-options select {
-    border-radius: 2px;
+.customSelect {
+    width: 50%;
+    padding: .25em;
+    border-radius: 3px;
     border: 1px solid #ccc;
-    background: #fff;
-    color: #666;
-    flex: 1 1;
-    outline: none;
-    display: inline-block;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    text-indent: .25em;
-    text-overflow: "";
-    transition: border-color .25s ease, color .25s ease;
+    background-color: #fff;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgNjQwIDY0MCI+PHBhdGggc3R5bGU9ImZpbGw6ICM2NjYiIGQ9Ik0zMjAgMGwtMTQ3LjIgMjMzLjZoMjk0LjM2OGwtMTQ3LjE2OC0yMzMuNnpNMzIwLjAzMiA2NDBsMTQ3LjE2OC0yMzMuNi0yOTQuNC0wLjAzMiAxNDcuMjMyIDIzMy42MzJ6Ij48L3BhdGg+PC9zdmc+);
+    background-size: 1em;
+    background-repeat: no-repeat;
+    background-position: right;
 }
-#options-box .list-options li:hover select { color: #111; border-color: #888 }
+
+.customSelectInner {
+    white-space: nowrap;
+}
+
+#options-box select { flex: 1 }
 
 #options-box .list-user li {
     padding: 0 .33em;
@@ -1317,7 +1322,7 @@ input:-webkit-autofill {
     height: 1.75em;
     line-height: 1.75em;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 3px;
     background: #fff;
 }
 

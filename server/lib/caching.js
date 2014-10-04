@@ -28,6 +28,7 @@ var files = {
         ],
         js: [
             "node_modules/jquery/dist/jquery.js",
+            "client/lib/jquery.customSelect.min.js",
             "client/client.js",
             "node_modules/codemirror/lib/codemirror.js",
             "node_modules/codemirror/addon/selection/active-line.js",

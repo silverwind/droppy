@@ -2215,12 +2215,17 @@
     function showOptions(userlist) {
         var box = $("#options-box");
         box.empty().append(createOptions);
+
         if (Object.keys(userlist).length > 0) {
             box.append(createUserList(userlist));
             box.replaceClass("single", "double");
         } else {
             box.replaceClass("double", "single");
         }
+
+        // Transform the select box, width is needed for the dropdown to behave correctly
+        $("#options-box select").width($(".list-options label").eq(0).width()).customSelect();
+
         bindUserlistEvents();
 
         $("select.theme").register("change", function () {
@@ -2235,7 +2240,7 @@
         toggleCatcher();
         $("#click-catcher").one("click", function () {
             box.find("select").each(function () {
-                var option = $(this).attr("class"),
+                var option = $(this).attr("class").replace(" hasCustomSelect", ""),
                     value = $(this).val();
 
                 if (value === "true") value = true;
