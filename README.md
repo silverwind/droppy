@@ -78,10 +78,12 @@ Note: Options marked with [1] are not used when used as a module.
 ###API
 ####droppy([home], [options])
 
-Returns an `onRequest` function, taking `req` and `res`. All arguments are optional.
+All arguments are optional.
 
 - `home`: The path to droppy's home folder. Defaults to `~/.droppy`.
 - `options`: The [options](#options) object. Defaults to the configuration object.
+
+Returns an `onRequest` function, taking `req` and `res`.
 
 ###CLI
 For available CLI commands see
