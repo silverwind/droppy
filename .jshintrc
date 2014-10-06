@@ -22,7 +22,6 @@
     "regexdash": true,
     "strict": true,
     "sub": true,
-    "trailing": false,
     "undef": true,
     "unused": true,
     "white": true
