@@ -1196,9 +1196,14 @@
                     var viewLoc = getViewLocation(view);
                     showSpinner(view);
                     // Find the direction in which we should animate
-                    if (viewDest.length > viewLoc.length) view[0].animDirection = "forward";
-                    else if (viewDest.length === viewLoc.length) view[0].animDirection = "center";
-                    else view[0].animDirection = "back";
+                    if (!viewLoc)
+                        view[0].animDirection = "center"
+                    else if (viewDest.length > viewLoc.length)
+                        view[0].animDirection = "forward";
+                    else if (viewDest.length === viewLoc.length)
+                        view[0].animDirection = "center";
+                    else
+                        view[0].animDirection = "back";
                     sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
                     // Skip the push if we're already navigating through history
