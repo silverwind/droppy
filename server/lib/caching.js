@@ -17,6 +17,7 @@ var async        = require("async"),
     zlib         = require("zlib");
 
 var doMinify,
+    etag         = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
     themesPath   = path.join(paths.module, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.module, "/node_modules/codemirror/mode");
 
@@ -164,7 +165,7 @@ caching.init = function init(minify, callback) {
     doMinify = minify;
     async.series([compileResources, readThemes, readModes], function (err, results) {
         if (err) return callback(err);
-        var cache = {}, etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
+        var cache = { etags: {} };
 
         cache.res = results[0];
 
@@ -178,7 +179,6 @@ caching.init = function init(minify, callback) {
             cache.modes[mode] = {data: results[2][mode], etag: etag, mime: mime.lookup("js")};
         });
 
-        // callback(null, cache);
         addGzip(cache, callback);
     });
 };
@@ -322,16 +322,12 @@ function compileResources(callback) {
     }
 
     // Save compiled resources
-    var etag = crypto.createHash("md5").update(String(Date.now())).digest("hex");
-
-    // Prepare HTML by removing tabs, CRs and LFs
-    while (files.html.length) {
+    while (files.html.length) {  // Prepare HTML by removing tabs, CRs and LFs
         var name = path.basename(files.html.pop()),
             data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version);
 
         resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
     }
-
     resCache["client.js"] = {data: out.js, etag: etag, mime: mime.lookup("js")};
     resCache["style.css"] = {data: out.css, etag: etag, mime: mime.lookup("css")};
 

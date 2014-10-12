@@ -63,8 +63,7 @@ var server = function init(home, options, isStandalone, callback) {
                 caching.init(!config.debug, function (err, c) {
                     if (err) return callback(err);
                     cache = c;
-                    cache.files = {};
-                    cb(err);
+                    cb();
                 });
             },
             function (cb) { cleanupTemp(cb); },
@@ -445,7 +444,7 @@ function setupSocket(server) {
                                 log.error(error);
                                 sendSaveStatus(cookie, vId, 1); // Save failed
                             } else {
-                                delete cache.files[msg.data.to];
+                                delete cache.etags[msg.data.to];
                                 sendSaveStatus(cookie, vId, 0); // Save successful
                             }
                         });
@@ -925,7 +924,7 @@ function handleResourceRequest(req, res, resourceName) {
         res.statusCode = 404;
         res.end();
     } else {
-        if ((req.headers["if-none-match"] || "") === resource.etag) {
+        if ((req.headers["if-none-match"] || "") === '"' + resource.etag + '"') {
             res.statusCode = 304;
             res.end();
         } else {
@@ -943,7 +942,7 @@ function handleResourceRequest(req, res, resourceName) {
                 res.setHeader("Cache-Control", "public, max-age=604800");
                 res.setHeader("Expires", new Date(Date.now() + 604800000).toUTCString());
             } else if (resource.etag) {
-                res.setHeader("ETag", resource.etag);
+                res.setHeader("ETag", '"' + resource.etag + '"');
             }
 
             // Content-Type
@@ -990,7 +989,7 @@ function handleFileRequest(req, res, download) {
     }
 
     // 304 response when Etag matches
-    if (!download && ((req.headers["if-none-match"] || "") === cache.files[filepath])) {
+    if (!download && ((req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"')) {
         res.statusCode = 304;
         res.end();
         log.info(req, res);
@@ -1002,16 +1001,15 @@ function handleFileRequest(req, res, download) {
             if (stats.isDirectory() && shortLink) {
                 streamArchive(req, res, filepath);
             } else {
-                var headers = {"Content-Type": mime.lookup(filepath)}, status = 200;
+                var headers = {"Content-Type": mime.lookup(filepath), "Content-Length": stats.size}, status = 200;
                 if (download) {
-                    headers["Content-Length"] = stats.size;
                     headers["Content-Disposition"] = utils.getDispo(filepath);
                     res.writeHead(status, headers);
                     fs.createReadStream(filepath).pipe(res);
                 } else {
-                    cache.files[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
+                    cache.etags[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
                     headers["Accept-Ranges"] = "bytes"; // advertise ranges support
-                    headers["Etag"] = cache.files[filepath];
+                    headers["Etag"] = '"' + cache.etags[filepath] + '"';
                     if (req.headers.range) {
                         var total        = stats.size,
                             range        = req.headers.range,
@@ -1361,10 +1359,9 @@ function cleanUpSessions() {
 }
 
 // Clean up Etag cache hourly
-setInterval(cleanUpEtags, 60 * 60 * 1000);
-function cleanUpEtags() {
-    cache.files = {};
-}
+setInterval(function () {
+    cache.etags = {};
+}, 60 * 60 * 1000);
 
 //-----------------------------------------------------------------------------
 // Watch and update style.css for debugging
