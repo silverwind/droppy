@@ -1993,7 +1993,10 @@
                     "controls": "controls",
                     "preload" : "auto"
                 }).one("loadedmetadata", aspectScale);
-                newEl[0].addEventListener("error", aspectScale);
+                newEl[0].addEventListener("error", function(event) {
+                    console.error(event);
+                    aspectScale();
+                });
             }
             (function swap(a, b) {
                 b.attr("src", getMediaSrc(view, filename));
