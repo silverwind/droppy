@@ -42,18 +42,37 @@ utils.getExt = function getExt(filename) {
 };
 
 utils.getNewPath = function getNewPath(origPath, callback) {
-    fs.stat(origPath, function (err) {
+    fs.stat(origPath, function (err, stats) {
         if (err) callback(origPath);
         else {
-            origPath = origPath.replace(/([\\\/]?\.?[^\\\/\.]+)([^\\\/]*)$/, function (match, filename, exts) {
-                var fnMatch = filename.match(/([\\\/\.]+\w+)\-(\d+)$/), i = 1;
-                if (fnMatch !== null) {
-                    filename = fnMatch[1];
-                    i = parseInt(fnMatch[2], 10) + 1;
+            var filename  = path.basename(origPath),
+                dirname   = path.dirname(origPath),
+                extension = "";
+
+            if (filename.indexOf(".") !== -1) {
+                extension = filename.substring(filename.lastIndexOf("."));
+                filename  = filename.substring(0, filename.lastIndexOf("."));
+            }
+
+            if (!/\-\d+$/.test(filename)) filename = filename + "-1";
+
+            var canCreate = false;
+            async.until(
+                function () {
+                    return canCreate;
+                },
+                function (cb) {
+                    var num = parseInt(filename.substring(filename.lastIndexOf("-") + 1), 10);
+                    filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
+                    fs.stat(path.join(dirname, filename + extension), function(err) {
+                        canCreate = err;
+                        cb();
+                    });
+                },
+                function () {
+                    callback(path.join(dirname, filename + extension));
                 }
-                return filename + "-" + i + exts;
-            });
-            getNewPath(origPath, callback);
+            );
         }
     });
 };
