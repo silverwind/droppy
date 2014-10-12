@@ -39,9 +39,9 @@ var files = {
             "node_modules/codemirror/keymap/sublime.js"
         ],
         html: [
-            "client/base.html",
-            "client/auth.html",
-            "client/main.html"
+            "client/html/base.html",
+            "client/html/auth.html",
+            "client/html/main.html"
         ],
         templates: [
             "client/templates/views/directory.dotjs",
@@ -51,14 +51,14 @@ var files = {
         ],
         other: [
             "client/Roboto.woff",
-            "client/logo.svg",
-            "client/logo16.png",
-            "client/logo32.png",
-            "client/logo128.png",
-            "client/logo152.png",
-            "client/logo180.png",
-            "client/logo192.png",
-            "client/favicon.ico"
+            "client/images/logo.svg",
+            "client/images/logo16.png",
+            "client/images/logo32.png",
+            "client/images/logo128.png",
+            "client/images/logo152.png",
+            "client/images/logo180.png",
+            "client/images/logo192.png",
+            "client/images/favicon.ico"
         ]
     };
 
