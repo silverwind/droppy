@@ -9,7 +9,9 @@ var cfg        = {},
     defaults   = {
         "host"         : "0.0.0.0",
         "port"         : 8989,
+        "public"       : false,
         "debug"        : false,
+        "timestamps"   : true,
         "useTLS"       : false,
         "useSPDY"      : false,
         "useHSTS"      : false,
@@ -19,10 +21,7 @@ var cfg        = {},
         "logLevel"     : 2,
         "maxOpen"      : 256,
         "maxFileSize"  : 0,
-        "zipLevel"     : 1,
-        "public"       : false,
-        "demoMode"     : false,
-        "timestamps"   : true
+        "zipLevel"     : 1
     };
 
 cfg.init = function (config, callback) {
@@ -32,7 +31,6 @@ cfg.init = function (config, callback) {
     } else if (process.env.NODE_ENV === "droppydemo") {
         config = _.defaults({
             "port"       : process.env.PORT,
-            "demoMode"   : true,
             "public"     : true,
             "timestamps" : false
         }, defaults);

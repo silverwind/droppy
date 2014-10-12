@@ -1,11 +1,11 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 > Personal file server with a modern web interface
 
-###Features 
+###Features
 * Lightweight node.js backend, HTML5 frontend <img src="https://silverwind.github.io/droppy/logo.svg" width="240" height="240" align="right">
 * Responsive Layout
-* Realtime updating of all clients 
-* Asynchronous uploads. Directory uploads in Chrome 
+* Realtime updating of all clients
+* Asynchronous uploads. Directory uploads in Chrome
 * Zip download of directories
 * Edit text files in CodeMirror
 * Share public shortlinks to files/folders
@@ -49,7 +49,6 @@ app.listen(80);
     "maxFileSize"  : 0,
     "zipLevel"     : 1,
     "public"       : false,
-    "demoMode"     : false,
     "timestamps"   : true
 }
 ```
@@ -60,8 +59,12 @@ Note: Options marked with [1] are not used when used as a module.
 Network interface(s) to listen on.
 ####`port` *string* / *array*
 Port(s) to listen on.
+####`public` *boolean*
+When enabled, no authentication is performed.
 ####`debug` *boolean*
 When enabled, skips resource minification and enables CSS reloading.
+####`timestamps` *boolean*
+When enabled, adds timestamps to log output.
 ####`useTLS` *boolean*
 When enabled, uses TLS encryption. When set, droppy will look for certificate files stored in `~/.droppy/config`: `tls.key`, `tls.cert`, `tls.ca`. If neither of these files are provided, droppy will use a self-signed certificate.
 ####`useSPDY` *boolean*
@@ -82,12 +85,6 @@ The maximum number of concurrently opened files. This number should only be of c
 The maximum file size in bytes a user can upload in a single file.
 ####`zipLevel` *interger*
 The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
-####`public` *boolean*
-When enabled, the client skips the user authentication.
-####`demoMode` *boolean*
-When enabled, the server will regularly clean out all files and restore samples.
-####`timestamps` *boolean*
-When enabled, adds timestamps to log output.
 
 ###API
 ####droppy([home], [options])

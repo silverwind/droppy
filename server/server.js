@@ -36,9 +36,10 @@ var cache      = {},
     hasServer  = null,
     ready      = false,
     mode       = {file: "644", dir: "755"},
+    isDemo     = process.env.NODE_ENV === "droppydemo",
     mkdirpOpts = {fs: fs, mode: mode.dir};
 
-var server =  function init(home, options, isStandalone, callback) {
+var server = function init(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
 
     async.series([
@@ -68,10 +69,10 @@ var server =  function init(home, options, isStandalone, callback) {
             },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) { if (config.demoMode) cleanupForDemo(function (err) { if (err) log.error(err); cb(); }); else cb(); }
+            function (cb) { if (isDemo) cleanupForDemo(function (err) { if (err) log.error(err); cb(); }); else cb(); }
         ], function (err) {
             if (err) return callback(err);
-            if (config.demoMode) setInterval(cleanupForDemo, 30 * 60 * 1000);
+            if (isDemo) setInterval(cleanupForDemo, 30 * 60 * 1000);
             ready = true;
             log.simple("Ready for requests!");
             callback();
@@ -339,7 +340,7 @@ function setupSocket(server) {
             case "REQUEST_SETTINGS":
                 send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
                     "debug"       : config.debug,
-                    "demoMode"    : config.demoMode,
+                    "demoMode"    : isDemo,
                     "public"      : config.public,
                     "maxFileSize" : config.maxFileSize
                 }}));
