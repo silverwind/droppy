@@ -188,6 +188,7 @@
     $(function () {
         var prefs, doSave, defaults = {
             volume : 0.5,
+            videoVolume : 0.5,
             theme: "xq-light",
             indentWithTabs : false,
             indentUnit : 4,
@@ -1992,11 +1993,8 @@
                     "loop"    : "loop",
                     "controls": "controls",
                     "preload" : "auto"
-                }).one("loadedmetadata", aspectScale);
-                newEl[0].addEventListener("error", function(event) {
-                    console.error(event);
-                    aspectScale();
                 });
+                newEl = $(bindVideoEvents(newEl[0]));
             }
             (function swap(a, b) {
                 b.attr("src", getMediaSrc(view, filename));
@@ -2043,6 +2041,20 @@
         });
     }
 
+    function bindVideoEvents(el) {
+        var volume = droppy.get("videoVolume");
+        if (volume) el.volume = volume;
+        el.addEventListener("loadedmetadata", aspectScale);
+        el.addEventListener("volumechange", function() {
+            droppy.set("videoVolume", this.volume);
+        });
+        el.addEventListener("error", function(event) {
+            console.error(event);
+            aspectScale();
+        });
+        return el;
+    }
+
     function getMediaSrc(view, filename) {
         var encodedId = join(view[0].currentFolder, filename).split("/"),
             i = encodedId.length - 1;
@@ -2073,8 +2085,7 @@
         });
 
         view.find(".media-container video").each(function () {
-            $(this).one("loadedmetadata", aspectScale);
-            this.addEventListener("error", aspectScale);
+            bindVideoEvents(this);
         });
 
         if (view[0].vId === 0) updateTitle(filename);
