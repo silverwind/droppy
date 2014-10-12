@@ -1031,7 +1031,7 @@
             var bytesSent  = event.loaded,
                 bytesTotal = event.total,
                 progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                speed      = convertToSI(bytesSent / ((Date.now() - view[0].uploadStart) / 1000), 2),
+                speed      = convertToSI(bytesSent / ((Date.now() - view[0].uploadStart) / 1000)),
                 elapsed, secs;
 
             updateTitle(progress);
@@ -2623,28 +2623,18 @@
     }
 
     function setSize(el, bytes) {
-        var result = convertToSI(bytes, 2);
+        var result = convertToSI(bytes);
         $(el).siblings(".size").attr("data-size", bytes).text(result.size + " " + result.unit);
     }
 
     // Convert raw byte numbers to SI values
-    function convertToSI(bytes, decimals) {
-        var step = 0, units = ["b", "k", "M", "G", "T"];
+    function convertToSI(bytes) {
+        var step = 0;
         while (bytes >= 1024) {
             bytes /= 1024;
             step++;
         }
-        if (!decimals) {
-            return {
-                size: (step === 0) ? bytes : Math.round(bytes),
-                unit: units[step]
-            };
-        } else {
-            return {
-                size: (step === 0) ? bytes : (bytes).toFixed(decimals),
-                unit: units[step]
-            };
-        }
+        return { size: bytes > 0 ? bytes.toPrecision(3) : 0, unit: ["b", "k", "M", "G", "T"][step] };
     }
     t.fn.convertToSI = convertToSI;
 

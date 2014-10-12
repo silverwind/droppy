@@ -397,7 +397,7 @@ input:-webkit-autofill {
     text-align: right;
 }
 .header-size {
-    flex: 0 0 6em;
+    flex: 0 0 5em;
     display: inline-block;
     text-align: right;
 }
@@ -483,7 +483,7 @@ input:-webkit-autofill {
 .size {
     text-align: right;
     white-space: nowrap;
-    flex: 0 0 6em;
+    flex: 0 0 5em;
     margin-right: 1em;
     display: inline-block;
 }
@@ -513,7 +513,7 @@ input:-webkit-autofill {
 @media all and (max-width: 639px) { .view .header-size                     { flex: 0 0 3em;    } }
 @media all and (max-width: 319px) { .view .header-size                     { display: none     } }
 @media all and (max-width: 639px) { .view .data-row .mtime                 { display: none     } }
-@media all and (max-width: 639px) { .view .data-row .size                  { flex: 0 0 4.5em; margin-right: .25em; font-size: .66em } }
+@media all and (max-width: 639px) { .view .data-row .size                  { flex: 0 0 3em; margin-right: .25em; font-size: .66em } }
 @media all and (max-width: 319px) { .view .data-row .size                  { display: none     } }
 @media all and (max-width: 319px) { .view .data-row svg                    { width: 1.1em      } }
 
