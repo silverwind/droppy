@@ -668,19 +668,27 @@ function send(ws, data) {
 // Perform clipboard operation, copy/paste or cut/paste
 function doClipboard(type, from, to) {
     fs.stat(from, function (error, stats) {
-        if (error) logError(error);
-        if (stats && !error) {
+        if (error) return logError(error);
+        if (stats) {
             if (type === "cut") {
                 mv(from, to, logError);
             } else {
                 if (stats.isFile()) {
                     utils.copyFile(from, to, logError);
                 } else {
-                    cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
+                    fs.readdir(from, function(error, files) {
+                        if (error) return logError(error);
+                        if (files.length) {
+                            cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
+                        } else {
+                            mkdirp(to, mkdirpOpts);
+                        }
+                    });
                 }
             }
         }
     });
+
     function logError(error) {
         if (!error) return;
         if (type === "cut")
