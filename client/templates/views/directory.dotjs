@@ -30,7 +30,6 @@ it = {
         <a class="folder-link entry-link">{{= temp.entryname }}</a>
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
-        <span class="size-unit">{{= temp.sizeUnit }}</span>
         <span class="shortlink faux-button" title="Get Shortlink">{{= droppy.svg.link }}</span>
         <span><a class="zip" title="Download as Zip" href="?~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= droppy.svg.download }}</a></span>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
@@ -42,7 +41,6 @@ it = {
         <a class="file-link entry-link" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
         <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
         <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
-        <span class="size-unit">{{= temp.sizeUnit }}</span>
         <span class="shortlink faux-button" title="Get Shortlink">{{= droppy.svg.link }}</span>
         <a class="download faux-button" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}" title="Download File">{{= droppy.svg.download }}</a>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
@@ -66,8 +64,7 @@ it = {
             {{  var obj = it.entries[entryname],
                     tempSize = t.fn.convertToSI(obj.size);
                     entryExt = entryname.match(extRE)[0];
-                    temp.size = tempSize.size;
-                    temp.sizeUnit = tempSize.unit;
+                    temp.size = tempSize.size + " " + tempSize.unit;
                     temp.id = folder + entryname;
                     temp.spriteClass = t.fn.getSpriteClass(entryExt);
                     temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;

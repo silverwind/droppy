@@ -2623,9 +2623,8 @@
     }
 
     function setSize(el, bytes) {
-        var temp = convertToSI(bytes);
-        $(el).siblings(".size").attr("data-size", bytes).text(temp.size);
-        $(el).siblings(".size-unit").text(temp.unit);
+        var result = convertToSI(bytes, 2);
+        $(el).siblings(".size").attr("data-size", bytes).text(result.size + " " + result.unit);
     }
 
     // Convert raw byte numbers to SI values
