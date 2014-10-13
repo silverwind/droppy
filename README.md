@@ -83,7 +83,7 @@ The amount of logging to show. `0` is no logging, `1` is errors, `2` is info ( H
 The maximum number of concurrently opened files. This number should only be of concern on Windows.
 ####`maxFileSize` *integer*
 The maximum file size in bytes a user can upload in a single file.
-####`zipLevel` *interger*
+####`zipLevel` *integer*
 The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
 
 ###API
