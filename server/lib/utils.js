@@ -49,7 +49,7 @@ utils.getNewPath = function getNewPath(origPath, callback) {
                 dirname   = path.dirname(origPath),
                 extension = "";
 
-            if (filename.indexOf(".") !== -1) {
+            if (filename.indexOf(".") !== -1 && stats.isFile()) {
                 extension = filename.substring(filename.lastIndexOf("."));
                 filename  = filename.substring(0, filename.lastIndexOf("."));
             }
