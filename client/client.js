@@ -1986,32 +1986,41 @@
             });
         }
 
-        function swapMedia(view, filename, dir) {
-            var newEl,
-                oldEl = view.find(".media-container > img, .media-container > video");
-            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1)
-                newEl = $("<img>").attr("class", dir).one("load", aspectScale);
-            else {
-                newEl = $("<video>").attr({
-                    "class"   : dir,
-                    "autoplay": "autoplay",
-                    "loop"    : "loop",
-                    "controls": "controls",
-                    "preload" : "auto"
+        function swap(a,b, dir) {
+            if (droppy.detects.animation) {
+                a.attr("class", dir === "left" ? "right" : "left");
+                b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
+                    a.remove();
                 });
-                newEl = $(bindVideoEvents(newEl[0]));
+            } else {
+                a.replaceWith(b);
             }
-            (function swap(a, b) {
-                b.attr("src", getMediaSrc(view, filename));
-                if (droppy.detects.animation) {
-                    a.attr("class", dir === "left" ? "right" : "left");
-                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
-                        a.remove();
-                    });
+        }
+
+        function swapMedia(view, filename, dir) {
+            var b, a = view.find(".media-container > img, .media-container > video"),
+                source = getMediaSrc(view, filename),
+                nextIsImage = Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1;
+
+            if (nextIsImage) {
+                b = $("<img>").attr("class", dir).attr("src", source).one("load", aspectScale);
+                swap(a, b, dir);
+            } else {
+                if (a[0].tagName.toLowerCase() == "video") {
+                    a.attr("src", getMediaSrc(view, filename));
                 } else {
-                    a.replaceWith(b);
+                    b = $("<video>").attr({
+                        "class"   : dir,
+                        "src"     : source,
+                        "autoplay": "autoplay",
+                        "loop"    : "loop",
+                        "controls": "controls",
+                        "preload" : "auto"
+                    });
+                    b = $(bindVideoEvents(b[0]));
+                    swap(a, b, dir);
                 }
-            })(oldEl, newEl);
+            }
             view[0].currentFile = filename;
             populateMediaCache(view, view[0].currentData);
             window.history.replaceState(null, null, getHashPaths(view, join(view[0].currentFolder, view[0].currentFile)));
