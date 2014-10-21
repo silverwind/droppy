@@ -427,10 +427,15 @@ input:-webkit-autofill {
     color: #333;
 }
 
-.data-row:not(.animating):not(.editing):hover {
+.data-row:not(.playing):not(.animating):not(.editing):hover {
     background: #f8f8f8;
     border-radius: 2px;
 }
+
+.data-row.playing { background: #1af }
+.data-row.playing a.entry-link, .playing span { color: #fff }
+.data-row.playing svg { fill: #fff !important }
+.data-row.playing svg:hover { background: #08d !important }
 
 .data-row.uploading .sprite {
     background: none;
@@ -466,14 +471,6 @@ input:-webkit-autofill {
 
 .inline-namer { background: transparent }
 
-.playing a.entry-link {
-    color: #16a;
-}
-
-.playing svg.pause {
-    fill: #d44 !important;
-}
-
 @keyframes zoom {
   0%   { transform: scale(1.3) }
   50%  { transform: scale(0.9) }
@@ -495,7 +492,7 @@ input:-webkit-autofill {
     display: inline-block;
 }
 
-.data-row svg {
+.data-row svg:not(.up-arrow):not(.play) {
     display: block;
     cursor: pointer;
     fill: #333;
@@ -503,7 +500,10 @@ input:-webkit-autofill {
     width: 1em;
     padding: .125em;
 }
-.data-row svg:not(.up-arrow):hover { background: #555; fill: #fff; border-radius: 4px }
+.data-row svg:not(.up-arrow):not(.play):hover {
+    background: #d8d8d8;
+    border-radius: 4px;
+}
 
 /* Hide certain list elements when width gets too small */
 @media all and (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .125em } }
@@ -515,7 +515,7 @@ input:-webkit-autofill {
 @media all and (max-width: 639px) { .view .data-row .mtime                 { display: none     } }
 @media all and (max-width: 639px) { .view .data-row .size                  { flex: 0 0 3em; margin-right: .25em; font-size: .66em } }
 @media all and (max-width: 319px) { .view .data-row .size                  { display: none     } }
-@media all and (max-width: 319px) { .view .data-row svg                    { width: 1.1em      } }
+@media all and (max-width: 319px) { .view .data-row svg:not(.up-arrow):not(.play) { width: 1.1em } }
 
 /* Hide them sooner when the view is split */
 @media all and (max-width: 1279px) {
@@ -581,22 +581,19 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .sprite { transform: scale(.90) } }
 @media all and (max-width:  639px) { .sprite { transform: scale(.85) } }
 
-.data-row.playable:hover .sprite {
+.data-row.playable:not(.playing):hover .sprite {
     background: none;
 }
 
-.data-row.playable:hover .icon-play svg {
+.data-row.playable:not(.playing):hover .icon-play svg {
     visibility: visible;
-    position: absolute;
 }
 
 .icon-play svg {
+    width: 24px; height: 24px;
     visibility: hidden;
     cursor: pointer;
-    height: 100%;
-    width: 100%;
-    transition: transform .2s ease;
-    fill: #46f;
+    fill: #333;
 }
 
 .loading {
@@ -1011,7 +1008,7 @@ input:-webkit-autofill {
 /* =============================== Audio Panel =============================== */
 
 #audio-controls {
-    background: linear-gradient(#111,#222);
+    background: #222;
     color: #aaa;
     flex: 0 0;
     order: 4;

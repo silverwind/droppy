@@ -2373,24 +2373,16 @@
         if (!player.canPlayType(droppy.audioTypes[getExt(source)]))
             return showError(playButton.parents(".view"), "Sorry, your browser can't play this file.");
 
-        $(".file-link").parent().removeClass("playing").removeClass("paused");
+        $(".file-link").parent().removeClass("playing");
         $(".icon-play").html(droppy.svg.play);
 
-        if (decodeURI(player.src).indexOf(source) > 0) {
-            if (player.paused) player.play();
-            else player.pause();
-        } else {
-            player.src = source;
-            player.load();
-            player.play();
-        }
+        player.src = source;
+        player.load();
+        player.play();
+
+
         if (playButton) {
-            if (player.paused) {
-                playButton.parent().parent().removeClass("playing").addClass("paused");
-            } else {
-                playButton.parent().parent().removeClass("paused").addClass("playing");
-            }
-            playButton.html(player.paused ? droppy.svg.play : droppy.svg.pause);
+            playButton.parent().parent().addClass("playing");
         }
     }
 
