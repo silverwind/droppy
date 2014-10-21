@@ -146,10 +146,9 @@ input:-webkit-autofill {
 /* ================================== View ================================= */
 .view {
     position: absolute;
-    bottom: 0;
-    left:0;
-    right:0;
-    top: 1.5rem;
+    bottom: 0; left:0; right:0; top:1.5rem;
+    display: flex;
+    flex-direction: column;
     transition: left .2s ease, right .2s ease;
 }
 .content-container {
@@ -157,6 +156,7 @@ input:-webkit-autofill {
     width: 100%;
     height: 100%;
     position: relative;
+    flex: 1;
 }
 
 .view.left  { left:0; right:50%; }
@@ -214,6 +214,8 @@ input:-webkit-autofill {
    width: 100%;
    position: absolute;
    z-index: 1;
+   flex: 0 0 1.5rem;
+   order: 1;
 }
 
 .view.right .path { border-left: 1px solid #333}
@@ -1008,9 +1010,9 @@ input:-webkit-autofill {
 /* =============================== Audio Panel =============================== */
 
 #audio-controls {
-    background: #222;
+    background: #181818;
     color: #aaa;
-    flex: 0 0;
+    flex: 0;
     order: 4;
     overflow: hidden;
     position: relative;
@@ -1018,7 +1020,7 @@ input:-webkit-autofill {
     width: 100%;
 }
 
-#audio-controls.in  { flex-basis: 2em; box-shadow: -2px 0 0 2px #444 }
+#audio-controls.in  { flex-basis: 1.5rem }
 #audio-controls.out { flex-basis: 0 }
 
 @media all and (min-width: 1024px) { #audio-controls { font-size: .9em} }

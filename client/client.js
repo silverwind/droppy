@@ -243,6 +243,23 @@
                         "<div class=\"content-container\"><div class=\"content\"></div></div>" +
                         "<div class=\"dropzone\"></div>" +
                         "<div class=\"info-box\"><div class=\"box-icon\"><svg></svg></div><span><input></span></div>" +
+                        "<div id=\"audio-controls\" class=\"out\">" +
+                          "<span id=\"volume-icon\" title=\"Scroll or click to modify the volume\">" +
+                            "<svg class=\"volume-medium\"></svg>" +
+                          "</span>" +
+                          "<input id=\"volume-slider\" class=\"out\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">" +
+                          "<span id=\"volume-level\"></span>" +
+                          "<span id=\"audio-title\"></span>" +
+                          "<div id=\"seekbar\">" +
+                            "<div id=\"seekbar-played\"></div>" +
+                            "<div id=\"seekbar-loaded\"></div>" +
+                          "</div>" +
+                          "<div id=\"time\">" +
+                            "<span id=\"time-cur\"></span>" +
+                            "<span> / </span>" +
+                            "<span id=\"time-max\"></span>" +
+                          "</div>" +
+                        "</div>" +
                     "</div>");
         destroyView(vId);
         view.appendTo("#view-container");
@@ -713,141 +730,6 @@
             $(".info-box").replaceClass("in", "out");
             toggleCatcher();
         });
-
-        // ============================================================================
-        //  Audio functions / events
-        // ============================================================================
-
-        var slider     = $("#volume-slider"),
-            volumeIcon = $("#volume-icon"),
-            controls   = $("#audio-controls"),
-            seekbar    = $("#seekbar"),
-            level      = $("#volume-level"),
-            tooltip    = $("#tooltip"),
-            player     = $("#audio-player")[0];
-
-        volumeIcon.register("click", function () {
-            slider.attr("class", slider.attr("class") === "" ? "in" : "");
-            level.attr("class", level.attr("class") === "" ? "in" : "");
-        });
-
-        seekbar.register("click", function (event) {
-            player.currentTime = player.duration * (event.clientX / window.innerWidth);
-        });
-
-        seekbar.register("mousemove", debounce(function (event) {
-            var left = event.clientX;
-            if (!player.duration) return;
-            tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
-            tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
-            tooltip.attr("class", "in");
-            tooltip.text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
-        }), 50);
-
-        seekbar.register("mouseleave", debounce(function () {
-            tooltip.removeAttr("class");
-        }), 50);
-
-        function onWheel(event) {
-            setVolume(event.wheelDelta || -event.detail);
-            slider.attr("class", "in");
-            level.attr("class", "in");
-        }
-
-        volumeIcon[0].addEventListener("mousewheel", onWheel);
-        volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
-        slider[0].addEventListener("mousewheel", onWheel);
-        slider[0].addEventListener("DOMMouseScroll", onWheel);
-
-        player.volume = droppy.get("volume");
-        slider.val(player.volume * 100);
-
-        var volumeTimeout;
-        function setVolume(delta) {
-            clearTimeout(volumeTimeout);
-            volumeTimeout = setTimeout(function () {
-                slider.attr("class", "");
-                level.attr("class", "");
-            }, 2000);
-            var volume = player.volume;
-            if (typeof delta === "number") {
-                if (delta > 0) {
-                    volume += 0.05;
-                    if (volume > 1) volume = 1;
-                } else {
-                    volume -= 0.05;
-                    if (volume < 0) volume = 0;
-                }
-            } else {
-                volume = slider.val() / 100;
-            }
-
-            player.volume = volume;
-            droppy.set("volume", volume);
-            slider.val(volume * 100);
-            level.text(Math.round(volume * 100) + "%");
-
-            if (player.volume === 0) volumeIcon.html(droppy.svg["volume-mute"]);
-            else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
-            else if (player.volume <= 0.67) volumeIcon.html(droppy.svg["volume-medium"]);
-            else volumeIcon.html(droppy.svg["volume-high"]);
-        }
-
-        slider.register("input", setVolume);
-        setVolume();
-
-        var played = $("#seekbar-played"),
-            loaded = $("#seekbar-loaded"),
-            fullyLoaded;
-
-        function updater() {
-            var cur = player.currentTime,
-                max = player.duration;
-            if (player.buffered && !fullyLoaded) {
-                var loadProgress = player.buffered.end(0) / max * 100;
-                loaded.css("width", loadProgress  + "%");
-                if (loadProgress === 100) fullyLoaded = true;
-            }
-            if (!cur || !max) return;
-            played.css("width", (cur  / max * 100)  + "%");
-            $("#time-cur").text(secsToTime(cur));
-            $("#time-max").text(secsToTime(max));
-        }
-
-        function playing() {
-            var matches = $(player).attr("src").match(/(.+)\/(.+)\./),
-                title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
-            droppy.isPlaying = true;
-            updateTitle(title);
-            $("#audio-title").text(title);
-            controls.attr("class", "in");
-            fullyLoaded = false;
-            droppy.audioUpdater = setInterval(updater, 100);
-        }
-
-        function stop(event) {
-            if (event.type === "ended") {
-                var next = $(".playing").next();
-                play($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
-            }
-            $("#audio-title").html("");
-            if (droppy.audioUpdater) {
-                clearInterval(droppy.audioUpdater);
-                droppy.audioUpdater = null;
-            }
-            droppy.isPlaying = false;
-            updateTitle(basename(getView()[0].currentFolder));
-            setTimeout(function () {
-                if (!droppy.isPlaying) {
-                    controls.attr("class", "out");
-                }
-            }, 500);
-        }
-
-        // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
-        player.addEventListener("pause", stop);
-        player.addEventListener("ended", stop);
-        player.addEventListener("playing", playing);
     }
     // ============================================================================
     //  Upload functions
@@ -2282,6 +2164,143 @@
                 });
             });
         });
+    }
+
+    // ============================================================================
+    //  Audio functions / events
+    // ============================================================================
+
+    function initAudio(view) {
+        var slider     = $("#volume-slider"),
+            volumeIcon = $("#volume-icon"),
+            controls   = $("#audio-controls"),
+            seekbar    = $("#seekbar"),
+            level      = $("#volume-level"),
+            tooltip    = $("#tooltip"),
+            player     = $("#audio-player")[0];
+
+        volumeIcon.register("click", function () {
+            slider.attr("class", slider.attr("class") === "" ? "in" : "");
+            level.attr("class", level.attr("class") === "" ? "in" : "");
+        });
+
+        seekbar.register("click", function (event) {
+            player.currentTime = player.duration * (event.clientX / window.innerWidth);
+        });
+
+        seekbar.register("mousemove", debounce(function (event) {
+            var left = event.clientX;
+            if (!player.duration) return;
+            tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
+            tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
+            tooltip.attr("class", "in");
+            tooltip.text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
+        }), 50);
+
+        seekbar.register("mouseleave", debounce(function () {
+            tooltip.removeAttr("class");
+        }), 50);
+
+        function onWheel(event) {
+            setVolume(event.wheelDelta || -event.detail);
+            slider.attr("class", "in");
+            level.attr("class", "in");
+        }
+
+        volumeIcon[0].addEventListener("mousewheel", onWheel);
+        volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
+        slider[0].addEventListener("mousewheel", onWheel);
+        slider[0].addEventListener("DOMMouseScroll", onWheel);
+
+        player.volume = droppy.get("volume");
+        slider.val(player.volume * 100);
+
+        var volumeTimeout;
+        function setVolume(delta) {
+            clearTimeout(volumeTimeout);
+            volumeTimeout = setTimeout(function () {
+                slider.attr("class", "");
+                level.attr("class", "");
+            }, 2000);
+            var volume = player.volume;
+            if (typeof delta === "number") {
+                if (delta > 0) {
+                    volume += 0.05;
+                    if (volume > 1) volume = 1;
+                } else {
+                    volume -= 0.05;
+                    if (volume < 0) volume = 0;
+                }
+            } else {
+                volume = slider.val() / 100;
+            }
+
+            player.volume = volume;
+            droppy.set("volume", volume);
+            slider.val(volume * 100);
+            level.text(Math.round(volume * 100) + "%");
+
+            if (player.volume === 0) volumeIcon.html(droppy.svg["volume-mute"]);
+            else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
+            else if (player.volume <= 0.67) volumeIcon.html(droppy.svg["volume-medium"]);
+            else volumeIcon.html(droppy.svg["volume-high"]);
+        }
+
+        slider.register("input", setVolume);
+        setVolume();
+
+        var played = $("#seekbar-played"),
+            loaded = $("#seekbar-loaded"),
+            fullyLoaded;
+
+        function updater() {
+            var cur = player.currentTime,
+                max = player.duration;
+            if (player.buffered && !fullyLoaded) {
+                var loadProgress = player.buffered.end(0) / max * 100;
+                loaded.css("width", loadProgress  + "%");
+                if (loadProgress === 100) fullyLoaded = true;
+            }
+            if (!cur || !max) return;
+            played.css("width", (cur  / max * 100)  + "%");
+            $("#time-cur").text(secsToTime(cur));
+            $("#time-max").text(secsToTime(max));
+        }
+
+        function playing() {
+            var matches = $(player).attr("src").match(/(.+)\/(.+)\./),
+                title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
+            droppy.isPlaying = true;
+            updateTitle(title);
+            $("#audio-title").text(title);
+            controls.attr("class", "in");
+            fullyLoaded = false;
+            droppy.audioUpdater = setInterval(updater, 100);
+        }
+
+        function stop(event) {
+            if (event.type === "ended") {
+                var next = $(".playing").next();
+                play($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
+            }
+            $("#audio-title").html("");
+            if (droppy.audioUpdater) {
+                clearInterval(droppy.audioUpdater);
+                droppy.audioUpdater = null;
+            }
+            droppy.isPlaying = false;
+            updateTitle(basename(getView()[0].currentFolder));
+            setTimeout(function () {
+                if (!droppy.isPlaying) {
+                    controls.attr("class", "out");
+                }
+            }, 500);
+        }
+
+        // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
+        player.addEventListener("pause", stop);
+        player.addEventListener("ended", stop);
+        player.addEventListener("playing", playing);
     }
 
     function getTheme(theme, callback) {
