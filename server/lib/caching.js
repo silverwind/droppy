@@ -21,7 +21,7 @@ var doMinify,
     themesPath   = path.join(paths.module, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.module, "/node_modules/codemirror/mode");
 
-var files = {
+caching.files = {
         css: [
             "node_modules/codemirror/lib/codemirror.css",
             "client/style.css",
@@ -273,8 +273,8 @@ function compileResources(callback) {
         out      = { css : "", js  : "" };
 
     // Read resources
-    Object.keys(files).forEach(function (type) {
-        resData[type] = files[type].map(function read(file) {
+    Object.keys(caching.files).forEach(function (type) {
+        resData[type] = caching.files[type].map(function read(file) {
             var data;
             try {
                 data = fs.readFileSync(path.join(paths.module, file)).toString("utf8");
@@ -307,7 +307,7 @@ function compileResources(callback) {
     resData.templates.forEach(function (data, index) {
         // Produce the doT functions
         templateCode += dottemplates
-            .produceFunction("t." + files.templates[index].replace(/\.dotjs$/, "")
+            .produceFunction("t." + caching.files.templates[index].replace(/\.dotjs$/, "")
             .split("/").slice(2).join("."), data);
     });
     templateCode += ";";
@@ -322,8 +322,8 @@ function compileResources(callback) {
     }
 
     // Save compiled resources
-    while (files.html.length) {  // Prepare HTML by removing tabs, CRs and LFs
-        var name = path.basename(files.html.pop()),
+    while (caching.files.html.length) {  // Prepare HTML by removing tabs, CRs and LFs
+        var name = path.basename(caching.files.html.pop()),
             data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version);
 
         resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
@@ -332,7 +332,7 @@ function compileResources(callback) {
     resCache["style.css"] = {data: out.css, etag: etag, mime: mime.lookup("css")};
 
     // Read misc files
-    files.other.forEach(function (file) {
+    caching.files.other.forEach(function (file) {
         var data, date,
             name     = path.basename(file),
             fullPath = path.join(paths.module, file);
