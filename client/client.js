@@ -247,8 +247,7 @@
                           "<span class=\"volume-icon\" title=\"Scroll or click to modify the volume\">" +
                             "<svg class=\"volume-medium\"></svg>" +
                           "</span>" +
-                          "<input class=\"volume-slider\" class=\"out\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">" +
-                          "<span class=\"volume-level\"></span>" +
+                          "<div class=\"volume-slider\" class=\"out\"></div>" +
                           "<span class=\"audio-title\"></span>" +
                           "<div class=\"seekbar\">" +
                             "<div class=\"seekbar-played\"></div>" +
@@ -2184,13 +2183,11 @@
             volumeIcon = view.find(".volume-icon"),
             controls   = view.find(".audio-controls"),
             seekbar    = view.find(".seekbar"),
-            level      = view.find(".volume-level"),
             tooltip    = view.find(".tooltip"),
             player     = view.find(".audio-player")[0];
 
         volumeIcon.register("click", function () {
-            slider.attr("class", slider.attr("class") === "" ? "in" : "");
-            level.attr("class", level.attr("class") === "" ? "in" : "");
+            slider.replaceClass("out", "in");
         });
 
         seekbar.register("click", function (event) {
@@ -2212,42 +2209,25 @@
 
         function onWheel(event) {
             setVolume(event.wheelDelta || -event.detail);
-            slider.attr("class", "in");
-            level.attr("class", "in");
         }
 
         volumeIcon[0].addEventListener("mousewheel", onWheel);
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
-        slider[0].addEventListener("mousewheel", onWheel);
-        slider[0].addEventListener("DOMMouseScroll", onWheel);
 
         player.volume = droppy.get("volume");
-        slider.val(player.volume * 100);
 
-        var volumeTimeout;
         function setVolume(delta) {
-            clearTimeout(volumeTimeout);
-            volumeTimeout = setTimeout(function () {
-                slider.attr("class", "");
-                level.attr("class", "");
-            }, 2000);
             var volume = player.volume;
-            if (typeof delta === "number") {
-                if (delta > 0) {
-                    volume += 0.05;
-                    if (volume > 1) volume = 1;
-                } else {
-                    volume -= 0.05;
-                    if (volume < 0) volume = 0;
-                }
+            if (delta > 0) {
+                volume += 0.05;
+                if (volume > 1) volume = 1;
             } else {
-                volume = slider.val() / 100;
+                volume -= 0.05;
+                if (volume < 0) volume = 0;
             }
 
             player.volume = volume;
             droppy.set("volume", volume);
-            slider.val(volume * 100);
-            level.text(Math.round(volume * 100) + "%");
 
             if (player.volume === 0) volumeIcon.html(droppy.svg["volume-mute"]);
             else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
@@ -2255,11 +2235,10 @@
             else volumeIcon.html(droppy.svg["volume-high"]);
         }
 
-        slider.register("input", setVolume);
         setVolume();
 
-        var played = $("#seekbar-played"),
-            loaded = $("#seekbar-loaded"),
+        var played = view.find(".seekbar-played"),
+            loaded = view.find(".seekbar-loaded"),
             fullyLoaded;
 
         function updater() {
@@ -2272,8 +2251,8 @@
             }
             if (!cur || !max) return;
             played.css("width", (cur  / max * 100)  + "%");
-            $("#time-cur").text(secsToTime(cur));
-            $("#time-max").text(secsToTime(max));
+            view.find(".time-cur").text(secsToTime(cur));
+            view.find(".time-max").text(secsToTime(max));
         }
 
         function playing() {
@@ -2281,18 +2260,22 @@
                 title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
             droppy.isPlaying = true;
             updateTitle(title);
-            $("#audio-title").text(title);
-            controls.attr("class", "in");
+            view.find(".audio-title").text(title);
+            controls.replaceClass("out", "in");
             fullyLoaded = false;
             droppy.audioUpdater = setInterval(updater, 100);
         }
 
         function stop(event) {
+            var view = $(event.target).parents(".view");
+
             if (event.type === "ended") {
-                var next = $(".playing").next();
-                play($((next.length) ? next.find(".icon-play") : $(".content ul").find(".icon-play").first()));
+                if (view[0].playlistIndex < view[0].playlist.length - 1)
+                    play(view, view[0].playlist[view[0].playlistIndex + 1]);
+                else
+                    play(view, view[0].playlist[0]);
             }
-            $("#audio-title").html("");
+            view.find(".audio-title").html("");
             if (droppy.audioUpdater) {
                 clearInterval(droppy.audioUpdater);
                 droppy.audioUpdater = null;
@@ -2301,7 +2284,7 @@
             updateTitle(basename(getView()[0].currentFolder));
             setTimeout(function () {
                 if (!droppy.isPlaying) {
-                    controls.attr("class", "out");
+                    controls.replaceClass("in", "out");
                 }
             }, 500);
         }
@@ -2406,6 +2389,14 @@
 
         row.addClass("playing");
         row.siblings().removeClass("playing");
+
+        var paths = [];
+        row.parent().children(".playable").each(function () {
+            paths.push($(this).data("id"));
+        });
+
+        view[0].playlist = paths;
+        view[0].playlistIndex = paths.indexOf(path);
     }
 
     // Extract the extension from a file name
