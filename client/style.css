@@ -1009,7 +1009,7 @@ input:-webkit-autofill {
 
 /* =============================== Audio Panel =============================== */
 
-#audio-controls {
+.audio-controls {
     background: #181818;
     color: #aaa;
     flex: 0;
@@ -1020,14 +1020,14 @@ input:-webkit-autofill {
     width: 100%;
 }
 
-#audio-controls.in  { flex-basis: 1.5rem }
-#audio-controls.out { flex-basis: 0 }
+.audio-controls.in  { flex-basis: 1.5rem }
+.audio-controls.out { flex-basis: 0 }
 
-@media all and (min-width: 1024px) { #audio-controls { font-size: .9em} }
-@media all and (max-width: 1023px) { #audio-controls { font-size: .8em} }
-@media all and (max-width:  639px) { #audio-controls { font-size: .7em} }
+@media all and (min-width: 1024px) { .audio-controls { font-size: .9em} }
+@media all and (max-width: 1023px) { .audio-controls { font-size: .8em} }
+@media all and (max-width:  639px) { .audio-controls { font-size: .7em} }
 
-#volume-icon svg {
+.volume-icon svg {
     cursor: pointer;
     display: inline-block;
     fill: #ccc;
@@ -1038,9 +1038,9 @@ input:-webkit-autofill {
     z-index: 3;
 }
 
-#volume-icon:hover svg { fill: #fff }
+.volume-icon:hover svg { fill: #fff }
 
-#volume-slider {
+.volume-slider {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
@@ -1053,11 +1053,11 @@ input:-webkit-autofill {
     z-index: 2;
 }
 
-@media all and (min-width: 1024px) { #volume-slider { width: 175px } }
-@media all and (max-width: 1023px) { #volume-slider { width: 150px } }
-@media all and (max-width:  639px) { #volume-slider { width: 90px  } }
+@media all and (min-width: 1024px) { .volume-slider { width: 175px } }
+@media all and (max-width: 1023px) { .volume-slider { width: 150px } }
+@media all and (max-width:  639px) { .volume-slider { width: 90px  } }
 
-#volume-level {
+.volume-level {
     position: absolute;
     background: linear-gradient(#111,#222);
     z-index: 2;
@@ -1068,28 +1068,28 @@ input:-webkit-autofill {
     transition: all .2s ease-in;
 }
 
-@media all and (min-width: 1024px) { #volume-level { left: 216px } }
-@media all and (max-width: 1023px) { #volume-level { left: 190px } }
-@media all and (max-width:  639px) { #volume-level { left: 128px } }
+@media all and (min-width: 1024px) { .volume-level { left: 216px } }
+@media all and (max-width: 1023px) { .volume-level { left: 190px } }
+@media all and (max-width:  639px) { .volume-level { left: 128px } }
 
-#volume-slider.in, #volume-level.in {
+.volume-slider.in, .volume-level.in {
     opacity: 1;
     visibility: visible;
 }
 
-#volume-slider::-moz-range-thumb {
+.volume-slider::-moz-range-thumb {
     background: linear-gradient(#aaa,#fff);
     border-radius: 4px;
     border: none;
     width: 1em;
 }
 
-#volume-slider::-moz-range-track {
+.volume-slider::-moz-range-track {
     -moz-appearance: none;
     opacity: 0;
 }
 
-#volume-slider::-webkit-slider-thumb {
+.volume-slider::-webkit-slider-thumb {
      -webkit-appearance: none;
     background: #ccc;
     border-radius: 1em;
@@ -1097,7 +1097,7 @@ input:-webkit-autofill {
     width: 2em;
 }
 
-#audio-title {
+.audio-title {
     overflow: hidden;
     position: absolute;
     text-align: center;
@@ -1110,14 +1110,14 @@ input:-webkit-autofill {
 }
 
 @media all and (max-width:  639px) {
-    #audio-title {
+    .audio-title {
         left: 2em;
         right: 6em;
         text-align: left;
     }
 }
 
-#seekbar {
+.seekbar {
     position: absolute;
     width: 100%;
     height: 4px;
@@ -1126,7 +1126,7 @@ input:-webkit-autofill {
     z-index: 4;
 }
 
-#seekbar-played {
+.seekbar-played {
     position: absolute;
     width: 0;
     background: #eee;
@@ -1134,7 +1134,7 @@ input:-webkit-autofill {
     z-index: 2;
 }
 
-#seekbar-loaded {
+.seekbar-loaded {
     position: absolute;
     width: 0;
     background: #555;
@@ -1142,7 +1142,7 @@ input:-webkit-autofill {
     z-index: 1;
 }
 
-#time {
+.time {
     position: absolute;
     right: .25em;
     z-index: 3;
@@ -1151,7 +1151,7 @@ input:-webkit-autofill {
     line-height: 2em
 }
 
-#time-cur, #time-max { color: #eee }
+.time-cur, .time-max { color: #eee }
 
 /* =============================== About box =============================== */
 

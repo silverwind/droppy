@@ -243,22 +243,23 @@
                         "<div class=\"content-container\"><div class=\"content\"></div></div>" +
                         "<div class=\"dropzone\"></div>" +
                         "<div class=\"info-box\"><div class=\"box-icon\"><svg></svg></div><span><input></span></div>" +
-                        "<div id=\"audio-controls\" class=\"out\">" +
-                          "<span id=\"volume-icon\" title=\"Scroll or click to modify the volume\">" +
+                        "<div class=\"audio-controls\" class=\"out\">" +
+                          "<span class=\"volume-icon\" title=\"Scroll or click to modify the volume\">" +
                             "<svg class=\"volume-medium\"></svg>" +
                           "</span>" +
-                          "<input id=\"volume-slider\" class=\"out\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">" +
-                          "<span id=\"volume-level\"></span>" +
-                          "<span id=\"audio-title\"></span>" +
-                          "<div id=\"seekbar\">" +
-                            "<div id=\"seekbar-played\"></div>" +
-                            "<div id=\"seekbar-loaded\"></div>" +
+                          "<input class=\"volume-slider\" class=\"out\" type=\"range\" min=\"0\" max=\"100\" step=\"1\">" +
+                          "<span class=\"volume-level\"></span>" +
+                          "<span class=\"audio-title\"></span>" +
+                          "<div class=\"seekbar\">" +
+                            "<div class=\"seekbar-played\"></div>" +
+                            "<div class=\"seekbar-loaded\"></div>" +
                           "</div>" +
-                          "<div id=\"time\">" +
-                            "<span id=\"time-cur\"></span>" +
+                          "<div class=\"time\">" +
+                            "<span class=\"time-cur\"></span>" +
                             "<span> / </span>" +
-                            "<span id=\"time-max\"></span>" +
+                            "<span class=\"time-max\"></span>" +
                           "</div>" +
+                          "<audio class=\"audio-player\" preload=\"none\"></audio>" +
                         "</div>" +
                     "</div>");
         destroyView(vId);
@@ -1283,7 +1284,14 @@
         });
 
         content.find(".icon-play").register("click", function () {
-            play($(this));
+            var view = $(this).parents(".view");
+
+            if (!view[0].audioInitialized) {
+                initAudio(view);
+                view[0].audioInitialized = true;
+            }
+
+            play(view, $(this).parents(".data-row").data("id"));
         });
 
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
@@ -1597,16 +1605,17 @@
         // Play an audio file
         $("#entry-menu .play").register("click", function (event) {
             var entry = $("#entry-menu").data("target"),
-                url   = entry.find(".file-link").attr("href").replace(/\?~\//, "?_/");
+                view  = entry.parents(".view");
+
             event.stopPropagation();
-            play(entry.find(".icon-play"), url);
+            play(view, entry.data("id"));
             $("#click-catcher").trigger("click");
         });
 
         $("#entry-menu .edit").register("click", function (event) {
             var location,
-                entry    = $("#entry-menu").data("target"),
-                view     = entry.parents(".view");
+                entry = $("#entry-menu").data("target"),
+                view  = entry.parents(".view");
 
             $("#click-catcher").trigger("click");
 
@@ -2171,13 +2180,13 @@
     // ============================================================================
 
     function initAudio(view) {
-        var slider     = $("#volume-slider"),
-            volumeIcon = $("#volume-icon"),
-            controls   = $("#audio-controls"),
-            seekbar    = $("#seekbar"),
-            level      = $("#volume-level"),
-            tooltip    = $("#tooltip"),
-            player     = $("#audio-player")[0];
+        var slider     = view.find(".volume-slider"),
+            volumeIcon = view.find(".volume-icon"),
+            controls   = view.find(".audio-controls"),
+            seekbar    = view.find(".seekbar"),
+            level      = view.find(".volume-level"),
+            tooltip    = view.find(".tooltip"),
+            player     = view.find(".audio-player")[0];
 
         volumeIcon.register("click", function () {
             slider.attr("class", slider.attr("class") === "" ? "in" : "");
@@ -2383,26 +2392,20 @@
         });
     }
 
-    function play(playButton, source) {
-        var player = document.getElementById("audio-player");
-
-        if (!source)
-            source = playButton.parents(".data-row").children(".file-link").attr("href");
+    function play(view, path) {
+        var player = view.find(".audio-player")[0];
+        var row    = view.find(".data-row[data-id='" + path + "']");
+        var source = "?_" + path;
 
         if (!player.canPlayType(droppy.audioTypes[getExt(source)]))
-            return showError(playButton.parents(".view"), "Sorry, your browser can't play this file.");
-
-        $(".file-link").parent().removeClass("playing");
-        $(".icon-play").html(droppy.svg.play);
+            return showError(view, "Sorry, your browser can't play this file.");
 
         player.src = source;
         player.load();
         player.play();
 
-
-        if (playButton) {
-            playButton.parent().parent().addClass("playing");
-        }
+        row.addClass("playing");
+        row.siblings().removeClass("playing");
     }
 
     // Extract the extension from a file name
