@@ -1012,15 +1012,12 @@ input:-webkit-autofill {
 
 .audio-controls {
     background: #181818;
-    color: #aaa;
     flex: 0;
     order: 3;
     display: flex;
-    overflow: hidden;
     position: relative;
     transition: all .2s ease;
     width: 100%;
-    margin-bottom: 5px;
 }
 
 .audio-controls.in  { flex-basis: 1.5em }
@@ -1082,11 +1079,11 @@ input:-webkit-autofill {
     text-align: right;
     margin-right: .25em;
     display: block;
-    height: 100%;
+    color: #999;
     line-height: 1.5em;
 }
 
-.time-cur, .time-max { color: #eee }
+.time-cur, .time-max { color: #fff }
 
 /* =============================== About box =============================== */
 
