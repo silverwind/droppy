@@ -1010,7 +1010,7 @@ input:-webkit-autofill {
 
 /* =============================== Audio Panel =============================== */
 
-.audio-controls {
+.audio-bar {
     background: #181818;
     flex: 0;
     order: 3;
@@ -1018,14 +1018,15 @@ input:-webkit-autofill {
     position: relative;
     transition: all .2s ease;
     width: 100%;
+    user-select: none;
 }
 
-.audio-controls.in  { flex-basis: 1.5em }
-.audio-controls.out { flex-basis: 0 }
+.audio-bar.in  { flex-basis: 1.5em }
+.audio-bar.out { flex-basis: 0 }
 
-@media all and (min-width: 1024px) { .audio-controls { font-size: .9em} }
-@media all and (max-width: 1023px) { .audio-controls { font-size: .8em} }
-@media all and (max-width:  639px) { .audio-controls { font-size: .7em} }
+@media all and (min-width: 1024px) { .audio-bar { font-size: .9em} }
+@media all and (max-width: 1023px) { .audio-bar { font-size: .8em} }
+@media all and (max-width:  639px) { .audio-bar { font-size: .7em} }
 
 .volume-icon {
     z-index: 4;
@@ -1036,6 +1037,22 @@ input:-webkit-autofill {
     height: 1.25em;
     flex: 0 0 1.25em;
     margin: .125em;
+    pointer-events: none;
+}
+
+.volume-slider {
+    z-index: 4;
+    box-shadow: 0 0 0 1px #eee;
+    height: .75em;
+    margin: .375em 0;
+    transition: flex-basis .2s ease;
+}
+.volume-slider.out { flex: 0 0 0; box-shadow: none }
+.volume-slider.in  { flex: 0 0 4em; margin-right: .5em }
+
+.volume-slider-inner {
+    background: #eee;
+    height: .75em;
 }
 
 .audio-title {
@@ -1047,7 +1064,7 @@ input:-webkit-autofill {
     color: #fff;
     flex: 1;
     z-index: 4;
-    pointer-event: none;
+    cursor: default;
 }
 
 .seekbar {
@@ -1069,7 +1086,7 @@ input:-webkit-autofill {
     position: absolute;
     width: 0;
     height: 100%;
-    background: #333;
+    background: #444;
     z-index: 1;
 }
 
@@ -1081,8 +1098,10 @@ input:-webkit-autofill {
     display: block;
     color: #999;
     line-height: 1.5em;
+    cursor: default;
 }
 
+.time > * { pointer-events: none }
 .time-cur, .time-max { color: #fff }
 
 /* =============================== About box =============================== */

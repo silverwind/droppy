@@ -238,27 +238,29 @@
     }
 
     function newView(dest, vId) {
-        var view = $("<div class=\"view\">" +
-                        "<ul class=\"path\"></ul>" +
-                        "<div class=\"content-container\"><div class=\"content\"></div></div>" +
-                        "<div class=\"dropzone\"></div>" +
-                        "<div class=\"info-box\"><div class=\"box-icon\"><svg></svg></div><span><input></span></div>" +
-                        "<div class=\"audio-controls\" class=\"out\">" +
-                          "<span class=\"volume-icon\" title=\"Scroll or click to modify the volume\">" +
-                            "<svg class=\"volume-medium\"></svg>" +
-                          "</span>" +
-                          "<div class=\"volume-slider\" class=\"out\"></div>" +
-                          "<span class=\"audio-title\"></span>" +
-                          "<div class=\"seekbar\">" +
-                            "<div class=\"seekbar-played\"></div>" +
-                            "<div class=\"seekbar-loaded\"></div>" +
+        var view = $("<div class='view'>" +
+                        "<ul class='path'></ul>" +
+                        "<div class='content-container'><div class='content'></div></div>" +
+                        "<div class='dropzone'></div>" +
+                        "<div class='info-box'><div class='box-icon'><svg></svg></div><span><input></span></div>" +
+                        "<div class='audio-bar out'>" +
+                          "<div class='volume-icon' title='Scroll or click to modify the volume'>" +
+                            "<svg class='volume-medium'></svg>" +
                           "</div>" +
-                          "<div class=\"time\">" +
-                            "<span class=\"time-cur\"></span>" +
+                          "<div class='volume-slider out'>" +
+                            "<div class='volume-slider-inner'></div>" +
+                          "</div>" +
+                          "<div class='audio-title'></div>" +
+                          "<div class='time'>" +
+                            "<span class='time-cur'></span>" +
                             "<span> / </span>" +
-                            "<span class=\"time-max\"></span>" +
+                            "<span class='time-max'></span>" +
                           "</div>" +
-                          "<audio class=\"audio-player\" preload=\"none\"></audio>" +
+                          "<div class='seekbar'>" +
+                            "<div class='seekbar-played'></div>" +
+                            "<div class='seekbar-loaded'></div>" +
+                          "</div>" +
+                          "<audio class='audio-player' preload='none'></audio>" +
                         "</div>" +
                     "</div>");
         destroyView(vId);
@@ -1079,7 +1081,7 @@
                     showSpinner(view);
                     // Find the direction in which we should animate
                     if (!viewLoc)
-                        view[0].animDirection = "center"
+                        view[0].animDirection = "center";
                     else if (viewDest.length > viewLoc.length)
                         view[0].animDirection = "forward";
                     else if (viewDest.length === viewLoc.length)
@@ -1876,7 +1878,7 @@
             });
         }
 
-        function swap(a,b, dir) {
+        function swap(a, b, dir) {
             if (droppy.detects.animation) {
                 a.attr("class", dir === "left" ? "right" : "left");
                 b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
@@ -1896,7 +1898,7 @@
                 b = $("<img>").attr("class", dir).attr("src", source).one("load", aspectScale);
                 swap(a, b, dir);
             } else {
-                if (a[0].tagName.toLowerCase() == "video") {
+                if (a[0].tagName.toLowerCase() === "video") {
                     a.attr("src", getMediaSrc(view, filename));
                 } else {
                     b = $("<video>").attr({
@@ -1949,10 +1951,10 @@
         var volume = droppy.get("videoVolume");
         if (volume) el.volume = volume;
         el.addEventListener("loadedmetadata", aspectScale);
-        el.addEventListener("volumechange", function() {
+        el.addEventListener("volumechange", function () {
             droppy.set("videoVolume", this.volume);
         });
-        el.addEventListener("error", function(event) {
+        el.addEventListener("error", function (event) {
             console.error(event);
             aspectScale();
         });
@@ -2179,63 +2181,65 @@
     // ============================================================================
 
     function initAudio(view) {
-        var slider     = view.find(".volume-slider"),
+        var bar        = view.find(".audio-bar"),
+            slider     = view.find(".volume-slider"),
             volumeIcon = view.find(".volume-icon"),
-            controls   = view.find(".audio-controls"),
-            seekbar    = view.find(".seekbar"),
-            tooltip    = view.find(".tooltip"),
             player     = view.find(".audio-player")[0];
 
-        volumeIcon.register("click", function () {
-            slider.replaceClass("out", "in");
+        volumeIcon.register("click", function (event) {
+            slider.replaceClass(/in|out/, slider.hasClass("in") ? "out" : "in");
+            event.stopPropagation();
         });
 
-        seekbar.register("click", function (event) {
-            player.currentTime = player.duration * (event.clientX / window.innerWidth);
+        var heldVolume = false, left, right;
+        var updateVolume = throttle(function (x) {
+            setVolume((x - left) / (right - left));
+        }, 1000 / 60);
+
+        slider.register("mousedown", function (event) {
+            left  = slider[0].offsetLeft;
+            right = slider[0].offsetLeft + slider[0].offsetWidth;
+            heldVolume  = true;
+            updateVolume(event.pageX);
+            event.stopPropagation();
+        });
+        bar.register("mousemove", function (event) { if (heldVolume) updateVolume(event.pageX); });
+        bar.register("mouseup", function () { heldVolume = false; });
+
+        slider.register("click", function (event) {
+            setVolume(Math.round(100 * (event.pageX - slider.offset().left) / slider.innerWidth()) / 100);
+            event.stopPropagation();
         });
 
-        seekbar.register("mousemove", debounce(function (event) {
-            var left = event.clientX;
-            if (!player.duration) return;
-            tooltip.css("bottom", ($(window).height() - seekbar[0].getBoundingClientRect().top + 8) + "px");
-            tooltip.css("left", (left - tooltip.width() / 2 - 3), + "px");
-            tooltip.attr("class", "in");
-            tooltip.text(secsToTime(player.duration * (event.clientX / window.innerWidth)));
-        }), 50);
-
-        seekbar.register("mouseleave", debounce(function () {
-            tooltip.removeAttr("class");
-        }), 50);
+        bar.register("click", function (event) {
+            player.currentTime = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
+        });
 
         function onWheel(event) {
-            setVolume(event.wheelDelta || -event.detail);
+            var volume = player.volume,
+                delta  = event.wheelDelta || -event.detail;
+            if (delta > 0)
+                volume += 0.05;
+            else
+                volume -= 0.05;
+            setVolume(volume);
         }
 
         volumeIcon[0].addEventListener("mousewheel", onWheel);
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
 
-        player.volume = droppy.get("volume");
-
-        function setVolume(delta) {
-            var volume = player.volume;
-            if (delta > 0) {
-                volume += 0.05;
-                if (volume > 1) volume = 1;
-            } else {
-                volume -= 0.05;
-                if (volume < 0) volume = 0;
-            }
-
+        function setVolume(volume) {
+            if (volume > 1) volume = 1;
+            if (volume < 0) volume = 0;
             player.volume = volume;
             droppy.set("volume", volume);
-
             if (player.volume === 0) volumeIcon.html(droppy.svg["volume-mute"]);
             else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
             else if (player.volume <= 0.67) volumeIcon.html(droppy.svg["volume-medium"]);
             else volumeIcon.html(droppy.svg["volume-high"]);
+            view.find(".volume-slider-inner").width((volume * 100) + "%");
         }
-
-        setVolume();
+        setVolume(droppy.get("volume"));
 
         var played = view.find(".seekbar-played"),
             loaded = view.find(".seekbar-loaded"),
@@ -2261,7 +2265,7 @@
             droppy.isPlaying = true;
             updateTitle(title);
             view.find(".audio-title").text(title);
-            controls.replaceClass("out", "in");
+            bar.replaceClass("out", "in");
             fullyLoaded = false;
             droppy.audioUpdater = setInterval(updater, 100);
         }
@@ -2284,7 +2288,7 @@
             updateTitle(basename(getView()[0].currentFolder));
             setTimeout(function () {
                 if (!droppy.isPlaying) {
-                    controls.replaceClass("in", "out");
+                    bar.replaceClass("in", "out");
                 }
             }, 500);
         }
@@ -2886,16 +2890,22 @@
         }
     }
 
-    function debounce(func, wait) {
-        var timeout, result;
+    function throttle(func, threshhold) {
+        if (!threshhold) threshhold = 250;
+        var last, deferTimer;
         return function () {
-            var context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(function () {
-                timeout = null;
-                result = func.apply(context, args);
-            }, wait);
-            return result;
+            var now = Date.now(),
+                args = arguments;
+            if (last && now < last + threshhold) {
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    func.apply(this, args);
+                }, threshhold);
+            } else {
+                last = now;
+                func.apply(this, args);
+            }
         };
     }
 
