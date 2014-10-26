@@ -881,7 +881,7 @@ input:-webkit-autofill {
 }
 
 /* CM tweaks */
-.cm-s-mdn-like .CodeMirror-linenumber { margin-left: 0 !important }
+.cm-s-mdn-like .CodeMirror-linenumber { left: 0 !important }
 .cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
 .CodeMirror-scrollbar-filler { background: transparent }
 
