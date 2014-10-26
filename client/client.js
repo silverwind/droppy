@@ -2328,7 +2328,6 @@
             do {
                 nextIndex = Math.floor(Math.random() * view[0].playlist.length);
             } while (nextIndex === view[0].playlistIndex);
-            console.log(nextIndex, view[0].playlist[nextIndex]);
             play(view, view[0].playlist[nextIndex]);
         }
 
@@ -2440,33 +2439,35 @@
 
     function play(view, path) {
         var player = view.find(".audio-player")[0];
-        var row    = view.find(".data-row[data-id='" + path + "']");
         var source = "?_" + path;
 
-        if (!player.canPlayType(droppy.audioTypes[getExt(source)]))
+        if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
+            player.src = source;
+            player.load();
+            player.play();
+        } else {
             return showError(view, "Sorry, your browser can't play this file.");
-
-        player.src = source;
-        player.load();
-        player.play();
-
-        row.addClass("playing");
-        row.siblings().removeClass("playing");
-
-        // keep played element in view
-        var content = row.parents(".content");
-        if ((row[0].offsetTop < content.scrollTop()) ||
-            (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
-            row.parents(".content").scrollTop(row[0].offsetTop - 2);
         }
 
-        var paths = [];
-        row.parent().children(".playable").each(function () {
-            paths.push($(this).data("id"));
-        });
+        var row = view.find(".data-row[data-id='" + path + "']");
+        if (row.length) {
+            row.addClass("playing").siblings().removeClass("playing");
+            // keep played element in view
+            var content = row.parents(".content");
+            if ((row[0].offsetTop < content.scrollTop()) ||
+                (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
+                row.parents(".content").scrollTop(row[0].offsetTop - 2);
+            }
 
-        view[0].playlist = paths;
-        view[0].playlistIndex = paths.indexOf(path);
+            var paths = [];
+            row.parent().children(".playable").each(function () {
+                paths.push($(this).data("id"));
+            });
+            view[0].playlist = paths;
+            view[0].playlistIndex = paths.indexOf(path);
+        } else {
+            view[0].playlistIndex = view[0].playlist.indexOf(path);
+        }
     }
 
     // Extract the extension from a file name
