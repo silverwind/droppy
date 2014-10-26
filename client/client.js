@@ -2191,26 +2191,33 @@
             event.stopPropagation();
         });
 
-        var heldVolume = false, left, right;
-        var updateVolume = throttle(function (x) {
+        var heldVolume = false;
+        var updateVolume = throttle(function (event) {
+            var slider = $(event.target).parents(".view").find(".volume-slider")[0],
+                left   = slider.getBoundingClientRect().left,
+                right  = slider.getBoundingClientRect().right,
+                x      = event.pageX;
+
+            console.log(x, left, right);
             setVolume((x - left) / (right - left));
         }, 1000 / 60);
 
         slider.register("mousedown", function (event) {
-            left  = slider[0].offsetLeft;
-            right = slider[0].offsetLeft + slider[0].offsetWidth;
-            heldVolume  = true;
-            updateVolume(event.pageX);
+            heldVolume = true;
+            updateVolume(event);
             event.stopPropagation();
         });
-        bar.register("mousemove", function (event) { if (heldVolume) updateVolume(event.pageX); });
-        bar.register("mouseup", function () { heldVolume = false; });
-
+        bar.register("mousemove", function (event) {
+            console.log(heldVolume);
+            if (heldVolume) updateVolume(event);
+        });
+        bar.register("mouseup", function () {
+            heldVolume = false;
+        });
         slider.register("click", function (event) {
-            setVolume(Math.round(100 * (event.pageX - slider.offset().left) / slider.innerWidth()) / 100);
+            updateVolume(event);
             event.stopPropagation();
         });
-
         bar.register("click", function (event) {
             player.currentTime = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
         });
@@ -2219,9 +2226,9 @@
             var volume = player.volume,
                 delta  = event.wheelDelta || -event.detail;
             if (delta > 0)
-                volume += 0.05;
+                volume += 0.1;
             else
-                volume -= 0.05;
+                volume -= 0.1;
             setVolume(volume);
         }
 
