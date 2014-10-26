@@ -1028,27 +1028,32 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .audio-bar { font-size: .8em} }
 @media all and (max-width:  639px) { .audio-bar { font-size: .7em} }
 
-.volume-icon {
+.audio-icon {
     z-index: 4;
+    flex: 0 0 1.5em;
 }
-.volume-icon svg {
+
+.audio-icon svg {
     cursor: pointer;
-    fill: #fff;
-    height: 1.25em;
-    flex: 0 0 1.25em;
-    margin: .125em;
+    fill: #bbb;
+    height: 1em;
+    width: 1em;
+    margin: .25em .25em;
     pointer-events: none;
+}
+.audio-icon:hover svg, .audio-icon.active svg {
+    fill: #fff;
 }
 
 .volume-slider {
     z-index: 4;
     box-shadow: 0 0 0 1px #eee;
     height: .75em;
-    margin: .375em 0;
+    margin: .375em .125em;
     transition: flex-basis .2s ease;
 }
-.volume-slider.out { flex: 0 0 0; box-shadow: none }
-.volume-slider.in  { flex: 0 0 4em; margin-right: .5em }
+.volume-slider.out { flex: 0 0 0; box-shadow: none; margin: .375em 0 }
+.volume-slider.in  { flex: 0 0 4em; }
 
 .volume-slider-inner {
     background: #eee;
@@ -1647,36 +1652,6 @@ input[type="checkbox"] { display: none }
 @media all and (max-width:  639px) { .dropzone { top: 1.25rem; } }
 
 .dropzone.in  { opacity: .8 ; visibility: visible }
-
-#tooltip {
-    color: #eee;
-    position: fixed;
-    font-size: .75em;
-    visibility: hidden;
-    opacity: 0;
-    width: 80px;
-    height: 1.5em;
-    text-align: center;
-    padding: 2px 6px;
-    background: #222;
-    border-radius: 4px;
-    line-height: 1.25em;
-    z-index: 2;
-}
-
-#tooltip.in { visibility: visible; opacity: 1 }
-
-#tooltip:after {
-    content: "";
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: #222;
-    bottom: -2px;
-    left: calc(50% - .5em);
-    transform: rotate(45deg);
-    z-index: -1;
-}
 
 #noscript {
     background: #111;

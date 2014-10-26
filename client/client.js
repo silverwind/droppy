@@ -244,12 +244,15 @@
                         "<div class='dropzone'></div>" +
                         "<div class='info-box'><div class='box-icon'><svg></svg></div><span><input></span></div>" +
                         "<div class='audio-bar out'>" +
-                          "<div class='volume-icon' title='Scroll or click to modify the volume'>" +
-                            "<svg class='volume-medium'></svg>" +
-                          "</div>" +
+                          "<div class='audio-icon volume'>" + droppy.svg["volume-medium"] + "</div>" +
                           "<div class='volume-slider out'>" +
                             "<div class='volume-slider-inner'></div>" +
                           "</div>" +
+                          "<div class='audio-icon previous'>" + droppy.svg.previous + "</div>" +
+                          "<div class='audio-icon pause-play'>" + droppy.svg.pause + "</div>" +
+                          "<div class='audio-icon stop'>" + droppy.svg.stop + "</div>" +
+                          "<div class='audio-icon shuffle'>" + droppy.svg.shuffle + "</div>" +
+                          "<div class='audio-icon next'>" + droppy.svg.next + "</div>" +
                           "<div class='audio-title'></div>" +
                           "<div class='time'>" +
                             "<span class='time-cur'></span>" +
@@ -1287,6 +1290,9 @@
         content.find(".icon-play").register("click", function () {
             var view = $(this).parents(".view");
 
+            if ($(this).parents(".data-row").hasClass("playing"))
+                return;
+
             if (!view[0].audioInitialized) {
                 initAudio(view);
                 view[0].audioInitialized = true;
@@ -2183,13 +2189,8 @@
     function initAudio(view) {
         var bar        = view.find(".audio-bar"),
             slider     = view.find(".volume-slider"),
-            volumeIcon = view.find(".volume-icon"),
+            volumeIcon = view.find(".audio-bar .volume"),
             player     = view.find(".audio-player")[0];
-
-        volumeIcon.register("click", function (event) {
-            slider.replaceClass(/in|out/, slider.hasClass("in") ? "out" : "in");
-            event.stopPropagation();
-        });
 
         var heldVolume = false;
         var updateVolume = throttle(function (event) {
@@ -2198,7 +2199,6 @@
                 right  = slider.getBoundingClientRect().right,
                 x      = event.pageX;
 
-            console.log(x, left, right);
             setVolume((x - left) / (right - left));
         }, 1000 / 60);
 
@@ -2208,7 +2208,6 @@
             event.stopPropagation();
         });
         bar.register("mousemove", function (event) {
-            console.log(heldVolume);
             if (heldVolume) updateVolume(event);
         });
         bar.register("mouseup", function () {
@@ -2221,6 +2220,46 @@
         bar.register("click", function (event) {
             player.currentTime = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
         });
+        bar.find(".previous").register("click", function (event) {
+            playPrev($(event.target).parents(".view"));
+            event.stopPropagation();
+        });
+        bar.find(".next").register("click", function (event) {
+            playNext($(event.target).parents(".view"));
+            event.stopPropagation();
+        });
+        bar.find(".pause-play").register("click", function (event) {
+            var icon = $(this).children("svg"),
+                player = $(this).parents(".audio-bar").find(".audio-player")[0];
+            if (icon.attr("class") === "play") {
+                icon.replaceWith($(droppy.svg.pause));
+                player.play();
+            } else {
+                icon.replaceWith($(droppy.svg.play));
+                player.pause();
+            }
+            event.stopPropagation();
+        });
+        bar.find(".stop").register("click", function (event) {
+            var view   = $(this).parents(".view"),
+                player = view.find(".audio-player")[0];
+            player.pause();
+            view.find(".audio-title").html("");
+            view.find(".data-row.playing").removeClass("playing");
+            if (view[0].audioUpdater) {
+                clearInterval(view[0].audioUpdater);
+                view[0].audioUpdater = null;
+            }
+            updateTitle(basename(getView()[0].currentFolder));
+            bar.replaceClass("in", "out");
+            event.stopPropagation();
+        });
+        bar.find(".shuffle").register("click", function (event) {
+            var view = $(this).parents(".view");
+            $(this).toggleClass("active");
+            view[0].shuffle = $(this).hasClass("active");
+            event.stopPropagation();
+        });
 
         function onWheel(event) {
             var volume = player.volume,
@@ -2232,8 +2271,14 @@
             setVolume(volume);
         }
 
+        slider[0].addEventListener("mousewheel", onWheel);
+        slider[0].addEventListener("DOMMouseScroll", onWheel);
         volumeIcon[0].addEventListener("mousewheel", onWheel);
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
+        volumeIcon.register("click", function (event) {
+            slider.replaceClass(/in|out/, slider.hasClass("in") ? "out" : "in");
+            event.stopPropagation();
+        });
 
         function setVolume(volume) {
             if (volume > 1) volume = 1;
@@ -2266,42 +2311,49 @@
             view.find(".time-max").text(secsToTime(max));
         }
 
-        function playing() {
-            var matches = $(player).attr("src").match(/(.+)\/(.+)\./),
+        function playing(event) {
+            var view    = $(event.target).parents(".view"),
+                matches = $(player).attr("src").match(/(.+)\/(.+)\./),
                 title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
-            droppy.isPlaying = true;
             updateTitle(title);
             view.find(".audio-title").text(title);
             bar.replaceClass("out", "in");
             fullyLoaded = false;
-            droppy.audioUpdater = setInterval(updater, 100);
+            view[0].audioUpdater = setInterval(updater, 100);
+        }
+
+        function playRandom(view) {
+            var nextIndex;
+            if (view[0].playlist.length === 1) return play(view, view[0].playlist[0]);
+            do {
+                nextIndex = Math.floor(Math.random() * view[0].playlist.length);
+            } while (nextIndex === view[0].playlistIndex);
+            console.log(nextIndex, view[0].playlist[nextIndex]);
+            play(view, view[0].playlist[nextIndex]);
+        }
+
+        function playNext(view) {
+            if (view[0].shuffle) return playRandom(view);
+            if (view[0].playlistIndex < view[0].playlist.length - 1)
+                play(view, view[0].playlist[view[0].playlistIndex + 1]);
+            else
+                play(view, view[0].playlist[0]);
+        }
+
+        function playPrev(view) {
+            if (view[0].shuffle) return playRandom(view);
+            if (view[0].playlistIndex === 0)
+                play(view, view[0].playlist[view[0].playlist.length - 1]);
+            else
+                play(view, view[0].playlist[view[0].playlistIndex - 1]);
         }
 
         function stop(event) {
             var view = $(event.target).parents(".view");
-
-            if (event.type === "ended") {
-                if (view[0].playlistIndex < view[0].playlist.length - 1)
-                    play(view, view[0].playlist[view[0].playlistIndex + 1]);
-                else
-                    play(view, view[0].playlist[0]);
-            }
-            view.find(".audio-title").html("");
-            if (droppy.audioUpdater) {
-                clearInterval(droppy.audioUpdater);
-                droppy.audioUpdater = null;
-            }
-            droppy.isPlaying = false;
-            updateTitle(basename(getView()[0].currentFolder));
-            setTimeout(function () {
-                if (!droppy.isPlaying) {
-                    bar.replaceClass("in", "out");
-                }
-            }, 500);
+            playNext(view);
         }
 
         // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
-        player.addEventListener("pause", stop);
         player.addEventListener("ended", stop);
         player.addEventListener("playing", playing);
     }
@@ -2401,6 +2453,13 @@
         row.addClass("playing");
         row.siblings().removeClass("playing");
 
+        // keep played element in view
+        var content = row.parents(".content");
+        if ((row[0].offsetTop < content.scrollTop()) ||
+            (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
+            row.parents(".content").scrollTop(row[0].offsetTop - 2);
+        }
+
         var paths = [];
         row.parent().children(".playable").each(function () {
             paths.push($(this).data("id"));
@@ -2424,10 +2483,8 @@
 
     function initVariables() {
         droppy.activeFiles = [];
-        droppy.audioUpdater = null;
         droppy.debug = null;
         droppy.demoMode = null;
-        droppy.isPlaying = null;
         droppy.public = null;
         droppy.queuedData = null;
         droppy.reopen = null;
