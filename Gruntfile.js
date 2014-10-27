@@ -42,9 +42,9 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask("update", ["shell:update", "shell:modules"]);
-    grunt.registerTask("patch",  ["bump", "shell:push", "shell:publish"]);
-    grunt.registerTask("minor",  ["bump:minor", "shell:push", "shell:publish"]);
-    grunt.registerTask("major",  ["bump:major", "shell:push", "shell:publish"]);
+    grunt.registerTask("patch",  ["bump", "shell:push", "shell:publish", "shell:heroku"]);
+    grunt.registerTask("minor",  ["bump:minor", "shell:push", "shell:publish", "shell:heroku"]);
+    grunt.registerTask("major",  ["bump:major", "shell:push", "shell:publish", "shell:heroku"]);
     grunt.registerTask("deploy", ["shell:heroku"]);
 
     grunt.loadNpmTasks("grunt-bump");
