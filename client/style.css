@@ -1091,7 +1091,7 @@ input:-webkit-autofill {
     position: absolute;
     width: 0;
     height: 100%;
-    background: #444;
+    background: #383838;
     z-index: 1;
 }
 

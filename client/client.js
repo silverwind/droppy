@@ -2277,6 +2277,7 @@
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
         volumeIcon.register("click", function (event) {
             slider.replaceClass(/in|out/, slider.hasClass("in") ? "out" : "in");
+            volumeIcon.toggleClass("active");
             event.stopPropagation();
         });
 

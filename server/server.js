@@ -57,7 +57,7 @@ var server = function init(home, options, isStandalone, callback) {
         firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
         log.simple("Preparing resources ...");
         async.series([
-            function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb();}); },
+            function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb(); }); },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
             function (cb) { if (isDemo) cleanupForDemo(function (err) { if (err) log.error(err); cb(); }); else cb(); },
@@ -141,6 +141,32 @@ function cleanupForDemo(doneCallback) {
         });
     }
 
+    function get(src, dst) {
+        return function (cb) {
+            var stream;
+            var temp = path.join(paths.home, "/demoTemp", dst);
+            var dest = path.join(paths.files, dst);
+
+            mkdirp(path.dirname(temp), mkdirpOpts, function () {
+                mkdirp(path.dirname(dest), mkdirpOpts, function () {
+                    fs.exists(temp, function (exists) {
+                        if (!exists) {
+                            log.simple("Downloading " + src + " ...");
+                            stream = fs.createWriteStream(temp);
+                            stream.on("error", cb);
+                            stream.on("close", function () {
+                                utils.copyFile(temp, dest, cb);
+                            });
+                            request(src).pipe(stream);
+                        } else {
+                            utils.copyFile(temp, dest, cb);
+                        }
+                    });
+                });
+            });
+        };
+    }
+
     async.series([
         function (callback) {
             log.simple("Cleaning up ...");
@@ -182,7 +208,13 @@ function cleanupForDemo(doneCallback) {
                     }
                 });
             });
-        }
+        },
+        // http://www.webmfiles.org
+        get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/sample-video/Big Buck Bunny.webm"),
+        // http://sampleswap.org/mp3/creative-commons/free-music.php
+        get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/sample-audio/Earthling - Room To Breath.mp3"),
+        get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/sample-audio/Joevirus - Tenchu.mp3"),
+        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/sample-audio/Tejaswi - Intuition.mp3")
     ], doneCallback);
 }
 
@@ -669,7 +701,7 @@ function doClipboard(type, from, to) {
                 if (stats.isFile()) {
                     utils.copyFile(from, to, logError);
                 } else {
-                    fs.readdir(from, function(error, files) {
+                    fs.readdir(from, function (error, files) {
                         if (error) return logError(error);
                         if (files.length) {
                             cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
