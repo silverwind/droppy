@@ -1014,7 +1014,7 @@ function handleResourceRequest(req, res, resourceName) {
 
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res, download) {
-    var URI = decodeURIComponent(req.url), shortLink, filename, filepath;
+    var URI = decodeURIComponent(req.url), shortLink, filepath;
 
     // Check for a shortlink
     filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
@@ -1421,7 +1421,7 @@ function updateCSS(event, filename, cb) {
         setTimeout(function () { // Short timeout in case Windows still has the file locked
             var css = "";
 
-            caching.files.css.forEach(function(file) {
+            caching.files.css.forEach(function (file) {
                 css += fs.readFileSync(file).toString("utf8");
             });
 

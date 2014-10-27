@@ -64,7 +64,7 @@ utils.getNewPath = function getNewPath(origPath, callback) {
                 function (cb) {
                     var num = parseInt(filename.substring(filename.lastIndexOf("-") + 1), 10);
                     filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
-                    fs.stat(path.join(dirname, filename + extension), function(err) {
+                    fs.stat(path.join(dirname, filename + extension), function (err) {
                         canCreate = err;
                         cb();
                     });
