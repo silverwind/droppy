@@ -214,7 +214,11 @@ function cleanupForDemo(doneCallback) {
         // http://sampleswap.org/mp3/creative-commons/free-music.php
         get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/sample-audio/Earthling - Room To Breath.mp3"),
         get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/sample-audio/Joevirus - Tenchu.mp3"),
-        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/sample-audio/Tejaswi - Intuition.mp3")
+        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/sample-audio/Tejaswi - Intuition.mp3"),
+        function (callback) {
+            log.simple("Demo files ready!");
+            callback();
+        }
     ], doneCallback);
 }
 

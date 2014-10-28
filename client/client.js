@@ -2187,13 +2187,31 @@
     // ============================================================================
 
     function initAudio(view) {
-        var bar        = view.find(".audio-bar"),
+        var updateVolume, fullyLoaded, heldVolume = false,
+            bar        = view.find(".audio-bar"),
             slider     = view.find(".volume-slider"),
             volumeIcon = view.find(".audio-bar .volume"),
+            seekPlayed = view.find(".seekbar-played"),
+            seekLoaded = view.find(".seekbar-loaded"),
             player     = view.find(".audio-player")[0];
 
-        var heldVolume = false;
-        var updateVolume = throttle(function (event) {
+        setVolume(droppy.get("volume"));
+
+        player.addEventListener("ended", function ended(event) {
+            var view = $(event.target).parents(".view");
+            playNext(view);
+        });
+        player.addEventListener("playing", function playing(event) {
+            var view    = $(event.target).parents(".view"),
+                matches = $(player).attr("src").match(/(.+)\/(.+)\./),
+                title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
+            updateTitle(title);
+            view.find(".audio-title").text(title);
+            bar.replaceClass("out", "in");
+            fullyLoaded = false;
+            view[0].audioUpdater = setInterval(updater, 100);
+        });
+        updateVolume = throttle(function (event) {
             var slider = $(event.target).parents(".view").find(".volume-slider")[0],
                 left   = slider.getBoundingClientRect().left,
                 right  = slider.getBoundingClientRect().right,
@@ -2201,7 +2219,6 @@
 
             setVolume((x - left) / (right - left));
         }, 1000 / 60);
-
         slider.register("mousedown", function (event) {
             heldVolume = true;
             updateVolume(event);
@@ -2229,7 +2246,7 @@
             event.stopPropagation();
         });
         bar.find(".pause-play").register("click", function (event) {
-            var icon = $(this).children("svg"),
+            var icon   = $(this).children("svg"),
                 player = $(this).parents(".audio-bar").find(".audio-player")[0];
             if (icon.attr("class") === "play") {
                 icon.replaceWith($(droppy.svg.pause));
@@ -2260,17 +2277,12 @@
             view[0].shuffle = $(this).hasClass("active");
             event.stopPropagation();
         });
-
         function onWheel(event) {
-            var volume = player.volume,
-                delta  = event.wheelDelta || -event.detail;
-            if (delta > 0)
-                volume += 0.1;
+            if ((event.wheelDelta || -event.detail) > 0)
+                setVolume(player.volume + 0.1);
             else
-                volume -= 0.1;
-            setVolume(volume);
+                setVolume(player.volume - 0.1);
         }
-
         slider[0].addEventListener("mousewheel", onWheel);
         slider[0].addEventListener("DOMMouseScroll", onWheel);
         volumeIcon[0].addEventListener("mousewheel", onWheel);
@@ -2280,7 +2292,6 @@
             volumeIcon.toggleClass("active");
             event.stopPropagation();
         });
-
         function setVolume(volume) {
             if (volume > 1) volume = 1;
             if (volume < 0) volume = 0;
@@ -2292,37 +2303,19 @@
             else volumeIcon.html(droppy.svg["volume-high"]);
             view.find(".volume-slider-inner").width((volume * 100) + "%");
         }
-        setVolume(droppy.get("volume"));
-
-        var played = view.find(".seekbar-played"),
-            loaded = view.find(".seekbar-loaded"),
-            fullyLoaded;
-
         function updater() {
             var cur = player.currentTime,
                 max = player.duration;
             if (player.buffered && !fullyLoaded) {
                 var loadProgress = player.buffered.end(0) / max * 100;
-                loaded.css("width", loadProgress  + "%");
+                seekLoaded.css("width", loadProgress  + "%");
                 if (loadProgress === 100) fullyLoaded = true;
             }
             if (!cur || !max) return;
-            played.css("width", (cur  / max * 100)  + "%");
+            seekPlayed.css("width", (cur  / max * 100)  + "%");
             view.find(".time-cur").text(secsToTime(cur));
             view.find(".time-max").text(secsToTime(max));
         }
-
-        function playing(event) {
-            var view    = $(event.target).parents(".view"),
-                matches = $(player).attr("src").match(/(.+)\/(.+)\./),
-                title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
-            updateTitle(title);
-            view.find(".audio-title").text(title);
-            bar.replaceClass("out", "in");
-            fullyLoaded = false;
-            view[0].audioUpdater = setInterval(updater, 100);
-        }
-
         function playRandom(view) {
             var nextIndex;
             if (view[0].playlist.length === 1) return play(view, view[0].playlist[0]);
@@ -2331,7 +2324,6 @@
             } while (nextIndex === view[0].playlistIndex);
             play(view, view[0].playlist[nextIndex]);
         }
-
         function playNext(view) {
             if (view[0].shuffle) return playRandom(view);
             if (view[0].playlistIndex < view[0].playlist.length - 1)
@@ -2339,7 +2331,6 @@
             else
                 play(view, view[0].playlist[0]);
         }
-
         function playPrev(view) {
             if (view[0].shuffle) return playRandom(view);
             if (view[0].playlistIndex === 0)
@@ -2347,15 +2338,41 @@
             else
                 play(view, view[0].playlist[view[0].playlistIndex - 1]);
         }
+    }
 
-        function stop(event) {
-            var view = $(event.target).parents(".view");
-            playNext(view);
+    function play(view, path) {
+        var content, paths,
+            row    = view.find(".data-row[data-id='" + path + "']"),
+            player = view.find(".audio-player")[0],
+            source = "?_" + path;
+
+        view.find(".seekbar-played").css("width", "0%");
+        view.find(".seekbar-loaded").css("width", "0%");
+
+        if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
+            player.src = source;
+            player.load();
+            player.play();
+        } else {
+            return showError(view, "Sorry, your browser can't play this file.");
         }
+        if (row.length) {
+            content = row.parents(".content");
+            paths   = [];
 
-        // Playback events : http://www.w3.org/wiki/HTML/Elements/audio#Media_Events
-        player.addEventListener("ended", stop);
-        player.addEventListener("playing", playing);
+            row.addClass("playing").siblings().removeClass("playing");
+            if ((row[0].offsetTop < content.scrollTop()) ||
+                (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
+                row.parents(".content").scrollTop(row[0].offsetTop - 2); // keep played element in view
+            }
+            row.parent().children(".playable").each(function () {
+                paths.push($(this).data("id"));
+            });
+            view[0].playlist = paths;
+            view[0].playlistIndex = paths.indexOf(path);
+        } else {
+            view[0].playlistIndex = view[0].playlist.indexOf(path);
+        }
     }
 
     function getTheme(theme, callback) {
@@ -2436,39 +2453,6 @@
                 pass: ""
             });
         });
-    }
-
-    function play(view, path) {
-        var player = view.find(".audio-player")[0];
-        var source = "?_" + path;
-
-        if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
-            player.src = source;
-            player.load();
-            player.play();
-        } else {
-            return showError(view, "Sorry, your browser can't play this file.");
-        }
-
-        var row = view.find(".data-row[data-id='" + path + "']");
-        if (row.length) {
-            row.addClass("playing").siblings().removeClass("playing");
-            // keep played element in view
-            var content = row.parents(".content");
-            if ((row[0].offsetTop < content.scrollTop()) ||
-                (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
-                row.parents(".content").scrollTop(row[0].offsetTop - 2);
-            }
-
-            var paths = [];
-            row.parent().children(".playable").each(function () {
-                paths.push($(this).data("id"));
-            });
-            view[0].playlist = paths;
-            view[0].playlistIndex = paths.indexOf(path);
-        } else {
-            view[0].playlistIndex = view[0].playlist.indexOf(path);
-        }
     }
 
     // Extract the extension from a file name
