@@ -855,10 +855,8 @@
     }
 
     function uploadInit(view) {
-        var uploadInfo = '<section class="upload-info out">' +
-                '<div class="upload-bar">' +
-                    '<div class="upload-bar-inner"></div>' +
-                '</div>' +
+        var uploadInfo = '<div class="upload-info out">' +
+                '<div class="upload-bar"></div>' +
                 '<span class="upload-title"></span>' +
                 '<span class="upload-speed">' +
                     droppy.svg.speed +
@@ -872,18 +870,18 @@
                     droppy.svg.remove +
                     '<span>Cancel</span>' +
                 '</span>' +
-            '</section>';
+            '</div>';
 
         if (!view.find(".upload-info").length) view.append(uploadInfo);
         view.find(".upload-info").setTransitionClass("out", "in");
-        view.find(".upload-bar-inner").css("width", "0%");
+        view.find(".upload-bar").css("width", "0%");
         view.find(".upload-time-left, .upload-speed > span").text("");
         view.find(".upload-title").text("Reading files ...");
         updateTitle("0%");
     }
 
     function uploadDone(view) {
-        view.find(".upload-bar-inner").css("width", "100%");
+        view.find(".upload-bar").css("width", "100%");
         view.find(".upload-title").text("Processing ...");
         view[0].uploadSuccess = true;
     }
@@ -906,7 +904,7 @@
             view[0].uploadSuccess = false;
         }
         setTimeout(function () {
-            view.find(".upload-bar-inner").removeAttr("style");
+            view.find(".upload-bar").removeAttr("style");
         }, 200);
     }
 
@@ -923,7 +921,7 @@
                 elapsed, secs;
 
             updateTitle(progress);
-            view.find(".upload-bar-inner").css("width", progress);
+            view.find(".upload-bar").css("width", progress);
             view.find(".upload-speed > span").text(speed.size + " " + speed.unit + "/s");
 
             // Calculate estimated time left
