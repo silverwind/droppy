@@ -401,7 +401,7 @@ input:-webkit-autofill {
 }
 
 .header-mtime {
-    flex: 0 0 7em;
+    flex: 0 0 6em;
     display: inline-block;
     text-align: right;
 }
@@ -496,7 +496,7 @@ input:-webkit-autofill {
 
 .mtime {
     white-space: nowrap;
-    flex: 0 0 7em;
+    flex: 0 0 6em;
     text-align: right;
     display: inline-block;
 }
