@@ -1233,16 +1233,16 @@
         // Switch into a folder
         content.find(".folder-link").register("click", function (event) {
             if (droppy.socketWait) return;
-            event.preventDefault();
             updateLocation(view, $(this).parents(".data-row").data("id"));
+            event.preventDefault();
         });
 
         // Click on a file link
         content.find(".file-link").register("click", function (event) {
             if (droppy.socketWait) return;
             var view = $(event.target).parents(".view");
+            openFile(view, view[0].currentFolder, $(event.target).text());
             event.preventDefault();
-            updateLocation(view, join(view[0].currentFolder, $(event.target).text()));
         });
 
         content.find(".data-row").each(function (index) {
@@ -1637,7 +1637,7 @@
             var entry  = $("#entry-menu").data("target"),
                 view   = entry.parents(".view");
             $("#click-catcher").trigger("click");
-            updateLocation(view, join(view[0].currentFolder, entry.find(".file-link").text()));
+            openFile(view, view[0].currentFolder, entry.find(".file-link").text());
             event.stopPropagation();
         });
 
@@ -1819,7 +1819,6 @@
                     $("<iframe class='dl'>").css("display", "none").appendTo("body").attr("src", "?~" + entryId);
                     setTimeout(function () { $("iframe.dl").remove(); }, 1000);
                     hideSpinner(view);
-                    updateLocation(view, view[0].currentFolder);
                 }
             });
         }
