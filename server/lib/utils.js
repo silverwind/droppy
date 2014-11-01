@@ -5,7 +5,13 @@ var utils = {},
     fs    = require("graceful-fs"),
     isBin = require("isbinaryfile"),
     path  = require("path"),
-    paths = require("./paths.js").get();
+    paths = require("./paths.js").get(),
+    forceBinaryTypes = [
+        "pdf",
+        "ps",
+        "eps",
+        "ai"
+    ];
 
 // Recursively walk a directory and return file paths in an array
 utils.walkDirectory = function walkDirectory(dir, includeEmptyDirs, callback) {
@@ -117,6 +123,9 @@ utils.isPathSane = function isPathSane(name) {
 };
 
 utils.isBinary = function isBinary(path, callback) {
+    if (forceBinaryTypes.indexOf(utils.getExt(path)) !== -1)
+        return callback(null, true);
+
     isBin(path, function (err, result) {
         if (err) return callback(err);
         callback(null, result);
