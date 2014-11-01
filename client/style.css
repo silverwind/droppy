@@ -1169,52 +1169,34 @@ input:-webkit-autofill {
     border-radius: 6px;
     box-shadow: 0 0 30px rgba(0,0,0,.4);
     color: #666;
-    max-height: 80%;
+    max-height: 95%;
     transform: translateY(-50%);
     position: fixed;
     transition: top, .3s ease, opacity .3s ease, visibility .3s ease;
     z-index: 32;
-    padding: .25em .5em ;
+    padding: .66em;
     overflow-y: auto;
 }
+
+@media all and (min-width: 800px) { #options-box { width: 24em; left: 30% } }
+@media all and (max-width: 799px) { #options-box { width: 80%;  left: 10% } }
 
 @media all and (min-width: 1024px) { #options-box { font-size: .8em } }
 @media all and (max-width: 1023px) { #options-box { font-size: .7em } }
 @media all and (max-width:  799px) { #options-box { font-size: .6em } }
 
 #options-box.in  { top: 50%; opacity: 1; visibility: visible }
-#options-box.out { top: 60%; opacity: 0; visibility: hidden }
+#options-box.out { top: 60%; opacity: 0; visibility: hidden  }
 
-@media all and (min-width: 800px) {
-    #options-box.single { width: 40%; left: 30%; }
-    #options-box.double { width: 80%; left: 10%; }
-    #options-box.single > div { width: 100%; }
-    #options-box.double > div { width: 50%;  }
-}
+#options-box > div { width: 100% }
 
-@media all and (max-width: 799px) {
-    #options-box.single { width: 80%; left: 10%; }
-    #options-box.double { width: 80%; left: 10%; }
-    #options-box.single > div { width: 100%; }
-    #options-box.double > div { width: 100%; }
-}
-
-#options-box > div {
-    float: left;
-}
-
-#options-box .list-options ul li {
-    display: flex;
-    margin: .375em .25em;
-    height: 1.75em;
-}
+#options-box .list-options ul li { display: flex; margin: 0.25em 0 }
+#options-box .list-options ul li:first-of-type { margin-top: 0 }
 
 #options-box .list-options label {
     display: inline-block;
     white-space: nowrap;
-    text-align: right;
-    line-height: 1.75em;
-    margin-right: .5em;
+    line-height: 1.5em;
     flex: 1;
 }
 
@@ -1256,37 +1238,23 @@ input:-webkit-autofill {
 
 #options-box select { flex: 1 }
 
-#options-box .list-user li {
-    padding: 0 .33em;
-    margin: .375em .25em;
-    height: 1.75em;
-    line-height: 1.75em;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    background: #fff;
+#options-box .list-user:before {
+    content: "Users";
+    margin: 0 1em;
+    border-bottom: 1px solid #999;
+    padding: .25em;
+    display: block;
 }
-
-#options-box .list-user h4 {
-    display: none;
+#options-box .list-user li {
+    padding: 0 .5em;
+    margin: 0 1em;
+    line-height: 1.25em;
 }
 
 @media all and (max-width: 799px) {
-    #options-box .list-user h4 {
-        display: block;
-        width: 100%;
-        text-align: center;
-        font-size: 1.5em;
-        margin: .5em 0;
-    }
     #options-box .list-user li {
         padding: .25em .5em;
         height: auto;
-    }
-    .firefox .list-user:after {
-        bottom: 0;
-        content: "";
-        display: block;
-        height: .5em;
     }
 }
 
@@ -1297,7 +1265,7 @@ input:-webkit-autofill {
     height: 1em;
     width: 1em;
     float: right;
-    fill: #888;
+    fill: #ccc;
     cursor: pointer;
 }
 
@@ -1309,12 +1277,12 @@ input:-webkit-autofill {
     line-height: 2em;
     text-align: center;
     border-radius: 4px;
-    margin: 0 .25em;
     cursor: pointer;
-    margin: 0 .25em;
+    width: 10em;
+    margin: .25em auto;
 }
-#options-box .list-user .add-user:hover {color: #000 }
-#options-box .list-user .add-user:hover svg { fill: #000 }
+#options-box .list-user .add-user:hover { background: #18f; color: #fff }
+#options-box .list-user .add-user:hover svg { fill: #fff }
 
 #options-box .list-user .add-user svg {
     height: 1.25em;

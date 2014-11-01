@@ -439,10 +439,7 @@
                 toggleCatcher();
                 break;
             case "USER_LIST":
-                if (!$("#options-box").hasClass("in"))
-                    showOptions(msg.users);
-                else
-                    updateUsers(msg.users);
+                if ($("#options-box").hasClass("in")) updateUsers(msg.users);
                 break;
             case "SAVE_STATUS":
                 view = getView(vId);
@@ -723,6 +720,7 @@
         });
 
         $("#options-button").register("click", function () {
+            showOptions();
             sendMessage(null, "GET_USERS");
         });
 
@@ -2119,8 +2117,7 @@
     }
 
     function createUserList(users) {
-        var output = "<div class='list-user'><h4>Users</h4>";
-        output += "<ul>";
+        var output = "<div class='list-user'>";
         Object.keys(users).forEach(function (user) {
             output += '<li><span class="username">' + user + "</span>" + droppy.svg.remove + '</li>';
         });
@@ -2131,25 +2128,37 @@
     }
 
     function updateUsers(userlist) {
-        $("#options-box").find(".list-user").empty().append(createUserList(userlist));
-        bindUserlistEvents();
-    }
-
-    function showOptions(userlist) {
-        var box = $("#options-box");
-        box.empty().append(createOptions);
+        var list, box = $("#options-box");
 
         if (Object.keys(userlist).length > 0) {
+            box.find(".list-user").remove();
             box.append(createUserList(userlist));
-            box.replaceClass("single", "double");
-        } else {
-            box.replaceClass("double", "single");
+            list = box.find(".list-user");
+            list.find(".add-user").register("click", function () {
+                var user = window.prompt("Username?"),
+                    pass = window.prompt("Password?");
+                if (!user || !pass) return;
+                sendMessage(null, "UPDATE_USER", {
+                    name: user,
+                    pass: pass,
+                    priv: true
+                });
+            });
+            list.find(".remove").register("click", function (event) {
+                event.stopPropagation();
+                sendMessage(null, "UPDATE_USER", {
+                    name: $(this).parents("li").children(".username").text(),
+                    pass: ""
+                });
+            });
         }
-
         // Transform the select box, width is needed for the dropdown to behave correctly
         $("#options-box select").width($(".list-options label").eq(0).width()).customSelect();
+    }
 
-        bindUserlistEvents();
+    function showOptions() {
+        var box = $("#options-box");
+        box.empty().append(createOptions);
 
         $("select.theme").register("change", function () {
             var theme = $(this).val();
@@ -2438,26 +2447,6 @@
                 });
             }
         };
-    }
-
-    function bindUserlistEvents() {
-        $(".add-user").register("click", function () {
-            var user = window.prompt("Username?"),
-                pass = window.prompt("Password?");
-            if (!user || !pass) return;
-            sendMessage(null, "UPDATE_USER", {
-                name: user,
-                pass: pass,
-                priv: true
-            });
-        });
-        $(".list-user .remove").register("click", function (event) {
-            event.stopPropagation();
-            sendMessage(null, "UPDATE_USER", {
-                name: $(this).parents("li").children(".username").text(),
-                pass: ""
-            });
-        });
     }
 
     // Extract the extension from a file name
