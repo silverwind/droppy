@@ -834,9 +834,10 @@
             if (droppy.emptyFolders.length) sendEmptyFolders(view);
         }
 
-        function isOverLimit(size) {
+        function isOverLimit(view, size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
                 showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize));
+                uploadCancel(view);
                 return true;
             }
             return false;
@@ -2890,7 +2891,7 @@
         box.children("span").text(text);
         box.attr("class", "info-box error in");
         setTimeout(function () {
-            box.removeAttr("class");
+            box.replaceClass("in", "out");
         }, 3000);
     }
 
