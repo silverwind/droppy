@@ -236,9 +236,9 @@ input:-webkit-autofill {
 @media all and (max-width: 1023px) { .path li { padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { .path li { padding: 0 .2em 0 1.4em; line-height: 1.25rem; } }
 
-.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: calc(-1.5rem + .5px) }
+.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.88rem }
 @media all and (max-width:  639px) {
-    .path .triangle { height: 1.25rem; width: 1.25rem; right: calc(-1.25rem + .5px) }
+    .path .triangle { height: 1.25rem; width: 1.25rem; right: -.75rem }
 }
 
 .path .home {
