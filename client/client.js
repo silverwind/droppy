@@ -2183,13 +2183,76 @@
     //  Audio functions / events
     // ============================================================================
 
+    function play(view, path) {
+        var content, paths,
+            row    = view.find(".data-row[data-id='" + path + "']"),
+            player = view.find(".audio-player")[0],
+            source = "?_" + path;
+
+        view.find(".seekbar-played").css("width", "0%");
+        view.find(".seekbar-loaded").css("width", "0%");
+
+        if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
+            player.src = source;
+            onNewAudio(view);
+            player.load();
+            player.play();
+        } else {
+            return showError(view, "Sorry, your browser can't play this file.");
+        }
+        if (row.length) {
+            content = row.parents(".content");
+            paths   = [];
+
+            row.addClass("playing").siblings().removeClass("playing");
+            if ((row[0].offsetTop < content.scrollTop()) ||
+                (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
+                row.parents(".content").scrollTop(row[0].offsetTop - 2); // keep played element in view
+            }
+            row.parent().children(".playable").each(function () {
+                paths.push($(this).data("id"));
+            });
+            view[0].playlist = paths;
+            view[0].playlistIndex = paths.indexOf(path);
+        } else {
+            view[0].playlistIndex = view[0].playlist.indexOf(path);
+        }
+    }
+
+    function onNewAudio(view) {
+        var player     = view.find(".audio-player")[0],
+            seekPlayed = view.find(".seekbar-played"),
+            seekLoaded = view.find(".seekbar-loaded"),
+            timeCur    = view.find(".time-cur"),
+            timeMax    = view.find(".time-max"),
+            title      = basename(player.src).replace(/\..+$/, "").replace(/_/g, " ").replace(/\s+/, " ");
+
+        title = decodeURIComponent(title);
+        view.find(".audio-bar").replaceClass("out", "in");
+        view.find(".audio-title").text(title);
+        updateTitle(title);
+
+        view[0].audioUpdater = setInterval(function updater() {
+            var progress, cur = player.currentTime, max = player.duration;
+
+            if (player.buffered.length) {
+                progress = player.buffered.end(0) / max * 100;
+                seekLoaded.css("width", progress + "%");
+                if (progress === 100) clearInterval(view[0].audioUpdater);
+            }
+            if (cur && max) {
+                seekPlayed.css("width", (cur / max * 100)  + "%");
+                timeCur.text(secsToTime(cur));
+                timeMax.text(secsToTime(max));
+            }
+        }, 1000 / 60);
+    }
+
     function initAudio(view) {
-        var updateVolume, fullyLoaded, heldVolume = false,
+        var updateVolume, heldVolume = false,
             bar        = view.find(".audio-bar"),
             slider     = view.find(".volume-slider"),
             volumeIcon = view.find(".audio-bar .volume"),
-            seekPlayed = view.find(".seekbar-played"),
-            seekLoaded = view.find(".seekbar-loaded"),
             player     = view.find(".audio-player")[0];
 
         setVolume(droppy.get("volume"));
@@ -2199,14 +2262,7 @@
             playNext(view);
         });
         player.addEventListener("playing", function playing(event) {
-            var view    = $(event.target).parents(".view"),
-                matches = $(player).attr("src").match(/(.+)\/(.+)\./),
-                title   = matches[matches.length - 1].replace(/_/g, " ").replace(/\s+/, " ");
-            updateTitle(title);
-            view.find(".audio-title").text(title);
-            bar.replaceClass("out", "in");
-            fullyLoaded = false;
-            view[0].audioUpdater = setInterval(updater, 100);
+            onNewAudio($(event.target).parents(".view"));
         });
         updateVolume = throttle(function (event) {
             var slider = $(event.target).parents(".view").find(".volume-slider")[0],
@@ -2300,19 +2356,6 @@
             else volumeIcon.html(droppy.svg["volume-high"]);
             view.find(".volume-slider-inner").width((volume * 100) + "%");
         }
-        function updater() {
-            var cur = player.currentTime,
-                max = player.duration;
-            if (player.buffered && !fullyLoaded) {
-                var loadProgress = player.buffered.end(0) / max * 100;
-                seekLoaded.css("width", loadProgress  + "%");
-                if (loadProgress === 100) fullyLoaded = true;
-            }
-            if (!cur || !max) return;
-            seekPlayed.css("width", (cur  / max * 100)  + "%");
-            view.find(".time-cur").text(secsToTime(cur));
-            view.find(".time-max").text(secsToTime(max));
-        }
         function playRandom(view) {
             var nextIndex;
             if (view[0].playlist.length === 1) return play(view, view[0].playlist[0]);
@@ -2334,41 +2377,6 @@
                 play(view, view[0].playlist[view[0].playlist.length - 1]);
             else
                 play(view, view[0].playlist[view[0].playlistIndex - 1]);
-        }
-    }
-
-    function play(view, path) {
-        var content, paths,
-            row    = view.find(".data-row[data-id='" + path + "']"),
-            player = view.find(".audio-player")[0],
-            source = "?_" + path;
-
-        view.find(".seekbar-played").css("width", "0%");
-        view.find(".seekbar-loaded").css("width", "0%");
-
-        if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
-            player.src = source;
-            player.load();
-            player.play();
-        } else {
-            return showError(view, "Sorry, your browser can't play this file.");
-        }
-        if (row.length) {
-            content = row.parents(".content");
-            paths   = [];
-
-            row.addClass("playing").siblings().removeClass("playing");
-            if ((row[0].offsetTop < content.scrollTop()) ||
-                (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
-                row.parents(".content").scrollTop(row[0].offsetTop - 2); // keep played element in view
-            }
-            row.parent().children(".playable").each(function () {
-                paths.push($(this).data("id"));
-            });
-            view[0].playlist = paths;
-            view[0].playlistIndex = paths.indexOf(path);
-        } else {
-            view[0].playlistIndex = view[0].playlist.indexOf(path);
         }
     }
 
