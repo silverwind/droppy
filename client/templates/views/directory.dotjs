@@ -54,7 +54,6 @@ it = {
             sortedEntries = t.fn.sortKeysByProperty(it.entries, it.sortBy),
             extRE = /[^.]*$/,
             entryExt,
-            tempSize,
             temp = {};
         if(it.sortAsc) sortedEntries.reverse();
     }}
@@ -62,9 +61,8 @@ it = {
         {{#def.directoryHeader}}
         {{~sortedEntries :entryname}}
             {{  var obj = it.entries[entryname],
-                    tempSize = t.fn.convertToSI(obj.size);
                     entryExt = entryname.match(extRE)[0];
-                    temp.size = tempSize.size + " " + tempSize.unit;
+                    temp.size = prettyBytes(obj.size);
                     temp.id = folder + entryname;
                     temp.spriteClass = t.fn.getSpriteClass(entryExt);
                     temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;

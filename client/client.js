@@ -1,4 +1,4 @@
-/*global CodeMirror, t, Notification */
+/*global CodeMirror, t, Notification, prettyBytes */
 
 (function ($, window, document) {
     "use strict";
@@ -836,8 +836,7 @@
 
         function isOverLimit(size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
-                var si = convertToSI(droppy.maxFileSize);
-                showError(view, "Maximum file size for uploads is " + si.size + si.unit);
+                showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize));
                 return true;
             }
             return false;
@@ -917,12 +916,12 @@
             var bytesSent  = event.loaded,
                 bytesTotal = event.total,
                 progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                speed      = convertToSI(bytesSent / ((Date.now() - view[0].uploadStart) / 1000)),
+                speed      = prettyBytes(bytesSent / ((Date.now() - view[0].uploadStart) / 1000)),
                 elapsed, secs;
 
             updateTitle(progress);
             view.find(".upload-bar").css("width", progress);
-            view.find(".upload-speed > span").text(speed.size + " " + speed.unit + "/s");
+            view.find(".upload-speed > span").text(speed + "/s");
 
             // Calculate estimated time left
             elapsed = Date.now() - view[0].uploadStart;
@@ -2709,20 +2708,8 @@
     }
 
     function setSize(el, bytes) {
-        var result = convertToSI(bytes);
-        $(el).siblings(".size").attr("data-size", bytes).text(result.size + " " + result.unit);
+        $(el).siblings(".size").attr("data-size", bytes).text(prettyBytes(bytes));
     }
-
-    // Convert raw byte numbers to SI values
-    function convertToSI(bytes) {
-        var step = 0;
-        while (bytes >= 1024) {
-            bytes /= 1024;
-            step++;
-        }
-        return { size: bytes > 0 ? bytes.toPrecision(3) : 0, unit: ["b", "k", "M", "G", "T"][step] };
-    }
-    t.fn.convertToSI = convertToSI;
 
     // SVG preprocessing
     function prepareSVG(html) {

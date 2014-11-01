@@ -30,13 +30,14 @@ caching.files = {
         js: [
             "node_modules/jquery/dist/jquery.js",
             "client/lib/jquery.customSelect.min.js",
-            "client/client.js",
+            "node_modules/pretty-bytes/pretty-bytes.js",
             "node_modules/codemirror/lib/codemirror.js",
             "node_modules/codemirror/addon/selection/active-line.js",
             "node_modules/codemirror/addon/selection/mark-selection.js",
             "node_modules/codemirror/addon/search/searchcursor.js",
             "node_modules/codemirror/addon/edit/matchbrackets.js",
-            "node_modules/codemirror/keymap/sublime.js"
+            "node_modules/codemirror/keymap/sublime.js",
+            "client/client.js"
         ],
         html: [
             "client/html/base.html",
