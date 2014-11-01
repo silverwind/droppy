@@ -1332,7 +1332,7 @@ function streamArchive(req, res, zipPath) {
             archive.pipe(res);
             archive.append(null, { name: path.basename(zipPath) + '/' });
             archive.bulk([
-                { expand: true, cwd: zipPath, src: ["**/*", "**/.*", "**/.*/**"], dest: path.basename(zipPath) }
+                { expand: true, dot: true, cwd: zipPath, src: ["**"], dest: path.basename(zipPath) }
             ]);
             archive.finalize();
         } else {
