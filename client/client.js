@@ -403,10 +403,10 @@
                 } else {
                     if (view.data("type") === "directory") {
                         if (msg.folder !== getViewLocation(view)) {
-                            window.history.replaceState(null, null, getHashPaths(view, msg.folder));
-                            if (view[0].vId === 0) updateTitle(basename(msg.folder));
                             view[0].currentFile = null;
                             view[0].currentFolder = msg.folder;
+                            if (view[0].vId === 0) updateTitle(basename(msg.folder));
+                            replaceHistory(view, msg.folder);
                             updatePath(view);
                         }
                         view[0].switchRequest = false;
@@ -702,7 +702,7 @@
                 button.attr("title", "Merge views back into a single one");
             } else {
                 destroyView(1);
-                window.history.replaceState(null, null, getHashPaths(first, join(first[0].currentFolder, first[0].currentFile)));
+                replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
                 getView(0).removeClass("left");
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
@@ -1069,6 +1069,14 @@
         return hash;
     }
 
+    function pushHistory(view, dest) {
+        window.history.pushState(null, null, getHashPaths(view, dest));
+    }
+
+    function replaceHistory(view, dest) {
+        window.history.replaceState(null, null, getHashPaths(view, dest));
+    }
+
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
         if (typeof destination.length !== "number") throw "Destination needs to be string or array";
@@ -1090,7 +1098,7 @@
                     sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
                     // Skip the push if we're already navigating through history
-                    if (!skipPush) updateHistory(view, viewDest);
+                    if (!skipPush) pushHistory(view, viewDest);
                 } else
                     setTimeout(queue, 50, time + 50);
             })(time);
@@ -1102,10 +1110,6 @@
                     sendReq(getView(i), destination[i], 0);
             }
         } else if (droppy.views[view[0].vId]) sendReq(view, destination, 0);
-    }
-
-    function updateHistory(view, dest) {
-        window.history.pushState(null, null, getHashPaths(view, dest));
     }
 
     // Update the path indicator
@@ -1624,7 +1628,7 @@
 
             view[0].currentFile = entry.find(".file-link").text();
             location = join(view[0].currentFolder, view[0].currentFile);
-            updateHistory(view, location);
+            pushHistory(view, location);
             updatePath(view);
             openDoc(view, location);
             event.stopPropagation();
@@ -1785,8 +1789,9 @@
         if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) { // Image
             view[0].currentFile = file;
             view[0].currentFolder = newFolder;
-            openMedia(view, "image", oldFolder === newFolder);
+            pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
             updatePath(view);
+            openMedia(view, "image", oldFolder === newFolder);
         } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) { // Video
             if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
                 showError(view, "Sorry, your browser can't play this file.");
@@ -1794,8 +1799,9 @@
             } else {
                 view[0].currentFile = file;
                 view[0].currentFolder = newFolder;
-                openMedia(view, "video", oldFolder === newFolder);
+                pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
                 updatePath(view);
+                openMedia(view, "video", oldFolder === newFolder);
             }
         } else { // Generic file, ask the server if the file has binary contents
             var entryId = join(newFolder, file);
@@ -1810,6 +1816,7 @@
                 } else if (data === "text") { // Non-Binary content
                     view[0].currentFile = file;
                     view[0].currentFolder = newFolder;
+                    pushHistory(view, entryId);
                     updatePath(view);
                     openDoc(view, entryId);
                 } else { // Binary content - download it
@@ -1860,42 +1867,41 @@
     }
 
     function bindMediaArrows(view) {
-        view.find(".arrow-back").register("click", function () {
-            swapMedia(view, getPrevMedia(view), "left");
-        });
-        view.find(".arrow-forward").register("click", function () {
-            swapMedia(view, getNextMedia(view), "right");
-        });
+        var forward = view.find(".arrow-forward"),
+            back    = view.find(".arrow-back"),
+            arrows  = view.find(".arrow-back, .arrow-forward");
+
+        back.register("click", function ()    { swapMedia(view, getPrevMedia(view), "left");  });
+        forward.register("click", function () { swapMedia(view, getNextMedia(view), "right"); });
 
         if (droppy.detects.mobile) { // Always show arrows on mobile
-            if (!view.find(".arrow-back").hasClass("in"))
-                view.find(".arrow-back, .arrow-forward").addClass("in");
+            if (!back.hasClass("in")) arrows.addClass("in");
         } else {  // Show arrows on hover on desktops
-            view.find(".arrow-back, .arrow-forward").register("mouseenter", function () {
-                if (!$(this).hasClass("in")) $(this).addClass("in");
-            });
-            view.find(".arrow-back, .arrow-forward").register("mouseleave", function () {
-                $(this).removeClass("in");
-            });
+            arrows
+                .register("mouseenter mousemove", function () { if (!$(this).hasClass("in")) $(this).addClass("in"); })
+                .register("mouseleave", function () { $(this).removeClass("in"); });
         }
 
-        function swap(a, b, dir) {
-            if (droppy.detects.animation) {
-                a.attr("class", dir === "left" ? "right" : "left");
-                b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
-                    a.remove();
-                });
-            } else {
-                a.replaceWith(b);
-            }
-        }
+        // show arrows for two seconds so they won't have to be discovered
+        arrows.addClass("in");
+        setTimeout(function () {arrows.removeClass("in"); }, 2000);
 
         function swapMedia(view, filename, dir) {
             var b, a = view.find(".media-container > img, .media-container > video"),
-                source = getMediaSrc(view, filename),
-                nextIsImage = Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1;
+                source = getMediaSrc(view, filename);
 
-            if (nextIsImage) {
+            function swap(a, b, dir) {
+                if (droppy.detects.animation) {
+                    a.attr("class", dir === "left" ? "right" : "left");
+                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
+                        a.remove();
+                    });
+                } else {
+                    a.replaceWith(b);
+                }
+            }
+
+            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) { // Is the next media an image?
                 b = $("<img>").attr("class", dir).attr("src", source).one("load", aspectScale);
                 swap(a, b, dir);
             } else {
@@ -1916,7 +1922,7 @@
             }
             view[0].currentFile = filename;
             populateMediaCache(view, view[0].currentData);
-            window.history.replaceState(null, null, getHashPaths(view, join(view[0].currentFolder, view[0].currentFile)));
+            replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
             updatePath(view);
             if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }

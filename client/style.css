@@ -376,23 +376,14 @@ input:-webkit-autofill {
     fill: #666;
     z-index: 2;
     top: -.1em;
-    left: -.2em;
-}
-
-.file-header .down .triangle {
-    transform: rotate(90deg);
-    top: 0;
     left: -.3em;
 }
 
-.file-header .up .triangle {
-    transform: rotate(270deg);
-    top: -.2em;
-    left: -.3em;
-}
+.file-header .down .triangle { transform: rotate(90deg);  top: -.2em;  left: -.2em }
+.file-header .up   .triangle { transform: rotate(270deg); top: -.05em; left: -.2em }
 
-.file-header .active  { color: #000; }
-.file-header .active .triangle { fill: #000; }
+.file-header .active  { color: #000 }
+.file-header .active .triangle { fill: #000 }
 
 .header-name {
     flex: 1 1;
@@ -428,8 +419,8 @@ input:-webkit-autofill {
 .data-row.editing .entry-link { display: none; }
 
 .data-row.drop-hover {
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     background: #f81;
+    border-radius: 3px;
 }
 
 .data-row, .data-row a {
@@ -437,8 +428,8 @@ input:-webkit-autofill {
 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover {
-    background: #f8f8f8;
-    border-radius: 2px;
+    background: #fbfbfb;
+    border-radius: 3px;
 }
 
 .data-row.playing { background: #18f }
@@ -510,7 +501,7 @@ input:-webkit-autofill {
     padding: .125em;
 }
 .data-row svg:not(.up-arrow):not(.play):hover {
-    background: #d8d8d8;
+    background: #e8e8e8;
     border-radius: 4px;
 }
 
@@ -739,7 +730,9 @@ input:-webkit-autofill {
 
 .previewer .arrow-back, .previewer .arrow-forward {
     position: absolute;
-    bottom: 15%; top: 15%;
+    height: 6em;
+    width: 6em;
+    top: calc(50% - 3em);
     cursor: pointer;
     z-index: 33;
     user-select: none;
@@ -751,8 +744,8 @@ input:-webkit-autofill {
 }
 .mobile .previewer .arrow-back, .mobile .previewer .arrow-forward { opacity: 1; transition: none }
 
-.previewer .arrow-back    { left: 0; right: 85% }
-.previewer .arrow-forward { left: 85%; right: 0 }
+.previewer .arrow-back       { left:  0 }
+.previewer .arrow-forward    { right: 0 }
 .previewer .arrow-back.in    { opacity: 1 }
 .previewer .arrow-forward.in { opacity: 1 }
 
@@ -1242,7 +1235,7 @@ input:-webkit-autofill {
     content: "Users";
     margin: 0 1em;
     border-bottom: 1px solid #999;
-    padding: .25em;
+    padding: .25em .5em;
     display: block;
 }
 #options-box .list-user li {
