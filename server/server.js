@@ -1,12 +1,13 @@
 "use strict";
 
 var pkg        = require("./../package.json"),
-    utils      = require("./lib/utils.js"),
-    paths      = require("./lib/paths.js").get(),
-    log        = require("./lib/log.js"),
-    cfg        = require("./lib/cfg.js"),
     caching    = require("./lib/caching.js"),
-    db         = require("./lib/db.js");
+    cfg        = require("./lib/cfg.js"),
+    db         = require("./lib/db.js"),
+    log        = require("./lib/log.js"),
+    manifest   = require("./lib/manifest.js"),
+    paths      = require("./lib/paths.js").get(),
+    utils      = require("./lib/utils.js");
 
 var _          = require("lodash"),
     ap         = require("autoprefixer-core"),
@@ -849,7 +850,7 @@ function handleGET(req, res) {
     if (getCookie(req.headers.cookie) || config.public)
         isAuth = true;
 
-    if (/\?!\/content/.test(URI)) {
+    if (/^\/\?!\/content/.test(URI)) {
         if (isAuth) {
             res.setHeader("X-Page-Type", "main");
             handleResourceRequest(req, res, "main.html");
@@ -860,17 +861,17 @@ function handleGET(req, res) {
             res.setHeader("X-Page-Type", "auth");
             handleResourceRequest(req, res, "auth.html");
         }
-    } else if (/\?!\//.test(URI)) {
+    } else if (/^\/\?!\//.test(URI)) {
         handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
-    } else if (/\?[~\$]\//.test(URI)) {
+    } else if (/^\/\?[~\$]\//.test(URI)) {
         handleFileRequest(req, res, true);
-    } else if (/\?\?\//.test(URI)) {
+    } else if (/^\/\?\?\//.test(URI)) {
         handleTypeRequest(req, res);
-    } else if (/\?_\//.test(URI)) {
+    } else if (/^\/\?_\//.test(URI)) {
         handleFileRequest(req, res, false);
-    } else if (/\?~~\//.test(URI)) {
+    } else if (/^\/\?~~\//.test(URI)) {
         streamArchive(req, res, utils.addFilesPath(decodeURIComponent(req.url.substring("/~~/".length))));
-    } else if (/favicon.ico/.test(URI)) {
+    } else if (/^\/favicon.ico$/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
     } else {
         handleResourceRequest(req, res, "base.html");
@@ -949,6 +950,7 @@ function handlePOST(req, res) {
 function handleResourceRequest(req, res, resourceName) {
     var resource;
 
+    // CSS debugging
     if (config.debug && resourceName === "style.css") {
         res.writeHead(200, {
             "Content-Type"   : "text/css; charset=utf-8",
@@ -961,12 +963,19 @@ function handleResourceRequest(req, res, resourceName) {
         return;
     }
 
-    if (/^\/\?!\/theme\//.test(req.url))
+    // Assign filename, must be unique for resource requests
+    if (/^\/\?!\/theme\//.test(req.url)) {
         resource = cache.themes[req.url.substring("/?!/theme/".length)];
-    else if (/^\/\?!\/mode\//.test(req.url))
+    } else if (/^\/\?!\/mode\//.test(req.url)) {
         resource = cache.modes[req.url.substring("/?!/mode/".length)];
-    else
+    } else if (/^\/\?!\/manifest\.json$/.test(req.url)) {
+        resource = {
+            data: manifest(req),
+            mime: "application/manifest+json"
+        };
+    } else {
         resource = cache.res[resourceName];
+    }
 
     // Regular resource handling
     if (resource === undefined) {
@@ -987,6 +996,9 @@ function handleResourceRequest(req, res, resourceName) {
                     res.setHeader("X-Frame-Options", "DENY");
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
                     res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
+            } else if (resourceName === "manifest.json") {
+                res.setHeader("Cache-Control", "private, max-age=0");
+                res.setHeader("Expires", "0");
             } else if (resourceName === "favicon.ico") {
                 res.setHeader("Cache-Control", "public, max-age=604800");
                 res.setHeader("Expires", new Date(Date.now() + 604800000).toUTCString());

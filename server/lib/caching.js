@@ -327,7 +327,9 @@ function compileResources(callback) {
     // Save compiled resources
     while (caching.files.html.length) {  // Prepare HTML by removing tabs, CRs and LFs
         var name = path.basename(caching.files.html.pop()),
-            data = resData.html.pop().replace(/\n^\s*/gm, "").replace("{{version}}", pkg.version);
+            data = resData.html.pop().replace(/\n^\s*/gm, "")
+                .replace("{{version}}", pkg.version)
+                .replace("{{name}}", pkg.name);
 
         resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
     }

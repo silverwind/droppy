@@ -1149,11 +1149,11 @@ input:-webkit-autofill {
 
 #about-fork {
     font-size: .66em;
-    color: #333;
+    color: #666;
     padding: .1em .5em .1em 0;
     border-radius: .5em;
 }
-#about-fork:hover { background: #ddd }
+#about-fork:hover { border: 1px solid #999; background: #fff; }
 
 /* =============================== Options ============================== */
 
