@@ -21,7 +21,7 @@ exports = module.exports = function manifest(req) {
     };
 
     if (req.headers["host"]) {
-        data["start_url"] = req.connection.encrypted ? "https://" : "http://" + req.headers["host"] + "/";
+        data["start_url"] = (req.connection.encrypted ? "https://" : "http://") + req.headers["host"] + "/";
     }
 
     return JSON.stringify(data);
