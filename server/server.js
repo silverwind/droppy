@@ -49,15 +49,14 @@ var server = function init(home, options, isStandalone, callback) {
         function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
-        function (cb) { if (config.useTLS) utils.tlsInit(cb); else cb(); }
-    ], function (err, result) {
+    ], function (err) {
         if (err) return callback(err);
-        if (isStandalone) startListener(config.useTLS && result[5]);
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
-        log.simple("Preparing resources ...");
         async.series([
+            function (cb) { if (isStandalone) startListeners(cb); else cb(); },
+            function (cb) { log.simple("Preparing resources ..."); cb(); },
             function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb(); }); },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
@@ -117,15 +116,68 @@ function printLogo() {
     log.simple(chalk.blue("home"), " is at ", chalk.green(paths.home), "\n");
 }
 
-function startListener(tlsData) {
-    var hosts = Array.isArray(config.host) ? config.host : [config.host],
-        ports = Array.isArray(config.port) ? config.port : [config.port];
+function startListeners(callback) {
+    var listeners = config.listeners, sockets = [] ;
 
-    hosts.forEach(function (host) {
-        ports.forEach(function (port) {
-            createListener(onRequest, tlsData).listen(port, host);
+    if (!Array.isArray(listeners))
+        return callback(new Error("Config Error: 'listeners' must be an array"));
+
+    listeners.forEach(function (listener) {
+        ["host", "port", "protocol"].forEach(function (prop) {
+            if (!listener[prop]) return callback(new Error("Config Error: listener " + prop + " undefined"));
+        });
+
+        sockets.push({
+            hosts : Array.isArray(listener.host) ? listener.host : [listener.host],
+            ports : Array.isArray(listener.port) ? listener.port : [listener.port],
+            proto : listener.protocol,
+            hsts  : listener.hsts
         });
     });
+
+    async.each(sockets, setupListener, callback);
+}
+
+function setupListener(socket, callback) {
+    var sockets = [];
+
+    socket.hosts.forEach(function (host) {
+        socket.ports.forEach(function (port) {
+            sockets.push({
+                host  : host,
+                port  : port,
+                proto : socket.proto,
+                hsts  : socket.hsts
+            });
+        });
+    });
+
+    async.each(sockets, function(s, cb) {
+        createListener(onRequest, s.proto, s.hsts, function(err, server) {
+            if (err) log.error(err);
+
+            server.on("listening", function () {
+                setupSocket(server);
+                log.simple(chalk.green(s.proto.toUpperCase()) + " listening on ",
+                           chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
+                cb();
+            });
+
+            server.on("error", function (error) {
+                if (error.code === "EADDRINUSE")
+                    log.simple("Failed to bind to ", chalk.cyan(s.host), chalk.red(":"),
+                              chalk.blue(s.port), chalk.red(". Address already in use."));
+                else if (error.code === "EACCES")
+                    log.simple("Failed to bind to ", chalk.cyan(s.host), chalk.red(":"),
+                              chalk.blue(s.port), chalk.red(". Need permission to bind to ports < 1024."));
+                else
+                    log.error(error);
+                cb(); // TODO: Pass error
+            });
+
+            server.listen(s.port, s.host);
+        });
+    }, callback);
 }
 
 //-----------------------------------------------------------------------------
@@ -263,75 +315,64 @@ function cleanupLinks(callback) {
 }
 
 //-----------------------------------------------------------------------------
-// Bind to listening port
-function createListener(handler, tlsData) {
-    var server, tlsModule, options, sessions,
-        http = require("http");
-    if (!config.useTLS) {
-        server = http.createServer(handler);
+// Create socket listeners
+function createListener(handler, proto, hsts, callback) {
+    var server, tlsModule, options, sessions, http = require("http");
+    if (proto === "http") {
+        callback(null, http.createServer(handler));
     } else {
-        tlsModule = config.useSPDY ? require("spdy").server : require("tls");
+        if (proto === "https")
+            tlsModule = require("tls");
+        else if (proto === "spdy")
+            tlsModule = require("spdy").server;
+        else
+            return callback(new Error("Config error: Unknown protocol type " + proto));
 
-        // TLS options
-        options = {
-            key              : tlsData[0],
-            cert             : tlsData[1],
-            ca               : tlsData[2] !== "" ? tlsData[2] : undefined,
-            honorCipherOrder : true,
-            ciphers          : "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
-            secureProtocol   : "SSLv23_server_method",
-            NPNProtocols     : []
-        };
+        utils.tlsInit(function(err, tlsData) {
+            if (err) return callback(err);
+            // TLS options
+            options = {
+                key              : tlsData[0],
+                cert             : tlsData[1],
+                ca               : tlsData[2] !== "" ? tlsData[2] : undefined,
+                honorCipherOrder : true,
+                ciphers          : "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
+                secureProtocol   : "SSLv23_server_method",
+                NPNProtocols     : []
+            };
 
-        tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
+            tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
 
-        // Protocol-specific options
-        if (config.useSPDY) options.windowSize = 1024 * 1024;
+            // Protocol-specific options
+            if (proto === "spdy") options.windowSize = 1024 * 1024;
 
-        server = new tlsModule.Server(options, http._connectionListener);
-        server.httpAllowHalfOpen = false;
-        server.timeout = 120000;
+            server = new tlsModule.Server(options, http._connectionListener);
+            server.httpAllowHalfOpen = false;
+            server.timeout = 120000;
 
-        server.on("request", function (req, res) {
-            if (config.useHSTS) res.setHeader("Strict-Transport-Security", "max-age=31536000");
-            handler(req, res);
-        });
+            server.on("request", function (req, res) {
+                if (hsts && hsts > 0) res.setHeader("Strict-Transport-Security", "max-age=" + hsts);
+                handler(req, res);
+            });
 
-        server.on("clientError", function (err, conn) {
-            conn.destroy();
-        });
+            server.on("clientError", function (err, conn) {
+                conn.destroy();
+            });
 
-        // TLS session resumption
-        sessions = {};
+            // TLS session resumption
+            sessions = {};
 
-        server.on("newSession", function (id, data) {
-            sessions[id] = data;
-        });
+            server.on("newSession", function (id, data) {
+                sessions[id] = data;
+            });
 
-        server.on("resumeSession", function (id, callback) {
-            callback(null, (id in sessions) ? sessions[id] : null);
+            server.on("resumeSession", function (id, cb) {
+                cb(null, (id in sessions) ? sessions[id] : null);
+            });
+
+            callback(null, server);
         });
     }
-
-    server.on("listening", function () {
-        setupSocket(server);
-        log.simple("Listening on ", chalk.cyan(server.address().address),
-                   ":", chalk.blue(server.address().port));
-    });
-
-    server.on("error", function (error) {
-        if (error.code === "EADDRINUSE")
-            log.simple("Failed to bind to ", chalk.cyan(config.host), chalk.red(":"),
-                      chalk.blue(config.port), chalk.red(". Address already in use.\n"));
-        else if (error.code === "EACCES")
-            log.simple("Failed to bind to ", chalk.cyan(config.host), chalk.red(":"),
-                      chalk.blue(config.port), chalk.red(". Need permission to bind to ports < 1024.\n"));
-        else
-            log.error(error);
-        process.exit(1);
-    });
-
-    return server;
 }
 
 //-----------------------------------------------------------------------------

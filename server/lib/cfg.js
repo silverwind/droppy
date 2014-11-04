@@ -7,20 +7,22 @@ var cfg        = {},
     path       = require("path"),
     configFile = require("./paths.js").get().cfg,
     defaults   = {
-        "host"         : "0.0.0.0",
-        "port"         : 8989,
-        "public"       : false,
+        "listeners" : [
+            {
+                "host"     : "0.0.0.0",
+                "port"     : 8989,
+                "protocol" : "http"
+            }
+        ],
         "debug"        : false,
-        "timestamps"   : true,
-        "useTLS"       : false,
-        "useSPDY"      : false,
-        "useHSTS"      : false,
-        "readInterval" : 250,
         "keepAlive"    : 20000,
         "linkLength"   : 3,
         "logLevel"     : 2,
-        "maxOpen"      : 256,
         "maxFileSize"  : 0,
+        "maxOpen"      : 256,
+        "public"       : false,
+        "readInterval" : 250,
+        "timestamps"   : true,
         "zipLevel"     : 1
     };
 
@@ -30,10 +32,17 @@ cfg.init = function (config, callback) {
         callback(null, config);
     } else if (process.env.NODE_ENV === "droppydemo") {
         config = _.defaults({
-            "port"       : process.env.PORT,
+            "listeners" : [
+                {
+                    "host"     : "0.0.0.0",
+                    "port"     : 8989,
+                    "protocol" : "http"
+                }
+            ],
             "public"     : true,
             "timestamps" : false
         }, defaults);
+        console.log(JSON.stringify(config, null, 4));
         callback(null, config);
     } else {
         fs.stat(configFile, function (err) {
