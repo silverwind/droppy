@@ -10,6 +10,93 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <style>
+      body, div, p {
+          box-sizing: border-box;
+          border: 0;
+          margin: 0;
+          padding: 0;
+      }
+
+      html {
+          background: #181818;
+          overflow: hidden;
+      }
+
+      .loading {
+          position: absolute;
+          -webkit-animation: spin 1s infinite linear;
+                  animation: spin 1s infinite linear;
+          border-bottom : 5px solid #18f;
+          border-left   : 5px solid #000;
+          border-right  : 5px solid #000;
+          border-top    : 5px solid #f1a;
+          border-radius: 100%;
+          box-shadow: 0 0 10px #000, inset 0 0 10px #000;
+          height: 200px;
+          width: 200px;
+          left: calc(50% - 100px);
+          top:  calc(50% - 100px);
+      }
+
+      .loading-logo {
+          position: absolute;
+          fill: #eee;
+          stroke: #888;
+          stroke-width: 8;
+          width: 200px;
+          height: 200px;
+          left: calc(50% - 100px);
+          top:  calc(50% - 100px);
+      }
+
+      @-webkit-keyframes spin {
+       from { -webkit-transform: rotate(0deg); transform: rotate(0deg)   }
+       to   { -webkit-transform: rotate(359deg); transform: rotate(359deg) }
+      }
+
+      @keyframes spin {
+       from { -webkit-transform: rotate(0deg); transform: rotate(0deg)   }
+       to   { -webkit-transform: rotate(359deg); transform: rotate(359deg) }
+      }
+
+      #noscript {
+          background: #111;
+          border-radius: 6px;
+          display: table;
+          height: 120px;
+          left: 50%;
+          margin-left: -200px;
+          margin-top: -100px;
+          padding: 30px;
+          position: fixed;
+          top: 50%;
+          width: 400px;
+      }
+
+      @media all and (max-width: 639px), all and (max-height: 399px) {
+          #noscript {
+              border-radius: 0;
+              box-shadow: none;
+              height: 100%;
+              left: 0;
+              margin: 0;
+              padding: 0;
+              top: 0;
+              width: 100%;
+          }
+      }
+
+      #noscript p {
+          color:  #ccc;
+          display: table-cell;
+          font-size: 1.5em;
+          line-height: 1.5;
+          padding: 0;
+          text-align: center;
+          vertical-align: middle;
+      }
+    </style>
   </head>
   <body>
     <div id="page" class="in">

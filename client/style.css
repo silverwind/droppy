@@ -37,10 +37,8 @@ button, input { line-height: normal }
 /* ============================ Global styles / fonts ============================= */
 
 html {
-    background: #181818;
     font: 1.5em/1 "Roboto", Helvetica, sans-serif;
     font-weight: 300;
-    overflow: hidden;
     text-rendering: geometricPrecision;
     -webkit-backface-visibility: hidden;
 }
@@ -596,31 +594,6 @@ input:-webkit-autofill {
     fill: #333;
 }
 
-.loading {
-    position: absolute;
-    animation: spin 1s infinite linear;
-    border-bottom : 5px solid #18f;
-    border-left   : 5px solid #000;
-    border-right  : 5px solid #000;
-    border-top    : 5px solid #f1a;
-    border-radius: 100%;
-    box-shadow: 0 0 10px #000, inset 0 0 10px #000;
-    height: 200px;
-    width: 200px;
-    left: calc(50% - 100px);
-    top:  calc(50% - 100px);
-}
-
-.loading-logo {
-    position: absolute;
-    fill: #eee;
-    stroke: #888;
-    stroke-width: 8;
-    width: 200px;
-    height: 200px;
-    left: calc(50% - 100px);
-    top:  calc(50% - 100px);
-}
 
 .spinner {
     float: right;
@@ -1149,7 +1122,7 @@ input:-webkit-autofill {
 
 #about-fork {
     font-size: .66em;
-    color: #666;
+    color: #333;
     padding: .1em .5em .1em 0;
     border-radius: .5em;
 }
@@ -1607,43 +1580,6 @@ input[type="checkbox"] { display: none }
 @media all and (max-width:  639px) { .dropzone { top: 1.25rem; } }
 
 .dropzone.in  { opacity: .8 ; visibility: visible }
-
-#noscript {
-    background: #111;
-    border-radius: 6px;
-    display: table;
-    height: 120px;
-    left: 50%;
-    margin-left: -200px;
-    margin-top: -100px;
-    padding: 30px;
-    position: fixed;
-    top: 50%;
-    width: 400px;
-}
-
-@media all and (max-width: 639px), all and (max-height: 399px) {
-    #noscript {
-        border-radius: 0;
-        box-shadow: none;
-        height: 100%;
-        left: 0;
-        margin: 0;
-        padding: 0;
-        top: 0;
-        width: 100%;
-    }
-}
-
-#noscript p {
-    color:  #ccc;
-    display: table-cell;
-    font-size: 1.5em;
-    line-height: 1.5;
-    padding: 0;
-    text-align: center;
-    vertical-align: middle;
-}
 
 iframe {
     display: none;
