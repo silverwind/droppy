@@ -36,13 +36,6 @@ button, input { line-height: normal }
 
 /* ============================ Global styles / fonts ============================= */
 
-html {
-    font: 1.5em/1 "Roboto", Helvetica, sans-serif;
-    font-weight: 300;
-    text-rendering: geometricPrecision;
-    -webkit-backface-visibility: hidden;
-}
-
 ::selection      { background: #18f; color: #fff }
 ::-moz-selection { background: #18f; color: #fff }
 
