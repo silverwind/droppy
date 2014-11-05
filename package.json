@@ -32,6 +32,7 @@
     "cpr": "~0.3.2",
     "dot": "~1.0.2",
     "graceful-fs": "~3.0.4",
+    "html-minifier": "~0.6.9",
     "isbinaryfile": "~2.0.2",
     "jquery": "~2.1.1",
     "lodash": "~2.4.1",

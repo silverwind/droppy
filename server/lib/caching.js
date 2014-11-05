@@ -11,6 +11,7 @@ var async        = require("async"),
     cleanCSS     = new require("clean-css")({keepSpecialComments : 0}),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
+    htmlMinifier = require("html-minifier"),
     mime         = require("mime"),
     path         = require("path"),
     uglify       = require("uglify-js"),
@@ -325,11 +326,20 @@ function compileResources(callback) {
     }
 
     // Save compiled resources
-    while (caching.files.html.length) {  // Prepare HTML by removing tabs, CRs and LFs
+    while (caching.files.html.length) {
         var name = path.basename(caching.files.html.pop()),
-            data = resData.html.pop().replace(/\n^\s*/gm, "")
-                .replace("{{version}}", pkg.version)
-                .replace("{{name}}", pkg.name);
+            data = resData.html.pop().replace("{{version}}", pkg.version).replace("{{name}}", pkg.name);
+
+        if (doMinify) {
+            data = htmlMinifier.minify(data, {
+                removeComments: true,
+                collapseWhitespace: true,
+                collapseBooleanAttributes: true,
+                removeRedundantAttributes: true,
+                caseSensitive: true,
+                minifyCSS: true
+            });
+        }
 
         resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
     }
