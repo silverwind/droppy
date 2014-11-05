@@ -35,14 +35,13 @@ cfg.init = function (config, callback) {
             "listeners" : [
                 {
                     "host"     : "0.0.0.0",
-                    "port"     : 8989,
+                    "port"     : process.env.PORT,
                     "protocol" : "http"
                 }
             ],
             "public"     : true,
             "timestamps" : false
         }, defaults);
-        console.log(JSON.stringify(config, null, 4));
         callback(null, config);
     } else {
         fs.stat(configFile, function (err) {
