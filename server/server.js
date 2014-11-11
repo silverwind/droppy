@@ -3,6 +3,7 @@
 var pkg        = require("./../package.json"),
     caching    = require("./lib/caching.js"),
     cfg        = require("./lib/cfg.js"),
+    demo       = require("./lib/demo.js"),
     db         = require("./lib/db.js"),
     log        = require("./lib/log.js"),
     manifest   = require("./lib/manifest.js"),
@@ -18,7 +19,6 @@ var _          = require("lodash"),
     cpr        = require("cpr"),
     fs         = require("graceful-fs"),
     mime       = require("mime"),
-    mkdirp     = require("mkdirp"),
     mv         = require("mv"),
     request    = require("request"),
     rimraf     = require("rimraf"),
@@ -37,16 +37,15 @@ var cache      = {},
     hasServer  = null,
     ready      = false,
     mode       = {file: "644", dir: "755"},
-    isDemo     = process.env.NODE_ENV === "droppydemo",
-    mkdirpOpts = {fs: fs, mode: mode.dir};
+    isDemo     = process.env.NODE_ENV === "droppydemo";
 
 var server = function init(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
 
     async.series([
-        function (cb) { mkdirp(paths.files, mkdirpOpts, cb); },
-        function (cb) { mkdirp(paths.temp, mkdirpOpts, cb); },
-        function (cb) { mkdirp(path.dirname(paths.cfg), mkdirpOpts, cb); },
+        function (cb) { utils.mkdir(paths.files, cb); },
+        function (cb) { utils.mkdir(paths.temp, cb); },
+        function (cb) { utils.mkdir(path.dirname(paths.cfg), cb); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
     ], function (err) {
@@ -60,11 +59,11 @@ var server = function init(home, options, isStandalone, callback) {
             function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb(); }); },
             function (cb) { cleanupTemp(cb); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) { if (isDemo) cleanupForDemo(function (err) { if (err) log.error(err); cb(); }); else cb(); },
+            function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); cb(); }); else cb(); },
             function (cb) { if (config.debug) { watchCSS(); updateCSS(null, null, cb); } else cb(); }
         ], function (err) {
             if (err) return callback(err);
-            if (isDemo) setInterval(cleanupForDemo, 30 * 60 * 1000);
+            if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
             ready = true;
             log.simple("Ready for requests!");
             callback();
@@ -117,7 +116,7 @@ function printLogo() {
 }
 
 function startListeners(callback) {
-    var listeners = config.listeners, sockets = [] ;
+    var listeners = config.listeners, sockets = [];
 
     if (!Array.isArray(listeners))
         return callback(new Error("Config Error: 'listeners' must be an array"));
@@ -174,105 +173,9 @@ function setupListener(socket, callback) {
                     log.error(error);
                 cb(); // TODO: Pass error
             });
-
             server.listen(s.port, s.host);
         });
     }, callback);
-}
-
-//-----------------------------------------------------------------------------
-// Restore the files directory to an initial state for the demo mode
-function cleanupForDemo(doneCallback) {
-    var oldWatched, currentWatched;
-    oldWatched = [];
-    currentWatched = Object.keys(watchers);
-    if (currentWatched.length > 0) {
-        oldWatched = currentWatched;
-        currentWatched.forEach(function (dir) {
-            watchers[dir].close();
-            delete watchers[dir];
-        });
-    }
-
-    function get(src, dst) {
-        return function (cb) {
-            var stream;
-            var temp = path.join(paths.home, "/demoTemp", dst);
-            var dest = path.join(paths.files, dst);
-
-            mkdirp(path.dirname(temp), mkdirpOpts, function () {
-                mkdirp(path.dirname(dest), mkdirpOpts, function () {
-                    fs.exists(temp, function (exists) {
-                        if (!exists) {
-                            log.simple("Downloading " + src + " ...");
-                            stream = fs.createWriteStream(temp);
-                            stream.on("error", cb);
-                            stream.on("close", function () {
-                                utils.copyFile(temp, dest, cb);
-                            });
-                            request(src).pipe(stream);
-                        } else {
-                            utils.copyFile(temp, dest, cb);
-                        }
-                    });
-                });
-            });
-        };
-    }
-
-    async.series([
-        function (callback) {
-            log.simple("Cleaning up ...");
-            rimraf(paths.files, function () {
-                mkdirp(paths.files, mkdirpOpts, function () {
-                    callback(null);
-                });
-            });
-        },
-        function (callback) {
-            log.simple("Adding samples ...");
-            async.parallel([
-                function (cb) { cpr(paths.client, path.join(paths.files, "/client"), cb); },
-                function (cb) { cpr(paths.server, path.join(paths.files, "/server"), cb); }
-            ], function (err) {
-                if (err) log.error(err);
-                callback(null);
-            });
-        },
-        function (callback) {
-            var dest    = path.join(paths.files, "/sample-images"),
-                zipDest = path.join(paths.home, "/img.zip"),
-                output  = require("unzip").Extract({ path: dest });
-
-            output.on("error", callback);
-            output.on("close", callback);
-
-            mkdirp(dest, mkdirpOpts, function () {
-                fs.exists(zipDest, function (exists) {
-                    if (!exists) {
-                        log.simple("Downloading image samples ...");
-                        var ws = fs.createWriteStream(zipDest);
-                        ws.on("finish", function () {
-                            fs.createReadStream(zipDest).pipe(output);
-                        });
-                        request("https://silverwind.io/droppy-samples.zip").pipe(ws);
-                    } else {
-                        fs.createReadStream(zipDest).pipe(output);
-                    }
-                });
-            });
-        },
-        // http://www.webmfiles.org
-        get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/sample-video/Big Buck Bunny.webm"),
-        // http://sampleswap.org/mp3/creative-commons/free-music.php
-        get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/sample-audio/Earthling - Room To Breath.mp3"),
-        get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/sample-audio/Joevirus - Tenchu.mp3"),
-        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/sample-audio/Tejaswi - Intuition.mp3"),
-        function (callback) {
-            log.simple("Demo files ready!");
-            callback();
-        }
-    ], doneCallback);
 }
 
 //-----------------------------------------------------------------------------
@@ -280,7 +183,7 @@ function cleanupForDemo(doneCallback) {
 function cleanupTemp(callback) {
     rimraf(paths.temp, function (err) {
         if (err && err.code !== "ENOENT" && callback) return callback(err);
-        mkdirp(paths.temp, mkdirpOpts, function (err) {
+        utils.mkdir(paths.temp, function (err) {
             if (err && callback) return callback(err);
             callback();
         });
@@ -546,7 +449,7 @@ function setupSocket(server) {
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                mkdirp(utils.addFilesPath(msg.data), mkdirpOpts, function (error) {
+                utils.mkdir(utils.addFilesPath(msg.data), function (error) {
                     if (error) log.error(error);
                     log.info(ws, null, "Created: ", msg.data);
                 });
@@ -597,7 +500,7 @@ function setupSocket(server) {
                 async.each(files,
                     function (file, callback) {
                         if (!utils.isPathSane(file)) return callback(new Error("Invalid empty file creation request: " + file));
-                        mkdirp(path.dirname(utils.addFilesPath(file)), mkdirpOpts, function (err) {
+                        utils.mkdir(path.dirname(utils.addFilesPath(file)), function (err) {
                             if (err) callback(err);
                             fs.writeFile(utils.addFilesPath(file), "", {mode: mode.file}, function (err) {
                                 if (err) return callback(err);
@@ -616,7 +519,7 @@ function setupSocket(server) {
                 async.each(folders,
                     function (folder, callback) {
                         if (!utils.isPathSane(folder)) return callback(new Error("Invalid empty file creation request: " + folder));
-                        mkdirp(utils.addFilesPath(folder), mkdirpOpts, callback);
+                        utils.mkdir(utils.addFilesPath(folder), callback);
                     }, function (err) {
                         if (err) log.error(ws, null, err);
                         if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
@@ -752,7 +655,7 @@ function doClipboard(type, from, to) {
                         if (files.length) {
                             cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
                         } else {
-                            mkdirp(to, mkdirpOpts);
+                            utils.mkdir(to);
                         }
                     });
                 }
@@ -766,7 +669,7 @@ function doClipboard(type, from, to) {
             log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
         else  {
             if (error === "no files to copy") {
-                mkdirp(to, mkdirpOpts);
+                utils.mkdir(to);
             } else {
                 log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
             }
@@ -1215,7 +1118,7 @@ function handleUploadRequest(req, res) {
                     if (error) { // File doesn't exist
                         fs.stat(path.dirname(files[name].dst), function (error) {
                             if (error) { // Dir doesn't exist
-                                mkdirp(path.dirname(files[name].dst), mkdirpOpts, function () {
+                                utils.mkdir(path.dirname(files[name].dst), function () {
                                     moveFile(files[name].src, files[name].dst);
                                 });
                             } else {

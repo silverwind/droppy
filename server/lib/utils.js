@@ -1,17 +1,22 @@
 "use strict";
 
-var utils = {},
-    async = require("async"),
-    fs    = require("graceful-fs"),
-    isBin = require("isbinaryfile"),
-    path  = require("path"),
-    paths = require("./paths.js").get(),
+var utils  = {},
+    async  = require("async"),
+    fs     = require("graceful-fs"),
+    isBin  = require("isbinaryfile"),
+    mkdirp = require("mkdirp"),
+    path   = require("path"),
+    paths  = require("./paths.js").get(),
     forceBinaryTypes = [
         "pdf",
         "ps",
         "eps",
         "ai"
     ];
+
+utils.mkdir = function mkdir(path, cb) {
+    mkdirp(path, {fs: fs, mode: "755"}, cb);
+};
 
 // Recursively walk a directory and return file paths in an array
 utils.walkDirectory = function walkDirectory(dir, includeEmptyDirs, callback) {
