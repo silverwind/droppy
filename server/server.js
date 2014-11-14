@@ -120,36 +120,35 @@ function startListeners(callback) {
         return callback(new Error("Config Error: 'listeners' must be an array"));
 
     listeners.forEach(function (listener) {
-        var hosts, ports;
-
         ["host", "port", "protocol"].forEach(function (prop) {
             if (typeof listener[prop] === "undefined")
                 return callback(new Error("Config Error: listener " + prop + " undefined"));
         });
 
-        hosts = Array.isArray(listener.host) ? listener.host : [listener.host];
-        ports = Array.isArray(listener.port) ? listener.port : [listener.port];
-
-        hosts.forEach(function (host) {
-            ports.forEach(function (port) {
+        (Array.isArray(listener.host) ? listener.host : [listener.host]).forEach(function (host) {
+            (Array.isArray(listener.port) ? listener.port : [listener.port]).forEach(function (port) {
                 sockets.push({
                     host  : host,
                     port  : port,
-                    proto : listener.protocol,
-                    hsts  : listener.hsts
+                    opts  : {
+                        proto : listener.protocol,
+                        hsts  : listener.hsts,
+                        key   : listener.key,
+                        cert  : listener.cert,
+                        ca    : listener.ca
+                    }
                 });
-
             });
         });
     });
 
     async.each(sockets, function (socket, cb) {
-        createListener(onRequest, socket.proto, socket.hsts, function (err, server) {
+        createListener(onRequest, socket.opts, function (err, server) {
             if (err) log.error(err);
 
             server.on("listening", function () {
                 setupSocket(server);
-                log.simple(chalk.green(socket.proto.toUpperCase()) + " listening on ",
+                log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
                            chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
                 cb();
             });
@@ -172,22 +171,23 @@ function startListeners(callback) {
 
 //-----------------------------------------------------------------------------
 // Create socket listeners
-function createListener(handler, proto, hsts, callback) {
-    var server, tlsModule, options, sessions, http = require("http");
-    if (proto === "http") {
+function createListener(handler, opts, callback) {
+    var server, tlsModule, sessions, http = require("http");
+    if (opts.proto === "http") {
         callback(null, http.createServer(handler));
     } else {
-        if (proto === "https")
+        if (opts.proto === "https")
             tlsModule = require("tls");
-        else if (proto === "spdy")
+        else if (opts.proto === "spdy")
             tlsModule = require("spdy").server;
         else
-            return callback(new Error("Config error: Unknown protocol type " + proto));
+            return callback(new Error("Config error: Unknown protocol type " + opts.proto));
 
         utils.tlsInit(function (err, tlsData) {
+            var tlsOptions;
             if (err) return callback(err);
             // TLS options
-            options = {
+            tlsOptions = {
                 key              : tlsData[0],
                 cert             : tlsData[1],
                 ca               : tlsData[2] !== "" ? tlsData[2] : undefined,
@@ -200,14 +200,15 @@ function createListener(handler, proto, hsts, callback) {
             tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
 
             // Protocol-specific options
-            if (proto === "spdy") options.windowSize = 1024 * 1024;
+            if (opts.proto === "spdy") tlsOptions.windowSize = 1024 * 1024;
 
-            server = new tlsModule.Server(options, http._connectionListener);
+            server = new tlsModule.Server(tlsOptions, http._connectionListener);
             server.httpAllowHalfOpen = false;
             server.timeout = 120000;
 
             server.on("request", function (req, res) {
-                if (hsts && hsts > 0) res.setHeader("Strict-Transport-Security", "max-age=" + hsts);
+                if (opts.hsts && opts.hsts > 0)
+                    res.setHeader("Strict-Transport-Security", "max-age=" + opts.hsts);
                 handler(req, res);
             });
 
