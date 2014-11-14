@@ -43,9 +43,7 @@ var server = function init(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
 
     async.series([
-        function (cb) { utils.mkdir(paths.files, cb); },
-        function (cb) { utils.mkdir(paths.temp, cb); },
-        function (cb) { utils.mkdir(path.dirname(paths.cfg), cb); },
+        function (cb) { utils.mkdir([paths.files, paths.temp, path.dirname(paths.cfg)], cb); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
     ], function (err) {
@@ -151,8 +149,8 @@ function setupListener(socket, callback) {
         });
     });
 
-    async.each(sockets, function(s, cb) {
-        createListener(onRequest, s.proto, s.hsts, function(err, server) {
+    async.each(sockets, function (s, cb) {
+        createListener(onRequest, s.proto, s.hsts, function (err, server) {
             if (err) log.error(err);
 
             server.on("listening", function () {

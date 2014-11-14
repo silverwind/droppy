@@ -14,8 +14,18 @@ var utils  = {},
         "ai"
     ];
 
-utils.mkdir = function mkdir(path, cb) {
-    mkdirp(path, {fs: fs, mode: "755"}, cb);
+utils.mkdir = function mkdir(dir, cb) {
+    if (Array.isArray(dir)) {
+        async.each(dir, function (p, cb) {
+            mkdirp(p, {fs: fs, mode: "755"}, cb);
+        }, function (err) {
+            cb(err);
+        });
+    } else if (typeof dir === "string") {
+        mkdirp(dir, {fs: fs, mode: "755"}, cb);
+    } else {
+        cb(new Error("mkdir: Wrong dir type: " + typeof dir));
+    }
 };
 
 // Recursively walk a directory and return file paths in an array
