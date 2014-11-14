@@ -120,99 +120,54 @@ function startListeners(callback) {
         return callback(new Error("Config Error: 'listeners' must be an array"));
 
     listeners.forEach(function (listener) {
+        var hosts, ports;
+
         ["host", "port", "protocol"].forEach(function (prop) {
-            if (!listener[prop]) return callback(new Error("Config Error: listener " + prop + " undefined"));
+            if (typeof listener[prop] === "undefined")
+                return callback(new Error("Config Error: listener " + prop + " undefined"));
         });
 
-        sockets.push({
-            hosts : Array.isArray(listener.host) ? listener.host : [listener.host],
-            ports : Array.isArray(listener.port) ? listener.port : [listener.port],
-            proto : listener.protocol,
-            hsts  : listener.hsts
-        });
-    });
+        hosts = Array.isArray(listener.host) ? listener.host : [listener.host];
+        ports = Array.isArray(listener.port) ? listener.port : [listener.port];
 
-    async.each(sockets, setupListener, callback);
-}
+        hosts.forEach(function (host) {
+            ports.forEach(function (port) {
+                sockets.push({
+                    host  : host,
+                    port  : port,
+                    proto : listener.protocol,
+                    hsts  : listener.hsts
+                });
 
-function setupListener(socket, callback) {
-    var sockets = [];
-
-    socket.hosts.forEach(function (host) {
-        socket.ports.forEach(function (port) {
-            sockets.push({
-                host  : host,
-                port  : port,
-                proto : socket.proto,
-                hsts  : socket.hsts
             });
         });
     });
 
-    async.each(sockets, function (s, cb) {
-        createListener(onRequest, s.proto, s.hsts, function (err, server) {
+    async.each(sockets, function (socket, cb) {
+        createListener(onRequest, socket.proto, socket.hsts, function (err, server) {
             if (err) log.error(err);
 
             server.on("listening", function () {
                 setupSocket(server);
-                log.simple(chalk.green(s.proto.toUpperCase()) + " listening on ",
+                log.simple(chalk.green(socket.proto.toUpperCase()) + " listening on ",
                            chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
                 cb();
             });
 
             server.on("error", function (error) {
                 if (error.code === "EADDRINUSE")
-                    log.simple("Failed to bind to ", chalk.cyan(s.host), chalk.red(":"),
-                              chalk.blue(s.port), chalk.red(". Address already in use."));
+                    log.simple("Failed to bind to ", chalk.cyan(socket.host), chalk.red(":"),
+                              chalk.blue(socket.port), chalk.red(". Address already in use."));
                 else if (error.code === "EACCES")
-                    log.simple("Failed to bind to ", chalk.cyan(s.host), chalk.red(":"),
-                              chalk.blue(s.port), chalk.red(". Need permission to bind to ports < 1024."));
+                    log.simple("Failed to bind to ", chalk.cyan(socket.host), chalk.red(":"),
+                              chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024."));
                 else
                     log.error(error);
                 cb(); // TODO: Pass error
             });
-            server.listen(s.port, s.host);
+            server.listen(socket.port, socket.host);
         });
     }, callback);
-}
-
-//-----------------------------------------------------------------------------
-// Clean up the directory for incoming files
-function cleanupTemp(callback) {
-    rimraf(paths.temp, function (err) {
-        if (err && err.code !== "ENOENT" && callback) return callback(err);
-        utils.mkdir(paths.temp, function (err) {
-            if (err && callback) return callback(err);
-            callback();
-        });
-    });
-}
-
-//-----------------------------------------------------------------------------
-// Clean up our shortened links by removing links to nonexistant files
-function cleanupLinks(callback) {
-    var linkcount = 0, cbcount = 0;
-    var links = db.get("shortlinks");
-    if (Object.keys(links).length === 0)
-        callback();
-    else {
-        Object.keys(links).forEach(function (link) {
-            linkcount++;
-            (function (shortlink, location) {
-                fs.stat(path.join(paths.files, location), function (error, stats) {
-                    cbcount++;
-                    if (!stats || error) {
-                        delete links[shortlink];
-                    }
-                    if (cbcount === linkcount) {
-                        db.set("shortlinks", links, function () {
-                            callback();
-                        });
-                    }
-                });
-            })(link, links[link]);
-        });
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -229,7 +184,7 @@ function createListener(handler, proto, hsts, callback) {
         else
             return callback(new Error("Config error: Unknown protocol type " + proto));
 
-        utils.tlsInit(function(err, tlsData) {
+        utils.tlsInit(function (err, tlsData) {
             if (err) return callback(err);
             // TLS options
             options = {
@@ -1397,6 +1352,45 @@ function updateCSS(event, filename, cb) {
                 });
             }
         }, 200);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Clean up the directory for incoming files
+function cleanupTemp(callback) {
+    rimraf(paths.temp, function (err) {
+        if (err && err.code !== "ENOENT" && callback) return callback(err);
+        utils.mkdir(paths.temp, function (err) {
+            if (err && callback) return callback(err);
+            callback();
+        });
+    });
+}
+
+//-----------------------------------------------------------------------------
+// Clean up our shortened links by removing links to nonexistant files
+function cleanupLinks(callback) {
+    var linkcount = 0, cbcount = 0;
+    var links = db.get("shortlinks");
+    if (Object.keys(links).length === 0)
+        callback();
+    else {
+        Object.keys(links).forEach(function (link) {
+            linkcount++;
+            (function (shortlink, location) {
+                fs.stat(path.join(paths.files, location), function (error, stats) {
+                    cbcount++;
+                    if (!stats || error) {
+                        delete links[shortlink];
+                    }
+                    if (cbcount === linkcount) {
+                        db.set("shortlinks", links, function () {
+                            callback();
+                        });
+                    }
+                });
+            })(link, links[link]);
+        });
     }
 }
 
