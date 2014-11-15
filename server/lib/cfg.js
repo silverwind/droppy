@@ -28,6 +28,7 @@ var cfg        = {},
 
 cfg.init = function (config, callback) {
     if (typeof config === "object" && config !== null) {
+        config = migrate(config);
         config = _.defaults(config, defaults); // Add missing options
         callback(null, config);
     } else if (process.env.NODE_ENV === "droppydemo") {
@@ -67,6 +68,8 @@ cfg.init = function (config, callback) {
                     }
 
                     if (!config) config = {};
+
+                    config = migrate(config);
                     config = _.defaults(config, defaults);
 
                     // Remove options no longer present
@@ -87,6 +90,29 @@ cfg.init = function (config, callback) {
 
 function write(config, callback) {
     fs.writeFile(configFile, JSON.stringify(config, null, 4), callback);
+}
+
+function migrate(config) {
+    var oldProps = ["host", "port", "useTLS", "useSPDY", "useHSTS"];
+
+    var needToMigrate = oldProps.every(function (prop) {
+        return config.hasOwnProperty(prop);
+    });
+
+    if (needToMigrate && !config.listeners) {
+        config.listeners = [{
+            "host"     : config.host,
+            "port"     : config.port,
+            "protocol" : config.useSPDY ? "spdy" : config.useTLS ? "https" : "http",
+            "hsts"     : config.useHSTS ? 31536000 : 0
+        }];
+        oldProps.forEach(function (prop) {
+            delete config[prop];
+        });
+        return config;
+    } else {
+        return config;
+    }
 }
 
 exports = module.exports = cfg;
