@@ -52,7 +52,7 @@ var server = function init(home, options, isStandalone, callback) {
         fs.MAX_OPEN = config.maxOpen;
         firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
         async.series([
-            function (cb) { if (isStandalone) startListeners(cb); else cb(); },
+            function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) { log.simple("Preparing resources ..."); cb(); },
             function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb(); }); },
             function (cb) { cleanupTemp(cb); },
@@ -143,14 +143,33 @@ function startListeners(callback) {
     });
 
     async.each(sockets, function (socket, cb) {
-        createListener(onRequest, socket.opts, function (err, server) {
-            if (err) log.error(err);
+        createListener(onRequest, socket.opts, function (err, server, tlsData) {
+            if (err) {
+                log.error(err);
+                return cb();
+            }
 
             server.on("listening", function () {
                 setupSocket(server);
-                log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
-                           chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
-                cb();
+                if (tlsData) {
+                    if (tlsData.selfsigned) {
+                        log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                                   chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
+                                   " (" + chalk.yellow("self-signed") + ")");
+                        cb();
+                    } else {
+                        require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
+                            log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                                       chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
+                                       " (" + chalk.yellow(info.commonName) + ")");
+                            cb();
+                        });
+                    }
+                } else {
+                    log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                               chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
+                    cb();
+                }
             });
 
             server.on("error", function (error) {
@@ -224,7 +243,7 @@ function createListener(handler, opts, callback) {
                 cb(null, (id in sessions) ? sessions[id] : null);
             });
 
-            callback(null, server);
+            callback(null, server, tlsData);
         });
     }
 }
