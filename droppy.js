@@ -75,12 +75,12 @@ if (cmds[cmd]) {
         var paths = require("./server/lib/paths.js").get(),
             cfg   = require("./server/lib/cfg.js"),
             edit  = function () {
-                require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfg], {stdio: "inherit"});
+                require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfgFile], {stdio: "inherit"});
             };
 
-        require("graceful-fs").stat(paths.cfg, function (err) {
+        require("graceful-fs").stat(paths.cfgFile, function (err) {
             if (err && err.code === "ENOENT") {
-                require("mkdirp")(require("path").dirname(paths.cfg), function () {
+                require("mkdirp")(paths.cfg, function () {
                     cfg.init(null, function (err) {
                         if (err) return console.error(err);
                         edit();

@@ -43,7 +43,7 @@ var server = function init(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
 
     async.series([
-        function (cb) { utils.mkdir([paths.files, paths.temp, path.dirname(paths.cfg)], cb); },
+        function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
     ], function (err) {
@@ -181,16 +181,15 @@ function createListener(handler, opts, callback) {
         else if (opts.proto === "spdy")
             tlsModule = require("spdy").server;
         else
-            return callback(new Error("Config error: Unknown protocol type " + opts.proto));
+            return callback(new Error("Config error: Unknown protocol type: " + opts.proto));
 
-        utils.tlsInit(function (err, tlsData) {
-            var tlsOptions;
+        utils.tlsInit(opts, function (err, tlsData) {
             if (err) return callback(err);
-            // TLS options
-            tlsOptions = {
-                key              : tlsData[0],
-                cert             : tlsData[1],
-                ca               : tlsData[2] !== "" ? tlsData[2] : undefined,
+
+            var tlsOptions = {
+                key              : tlsData.key,
+                cert             : tlsData.cert,
+                ca               : tlsData.ca ? tlsData.ca : undefined,
                 honorCipherOrder : true,
                 ciphers          : "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
                 secureProtocol   : "SSLv23_server_method",
@@ -218,11 +217,9 @@ function createListener(handler, opts, callback) {
 
             // TLS session resumption
             sessions = {};
-
             server.on("newSession", function (id, data) {
                 sessions[id] = data;
             });
-
             server.on("resumeSession", function (id, cb) {
                 cb(null, (id in sessions) ? sessions[id] : null);
             });

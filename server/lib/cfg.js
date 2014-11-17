@@ -5,7 +5,7 @@ var cfg        = {},
     fs         = require("graceful-fs"),
     mkdirp     = require("mkdirp"),
     path       = require("path"),
-    configFile = require("./paths.js").get().cfg,
+    configFile = require("./paths.js").get().cfgFile,
     defaults   = {
         "listeners" : [
             {
