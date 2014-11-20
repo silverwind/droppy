@@ -1351,10 +1351,10 @@ function updateCSS(event, filename, cb) {
             var css = "";
 
             caching.files.css.forEach(function (file) {
-                css += fs.readFileSync(file).toString("utf8");
+                css += fs.readFileSync(path.join(paths.module, file)).toString("utf8");
             });
 
-            css = ap({browsers: "last 2 versions"}).process(css).css;
+            css = ap.process(css).css;
             cache.css = css;
 
             if (typeof cb === "function") { // Initial cache seeding
