@@ -35,56 +35,98 @@ app.listen(80);
 `config.json` inside `~/.droppy/config` can be edited with `droppy config` or by hand and is created with these defaults:
 ```javascript
 {
-    "host"         : "0.0.0.0",         // [1]
-    "port"         : 8989,              // [1]
-    "debug"        : false,
-    "useTLS"       : false,             // [1]
-    "useSPDY"      : false,             // [1]
-    "useHSTS"      : false,             // [1]
-    "readInterval" : 250,
-    "keepAlive"    : 20000,
-    "linkLength"   : 3,
-    "logLevel"     : 2,
-    "maxOpen"      : 256,
-    "maxFileSize"  : 0,
-    "zipLevel"     : 1,
-    "public"       : false,
-    "timestamps"   : true
+  "listeners" : [
+      {
+          "host"     : "0.0.0.0",
+          "port"     : 8989,
+          "protocol" : "http"
+      }
+  ],
+  "debug"        : false,
+  "keepAlive"    : 20000,
+  "linkLength"   : 3,
+  "logLevel"     : 2,
+  "maxFileSize"  : 0,
+  "maxOpen"      : 256,
+  "public"       : false,
+  "readInterval" : 250,
+  "timestamps"   : true,
+  "zipLevel"     : 1
 }
 ```
-Note: Options marked with [1] are not used when used as a module.
-
 ###Options
-####`host` *string* / *array*
-Network interface(s) to listen on.
-####`port` *string* / *array*
-Port(s) to listen on.
-####`public` *boolean*
-When enabled, no authentication is performed.
+####`listeners` *array*
+Defines one or more listening sockets defined by an [`listener` object](#listener).
 ####`debug` *boolean*
 When enabled, skips resource minification and enables CSS reloading.
-####`timestamps` *boolean*
-When enabled, adds timestamps to log output.
-####`useTLS` *boolean*
-When enabled, uses TLS encryption. When set, droppy will look for certificate files stored in `~/.droppy/config`: `tls.key`, `tls.cert`, `tls.ca`. If neither of these files are provided, droppy will use a self-signed certificate.
-####`useSPDY` *boolean*
-Enables the SPDYv3 protocol. Depends on `useTLS`.
-####`useHSTS` *boolean*
-Enables the [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header with 1 year caching time. Depends on `useTLS`.
-####`readInterval` *integer*
-The minimum time gap in milliseconds in which updates to a single directory are sent.
 ####`keepAlive` *integer*
 The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
 ####`linkLength` *integer*
 The amount of characters in a shortlink.
 ####`logLevel` *integer*
-The amount of logging to show. `0` is no logging, `1` is errors, `2` is info ( HTTP requests), `3` is debug (socket communication).
-####`maxOpen` *integer*
-The maximum number of concurrently opened files. This number should only be of concern on Windows.
+The amount of logging to show. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
 ####`maxFileSize` *integer*
 The maximum file size in bytes a user can upload in a single file.
+####`maxOpen` *integer*
+The maximum number of concurrently opened files. This number should only be of concern on Windows.
+####`public` *boolean*
+When enabled, no authentication is performed.
+####`readInterval` *integer*
+The minimum time gap in milliseconds in which updates to a single directory are sent.
+####`timestamps` *boolean*
+When enabled, adds timestamps to log output.
 ####`zipLevel` *integer*
 The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
+
+<a name="listener" />
+###Listener Object
+Below is an example `listeners` object, showing off the possibilties.
+```javascript
+"listeners": [
+    {
+        "host": [ "0.0.0.0", "::" ],
+        "port": 80,
+        "protocol": "http"
+    },
+    {
+        "host": "0.0.0.0",
+        "port": 443,
+        "protocol": "https",
+        "hsts": 31536000,
+        "key": "config/tls.key",
+        "cert": "config/tls.crt",
+        "ca": "config/tls.ca",
+    },
+    {
+        "host": "::",
+        "port": [1443, 2443],
+        "protocol": "spdy",
+        "hsts" : 0
+    }
+]
+```
+This will result in:
+* HTTP listening on all IPv4 and IPv6 interfaces, port 80.
+* HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
+* SPDY listening on all IPv6 interfaces, ports 1443 and 2443, with HSTS disabled, using a self-signed certificate.
+
+A listener object accepts these options:
+####`host` *string* / *array*
+Network interface(s) to listen on. Use an array for multiple hosts.
+####`port` *integer* / *array*
+Port(s) to listen on. Use an array for multiple ports.
+####`protocol` *string*
+Protocol to use. Can be either `http`, `https` or `spdy`.
+####`hsts` *integer*
+Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header. A value of `0` disables HSTS.
+####`key` *string*
+Path to the SSL/TLS private key file.
+####`cert` *string*
+Path to the SSL/TLS certificate file.
+####`ca` *string*
+Path to the SSL/TLS intermediate certificate file.
+
+*Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
 
 ###API
 ####droppy([home], [options])
