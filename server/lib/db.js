@@ -80,7 +80,7 @@ db.authUser = function (user, pass) {
 };
 
 function write(callback) {
-    fs.writeFile(dbFile, JSON.stringify(database, null, 4), callback);
+    fs.writeFile(dbFile, JSON.stringify(database, null, 2), callback);
 }
 
 function getHash(string) {

@@ -89,7 +89,7 @@ cfg.init = function (config, callback) {
 };
 
 function write(config, callback) {
-    fs.writeFile(configFile, JSON.stringify(config, null, 4), callback);
+    fs.writeFile(configFile, JSON.stringify(config, null, 2), callback);
 }
 
 function migrate(config) {
