@@ -599,7 +599,7 @@ input:-webkit-autofill {
     margin-right: .2rem;
     border-style: solid;
     border-radius: 100%;
-    border-width: 3px
+    border-width: 3px;
     z-index: 32;
     height: 1.1rem;
     width: 1.1rem;

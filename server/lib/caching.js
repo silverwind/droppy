@@ -318,7 +318,11 @@ function compileResources(callback) {
     out.js = out.js.replace("/* {{ templates }} */", templateCode);
 
     // Add CSS vendor prefixes
-    out.css = autoprefixer({browsers: "last 2 versions"}).process(out.css).css;
+    try {
+        out.css = autoprefixer.process(out.css).css;
+    } catch (e) {
+        return callback(e);
+    }
 
     if (doMinify) {
         out.js  = uglify.minify(out.js, { fromString: true, compress: { unsafe: true, screw_ie8: true } }).code;
