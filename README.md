@@ -32,7 +32,7 @@ app.use("/", droppy("/srv/droppy", { linkLength: 8 }));
 app.listen(80);
 ```
 ###Configuration
-`config.json` inside `~/.droppy/config` can be edited with `droppy config` or by hand and is created with these defaults:
+`config.json` inside `~/.droppy/config` can be edited by running `droppy config` and is created with these defaults:
 ```javascript
 {
   "listeners" : [
@@ -81,34 +81,36 @@ The level of compression for zip files. Ranging from 0 (no compression) to 9 (ma
 <a name="listener" />
 ###Listener Object
 Below is an example `listeners` object, showing off the possibilties.
-```javascript
-"listeners": [
-    {
-        "host": [ "0.0.0.0", "::" ],
-        "port": 80,
-        "protocol": "http"
-    },
-    {
-        "host": "0.0.0.0",
-        "port": 443,
-        "protocol": "https",
-        "hsts": 31536000,
-        "key": "config/tls.key",
-        "cert": "config/tls.crt",
-        "ca": "config/tls.ca",
-    },
-    {
-        "host": "::",
-        "port": [1443, 2443],
-        "protocol": "spdy",
-        "hsts" : 0
-    }
-]
-```
+
 This will result in:
 * HTTP listening on all IPv4 and IPv6 interfaces, port 80.
 * HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
 * SPDY listening on all IPv6 interfaces, ports 1443 and 2443, with HSTS disabled, using a self-signed certificate.
+
+```javascript
+"listeners": [
+    {
+        "host"     : [ "0.0.0.0", "::" ],
+        "port"     : 80,
+        "protocol" : "http"
+    },
+    {
+        "host"     : "0.0.0.0",
+        "port"     : 443,
+        "protocol" : "https",
+        "hsts"     : 31536000,
+        "key"      : "config/tls.key",
+        "cert"     : "config/tls.crt",
+        "ca"       : "config/tls.ca"
+    },
+    {
+        "host"     : "::",
+        "port"     : [1443, 2443],
+        "protocol" : "spdy",
+        "hsts"     : 0
+    }
+]
+```
 
 A listener object accepts these options:
 ####`host` *string* / *array*
