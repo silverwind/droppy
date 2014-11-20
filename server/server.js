@@ -927,7 +927,7 @@ function handleResourceRequest(req, res, resourceName) {
 
             // Encoding, Length
             var acceptEncoding = req.headers["accept-encoding"] || "";
-            if (/\bgzip\b/.test(acceptEncoding) && resource.gzip !== undefined) {
+            if ((/\bgzip\b/.test(acceptEncoding)) && resource.gzip !== undefined || req.isSpdy) {
                 res.setHeader("Content-Encoding", "gzip");
                 res.setHeader("Content-Length", resource.gzip.length);
                 res.setHeader("Vary", "Accept-Encoding");
