@@ -152,19 +152,18 @@ function startListeners(callback) {
             server.on("listening", function () {
                 setupSocket(server);
                 if (tlsData) {
-                    if (tlsData.selfsigned) {
-                        log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
-                                   chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
-                                   " (" + chalk.yellow("self-signed") + ")");
-                        cb();
-                    } else {
-                        require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
+                    require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
+                        if (tlsData.selfsigned || !info.commonName) {
+                            log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                                       chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
+                                       " (" + chalk.yellow("self-signed") + ")");
+                        } else {
                             log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
                                        chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
                                        " (" + chalk.yellow(info.commonName) + ")");
-                            cb();
-                        });
-                    }
+                        }
+                        cb();
+                    });
                 } else {
                     log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
                                chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
