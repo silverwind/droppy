@@ -15,7 +15,7 @@
 Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>. Also check out this <a target="_blank" href="http://droppy-demo.silverwind.io/#!/#!/">demo</a>.
 
 ###Standalone Usage
-```bash
+```
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
@@ -142,11 +142,11 @@ Returns a middleware function, `function(req, res)`.
 
 ###CLI
 For available CLI commands see
-```bash
+```
 $ droppy help
 ```
 To update droppy, run
-```bash
+```
 $ [sudo] droppy update
 ```
 
