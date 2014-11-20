@@ -56,7 +56,7 @@ app.listen(80);
 ```
 ###Options
 ####`listeners` *array*
-Defines one or more listening sockets defined by an [`listener` object](#listener).
+Defines one or more listening sockets defined by an [`listener` object](#listener). This option has no effect when droppy is used as a module.
 ####`debug` *boolean*
 When enabled, skips resource minification and enables CSS reloading.
 ####`keepAlive` *integer*
