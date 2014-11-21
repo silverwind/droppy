@@ -76,7 +76,7 @@ The minimum time gap in milliseconds in which updates to a single directory are 
 ####`timestamps` *boolean*
 When enabled, adds timestamps to log output.
 ####`zipLevel` *integer*
-The level of compression for zip files. Ranging from 0 (no compression) to 9 (maximum compression).
+The level of compression for zip files. Ranging from `0` (no compression) to `9` (maximum compression).
 
 <a name="listener" />
 ###Listener Object
@@ -120,7 +120,7 @@ Port(s) to listen on. Use an array for multiple ports.
 ####`protocol` *string*
 Protocol to use. Can be either `http`, `https` or `spdy`.
 ####`hsts` *integer*
-Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header. A value of `0` disables HSTS.
+Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) in seconds. Set to `0` to disable HSTS.
 ####`key` *string*
 Path to the SSL/TLS private key file.
 ####`cert` *string*
