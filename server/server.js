@@ -188,7 +188,7 @@ function startListeners(callback) {
 }
 
 //-----------------------------------------------------------------------------
-// Create socket listeners
+// Create socket listener
 function createListener(handler, opts, callback) {
     var server, tlsModule, sessions, http = require("http");
     if (opts.proto === "http") {
