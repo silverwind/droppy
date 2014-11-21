@@ -2,7 +2,6 @@
 
 var demo    = {},
     async   = require("async"),
-    rimraf  = require("rimraf"),
     cpr     = require("cpr"),
     log     = require("./log.js"),
     utils   = require("./utils.js"),
@@ -15,7 +14,7 @@ demo.init = function init(doneCallback) {
     async.series([
         function (callback) {
             log.simple("Cleaning up ...");
-            rimraf(paths.files, function () {
+            utils.rm(paths.files, function () {
                 utils.mkdir(paths.files, function () {
                     callback(null);
                 });

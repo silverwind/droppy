@@ -6,6 +6,7 @@ var utils  = {},
     isBin  = require("isbinaryfile"),
     mkdirp = require("mkdirp"),
     path   = require("path"),
+    rimraf = require("rimraf"),
     paths  = require("./paths.js").get(),
     forceBinaryTypes = [
         "pdf",
@@ -40,6 +41,16 @@ utils.mkdirSync = function mkdirSync(dir) {
     } else {
         throw new Error("mkdirSync: Wrong dir type: " + typeof dir);
     }
+};
+
+// rimraf wrapper with 10 retries
+utils.rm = function rm(p, cb) {
+    rimraf(p, {maxBusyTries: 10}, cb);
+};
+
+// rimraf.sync wrapper with 10 retries
+utils.rmSync = function rmSync(p) {
+    rimraf.sync(p, {maxBusyTries: 10});
 };
 
 // Recursively walk a directory and return file paths in an array

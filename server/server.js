@@ -21,7 +21,6 @@ var _          = require("lodash"),
     mime       = require("mime"),
     mv         = require("mv"),
     request    = require("request"),
-    rimraf     = require("rimraf"),
     Wss        = require("ws").Server;
 
 var crypto     = require("crypto"),
@@ -362,13 +361,15 @@ function setupSocket(server) {
                 msg.data = utils.addFilesPath(msg.data);
                 fs.stat(msg.data, function (error, stats) {
                     if (error) {
-                        log.error("Error getting stats to delete " + msg.data);
+                        log.error("Error on stat()ing " + msg.data);
                         log.error(error);
                     } else if (stats) {
-                        if (stats.isFile())
-                            deleteFile(msg.data);
-                        else if (stats.isDirectory())
-                            deleteDirectory(msg.data);
+                        utils.rm(msg.data, function (error) {
+                            if (error) {
+                                log.error("Error deleting " + msg.data);
+                                log.error(error);
+                            }
+                        });
                     }
                 });
                 break;
@@ -645,35 +646,6 @@ function doClipboard(type, from, to) {
             }
         }
         log.error(error);
-    }
-}
-
-//-----------------------------------------------------------------------------
-// Delete a file
-function deleteFile(file) {
-    fs.unlink(file, function (error) {
-        if (error) log.error(error);
-    });
-}
-
-//-----------------------------------------------------------------------------
-// Delete a directory recursively
-function deleteDirectory(directory) {
-    var retries = 10;
-    try {
-        del(directory);
-    } catch (err) {
-        if (retries > 0) {
-            retries--;
-            del(directory);
-        } else {
-            log.error("Unable to delete " + directory + " after 10 retries.");
-            log.error(err);
-        }
-    }
-    function del(dir) {
-        rimraf.sync(dir);
-        checkWatchedDirs();
     }
 }
 
@@ -1377,17 +1349,7 @@ function updateCSS(event, filename, cb) {
 // Clean up the directory for incoming files
 // Needs to be synchronous for process.on("exit")
 function cleanupTemp() {
-    try {
-        rimraf.sync(paths.temp);
-    } catch (err) {
-        if (err.code !== "ENOENT") {
-            log.error(err);
-        } else {
-            utils.mkdirSync(paths.temp);
-        }
-        return;
-    }
-    utils.mkdirSync(paths.temp);
+    fs.readdirSync(paths.temp).forEach(utils.rmSync);
 }
 
 //-----------------------------------------------------------------------------
