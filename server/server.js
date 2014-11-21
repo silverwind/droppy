@@ -1349,7 +1349,9 @@ function updateCSS(event, filename, cb) {
 // Clean up the directory for incoming files
 // Needs to be synchronous for process.on("exit")
 function cleanupTemp() {
-    fs.readdirSync(paths.temp).forEach(utils.rmSync);
+    fs.readdirSync(paths.temp).forEach(function (file) {
+        utils.rmSync(path.join(paths.temp, file));
+    });
 }
 
 //-----------------------------------------------------------------------------
