@@ -1,0 +1,87 @@
+{{##def.data:
+<script>
+it = {
+    folder: String // folder path
+    clipboardBasename: String // basename(droppy.clipboard) || null
+    isUpload: Boolean // Determines if we need to DecodeURI
+    sortBy: String // What property to sort the entries by
+    sortAsc: Boolean // Ascending or descending
+    entries: {
+        filename: { // obj
+            type: String // type of entry = "f" | "nf" | "d" | "nd"
+            mtime: Number // Last modified in ms
+            size: Number // Size in bytes
+        }
+    }
+}
+</script>
+#}}
+{{##def.directoryHeader:
+    <div class="file-header">
+        <span data-sort="type" class="header-name down active">Name {{= droppy.svg.triangle }}</span>
+        <span data-sort="mtime" class="header-mtime">Modified {{= droppy.svg.triangle }}</span>
+        <span data-sort="size" class="header-size">Size {{= droppy.svg.triangle }}</span>
+        <span class="header-spacer"></span>
+    </div>
+#}}
+{{##def.folderLink:
+    <li class="data-row{{= temp.classes }}" data-type="folder" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
+        <span class="sprite sprite-folder">{{= temp.svgIcon }}</span>
+        <a class="folder-link entry-link">{{= temp.entryname }}</a>
+        <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
+        <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
+        <span class="shortlink faux-button" title="Get Shortlink">{{= droppy.svg.link }}</span>
+        <span><a class="zip" title="Download as Zip" href="?~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= droppy.svg.download }}</a></span>
+        <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
+    </li>
+#}}
+{{##def.fileLink:
+    <li class="data-row{{= temp.classes }}" data-type="file" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
+        <span class="sprite {{= temp.spriteClass}}">{{= temp.svgIcon }}</span>
+        <a class="file-link entry-link" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
+        <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= t.fn.timeDifference(obj.mtime) }}</span>
+        <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
+        <span class="shortlink faux-button" title="Get Shortlink">{{= droppy.svg.link }}</span>
+        <a class="download faux-button" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}" title="Download File">{{= droppy.svg.download }}</a>
+        <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
+    </li>
+#}}
+{{? Object.keys(it.entries).length === 0 }}
+    <div id="empty" class="empty">{{= droppy.svg["upload-cloud"] }}<div class="text">Add files</div></div>
+{{??}}
+    {{  if (it.sortBy === "name") it.sortBy = "type";
+        var folder = (it.folder === "/") ? "/" : it.folder + "/",
+            sortedEntries = t.fn.sortKeysByProperty(it.entries, it.sortBy),
+            extRE = /[^.]*$/,
+            entryExt,
+            temp = {};
+        if(it.sortAsc) sortedEntries.reverse();
+    }}
+    <ul>
+        {{#def.directoryHeader}}
+        {{~sortedEntries :entryname}}
+            {{  var obj = it.entries[entryname],
+                    entryExt = entryname.match(extRE)[0];
+                    temp.size = prettyBytes(obj.size);
+                    temp.id = folder + entryname;
+                    temp.spriteClass = t.fn.getSpriteClass(entryExt);
+                    temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;
+                if (obj.type === "nd" || obj.type === "nf") {
+                    temp.classes = " uploading";
+                    temp.svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
+                } else if (Object.keys(droppy.audioTypes).indexOf(getExt(entryname)) !== -1) {
+                    temp.classes = " playable";
+                    temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
+                } else {
+                    temp.classes = "";
+                    temp.svgIcon = "";
+                };
+            }}
+            {{? obj.type === "f" || obj.type === "nf" }}
+                {{#def.fileLink}}
+            {{?? obj.type === "d" || obj.type === "nd" }}
+                {{#def.folderLink}}
+            {{?}}
+        {{~}}
+    </ul>
+{{?}}

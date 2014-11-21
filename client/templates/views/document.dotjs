@@ -1,0 +1,15 @@
+{{##def.data:
+<script>
+it = {
+    readOnly: Boolean
+}
+</script>
+#}}
+<ul class="sidebar">
+    <li class="exit">{{= droppy.svg.remove}}<span>Close</span></li>
+    <li class="save">{{= droppy.svg.disk}}<span>Save</span></li>
+    <li class="ww">{{= droppy.svg.wordwrap}}<span>Wrap</span></li>
+</ul>
+<div class="doc {{? it.readOnly }}readonly{{??}}editing{{?}}">
+    <div class="text-editor"></div>
+</div>

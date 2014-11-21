@@ -36,16 +36,16 @@ module.exports = function (grunt) {
                 command: "jitsu login && jitsu deploy && jitsu logs tail"
             },
             heroku : {
-                command: "git push -u -f --tags heroku master"
+                command: "git push -u -f --tags heroku master && heroku logs -t"
             }
         }
     });
 
-    grunt.registerTask("update",  ["shell:update", "shell:modules"]);
-    grunt.registerTask("release", ["bump", "shell:push", "shell:publish", "shell:heroku"]);
-    grunt.registerTask("minor",   ["bump:minor", "shell:push", "shell:publish"]);
-    grunt.registerTask("major",   ["bump:major", "shell:push", "shell:publish"]);
-    grunt.registerTask("deploy",  ["shell:heroku"]);
+    grunt.registerTask("update", ["shell:update", "shell:modules"]);
+    grunt.registerTask("patch",  ["bump", "shell:push", "shell:publish", "shell:heroku"]);
+    grunt.registerTask("minor",  ["bump:minor", "shell:push", "shell:publish", "shell:heroku"]);
+    grunt.registerTask("major",  ["bump:major", "shell:push", "shell:publish", "shell:heroku"]);
+    grunt.registerTask("deploy", ["shell:heroku"]);
 
     grunt.loadNpmTasks("grunt-bump");
     grunt.loadNpmTasks("grunt-shell");

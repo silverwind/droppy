@@ -1,0 +1,26 @@
+{{##def.data:
+<script>
+it = {
+    type: String // Type of media, appended to previewer classes
+    src: String // url src for image or media
+}
+</script>
+#}}
+{{? it.type === "image"}}
+<ul class="sidebar">
+    <li class="fs">{{= droppy.svg.fullscreen}}</li>
+</ul>
+{{?}}
+<div class="previewer {{= it.type}}">
+    <div class="arrow-back"> {{= droppy.svg.arrow}} </div>
+    <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
+    <figure class="media-container">
+        {{? it.type === "video"}}
+            <video autoplay loop controls preload="auto" src="{{= it.src }}"></video>
+        {{?? it.type === "image"}}
+            <img src="{{= it.src }}">
+        {{??}}
+            <img src="{{= it.src }}">
+        {{?}}
+    </figure>
+</div>

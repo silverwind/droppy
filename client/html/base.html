@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <title>{{name}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" sizes="32x32" type="image/png" href="?!/logo32.png">
+    <link rel="stylesheet" id="css" href="?!/style.css">
+    <link rel="manifest" href="?!/manifest.json">
+    <meta name="application-name" content="{{name}}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#181818">
+    <style>
+      body, div, p {
+          box-sizing: border-box;
+          border: 0;
+          margin: 0;
+          padding: 0;
+      }
+
+      html {
+          font-weight: 300;
+          font: 1.5em/1 "Roboto", Helvetica, sans-serif;
+          text-rendering: geometricPrecision;
+          -webkit-backface-visibility: hidden;
+      }
+
+      body {
+          background: #181818;
+          left: 0; right: 0; top: 0; bottom:0;
+          overflow: hidden;
+          position: absolute;
+      }
+
+      .loading {
+          position: absolute;
+          -webkit-animation: spin 1s infinite linear;
+                  animation: spin 1s infinite linear;
+          border-bottom : 5px solid #18f;
+          border-left   : 5px solid #000;
+          border-right  : 5px solid #000;
+          border-top    : 5px solid #f1a;
+          border-radius: 100%;
+          box-shadow: 0 0 10px #000, inset 0 0 10px #000;
+          height: 200px;
+          width: 200px;
+          left: calc(50% - 100px);
+          top:  calc(50% - 100px);
+      }
+
+      .loading-logo {
+          position: absolute;
+          fill: #eee;
+          stroke: #888;
+          stroke-width: 8;
+          width: 200px;
+          height: 200px;
+          left: calc(50% - 100px);
+          top:  calc(50% - 100px);
+      }
+
+      @-webkit-keyframes spin {
+       from { -webkit-transform: rotate(0deg); transform: rotate(0deg)   }
+       to   { -webkit-transform: rotate(359deg); transform: rotate(359deg) }
+      }
+
+      @keyframes spin {
+       from { -webkit-transform: rotate(0deg); transform: rotate(0deg)   }
+       to   { -webkit-transform: rotate(359deg); transform: rotate(359deg) }
+      }
+
+      #noscript {
+          background: #111;
+          border-radius: 6px;
+          display: table;
+          height: 120px;
+          left: 50%;
+          margin-left: -200px;
+          margin-top: -100px;
+          padding: 30px;
+          position: fixed;
+          top: 50%;
+          width: 400px;
+      }
+
+      @media all and (max-width: 639px), all and (max-height: 399px) {
+          #noscript {
+              border-radius: 0;
+              box-shadow: none;
+              height: 100%;
+              left: 0;
+              margin: 0;
+              padding: 0;
+              top: 0;
+              width: 100%;
+          }
+      }
+
+      #noscript p {
+          color:  #ccc;
+          display: table-cell;
+          font-size: 1.5em;
+          line-height: 1.5;
+          padding: 0;
+          text-align: center;
+          vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page" class="in">
+      <div class="loading"></div>
+      <svg class="loading-logo" width="512" height="512" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290.47 85.15v103.982c-7.855-5.228-16.392-9.023-25.607-11.53s-19.564-3.724-31.046-3.724c-34.748 0-63.603 11.458-86.643 34.445-23.04 22.99-34.52 52.064-34.52 87.44 0 33.517 11.03 61.874 33.16 85.078 22.057 23.204 48.873 34.734 80.298 34.734 12.916 0 24.7-2.006 35.35-5.944 10.728-3.94 20.85-10.17 30.444-18.692v21.485h80.146V85.148H290.47v.002zm-60.28 270.625l-60.658-61.013h30.442V250.36h60.432v44.402h30.443l-60.66 61.013z"/></svg>
+    </div>
+    <noscript>
+      <div id="noscript">
+        <p>Please enable<br>JavaScript to<br>use {{name}}!</p>
+      </div>
+    </noscript>
+    <script async src="?!/client.js"></script>
+  </body>
+</html>

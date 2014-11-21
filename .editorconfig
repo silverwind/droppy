@@ -10,6 +10,9 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.html]
+[**.html]
 indent_size = 2
 tab_width = 2
+
+[**.svg]
+insert_final_newline = false

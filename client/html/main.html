@@ -1,0 +1,66 @@
+<div id="flex-container">
+  <section id="navigation" class="out">
+    <ul id="buttons">
+      <li id="upload-file-button" class="button" title="Upload files into the current directory">
+        <svg class="upload-file"></svg>
+        <span>Add files</span>
+      </li>
+      <li id="upload-folder-button" class="button" title="Upload a folder into the current directory">
+        <svg class="upload-folder"></svg>
+        <span>Add folder</span>
+      </li>
+      <li id="create-folder-button" class="button" title="Create a new folder">
+        <svg class="create-folder"></svg>
+        <span>New Folder</span>
+      </li>
+      <li id="split-button" class="button" title="Split the view in half">
+        <svg class="split"></svg>
+        <span>Split</span>
+      </li>
+      <li id="options-button" class="button" title="Show Options">
+        <svg class="cog"></svg>
+        <span>Options</span>
+      </li>
+      <li id="about-button" class="button" title="About">
+        <svg class="info"></svg>
+        <span>About</span>
+      </li>
+      <li id="logout-button" class="button" title="Sign out">
+        <svg class="signout"></svg>
+        <span>Sign out</span>
+      </li>
+    </ul>
+  </section>
+  <section id="view-container">
+  </section>
+</div>
+<input type="file" name="file" id="file" multiple>
+<div id="click-catcher" class="out"></div>
+<div id="entry-menu" class="out">
+  <div class="radius-wrap">
+    <a class="play"><svg class="play"></svg><span>Play</span></a>
+    <a class="openfile"><svg class="open"></svg><span>Open</span></a>
+    <a class="edit"><svg class="pencil"></svg><span>Edit</span></a>
+    <a class="rename"><svg class="rename"></svg><span>Rename</span></a>
+    <a class="delete"><svg class="trash"></svg><span>Delete</span></a>
+    <a class="cut"><svg class="scissors"></svg><span>Cut</span></a>
+    <a class="copy"><svg class="copy"></svg><span>Copy</span></a>
+  </div>
+</div>
+<div id="about-box" class="out">
+  <div id="about-content">
+    <p id="about-title">{{name}} {{version}}</p>
+    <a id="about-fork" target="_blank" href="https://github.com/silverwind/droppy">
+      <svg class="github"></svg><span>GitHub project page</span>
+    </a>
+    <p id="about-copy">© 2012 - 2014 <a href="https://github.com/silverwind" target="_blank">silverwind</a></p>
+  </div>
+</div>
+<div id="options-box" class="out"></div>
+<div id="drop-select">
+  <span class="movefile">Move</span>
+  <span class="copyfile">Copy</span>
+  <span class="viewfile">View</span>
+</div>
+<div id="tooltip"></div>
+<iframe name="nope"></iframe>
