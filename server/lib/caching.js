@@ -334,7 +334,7 @@ function compileResources(callback) {
         var name = path.basename(caching.files.html.pop()),
             data = resData.html.pop()
                 .replace(/\{\{version\}\}/gm, pkg.version)
-                .replace(/\{\{name\}\}/, pkg.name);
+                .replace(/\{\{name\}\}/gm, pkg.name);
 
         if (doMinify) {
             data = htmlMinifier.minify(data, {
