@@ -70,11 +70,12 @@ var droppy = function droppy(home, options, isStandalone, callback) {
 };
 
 function onRequest(req, res, next) {
+    req.time = Date.now();
     var method = req.method.toUpperCase();
     if (!hasServer && req.socket.server) setupSocket(req.socket.server);
     if (!ready) { // Show a simple self-reloading loading page during startup
         res.statusCode = 503;
-        res.end("<!DOCTYPE html><html><head></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},500)</script></body></html>");
+        res.end("<!DOCTYPE html><html><head><title>droppy - starting ...</title></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},2000)</script></body></html>");
     } else {
         while (req.url.indexOf("%00") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
         if (method === "GET") {
@@ -752,19 +753,15 @@ function checkWatchedDirs() {
 
 //-----------------------------------------------------------------------------
 function handleGET(req, res) {
-    var URI = decodeURIComponent(req.url),
-    isAuth = false;
-    req.time = Date.now();
+    var URI = decodeURIComponent(req.url);
 
     if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid GET: " + req.url);
 
     if (config.public && !getCookie(req.headers.cookie))
         freeCookie(req, res);
-    if (getCookie(req.headers.cookie) || config.public)
-        isAuth = true;
 
     if (/^\/\?!\/content/.test(URI)) {
-        if (isAuth) {
+        if (getCookie(req.headers.cookie) || config.public) {
             res.setHeader("X-Page-Type", "main");
             handleResourceRequest(req, res, "main.html");
         } else if (firstRun) {
@@ -917,7 +914,7 @@ function handleResourceRequest(req, res, resourceName) {
                 headers["Expires"] = "0";
             }
 
-            if (resource.etag) {
+            if (resource.etag && !/\?\!\/content/.test(req.url)) {
                 headers["ETag"] = '"' + resource.etag + '"';
             }
 
