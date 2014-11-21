@@ -28,19 +28,19 @@ var crypto     = require("crypto"),
     path       = require("path"),
     qs         = require("querystring");
 
-var cache      = {},
-    clients    = {},
-    dirs       = {},
-    watchers   = {},
-    config     = null,
-    firstRun   = null,
-    hasServer  = null,
-    ready      = false,
-    mode       = {file: "644", dir: "755"},
-    isDemo     = process.env.NODE_ENV === "droppydemo";
+var cache        = {},
+    clients      = {},
+    dirs         = {},
+    watchers     = {},
+    config       = null,
+    firstRun     = null,
+    hasServer    = null,
+    ready        = false,
+    isDemo       = process.env.NODE_ENV === "droppydemo";
 
-var server = function init(home, options, isStandalone, callback) {
+var droppy = function droppy(home, options, isStandalone, callback) {
     if (isStandalone) printLogo();
+    bindProcessEvents(isStandalone);
 
     async.series([
         function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
@@ -55,7 +55,7 @@ var server = function init(home, options, isStandalone, callback) {
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) { log.simple("Preparing resources ..."); cb(); },
             function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb(); }); },
-            function (cb) { cleanupTemp(cb); },
+            function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
             function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); cb(); }); else cb(); },
             function (cb) { if (config.debug) { watchCSS(); updateCSS(null, null, cb); } else cb(); }
@@ -93,8 +93,8 @@ function onRequest(req, res, next) {
     }
 }
 
-server._onRequest = onRequest;
-exports = module.exports = server;
+droppy._onRequest = onRequest;
+exports = module.exports = droppy;
 
 function printLogo() {
     log.plain([
@@ -471,7 +471,7 @@ function setupSocket(server) {
                         if (!utils.isPathSane(file)) return callback(new Error("Invalid empty file creation request: " + file));
                         utils.mkdir(path.dirname(utils.addFilesPath(file)), function (err) {
                             if (err) callback(err);
-                            fs.writeFile(utils.addFilesPath(file), "", {mode: mode.file}, function (err) {
+                            fs.writeFile(utils.addFilesPath(file), "", {mode: "644"}, function (err) {
                                 if (err) return callback(err);
                                 log.info(ws, null, "Created: " + file.substring(1));
                                 callback();
@@ -503,7 +503,7 @@ function setupSocket(server) {
                         log.error(err);
                     } else {
                         var dest = path.join(msg.to, path.basename(msg.url));
-                        fs.writeFile(dest, data, {mode: mode.file}, function () {
+                        fs.writeFile(dest, data, {mode: "644"}, function () {
                             log.info("Sucessfully saved " + dest);
                         });
                     }
@@ -1061,7 +1061,7 @@ function handleUploadRequest(req, res) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
             dst         = path.join(paths.files, req.query.to, dstRelative),
             tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
-            writeStream = fs.createWriteStream(tmp, { mode: mode.file});
+            writeStream = fs.createWriteStream(tmp, { mode: "644"});
 
         files[dstRelative] = {
             src : tmp,
@@ -1373,14 +1373,19 @@ function updateCSS(event, filename, cb) {
 
 //-----------------------------------------------------------------------------
 // Clean up the directory for incoming files
-function cleanupTemp(callback) {
-    rimraf(paths.temp, function (err) {
-        if (err && err.code !== "ENOENT" && callback) return callback(err);
-        utils.mkdir(paths.temp, function (err) {
-            if (err && callback) return callback(err);
-            callback();
-        });
-    });
+// Needs to be synchronous for process.on("exit")
+function cleanupTemp() {
+    try {
+        rimraf.sync(paths.temp);
+    } catch (err) {
+        if (err.code !== "ENOENT") {
+            log.error(err);
+        } else {
+            utils.mkdirSync(paths.temp);
+        }
+        return;
+    }
+    utils.mkdirSync(paths.temp);
 }
 
 //-----------------------------------------------------------------------------
@@ -1411,17 +1416,7 @@ function cleanupLinks(callback) {
 }
 
 //-----------------------------------------------------------------------------
-// Process signal and events
-process
-    .on("SIGINT",  function () { shutdown("SIGINT");  })
-    .on("SIGQUIT", function () { shutdown("SIGQUIT"); })
-    .on("SIGTERM", function () { shutdown("SIGTERM"); })
-    .on("uncaughtException", function (error) {
-        log.error("=============== Uncaught exception! ===============");
-        log.error(error.stack);
-    });
-
-//-----------------------------------------------------------------------------
+// Shutdown cleanup
 function shutdown(signal) {
     var count = 0;
     if (!ready) process.exit(0);
@@ -1435,7 +1430,21 @@ function shutdown(signal) {
     });
     if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
-    cleanupTemp(function () {
-        process.exit(0);
-    });
+    process.exit(0);
+}
+
+//-----------------------------------------------------------------------------
+// Process signal and events
+function bindProcessEvents(standalone) {
+    process.on("exit", cleanupTemp);
+
+    if (standalone) {
+        process.on("SIGINT",  function () { shutdown("SIGINT");  });
+        process.on("SIGQUIT", function () { shutdown("SIGQUIT"); });
+        process.on("SIGTERM", function () { shutdown("SIGTERM"); });
+        process.on("uncaughtException", function (error) {
+            log.error("=============== Uncaught exception! ===============");
+            log.error(error.stack);
+        });
+    }
 }

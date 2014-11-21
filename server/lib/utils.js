@@ -14,6 +14,7 @@ var utils  = {},
         "ai"
     ];
 
+// mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
     if (Array.isArray(dir)) {
         async.each(dir, function (p, cb) {
@@ -25,6 +26,19 @@ utils.mkdir = function mkdir(dir, cb) {
         mkdirp(dir, {fs: fs, mode: "755"}, cb);
     } else {
         cb(new Error("mkdir: Wrong dir type: " + typeof dir));
+    }
+};
+
+// mkdirp.sync wrapper with array support
+utils.mkdirSync = function mkdirSync(dir) {
+    if (Array.isArray(dir)) {
+        dir.forEach(function (p) {
+            mkdirp.sync(p, {fs: fs, mode: "755"});
+        });
+    } else if (typeof dir === "string") {
+        mkdirp.sync(dir, {fs: fs, mode: "755"});
+    } else {
+        throw new Error("mkdirSync: Wrong dir type: " + typeof dir);
     }
 };
 
