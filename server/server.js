@@ -899,43 +899,48 @@ function handleResourceRequest(req, res, resourceName) {
             res.statusCode = 304;
             res.end();
         } else {
-            res.statusCode = 200;
+            var headers = {}, status = 200;
 
             // Caching
             if (req.url === "/" || /\?\!\/content/.test(req.url)) {
-                res.setHeader("Cache-Control", "private, max-age=0");
-                res.setHeader("Expires", "0");
                 if (!config.debug)
-                    res.setHeader("X-Frame-Options", "DENY");
+                    headers["X-Frame-Options"] = "DENY";
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-                    res.setHeader("X-UA-Compatible", "IE=Edge, chrome=1");
-            } else if (resourceName === "manifest.json") {
-                res.setHeader("Cache-Control", "private, max-age=0");
-                res.setHeader("Expires", "0");
-            } else if (resourceName === "favicon.ico") {
-                res.setHeader("Cache-Control", "public, max-age=604800");
-                res.setHeader("Expires", new Date(Date.now() + 604800000).toUTCString());
-            } else if (resource.etag) {
-                res.setHeader("ETag", '"' + resource.etag + '"');
+                    headers["X-UA-Compatible"] = "IE=Edge, chrome=1";
+            }
+
+            if (/.+\.(png|ico|svg|woff)$/.test(resourceName)) {
+                headers["Cache-Control"] = "public, max-age=604800";
+                headers["Expires"] = new Date(Date.now() + 604800000).toUTCString();
+            } else {
+                headers["Cache-Control"] = "private, max-age=0";
+                headers["Expires"] = "0";
+            }
+
+            if (resource.etag) {
+                headers["ETag"] = '"' + resource.etag + '"';
             }
 
             // Content-Type
-            if (/.+\.(js|css|html)$/.test(resourceName))
-                res.setHeader("Content-Type", resource.mime + "; charset=utf-8");
+            if (/.+\.(js|css|html|svg)$/.test(resourceName))
+                headers["Content-Type"] = resource.mime + "; charset=utf-8";
             else
-                res.setHeader("Content-Type", resource.mime);
+                headers["Content-Type"] = resource.mime;
 
             // Encoding, Length
             var acceptEncoding = req.headers["accept-encoding"] || "";
             if ((/\bgzip\b/.test(acceptEncoding) || req.isSpdy) && resource.gzip !== undefined) {
-                res.setHeader("Content-Encoding", "gzip");
-                res.setHeader("Content-Length", resource.gzip.length);
-                res.setHeader("Vary", "Accept-Encoding");
+                headers["Content-Encoding"] = "gzip";
+                headers["Content-Length"] = resource.gzip.length;
+                headers["Vary"] = "Accept-Encoding";
+                res.writeHead(status, headers);
                 res.end(resource.gzip);
             } else {
-                res.setHeader("Content-Length", resource.data.length);
+                headers["Content-Length"] = resource.data.length;
+                res.writeHead(status, headers);
                 res.end(resource.data);
             }
+
         }
     }
     log.info(req, res);
