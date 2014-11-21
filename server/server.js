@@ -1033,13 +1033,13 @@ function handleUploadRequest(req, res) {
 
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-            dst         = path.join(paths.files, req.query.to, dstRelative),
+            dst         = path.join(paths.files, decodeURIComponent(req.query.to), dstRelative),
             tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
             writeStream = fs.createWriteStream(tmp, { mode: "644"});
 
         files[dstRelative] = {
             src : tmp,
-            dst : decodeURIComponent(dst),
+            dst : dst,
             ws  : writeStream
         };
 
