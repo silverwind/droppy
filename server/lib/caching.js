@@ -17,7 +17,7 @@ var async        = require("async"),
     uglify       = require("uglify-js"),
     zlib         = require("zlib");
 
-var doMinify,
+var doMinify, modesByMime,
     etag         = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
     themesPath   = path.join(paths.module, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.module, "/node_modules/codemirror/mode");
@@ -75,111 +75,8 @@ var libs = {
     "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
 };
 
-// Mime list extracted from codemirror/mode/meta.js
-var modesByMime = {
-    "application/javascript": "javascript",
-    "application/json": "javascript",
-    "application/ld+json": "javascript",
-    "application/sieve": "sieve",
-    "application/typescript": "javascript",
-    "application/x-aspx": "htmlembedded",
-    "application/x-cypher-query": "cypher",
-    "application/x-ejs": "htmlembedded",
-    "application/x-httpd-php": "php",
-    "application/x-json": "javascript",
-    "application/x-jsp": "htmlembedded",
-    "application/x-sparql-query": "sparql",
-    "application/xml": "xml",
-    "application/xml-dtd": "dtd",
-    "application/xquery": "xquery",
-    "message/http": "http",
-    "text/apl": "apl",
-    "text/css": "css",
-    "text/html": "htmlmixed",
-    "text/javascript": "javascript",
-    "text/mirc": "mirc",
-    "text/n-triples": "ntriples",
-    "text/tiki": "tiki",
-    "text/turtle": "turtle",
-    "text/vbscript": "vbscript",
-    "text/velocity": "velocity",
-    "text/x-asterisk": "asterisk",
-    "text/x-c++src": "clike",
-    "text/x-clojure": "clojure",
-    "text/x-cobol": "cobol",
-    "text/x-coffeescript": "coffeescript",
-    "text/x-common-lisp": "commonlisp",
-    "text/x-csharp": "clike",
-    "text/x-csrc": "clike",
-    "text/x-cython": "python",
-    "text/x-d": "d",
-    "text/x-diff": "diff",
-    "text/x-dockerfile": "dockerfile",
-    "text/x-dylan": "dylan",
-    "text/x-ecl": "ecl",
-    "text/x-eiffel": "eiffel",
-    "text/x-erlang": "erlang",
-    "text/x-feature": "gherkin",
-    "text/x-fortran": "fortran",
-    "text/x-fsharp": "mllike",
-    "text/x-gas": "gas",
-    "text/x-gfm": "gfm",
-    "text/x-go": "go",
-    "text/x-groovy": "groovy",
-    "text/x-haml": "haml",
-    "text/x-haskell": "haskell",
-    "text/x-haxe": "haxe",
-    "text/x-idl": "idl",
-    "text/x-jade": "jade",
-    "text/x-java": "clike",
-    "text/x-julia": "julia",
-    "text/x-kotlin": "kotlin",
-    "text/x-latex": "stex",
-    "text/x-less": "css",
-    "text/x-livescript": "livescript",
-    "text/x-lua": "lua",
-    "text/x-mariadb": "sql",
-    "text/x-markdown": "markdown",
-    "text/x-modelica": "modelica",
-    "text/x-nginx-conf": "nginx",
-    "text/x-objectivec": "clike",
-    "text/x-ocaml": "mllike",
-    "text/x-octave": "octave",
-    "text/x-pascal": "pascal",
-    "text/x-perl": "perl",
-    "text/x-php": "php",
-    "text/x-pig": "pig",
-    "text/x-properties": "properties",
-    "text/x-puppet": "puppet",
-    "text/x-python": "python",
-    "text/x-rsrc": "r",
-    "text/x-rst": "rst",
-    "text/x-ruby": "ruby",
-    "text/x-rustsrc": "rust",
-    "text/x-sass": "sass",
-    "text/x-scala": "clike",
-    "text/x-scheme": "scheme",
-    "text/x-scss": "css",
-    "text/x-sh": "shell",
-    "text/x-slim": "slim",
-    "text/x-smarty": "smarty",
-    "text/x-solr": "solr",
-    "text/x-sql": "sql",
-    "text/x-stex": "stex",
-    "text/x-stsrc": "smalltalk",
-    "text/x-systemverilog": "verilog",
-    "text/x-tcl": "tcl",
-    "text/x-textile": "textile",
-    "text/x-tiddlywiki": "tiddlywiki",
-    "text/x-toml": "toml",
-    "text/x-tornado": "tornado",
-    "text/x-vb": "vb",
-    "text/x-verilog": "verilog",
-    "text/x-yaml": "yaml",
-    "text/x-z80": "z80"
-};
-
-caching.init = function init(minify, callback) {
+caching.init = function init(minify, mimes, callback) {
+    modesByMime = mimes;
     doMinify = minify;
     async.series([
         compileResources,
@@ -353,6 +250,9 @@ function compileResources(callback) {
     });
     templateCode += ";";
     out.js = out.js.replace("/* {{ templates }} */", templateCode);
+
+    // Insert CM mime modes
+    out.js = out.js.replace("/* {{ droppy.mimeModes }} */", "droppy.mimeModes = " + JSON.stringify(modesByMime) + ";\n");
 
     // Add CSS vendor prefixes
     try {

@@ -53,7 +53,16 @@ var droppy = function droppy(home, options, isStandalone, callback) {
         async.series([
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) { log.simple("Preparing resources ..."); cb(); },
-            function (cb) { caching.init(!config.debug, function (err, c) { if (err) return callback(err); cache = c; cb(); }); },
+            function (cb) {
+                utils.parseCMmodes(mime, function (modesByMime, mimesToDefine) {
+                    mime.define(mimesToDefine);
+                    caching.init(!config.debug, modesByMime, function (err, c) {
+                        if (err) return callback(err);
+                        cache = c;
+                        cb();
+                    });
+                });
+            },
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
             function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); cb(); }); else cb(); },

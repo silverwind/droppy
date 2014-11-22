@@ -7,6 +7,7 @@ var utils  = {},
     mkdirp = require("mkdirp"),
     path   = require("path"),
     rimraf = require("rimraf"),
+    vm     = require("vm"),
     paths  = require("./paths.js").get(),
     forceBinaryTypes = [
         "pdf",
@@ -14,6 +15,28 @@ var utils  = {},
         "eps",
         "ai"
     ];
+
+// parse meta.js from CM for mode information
+utils.parseCMmodes = function parseCMmodes(mime, cb) {
+    var sandbox = { CodeMirror : {}};
+    vm.runInNewContext(fs.readFileSync("node_modules/codemirror/mode/meta.js"), sandbox);
+    var modesByMime = {}, mimesToDefine = {};
+
+    // Parse out entries with meaningful data
+    sandbox.CodeMirror.modeInfo.forEach(function (entry) {
+        if (entry.mime && entry.mime !== "null" && entry.mode && entry.mode !== "null")
+            modesByMime[entry.mime] = entry.mode;
+        if (entry.mime && entry.mime !== "null" && entry.ext && Array.isArray(entry.ext))
+            mimesToDefine[entry.mime] = entry.ext;
+    });
+
+    // Remove already defined mimes
+    Object.keys(mimesToDefine).forEach(function (m) {
+        if (mime.extension(m)) delete mimesToDefine[m];
+    });
+
+    cb(modesByMime, mimesToDefine);
+};
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
