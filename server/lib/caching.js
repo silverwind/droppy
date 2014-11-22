@@ -64,7 +64,18 @@ caching.files = {
         ]
     };
 
-// mime list extracted from codemirror/mode/meta.js
+// On-demand loadable libs, preferably minified. Will be available as ?!/[property value]
+var libs = {
+    "node_modules/video.js/dist/cdn/video.js"              : "video.js/vjs.js",
+    "node_modules/video.js/dist/video-js/video-js.min.css" : "video.js/vjs.css",
+    "node_modules/video.js/dist/video-js/video-js.swf"     : "video.js/vjs.swf",
+    "node_modules/video.js/dist/video-js/font/vjs.eot"     : "video.js/font/vjs.eot",
+    "node_modules/video.js/dist/video-js/font/vjs.svg"     : "video.js/font/vjs.svg",
+    "node_modules/video.js/dist/video-js/font/vjs.ttf"     : "video.js/font/vjs.ttf",
+    "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
+};
+
+// Mime list extracted from codemirror/mode/meta.js
 var modesByMime = {
     "application/javascript": "javascript",
     "application/json": "javascript",
@@ -167,48 +178,59 @@ var modesByMime = {
 
 caching.init = function init(minify, callback) {
     doMinify = minify;
-    async.series([compileResources, readThemes, readModes], function (err, results) {
+    async.series([
+        compileResources,
+        readThemes,
+        readModes,
+        readLibs
+    ], function (err, results) {
         if (err) return callback(err);
-        var cache = { etags: {} };
+        var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
 
-        cache.res = results[0];
-
-        cache.themes = {};
         Object.keys(results[1]).forEach(function (theme) {
             cache.themes[theme] = {data: results[1][theme], etag: etag, mime: mime.lookup("css")};
         });
 
-        cache.modes = {};
         Object.keys(results[2]).forEach(function (mode) {
             cache.modes[mode] = {data: results[2][mode], etag: etag, mime: mime.lookup("js")};
         });
 
-        addGzip(cache, callback);
+        Object.keys(results[3]).forEach(function (file) {
+            cache.lib[file] = {data: results[3][file], etag: etag, mime: mime.lookup(path.basename(file))};
+        });
+
+        addGzip(cache, function (err, cache) {
+            cache.etags = {};
+            callback(err, cache);
+        });
     });
 };
 
 // Create gzip compressed data
 function addGzip(cache, callback) {
-    async.series([
-        function (cb) { gzipMap(cache.res, cb); },
-        function (cb) { gzipMap(cache.themes, cb); },
-        function (cb) { gzipMap(cache.modes, cb); }
-    ], function (err, results) {
-        if (err) callback(err);
-        cache.res = results[0];
-        cache.themes = results[1];
-        cache.modes = results[2];
+    var types = Object.keys(cache), funcs = [];
+    types.forEach(function (type) {
+        funcs.push(function (cb) {
+            gzipMap(cache[type], cb);
+        });
+    });
+    async.parallel(funcs, function (err, results) {
+        if (err) return callback(err);
+        types.forEach(function (type, index) {
+            cache[type] = results[index];
+        });
         callback(null, cache);
     });
 }
 
 function gzipMap(map, callback) {
-    var names = Object.keys(map);
-    var dataFunctions = [];
+    var names = Object.keys(map), funcs = [];
     names.forEach(function (name) {
-        dataFunctions.push(function (fcb) { gzip(map[name].data, fcb); });
+        funcs.push(function (cb) {
+            gzip(map[name].data, cb);
+        });
     });
-    async.parallel(dataFunctions, function (err, results) {
+    async.parallel(funcs, function (err, results) {
         if (err) return callback(err);
         names.forEach(function (name, index) {
             map[name].gzip = results[index];
@@ -269,6 +291,18 @@ function readModes(callback) {
 
             if (cbFired === cbDue) callback(null, ret);
         });
+    });
+}
+
+function readLibs(callback) {
+    var ret = {};
+    async.each(Object.keys(libs), function (p, cb) {
+        fs.readFile(path.join(paths.module, p), function (err, data) {
+            ret[libs[p]] = data;
+            cb(err);
+        });
+    }, function (err) {
+        callback(err, ret);
     });
 }
 

@@ -1379,7 +1379,7 @@
                 catcher.off("mousemove").trigger("click");
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
-                updateLocation(view, JSON.parse(event.dataTransfer.getData("text")).path);
+                updateLocation(view, from);
                 catcher.off("mousemove").trigger("click");
             });
             return;

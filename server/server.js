@@ -850,6 +850,8 @@ function handleResourceRequest(req, res, resourceName) {
         resource = cache.themes[req.url.substring("/?!/theme/".length)];
     } else if (/^\/\?!\/mode\//.test(req.url)) {
         resource = cache.modes[req.url.substring("/?!/mode/".length)];
+    } else if (/^\/\?!\/lib\//.test(req.url)) {
+        resource = cache.lib[req.url.substring("/?!/lib/".length)];
     } else if (/^\/\?!\/manifest\.json$/.test(req.url)) {
         resource = {
             data: manifest(req),
