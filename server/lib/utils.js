@@ -19,7 +19,7 @@ var utils  = {},
 // parse meta.js from CM for mode information
 utils.parseCMmodes = function parseCMmodes(mime, cb) {
     var sandbox = { CodeMirror : {}};
-    vm.runInNewContext(fs.readFileSync("node_modules/codemirror/mode/meta.js"), sandbox);
+    vm.runInNewContext(fs.readFileSync(path.join(paths.module, "node_modules/codemirror/mode/meta.js")), sandbox);
     var modesByMime = {}, mimesToDefine = {};
 
     // Parse out entries with meaningful data
