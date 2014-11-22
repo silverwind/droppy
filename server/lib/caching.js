@@ -366,7 +366,9 @@ function compileResources(callback) {
     // Save compiled resources
     while (caching.files.html.length) {
         var name = path.basename(caching.files.html.pop()),
-            data = resData.html.pop().replace("{{version}}", pkg.version).replace("{{name}}", pkg.name);
+            data = resData.html.pop()
+                .replace(/\{\{version\}\}/gm, pkg.version)
+                .replace(/\{\{name\}\}/gm, pkg.name);
 
         if (doMinify) {
             data = htmlMinifier.minify(data, {
