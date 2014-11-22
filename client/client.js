@@ -1895,10 +1895,20 @@
                     a.attr("class", dir === "left" ? "right" : "left");
                     b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
                         a.remove();
+                        finish();
                     });
                 } else {
                     a.replaceWith(b);
+                    finish();
                 }
+            }
+
+            function finish() {
+                view[0].currentFile = filename;
+                populateMediaCache(view, view[0].currentData);
+                replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
+                updatePath(view);
+                if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
             }
 
             if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) { // Is the next media an image?
@@ -1907,8 +1917,10 @@
             } else {
                 if (a[0].tagName.toLowerCase() === "video") {
                     a.attr("src", getMediaSrc(view, filename));
+                    finish();
                 } else {
                     b = $("<video>").attr({
+                        "id"      : "video-" + view[0].vId,
                         "class"   : dir,
                         "src"     : source,
                         "autoplay": "autoplay",
@@ -1920,11 +1932,6 @@
                     swap(a, b, dir);
                 }
             }
-            view[0].currentFile = filename;
-            populateMediaCache(view, view[0].currentData);
-            replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
-            updatePath(view);
-            if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
         }
     }
 
@@ -1980,7 +1987,7 @@
         var previewer,
             filename  = view[0].currentFile;
         view.data("type", type);
-        previewer = $(t.views.media({ type: type, src: getMediaSrc(view, filename)}));
+        previewer = $(t.views.media({ type: type, src: getMediaSrc(view, filename), vid: view[0].vId}));
         if (sameFolder && view[0].currentData) {
             populateMediaCache(view, view[0].currentData);
         } else { // In case we switch into an unknown folder, request its files

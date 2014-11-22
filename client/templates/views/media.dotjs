@@ -2,7 +2,8 @@
 <script>
 it = {
     type: String // Type of media, appended to previewer classes
-    src: String // url src for image or media
+    src: String  // url src for image or media
+    vid: Number  // View ID
 }
 </script>
 #}}
@@ -16,7 +17,7 @@ it = {
     <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
     <figure class="media-container">
         {{? it.type === "video"}}
-            <video autoplay loop controls preload="auto" src="{{= it.src }}"></video>
+            <video id="video-{{= it.vid}}" autoplay loop controls preload="auto" src="{{= it.src }}"></video>
         {{?? it.type === "image"}}
             <img src="{{= it.src }}">
         {{??}}
