@@ -1,4 +1,4 @@
-/*global CodeMirror, t, Notification, prettyBytes */
+/*global CodeMirror, t, Notification, prettyBytes, videojs */
 
 (function ($, window, document) {
     "use strict";
@@ -1887,23 +1887,12 @@
         setTimeout(function () {arrows.removeClass("in"); }, 2000);
 
         function swapMedia(view, filename, dir) {
-            var b, a = view.find(".media-container > img, .media-container > video"),
-                source = getMediaSrc(view, filename);
+            var b, a = view.find(".media-container img, .media-container video"),
+                isImage = Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1,
+                source  = getMediaSrc(view, filename);
 
-            function swap(a, b, dir) {
-                if (droppy.detects.animation) {
-                    a.attr("class", dir === "left" ? "right" : "left");
-                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
-                        a.remove();
-                        finish();
-                    });
-                } else {
-                    a.replaceWith(b);
-                    finish();
-                }
-            }
-
-            function finish() {
+            function finish(el) {
+                if (!isImage) initVideoJS(el);
                 view[0].currentFile = filename;
                 populateMediaCache(view, view[0].currentData);
                 replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
@@ -1911,22 +1900,34 @@
                 if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
             }
 
-            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) { // Is the next media an image?
+            function swap(a, b, dir) {
+                if (droppy.detects.animation) {
+                    a.attr("class", dir === "left" ? "right" : "left");
+                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
+                        if (a[0].tagName.toLowerCase() === "video" && a.parent()[0].tagName.toLowerCase() === "div") {
+                            a.parent().remove();
+                        } else {
+                            a.remove();
+                        }
+                        finish(b[0]);
+                    });
+                } else {
+                    a.replaceWith(b);
+                    finish(b[0]);
+                }
+            }
+
+            if (isImage) {
                 b = $("<img>").attr("class", dir).attr("src", source).one("load", aspectScale);
                 swap(a, b, dir);
             } else {
                 if (a[0].tagName.toLowerCase() === "video") {
                     a.attr("src", getMediaSrc(view, filename));
-                    finish();
+                    finish(a[0]);
                 } else {
                     b = $("<video>").attr({
                         "id"      : "video-" + view[0].vId,
-                        "class"   : dir,
-                        "src"     : source,
-                        "autoplay": "autoplay",
-                        "loop"    : "loop",
-                        "controls": "controls",
-                        "preload" : "auto"
+                        "src"     : source
                     });
                     b = $(bindVideoEvents(b[0]));
                     swap(a, b, dir);
@@ -2005,6 +2006,7 @@
         });
 
         view.find(".media-container video").each(function () {
+            initVideoJS(this);
             bindVideoEvents(this);
         });
 
@@ -2411,6 +2413,8 @@
         });
     }
 
+    // CodeMirror dynamic mode loading
+    // based on https://github.com/codemirror/CodeMirror/blob/master/addon/mode/loadmode.js
     function initModeLoad() {
         var loading = {};
         function splitCallback(cont, n) {
@@ -2460,6 +2464,40 @@
                 });
             }
         };
+    }
+
+    // Lazy-load video.js
+    function initVideoJS(el) {
+        function init() {
+            if (!window.videojs) return console.error("videojs undefined");
+            if (!el.classList.contains("video-js")) {
+                el.classList.add("video-js", "vjs-default-skin");
+                videojs.options.flash.swf = "?!/lib/video.js/vjs.swf";
+                videojs(el, {
+                    "controls" : true,
+                    "autoplay" : true,
+                    "preload"  : "auto",
+                    "loop"     : "loop",
+                    "width"    : $(el).parents(".media-container")[0].clientWidth,
+                    "heigth"   : $(el).parents(".media-container")[0].clientHeight
+                });
+            }
+        }
+        if (!$("#vjs-css").length) {
+            $.get("?!/lib/video.js/vjs.css").then(function (data) {
+                $('<style id="vjs-css"></style>').appendTo("head");
+                $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/video.js/font/"));
+            });
+        }
+
+        if (!$("#vjs-js").length) {
+            var script = document.createElement("script");
+            script.onload = init;
+            script.setAttribute("id", "vjs-js");
+            script.src = "?!/lib/video.js/vjs.js";
+            document.querySelector("head").appendChild(script);
+        } else
+            init();
     }
 
     // Extract the extension from a file name

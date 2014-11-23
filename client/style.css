@@ -733,8 +733,17 @@ input:-webkit-autofill {
     height: 100%;
 }
 
-.media-container > img.left, .media-container > video.left    { transform: translate3d(-100%, -50%, 0); opacity: 0 }
-.media-container > img.right, .media-container > video.right  { transform: translate3d( 100%, -50%, 0); opacity: 0 }
+.media-container > img.left, .media-container video.left    { transform: translate3d(-100%, -50%, 0); opacity: 0 }
+.media-container > img.right, .media-container video.right  { transform: translate3d( 100%, -50%, 0); opacity: 0 }
+
+.video-js {
+    height: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+}
+.vjs-big-play-button {
+    display: none !important;
+}
 
 /* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
 .media-container > img {
@@ -744,31 +753,31 @@ input:-webkit-autofill {
     transform: translate(-50%, -50%);
     transition: transform .3s ease, opacity .3s ease;
 }
-.nofullscreen .media-container > video {
+.nofullscreen .media-container video {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
-.media-container > video:not(:fullscreen) {
+.media-container video:not(:fullscreen) {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
-.media-container > video:not(:-webkit-full-screen) {
+.media-container video:not(:-webkit-full-screen) {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
-.media-container > video:not(:-moz-full-screen) {
+.media-container video:not(:-moz-full-screen) {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
-.media-container > video:not(:-ms-fullscreen) {
+.media-container video:not(:-ms-fullscreen) {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;

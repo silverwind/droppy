@@ -66,7 +66,7 @@ caching.files = {
 
 // On-demand loadable libs, preferably minified. Will be available as ?!/[property value]
 var libs = {
-    "node_modules/video.js/dist/cdn/video.js"              : "video.js/vjs.js",
+    "node_modules/video.js/dist/video-js/video.js"         : "video.js/vjs.js",
     "node_modules/video.js/dist/video-js/video-js.min.css" : "video.js/vjs.css",
     "node_modules/video.js/dist/video-js/video-js.swf"     : "video.js/vjs.swf",
     "node_modules/video.js/dist/video-js/font/vjs.eot"     : "video.js/font/vjs.eot",
