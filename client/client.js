@@ -316,7 +316,7 @@
             initAuthPage(type === "firstrun");
             raf(function () {
                 oldPage.replaceClass("in", "out").end(function () {
-                    $("#center-box").removeAttr("class"); // remove out class
+                    $("#center-box").replaceClass("out", "in"); // remove out class
                 });
                 if (type === "firstrun") {
                     $("#login-info").text("Hello! Choose your creditentials.");
@@ -2802,12 +2802,7 @@
 
     function reloadCSS(css) {
         if (!droppy.debug) return;
-        var i = 0;
         $("#css").remove();
-
-        while (document.styleSheets[i])
-            document.styleSheets[i++].disabled = true;
-
         $("<style id='css'></style>").text(css).appendTo($("head"));
     }
 
