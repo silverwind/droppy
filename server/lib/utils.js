@@ -17,25 +17,32 @@ var utils  = {},
     ];
 
 // parse meta.js from CM for mode information
-utils.parseCMmodes = function parseCMmodes(mime, cb) {
-    var sandbox = { CodeMirror : {}};
-    vm.runInNewContext(fs.readFileSync(path.join(paths.module, "node_modules/codemirror/mode/meta.js")), sandbox);
-    var modesByMime = {}, mimesToDefine = {};
+utils.parseCMmodes = function parseCMmodes(mime, callback) {
+    fs.readFile(path.join(paths.module, "node_modules/codemirror/mode/meta.js"), function (err, js) {
+        if (err) return callback(err);
 
-    // Parse out entries with meaningful data
-    sandbox.CodeMirror.modeInfo.forEach(function (entry) {
-        if (entry.mime && entry.mime !== "null" && entry.mode && entry.mode !== "null")
-            modesByMime[entry.mime] = entry.mode;
-        if (entry.mime && entry.mime !== "null" && entry.ext && Array.isArray(entry.ext))
-            mimesToDefine[entry.mime] = entry.ext;
+        var sandbox       = { CodeMirror : {} },
+            modesByMime   = {},
+            mimesToDefine = {};
+
+        // Execute meta.js in a sandbox
+        vm.runInNewContext(js, sandbox);
+
+        // Parse out the entries with meaningful data
+        sandbox.CodeMirror.modeInfo.forEach(function (entry) {
+            if (entry.mime && entry.mime !== "null" && entry.mode && entry.mode !== "null")
+                modesByMime[entry.mime] = entry.mode;
+            if (entry.mime && entry.mime !== "null" && entry.ext && Array.isArray(entry.ext))
+                mimesToDefine[entry.mime] = entry.ext;
+        });
+
+        // Remove extensions already defined by the mime module
+        Object.keys(mimesToDefine).forEach(function (m) {
+            if (mime.extension(m)) delete mimesToDefine[m];
+        });
+
+        callback(modesByMime, mimesToDefine);
     });
-
-    // Remove already defined mimes
-    Object.keys(mimesToDefine).forEach(function (m) {
-        if (mime.extension(m)) delete mimesToDefine[m];
-    });
-
-    cb(modesByMime, mimesToDefine);
 };
 
 // mkdirp wrapper with array support
