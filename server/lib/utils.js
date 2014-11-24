@@ -2,13 +2,14 @@
 
 var utils  = {},
     async  = require("async"),
+    cd     = require("content-disposition"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
     mkdirp = require("mkdirp"),
     path   = require("path"),
+    paths  = require("./paths.js").get(),
     rimraf = require("rimraf"),
     vm     = require("vm"),
-    paths  = require("./paths.js").get(),
     forceBinaryTypes = [
         "pdf",
         "ps",
@@ -203,8 +204,7 @@ utils.isBinary = function isBinary(path, callback) {
 };
 
 utils.getDispo = function getDispo(fileName) {
-    fileName = path.basename(fileName);
-    return "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + encodeURIComponent(fileName);
+    return cd(path.basename(fileName));
 };
 
 utils.tlsInit = function tlsInit(opts, callback) {
