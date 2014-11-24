@@ -7,17 +7,13 @@ it = {
 }
 </script>
 #}}
-{{? it.type === "image"}}
-<ul class="sidebar">
-    <li class="fs">{{= droppy.svg.fullscreen}}</li>
-</ul>
-{{?}}
+<button class="fs">{{= droppy.svg.fullscreen}}</button>
 <div class="previewer {{= it.type}}">
     <div class="arrow-back"> {{= droppy.svg.arrow}} </div>
     <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
     <figure class="media-container">
         {{? it.type === "video"}}
-            <video id="video-{{= it.vid}}" loop controls preload="auto" src="{{= it.src }}"></video>
+            <video id="video-{{= it.vid}}" src="{{= it.src }}"></video>
         {{?? it.type === "image"}}
             <img src="{{= it.src }}">
         {{??}}

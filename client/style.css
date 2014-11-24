@@ -784,6 +784,21 @@ input:-webkit-autofill {
     transform: translate(-50%, -50%);
 }
 
+.fs {
+    position: absolute;
+    right: .15em;
+    bottom: .15em;
+    z-index: 5;
+    background: transparent;
+}
+.fs svg {
+    fill: #bbb;
+    height: .8em;
+    width: .8em;
+}
+.fs:hover svg { fill: #fff }
+.video .fs, .nofullscreen .fs { display: none }
+
 /* ============================ Document Previewer ============================ */
 .doc, .doc > .text-editor {
     width: 100%;
@@ -824,7 +839,7 @@ input:-webkit-autofill {
     border-radius: 3px;
 }
 
-.sidebar > li:hover         { cursor: pointer; }
+.sidebar > li:hover         { cursor: pointer }
 .sidebar > li:hover span    { color: #fff }
 .sidebar > .exit:hover svg  { fill:  #c33 }
 .sidebar > .exit:hover span { background: #c33; opacity: 1 }
@@ -832,14 +847,6 @@ input:-webkit-autofill {
 .sidebar > .save:hover span { background: #169; opacity: 1 }
 .sidebar > .ww:hover svg    { fill:  #5c5 }
 .sidebar > .ww:hover span   { background: #5c5; opacity: 1 }
-.sidebar > .fs:hover svg    { fill:  #fff }
-
-.nofullscreen .sidebar > .fs { display: none }
-
-.content:fullscreen .sidebar           { visibility: hidden; }
-.content::-webkit-full-screen .sidebar { visibility: hidden; }
-.content::-moz-full-screen .sidebar    { visibility: hidden; }
-.content::-ms-fullscreen .sidebar      { visibility: hidden; }
 
 .doc.readonly > .sidebar > .save { display: none }
 

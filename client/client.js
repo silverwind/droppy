@@ -599,6 +599,24 @@
                 if (event.keyCode === 83 && (event.metaKey || event.ctrlKey)) event.preventDefault();
             });
 
+        // fullscreen event
+        droppy.prefixes.fullscreenchange.forEach(function (eventName) {
+            $(document).register(eventName, function () {
+                var fse  = fullScreenElement(),
+                    view = $(fse).parents(".view");
+
+                if (fse) {
+                    addKey(32, function (e) { view.find(e.shiftKey ? ".arrow-back" : ".arrow-forward").click(); });
+                    addKey([37, 38], function () { view.find(".arrow-back").click(); });
+                    addKey([39, 40], function () { view.find(".arrow-forward").click(); });
+                    view.find(".fs").html(droppy.svg.unfullscreen);
+                } else {
+                    removeKey([32, 37, 38, 39, 40]);
+                    view.find(".fs").html(droppy.svg.fullscreen);
+                }
+            });
+        });
+
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             var files, path, name, rootAdded,
@@ -1889,10 +1907,11 @@
         function swapMedia(view, filename, dir) {
             var b, a = view.find(".media-container img, .media-container video"),
                 isImage = Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1,
-                source  = getMediaSrc(view, filename);
+                src  = getMediaSrc(view, filename);
 
             function finish(el) {
                 if (!isImage) initVideoJS(el);
+                $(el).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
                 view[0].currentFile = filename;
                 populateMediaCache(view, view[0].currentData);
                 replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
@@ -1917,18 +1936,16 @@
                 }
             }
 
+
             if (isImage) {
-                b = $("<img>").attr("class", dir).attr("src", source).one("load", aspectScale);
+                b = $("<img>").attr({"class": dir, "src": src}).one("load", aspectScale);
                 swap(a, b, dir);
             } else {
                 if (a[0].tagName.toLowerCase() === "video") {
                     a.attr("src", getMediaSrc(view, filename));
                     finish(a[0]);
                 } else {
-                    b = $("<video>").attr({
-                        "id"      : "video-" + view[0].vId,
-                        "src"     : source
-                    });
+                    b = $("<video>").attr({"id": "video-" + view[0].vId, "src": src});
                     b = $(bindVideoEvents(b[0]));
                     swap(a, b, dir);
                 }
@@ -1998,7 +2015,7 @@
         loadContent(view, contentWrap(view).append(previewer));
 
         view.find(".fs").register("click", function () {
-            setFullscreen($(this).parents(".content")[0]);
+            toggleFullscreen($(this).parents(".content")[0]);
         });
 
         view.find(".media-container img").each(function () {
@@ -2536,7 +2553,8 @@
             requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
             fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange" ],
             fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
-            fullscreenEnabled : ["fullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled", "msFullscreenEnabled"]
+            fullscreenEnabled : ["fullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled", "msFullscreenEnabled"],
+            exitFullscreen    : ["exitFullscreen", "mozCancelFullScreen", "webkitExitFullscreen", "msExitFullscreen"]
         };
 
         // Extension to icon mappings
@@ -2699,27 +2717,23 @@
                 '</div>';
     }
 
-    function setFullscreen(el) {
-        droppy.prefixes.requestFullscreen.some(function (prop) {
-            if (prop in el) {
-                el[prop]();
-                return true;
-            }
+
+    function fullScreenElement() {
+        return droppy.prefixes.fullscreenElement.some(function (prop) {
+            if (prop in document) return document[prop];
         });
-        droppy.prefixes.fullscreenchange.forEach(function (eventName) {
-            $(document).register(eventName, function () {
-                var isFullScreen = droppy.prefixes.fullscreenElement.some(function (prop) {
-                    if (prop in document) return Boolean(document[prop]);
-                });
-                if (isFullScreen) {
-                    addKey(32, function (e) { $(el).parents(".view").find(e.shiftKey ? ".arrow-back" : ".arrow-forward").click(); });
-                    addKey([37, 38], function () { $(el).parents(".view").find(".arrow-back").click(); });
-                    addKey([39, 40], function () { $(el).parents(".view").find(".arrow-forward").click(); });
-                } else {
-                    removeKey([32, 37, 38, 39, 40]);
-                }
+    }
+
+    function toggleFullscreen(el) {
+        if (!fullScreenElement()) {
+            droppy.prefixes.requestFullscreen.some(function (prop) {
+                if (prop in el) el[prop]();
             });
-        });
+        } else {
+            droppy.prefixes.exitFullscreen.some(function (method) {
+                if (method in document) return document[method]();
+            });
+        }
     }
 
     var bindings = {};
