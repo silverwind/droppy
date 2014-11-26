@@ -54,7 +54,7 @@ var droppy = function droppy(home, options, isStandalone, callback) {
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) { log.simple("Preparing resources ..."); cb(); },
             function (cb) {
-                utils.parseCMmodes(mime, function (modesByMime, mimesToDefine) {
+                utils.compileMimes(mime, function (modesByMime, mimesToDefine) {
                     mime.define(mimesToDefine);
                     caching.init(!config.debug, modesByMime, function (err, c) {
                         if (err) return callback(err);

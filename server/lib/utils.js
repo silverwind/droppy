@@ -15,10 +15,13 @@ var utils  = {},
         "ps",
         "eps",
         "ai"
-    ];
+    ],
+    overrideMimes = {
+        "video/mp4": ["mp4", "mp4v", "mpg4", "m4v"]     // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
+    };
 
-// parse meta.js from CM for mode information
-utils.parseCMmodes = function parseCMmodes(mime, callback) {
+utils.compileMimes = function compileMimes(mime, callback) {
+    // parse meta.js from CM for mode information
     fs.readFile(path.join(paths.module, "node_modules/codemirror/mode/meta.js"), function (err, js) {
         if (err) return callback(err);
 
@@ -38,8 +41,13 @@ utils.parseCMmodes = function parseCMmodes(mime, callback) {
         });
 
         // Remove extensions already defined by the mime module
-        Object.keys(mimesToDefine).forEach(function (m) {
-            if (mime.extension(m)) delete mimesToDefine[m];
+        Object.keys(mimesToDefine).forEach(function (type) {
+            if (mime.extension(type)) delete mimesToDefine[type];
+        });
+
+        // Add override mimes
+        Object.keys(overrideMimes).forEach(function (type) {
+            mimesToDefine[type] = overrideMimes[type];
         });
 
         callback(modesByMime, mimesToDefine);
