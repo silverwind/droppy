@@ -736,15 +736,6 @@ input:-webkit-autofill {
 .media-container > img.left, .media-container video.left    { transform: translate(-100%, -50%); opacity: 0 }
 .media-container > img.right, .media-container video.right  { transform: translate( 100%, -50%); opacity: 0 }
 
-.video-js {
-    height: 100% !important;
-    width: 100% !important;
-    background: transparent !important;
-}
-.vjs-big-play-button {
-    display: none !important;
-}
-
 /* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
 .media-container > img {
     position: absolute; width: auto;
@@ -798,6 +789,43 @@ input:-webkit-autofill {
 }
 .fs:hover svg { fill: #fff }
 .video .fs, .nofullscreen .fs { display: none }
+
+/* ================================= Video.js ================================= */
+
+.video-js {
+    height: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+}
+
+.vjs-big-play-button {
+    left: 50% !important;
+    top: 50% !important;
+    height: 10rem !important;
+    transform: translate(-50%, -50%) !important;
+    box-shadow: none !important;
+    background: none !important;
+    color: #ccc !important;
+    border: none !important;
+    transition: all .3s !important;
+}
+
+.vjs-big-play-button:before {
+    font-size: 3.8rem !important;
+    text-shadow: none !important;
+}
+
+.vjs-default-skin:hover .vjs-big-play-button, .vjs-default-skin .vjs-big-play-button:focus {
+    background: none !important;
+    box-shadow: none !important;
+    transform: translate(-50%, -50%) scale(1.25) !important;
+    color: #fff !important;
+}
+
+/* Non-mobile supports autoplay */
+html:not(.mobile) .vjs-big-play-button {
+    display: none !important;
+}
 
 /* ============================ Document Previewer ============================ */
 .doc, .doc > .text-editor {

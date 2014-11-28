@@ -1097,7 +1097,7 @@
 
     // Update our current location and change the URL to it
     function updateLocation(view, destination, skipPush) {
-        if (typeof destination.length !== "number") throw "Destination needs to be string or array";
+        if (typeof destination.length !== "number") throw new Error("Destination needs to be string or array");
         // Queue the folder switching if we are mid-animation or waiting for the server
         function sendReq(view, viewDest, time) {
             (function queue(time) {
@@ -1358,7 +1358,7 @@
             bindHoverEvents(view);
             bindDropEvents(view);
             allowDrop(view);
-            if (callback) callback();
+            if (callback) callback(view);
         }
     }
 
@@ -1702,7 +1702,7 @@
                         droppy.clipboard.to = join(view[0].currentFolder, basename(droppy.clipboard.from));
                         sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
                     } else {
-                        throw "Clipboard was empty!";
+                        throw new Error("Clipboard was empty!");
                     }
                     droppy.clipboard = null;
                     $("#click-catcher").trigger("click");
@@ -2011,24 +2011,22 @@
         } else { // In case we switch into an unknown folder, request its files
             sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
         }
-        view[0].animDirection = "forward";
-        loadContent(view, contentWrap(view).append(previewer));
+        view[0].animDirection = "center";
+        loadContent(view, contentWrap(view).append(previewer), function (view) {
+            view.find(".fs").register("click", function () {
+                toggleFullscreen($(this).parents(".content")[0]);
+            });
+            view.find(".media-container img").each(function () {
+                $(this).one("load", aspectScale);
+            });
+            view.find(".media-container video").each(function () {
+                initVideoJS(this);
+                bindVideoEvents(this);
+            });
 
-        view.find(".fs").register("click", function () {
-            toggleFullscreen($(this).parents(".content")[0]);
+            if (view[0].vId === 0) updateTitle(filename);
+            hideSpinner(view);
         });
-
-        view.find(".media-container img").each(function () {
-            $(this).one("load", aspectScale);
-        });
-
-        view.find(".media-container video").each(function () {
-            initVideoJS(this);
-            bindVideoEvents(this);
-        });
-
-        if (view[0].vId === 0) updateTitle(filename);
-        hideSpinner(view);
     }
 
     function openDoc(view, entryId) {
@@ -2486,19 +2484,22 @@
     // Lazy-load video.js
     function initVideoJS(el) {
         function init() {
-            if (!window.videojs) return console.error("videojs undefined");
-            if (!el.classList.contains("video-js")) {
+            if (!window.videojs)
+                throw new Error("videojs undefined");
+
+            if (!el.classList.contains("video-js"))
                 el.classList.add("video-js", "vjs-default-skin");
-                videojs.options.flash.swf = "?!/lib/video.js/vjs.swf";
-                videojs(el, {
-                    "controls" : true,
-                    "autoplay" : true,
-                    "preload"  : "auto",
-                    "loop"     : "loop",
-                    "width"    : $(el).parents(".media-container")[0].clientWidth,
-                    "heigth"   : $(el).parents(".media-container")[0].clientHeight
-                });
-            }
+
+            videojs.options.flash.swf = "?!/lib/video.js/vjs.swf";
+            videojs(el, {
+                "controls" : true,
+                "autoplay" : false,
+                "autoplay" : droppy.detects.mobile ? false : true,
+                "preload"  : "auto",
+                "loop"     : "loop",
+                "width"    : $(el).parents(".media-container")[0].clientWidth,
+                "heigth"   : $(el).parents(".media-container")[0].clientHeight
+            });
         }
         if (!$("#vjs-css").length) {
             $.get("?!/lib/video.js/vjs.css").then(function (data) {
