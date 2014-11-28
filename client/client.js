@@ -2493,7 +2493,6 @@
             videojs.options.flash.swf = "?!/lib/video.js/vjs.swf";
             videojs(el, {
                 "controls" : true,
-                "autoplay" : false,
                 "autoplay" : droppy.detects.mobile ? false : true,
                 "preload"  : "auto",
                 "loop"     : "loop",
