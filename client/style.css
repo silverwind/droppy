@@ -81,21 +81,16 @@ input:-webkit-autofill {
     white-space: nowrap;
     user-select: none;
     align-items: center;
-    height: 1.5rem;
+
 }
 
 .button {
+    line-height: 1.5rem;
     color: #aaa;
     cursor: pointer;
     flex: 1;
-    display: inline-block;
 }
-.button:hover { color: #fff; text-shadow: 0 0 1px #888 }
-
-.button span {
-    vertical-align: middle;
-    transition: color .2s ease;
-}
+.button:hover span { color: #fff; text-shadow: 0 0 1px #888 }
 
 @media all and (min-width: 1024px) { .button { font-size: .7em } }
 @media all and (max-width: 1023px) { .button { font-size: .7em } }
@@ -104,15 +99,11 @@ input:-webkit-autofill {
 .button svg {
     fill: #aaa;
     display: inline-block;
-    vertical-align: middle;
-    width: 32px;
-    height: 32px;
+    height: .8rem;
+    width: .8rem;
+    position: relative;
+    top: .15rem;
 }
-.button svg, .button svg * { transition: fill .2s ease }
-
-@media all and (min-width: 1024px) { .button svg { height: 24px } }
-@media all and (max-width: 1023px) { .button svg { height: 20px } }
-@media all and (max-width: 639px)  { .button svg { height: 16px; margin-right: 0; vertical-align: baseline } }
 
 #upload-file-button:hover svg        { fill: #29f }
 #upload-folder-button:hover svg      { fill: #f1a }
