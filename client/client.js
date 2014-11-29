@@ -67,6 +67,9 @@
     // Add the dataTransfer property to the drag-and-drop events
     $.event.props.push("dataTransfer");
 
+    // Disable jQuery's appending of _=timestamp parameter to script requests
+    $.ajaxSetup({ cache: true });
+
     // Shorthand for safe event listeners
     $.fn.register = function (events, callback) {
         return this.off(events).on(events, callback);

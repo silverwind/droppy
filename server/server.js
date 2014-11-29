@@ -860,13 +860,7 @@ function handleResourceRequest(req, res, resourceName) {
     } else if (/^\/\?!\/mode\//.test(req.url)) {
         resource = cache.modes[req.url.substring("/?!/mode/".length)];
     } else if (/^\/\?!\/lib\//.test(req.url)) {
-        var p = req.url.substring("/?!/lib/".length);
-
-        // Strip querystrings
-        if (/\?/.test(p)) p = p.substring(0, p.indexOf("?"));
-        if (/\&/.test(p)) p = p.substring(0, p.indexOf("&"));
-
-        resource = cache.lib[p];
+        resource = cache.lib[req.url.substring("/?!/lib/".length)];
     } else if (/^\/\?!\/manifest\.json$/.test(req.url)) {
         resource = {
             data: manifest(req),
