@@ -699,7 +699,7 @@ input:-webkit-autofill {
     opacity: 0;
     transition: opacity .3s ease;
 }
-.mobile .previewer .arrow-back, .mobile .previewer .arrow-forward { opacity: 1; transition: none }
+.mobile .previewer .arrow-back, .mobile .previewer .arrow-forward { display: none }
 
 .previewer .arrow-back       { left:  0 }
 .previewer .arrow-forward    { right: 0 }
@@ -724,16 +724,25 @@ input:-webkit-autofill {
     height: 100%;
 }
 
-.media-container > img.left, .media-container video.left    { transform: translate(-100%, -50%); opacity: 0 }
-.media-container > img.right, .media-container video.right  { transform: translate( 100%, -50%); opacity: 0 }
+.media-wrapper {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    transition: transform .2s ease, opacity .2s ease;
+}
+
+.mobile .media-wrapper {
+    transition: none;
+}
+
+.media-container .media-wrapper.left  { transform: translate(-100%, 0%); opacity: 0 }
+.media-container .media-wrapper.right { transform: translate( 100%, 0%); opacity: 0 }
 
 /* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
-.media-container > img {
+.media-container img {
     position: absolute; width: auto;
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-    transition: transform .3s ease, opacity .3s ease;
 }
 .nofullscreen .media-container video {
     position: absolute; width: auto;
@@ -782,6 +791,10 @@ input:-webkit-autofill {
 .video .fs, .nofullscreen .fs { display: none }
 
 /* ================================= Video.js ================================= */
+
+.media-container video:not(.vjs-tech) {
+    display: none;
+}
 
 .video-js {
     height: 100% !important;

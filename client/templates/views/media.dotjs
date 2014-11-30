@@ -12,12 +12,14 @@ it = {
     <div class="arrow-back"> {{= droppy.svg.arrow}} </div>
     <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
     <figure class="media-container">
-        {{? it.type === "video"}}
-            <video id="video-{{= it.vid}}" src="{{= it.src }}"></video>
-        {{?? it.type === "image"}}
-            <img src="{{= it.src }}">
-        {{??}}
-            <img src="{{= it.src }}">
-        {{?}}
+        <div class="media-wrapper">
+            {{? it.type === "video"}}
+                <video id="video-{{= it.vid}}" src="{{= it.src }}"></video>
+            {{?? it.type === "image"}}
+                <img src="{{= it.src }}">
+            {{??}}
+                <img src="{{= it.src }}">
+            {{?}}
+        </div>
     </figure>
 </div>

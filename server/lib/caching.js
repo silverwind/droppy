@@ -72,7 +72,8 @@ var libs = {
     "node_modules/video.js/dist/video-js/font/vjs.eot"     : "video.js/font/vjs.eot",
     "node_modules/video.js/dist/video-js/font/vjs.svg"     : "video.js/font/vjs.svg",
     "node_modules/video.js/dist/video-js/font/vjs.ttf"     : "video.js/font/vjs.ttf",
-    "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
+    "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff",
+    "node_modules/draggabilly/dist/draggabilly.pkgd.min.js": "draggabilly.js"
 };
 
 caching.init = function init(minify, mimes, callback) {

@@ -32,6 +32,7 @@
     "content-disposition": "~0.5.0",
     "cpr": "~0.3.2",
     "dot": "~1.0.2",
+    "draggabilly": "~1.1.1",
     "graceful-fs": "~3.0.4",
     "html-minifier": "~0.6.9",
     "isbinaryfile": "~2.0.3",

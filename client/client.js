@@ -1,4 +1,4 @@
-/*global CodeMirror, t, Notification, prettyBytes, videojs */
+/*global CodeMirror, t, Notification, prettyBytes, videojs, Draggabilly */
 
 (function ($, window, document) {
     "use strict";
@@ -13,12 +13,6 @@
 //  Feature Detects
 // ============================================================================
     droppy.detects = {
-        animation: (function () {
-            var el = document.createElement("div");
-            return droppy.prefixes.animation.some(function (prop) {
-                if (prop in el.style) return true;
-            });
-        })(),
         inputDirectory: (function () {
             var el = document.createElement("input");
             return droppy.prefixes.directory.some(function (prop) {
@@ -129,26 +123,19 @@
             newclass = oldclass;
             oldclass = null;
         }
-        if (droppy.detects.animation) {
-            // Add a pseudo-animation to the element. When the "animationstart" event
-            // is fired on the element, we know it is ready to be transitioned.
-            this.css("animation", "nodeInserted 0.001s");
+        // Add a pseudo-animation to the element. When the "animationstart" event
+        // is fired on the element, we know it is ready to be transitioned.
+        this.css("animation", "nodeInserted 0.001s");
 
-            // Set the new and oldclass as data attributes.
-            if (oldclass) this.data("oldclass", oldclass);
-            this.data("newclass", newclass);
-        } else {
-            // If we don't support animations, fallback to a simple timeout
-            setTimeout(function () {
-                if (oldclass) this.replaceClass(oldclass, newclass);
-                else this.addClass(newclass);
-            }, 30);
-        }
+        // Set the new and oldclass as data attributes.
+        if (oldclass) this.data("oldclass", oldclass);
+        this.data("newclass", newclass);
         return this;
     };
 
-    if (droppy.detects.animation) {
-        var animStart = function (event) {
+    // Listen for the animation event for our pseudo-animation
+    droppy.prefixes.animationstart.forEach(function (eventName) {
+        document.addEventListener(eventName, function (event) {
             if (event.animationName === "nodeInserted") {
                 var target = $(event.target),
                     newClass = target.data("newclass"),
@@ -160,12 +147,8 @@
                 if (oldClass) target.removeData("oldclass").replaceClass(oldClass, newClass);
                 else target.addClass(newClass);
             }
-        };
-        // Listen for the animation event for our pseudo-animation
-        droppy.prefixes.animationstart.forEach(function (eventName) {
-            document.addEventListener(eventName, animStart);
         });
-    }
+    });
 
     // Alias requestAnimationFrame
     var raf = (function () {
@@ -447,8 +430,10 @@
             case "SAVE_STATUS":
                 view = getView(vId);
                 hideSpinner(view);
-                view.find(".path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed"); // TODO: Change to be view-relative
-                setTimeout(function () { view.find(".path li:last-child").removeClass("saved save-failed"); }, 1000); // TODO: Change to be view-relative
+
+                // TODO: Change to be view-relative
+                view.find(".path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
+                setTimeout(function () { view.find(".path li:last-child").removeClass("saved save-failed"); }, 1000);
                 break;
             case "SETTINGS":
                 droppy.debug = msg.settings.debug;
@@ -1027,7 +1012,8 @@
             view.find(".inline-namer").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
-            if (wasEmpty) view.find(".content").html('<div class="empty">' + droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
+            if (wasEmpty) view.find(".content").html('<div class="empty">' +
+                droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
         }
     }
 
@@ -1343,7 +1329,8 @@
             view.find(".new").data("root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
-            view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ? "back" : (view[0].animDirection === "back") ? "forward" : "center");
+            view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
+                "back" : (view[0].animDirection === "back") ? "forward" : "center");
             view.find(".new").addClass(type).setTransitionClass(navRegex, "center").end(finish);
         }
         view[0].animDirection = "center";
@@ -1888,86 +1875,62 @@
     }
 
     function bindMediaArrows(view) {
+        if (droppy.detects.mobile) return; // Using swipe on mobile
         var forward = view.find(".arrow-forward"),
             back    = view.find(".arrow-back"),
             arrows  = view.find(".arrow-back, .arrow-forward");
 
-        back.register("click", function ()    { swapMedia(view, getPrevMedia(view), "left");  });
-        forward.register("click", function () { swapMedia(view, getNextMedia(view), "right"); });
+        back.register("click", function ()    { swapMedia(view, "left");  });
+        forward.register("click", function () { swapMedia(view, "right"); });
 
-        if (droppy.detects.mobile) { // Always show arrows on mobile
-            if (!back.hasClass("in")) arrows.addClass("in");
-        } else {  // Show arrows on hover on desktops
-            arrows
-                .register("mouseenter mousemove", function () { if (!$(this).hasClass("in")) $(this).addClass("in"); })
-                .register("mouseleave", function () { $(this).removeClass("in"); });
-        }
+        arrows
+            .register("mouseenter mousemove", function () { if (!$(this).hasClass("in")) $(this).addClass("in"); })
+            .register("mouseleave", function () { $(this).removeClass("in"); });
 
-        // show arrows for two seconds so they won't have to be discovered
+        // Show arrows for three seconds so they won't have to be discovered
         arrows.addClass("in");
-        setTimeout(function () {arrows.removeClass("in"); }, 2000);
+        setTimeout(function () {arrows.removeClass("in"); }, 3000);
+    }
 
-        function swapMedia(view, filename, dir) {
-            var b, a = view.find(".media-container img, .media-container video"),
-                isImage = Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1,
-                src  = getMediaSrc(view, filename);
+    function swapMedia(view, dir) {
+        var b, a = view.find(".media-wrapper"),
+            nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view),
+            isImage = Object.keys(droppy.imageTypes).indexOf(getExt(nextFile)) !== -1,
+            src = getMediaSrc(view, nextFile);
 
-            function finish(el) {
-                if (!isImage) initVideoJS(el);
-                $(el).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
-                view[0].currentFile = filename;
-                populateMediaCache(view, view[0].currentData);
-                replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
-                updatePath(view);
-                if (view[0].vId === 0) updateTitle(filename); // Only update the page's title from view 0
-            }
-
-            function swap(a, b, dir) {
-                if (droppy.detects.animation) {
-                    a.attr("class", dir === "left" ? "right" : "left");
-                    b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
-                        if (a[0].tagName.toLowerCase() === "video" && a.parent()[0].tagName.toLowerCase() === "div") {
-                            a.parent().remove();
-                        } else {
-                            a.remove();
-                        }
-                        finish(b[0]);
-                    });
-                } else {
-                    a.replaceWith(b);
-                    finish(b[0]);
-                }
-            }
-
-
-            if (isImage) {
-                b = $("<img>").attr({"class": dir, "src": src}).one("load", aspectScale);
-                swap(a, b, dir);
-            } else {
-                if (a[0].tagName.toLowerCase() === "video") {
-                    a.attr("src", getMediaSrc(view, filename));
-                    finish(a[0]);
-                } else {
-                    b = $("<video>").attr({"id": "video-" + view[0].vId, "src": src});
-                    b = $(bindVideoEvents(b[0]));
-                    swap(a, b, dir);
-                }
-            }
+        if (isImage) {
+            b = $("<div class='media-wrapper " + dir + "'><img src='" + src + "'></div>").one("load", aspectScale);
+        } else {
+            b = $("<div class='media-wrapper " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
+            b = $(bindVideoEvents(b[0]));
         }
+        a.attr("class", dir === "left" ? "media-wrapper right" : "media-wrapper left");
+        b.appendTo(view.find(".media-container"));
+        b.setTransitionClass(/(left|right)/, "").end(function () {
+            a.remove();
+            if (!isImage) initVideoJS(b.find("video")[0]);
+            if (droppy.detects.mobile) initDraggabilly(b[0]);
+            $(b[0]).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
+            view[0].currentFile = nextFile;
+            populateMediaCache(view, view[0].currentData);
+            replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
+            updatePath(view);
+            if (view[0].vId === 0) updateTitle(nextFile); // Only update the page's title from view 0
+        });
     }
 
     // Media up/down-scaling while maintaining aspect ratio.
     function aspectScale() {
         $(".media-container").each(function () {
-            var container = this;
-            $(container).children("img, video").each(function () {
+            var container = $(this);
+            container.find("img, video").each(function () {
                 var dims  = {
                         w: this.naturalWidth || this.videoWidth || this.clientWidth,
                         h: this.naturalHeight || this.videoHeight || this.clientHeight
                     },
                     space = {
-                        w: $(container).width(),
-                        h: $(container).height()
+                        w: container.width(),
+                        h: container.height()
                     };
                 if (dims.w > space.w || dims.h > space.h) {
                     $(this).css({width: "", height: ""}); // Let CSS handle the downscale
@@ -2020,10 +1983,12 @@
                 toggleFullscreen($(this).parents(".content")[0]);
             });
             view.find(".media-container img").each(function () {
-                $(this).one("load", aspectScale);
+                aspectScale();
+                initDraggabilly(this.parentNode);
             });
             view.find(".media-container video").each(function () {
                 initVideoJS(this);
+                initDraggabilly(this.parentNode);
                 bindVideoEvents(this);
             });
 
@@ -2046,7 +2011,7 @@
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data, textStatus, request) {
-            getTheme(droppy.get("theme"), function () {
+            loadTheme(droppy.get("theme"), function () {
                 loadCM(data, request.getResponseHeader("Content-Type"));
             });
         }).fail(function () {
@@ -2195,7 +2160,7 @@
 
         $("select.theme").register("change", function () {
             var theme = $(this).val();
-            getTheme(theme);
+            loadTheme(theme);
             $(".view").each(function () {
                 if (this.editor) this.editor.setOption("theme", theme);
             });
@@ -2422,15 +2387,6 @@
         }
     }
 
-    function getTheme(theme, callback) {
-        $.get("?!/theme/" + theme).then(function (data) {
-            if (!$("#cmTheme").length) $('<style id="cmTheme"></style>').appendTo("head");
-            $("#cmTheme").text(data);
-            droppy.set("theme", theme);
-            if (callback) callback();
-        });
-    }
-
     // CodeMirror dynamic mode loading
     // based on https://github.com/codemirror/CodeMirror/blob/master/addon/mode/loadmode.js
     function initModeLoad() {
@@ -2484,9 +2440,34 @@
         };
     }
 
-    // Lazy-load video.js
+    // draggabilly
+    function initDraggabilly(el) {
+        if ($(el).hasClass("draggable")) return;
+        loadScript("draggabilly", "?!/lib/draggabilly.js", function () {
+            var draggie = new Draggabilly(el, {axis: "x"});
+            $(el).attr("class", "media-wrapper draggable");
+            draggie.on("dragEnd", function (instance) {
+                var view = $(instance.element).parents(".view");
+                if ((Math.abs(instance.position.x) / instance.element.clientWidth) > .2) { // 20% Threshold
+                    swapMedia(view, instance.position.x > 0 ? "left" : "right");
+                } else {
+                    $(instance.element).css({transition: "all .25s ease", left : 0}).end(function() {
+                        $(this).removeAttr("style");
+                    });
+                }
+            });
+        });
+    }
+
+    // video.js
     function initVideoJS(el) {
-        function init() {
+        if (!$("#vjs-css").length) {
+            $.get("?!/lib/video.js/vjs.css").then(function (data) {
+                $('<style id="vjs-css"></style>').appendTo("head");
+                $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/video.js/font/"));
+            });
+        }
+        loadScript("vjs-js", "?!/lib/video.js/vjs.js", function init() {
             if (!window.videojs)
                 throw new Error("videojs undefined");
 
@@ -2502,22 +2483,7 @@
                 "width"    : $(el).parents(".media-container")[0].clientWidth,
                 "heigth"   : $(el).parents(".media-container")[0].clientHeight
             });
-        }
-        if (!$("#vjs-css").length) {
-            $.get("?!/lib/video.js/vjs.css").then(function (data) {
-                $('<style id="vjs-css"></style>').appendTo("head");
-                $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/video.js/font/"));
-            });
-        }
-
-        if (!$("#vjs-js").length) {
-            var script = document.createElement("script");
-            script.onload = init;
-            script.setAttribute("id", "vjs-js");
-            script.src = "?!/lib/video.js/vjs.js";
-            document.querySelector("head").appendChild(script);
-        } else
-            init();
+        });
     }
 
     // Extract the extension from a file name
@@ -2757,7 +2723,6 @@
         });
     }
 
-
     function timeDifference(previous) {
         var msPerMinute = 60 * 1000,
             msPerHour   = msPerMinute * 60,
@@ -2816,6 +2781,28 @@
             }
         }
     }, 5000);
+
+
+    function loadScript(id, url, cb) {
+        if (!document.getElementById(id)) {
+            var script = document.createElement("script");
+            script.onload = cb;
+            script.setAttribute("id", id);
+            script.setAttribute("src", url);
+            document.querySelector("head").appendChild(script);
+        } else {
+           cb();
+        }
+    }
+
+    function loadTheme(theme, callback) {
+        $.get("?!/theme/" + theme).then(function (data) {
+            if (!$("#cmTheme").length) $('<style id="cmTheme"></style>').appendTo("head");
+            $("#cmTheme").text(data);
+            droppy.set("theme", theme);
+            if (callback) callback();
+        });
+    }
 
     function reloadCSS(css) {
         if (!droppy.debug) return;
