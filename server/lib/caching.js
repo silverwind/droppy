@@ -31,6 +31,7 @@ caching.files = {
         js: [
             "node_modules/jquery/dist/jquery.js",
             "client/lib/jquery.customSelect.min.js",
+            "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
             "node_modules/pretty-bytes/pretty-bytes.js",
             "node_modules/codemirror/lib/codemirror.js",
             "node_modules/codemirror/addon/selection/active-line.js",
@@ -72,8 +73,7 @@ var libs = {
     "node_modules/video.js/dist/video-js/font/vjs.eot"     : "video.js/font/vjs.eot",
     "node_modules/video.js/dist/video-js/font/vjs.svg"     : "video.js/font/vjs.svg",
     "node_modules/video.js/dist/video-js/font/vjs.ttf"     : "video.js/font/vjs.ttf",
-    "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff",
-    "node_modules/draggabilly/dist/draggabilly.pkgd.min.js": "draggabilly.js"
+    "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
 };
 
 caching.init = function init(minify, mimes, callback) {

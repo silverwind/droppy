@@ -88,7 +88,7 @@
             doCallback({target: el}); // Just mimic the event.target property on our fake event
         }, duration + 30);
 
-        return this.one("transitionend webkitTransitionEnd", doCallback);
+        return this.one("transitionend", doCallback);
     };
 
     // Class swapping helper
@@ -1899,17 +1899,19 @@
             src = getMediaSrc(view, nextFile);
 
         if (isImage) {
-            b = $("<div class='media-wrapper " + dir + "'><img src='" + src + "'></div>").one("load", aspectScale);
+            b = $("<div class='media-wrapper new-media " + dir + "'><img src='" + src + "'></div>").one("load", aspectScale);
         } else {
-            b = $("<div class='media-wrapper " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
+            b = $("<div class='media-wrapper new-media " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
         }
+
         a.attr("class", dir === "left" ? "media-wrapper right" : "media-wrapper left");
         b.appendTo(view.find(".media-container"));
         b.setTransitionClass(/(left|right)/, "").end(function () {
+            b.removeClass("new-media");
             a.remove();
             if (!isImage) initVideoJS(b.find("video")[0]);
-            if (droppy.detects.mobile) initDraggabilly(b[0]);
+            makeMediaDraggable(b[0]);
             $(b[0]).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
             view[0].currentFile = nextFile;
             populateMediaCache(view, view[0].currentData);
@@ -1984,11 +1986,11 @@
             });
             view.find(".media-container img").each(function () {
                 aspectScale();
-                initDraggabilly(this.parentNode);
+                makeMediaDraggable(this.parentNode);
             });
             view.find(".media-container video").each(function () {
                 initVideoJS(this);
-                initDraggabilly(this.parentNode);
+                makeMediaDraggable(this.parentNode);
                 bindVideoEvents(this);
             });
 
@@ -2441,21 +2443,17 @@
     }
 
     // draggabilly
-    function initDraggabilly(el) {
-        if ($(el).hasClass("draggable")) return;
-        loadScript("draggabilly", "?!/lib/draggabilly.js", function () {
-            var draggie = new Draggabilly(el, {axis: "x"});
-            $(el).attr("class", "media-wrapper draggable");
-            draggie.on("dragEnd", function (instance) {
-                var view = $(instance.element).parents(".view");
-                if ((Math.abs(instance.position.x) / instance.element.clientWidth) > .2) { // 20% Threshold
-                    swapMedia(view, instance.position.x > 0 ? "left" : "right");
-                } else {
-                    $(instance.element).css({transition: "all .25s ease", left : 0}).end(function() {
-                        $(this).removeAttr("style");
-                    });
-                }
-            });
+    function makeMediaDraggable(el) {
+        if (!droppy.detects.mobile || $(el).hasClass("draggable")) return;
+        var draggie = new Draggabilly(el, {axis: "x"});
+        $(el).attr("class", "media-wrapper draggable");
+        draggie.on("dragEnd", function (instance) {
+            var view = $(instance.element).parents(".view");
+            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > .15) { // 15% Threshold
+                swapMedia(view, instance.position.x > 0 ? "left" : "right");
+            } else {
+                $(instance.element).removeAttr("style");
+            }
         });
     }
 

@@ -730,7 +730,7 @@ input:-webkit-autofill {
     transition: transform .2s ease, opacity .2s ease;
 }
 
-.mobile .media-wrapper {
+.mobile .media-wrapper:not(.new-media) {
     transition: none;
 }
 
