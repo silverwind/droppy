@@ -755,7 +755,7 @@ input:-webkit-autofill {
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-    color: #eee; /* hack so autoprefixer won't combine this rule */
+    color: #eee; /* HACK: https://github.com/jakubpawlowicz/clean-css/issues/390 */
 }
 .media-container video:not(:-webkit-full-screen) {
     position: absolute; width: auto;
