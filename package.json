@@ -31,7 +31,7 @@
     "codemirror": "~4.8.0",
     "content-disposition": "~0.5.0",
     "cpr": "~0.3.2",
-    "dot": "~1.0.2",
+    "dot": "~1.0.3",
     "draggabilly": "~1.1.1",
     "graceful-fs": "~3.0.5",
     "html-minifier": "~0.6.9",
