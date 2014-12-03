@@ -593,10 +593,13 @@
                 var fse  = fullScreenElement(),
                     view = $(fse).parents(".view");
 
+                // unfocus the fullscreen button so the space key won't un-toggle fullscreen
+                document.activeElement.blur();
+
                 if (fse) {
-                    addKey(32, function (e) { view.find(e.shiftKey ? ".arrow-back" : ".arrow-forward").click(); });
-                    addKey([37, 38], function () { view.find(".arrow-back").click(); });
-                    addKey([39, 40], function () { view.find(".arrow-forward").click(); });
+                    addKey(32, function (e) { swapMedia(view, e.shiftKey ? "left" : "right") });
+                    addKey([37, 38], function () { swapMedia(view, "left");  });
+                    addKey([39, 40], function () { swapMedia(view, "right"); });
                     view.find(".fs").html(droppy.svg.unfullscreen);
                 } else {
                     removeKey([32, 37, 38, 39, 40]);
@@ -2511,6 +2514,7 @@
         droppy.views = [];
         droppy.emptyFiles = null;
         droppy.emptyFolders = null;
+        droppy.keyBindings = {};
 
         droppy.prefixes = {
             animation         : ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
@@ -2686,9 +2690,13 @@
 
 
     function fullScreenElement() {
-        return droppy.prefixes.fullscreenElement.some(function (prop) {
-            if (prop in document) return document[prop];
+        var el;
+        droppy.prefixes.fullscreenElement.some(function (prop) {
+            if (prop in document) {
+                el = document[prop];
+            }
         });
+        return el;
     }
 
     function toggleFullscreen(el) {
@@ -2703,20 +2711,19 @@
         }
     }
 
-    var bindings = {};
     function addKey(keyCode, callback) {
         keyCode = Array.isArray(keyCode) ? keyCode : [keyCode];
-        keyCode.forEach(function (key) { bindings[key] = callback; });
+        keyCode.forEach(function (key) { droppy.keyBindings[key] = callback; });
         setBindings();
     }
     function removeKey(keyCode) {
         keyCode = Array.isArray(keyCode) ? keyCode : [keyCode];
-        keyCode.forEach(function (key) { delete bindings[key]; });
+        keyCode.forEach(function (key) { delete droppy.keyBindings[key]; });
         setBindings();
     }
     function setBindings() {
-        document[Object.keys(bindings) > 0 ? "addEventListener" : "removeEventListener"]("keydown", function (e) {
-            var func = bindings[e.keyCode];
+        document[Object.keys(droppy.keyBindings) > 0 ? "addEventListener" : "removeEventListener"]("keydown", function (e) {
+            var func = droppy.keyBindings[e.keyCode];
             if (func) func(e);
         });
     }
