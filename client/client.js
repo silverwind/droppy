@@ -590,20 +590,17 @@
         // fullscreen event
         droppy.prefixes.fullscreenchange.forEach(function (eventName) {
             $(document).register(eventName, function () {
-                var fse  = fullScreenElement(),
-                    view = $(fse).parents(".view");
-
-                // unfocus the fullscreen button so the space key won't un-toggle fullscreen
-                document.activeElement.blur();
-
+                var view, fse = fullScreenElement();
+                document.activeElement.blur(); // unfocus the fullscreen button so the space key won't un-toggle fullscreen
                 if (fse) {
+                    view = $(fse).parents(".view");
                     addKey(32, function (e) { swapMedia(view, e.shiftKey ? "left" : "right") });
                     addKey([37, 38], function () { swapMedia(view, "left");  });
                     addKey([39, 40], function () { swapMedia(view, "right"); });
                     view.find(".fs").html(droppy.svg.unfullscreen);
                 } else {
                     removeKey([32, 37, 38, 39, 40]);
-                    view.find(".fs").html(droppy.svg.fullscreen);
+                    $(".fs").html(droppy.svg.fullscreen);
                 }
             });
         });
