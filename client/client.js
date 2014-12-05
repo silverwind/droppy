@@ -1989,9 +1989,10 @@
                 makeMediaDraggable(this.parentNode);
             });
             view.find(".media-container video").each(function () {
-                initVideoJS(this);
-                makeMediaDraggable(this.parentNode);
-                bindVideoEvents(this);
+                initVideoJS(this, function () {
+                    makeMediaDraggable(view.find(".media-wrapper")[0]);
+                    bindVideoEvents(view.find("video")[0]);
+                });
             });
 
             if (view[0].vId === 0) updateTitle(filename);
@@ -2458,7 +2459,7 @@
     }
 
     // video.js
-    function initVideoJS(el) {
+    function initVideoJS(el, cb) {
         if (!$("#vjs-css").length) {
             $.get("?!/lib/video.js/vjs.css").then(function (data) {
                 $('<style id="vjs-css"></style>').appendTo("head");
@@ -2480,7 +2481,7 @@
                 "loop"     : "loop",
                 "width"    : $(el).parents(".media-container")[0].clientWidth,
                 "heigth"   : $(el).parents(".media-container")[0].clientHeight
-            });
+            }, cb);
         });
     }
 
