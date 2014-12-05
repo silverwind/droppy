@@ -32,11 +32,8 @@ module.exports = function (grunt) {
             modules: {
                 command: "rm -rf node_modules && npm install"
             },
-            jitsu : {
-                command: "jitsu login && jitsu deploy && jitsu logs tail"
-            },
             heroku : {
-                command: "git push -u -f --tags heroku master && heroku logs -t"
+                command: "git push -u -f --tags heroku master"
             }
         }
     });
