@@ -49,7 +49,7 @@
     "uglify-js": "~2.4.15",
     "unzip": "~0.1.11",
     "video.js": "~4.11.1",
-    "ws": "~0.6.0"
+    "ws": "~0.6.2"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
