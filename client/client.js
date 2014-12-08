@@ -252,7 +252,7 @@
                           "<audio class='audio-player' preload='none'></audio>" +
                         "</div>" +
                     "</div>");
-        destroyView(vId);
+        getView(vId).remove();
         view.appendTo("#view-container");
         view[0].vId = vId;
         droppy.views[vId] = view[0];
@@ -392,7 +392,6 @@
                             view[0].currentFile = null;
                             view[0].currentFolder = msg.folder;
                             if (view[0].vId === 0) updateTitle(basename(msg.folder));
-                            replaceHistory(view, msg.folder);
                             updatePath(view);
                         }
                         view[0].switchRequest = false;
@@ -706,12 +705,13 @@
                 second = newView(dest, 1).addClass("right");
                 button.children("span").text("Merge");
                 button.attr("title", "Merge views back into a single one");
+                replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
             } else {
                 destroyView(1);
-                replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
                 getView(0).removeClass("left");
                 button.children("span").text("Split");
                 button.attr("title", "Split the view in half");
+                replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
             }
             first.end(function () {
                 button.register("click", split);
@@ -1040,11 +1040,13 @@
     // Listen for popstate events, which indicate the user navigated back
     $(window).register("popstate", function () {
         if (!droppy.socket) return;
+        var locs = getLocationsFromHash();
         droppy.views.forEach(function (view) {
+            var dest = locs[view.vId];
             view.switchRequest = true;
             setTimeout(function () { view.switchRequest = false; }, 1000);
+            if (dest) updateLocation($(view), dest, true);
         });
-        updateLocation(null, getLocationsFromHash(), true);
     });
 
     function getViewLocation(view) {
@@ -1055,11 +1057,17 @@
     }
 
     function getLocationsFromHash() {
-        var hash = document.location.hash.split("#!");
-        hash.shift();
-        if (hash.length === 0)
-            hash.push("");
-        return hash;
+        var locations = document.location.hash.split("#");
+        locations.shift();
+
+        if (locations.length === 0)
+            locations.push("");
+
+        locations.forEach(function (part, i) {
+            locations[i] = part.replace(/\/*$/g, "");
+            if (locations[i] === "") locations[i] = "/";
+        });
+        return locations;
     }
 
     function getHashPaths(modview, dest) {
@@ -1067,13 +1075,11 @@
         droppy.views.forEach(function (view) {
             view = $(view);
             if (modview && modview.is(view))
-                hash += "#!" + dest;
+                hash += "/#" + dest;
             else
-                hash += "#!" + getViewLocation(view);
+                hash += "/#" + getViewLocation(view);
         });
-        // Ensure slash before the first hashbang
-        if (!/\/$/.test(window.location.pathname)) hash = window.location.pathname + "/" + hash;
-        return hash;
+        return hash.replace(/\/+/g,"/");
     }
 
     function pushHistory(view, dest) {
