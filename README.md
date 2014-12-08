@@ -1,6 +1,8 @@
 #droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 > Personal file server with a modern web interface
 
+Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>.
+
 ###Features
 * Lightweight node.js backend, HTML5 frontend <img src="https://silverwind.github.io/droppy/logo.svg" width="240" height="240" align="right">
 * Responsive Layout
@@ -11,8 +13,6 @@
 * Share public shortlinks to files/folders
 * Picture gallery, Video streaming, Audio player
 * Drag and Drop support
-
-Screenshots <a target="_blank" href="http://i.imgur.com/izxnfAN.png">#1</a>, <a target="_blank" href="http://i.imgur.com/Ziv79rJ.png">#2</a>, <a target="_blank" href="http://i.imgur.com/ISlCyuw.png">#3</a>. Also check out this <a target="_blank" href="http://droppy-demo.silverwind.io/#!/#!/">demo</a>.
 
 ###Standalone Usage
 ```
