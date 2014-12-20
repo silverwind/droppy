@@ -161,7 +161,7 @@ function readThemes(callback) {
 
             filenames.forEach(function (name, index) {
                 var css = String(data[index]);
-                themes[name.replace(".css", "")] = doMinify ? cleanCSS.minify(css).styles : css;
+                themes[name.replace(/\.css$/, "")] = doMinify ? cleanCSS.minify(css).styles : css;
             });
 
             callback(err, themes);
@@ -262,7 +262,7 @@ function compileResources(callback) {
 
     if (doMinify) {
         out.js  = uglify.minify(out.js, { fromString: true, compress: { unsafe: true, screw_ie8: true } }).code;
-        out.css = cleanCSS.minify(out.css).styles
+        out.css = cleanCSS.minify(out.css).styles;
     }
 
     // Save compiled resources
