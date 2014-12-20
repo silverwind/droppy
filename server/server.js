@@ -43,6 +43,7 @@ var droppy = function droppy(options, isStandalone, callback) {
 
     async.series([
         function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
+        function (cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
         function (cb) { db.init(cb); },
     ], function (err) {
@@ -1398,7 +1399,6 @@ function setupProcess(standalone) {
     process.on("exit", cleanupTemp);
 
     if (standalone) {
-        fs.writeFileSync(paths.pid, process.pid);
         process.on("SIGINT",  function () { endProcess("SIGINT");  });
         process.on("SIGQUIT", function () { endProcess("SIGQUIT"); });
         process.on("SIGTERM", function () { endProcess("SIGTERM"); });
