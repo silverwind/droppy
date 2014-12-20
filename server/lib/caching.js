@@ -252,14 +252,14 @@ function compileResources(callback) {
         });
     });
 
-    // Concatenate CSS and JS
+    // Concatenate CSS
     resData.css.forEach(function (data) {
-        out.css += data + "\n";
+        out.css += data;
     });
 
-    // Append a semicolon to each javascript
+    // Concatenate JS
     resData.js.forEach(function (data) {
-        out.js += data + ";\n";
+        out.js += data + ";";
     });
 
     // Add SVG object
@@ -290,12 +290,13 @@ function compileResources(callback) {
         return callback(e);
     }
 
+    // Minify JS and CSS
     if (doMinify) {
         out.js  = uglify.minify(out.js, minfierOptions.uglify).code;
         out.css = cleanCSS.minify(out.css).styles;
     }
 
-    // Save compiled resources
+    // Read and minifiy HTML files
     while (caching.files.html.length) {
         var name = path.basename(caching.files.html.pop()),
             data = resData.html.pop()
@@ -308,6 +309,7 @@ function compileResources(callback) {
 
         resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
     }
+
     resCache["client.js"] = {data: out.js, etag: etag, mime: mime.lookup("js")};
     resCache["style.css"] = {data: out.css, etag: etag, mime: mime.lookup("css")};
 
