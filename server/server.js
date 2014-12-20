@@ -1393,8 +1393,25 @@ function cleanupLinks(callback) {
 }
 
 //-----------------------------------------------------------------------------
-// Shutdown cleanup
-function shutdown(signal) {
+// Process startup
+function setupProcess(standalone) {
+    process.on("exit", cleanupTemp);
+
+    if (standalone) {
+        fs.writeFileSync(paths.pid, process.pid);
+        process.on("SIGINT",  function () { endProcess("SIGINT");  });
+        process.on("SIGQUIT", function () { endProcess("SIGQUIT"); });
+        process.on("SIGTERM", function () { endProcess("SIGTERM"); });
+        process.on("uncaughtException", function (error) {
+            log.error("=============== Uncaught exception! ===============");
+            log.error(error.stack);
+        });
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Process shutdown
+function endProcess(signal) {
     var count = 0;
     log.simple("Received " + chalk.red(signal) + " - Shutting down ...");
     Object.keys(clients).forEach(function (client) {
@@ -1408,21 +1425,4 @@ function shutdown(signal) {
 
     fs.unlinkSync(paths.pid);
     process.exit(0);
-}
-
-//-----------------------------------------------------------------------------
-// Process signal and events
-function setupProcess(standalone) {
-    process.on("exit", cleanupTemp);
-
-    if (standalone) {
-        fs.writeFileSync(paths.pid, process.pid);
-        process.on("SIGINT",  function () { shutdown("SIGINT");  });
-        process.on("SIGQUIT", function () { shutdown("SIGQUIT"); });
-        process.on("SIGTERM", function () { shutdown("SIGTERM"); });
-        process.on("uncaughtException", function (error) {
-            log.error("=============== Uncaught exception! ===============");
-            log.error(error.stack);
-        });
-    }
 }

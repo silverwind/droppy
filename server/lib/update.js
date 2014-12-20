@@ -3,6 +3,7 @@
 var npm,
     async   = require("async"),
     chalk   = require("chalk"),
+    fs      = require("fs"),
     pidFile = require("./paths.js").get().pid;
 
 function updateSelf(pkg, callback) {
