@@ -1905,7 +1905,10 @@
             src = getMediaSrc(view, nextFile);
 
         if (isImage) {
-            b = $("<div class='media-wrapper new-media " + dir + "'><img src='" + src + "'></div>").one("load", aspectScale);
+            b = $("<div class='media-wrapper new-media " + dir + "'><img src='" + src + "'></div>");
+            b.find("img").one("load", function() {
+                aspectScale();
+            });
         } else {
             b = $("<div class='media-wrapper new-media " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
