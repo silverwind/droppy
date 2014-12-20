@@ -2459,8 +2459,8 @@
         $(el).attr("class", "media-wrapper draggable");
         draggie.on("dragEnd", function (instance) {
             var view = $(instance.element).parents(".view"),
-                tragThreshold = droppy.detects.mobile ? 0.15 : 0.075;
-            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > tragThreshold) {
+                dragThreshold = droppy.detects.mobile ? 0.15 : 0.075;
+            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > dragThreshold) {
                 swapMedia(view, instance.position.x > 0 ? "left" : "right");
             } else {
                 $(instance.element).removeAttr("style");
