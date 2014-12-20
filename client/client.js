@@ -2454,12 +2454,13 @@
 
     // draggabilly
     function makeMediaDraggable(el) {
-        if (!droppy.detects.mobile || $(el).hasClass("draggable")) return;
+        if ($(el).hasClass("draggable")) return;
         var draggie = new Draggabilly(el, {axis: "x"});
         $(el).attr("class", "media-wrapper draggable");
         draggie.on("dragEnd", function (instance) {
-            var view = $(instance.element).parents(".view");
-            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > .15) { // 15% Threshold
+            var view = $(instance.element).parents(".view"),
+                tragThreshold = droppy.detects.mobile ? 0.15 : 0.075;
+            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > tragThreshold) {
                 swapMedia(view, instance.position.x > 0 ? "left" : "right");
             } else {
                 $(instance.element).removeAttr("style");
