@@ -811,8 +811,8 @@
         xhr.upload.addEventListener("load", function () { uploadDone(view); });
         xhr.upload.addEventListener("error", function (event) {
             if (event && event.message) console.info(event.message);
-            showError(view, event.message);
-            uploadDone(view);
+            showError(view, "An error occured during upload");
+            uploadCancel(view);
         });
 
         $(".upload-cancel").register("click", function () {

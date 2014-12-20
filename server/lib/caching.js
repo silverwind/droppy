@@ -8,7 +8,7 @@ var dottemplates = require("./dottemplates.js"),
 
 var async        = require("async"),
     autoprefixer = require("autoprefixer-core"),
-    cleanCSS     = new require("clean-css")({keepSpecialComments : 0}),
+    cleanCSS     = new (require("clean-css"))({keepSpecialComments : 0}),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
     htmlMinifier = require("html-minifier"),
@@ -160,10 +160,8 @@ function readThemes(callback) {
             if (err) return callback(err);
 
             filenames.forEach(function (name, index) {
-                if (doMinify)
-                    themes[name.replace(".css", "")] = cleanCSS.minify(data[index].toString());
-                else
-                    themes[name.replace(".css", "")] = data[index].toString();
+                var css = String(data[index]);
+                themes[name.replace(".css", "")] = doMinify ? cleanCSS.minify(css).styles : css;
             });
 
             callback(err, themes);
@@ -264,7 +262,7 @@ function compileResources(callback) {
 
     if (doMinify) {
         out.js  = uglify.minify(out.js, { fromString: true, compress: { unsafe: true, screw_ie8: true } }).code;
-        out.css = cleanCSS.minify(out.css);
+        out.css = cleanCSS.minify(out.css).styles
     }
 
     // Save compiled resources
