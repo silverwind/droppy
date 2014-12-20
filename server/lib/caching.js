@@ -1,6 +1,6 @@
 "use strict";
 
-var caching      = {};
+var caching = {};
 
 var dottemplates = require("./dottemplates.js"),
     pkg          = require("./../../package.json"),
@@ -8,7 +8,7 @@ var dottemplates = require("./dottemplates.js"),
 
 var async        = require("async"),
     autoprefixer = require("autoprefixer-core"),
-    cleanCSS     = new (require("clean-css"))({keepSpecialComments : 0}),
+    cleanCSS     = require("clean-css"),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
     htmlMinifier = require("html-minifier"),
@@ -21,6 +21,36 @@ var doMinify, modesByMime,
     etag         = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
     themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
+
+var minfierOptions = {
+    get uglify() {
+        return {
+            fromString: true,
+            compress: {
+                unsafe: true,
+                screw_ie8: true
+            }
+        };
+    },
+    get cleanCSS() {
+        return {
+            advanced : true,
+            keepSpecialComments : 0
+        };
+    },
+    get htmlMinifier() {
+        return {
+            removeComments: true,
+            collapseWhitespace: true,
+            collapseBooleanAttributes: true,
+            removeRedundantAttributes: true,
+            caseSensitive: true,
+            minifyCSS: this.cleanCSS
+        };
+    }
+};
+
+cleanCSS = new cleanCSS(minfierOptions.cleanCSS);
 
 caching.files = {
         css: [
@@ -261,7 +291,7 @@ function compileResources(callback) {
     }
 
     if (doMinify) {
-        out.js  = uglify.minify(out.js, { fromString: true, compress: { unsafe: true, screw_ie8: true } }).code;
+        out.js  = uglify.minify(out.js, minfierOptions.uglify).code;
         out.css = cleanCSS.minify(out.css).styles;
     }
 
@@ -273,14 +303,7 @@ function compileResources(callback) {
                 .replace(/\{\{name\}\}/gm, pkg.name);
 
         if (doMinify) {
-            data = htmlMinifier.minify(data, {
-                removeComments: true,
-                collapseWhitespace: true,
-                collapseBooleanAttributes: true,
-                removeRedundantAttributes: true,
-                caseSensitive: true,
-                minifyCSS: true
-            });
+            data = htmlMinifier.minify(data, minfierOptions.htmlMinifier);
         }
 
         resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
