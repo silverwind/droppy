@@ -19,8 +19,8 @@ var async        = require("async"),
 
 var doMinify, modesByMime,
     etag         = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
-    themesPath   = path.join(paths.module, "/node_modules/codemirror/theme"),
-    modesPath    = path.join(paths.module, "/node_modules/codemirror/mode");
+    themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
+    modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 
 caching.files = {
         css: [
@@ -196,7 +196,7 @@ function readModes(callback) {
 function readLibs(callback) {
     var ret = {};
     async.each(Object.keys(libs), function (p, cb) {
-        fs.readFile(path.join(paths.module, p), function (err, data) {
+        fs.readFile(path.join(paths.mod, p), function (err, data) {
             ret[libs[p]] = data;
             cb(err);
         });
@@ -214,7 +214,7 @@ function compileResources(callback) {
         resData[type] = caching.files[type].map(function read(file) {
             var data;
             try {
-                data = fs.readFileSync(path.join(paths.module, file)).toString("utf8");
+                data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
             } catch (error) {
                 return callback(error);
             }
@@ -292,7 +292,7 @@ function compileResources(callback) {
     caching.files.other.forEach(function (file) {
         var data, date,
             name     = path.basename(file),
-            fullPath = path.join(paths.module, file);
+            fullPath = path.join(paths.mod, file);
 
         try {
             data = fs.readFileSync(fullPath);

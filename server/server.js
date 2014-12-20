@@ -1336,7 +1336,7 @@ function updateCSS(event, filename, cb) {
             var css = "";
 
             caching.files.css.forEach(function (file) {
-                css += fs.readFileSync(path.join(paths.module, file)).toString("utf8");
+                css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
             });
 
             css = ap.process(css).css;

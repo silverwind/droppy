@@ -16,7 +16,7 @@ paths.get = function get() {
         tlsKey    : resolve(root + "/config/tls.key"),
         tlsCert   : resolve(root + "/config/tls.cert"),
         tlsCA     : resolve(root + "/config/tls.ca"),
-        module    : resolve(__dirname + "/../.."),
+        mod       : resolve(__dirname + "/../.."),
         server    : resolve(__dirname + "/../../server"),
         client    : resolve(__dirname + "/../../client"),
         templates : resolve(__dirname + "/../../client/templates"),

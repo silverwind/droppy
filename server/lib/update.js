@@ -4,7 +4,9 @@ var npm,
     async   = require("async"),
     chalk   = require("chalk"),
     fs      = require("fs"),
-    pidFile = require("./paths.js").get().pid;
+    rm      = require("./utils").rm,
+    path    = require("path"),
+    paths   = require("./paths.js").get();
 
 function updateSelf(pkg, callback) {
     function loadNPM(cb) {
@@ -30,11 +32,25 @@ function updateSelf(pkg, callback) {
         });
     }
 
+    function cleanupModules(cb) {
+        var dir = path.join(paths.mod, "/node_modules");
+        fs.stat(dir, function(err, stats) {
+            if (err || !stats || !stats.isDirectory()) {
+                return cb();
+            } else {
+                console.info("Cleaning up node_modules ...");
+                rm(dir, cb);
+            }
+        });
+    }
+
     function install(versions, cb) {
-        console.info("Updating " + pkg.name + " from " + chalk.green(versions[0]) + " to " + chalk.green(versions[1]) + " ...");
-        npm.commands.install([pkg.name + "@" + versions[1]], function (err)  {
-            if (err) return cb(err);
-            cb(null, "Successfully updated to " + chalk.green(versions[1]) + "!");
+        cleanupModules(function() {
+            console.info("Updating " + pkg.name + " from " + chalk.green(versions[0]) + " to " + chalk.green(versions[1]) + " ...");
+            npm.commands.install([pkg.name + "@" + versions[1]], function (err)  {
+                if (err) return cb(err);
+                cb(null, "Successfully updated to " + chalk.green(versions[1]) + "!");
+            });
         });
     }
 
@@ -43,7 +59,7 @@ function updateSelf(pkg, callback) {
         async.parallel([getInstalledVersion, getNPMVersion], function (err, versions) {
             if (err) return callback(err);
             if (versions[0] !== versions[1]) {
-                fs.readFile(pidFile, function(err, data) {
+                fs.readFile(paths.pid, function(err, data) {
                     if (!err) {
                         var pid = parseInt(String(data), 10);
                         if (typeof pid === "number") {

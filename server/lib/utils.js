@@ -22,7 +22,7 @@ var utils  = {},
 
 utils.compileMimes = function compileMimes(mime, callback) {
     // parse meta.js from CM for mode information
-    fs.readFile(path.join(paths.module, "node_modules/codemirror/mode/meta.js"), function (err, js) {
+    fs.readFile(path.join(paths.mod, "node_modules/codemirror/mode/meta.js"), function (err, js) {
         if (err) return callback(err);
 
         var sandbox       = { CodeMirror : {} },
