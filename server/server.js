@@ -37,9 +37,9 @@ var cache        = {},
     ready        = false,
     isDemo       = process.env.NODE_ENV === "droppydemo";
 
-var droppy = function droppy(home, options, isStandalone, callback) {
+var droppy = function droppy(options, isStandalone, callback) {
     if (isStandalone) printLogo();
-    bindProcessEvents(isStandalone);
+    setupProcess(isStandalone);
 
     async.series([
         function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
@@ -52,10 +52,10 @@ var droppy = function droppy(home, options, isStandalone, callback) {
         firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
         async.series([
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
-            function (cb) { log.simple("Preparing resources ..."); cb(); },
             function (cb) {
                 utils.compileMimes(mime, function (modesByMime, mimesToDefine) {
                     mime.define(mimesToDefine);
+                    log.simple("Preparing resources ...");
                     caching.init(!config.debug, modesByMime, function (err, c) {
                         if (err) return callback(err);
                         cache = c;
@@ -1396,8 +1396,7 @@ function cleanupLinks(callback) {
 // Shutdown cleanup
 function shutdown(signal) {
     var count = 0;
-    if (!ready) process.exit(0);
-    log.simple("Received " + signal + " - Shutting down ...");
+    log.simple("Received " + chalk.red(signal) + " - Shutting down ...");
     Object.keys(clients).forEach(function (client) {
         if (!clients[client] || !clients[client].ws) return;
         if (clients[client].ws.readyState < 2) {
@@ -1407,15 +1406,17 @@ function shutdown(signal) {
     });
     if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
+    fs.unlinkSync(paths.pid);
     process.exit(0);
 }
 
 //-----------------------------------------------------------------------------
 // Process signal and events
-function bindProcessEvents(standalone) {
+function setupProcess(standalone) {
     process.on("exit", cleanupTemp);
 
     if (standalone) {
+        fs.writeFileSync(paths.pid, process.pid);
         process.on("SIGINT",  function () { shutdown("SIGINT");  });
         process.on("SIGQUIT", function () { shutdown("SIGQUIT"); });
         process.on("SIGTERM", function () { shutdown("SIGTERM"); });

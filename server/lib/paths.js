@@ -7,6 +7,7 @@ var paths = {},
 paths.get = function get() {
     return {
         home      : resolve(root),
+        pid       : resolve(root + "/droppy.pid"),
         files     : resolve(root + "/files"),
         temp      : resolve(root + "/temp"),
         cfg       : resolve(root + "/config"),

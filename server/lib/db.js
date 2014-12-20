@@ -24,11 +24,18 @@ db.init = function (callback) {
         } else {
             fs.readFile(dbFile, function (err, data) {
                 if (err) return callback(err);
-                try {
-                    database = JSON.parse(String(data));
-                } catch (error) {
-                    return callback(err);
+                data = data.toString();
+
+                if (data.trim() !== "") {
+                    try {
+                        database = JSON.parse(data);
+                    } catch (error) {
+                        return callback(err);
+                    }
+                } else {
+                    database = {};
                 }
+
                 database = _.defaults(database, defaults);
                 write(callback);
             });

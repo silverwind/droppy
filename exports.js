@@ -16,7 +16,7 @@ exports = module.exports = function droppy(home, options) {
 
     var server = require("./server/server.js");
 
-    server(home, options, false, function (err) {
+    server(options, false, function (err) {
         if (err) throw err;
     });
 

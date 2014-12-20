@@ -58,7 +58,7 @@ if (cmd === "--color") {
 if (cmds[cmd]) {
     switch (cmd) {
     case "start":
-        require("./server/server.js")(null, null, true, function (err) {
+        require("./server/server.js")(null, true, function (err) {
             if (err) console.error(err);
         });
         break;
