@@ -206,20 +206,18 @@ function readModes(callback) {
         if (!modes[mode]) modes[mode] = "";
     });
 
-    var cbDue = 0, cbFired = 0, ret = {};
-    Object.keys(modes).forEach(function (mode) {
-        cbDue++;
+    async.map(Object.keys(modes), function (mode, cb) {
         fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
-            if (err) callback(err);
-            cbFired++;
-
             if (doMinify)
-                ret[mode] = new Buffer(uglify.minify(data.toString(), minfierOptions.uglify).code);
+                cb(err, new Buffer(uglify.minify(data.toString(), minfierOptions.uglify).code));
             else
-                ret[mode] = new Buffer(data.toString());
-
-            if (cbFired === cbDue) callback(null, ret);
+                cb(err, data);
         });
+    }, function (err, result) {
+        Object.keys(modes).forEach(function (mode, i) {
+            modes[mode] = result[i];
+        });
+        callback(err, modes);
     });
 }
 
