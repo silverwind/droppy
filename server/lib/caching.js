@@ -191,7 +191,7 @@ function readThemes(callback) {
 
             filenames.forEach(function (name, index) {
                 var css = String(data[index]);
-                themes[name.replace(/\.css$/, "")] = doMinify ? cleanCSS.minify(css).styles : css;
+                themes[name.replace(/\.css$/, "")] = doMinify ? new Buffer(cleanCSS.minify(css).styles) : new Buffer(css);
             });
 
             callback(err, themes);
@@ -214,9 +214,9 @@ function readModes(callback) {
             cbFired++;
 
             if (doMinify)
-                ret[mode] = uglify.minify(data.toString(), {fromString: true, compress: {unsafe: true, screw_ie8: true}}).code;
+                ret[mode] = new Buffer(uglify.minify(data.toString(), minfierOptions.uglify).code);
             else
-                ret[mode] = data.toString();
+                ret[mode] = new Buffer(data.toString());
 
             if (cbFired === cbDue) callback(null, ret);
         });
@@ -307,11 +307,12 @@ function compileResources(callback) {
             data = htmlMinifier.minify(data, minfierOptions.htmlMinifier);
         }
 
-        resCache[name] = {data: data, etag: etag, mime: mime.lookup("html")};
+        resCache[name] = {data: new Buffer(data), etag: etag, mime: mime.lookup("html")};
     }
 
-    resCache["client.js"] = {data: out.js, etag: etag, mime: mime.lookup("js")};
-    resCache["style.css"] = {data: out.css, etag: etag, mime: mime.lookup("css")};
+
+    resCache["client.js"] = {data: new Buffer(out.js), etag: etag, mime: mime.lookup("js")};
+    resCache["style.css"] = {data: new Buffer(out.css), etag: etag, mime: mime.lookup("css")};
 
     // Read misc files
     caching.files.other.forEach(function (file) {
