@@ -2565,7 +2565,7 @@
             "install":  ["install", "msi"],
             "java":     ["java"],
             "jpg":      ["jpg", "jpeg"],
-            "js":       ["js"],
+            "js":       ["js", "es", "dart"],
             "json":     ["json"],
             "log":      ["log", "changelog"],
             "makefile": ["makefile", "pom"],
