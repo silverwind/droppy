@@ -294,7 +294,9 @@ function setupSocket(server) {
                     "debug"       : config.debug,
                     "demoMode"    : isDemo,
                     "public"      : config.public,
-                    "maxFileSize" : config.maxFileSize
+                    "maxFileSize" : config.maxFileSize,
+                    "themes"      : Object.keys(cache.themes),
+                    "modes"       : Object.keys(cache.modes)
                 }}));
                 break;
             case "REQUEST_UPDATE":

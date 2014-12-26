@@ -175,7 +175,7 @@
         var prefs, doSave, defaults = {
             volume : 0.5,
             videoVolume : 0.5,
-            theme: "xq-light",
+            theme: "tomorrow-night-bright",
             indentWithTabs : false,
             indentUnit : 4,
             lineWrapping: false,
@@ -435,10 +435,9 @@
                 setTimeout(function () { view.find(".path li:last-child").removeClass("saved save-failed"); }, 1000);
                 break;
             case "SETTINGS":
-                droppy.debug = msg.settings.debug;
-                droppy.demoMode = msg.settings.demoMode;
-                droppy.public = msg.settings.public;
-                droppy.maxFileSize = msg.settings.maxFileSize;
+                Object.keys(msg.settings).forEach(function (setting) {
+                   droppy[setting] = msg.settings[setting];
+                });
                 if (droppy.demoMode || droppy.public)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
@@ -2136,17 +2135,12 @@
     }
 
     function createOptions() {
-        var cmThemes = ["3024-day", "3024-night", "ambiance", "ambiance-mobile", "base16-dark", "base16-light", "blackboard",
-                        "cobalt", "eclipse", "elegant", "erlang-dark", "lesser-dark", "mbo", "mdn-like", "midnight", "monokai",
-                        "neat", "neo", "night", "paraiso-dark", "paraiso-light", "pastel-on-dark", "rubyblue", "solarized",
-                        "the-matrix", "tomorrow-night-eighties", "twilight", "vibrant-ink", "xq-dark", "xq-light"];
-
         return $("<div class='list-options'>").append(t.options({
             droppy: droppy,
             options: [
                 ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
                 ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
-                ["theme", "Editor Theme", cmThemes, cmThemes],
+                ["theme", "Editor Theme", droppy.themes, droppy.themes],
                 ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
                 ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
             ]
