@@ -90,7 +90,7 @@ input:-webkit-autofill {
     cursor: pointer;
     flex: 1;
 }
-.button:not(.disabled):hover { color: #fff; background: #222; outline: 1px solid #444 }
+.button:not(.disabled):hover { color: #fff;}
 
 @media all and (min-width: 1024px) { .button { font-size: .7em } }
 @media all and (max-width: 1023px) { .button { font-size: .7em } }
@@ -105,19 +105,28 @@ input:-webkit-autofill {
     top: .15rem;
 }
 
-#upload-file-button:hover svg        { fill: #29f }
-#upload-folder-button:hover svg      { fill: #f1a }
-#create-file-button:hover svg        { fill: #2c8 }
-#create-folder-button:hover svg      { fill: #ae5 }
-#about-button:hover svg              { fill: #f71 }
-#options-button:hover svg            { fill: #ff5 }
-#logout-button:hover svg             { fill: #e33 }
-#split-button:hover svg.split .left  { fill: #f22 }
-#split-button:hover svg.split .right { fill: #28f }
+#upload-file-button:hover   { background: rgba(102, 166, 255, .15) }
+#upload-folder-button:hover { background: rgba(255, 102, 252, .15) }
+#create-file-button:hover   { background: rgba(102, 255, 235, .15) }
+#create-folder-button:hover { background: rgba(102, 255, 125, .15) }
+#about-button:hover         { background: rgba(148, 102, 255, .15) }
+#options-button:hover       { background: rgba(255, 212, 102, .15) }
+#logout-button:hover        { background: rgba(255, 102, 102, .15) }
+#split-button:hover         { background: rgba(255,  82, 255, .15) }
 
-.button.disabled       { color: #666 !important; cursor: not-allowed !important }
-.button.disabled:hover { color: #666 !important }
-.button.disabled svg   { fill:  #666 !important }
+#upload-file-button:hover svg        { fill: rgba(102, 166, 255, 1) }
+#upload-folder-button:hover svg      { fill: rgba(255, 102, 252, 1) }
+#create-file-button:hover svg        { fill: rgba(102, 255, 235, 1) }
+#create-folder-button:hover svg      { fill: rgba(102, 255, 125, 1) }
+#about-button:hover svg              { fill: rgba(148, 102, 255, 1) }
+#options-button:hover svg            { fill: rgba(255, 212, 102, 1) }
+#logout-button:hover svg             { fill: rgba(255,  82,  82, 1) }
+#split-button:hover svg.split .left  { fill: rgba(255,  82,  82, 1) }
+#split-button:hover svg.split .right { fill: rgba(102, 166, 255, 1) }
+
+.button.disabled       { color: #444 !important; cursor: not-allowed !important }
+.button.disabled:hover { color: #444 !important; background: transparent !important;  }
+.button.disabled svg   { fill:  #444 !important }
 
 #view-container {
     flex: 1 1;
@@ -215,17 +224,27 @@ input:-webkit-autofill {
 @media all and (max-width:  639px) { .path {font-size: .7em; height: 1.25rem; } }
 
 .path li {
+    color: #ccc;
     cursor: pointer;
     display: inline-block;
     line-height: 1.5rem;
     position: relative;
+    transition: transform .4s ease, opacity .4s ease;
 }
+
+.path li.dirty { color: #f71 !important}
+.path li.saved { background: #361 !important}
+.path li.saved svg { fill: #361 !important}
+.path li.save-failed { background: #b44 !important }
+.path li.save-failed svg { background: #b44 !important }
+.path li.dirty:after { content: "*" }
+
 
 @media all and (min-width: 1024px) { .path li { padding: 0 .4em 0 1.6em } }
 @media all and (max-width: 1023px) { .path li { padding: 0 .2em 0 1.4em } }
 @media all and (max-width:  639px) { .path li { padding: 0 .2em 0 1.4em; line-height: 1.25rem; } }
 
-.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.88rem }
+.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.898rem }
 @media all and (max-width:  639px) {
     .path .triangle { height: 1.25rem; width: 1.25rem; right: -.75rem }
 }
@@ -243,7 +262,6 @@ input:-webkit-autofill {
 .path li.in  { opacity: 1; transform: translateX(0) }
 .path li.out { opacity: 0; transform: translateX(-100px) !important }
 .path li:first-of-type { padding-left: .5em }
-.path li { color: #ccc; transition: transform .4s ease, opacity .4s ease }
 
 .path li:nth-child(odd)        { background: #383838 }
 .path li:nth-child(odd) > .triangle  { fill: #383838 }
@@ -899,11 +917,6 @@ html:not(.mobile) .vjs-big-play-button {
 .cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
 .CodeMirror-scrollbar-filler { background: transparent }
 
-.path li.dirty { color: #f71 !important}
-.path li.saved { color: #7f1 !important}
-.path li.save-failed { color: #f44 !important }
-.path li.dirty:after { content: "*" }
-
 /* ============================ Upload Progress ============================ */
 
 .upload-info {
@@ -1209,8 +1222,6 @@ html:not(.mobile) .vjs-big-play-button {
     flex: 1;
 }
 
-#options-box .list-options li:hover label { color: #111; text-decoration: underline }
-
 @media all and (max-width: 319px) {
     #options-box .list-options ul li {
         flex-direction: column;
@@ -1235,7 +1246,7 @@ html:not(.mobile) .vjs-big-play-button {
     border-radius: 3px;
     border: 1px solid #ccc;
     background-color: #fff;
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgNjQwIDY0MCI+PHBhdGggc3R5bGU9ImZpbGw6ICM2NjYiIGQ9Ik0zMjAgMGwtMTQ3LjIgMjMzLjZoMjk0LjM2OGwtMTQ3LjE2OC0yMzMuNnpNMzIwLjAzMiA2NDBsMTQ3LjE2OC0yMzMuNi0yOTQuNC0wLjAzMiAxNDcuMjMyIDIzMy42MzJ6Ij48L3BhdGg+PC9zdmc+);
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgNjQwIDY0MCI+PHBhdGggc3R5bGU9ImZpbGw6ICM5OTkiIGQ9Ik0zMjAgMGwtMTQ3LjIgMjMzLjZoMjk0LjM2OGwtMTQ3LjE2OC0yMzMuNnpNMzIwLjAzMiA2NDBsMTQ3LjE2OC0yMzMuNi0yOTQuNC0wLjAzMiAxNDcuMjMyIDIzMy42MzJ6Ij48L3BhdGg+PC9zdmc+);
     background-size: 1em;
     background-repeat: no-repeat;
     background-position: right;

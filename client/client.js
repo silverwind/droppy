@@ -430,9 +430,18 @@
                 view = getView(vId);
                 hideSpinner(view);
 
-                // TODO: Change to be view-relative
-                view.find(".path li:last-child").removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
-                setTimeout(function () { view.find(".path li:last-child").removeClass("saved save-failed"); }, 1000);
+                var file = view.find(".path li:last-child");
+                var oldStyle = file.attr("style");
+
+                file.find("svg").css("transition","fill .2s ease");
+                file.removeClass("dirty").attr("style","transition: background .2s ease;")
+                    .addClass(msg.status === 0 ? "saved" : "save-failed");
+                setTimeout(function () {
+                    file.removeClass("saved save-failed").end(function() {
+                        $(this).attr("style", oldStyle);
+                        $(this).children("svg").removeAttr("style");
+                    });
+                }, 1000);
                 break;
             case "SETTINGS":
                 Object.keys(msg.settings).forEach(function (setting) {
@@ -1036,6 +1045,7 @@
         }
         function stopEdit(view) {
             view.find(".inline-namer").remove();
+            view.find(".data-row.new-file").remove();
             view.find(".data-row.new-folder").remove();
             entry.removeClass("editing invalid");
             if (wasEmpty) view.find(".content").html('<div class="empty">' +
@@ -2184,7 +2194,7 @@
             });
         }
         // Transform the select box, width is needed for the dropdown to behave correctly
-        $("#options-box select").width($(".list-options label").eq(0).width()).customSelect();
+        $("#options-box select").width($(".list-options li").eq(0).width() * .6).customSelect();
     }
 
     function showOptions() {
