@@ -431,8 +431,17 @@ function setupSocket(server) {
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
                 utils.mkdir(utils.addFilesPath(msg.data), function (error) {
-                    if (error) log.error(error);
+                    if (error) return log.error(error);
                     log.info(ws, null, "Created: ", msg.data);
+                });
+                break;
+            case "CREATE_FILE":
+                if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file creation request: " + msg.data);
+                fs.open(utils.addFilesPath(msg.data), "wx", function (error, fd) {
+                    if (error) return log.error(error);
+                    fs.close(fd, function() {
+                        log.info(ws, null, "Created: ", msg.data);
+                    });
                 });
                 break;
             case "RENAME":

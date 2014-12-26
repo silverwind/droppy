@@ -81,7 +81,7 @@ input:-webkit-autofill {
     white-space: nowrap;
     user-select: none;
     align-items: center;
-
+    letter-spacing: .05px;
 }
 
 .button {
@@ -90,7 +90,7 @@ input:-webkit-autofill {
     cursor: pointer;
     flex: 1;
 }
-.button:hover span { color: #fff; text-shadow: 0 0 1px #888 }
+.button:not(.disabled):hover { color: #fff; background: #222; outline: 1px solid #444 }
 
 @media all and (min-width: 1024px) { .button { font-size: .7em } }
 @media all and (max-width: 1023px) { .button { font-size: .7em } }
@@ -107,6 +107,7 @@ input:-webkit-autofill {
 
 #upload-file-button:hover svg        { fill: #29f }
 #upload-folder-button:hover svg      { fill: #f1a }
+#create-file-button:hover svg        { fill: #2c8 }
 #create-folder-button:hover svg      { fill: #ae5 }
 #about-button:hover svg              { fill: #f71 }
 #options-button:hover svg            { fill: #ff5 }
@@ -1498,7 +1499,7 @@ input[type="checkbox"] { display: none }
     border-radius: 6px;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -40%);
+    transform:  translate(-50%, -50%) scale(1.1);
     position: absolute;
     transition: all .3s ease;
     z-index: 66;
@@ -1509,7 +1510,7 @@ input[type="checkbox"] { display: none }
     visibility: hidden;
     box-shadow: 0 0 30px rgba(0,0,0,.4);
 }
-.info-box.in {opacity: 1; visibility: visible; transform: translate(-50%, -50%);}
+.info-box.in { visibility: visible; transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
 @media all and (min-width: 1024px) { .info-box { font-size: .9em } }
 @media all and (max-width: 1023px) { .info-box { font-size: .8em } }

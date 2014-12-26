@@ -663,14 +663,16 @@
             // No directory upload support - disable the button
             $("#upload-folder-button")
                 .addClass("disabled")
-                .attr("title", "Sorry, your browser doesn't support directory uploading yet!");
+                .on("click", function() {
+                    showError(getView(0), "Sorry, your browser doesn't support directory uploading yet!");
+                });
         }
 
         $("#create-folder-button").register("click", function () {
             var dummyFolder, wasEmpty,
                 view      = getView(), // TODO: Create folder in last active view
                 dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
-                                '<span class="sprite sprite-folder-open"></span>' +
+                                '<span class="sprite sprite-folder"></span>' +
                                 '<a class="folder-link entry-link"></a>' +
                             '</li>';
 
@@ -688,6 +690,31 @@
                     sendMessage(view[0].vId, "CREATE_FOLDER", newVal);
                 }
                 dummyFolder.remove();
+            });
+        });
+
+        $("#create-file-button").register("click", function () {
+            var dummyFile, wasEmpty,
+                view      = getView(), // TODO: Create folder in last active view
+                dummyHtml = '<li class="data-row new-file" data-type="file">' +
+                                '<span class="sprite sprite-default"></span>' +
+                                '<a class="file-link entry-link"></a>' +
+                            '</li>';
+
+            if (view.find(".empty").length > 0) {
+                view.find(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+                wasEmpty = true;
+            } else {
+                view.find(".content ul").prepend(dummyHtml);
+            }
+            dummyFile = $(".data-row.new-file");
+            view.find(".content").scrollTop(0);
+            entryRename(view, dummyFile, wasEmpty, function (success, oldVal, newVal) {
+                if (success) {
+                    showSpinner(view);
+                    sendMessage(view[0].vId, "CREATE_FILE", newVal);
+                }
+                dummyFile.remove();
             });
         });
 
