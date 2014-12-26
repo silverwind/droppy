@@ -441,7 +441,8 @@ function setupSocket(server) {
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file creation request: " + msg.data);
                 fs.open(utils.addFilesPath(msg.data), "wx", function (error, fd) {
                     if (error) return log.error(error);
-                    fs.close(fd, function() {
+                    fs.close(fd, function (error) {
+                        if (error) log.error(error);
                         log.info(ws, null, "Created: ", msg.data);
                     });
                 });
