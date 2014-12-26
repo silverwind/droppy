@@ -301,9 +301,9 @@ input:-webkit-autofill {
     fill: #333;
 }
 
-.paste-button .triangle { position: absolute; height: 1.5rem; width: 1.5rem; left: calc(-1.5rem + .5px) }
+.paste-button .triangle { position: absolute; height: 1.5rem; width: 1.5rem; left: -.898rem }
 @media all and (max-width:  639px) {
-    .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: calc(-1.25rem + .5px) }
+    .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: -.74rem  }
 }
 
 .paste-button svg.paste {
@@ -316,8 +316,8 @@ input:-webkit-autofill {
     width: 1em;
     margin-right: .25em;
 }
-.paste-button:hover svg.triangle {fill: #a51 }
-.paste-button:hover { background: #a51; color: #fff; }
+.paste-button:hover svg.triangle {fill: #25a }
+.paste-button:hover { background: #25a; color: #fff; }
 .paste-button .filename { color: #fff; }
 
 #click-catcher {
