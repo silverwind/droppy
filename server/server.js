@@ -341,10 +341,10 @@ function setupSocket(server) {
                 clients[cookie].views[vId] = null;
                 checkWatchedDirs();
                 break;
-            case "REQUEST_SHORTLINK":
-                if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid shortlink request: " + msg.data);
+            case "REQUEST_SHARELINK":
+                if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid share link request: " + msg.data);
                 var link,
-                    links = db.get("shortlinks");
+                    links = db.get("sharelinks");
 
                 // Check if we already have a link for that file
                 for (var l in links) {
@@ -362,10 +362,10 @@ function setupSocket(server) {
                     while (link.length < config.linkLength)
                         link += chars.charAt(Math.floor(Math.random() * chars.length));
                 } while (links[link]); // In case the RNG generates an existing link, go again
-                log.info(ws, null, "Shortlink created: " + link + " -> " + msg.data);
+                log.info(ws, null, "shareLink created: " + link + " -> " + msg.data);
                 links[link] = msg.data;
                 sendLink(cookie, link, vId);
-                db.set("shortlinks", links);
+                db.set("sharelinks", links);
                 break;
             case "DELETE_FILE":
                 log.info(ws, null, "Deleting: " + msg.data);
@@ -577,7 +577,7 @@ function sendLink(cookie, link, vId) {
     if (!clients[cookie] || !clients[cookie].ws) return;
     send(clients[cookie].ws, JSON.stringify({
         vId  : vId,
-        type : "SHORTLINK",
+        type : "SHARELINK",
         link : link
     }));
 }
@@ -941,19 +941,19 @@ function handleResourceRequest(req, res, resourceName) {
 
 //-----------------------------------------------------------------------------
 function handleFileRequest(req, res, download) {
-    var URI = decodeURIComponent(req.url), shortLink, filepath;
+    var URI = decodeURIComponent(req.url), shareLink, filepath;
 
-    // Check for a shortlink
+    // Check for a shareLink
     filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
     if (filepath[1] === "$") {
-        shortLink = true;
-        filepath = utils.addFilesPath(db.get("shortlinks")[filepath[2]]);
+        shareLink = true;
+        filepath = utils.addFilesPath(db.get("sharelinks")[filepath[2]]);
     } else if (filepath[1] === "~" || filepath[1] === "_") {
         filepath = utils.addFilesPath("/" + filepath[2]);
     }
 
     // Validate the cookie for the remaining requests
-    if (!getCookie(req.headers.cookie) && !shortLink) {
+    if (!getCookie(req.headers.cookie) && !shareLink) {
         res.writeHead(301, {"Location": "/"});
         res.end();
         log.info(req, res);
@@ -970,7 +970,7 @@ function handleFileRequest(req, res, download) {
 
     fs.stat(filepath, function (error, stats) {
         if (!error && stats) {
-            if (stats.isDirectory() && shortLink) {
+            if (stats.isDirectory() && shareLink) {
                 streamArchive(req, res, filepath);
             } else {
                 var headers = {"Content-Type": mime.lookup(filepath), "Content-Length": stats.size}, status = 200;
@@ -1248,7 +1248,7 @@ function streamArchive(req, res, zipPath) {
             res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
             res.setHeader("Transfer-Encoding", "chunked");
             log.info(req, res);
-            log.info("Streaming zip of ", req.url.substring(4));
+            log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
 
             archive = archiver("zip", {zlib: { level: config.zipLevel }});
             archive.on("error", function (error) { log.error(error); });
@@ -1382,20 +1382,20 @@ function cleanupTemp() {
 // Clean up our shortened links by removing links to nonexistant files
 function cleanupLinks(callback) {
     var linkcount = 0, cbcount = 0;
-    var links = db.get("shortlinks");
+    var links = db.get("sharelinks");
     if (Object.keys(links).length === 0)
         callback();
     else {
         Object.keys(links).forEach(function (link) {
             linkcount++;
-            (function (shortlink, location) {
+            (function (shareLink, location) {
                 fs.stat(path.join(paths.files, location), function (error, stats) {
                     cbcount++;
                     if (!stats || error) {
-                        delete links[shortlink];
+                        delete links[shareLink];
                     }
                     if (cbcount === linkcount) {
-                        db.set("shortlinks", links, function () {
+                        db.set("sharelinks", links, function () {
                             callback();
                         });
                     }

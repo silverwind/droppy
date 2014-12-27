@@ -532,7 +532,7 @@ input:-webkit-autofill {
 @media all and (max-width: 1279px) { .view.left .data-row .mtime,     .view.right .data-row .mtime { display: none   } }
 @media all and (max-width: 799px)  { .view.left .data-row .size,      .view.right .data-row .size  { display: none   } }
 
-.data-row .shortlink, .data-row .edit, .data-row .delete, .data-row .zip, .data-row span {
+.data-row .sharelink, .data-row .edit, .data-row .delete, .data-row .zip, .data-row span {
     display: block;
 }
 

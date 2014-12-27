@@ -8,7 +8,7 @@ var database,
     mkdirp   = require("mkdirp"),
     path     = require("path"),
     dbFile   = require("./paths.js").get().db,
-    defaults = {users: {}, sessions: {}, shortlinks: {}};
+    defaults = {users: {}, sessions: {}, sharelinks: {}};
 
 db.init = function (callback) {
     fs.stat(dbFile, function (err) {
@@ -37,6 +37,13 @@ db.init = function (callback) {
                 }
 
                 database = _.defaults(database, defaults);
+
+                // migrate old shortlinks
+                if (database.shortlinks) {
+                    database.sharelinks = database.shortlinks;
+                    delete database.shortlinks;
+                }
+
                 write(callback);
             });
         }

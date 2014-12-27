@@ -419,7 +419,7 @@
             case "UPDATE_CSS":
                 reloadCSS(msg.css);
                 break;
-            case "SHORTLINK":
+            case "SHARELINK":
                 showLinkBox(getView(vId), msg.link);
                 toggleCatcher();
                 break;
@@ -1332,10 +1332,10 @@
             }, 2000);
         });
 
-        // Request a shortlink
-        content.find(".shortlink").register("click", function () {
+        // Request a sharelink
+        content.find(".sharelink").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHORTLINK", $(this).parent(".data-row").data("id"));
+            sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHARELINK", $(this).parent(".data-row").data("id"));
         });
 
         content.find(".icon-play").register("click", function () {

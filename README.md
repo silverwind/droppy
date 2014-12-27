@@ -5,14 +5,14 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 
 ###Features
 * Lightweight node.js backend, HTML5 frontend <img src="https://silverwind.github.io/droppy/logo.svg" width="240" height="240" align="right">
-* Responsive Layout
+* Responsive layout
 * Realtime updating of all clients
-* Asynchronous uploads. Directory uploads in Chrome
-* Zip download of directories
-* Edit text files in CodeMirror
-* Share public shortlinks to files/folders
-* Picture gallery, Video streaming, Audio player
-* Drag and Drop support
+* Async uploads, folder uploads in supported browsers
+* Zip download of folders
+* Edit text-based files in CodeMirror
+* Share public download links to files and folders
+* Image and video gallery, audio player
+* Drag and drop support for gallery and move/copy operations
 
 ###Standalone Usage
 ```
@@ -44,7 +44,7 @@ app.listen(80);
   ],
   "debug"        : false,
   "keepAlive"    : 20000,
-  "linkLength"   : 3,
+  "linkLength"   : 5,
   "logLevel"     : 2,
   "maxFileSize"  : 0,
   "maxOpen"      : 256,
@@ -62,7 +62,7 @@ When enabled, skips resource minification and enables CSS reloading.
 ####`keepAlive` *integer*
 The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
 ####`linkLength` *integer*
-The amount of characters in a shortlink.
+The amount of characters in a share link.
 ####`logLevel` *integer*
 The amount of logging to show. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
 ####`maxFileSize` *integer*
