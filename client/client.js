@@ -750,6 +750,9 @@
             }
             first.end(function () {
                 button.register("click", split);
+                droppy.views.forEach(function (view) {
+                    checkPathOverflow($(view));
+                });
             });
         };
 
@@ -1233,13 +1236,12 @@
 
     // Check if the path indicator overflows and scroll it if neccessary
     function checkPathOverflow(view) {
-        var width = 40,
-            space = view.width(),
-            parts = view.find(".path li.in");
+        var width = 40, space = view.width();
 
-        for (var i = 0, l = parts.length; i < l; i++) {
-            width += parts[i].offsetWidth;
-        }
+        view.find(".path li.in").each(function () {
+            width += $(this)[0].offsetWidth;
+        });
+
         if (width > space) {
             raf(function () {
                 view.find(".path li").animate({"left": space - width + "px"}, {duration: 200});
