@@ -110,7 +110,7 @@ input:-webkit-autofill {
 #create-file-button:hover   { background: rgba(102, 255, 235, .15) }
 #create-folder-button:hover { background: rgba(102, 255, 125, .15) }
 #about-button:hover         { background: rgba(148, 102, 255, .15) }
-#options-button:hover       { background: rgba(255, 212, 102, .15) }
+#prefs-button:hover         { background: rgba(255, 212, 102, .15) }
 #logout-button:hover        { background: rgba(255, 102, 102, .15) }
 #split-button:hover         { background: rgba(255,  82, 255, .15) }
 
@@ -119,7 +119,7 @@ input:-webkit-autofill {
 #create-file-button:hover svg        { fill: rgba(102, 255, 235, 1) }
 #create-folder-button:hover svg      { fill: rgba(102, 255, 125, 1) }
 #about-button:hover svg              { fill: rgba(148, 102, 255, 1) }
-#options-button:hover svg            { fill: rgba(255, 212, 102, 1) }
+#prefs-button:hover svg              { fill: rgba(255, 212, 102, 1) }
 #logout-button:hover svg             { fill: rgba(255,  82,  82, 1) }
 #split-button:hover svg.split .left  { fill: rgba(255,  82,  82, 1) }
 #split-button:hover svg.split .right { fill: rgba(102, 166, 255, 1) }
@@ -1183,9 +1183,9 @@ html:not(.mobile) .vjs-big-play-button {
 }
 #about-fork:hover { border: 1px solid #999; background: #fff; }
 
-/* =============================== Options ============================== */
+/* ================================= Prefs ================================ */
 
-#options-box {
+#prefs-box {
     background: #eee;
     border-radius: 6px;
     box-shadow: 0 0 30px rgba(0,0,0,.4);
@@ -1200,22 +1200,22 @@ html:not(.mobile) .vjs-big-play-button {
     overflow-y: auto;
 }
 
-@media all and (min-width: 800px) { #options-box { width: 24em;} }
-@media all and (max-width: 799px) { #options-box { width: 80%; } }
+@media all and (min-width: 800px) { #prefs-box { width: 24em;} }
+@media all and (max-width: 799px) { #prefs-box { width: 80%; } }
 
-@media all and (min-width: 1024px) { #options-box { font-size: .8em } }
-@media all and (max-width: 1023px) { #options-box { font-size: .7em } }
-@media all and (max-width:  799px) { #options-box { font-size: .6em } }
+@media all and (min-width: 1024px) { #prefs-box { font-size: .8em } }
+@media all and (max-width: 1023px) { #prefs-box { font-size: .7em } }
+@media all and (max-width:  799px) { #prefs-box { font-size: .6em } }
 
-#options-box.in  { transform: translate(-50%, -50%) scale(1);   opacity: 1; visibility: visible }
-#options-box.out { transform: translate(-50%, -50%) scale(1.1); opacity: 0; visibility: hidden  }
+#prefs-box.in  { transform: translate(-50%, -50%) scale(1);   opacity: 1; visibility: visible }
+#prefs-box.out { transform: translate(-50%, -50%) scale(1.1); opacity: 0; visibility: hidden  }
 
-#options-box > div { width: 100% }
+#prefs-box > div { width: 100% }
 
-#options-box .list-options ul li { display: flex; margin: 0.25em 0 }
-#options-box .list-options ul li:first-of-type { margin-top: 0 }
+#prefs-box .list-prefs ul li { display: flex; margin: 0.25em 0 }
+#prefs-box .list-prefs ul li:first-of-type { margin-top: 0 }
 
-#options-box .list-options label {
+#prefs-box .list-prefs label {
     display: inline-block;
     white-space: nowrap;
     line-height: 1.5em;
@@ -1223,18 +1223,18 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 @media all and (max-width: 319px) {
-    #options-box .list-options ul li {
+    #prefs-box .list-prefs ul li {
         flex-direction: column;
         height: auto;
     }
-    #options-box .list-options label {
+    #prefs-box .list-prefs label {
         width: 100%;
         font-size: .9em;
         margin-bottom: .5em;
         text-align: center;
         line-height: 1em;
     }
-    #options-box .list-options select {
+    #prefs-box .list-prefs select {
         width: 100%;
         padding: .25em 0;
     }
@@ -1256,29 +1256,29 @@ html:not(.mobile) .vjs-big-play-button {
     white-space: nowrap;
 }
 
-#options-box select { flex: 1 }
+#prefs-box select { flex: 1 }
 
-#options-box .list-user:before {
+#prefs-box .list-user:before {
     content: "Users";
     margin: 0 1em;
     border-bottom: 1px solid #999;
     padding: .25em .5em;
     display: block;
 }
-#options-box .list-user li {
+#prefs-box .list-user li {
     padding: 0 .5em;
     margin: 0 1em;
     line-height: 1.25em;
 }
 
 @media all and (max-width: 799px) {
-    #options-box .list-user li {
+    #prefs-box .list-user li {
         padding: .25em .5em;
         height: auto;
     }
 }
 
-#options-box .list-user li svg.remove {
+#prefs-box .list-user li svg.remove {
     position: relative;
     top: .33em;
     right: 0;
@@ -1289,11 +1289,11 @@ html:not(.mobile) .vjs-big-play-button {
     cursor: pointer;
 }
 
-#options-box .list-user li svg.remove:hover {
+#prefs-box .list-user li svg.remove:hover {
     fill: #f44;
 }
 
-#options-box .add-user {
+#prefs-box .add-user {
     line-height: 2em;
     text-align: center;
     border-radius: 4px;
@@ -1301,10 +1301,10 @@ html:not(.mobile) .vjs-big-play-button {
     width: 10em;
     margin: .25em auto;
 }
-#options-box .list-user .add-user:hover { background: #18f; color: #fff }
-#options-box .list-user .add-user:hover svg { fill: #fff }
+#prefs-box .list-user .add-user:hover { background: #18f; color: #fff }
+#prefs-box .list-user .add-user:hover svg { fill: #fff }
 
-#options-box .list-user .add-user svg {
+#prefs-box .list-user .add-user svg {
     height: 1.25em;
     width: 1.25em;
     position: relative;

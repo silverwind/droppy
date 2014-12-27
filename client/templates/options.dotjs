@@ -2,9 +2,9 @@
 <script>
 it = {
     droppy: droppy,
-    options: [
+    prefs: [
         [
-          0:option,
+          0:pref,
           1:label,
           2:values,
           3:valueNames,
@@ -14,7 +14,7 @@ it = {
 </script>
 #}}
 {{##def.select:
-{{  var option = opt[0],
+{{  var pref = opt[0],
         label = opt[1],
         values = opt[2],
         valueNames = opt[3];
@@ -22,9 +22,9 @@ it = {
 
 <li>
     <label>{{= label }}</label>
-    <select class="{{= option }}">
+    <select class="{{= pref }}">
         {{~values :value:index}}
-            <option value="{{= value }}" {{? it.droppy.get(option) === value }}selected{{?}}>
+            <option value="{{= value }}" {{? it.droppy.get(pref) === value }}selected{{?}}>
                 {{= valueNames[index] }}
             </option>
         {{~}}
@@ -32,7 +32,7 @@ it = {
 </li>
 #}}
 <ul>
-{{~it.options :opt}}
+{{~it.prefs :opt}}
     {{#def.select }}
 {{~}}
 </ul>

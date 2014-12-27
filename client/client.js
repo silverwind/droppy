@@ -424,7 +424,7 @@
                 toggleCatcher();
                 break;
             case "USER_LIST":
-                if ($("#options-box").hasClass("in")) updateUsers(msg.users);
+                if ($("#prefs-box").hasClass("in")) updateUsers(msg.users);
                 break;
             case "SAVE_STATUS":
                 view = getView(vId);
@@ -763,14 +763,14 @@
             });
         });
 
-        $("#options-button").register("click", function () {
-            showOptions();
+        $("#prefs-button").register("click", function () {
+            showPrefs();
             sendMessage(null, "GET_USERS");
         });
 
         // Hide modals when clicking outside their box
         $("#click-catcher").register("click", function () {
-            $("#options-box").replaceClass("in", "out");
+            $("#prefs-box").replaceClass("in", "out");
             $("#about-box").replaceClass("in", "out");
             $("#entry-menu").replaceClass("in", "out");
             $("#drop-select").removeAttr("class");
@@ -1059,7 +1059,7 @@
     // Toggle the full-screen click catching frame if any modals are shown
     function toggleCatcher() {
         if ($("#about-box").hasClass("in") ||
-            $("#options-box").hasClass("in") ||
+            $("#prefs-box").hasClass("in") ||
             $(".info-box").hasClass("in") ||
             $("#entry-menu").hasClass("in") ||
             $("#drop-select").hasClass("in")
@@ -2146,19 +2146,6 @@
         }
     }
 
-    function createOptions() {
-        return $("<div class='list-options'>").append(t.options({
-            droppy: droppy,
-            options: [
-                ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
-                ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
-                ["theme", "Editor Theme", droppy.themes, droppy.themes],
-                ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
-                ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
-            ]
-        }));
-    }
-
     function createUserList(users) {
         var output = "<div class='list-user'>";
         Object.keys(users).forEach(function (user) {
@@ -2171,7 +2158,7 @@
     }
 
     function updateUsers(userlist) {
-        var list, box = $("#options-box");
+        var list, box = $("#prefs-box");
 
         if (Object.keys(userlist).length > 0) {
             box.find(".list-user").remove();
@@ -2196,12 +2183,23 @@
             });
         }
         // Transform the select box, width is needed for the dropdown to behave correctly
-        $("#options-box select").width($(".list-options li").eq(0).width() * .6).customSelect();
+        $("#prefs-box select").width($(".list-prefs li").eq(0).width() * .6).customSelect();
     }
 
-    function showOptions() {
-        var box = $("#options-box");
-        box.empty().append(createOptions);
+    function showPrefs() {
+        var box = $("#prefs-box");
+        box.empty().append(function () {
+            return $("<div class='list-prefs'>").append(t.options({
+                droppy: droppy,
+                prefs: [
+                    ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
+                    ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
+                    ["theme", "Editor Theme", droppy.themes, droppy.themes],
+                    ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
+                    ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
+                ]
+            }));
+        });
 
         $("select.theme").register("change", function () {
             var theme = $(this).val();
@@ -2211,7 +2209,7 @@
             });
         });
 
-        $("#options-box").replaceClass("out", "in");
+        $("#prefs-box").replaceClass("out", "in");
         toggleCatcher();
         $("#click-catcher").one("click", function () {
             box.find("select").each(function () {
@@ -2894,7 +2892,12 @@
         var box   = view.find(".info-box"),
             input = box.find("input");
         box.find("svg").replaceWith(droppy.svg.link);
-        input.val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link);
+        input
+            .val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link)
+            .register("keyup", function (event) {
+                if (event.keyCode === 27 || event.keyCode === 13)
+                    $("#click-catcher").click();
+            });
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
         });
