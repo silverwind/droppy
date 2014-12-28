@@ -920,7 +920,7 @@ html:not(.mobile) .vjs-big-play-button {
 /* ============================ Upload Progress ============================ */
 
 .upload-info {
-    background: linear-gradient(#111,#222);
+    background: #181818;
     color: #999;
     transition: flex-basis .2s ease;
     width: 100%;
@@ -1326,7 +1326,6 @@ html:not(.mobile) .vjs-big-play-button {
     text-align: center;
     top: 50%;
     left: 50%;
-    box-shadow: 0 0 30px 4px rgba(255,255,255,.15);
     border: 1px solid #484848;
     transition: transform .3s ease, opacity .3s ease;
     z-index: 0;
@@ -1366,10 +1365,9 @@ html:not(.mobile) .vjs-big-play-button {
     border-radius: 5px 5px 0 0;
     transition: background 0.2s ease;
     position: absolute;
-    background: #333;
+    background: #181818;
     top: 0;
     width: 100%;
-    margin: 0 auto;
 }
 
 #login-info-box.error { background: #f22; color: #fff }
@@ -1377,9 +1375,6 @@ html:not(.mobile) .vjs-big-play-button {
 
 #login-info {
     line-height: 1.75rem;
-    margin: 0 auto;
-    position: relative;
-    display: block;
 }
 
 .shake { animation: shake .5s }
@@ -1421,7 +1416,7 @@ html:not(.mobile) .vjs-big-play-button {
     color: #ddd;
     width: 50%;
     text-align: left;
-    background: #333;
+    background: #181818;
     border-bottom-left-radius: 5px;
     cursor: pointer;
     border-right: 1px solid #555;
@@ -1481,7 +1476,7 @@ html:not(.mobile) .vjs-big-play-button {
 #remember-checkbox:checked + label:after, input[type="checkbox"]:checked + label:after { opacity: 1 }
 
 .submit {
-    background: #333;
+    background: #181818;
     border-bottom-right-radius: 5px;
     bottom: 0;
     color: #ddd;
