@@ -1615,10 +1615,27 @@
 
             // We support GetAsEntry, go ahead and read recursively
             var obj = {};
+
+            // Calls the DirectoryReader until it returns no more new files are returned
+            function readEntries(entry, reader, oldEntries, cb) {
+                var dirReader = reader || entry.createReader();
+                dirReader.readEntries(function (entries) {
+                    var entries = oldEntries ? oldEntries.concat(entries) : entries;
+                    if (entries.length) {
+                        setTimeout(function() {
+                            readEntries(entry, dirReader, entries, cb);
+                        }, 0);
+                    }
+                    else {
+                        cb(entries);
+                    }
+                });
+            }
+
             function readDirectory(entry, path, dirPromise) {
                 if (!path) path = entry.name;
                 obj[path] = {};
-                entry.createReader().readEntries(function (entries) {
+                readEntries(entry, undefined, undefined, function (entries) {
                     var promises = []; // Create a new set of promises for each directory
                     entries.forEach(function (entry) {
                         var promise = $.Deferred();
