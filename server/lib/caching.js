@@ -3,6 +3,7 @@
 var caching = {};
 
 var dottemplates = require("./dottemplates.js"),
+    mime         = require("./mime.js"),
     pkg          = require("./../../package.json"),
     paths        = require("./paths.js").get();
 
@@ -12,7 +13,6 @@ var async        = require("async"),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
     htmlMinifier = require("html-minifier"),
-    mime         = require("mime"),
     path         = require("path"),
     uglify       = require("uglify-js"),
     zlib         = require("zlib");

@@ -7,6 +7,7 @@ var pkg        = require("./../package.json"),
     db         = require("./lib/db.js"),
     log        = require("./lib/log.js"),
     manifest   = require("./lib/manifest.js"),
+    mime       = require("./lib/mime.js"),
     paths      = require("./lib/paths.js").get(),
     utils      = require("./lib/utils.js");
 
@@ -18,7 +19,6 @@ var _          = require("lodash"),
     chalk      = require("chalk"),
     cpr        = require("cpr"),
     fs         = require("graceful-fs"),
-    mime       = require("mime"),
     mv         = require("mv"),
     request    = require("request"),
     Wss        = require("ws").Server;
@@ -54,8 +54,7 @@ var droppy = function droppy(options, isStandalone, callback) {
         async.series([
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) {
-                utils.compileMimes(mime, function (modesByMime, mimesToDefine) {
-                    mime.define(mimesToDefine);
+                mime.compile(function (modesByMime) {
                     log.simple("Preparing resources ...");
                     caching.init(!config.debug, modesByMime, function (err, c) {
                         if (err) return callback(err);
@@ -962,7 +961,9 @@ function handleFileRequest(req, res, download) {
 
     // 304 response when Etag matches
     if (!download && ((req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"')) {
-        res.statusCode = 304;
+        res.writeHead(304, {
+            "Content-Type": mime.lookup(filepath)
+        });
         res.end();
         log.info(req, res);
         return;

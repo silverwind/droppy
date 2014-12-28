@@ -9,50 +9,12 @@ var utils  = {},
     path   = require("path"),
     paths  = require("./paths.js").get(),
     rimraf = require("rimraf"),
-    vm     = require("vm"),
     forceBinaryTypes = [
         "pdf",
         "ps",
         "eps",
         "ai"
-    ],
-    overrideMimes = {
-        "video/mp4": ["mp4", "mp4v", "mpg4", "m4v"]     // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
-    };
-
-utils.compileMimes = function compileMimes(mime, callback) {
-    // parse meta.js from CM for mode information
-    fs.readFile(path.join(paths.mod, "node_modules/codemirror/mode/meta.js"), function (err, js) {
-        if (err) return callback(err);
-
-        var sandbox       = { CodeMirror : {} },
-            modesByMime   = {},
-            mimesToDefine = {};
-
-        // Execute meta.js in a sandbox
-        vm.runInNewContext(js, sandbox);
-
-        // Parse out the entries with meaningful data
-        sandbox.CodeMirror.modeInfo.forEach(function (entry) {
-            if (entry.mime && entry.mime !== "null" && entry.mode && entry.mode !== "null")
-                modesByMime[entry.mime] = entry.mode;
-            if (entry.mime && entry.mime !== "null" && entry.ext && Array.isArray(entry.ext))
-                mimesToDefine[entry.mime] = entry.ext;
-        });
-
-        // Remove extensions already defined by the mime module
-        Object.keys(mimesToDefine).forEach(function (type) {
-            if (mime.extension(type)) delete mimesToDefine[type];
-        });
-
-        // Add override mimes
-        Object.keys(overrideMimes).forEach(function (type) {
-            mimesToDefine[type] = overrideMimes[type];
-        });
-
-        callback(modesByMime, mimesToDefine);
-    });
-};
+    ];
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
