@@ -1624,7 +1624,7 @@
                 var dirReader = reader || entry.createReader();
                 dirReader.readEntries(function (entries) {
                     var newEntries = oldEntries ? oldEntries.concat(entries) : entries;
-                    if (newEntries.length) {
+                    if (entries.length) {
                         setTimeout(function () {
                             readEntries(entry, dirReader, newEntries, cb);
                         }, 0);
