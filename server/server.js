@@ -1306,7 +1306,7 @@ function createCookie(req, res, postData) {
         sessions  = db.get("sessions"),
         sessionID = crypto.randomBytes(32).toString("base64");
 
-    if (postData.check === "on") {
+    if (postData.remember) {
         // Create a semi-permanent cookie
         dateString = new Date(Date.now() + 31536000000).toUTCString();
         res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + dateString + ";path=/");

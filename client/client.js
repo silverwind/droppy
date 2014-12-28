@@ -517,16 +517,16 @@
     function initAuthPage(firstrun) {
         var loginform = $("#center-box"),
             submit    = $("#submit"),
+            checkbox  = $("#remember-checkbox"),
             form      = $("#form");
 
         // Auto-focus the user input on load
         $("#user").focus();
 
         // Remove invalid class on user action
-        $(".login-input").register("click keydown focus", function () {
+        $(".login-input").register("click keydown", function () {
             $("#login-info-box").removeClass("link error");
-            submit.removeClass("invalid");
-            loginform.removeClass("invalid");
+            $("#login-info").text("droppy");
         });
 
         // Return submits the form
@@ -538,9 +538,13 @@
 
         // Spacebar toggles the checkbox
         $("#remember").register("keyup", function (event) {
-            if (event.keyCode === 32) {
-                $("#remember > input").trigger("click");
-            }
+            if (event.keyCode === 32)
+                checkbox.prop("checked", !checkbox.prop("checked"));
+        });
+        // Catch clicks outside the label
+        $("#remember").register("click", function (event) {
+            if ($(event.target).attr("id") === "remember")
+                checkbox.prop("checked", !checkbox.prop("checked"));
         });
 
         submit.register("click", function () { form.submit(); });
@@ -549,17 +553,16 @@
                 if (xhr.status  === 202) {
                     window.location.reload(true);
                 } else if (xhr.status === 401) {
-                    submit.addClass("invalid");
-                    loginform.addClass("invalid");
                     $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
-                    if (!firstrun) $("#pass").val("").focus();
                     if ($("#login-info-box").hasClass("error")) {
                         $("#login-info").addClass("shake");
                         setTimeout(function () {
                             $("#login-info").removeClass("shake");
                         }, 500);
+                    } else {
+                        $("#login-info-box").attr("class", "error");
                     }
-                    $("#login-info-box").attr("class", "error");
+                    if (!firstrun) $("#pass").val("").focus();
                 }
             });
             return false;
