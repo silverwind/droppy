@@ -519,8 +519,7 @@
 //  Authentication page
 // ============================================================================
     function initAuthPage(firstrun) {
-        var loginform = $("#center-box"),
-            submit    = $("#submit"),
+        var submit    = $("#submit"),
             checkbox  = $("#remember-checkbox"),
             form      = $("#form");
 
@@ -608,7 +607,7 @@
                 document.activeElement.blur(); // unfocus the fullscreen button so the space key won't un-toggle fullscreen
                 if (fse) {
                     view = $(fse).parents(".view");
-                    addKey(32, function (e) { swapMedia(view, e.shiftKey ? "left" : "right") });
+                    addKey(32, function (e) { swapMedia(view, e.shiftKey ? "left" : "right"); });
                     addKey([37, 38], function () { swapMedia(view, "left");  });
                     addKey([39, 40], function () { swapMedia(view, "right"); });
                     view.find(".fs").html(droppy.svg.unfullscreen);
@@ -1620,18 +1619,18 @@
             // We support GetAsEntry, go ahead and read recursively
             var obj = {};
 
-            // Calls the DirectoryReader until it returns no more new files are returned
+            // Calls the DirectoryReader until no more new files are returned
             function readEntries(entry, reader, oldEntries, cb) {
                 var dirReader = reader || entry.createReader();
                 dirReader.readEntries(function (entries) {
-                    var entries = oldEntries ? oldEntries.concat(entries) : entries;
-                    if (entries.length) {
-                        setTimeout(function() {
-                            readEntries(entry, dirReader, entries, cb);
+                    var newEntries = oldEntries ? oldEntries.concat(entries) : entries;
+                    if (newEntries.length) {
+                        setTimeout(function () {
+                            readEntries(entry, dirReader, newEntries, cb);
                         }, 0);
                     }
                     else {
-                        cb(entries);
+                        cb(newEntries);
                     }
                 });
             }
@@ -2209,7 +2208,7 @@
             });
         }
         // Transform the select box, width is needed for the dropdown to behave correctly
-        $("#prefs-box select").width($(".list-prefs li").eq(0).width() * .6).customSelect();
+        $("#prefs-box select").width($(".list-prefs li").eq(0).width() * 0.6).customSelect();
     }
 
     function showPrefs() {
