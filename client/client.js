@@ -52,6 +52,9 @@
         })(),
         mobile: (function () {
             return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent);
+        })(),
+        mac: (function () {
+            return /Mac/.test(navigator.platform);
         })()
     };
 
@@ -168,6 +171,7 @@
         $("html").addClass("mobile");
     if (!droppy.detects.fullscreen)
         $("html").addClass("nofullscreen");
+
 // ============================================================================
 //  localStorage wrapper functions
 // ============================================================================
@@ -594,7 +598,7 @@
             })
             // Stop CTRL-S from showing a save dialog
             .register("keydown", function (event) {
-                if (event.keyCode === 83 && (event.metaKey || event.ctrlKey)) event.preventDefault();
+                if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) event.preventDefault();
             });
 
         // fullscreen event
@@ -2089,6 +2093,9 @@
         });
 
         function loadCM(data, type) {
+            // Disable New-Tab browser shortcut in keymap
+            CodeMirror.keyMap.sublime[droppy.detects.mac ? "Cmd-T" : "Ctrl-T"] = false;
+
             loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
@@ -2105,7 +2112,6 @@
                     theme: droppy.get("theme"),
                     mode: "text/plain"
                 });
-
                 doc.find(".exit").register("click", function () {
                     closeDoc($(this).parents(".view"));
                     editor = null;
@@ -2143,10 +2149,10 @@
                         if (change.origin !== "setValue")
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                     });
-                    editor.on("keyup", function (cm, e) { // Keyboard shortcuts
-                        if (e.keyCode === 83 && (e.metaKey || e.ctrlKey)) { // CTRL-S / CMD-S
+                    editor.on("keyup", function (cm, event) { // Keyboard shortcuts
+                        if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
                             var view = getCMView(cm);
-                            e.preventDefault();
+                            event.preventDefault();
                             showSpinner(view);
                             sendMessage(view[0].vId, "SAVE_FILE", {
                                 "to": view[0].editorEntryId,
