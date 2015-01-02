@@ -156,5 +156,4 @@ Regular testing is done on Firefox, Chrome and Safari on Desktops as well as Chr
 ###**wget** compatibilty
 For shared links to be compatible with wget, set `content-disposition = on` in `~/.wgetrc`.
 
-###LICENCE
-BSD © [silverwind](https://github.com/silverwind)
+© 2012-2015 [silverwind](https://github.com/silverwind), distributed under BSD licence
