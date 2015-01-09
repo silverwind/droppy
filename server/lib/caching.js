@@ -43,6 +43,8 @@ var minfierOptions = {
             removeComments: true,
             collapseWhitespace: true,
             collapseBooleanAttributes: true,
+            removeAttributeQuotes: true,
+            removeOptionalTags: true,
             removeRedundantAttributes: true,
             caseSensitive: true,
             minifyCSS: false

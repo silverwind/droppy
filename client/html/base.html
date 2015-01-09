@@ -35,8 +35,7 @@
 
       .loading {
           position: absolute;
-          -webkit-animation: spin 1s infinite linear;
-                  animation: spin 1s infinite linear;
+          animation: spin 1s infinite linear;
           border-bottom : 5px solid #18f;
           border-left   : 5px solid #000;
           border-right  : 5px solid #000;
@@ -60,51 +59,23 @@
           top:  calc(50% - 100px);
       }
 
-      @-webkit-keyframes spin {
-       from { -webkit-transform: rotate(0deg); transform: rotate(0deg)     }
-       to   { -webkit-transform: rotate(359deg); transform: rotate(359deg) }
-      }
-
-      @keyframes spin {
-       from { -webkit-transform: rotate(0deg); transform: rotate(0deg)     }
-       to   { -webkit-transform: rotate(359deg); transform: rotate(359deg) }
-      }
+      @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(359deg) } }
 
       #noscript {
-          background: #111;
-          border-radius: 6px;
-          display: table;
-          height: 120px;
-          left: 50%;
-          margin-left: -200px;
-          margin-top: -100px;
-          padding: 30px;
-          position: fixed;
-          top: 50%;
-          width: 400px;
-      }
-
-      @media all and (max-width: 639px), all and (max-height: 399px) {
-          #noscript {
-              border-radius: 0;
-              box-shadow: none;
-              height: 100%;
-              left: 0;
-              margin: 0;
-              padding: 0;
-              top: 0;
-              width: 100%;
-          }
+          background: rgba(0,0,0,.75);
+          width: 100%; height: 100%;
+          left: 0; top: 0;
+          position: relative;
       }
 
       #noscript p {
           color:  #ccc;
-          display: table-cell;
-          font-size: 1.5em;
-          line-height: 1.5;
-          padding: 0;
+          font-size: 1.5rem;
           text-align: center;
-          vertical-align: middle;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%,-50%);
       }
     </style>
   </head>
@@ -115,7 +86,7 @@
     </div>
     <noscript>
       <div id="noscript">
-        <p>Please enable<br>JavaScript to<br>use {{name}}!</p>
+        <p>Please enable JavaScript to use {{name}}!</p>
       </div>
     </noscript>
     <script async src="?!/client.js"></script>
