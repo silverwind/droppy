@@ -270,11 +270,11 @@ function compileResources(callback) {
     out.js = out.js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
     // Insert Templates Code
-    var templateCode = "var t = {fn:{},views:{}};";
+    var templateCode = "droppy.templates = {fn:{},views:{}};";
     resData.templates.forEach(function (data, index) {
         // Produce the doT functions
         templateCode += dottemplates
-            .produceFunction("t." + caching.files.templates[index].replace(/\.dotjs$/, "")
+            .produceFunction("droppy.templates." + caching.files.templates[index].replace(/\.dotjs$/, "")
             .split("/").slice(2).join("."), data);
     });
     templateCode += ";";

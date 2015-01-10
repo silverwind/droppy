@@ -1,4 +1,4 @@
-/*global CodeMirror, t, Notification, prettyBytes, videojs, Draggabilly */
+/*global CodeMirror, Notification, prettyBytes, videojs, Draggabilly */
 
 (function ($, window, document) {
     "use strict";
@@ -1267,7 +1267,7 @@
             });
         }
         // Create HTML from template
-        var content = contentWrap(view).html(t.views.directory({
+        var content = contentWrap(view).html(droppy.templates.views.directory({
             entries  : view[0].currentData,
             folder   : view[0].currentFolder,
             isUpload : isUpload,
@@ -1812,7 +1812,7 @@
         droppy.sorting.asc = header.hasClass("down");
         header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        var sortedEntries = t.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
+        var sortedEntries = droppy.templates.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             view.find("[data-entryname='" + sortedEntries[index] + "']:first").css({
@@ -1821,7 +1821,7 @@
             }).attr("order", index);
         }
     }
-    t.fn.compare = function (a, b) {
+    droppy.templates.fn.compare = function (a, b) {
         if (typeof a === "number" && typeof b === "number") {
             return b - a;
         } else {
@@ -1829,15 +1829,15 @@
         }
     };
     // Compare by property, then by key
-    t.fn.compare2 = function (entries, property) {
+    droppy.templates.fn.compare2 = function (entries, property) {
         var result;
         return function (a, b) {
-            result = t.fn.compare(entries[a][property], entries[b][property]);
-            if (result === 0) result = t.fn.compare(a, b);
+            result = droppy.templates.fn.compare(entries[a][property], entries[b][property]);
+            if (result === 0) result = droppy.templates.fn.compare(a, b);
             return result;
         };
     };
-    t.fn.sortKeysByProperty = function (entries, by) {
+    droppy.templates.fn.sortKeysByProperty = function (entries, by) {
         var filenames = Object.keys(entries);
         if (by === "type") { // Treat new files from uploads equally for sorting purpose
             filenames.forEach(function (entry) {
@@ -1845,7 +1845,7 @@
                 if (entries[entry].type === "nd") entries[entry].type = "d";
             });
         }
-        return filenames.sort(t.fn.compare2(entries, by));
+        return filenames.sort(droppy.templates.fn.compare2(entries, by));
     };
 
     function closeDoc(view) {
@@ -2041,7 +2041,11 @@
         var previewer,
             filename  = view[0].currentFile;
         view.data("type", type);
-        previewer = $(t.views.media({ type: type, src: getMediaSrc(view, filename), vid: view[0].vId}));
+        previewer = $(droppy.templates.views.media({
+            type: type,
+            src: getMediaSrc(view, filename),
+            vid: view[0].vId
+        }));
         if (sameFolder && view[0].currentData) {
             populateMediaCache(view, view[0].currentData);
         } else { // In case we switch into an unknown folder, request its files
@@ -2075,7 +2079,7 @@
 
         var editor,
             readOnly = false, // Check if not readonly
-            doc      = $(t.views.document({readOnly: readOnly}));
+            doc      = $(droppy.templates.views.document({readOnly: readOnly}));
 
         $.ajax({
             type: "GET",
@@ -2212,7 +2216,7 @@
     function showPrefs() {
         var box = $("#prefs-box");
         box.empty().append(function () {
-            return $("<div class='list-prefs'>").append(t.options({
+            return $("<div class='list-prefs'>").append(droppy.templates.options({
                 droppy: droppy,
                 prefs: [
                     ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
@@ -2739,7 +2743,7 @@
         }
         return "sprite sprite-bin";
     }
-    t.fn.getSpriteClass = getSpriteClass;
+    droppy.templates.fn.getSpriteClass = getSpriteClass;
 
     function getHeaderHTML() {
         return '<div class="file-header">' +
@@ -2820,7 +2824,7 @@
         }
         return retval;
     }
-    t.fn.timeDifference = timeDifference;
+    droppy.templates.fn.timeDifference = timeDifference;
 
     function secsToTime(secs) {
         var mins, hrs, time = "";
