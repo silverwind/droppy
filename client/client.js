@@ -437,11 +437,11 @@
                 var file = view.find(".path li:last-child");
                 var oldStyle = file.attr("style");
 
-                file.find("svg").css("transition","fill .2s ease");
-                file.removeClass("dirty").attr("style","transition: background .2s ease;")
+                file.find("svg").css("transition", "fill .2s ease");
+                file.removeClass("dirty").attr("style", "transition: background .2s ease;")
                     .addClass(msg.status === 0 ? "saved" : "save-failed");
                 setTimeout(function () {
-                    file.removeClass("saved save-failed").end(function() {
+                    file.removeClass("saved save-failed").end(function () {
                         $(this).attr("style", oldStyle);
                         $(this).children("svg").removeAttr("style");
                     });
@@ -449,7 +449,7 @@
                 break;
             case "SETTINGS":
                 Object.keys(msg.settings).forEach(function (setting) {
-                   droppy[setting] = msg.settings[setting];
+                    droppy[setting] = msg.settings[setting];
                 });
                 if (droppy.demoMode || droppy.public)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
@@ -675,11 +675,9 @@
             });
         } else {
             // No directory upload support - disable the button
-            $("#upload-folder-button")
-                .addClass("disabled")
-                .on("click", function() {
-                    showError(getView(0), "Sorry, your browser doesn't support directory uploading yet!");
-                });
+            $("#upload-folder-button").addClass("disabled").on("click", function () {
+                showError(getView(0), "Sorry, your browser doesn't support directory uploading yet!");
+            });
         }
 
         $("#create-folder-button").register("click", function () {
@@ -1124,7 +1122,7 @@
             else
                 hash += "/#" + getViewLocation(view);
         });
-        return hash.replace(/\/+/g,"/");
+        return hash.replace(/\/+/g, "/");
     }
 
     function pushHistory(view, dest) {
@@ -1425,7 +1423,7 @@
 
             dropSelect.attr("class", "in").css({
                 left: left,
-                top:  event.originalEvent.clientY,
+                top:  event.originalEvent.clientY
             });
             toggleCatcher();
             dropSelect.children(".movefile").off("click").one("click", function () {
@@ -1819,7 +1817,7 @@
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             view.find("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
-                "-ms-flex-order": String(index),
+                "-ms-flex-order": String(index)
             }).attr("order", index);
         }
     }
@@ -1967,7 +1965,7 @@
 
         if (isImage) {
             b = $("<div class='media-wrapper new-media " + dir + "'><img src='" + src + "'></div>");
-            b.find("img").one("load", function() {
+            b.find("img").one("load", function () {
                 aspectScale();
             });
         } else {
@@ -2851,7 +2849,6 @@
         }
     }, 5000);
 
-
     function loadScript(id, url, cb) {
         if (!document.getElementById(id)) {
             var script = document.createElement("script");
@@ -2860,7 +2857,7 @@
             script.setAttribute("src", url);
             document.querySelector("head").appendChild(script);
         } else {
-           cb();
+            cb();
         }
     }
 

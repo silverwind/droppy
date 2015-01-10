@@ -6,7 +6,6 @@
     "evil": false,
     "expr": false,
     "forin": false,
-    "freeze": true,
     "indent": false,
     "immed": true,
     "jquery": true,
