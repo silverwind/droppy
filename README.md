@@ -82,11 +82,6 @@ The level of compression for zip files. Ranging from `0` (no compression) to `9`
 ###Listener Object
 Below is an example `listeners` object, showing off the possibilties.
 
-This will result in:
-* HTTP listening on all IPv4 and IPv6 interfaces, port 80.
-* HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
-* SPDY listening on all IPv6 interfaces, ports 1443 and 2443, with HSTS disabled, using a self-signed certificate.
-
 ```javascript
 "listeners": [
     {
@@ -111,6 +106,10 @@ This will result in:
     }
 ]
 ```
+This will result in:
+* HTTP listening on all IPv4 and IPv6 interfaces, port 80.
+* HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
+* SPDY listening on all IPv6 interfaces, ports 1443 and 2443, with HSTS disabled, using a self-signed certificate.
 
 A listener object accepts these options:
 ####`host` *string* / *array*
@@ -120,7 +119,7 @@ Port(s) to listen on. Use an array for multiple ports.
 ####`protocol` *string*
 Protocol to use. Can be either `http`, `https` or `spdy`.
 ####`hsts` *integer*
-Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) in seconds. Set to `0` to disable HSTS.
+Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 ####`key` *string*
 Path to the SSL/TLS private key file.
 ####`cert` *string*
