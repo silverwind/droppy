@@ -118,7 +118,7 @@ function printLogo() {
                   .replace(/\|/gm, chalk.magenta("|"))
     );
     log.simple(chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-               chalk.blue("node"), " ", chalk.green(process.version.substring(1)));
+               chalk.blue(process.argv[0] || "node"), " ", chalk.green(process.version.substring(1)));
     log.simple(chalk.blue("home"), " is at ", chalk.green(paths.home), "\n");
 }
 
