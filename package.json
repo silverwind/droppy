@@ -22,7 +22,6 @@
     "start": "node droppy.js start"
   },
   "dependencies": {
-    "archiver": "^0.13.1",
     "async": "^0.9.0",
     "autoprefixer-core": "^5.0.0",
     "busboy": "^0.2.9",
@@ -49,7 +48,8 @@
     "uglify-js": "^2.4.16",
     "unzip": "^0.1.11",
     "video.js": "^4.11.3",
-    "ws": "^0.6.5"
+    "ws": "^0.6.5",
+    "yazl": "^2.0.2"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

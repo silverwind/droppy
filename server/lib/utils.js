@@ -148,13 +148,22 @@ utils.copyFile = function copyFile(source, target, cb) {
     }
 };
 
+function normalize(p) {
+    return p.replace(/[\\|\/]+/g, "/");
+}
+
 utils.addFilesPath = function addFilesPath(p) {
     return path.join(paths.files + "/" + p);
 };
 
 utils.removeFilesPath = function removeFilesPath(p) {
-    return "/" + path.relative(paths.files, p).replace(/[\\|\/]+/g, "/");
+    return normalize("/" + path.relative(paths.files, p));
 };
+
+utils.relativeZipPath = function removeFilesPath(p) {
+    return normalize(path.relative(normalize(paths.files), normalize(p)));
+};
+
 
 utils.isPathSane = function isPathSane(name) {
     if (/[\/\\]\.\./.test(name)) return false;      // Navigating down the tree (prefix)

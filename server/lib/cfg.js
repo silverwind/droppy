@@ -22,8 +22,7 @@ var cfg        = {},
         "maxOpen"      : 256,
         "public"       : false,
         "readInterval" : 250,
-        "timestamps"   : true,
-        "zipLevel"     : 1
+        "timestamps"   : true
     };
 
 cfg.init = function (config, callback) {

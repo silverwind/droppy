@@ -50,8 +50,7 @@ app.listen(80);
   "maxOpen"      : 256,
   "public"       : false,
   "readInterval" : 250,
-  "timestamps"   : true,
-  "zipLevel"     : 1
+  "timestamps"   : true
 }
 ```
 ###Options
@@ -75,8 +74,6 @@ When enabled, no authentication is performed.
 The minimum time gap in milliseconds in which updates to a single directory are sent.
 ####`timestamps` *boolean*
 When enabled, adds timestamps to log output.
-####`zipLevel` *integer*
-The level of compression for zip files. Ranging from `0` (no compression) to `9` (maximum compression).
 
 <a name="listener" />
 ###Listener Object

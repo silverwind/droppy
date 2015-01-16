@@ -13,7 +13,6 @@ var pkg        = require("./../package.json"),
 
 var _          = require("lodash"),
     ap         = require("autoprefixer-core"),
-    archiver   = require("archiver"),
     async      = require("async"),
     Busboy     = require("busboy"),
     chalk      = require("chalk"),
@@ -21,21 +20,22 @@ var _          = require("lodash"),
     fs         = require("graceful-fs"),
     mv         = require("mv"),
     request    = require("request"),
-    Wss        = require("ws").Server;
+    Wss        = require("ws").Server,
+    yazl       = require("yazl");
 
 var crypto     = require("crypto"),
     path       = require("path"),
     qs         = require("querystring");
 
-var cache        = {},
-    clients      = {},
-    dirs         = {},
-    watchers     = {},
-    config       = null,
-    firstRun     = null,
-    hasServer    = null,
-    ready        = false,
-    isDemo       = process.env.NODE_ENV === "droppydemo";
+var cache      = {},
+    clients    = {},
+    dirs       = {},
+    watchers   = {},
+    config     = null,
+    firstRun   = null,
+    hasServer  = null,
+    ready      = false,
+    isDemo     = process.env.NODE_ENV === "droppydemo";
 
 var droppy = function droppy(options, isStandalone, callback) {
     if (isStandalone) printLogo();
@@ -1239,7 +1239,7 @@ function du(dir, callback) {
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, zipPath) {
-    var archive;
+    var zip;
     fs.stat(zipPath, function (err, stats) {
         if (err) {
             log.error(err);
@@ -1250,15 +1250,15 @@ function streamArchive(req, res, zipPath) {
             res.setHeader("Transfer-Encoding", "chunked");
             log.info(req, res);
             log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
-
-            archive = archiver("zip", {zlib: { level: config.zipLevel }});
-            archive.on("error", function (error) { log.error(error); });
-            archive.pipe(res);
-            archive.append(null, { name: path.basename(zipPath) + '/' });
-            archive.bulk([
-                { expand: true, dot: true, cwd: zipPath, src: ["**"], dest: path.basename(zipPath) }
-            ]);
-            archive.finalize();
+            zip = new yazl.ZipFile();
+            utils.walkDirectory(zipPath, false, function (err, files) {
+                if (err) log.error(error);
+                files.forEach(function (file) {
+                    zip.addFile(file, utils.relativeZipPath(file));
+                });
+                zip.outputStream.pipe(res);
+                zip.end();
+            });
         } else {
             res.statusCode = 404;
             res.end();
