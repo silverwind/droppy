@@ -164,7 +164,6 @@ utils.relativeZipPath = function removeFilesPath(p) {
     return normalize(path.relative(normalize(paths.files), normalize(p)));
 };
 
-
 utils.isPathSane = function isPathSane(name) {
     if (/[\/\\]\.\./.test(name)) return false;      // Navigating down the tree (prefix)
     if (/\.\.[\/\\]/.test(name)) return false;      // Navigating down the tree (postfix)

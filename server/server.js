@@ -290,12 +290,13 @@ function setupSocket(server) {
             switch (msg.type) {
             case "REQUEST_SETTINGS":
                 send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
-                    "debug"       : config.debug,
-                    "demoMode"    : isDemo,
-                    "public"      : config.public,
-                    "maxFileSize" : config.maxFileSize,
-                    "themes"      : Object.keys(cache.themes),
-                    "modes"       : Object.keys(cache.modes)
+                    "debug"         : config.debug,
+                    "demoMode"      : isDemo,
+                    "public"        : config.public,
+                    "maxFileSize"   : config.maxFileSize,
+                    "themes"        : Object.keys(cache.themes),
+                    "modes"         : Object.keys(cache.modes),
+                    "caseSensitive" : process.platform !== "win32"
                 }}));
                 break;
             case "REQUEST_UPDATE":

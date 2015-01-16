@@ -991,7 +991,7 @@
         droppy.activeFiles = [];
         view.find(".entry-link").each(function () {
             $(this).removeClass("editing invalid");
-            droppy.activeFiles.push($(this).text().toLowerCase());
+            droppy.activeFiles.push(droppy.caseSensitive ? $(this).text() : $(this).text().toLowerCase());
         });
 
         // Hide menu, click-catcher and the original link, stop any previous edits
@@ -1001,16 +1001,15 @@
         // Add inline elements
         namer = $('<input class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '">');
         link.after(namer);
-
         entry.addClass("editing");
 
         link.next().register("input", function () {
             inputText = namer.val();
             valid = !/[\\\*\{\}\/\?\|<>"]/.test(inputText);
             if (inputText === "") valid = false;
-            exists = false;
-            for (var i = 0, len = droppy.activeFiles.length; i < len; i++)
-                if (droppy.activeFiles[i] === inputText.toLowerCase()) { exists = true; break; }
+            exists = droppy.activeFiles.some(function (file) {
+                if (file === (droppy.caseSensitive ? inputText : inputText.toLowerCase())) return true;
+            });
             canSubmit = valid && (!exists || inputText === namer.attr("placeholder"));
             // TODO: Better indicator of what's wrong
             if (!canSubmit)
