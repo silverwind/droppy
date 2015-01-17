@@ -1253,7 +1253,7 @@ function streamArchive(req, res, zipPath) {
             log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
             zip = new yazl.ZipFile();
             utils.walkDirectory(zipPath, false, function (err, files) {
-                if (err) log.error(error);
+                if (err) log.error(err);
                 files.forEach(function (file) {
                     zip.addFile(file, utils.relativeZipPath(file));
                 });
