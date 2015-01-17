@@ -9,10 +9,10 @@ var pkg        = require("./../package.json"),
     manifest   = require("./lib/manifest.js"),
     mime       = require("./lib/mime.js"),
     paths      = require("./lib/paths.js").get(),
-    utils      = require("./lib/utils.js");
+    utils      = require("./lib/utils.js"),
+    watcher    = require("./lib/watcher.js");
 
-var _          = require("lodash"),
-    ap         = require("autoprefixer-core"),
+var ap         = require("autoprefixer-core"),
     async      = require("async"),
     Busboy     = require("busboy"),
     chalk      = require("chalk"),
@@ -30,7 +30,6 @@ var crypto     = require("crypto"),
 var cache      = {},
     clients    = {},
     dirs       = {},
-    watchers   = {},
     config     = null,
     firstRun   = null,
     hasServer  = null,
@@ -45,6 +44,7 @@ var droppy = function droppy(options, isStandalone, callback) {
         function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
         function (cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
         function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
+        function (cb) { watcher.init(config.readInterval, watcherUpdate, cb); },
         function (cb) { db.init(cb); },
     ], function (err) {
         if (err) return callback(err);
@@ -323,7 +323,7 @@ function setupSocket(server) {
                         updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                         });
-                        updateWatchers(clients[cookie].views[vId].directory, function (success) {
+                        watcher.updateWatchers(clients[cookie].views[vId].directory, clients, function (success) {
                             // Send client back to / in case the directory can't be read
                             if (!success) sendToRoot(cookie, vId);
                         });
@@ -333,13 +333,13 @@ function setupSocket(server) {
                         updateDirectory("/", function (sizes) {
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                         });
-                        updateWatchers("/");
+                        watcher.updateWatchers("/", clients);
                     }
                 });
                 break;
             case "DESTROY_VIEW":
                 clients[cookie].views[vId] = null;
-                checkWatchedDirs();
+                watcher.checkWatchedDirs(clients);
                 break;
             case "REQUEST_SHARELINK":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid share link request: " + msg.data);
@@ -669,80 +669,6 @@ function doClipboard(type, from, to) {
         }
         log.error(error);
     }
-}
-
-//-----------------------------------------------------------------------------
-// Watch the directory for changes and send them to the appropriate clients.
-function createWatcher(directory) {
-    var watcher, clientsToUpdate, client,
-        dir = utils.removeFilesPath(directory);
-    log.debug(chalk.green("Adding Watcher: ") + dir);
-    watcher = fs.watch(directory, _.throttle(function () {
-        log.debug("Watcher detected update for ", chalk.blue(dir));
-        clientsToUpdate = [];
-        Object.keys(clients).forEach(function (cookie) {
-            client = clients[cookie];
-            client.views.forEach(function (view, vId) {
-                if (view && view.directory === dir) {
-                    clientsToUpdate.push({cookie: cookie, vId: vId});
-                }
-            });
-        });
-        if (clientsToUpdate.length > 0) {
-            updateDirectory(dir, function (sizes) {
-                clientsToUpdate.forEach(function (cl) {
-                    sendFiles(cl.cookie, cl.vId, "UPDATE_DIRECTORY", sizes);
-                });
-            });
-        }
-    }, config.readInterval, { leading: false, trailing: true }));
-    watcher.on("error", function (error) {
-        log.error("Error trying to watch ", dir, "\n", error);
-    });
-    watchers[dir] = watcher;
-}
-
-//-----------------------------------------------------------------------------
-// Watch given directory
-function updateWatchers(newDir, callback) {
-    if (!watchers[newDir]) {
-        newDir = utils.addFilesPath(newDir);
-        fs.stat(newDir, function (error, stats) {
-            if (error || !stats) {
-                // Requested Directory can't be read
-                checkWatchedDirs();
-                if (callback) callback(false);
-            } else {
-                // Directory is okay to be read
-                createWatcher(newDir);
-                checkWatchedDirs();
-                if (callback) callback(true);
-            }
-        });
-    } else {
-        if (callback) callback(true);
-    }
-}
-
-//-----------------------------------------------------------------------------
-// Check if we need the other active watchers
-function checkWatchedDirs() {
-    var neededDirs = {};
-    Object.keys(clients).forEach(function (cookie) {
-        var client = clients[cookie];
-        client.views.forEach(function (view, vId) {
-            if (view && view.directory && view.file === null) {
-                neededDirs[client.views[vId].directory] = true;
-            }
-        });
-    });
-    Object.keys(watchers).forEach(function (watchedDir) {
-        if (!neededDirs[watchedDir]) {
-            log.debug(chalk.red("Removing Watcher: ") + watchedDir);
-            watchers[watchedDir].close();
-            delete watchers[watchedDir];
-        }
-    });
 }
 
 //-----------------------------------------------------------------------------
@@ -1336,6 +1262,27 @@ function cleanUpSessions() {
 setInterval(function () {
     cache.etags = {};
 }, 60 * 60 * 1000);
+
+//-----------------------------------------------------------------------------
+// Update clients on file changes
+function watcherUpdate(dir) {
+    log.debug("Watcher detected update for ", chalk.blue(dir));
+    var clientsToUpdate = [];
+    Object.keys(clients).forEach(function (cookie) {
+        clients[cookie].views.forEach(function (view, vId) {
+            if (view && view.directory === dir) {
+                clientsToUpdate.push({cookie: cookie, vId: vId});
+            }
+        });
+    });
+    if (clientsToUpdate.length > 0) {
+        updateDirectory(dir, function (sizes) {
+            clientsToUpdate.forEach(function (cl) {
+                sendFiles(cl.cookie, cl.vId, "UPDATE_DIRECTORY", sizes);
+            });
+        });
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Watch and update style.css for debugging
