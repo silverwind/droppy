@@ -15,6 +15,7 @@ body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figca
     -webkit-touch-callout: none;
     border: 0;
     box-sizing: border-box;
+    letter-spacing: .05px;
     font-size: 100%;
     font-weight: inherit;
     margin: 0;
@@ -81,7 +82,6 @@ input:-webkit-autofill {
     white-space: nowrap;
     user-select: none;
     align-items: center;
-    letter-spacing: .05px;
 }
 
 .button {
