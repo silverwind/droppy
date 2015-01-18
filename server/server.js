@@ -1178,10 +1178,14 @@ function streamArchive(req, res, zipPath) {
             log.info(req, res);
             log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
             zip = new yazl.ZipFile();
-            utils.walkDirectory(zipPath, false, function (err, files) {
+            utils.walkDirectory(zipPath, true, function (err, files) {
                 if (err) log.error(err);
-                files.forEach(function (file) {
-                    zip.addFile(file, utils.relativeZipPath(file));
+                Object.keys(files).forEach(function (file) {
+                    var stats = files[file];
+                    if (/\/$/.test(file))
+                        zip.addEmptyDirectory(utils.relativeZipPath(file), {mtime: stats.mtime, mode: stats.mode});
+                    else
+                        zip.addFile(file, utils.relativeZipPath(file), {mtime: stats.mtime, mode: stats.mode});
                 });
                 zip.outputStream.pipe(res);
                 zip.end();

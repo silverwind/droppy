@@ -54,9 +54,9 @@ utils.rmSync = function rmSync(p) {
     rimraf.sync(p, {maxBusyTries: 10});
 };
 
-// Recursively walk a directory and return file paths in an array
+// Recursively walk a directory and return on object with paths as keys and stats as values
 utils.walkDirectory = function walkDirectory(dir, includeEmptyDirs, callback) {
-    var results = [];
+    var results = {};
     fs.readdir(dir, function (error, list) {
         var i = 0;
         if (error) return callback(error);
@@ -66,13 +66,15 @@ utils.walkDirectory = function walkDirectory(dir, includeEmptyDirs, callback) {
             file = dir + "/" + file;
             fs.stat(file, function (error, stats) {
                 if (stats && stats.isDirectory()) {
-                    if (includeEmptyDirs) results.push(file + "/");
-                    walkDirectory(file, includeEmptyDirs, function (error, res) {
-                        results = results.concat(res);
+                    if (includeEmptyDirs) results[file + "/"] = stats;
+                    walkDirectory(file, includeEmptyDirs, function (error, newResults) {
+                        Object.keys(newResults).forEach(function (newResult) {
+                            results[newResult] = newResults[newResult];
+                        });
                         next();
                     });
                 } else {
-                    results.push(file);
+                    results[file] = stats;
                     next();
                 }
             });
