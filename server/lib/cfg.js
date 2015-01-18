@@ -62,7 +62,7 @@ cfg.init = function (config, callback) {
 
                     try {
                         config = JSON.parse(String(data));
-                    } catch (error) {
+                    } catch (err) {
                         return callback(err);
                     }
 

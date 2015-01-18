@@ -43,7 +43,18 @@ var droppy = function droppy(options, isStandalone, callback) {
     async.series([
         function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
         function (cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
-        function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
+        function (cb) { cfg.init(options, function (err, conf) {
+                if (err && err instanceof SyntaxError) {
+                    if (isStandalone) {
+                        log.error("config.json contains invalid JSON: ", err.message);
+                        process.exit(1);
+                    } else {
+                        callback(err);
+                    }
+                }
+                config = conf; cb(err);
+            });
+        },
         function (cb) { watcher.init(config.readInterval, watcherUpdate, cb); },
         function (cb) { db.init(cb); },
     ], function (err) {
