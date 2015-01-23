@@ -19,7 +19,6 @@ var ap         = require("autoprefixer-core"),
     cpr        = require("cpr"),
     fs         = require("graceful-fs"),
     mv         = require("mv"),
-    request    = require("request"),
     Wss        = require("websocket").server,
     yazl       = require("yazl");
 
