@@ -3,12 +3,14 @@
 var demo    = {},
     async   = require("async"),
     cpr     = require("cpr"),
-    log     = require("./log.js"),
-    utils   = require("./utils.js"),
-    paths   = require("./paths.js").get(),
+    chalk   = require("chalk"),
     fs      = require("fs"),
+    log     = require("./log.js"),
+    path    = require("path"),
+    paths   = require("./paths.js").get(),
     request = require("request"),
-    path    = require("path");
+    utils   = require("./utils.js"),
+    yauzl   = require("yauzl");
 
 demo.init = function init(doneCallback) {
     async.series([
@@ -23,44 +25,21 @@ demo.init = function init(doneCallback) {
         function (callback) {
             log.simple("Copying code to samples ...");
             async.parallel([
-                function (cb) { cpr(paths.client, path.join(paths.files, "/client"), cb); },
-                function (cb) { cpr(paths.server, path.join(paths.files, "/server"), cb); }
-            ], function (err) {
-                if (err) log.error(err);
-                callback(null);
-            });
+                function (cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
+                function (cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
+            ], callback);
         },
-        function (callback) {
-            var dest    = path.join(paths.files, "/sample-images"),
-                zipDest = path.join(paths.home, "/demoTemp/img.zip"),
-                output  = require("unzip").Extract({ path: dest });
 
-            output.on("error", callback);
-            output.on("close", callback);
+        // Get image samples
+        getZip("https://silverwind.io/droppy-samples.zip", "/images", path.join(paths.home, "/demoTemp/img.zip")),
 
-            utils.mkdir(dest, function () {
-                utils.mkdir(path.dirname(zipDest), function () {
-                    fs.stat(zipDest, function (err, stats) {
-                        if (err || stats.size === 0) {
-                            log.simple("Getting image samples ...");
-                            var ws = fs.createWriteStream(zipDest);
-                            ws.on("finish", function () {
-                                fs.createReadStream(zipDest).pipe(output);
-                            });
-                            request("https://silverwind.io/droppy-samples.zip").pipe(ws);
-                        } else {
-                            fs.createReadStream(zipDest).pipe(output);
-                        }
-                    });
-                });
-            });
-        },
-        // http://www.webmfiles.org
-        get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/sample-video/Big Buck Bunny.webm"),
-        // http://sampleswap.org/mp3/creative-commons/free-music.php
-        get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/sample-audio/Earthling - Room To Breath.mp3"),
-        get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/sample-audio/Joevirus - Tenchu.mp3"),
-        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/sample-audio/Tejaswi - Intuition.mp3"),
+        // Get video samples - Provided by http://www.webmfiles.org
+        get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/video/Big Buck Bunny.webm"),
+
+        // Get audio samples - Provided by http://sampleswap.org/mp3/creative-commons/free-music.php
+        get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/audio/Earthling - Room To Breath.mp3"),
+        get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/audio/Joevirus - Tenchu.mp3"),
+        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3"),
         function (callback) {
             log.simple("Demo files ready!");
             callback();
@@ -68,30 +47,81 @@ demo.init = function init(doneCallback) {
     ], doneCallback);
 };
 
-function get(src, dst) {
-    return function (cb) {
-        var stream;
-        var temp = path.join(paths.home, "/demoTemp", dst);
-        var dest = path.join(paths.files, dst);
+function get(url, dest) {
+    return function (callback) {
+        var stream, temp;
+        temp = path.join(paths.home, "/demoTemp", dest);
+        dest = path.join(paths.files, dest);
 
-        utils.mkdir(path.dirname(temp), function () {
-            utils.mkdir(path.dirname(dest), function () {
-                fs.exists(temp, function (exists) {
-                    if (!exists) {
-                        log.simple("Downloading " + src + " ...");
-                        stream = fs.createWriteStream(temp);
-                        stream.on("error", cb);
-                        stream.on("close", function () {
-                            utils.copyFile(temp, dest, cb);
-                        });
-                        request(src).pipe(stream);
-                    } else {
-                        utils.copyFile(temp, dest, cb);
-                    }
-                });
+        utils.mkdir([path.dirname(temp), path.dirname(dest)], function () {
+            fs.stat(temp, function (err, stats) {
+                if (err || !stats.size) {
+                    stream = fs.createWriteStream(temp);
+                    stream.on("error", callback);
+                    stream.on("close", function () {
+                        utils.copyFile(temp, dest, callback);
+                    });
+                    log.simple(chalk.yellow("GET ") + url);
+                    request(url).pipe(stream);
+                } else {
+                    utils.copyFile(temp, dest, callback);
+                }
             });
         });
     };
+}
+
+function getZip(url, dest, zipDest) {
+    return function (callback) {
+        dest = path.join(paths.files, dest);
+        utils.mkdir([dest, path.dirname(zipDest)], function () {
+            fs.stat(zipDest, function (err, stats) {
+                if (err || !stats.size) {
+                    log.simple(chalk.yellow("GET ") + url);
+                    request({url: url, encoding: null}, function (err, _, data) {
+                        if (err) return callback(err);
+                        unzip(data, dest, callback);
+                    });
+                } else {
+                    fs.readFile(zipDest, function (err, data) {
+                        if (err) return callback(err);
+                        unzip(data, dest, callback);
+                    });
+                }
+            });
+        });
+    };
+}
+
+function unzip(data, dest, callback) {
+    log.simple("Unzipping ...");
+    yauzl.fromBuffer(data, function(err, zipfile) {
+        var done, count = 0, written = 0;
+        if (err) callback(err);
+        zipfile.on("entry", function(entry) {
+            count++;
+            if (/\/$/.test(entry.fileName)) {
+                utils.mkdir(path.join(dest, entry.fileName));
+                if (done) callback(null);
+            } else {
+                zipfile.openReadStream(entry, function(err, rs) {
+                    if (err) return callback(err);
+                    var ws = fs.createWriteStream(path.join(dest, entry.fileName));
+                    ws.on("finish", function() {
+                        written++;
+                        if (done && (written === count)) {
+                            log.simple("Unzipped " + count + " files!");
+                            callback(null);
+                        }
+                    });
+                    rs.pipe(ws);
+                });
+            }
+        });
+        zipfile.on("end", function() {
+            done = true;
+        });
+    });
 }
 
 exports = module.exports = demo;

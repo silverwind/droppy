@@ -141,7 +141,7 @@ function startListeners(callback) {
 
     listeners.forEach(function (listener) {
         ["host", "port", "protocol"].forEach(function (prop) {
-            if (typeof listener[prop] === "undefined")
+            if (typeof listener[prop] === "undefined" && !isDemo)
                 return callback(new Error("Config Error: listener " + prop + " undefined"));
         });
 
@@ -1399,6 +1399,9 @@ function endProcess(signal) {
     });
     if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
 
-    fs.unlinkSync(paths.pid);
+    try {
+       fs.unlinkSync(paths.pid);
+   } catch(err) {}
+
     process.exit(0);
 }
