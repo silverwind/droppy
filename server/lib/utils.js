@@ -127,26 +127,19 @@ utils.getNewPath = function getNewPath(origPath, callback) {
 };
 
 utils.copyFile = function copyFile(source, target, cb) {
-    var cbCalled = false;
+    var cbCalled = false,
+        read     = fs.createReadStream(source),
+        write    = fs.createWriteStream(target);
 
-    var rd = fs.createReadStream(source);
-    rd.on("error", function (err) {
-        done(err);
-    });
-    var wr = fs.createWriteStream(target);
-    wr.on("error", function (err) {
-        done(err);
-    });
-    wr.on("close", function () {
-        done();
-    });
-    rd.pipe(wr);
+    read.on("error", done);
+    write.on("error", done);
+    write.on("close", done);
+    read.pipe(write);
 
     function done(err) {
-        if (!cbCalled) {
-            cb(err);
-            cbCalled = true;
-        }
+        if (cbCalled) return;
+        cbCalled = true;
+        cb(err);
     }
 };
 
