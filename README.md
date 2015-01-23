@@ -3,8 +3,6 @@
 
 Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>.
 
-*Note: Currently incompatible with io.js until dependencies update.*
-
 ###Features
 * Lightweight node.js backend, HTML5 frontend <img src="https://silverwind.github.io/droppy/logo.svg" width="240" height="240" align="right">
 * Responsive layout

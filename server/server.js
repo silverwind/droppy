@@ -20,7 +20,7 @@ var ap         = require("autoprefixer-core"),
     fs         = require("graceful-fs"),
     mv         = require("mv"),
     request    = require("request"),
-    Wss        = require("ws").Server,
+    Wss        = require("websocket").server,
     yazl       = require("yazl");
 
 var crypto     = require("crypto"),
@@ -271,16 +271,18 @@ function createListener(handler, opts, callback) {
 // WebSocket functions
 function setupSocket(server) {
     hasServer = true;
-    var wss = new Wss({server: server});
+    var wss = new Wss({httpServer: server});
     if (config.keepAlive > 0) {
         setInterval(function () {
-            Object.keys(wss.clients).forEach(function (client) {
-                wss.clients[client].send("ping");
+            wss.connections.forEach(function (connection) {
+                log.debug(connection, null, chalk.green("SEND "), "ping");
+                connection.sendUTF("ping");
             });
         }, config.keepAlive);
     }
-    wss.on("connection", function (ws) {
-        var cookie = getCookie(ws.upgradeReq.headers.cookie);
+    wss.on("request", function (request) {
+        var ws     = request.accept(),
+            cookie = getCookie(request.cookies);
 
         if (!cookie && !config.public) {
             ws.close(4000);
@@ -290,13 +292,18 @@ function setupSocket(server) {
             log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
             clients[cookie] = { views: [], ws: ws };
         }
+
         ws.on("message", function (message) {
-            if (message === "pong") return;
-            var msg = JSON.parse(message),
+            if (message.utf8Data === "pong" || message.type !== "utf8") {
+                log.debug(ws, null, chalk.magenta("RECV "), "pong");
+                return;
+            }
+
+            var msg = JSON.parse(message.utf8Data),
                 vId = msg.vId;
 
             if (msg.type !== "SAVE_FILE") // Don't log these as they spam the file contents into the log
-                log.debug(ws, null, chalk.magenta("RECV "), message);
+                log.debug(ws, null, chalk.magenta("RECV "), message.utf8Data);
 
             switch (msg.type) {
             case "REQUEST_SETTINGS":
@@ -561,16 +568,14 @@ function setupSocket(server) {
             log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
         });
 
-        ws.on("error", function (error) {
-            log.error(error);
-        });
+        ws.on("error", log.error);
     });
 }
 
 //-----------------------------------------------------------------------------
 // Send a file list update
 function sendFiles(cookie, vId, eventType, sizes) {
-    if (!clients[cookie].views[vId] || !clients[cookie] || !clients[cookie].ws || !clients[cookie].ws._socket) return;
+    if (!clients[cookie]  || !clients[cookie].views[vId] || !clients[cookie].ws || !clients[cookie].ws.socket) return;
     var dir = clients[cookie].views[vId].directory,
         data = {
             vId    : vId,
@@ -626,7 +631,7 @@ function sendSaveStatus(cookie, vId, status) {
 function send(ws, data) {
     (function queue(ws, data, time) {
         if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
-        if (ws && ws.readyState === 1) {
+        if (ws && ws.state === "open") {
             if (config.logLevel === 3) {
                 var debugData = JSON.parse(data);
                 // Remove some spammy logging
@@ -634,9 +639,7 @@ function send(ws, data) {
                 if (debugData.type === "UPDATE_CSS") debugData.css = {"...": "..."};
                 log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
             }
-            ws.send(data, function (error) {
-                if (error) log.error(error);
-            });
+            ws.sendUTF(data);
         } else {
             setTimeout(queue, 50, ws, data, time + 50);
         }
@@ -1212,26 +1215,35 @@ function streamArchive(req, res, zipPath) {
 //-----------------------------------------------------------------------------
 // Cookie functions
 function getCookie(cookie) {
-    var cookies, sessions,
-        session = "";
-    if (cookie) {
-        cookies = cookie.split("; ");
-        cookies.forEach(function (c) {
-            if (new RegExp("^s.*").test(c)) {
-                session = c.substring(2);
-            }
+    var cookies = {};
+    if (Array.isArray(cookie) && cookie.length) {
+        cookies[cookie[0].name] = cookie[0].value;
+        return validate(cookies);
+    } else if (typeof cookie === "string" && cookie.length) {
+        cookie.split("; ").forEach(function(entry) {
+            var parts = entry.trim().split("=");
+            cookies[parts[0]] = parts[1];
         });
-        sessions = db.get("sessions");
-        for (var savedSession in sessions) {
-            if (savedSession === session) {
-                sessions[session].lastSeen = Date.now();
-                db.set("sessions", sessions);
-                return session;
-            }
-        }
+        return validate(cookies);
+    } else {
+        return false;
     }
-    return false;
 }
+
+function validate(cookies) {
+    if (!cookies || !cookies.s) return false;
+    var found, sessions = db.get("sessions");
+    Object.keys(sessions).some(function(session) {
+        if (session === cookies.s) {
+            sessions[session].lastSeen = Date.now();
+            db.set("sessions", sessions);
+            found = session;
+            return true;
+        }
+    });
+    return found;
+}
+
 
 function freeCookie(req, res) {
     var dateString = new Date(Date.now() + 31536000000).toUTCString(),
@@ -1247,7 +1259,7 @@ function createCookie(req, res, postData) {
     var dateString,
         users     = db.get("users"),
         sessions  = db.get("sessions"),
-        sessionID = crypto.randomBytes(32).toString("base64");
+        sessionID = crypto.randomBytes(64).toString("base64").substring(0, 48);
 
     if (postData.remember) {
         // Create a semi-permanent cookie
@@ -1392,7 +1404,7 @@ function endProcess(signal) {
     log.simple("Received " + chalk.red(signal) + " - Shutting down ...");
     Object.keys(clients).forEach(function (client) {
         if (!clients[client] || !clients[client].ws) return;
-        if (clients[client].ws.readyState < 2) {
+        if (clients[client].ws.state === "open" || clients[client].ws.state === "connecting") {
             count++;
             clients[client].ws.close(1001);
         }
