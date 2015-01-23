@@ -44,6 +44,13 @@ db.init = function (callback) {
                     delete database.shortlinks;
                 }
 
+                // remove pre-1.7 session tokens
+                if (database.sessions) {
+                    Object.keys(database.sessions).forEach(function(session) {
+                        if (session.length !== 48) delete database.sessions[session];
+                    });
+                }
+
                 write(callback);
             });
         }
