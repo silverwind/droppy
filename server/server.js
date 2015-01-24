@@ -270,15 +270,11 @@ function createListener(handler, opts, callback) {
 // WebSocket functions
 function setupSocket(server) {
     hasServer = true;
-    var wss = new Wss({httpServer: server});
-    if (config.keepAlive > 0) {
-        setInterval(function () {
-            wss.connections.forEach(function (connection) {
-                log.debug(connection, null, chalk.green("SEND "), "ping");
-                connection.sendUTF("ping");
-            });
-        }, config.keepAlive);
-    }
+    var wss = new Wss({
+        httpServer: server,
+        keepAlive: config.keepAlive > 0,
+        keepaliveInterval: config.keepAlive
+    });
     wss.on("request", function (request) {
         var ws     = request.accept(),
             cookie = getCookie(request.cookies);
@@ -293,11 +289,6 @@ function setupSocket(server) {
         }
 
         ws.on("message", function (message) {
-            if (message.utf8Data === "pong" || message.type !== "utf8") {
-                log.debug(ws, null, chalk.magenta("RECV "), "pong");
-                return;
-            }
-
             var msg = JSON.parse(message.utf8Data),
                 vId = msg.vId;
 
