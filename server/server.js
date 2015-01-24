@@ -1243,38 +1243,32 @@ function validate(cookies) {
     return found;
 }
 
-
 function freeCookie(req, res) {
-    var dateString = new Date(Date.now() + 31536000000).toUTCString(),
-        sessionID  = crypto.randomBytes(32).toString("base64"),
-        sessions   = db.get("sessions");
+    var sessions  = db.get("sessions"),
+        sessionID = utils.getSid();
 
-    res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + dateString + ";path=/");
+    res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + new Date(Date.now() + 31536000000).toUTCString() + ";path=/");
     sessions[sessionID] = {privileged : true, lastSeen : Date.now()};
     db.set("sessions", sessions);
 }
 
 function createCookie(req, res, postData) {
-    var dateString,
-        users     = db.get("users"),
-        sessions  = db.get("sessions"),
-        sessionID = crypto.randomBytes(64).toString("base64").substring(0, 48);
+    var sessions  = db.get("sessions"),
+        sessionID = utils.getSid();
 
-    if (postData.remember) {
-        // Create a semi-permanent cookie
-        dateString = new Date(Date.now() + 31536000000).toUTCString();
-        res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + dateString + ";path=/");
-    } else {
-        // Create a single-session cookie
+    if (postData.remember) // Create a semi-permanent cookie
+        res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + new Date(Date.now() + 31536000000).toUTCString() + ";path=/");
+    else // Create a single-session cookie
         res.setHeader("Set-Cookie", "s=" + sessionID + ";path=/");
-    }
-    sessions[sessionID] = {privileged : users[postData.username].privileged, lastSeen : Date.now()};
+
+    sessions[sessionID] = {privileged : db.get("users")[postData.username].privileged, lastSeen : Date.now()};
     db.set("sessions", sessions);
 }
 
-// Clean inactive sessions after 1 month of inactivity, and check their age hourly
-setInterval(cleanUpSessions, 60 * 60 * 1000);
-function cleanUpSessions() {
+//-----------------------------------------------------------------------------
+// Hourly tasks
+setInterval(function hourly() {
+    // Clean inactive sessions after 1 month of inactivity
     var sessions = db.get("sessions");
     Object.keys(sessions).forEach(function (session) {
         if (!sessions[session].lastSeen || (Date.now() - sessions[session].lastSeen >= 2678400000)) {
@@ -1282,10 +1276,7 @@ function cleanUpSessions() {
         }
     });
     db.set("sessions", sessions);
-}
-
-// Clean up Etag cache hourly
-setInterval(function () {
+    // Clean up Etag cache
     cache.etags = {};
 }, 60 * 60 * 1000);
 

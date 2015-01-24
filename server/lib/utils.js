@@ -3,6 +3,7 @@
 var utils  = {},
     async  = require("async"),
     cd     = require("content-disposition"),
+    crypto = require("crypto"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
     mkdirp = require("mkdirp"),
@@ -179,6 +180,10 @@ utils.isBinary = function isBinary(path, callback) {
 utils.getDispo = function getDispo(fileName) {
     return cd(path.basename(fileName));
 };
+
+utils.getSid = function getSid() {
+    return crypto.randomBytes(64).toString("base64").substring(0, 48);
+}
 
 utils.tlsInit = function tlsInit(opts, callback) {
     if (typeof opts.key === "string" && typeof opts.cert === "string") {
