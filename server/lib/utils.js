@@ -183,7 +183,7 @@ utils.getDispo = function getDispo(fileName) {
 
 utils.getSid = function getSid() {
     return crypto.randomBytes(64).toString("base64").substring(0, 48);
-}
+};
 
 utils.tlsInit = function tlsInit(opts, callback) {
     if (typeof opts.key === "string" && typeof opts.cert === "string") {
