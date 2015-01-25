@@ -1,23 +1,26 @@
 .cm-s-droppy.CodeMirror {
   line-height: 1.40em;
   color: #ccc;
-  background: #181818;
-  box-shadow: inset 0 0 10px rgba(0,0,0,.4);
+  background: #161616;
+  box-shadow: inset 0 0 10px #000;
 }
 .cm-s-droppy .CodeMirror-gutters {
-  background: #222;
-  border-right: 1px solid #222;
-  box-shadow: 0 10px 20px rgba(0,0,0,.4);
+  background: #282828;
+  border-right: none;
+  box-shadow: 0 0 10px #000;
 }
+
 .cm-s-droppy.CodeMirror a, .cm-s-droppy.CodeMirror a:visited { color: #607392 }
 .cm-s-droppy .CodeMirror-matchingbracket          { color: #0f0 }
 .cm-s-droppy .CodeMirror-nonmatchingbracket       { color: #f22 }
 .cm-s-droppy .CodeMirror-selected                 { background: #333 }
-.cm-s-droppy .CodeMirror-linenumber               { color: #888; padding: 0 5px }
+.cm-s-droppy .CodeMirror-linenumber               { color: #999; padding: 0 5px }
 .cm-s-droppy .CodeMirror-guttermarker             { color: #aaa }
 .cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
 .cm-s-droppy .CodeMirror-lines .CodeMirror-cursor { border-left: 1px solid #ccc }
-.cm-s-droppy .CodeMirror-activeline-background    { background: #0b0b0b !important }
+.cm-s-droppy .CodeMirror-activeline-background    { background: #262626 !important }
+.cm-s-droppy .CodeMirror-activeline .CodeMirror-gutter-wrapper { background: #484848 !important }
+.cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff }
 
 .cm-s-droppy .cm-keyword    { color: #CDA869 }
 .cm-s-droppy .cm-atom       { color: #CF6A4C }
