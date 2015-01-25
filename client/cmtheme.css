@@ -21,29 +21,7 @@
 .cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff }
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
 
-.cm-s-droppy .cm-searching  { background: #ffff88; color: #000 !important }
-.cm-s-droppy .CodeMirror-dialog-top { border-bottom: 1px solid #383838; top: 0 }
-.cm-s-droppy .CodeMirror-dialog-bottom { border-top: 1px solid #383838 bottom: 0 }
-
-.cm-s-droppy .CodeMirror-dialog {
-    position: absolute;
-    left: 0; right: 0;
-    background: #282828;
-    z-index: 15;
-    padding: .1em .8em;
-    overflow: hidden;
-    color: #aaa;
-    white-space: nowrap;
-}
-
-.cm-s-droppy .CodeMirror-dialog input {
-    border: none;
-    outline: none;
-    background: transparent;
-    width: 20em !important;
-    color: #eee;
-    font-family: monospace;
-}
+.cm-s-droppy .cm-searching { background: #ffff88; color: #000 !important }
 
 .cm-s-droppy .cm-keyword    { color: #CDA869 }
 .cm-s-droppy .cm-atom       { color: #CF6A4C }

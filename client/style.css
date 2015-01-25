@@ -912,11 +912,31 @@ html:not(.mobile) .vjs-big-play-button {
     position: relative;
 }
 
-/* CM tweaks */
-.cm-s-mdn-like .CodeMirror-linenumber { left: 0 !important }
-.cm-s-mdn-like .CodeMirror-gutters { border-left-color: transparent !important }
 .CodeMirror-scrollbar-filler { background: transparent !important }
 .CodeMirror-lines { padding: 0 !important }
+
+.CodeMirror-dialog-top { border-bottom: 1px solid #383838; top: 0 }
+.CodeMirror-dialog-bottom { border-top: 1px solid #383838; bottom: 0 }
+
+.CodeMirror-dialog {
+    position: absolute;
+    left: 0; right: 0;
+    background: #282828;
+    z-index: 15;
+    padding: .1em .8em;
+    overflow: hidden;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.CodeMirror-dialog input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 20em !important;
+    color: #eee;
+    font-family: monospace;
+}
 
 /* ============================ Upload Progress ============================ */
 
