@@ -1,0 +1,45 @@
+.cm-s-droppy.CodeMirror {
+  line-height: 1.40em;
+  color: #ccc;
+  background: #181818;
+  box-shadow: inset 0 0 10px rgba(0,0,0,.4);
+}
+.cm-s-droppy .CodeMirror-gutters {
+  background: #222;
+  border-right: 1px solid #222;
+  box-shadow: 0 10px 20px rgba(0,0,0,.4);
+}
+.cm-s-droppy.CodeMirror a, .cm-s-droppy.CodeMirror a:visited { color: #607392 }
+.cm-s-droppy .CodeMirror-matchingbracket          { color: #0f0 }
+.cm-s-droppy .CodeMirror-nonmatchingbracket       { color: #f22 }
+.cm-s-droppy .CodeMirror-selected                 { background: #333 }
+.cm-s-droppy .CodeMirror-linenumber               { color: #888; padding: 0 5px }
+.cm-s-droppy .CodeMirror-guttermarker             { color: #aaa }
+.cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
+.cm-s-droppy .CodeMirror-lines .CodeMirror-cursor { border-left: 1px solid #ccc }
+.cm-s-droppy .CodeMirror-activeline-background    { background: #0b0b0b !important }
+
+.cm-s-droppy .cm-keyword    { color: #CDA869 }
+.cm-s-droppy .cm-atom       { color: #CF6A4C }
+.cm-s-droppy .cm-number     { color: #CF6A4C }
+.cm-s-droppy .cm-def        { color: #7587A6 }
+.cm-s-droppy .cm-variable   { color: #CDA869 }
+.cm-s-droppy .cm-variable-2 { color: #7587A6 }
+.cm-s-droppy .cm-variable-3 { color: #7587A6 }
+.cm-s-droppy .cm-property   { color: #ccc    }
+.cm-s-droppy .cm-operator   { color: #cda869 }
+.cm-s-droppy .cm-comment    { color: #5F5A60; font-style:italic }
+.cm-s-droppy .cm-string     { color: #8F9D6A }
+.cm-s-droppy .cm-string-2   { color: #E9C062 }
+.cm-s-droppy .cm-meta       { color: #f7f7f7 }
+.cm-s-droppy .cm-qualifier  { color: #E9C062 }
+.cm-s-droppy .cm-builtin    { color: #E9C062 }
+.cm-s-droppy .cm-bracket    { color: #9B859D }
+.cm-s-droppy .cm-tag        { color: #997643 }
+.cm-s-droppy .cm-attribute  { color: #cda869 }
+.cm-s-droppy .cm-header     { color: #CF6A4C }
+.cm-s-droppy .cm-quote      { color: #9B859D }
+.cm-s-droppy .cm-hr         { color: #AEAEAE }
+.cm-s-droppy .cm-link       { color: #ad9361 }
+.cm-s-droppy .cm-special    { color: #FF9D00 }
+.cm-s-droppy .cm-error      { color: #AF2018 }
