@@ -1816,8 +1816,8 @@
     }
 
     function sortByHeader(view, header) {
-        view[0].sortBy = header[0].className.match(/header\-(\w+)/)[1],
-        view[0].sortAsc =  header.hasClass("down");
+        view[0].sortBy = header[0].className.match(/header\-(\w+)/)[1];
+        view[0].sortAsc = header.hasClass("down");
         header.attr("class", "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
         var sortedEntries = droppy.templates.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
