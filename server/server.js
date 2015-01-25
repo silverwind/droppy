@@ -64,13 +64,11 @@ var droppy = function droppy(options, isStandalone, callback) {
         async.series([
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) {
-                mime.compile(function (modesByMime) {
-                    log.simple("Preparing resources ...");
-                    caching.init(!config.debug, modesByMime, function (err, c) {
-                        if (err) return callback(err);
-                        cache = c;
-                        cb();
-                    });
+                log.simple("Preparing resources ...");
+                caching.init(!config.debug, function (err, c) {
+                    if (err) return callback(err);
+                    cache = c;
+                    cb();
                 });
             },
             function (cb) { cleanupTemp(); cb(); },
@@ -1387,7 +1385,7 @@ function endProcess(signal) {
         if (!clients[client] || !clients[client].ws) return;
         if (clients[client].ws.state === "open" || clients[client].ws.state === "connecting") {
             count++;
-            clients[client].ws.close(1001);
+            clients[client].ws.drop(1001);
         }
     });
     if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));

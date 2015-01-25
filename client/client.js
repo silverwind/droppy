@@ -179,7 +179,7 @@
         var prefs, doSave, defaults = {
             volume : 0.5,
             videoVolume : 0.5,
-            theme: "tomorrow-night-bright",
+            theme: "droppy",
             indentWithTabs : false,
             indentUnit : 4,
             lineWrapping: false,
@@ -451,6 +451,11 @@
                 Object.keys(msg.settings).forEach(function (setting) {
                     droppy[setting] = msg.settings[setting];
                 });
+
+                // Move own theme to top of theme list
+                droppy.themes.pop();
+                droppy.themes.unshift("droppy");
+
                 if (droppy.demoMode || droppy.public)
                     $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled.");
                 else
@@ -1265,13 +1270,17 @@
                     view[0].currentData[name].size = droppy.sizeCache[view[0].currentFolder][name];
             });
         }
+
+        if (!view[0].sortBy) view[0].sortBy = "name";
+        if (!view[0].sortAsc) view[0].sortAsc = false;
+
         // Create HTML from template
         var content = contentWrap(view).html(droppy.templates.views.directory({
             entries  : view[0].currentData,
             folder   : view[0].currentFolder,
             isUpload : isUpload,
-            sortBy   : "name",
-            sortAsc  : false,
+            sortBy   : view[0].sortBy,
+            sortAsc  : view[0].sortAsc,
             clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
         }));
         // Load it
@@ -1807,18 +1816,19 @@
     }
 
     function sortByHeader(view, header) {
-        droppy.sorting.col = header[0].className.match(/header\-(\w+)/)[1];
-        droppy.sorting.asc = header.hasClass("down");
-        header.attr("class", "header-" + droppy.sorting.col + " " + (droppy.sorting.asc ? "up" : "down") + " active");
+        view[0].sortBy = header[0].className.match(/header\-(\w+)/)[1],
+        view[0].sortAsc =  header.hasClass("down");
+        header.attr("class", "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
         var sortedEntries = droppy.templates.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
-        if (droppy.sorting.asc) sortedEntries = sortedEntries.reverse();
+        if (view[0].sortAsc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             view.find("[data-entryname='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index)
             }).attr("order", index);
         }
+
     }
     droppy.templates.fn.compare = function (a, b) {
         if (typeof a === "number" && typeof b === "number") {
@@ -2084,15 +2094,15 @@
             type: "GET",
             url: "?_" + entryId,
             dataType: "text"
-        }).done(function (data, textStatus, request) {
+        }).done(function (data) {
             loadTheme(droppy.get("theme"), function () {
-                loadCM(data, request.getResponseHeader("Content-Type"));
+                loadCM(data, basename(entryId));
             });
         }).fail(function () {
             closeDoc(view);
         });
 
-        function loadCM(data, type) {
+        function loadCM(data, filename) {
             // Disable New-Tab browser shortcut in keymap
             CodeMirror.keyMap.sublime[droppy.detects.mac ? "Cmd-T" : "Ctrl-T"] = false;
 
@@ -2109,6 +2119,7 @@
                     readOnly: readOnly,
                     showCursorWhenSelecting: true,
                     styleSelectedText: true,
+                    styleActiveLine: true,
                     theme: droppy.get("theme"),
                     mode: "text/plain"
                 });
@@ -2130,18 +2141,16 @@
                 });
 
                 var called = false;
-                var loadDocument = function () {
-                    if (called)
-                        return;
-                    else
-                        called = true;
+                view.find(".content").end(function () {
+                    if (called) return;
+                    called = true;
                     editor.setValue(data);
 
-                    // Lazy mode loading
                     if (!CodeMirror.autoLoadMode) initModeLoad();
-                    if (droppy.mimeModes[type]) {
-                        CodeMirror.autoLoadMode(editor, droppy.mimeModes[type]);
-                        editor.setOption("mode", droppy.mimeModes[type]);
+                    var modeInfo = CodeMirror.findModeByFileName(filename);
+                    if (modeInfo) {
+                        CodeMirror.autoLoadMode(editor, modeInfo.mode);
+                        editor.setOption("mode", modeInfo.mode);
                     }
 
                     editor.on("change", function (cm, change) {
@@ -2166,8 +2175,7 @@
                     function getCMView(cm) {
                         return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
                     }
-                };
-                view.find(".content").end(loadDocument);
+                });
             });
         }
     }
@@ -2575,7 +2583,6 @@
         droppy.sizeCache = {};
         droppy.socket = null;
         droppy.socketWait = null;
-        droppy.sorting = {col: "name", dir: "down"};
         droppy.views = [];
         droppy.emptyFiles = null;
         droppy.emptyFolders = null;
@@ -2685,8 +2692,6 @@
             "bmp" : "image/bmp",
             "ico" : "image/x-icon"
         };
-
-        /* {{ droppy.mimeModes }} */
     }
 
     // Add directory sizes
@@ -2800,28 +2805,28 @@
             msPerMonth  = msPerDay * 30,
             msPerYear   = msPerDay * 365,
             elapsed     = Date.now() - previous,
-            retval      = "";
+            result      = "";
 
         if (elapsed < 0) elapsed = 0;
         if (elapsed < msPerMinute) {
-            retval = "just now";
+            result = "just now";
         } else if (elapsed < msPerHour) {
-            retval = Math.round(elapsed / msPerMinute);
-            retval += (retval === 1) ? " min ago" : " mins ago";
+            result = Math.round(elapsed / msPerMinute);
+            result += (result === 1) ? " min ago" : " mins ago";
         } else if (elapsed < msPerDay) {
-            retval = Math.round(elapsed / msPerHour);
-            retval += (retval === 1) ? " hour ago" : " hours ago";
+            result = Math.round(elapsed / msPerHour);
+            result += (result === 1) ? " hour ago" : " hours ago";
         } else if (elapsed < msPerMonth) {
-            retval = Math.round(elapsed / msPerDay);
-            retval += (retval === 1) ? " day ago" : " days ago";
+            result = Math.round(elapsed / msPerDay);
+            result += (result === 1) ? " day ago" : " days ago";
         } else if (elapsed < msPerYear) {
-            retval = Math.round(elapsed / msPerMonth);
-            retval += (retval === 1) ? " month ago" : " months ago";
+            result = Math.round(elapsed / msPerMonth);
+            result += (result === 1) ? " month ago" : " months ago";
         } else {
-            retval = Math.round(elapsed / msPerYear);
-            retval += (retval === 1) ? " year ago" : " years ago";
+            result = Math.round(elapsed / msPerYear);
+            result += (result === 1) ? " year ago" : " years ago";
         }
-        return retval;
+        return result;
     }
     droppy.templates.fn.timeDifference = timeDifference;
 

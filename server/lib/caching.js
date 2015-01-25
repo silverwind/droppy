@@ -15,9 +15,10 @@ var async        = require("async"),
     htmlMinifier = require("html-minifier"),
     path         = require("path"),
     uglify       = require("uglify-js"),
+    vm           = require("vm"),
     zlib         = require("zlib");
 
-var doMinify, modesByMime,
+var doMinify,
     etag         = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
     themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
@@ -66,6 +67,7 @@ caching.files = {
             "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
             "node_modules/pretty-bytes/pretty-bytes.js",
             "node_modules/codemirror/lib/codemirror.js",
+            "node_modules/codemirror/mode/meta.js",
             "node_modules/codemirror/addon/selection/active-line.js",
             "node_modules/codemirror/addon/selection/mark-selection.js",
             "node_modules/codemirror/addon/search/searchcursor.js",
@@ -108,8 +110,7 @@ var libs = {
     "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
 };
 
-caching.init = function init(minify, mimes, callback) {
-    modesByMime = mimes;
+caching.init = function init(minify, callback) {
     doMinify = minify;
     async.series([
         compileResources,
@@ -193,8 +194,12 @@ function readThemes(callback) {
 
             filenames.forEach(function (name, index) {
                 var css = String(data[index]);
-                themes[name.replace(/\.css$/, "")] = doMinify ? new Buffer(cleanCSS.minify(css).styles) : new Buffer(css);
+                themes[name.replace(/\.css$/, "")] = new Buffer(doMinify ?  cleanCSS.minify(css).styles : css);
             });
+
+            // add our own theme
+            var css = fs.readFileSync("client/cmtheme.css");
+            themes.droppy = new Buffer(doMinify ?  cleanCSS.minify(css).styles : css);
 
             callback(err, themes);
         });
@@ -203,23 +208,28 @@ function readThemes(callback) {
 
 function readModes(callback) {
     var modes = {};
-    Object.keys(modesByMime).forEach(function (mime) {
-        var mode = modesByMime[mime];
-        if (!modes[mode]) modes[mode] = "";
-    });
 
-    async.map(Object.keys(modes), function (mode, cb) {
-        fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
-            if (doMinify)
-                cb(err, new Buffer(uglify.minify(data.toString(), minfierOptions.uglify).code));
-            else
-                cb(err, data);
+    // parse meta.js from CM for supported modes
+    fs.readFile(path.join(paths.mod, "node_modules/codemirror/mode/meta.js"), function (err, js) {
+        if (err) return callback(err);
+        var sandbox = { CodeMirror : {} };
+
+        // Execute meta.js in a sandbox
+        vm.runInNewContext(js, sandbox);
+        sandbox.CodeMirror.modeInfo.forEach(function (entry) {
+            if (entry.mode !== "null") modes[entry.mode] = null;
         });
-    }, function (err, result) {
-        Object.keys(modes).forEach(function (mode, i) {
-            modes[mode] = result[i];
+
+        async.map(Object.keys(modes), function (mode, cb) {
+            fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
+                cb(err, doMinify ? new Buffer(uglify.minify(data.toString(), minfierOptions.uglify).code) : data);
+            });
+        }, function (err, result) {
+            Object.keys(modes).forEach(function (mode, i) {
+                modes[mode] = result[i];
+            });
+            callback(err, modes);
         });
-        callback(err, modes);
     });
 }
 
@@ -279,9 +289,6 @@ function compileResources(callback) {
     });
     templateCode += ";";
     out.js = out.js.replace("/* {{ templates }} */", templateCode);
-
-    // Insert CM mime modes
-    out.js = out.js.replace("/* {{ droppy.mimeModes }} */", "droppy.mimeModes = " + JSON.stringify(modesByMime) + ";\n");
 
     // Add CSS vendor prefixes
     try {

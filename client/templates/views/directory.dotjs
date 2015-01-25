@@ -18,9 +18,9 @@ it = {
 #}}
 {{##def.directoryHeader:
     <div class="file-header">
-        <span data-sort="type" class="header-name down active">Name {{= droppy.svg.triangle }}</span>
-        <span data-sort="mtime" class="header-mtime">Modified {{= droppy.svg.triangle }}</span>
-        <span data-sort="size" class="header-size">Size {{= droppy.svg.triangle }}</span>
+        <span data-sort="type" class="header-name {{= temp.sort.type }}">Name {{= droppy.svg.triangle }}</span>
+        <span data-sort="mtime" class="header-mtime {{= temp.sort.mtime }}">Modified {{= droppy.svg.triangle }}</span>
+        <span data-sort="size" class="header-size {{= temp.sort.size }}">Size {{= droppy.svg.triangle }}</span>
         <span class="header-spacer"></span>
     </div>
 #}}
@@ -56,6 +56,8 @@ it = {
             entryExt,
             temp = {};
         if(it.sortAsc) sortedEntries.reverse();
+        temp.sort = { type: "", mtime: "", size: "" };
+        temp.sort[it.sortBy] = "active " + (it.sortAsc ? "up" : "down");
     }}
     <ul>
         {{#def.directoryHeader}}
