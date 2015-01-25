@@ -16,10 +16,34 @@
 .cm-s-droppy .CodeMirror-guttermarker             { color: #aaa }
 .cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
 .cm-s-droppy .CodeMirror-lines .CodeMirror-cursor { border-left: 1px solid #ccc }
-.cm-s-droppy .CodeMirror-activeline-background    { background: #262626 !important }
-.cm-s-droppy .CodeMirror-activeline .CodeMirror-gutter-wrapper { background: #484848 !important }
+.cm-s-droppy .CodeMirror-activeline-background    { background: #262626 }
+.cm-s-droppy .CodeMirror-activeline .CodeMirror-gutter-wrapper { background: #484848 }
 .cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff }
-.cm-s-droppy.CodeMirror a, .cm-s-droppy.CodeMirror a:visited { color: #607392 }
+.cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
+
+.cm-s-droppy .cm-searching  { background: #ffff88; color: #000 !important }
+.cm-s-droppy .CodeMirror-dialog-top { border-bottom: 1px solid #383838; top: 0 }
+.cm-s-droppy .CodeMirror-dialog-bottom { border-top: 1px solid #383838 bottom: 0 }
+
+.cm-s-droppy .CodeMirror-dialog {
+    position: absolute;
+    left: 0; right: 0;
+    background: #282828;
+    z-index: 15;
+    padding: .1em .8em;
+    overflow: hidden;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.cm-s-droppy .CodeMirror-dialog input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 20em !important;
+    color: #eee;
+    font-family: monospace;
+}
 
 .cm-s-droppy .cm-keyword    { color: #CDA869 }
 .cm-s-droppy .cm-atom       { color: #CF6A4C }

@@ -68,10 +68,12 @@ caching.files = {
             "node_modules/pretty-bytes/pretty-bytes.js",
             "node_modules/codemirror/lib/codemirror.js",
             "node_modules/codemirror/mode/meta.js",
+            "node_modules/codemirror/addon/dialog/dialog.js",
             "node_modules/codemirror/addon/selection/active-line.js",
             "node_modules/codemirror/addon/selection/mark-selection.js",
             "node_modules/codemirror/addon/search/searchcursor.js",
             "node_modules/codemirror/addon/edit/matchbrackets.js",
+            "node_modules/codemirror/addon/search/search.js",
             "node_modules/codemirror/keymap/sublime.js",
             "client/client.js"
         ],
