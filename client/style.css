@@ -244,7 +244,7 @@ input:-webkit-autofill {
 @media (max-width: 1023px) { .path li { padding: 0 .2em 0 1.4em } }
 @media (max-width:  639px) { .path li { padding: 0 .2em 0 1.4em; line-height: 1.25rem; } }
 
-.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.898rem }
+.path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.885rem }
 @media (max-width:  639px) {
     .path .triangle { height: 1.25rem; width: 1.25rem; right: -.75rem }
 }
