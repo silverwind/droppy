@@ -200,7 +200,7 @@ function readThemes(callback) {
             });
 
             // add our own theme
-            var css = fs.readFileSync("client/cmtheme.css");
+            var css = fs.readFileSync(path.join(paths.mod, "/client/cmtheme.css"));
             themes.droppy = new Buffer(doMinify ?  cleanCSS.minify(css).styles : css);
 
             callback(err, themes);
@@ -212,7 +212,7 @@ function readModes(callback) {
     var modes = {};
 
     // parse meta.js from CM for supported modes
-    fs.readFile(path.join(paths.mod, "node_modules/codemirror/mode/meta.js"), function (err, js) {
+    fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function (err, js) {
         if (err) return callback(err);
         var sandbox = { CodeMirror : {} };
 
