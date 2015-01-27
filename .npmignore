@@ -4,6 +4,8 @@ droppy*.tgz
 .gitignore
 .gitattributes
 .jshintrc
+.DS_Store
+.flowconfig
 *.sublime-project
 Gruntfile.js
 Procfile
