@@ -17,7 +17,7 @@
     "nonbsp"        : true,     // true: Prohibit "non-breaking whitespace" characters.
     "nonew"         : false,    // true: Prohibit use of constructors for side-effects (without assignment)
     "plusplus"      : false,    // true: Prohibit use of `++` & `--`
-    "quotmark"      : "double", // Quotation mark consistency
+    "quotmark"      : false,    // Quotation mark consistency
     "undef"         : true,     // true: Require all non-global variables to be declared (prevents global leaks)
     "unused"        : true,     // true: Require all defined variables be used
     "strict"        : true,     // true: Requires all functions run in ES5 Strict Mode
@@ -32,7 +32,6 @@
     "boss"          : false,     // true: Tolerate assignments where comparisons would be expected
     "debug"         : false,     // true: Allow debugger statements e.g. browser breakpoints.
     "eqnull"        : false,     // true: Tolerate use of `== null`
-    "es5"           : true,      // true: Allow ES5 syntax (ex: getters and setters)
     "esnext"        : true,      // true: Allow ES.next (ES6) syntax (ex: `const`)
     "moz"           : false,     // true: Allow Mozilla specific syntax (extends and overrides esnext features)
     "evil"          : false,     // true: Tolerate use of `eval` and `new Function()`
@@ -50,13 +49,12 @@
     "proto"         : false,     // true: Tolerate using the `__proto__` property
     "scripturl"     : false,     // true: Tolerate script-targeted URLs
     "shadow"        : false,     // true: Allows re-define variables later in code e.g. `var x=1; x=2;`
-    "sub"           : false,     // true: Tolerate using `[]` notation when it can still be expressed in dot notation
+    "sub"           : true,      // true: Tolerate using `[]` notation when it can still be expressed in dot notation
     "supernew"      : false,     // true: Tolerate `new function () { ... };` and `new Object;`
     "validthis"     : false,     // true: Tolerate using this in a non-constructor function
 
     // Environments
-    "browser"       : true,     // Web Browser (window, document, etc)
-    "devel"         : true,     // Development/debugging (alert, confirm, etc)
-    "jquery"        : true,     // jQuery
-    "node"          : true,     // Node.js
+    "browser"       : true,      // Web Browser (window, document, etc)
+    "devel"         : true,      // Development/debugging (alert, confirm, etc)
+    "node"          : true       // Node.js
 }

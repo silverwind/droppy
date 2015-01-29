@@ -1,4 +1,4 @@
-/*global CodeMirror, Notification, prettyBytes, videojs, Draggabilly */
+/*global CodeMirror, prettyBytes, videojs, Draggabilly */
 
 (function ($, window, document) {
     "use strict";
