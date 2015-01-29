@@ -1,9 +1,9 @@
-#droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
+# droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 > Personal file server with a modern web interface
 
 Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>.
 
-###Features
+### Features
 * Lightweight node.js backend, HTML5 frontend <img src="https://silverwind.github.io/droppy/logo.svg" width="240" height="240" align="right">
 * Responsive layout
 * Realtime updating of all clients
@@ -14,7 +14,7 @@ Demo available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">her
 * Image and video gallery, audio player
 * Drag and drop support for gallery and move/copy operations
 
-###Standalone Usage
+### Standalone Usage
 ```
 $ [sudo] npm install -g droppy
 $ droppy start
@@ -22,7 +22,7 @@ $ droppy start
 This will install droppy's home folder to `~/.droppy`. Append `--home <home>` to the command to define this path yourself. Once ready, navigate to [http://localhost:8989/](http://localhost:8989/). On first startup, you'll be prompted for a username and password for your first account.
 
 If you want to install a permanent server, follow the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
-###Module Usage - Express
+### Module Usage - Express
 droppy can be used with [express](http://expressjs.com/):
 ```js
 var droppy = require("droppy"),
@@ -31,7 +31,7 @@ var droppy = require("droppy"),
 app.use("/", droppy("/srv/droppy", { linkLength: 8 }));
 app.listen(80);
 ```
-###Configuration
+### Configuration
 `config.json` inside `~/.droppy/config` can be edited by running `droppy config` and is created with these defaults:
 ```javascript
 {
@@ -53,30 +53,30 @@ app.listen(80);
   "timestamps"   : true
 }
 ```
-###Options
-####`listeners` *array*
+### Options
+#### `listeners` *array*
 Defines one or more listening sockets defined by an [`listener` object](#listener). This option has no effect when droppy is used as a module.
-####`debug` *boolean*
+#### `debug` *boolean*
 When enabled, skips resource minification and enables CSS reloading.
-####`keepAlive` *integer*
+#### `keepAlive` *integer*
 The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
-####`linkLength` *integer*
+#### `linkLength` *integer*
 The amount of characters in a share link.
-####`logLevel` *integer*
+#### `logLevel` *integer*
 The amount of logging to show. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
-####`maxFileSize` *integer*
+#### `maxFileSize` *integer*
 The maximum file size in bytes a user can upload in a single file.
-####`maxOpen` *integer*
+#### `maxOpen` *integer*
 The maximum number of concurrently opened files. This number should only be of concern on Windows.
-####`public` *boolean*
+#### `public` *boolean*
 When enabled, no authentication is performed.
-####`readInterval` *integer*
+#### `readInterval` *integer*
 The minimum time gap in milliseconds in which updates to a single directory are sent.
-####`timestamps` *boolean*
+#### `timestamps` *boolean*
 When enabled, adds timestamps to log output.
 
 <a name="listener" />
-###Listener Object
+### Listener Object
 Below is an example `listeners` object, showing off the possibilties.
 
 ```javascript
@@ -109,25 +109,25 @@ This will result in:
 * SPDY listening on all IPv6 interfaces, ports 1443 and 2443, with HSTS disabled, using a self-signed certificate.
 
 A listener object accepts these options:
-####`host` *string* / *array*
+#### `host` *string* / *array*
 Network interface(s) to listen on. Use an array for multiple hosts.
-####`port` *integer* / *array*
+#### `port` *integer* / *array*
 Port(s) to listen on. Use an array for multiple ports.
-####`protocol` *string*
+#### `protocol` *string*
 Protocol to use. Can be either `http`, `https` or `spdy`.
-####`hsts` *integer*
+#### `hsts` *integer*
 Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
-####`key` *string*
+#### `key` *string*
 Path to the SSL/TLS private key file.
-####`cert` *string*
+#### `cert` *string*
 Path to the SSL/TLS certificate file.
-####`ca` *string*
+#### `ca` *string*
 Path to the SSL/TLS intermediate certificate file.
 
 *Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
 
-###API
-####droppy([home], [options])
+### API
+#### droppy([home], [options])
 
 All arguments are optional.
 
@@ -136,7 +136,7 @@ All arguments are optional.
 
 Returns a middleware function, `function(req, res)`.
 
-###CLI
+### CLI
 For available CLI commands see
 ```
 $ droppy help
@@ -146,10 +146,10 @@ To update droppy, run
 $ [sudo] droppy update
 ```
 
-###Browser Support
+### Browser Support
 Regular testing is done on Firefox, Chrome and Safari on Desktops as well as Chrome and Firefox on Android. IE receives very limited testing, and 10 is required for basic functionality. IOS Safari is largely untested, but should work reasonably well.
 
-###**wget** compatibilty
+### **wget** compatibilty
 For shared links to be compatible with wget, set `content-disposition = on` in `~/.wgetrc`.
 
 © 2012-2015 [silverwind](https://github.com/silverwind), distributed under BSD licence
