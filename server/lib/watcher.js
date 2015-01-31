@@ -27,9 +27,7 @@ var chokidarOpts = {
 // Watch the directory for changes and send them to the appropriate clients.
 watcher.createWatcher = function createWatcher(dir) {
     log.debug(chalk.green("Adding Watcher: ") + dir);
-    watchers[dir] = chokidar.watch(dir, chokidarOpts).on("all", _.throttle(function (a, p) {
-        update(dir);
-    }, interval, {leading: false, trailing: true}));
+    watchers[dir] = chokidar.watch(dir, chokidarOpts).on("all", _.throttle(update, interval, {leading: false, trailing: true}));
 };
 
 //-----------------------------------------------------------------------------

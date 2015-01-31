@@ -1217,8 +1217,10 @@ setInterval(function hourly() {
 
 //-----------------------------------------------------------------------------
 // Update clients on file changes
-function watcherUpdate(dir) {
-    log.debug("Watcher detected update for ", chalk.blue(dir));
+function watcherUpdate(event, p) {
+    var dir = path.dirname(p);
+    dir = (dir === ".") ? "/" : "/" + dir;
+    log.debug("Watcher event: " + chalk.blue("'" + event + "'") + " in ", chalk.blue(dir));
     var clientsToUpdate = [];
     Object.keys(clients).forEach(function (cookie) {
         clients[cookie].views.forEach(function (view, vId) {
