@@ -3,12 +3,13 @@
 var interval, update,
     watcher  = {},
     watchers = {},
-    log      = require("./log.js"),
-    utils    = require("./utils.js"),
     _        = require("lodash"),
-    fs       = require("graceful-fs"),
     chalk    = require("chalk"),
-    chokidar = require("chokidar");
+    chokidar = require("chokidar"),
+    fs       = require("graceful-fs"),
+    log      = require("./log.js"),
+    paths    = require("./paths.js").get(),
+    utils    = require("./utils.js");
 
 watcher.init = function init(intervalValue, updateFunc, cb) {
     interval = intervalValue;
@@ -17,16 +18,16 @@ watcher.init = function init(intervalValue, updateFunc, cb) {
 };
 
 var chokidarOpts = {
-    ignoreInitial: true,
-    depth        : 1     // https://github.com/paulmillr/chokidar/issues/206
+    ignoreInitial : true,
+    depth         : 1,
+    cwd           : paths.files
 };
 
 //-----------------------------------------------------------------------------
 // Watch the directory for changes and send them to the appropriate clients.
-watcher.createWatcher = function createWatcher(directory) {
-    var dir = utils.removeFilesPath(directory);
+watcher.createWatcher = function createWatcher(dir) {
     log.debug(chalk.green("Adding Watcher: ") + dir);
-    watchers[dir] = chokidar.watch(directory, chokidarOpts).on("all", _.throttle(function () {
+    watchers[dir] = chokidar.watch(dir, chokidarOpts).on("all", _.throttle(function (a, p) {
         update(dir);
     }, interval, {leading: false, trailing: true}));
 };
@@ -35,8 +36,7 @@ watcher.createWatcher = function createWatcher(directory) {
 // Watch given directory
 watcher.updateWatchers = function updateWatchers(newDir, clients, callback) {
     if (!watchers[newDir]) {
-        newDir = utils.addFilesPath(newDir);
-        fs.stat(newDir, function (error, stats) {
+        fs.stat(utils.addFilesPath(newDir), function (error, stats) {
             if (error || !stats) {
                 // Requested Directory can't be read
                 watcher.checkWatchedDirs(clients);
