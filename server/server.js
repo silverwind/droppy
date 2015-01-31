@@ -1205,7 +1205,9 @@ function streamArchive(req, res, zipPath) {
 function getCookie(cookie) {
     var cookies = {};
     if (Array.isArray(cookie) && cookie.length) {
-        cookies[cookie[0].name] = cookie[0].value;
+        cookie.forEach(function (c) {
+            cookies[c.name] = c.value;
+        });
         return validate(cookies);
     } else if (typeof cookie === "string" && cookie.length) {
         cookie.split("; ").forEach(function(entry) {
