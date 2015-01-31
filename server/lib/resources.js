@@ -1,6 +1,6 @@
 "use strict";
 
-var caching = {};
+var resources = {};
 
 var dottemplates = require("./dottemplates.js"),
     mime         = require("./mime.js"),
@@ -55,7 +55,7 @@ var minfierOptions = {
 
 cleanCSS = new cleanCSS(minfierOptions.cleanCSS);
 
-caching.files = {
+resources.files = {
         css: [
             "node_modules/codemirror/lib/codemirror.css",
             "client/style.css",
@@ -112,14 +112,9 @@ var libs = {
     "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
 };
 
-caching.init = function init(minify, callback) {
+resources.init = function init(minify, callback) {
     doMinify = minify;
-    async.series([
-        compileResources,
-        readThemes,
-        readModes,
-        readLibs
-    ], function (err, results) {
+    async.series([compileAll, readThemes, readModes, readLibs], function (err, results) {
         if (err) return callback(err);
         var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
 
@@ -247,13 +242,13 @@ function readLibs(callback) {
     });
 }
 
-function compileResources(callback) {
+function compileAll(callback) {
     var resData  = {}, resCache = {},
         out      = { css : "", js  : "" };
 
     // Read resources
-    Object.keys(caching.files).forEach(function (type) {
-        resData[type] = caching.files[type].map(function read(file) {
+    Object.keys(resources.files).forEach(function (type) {
+        resData[type] = resources.files[type].map(function read(file) {
             var data;
             try {
                 data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
@@ -286,7 +281,7 @@ function compileResources(callback) {
     resData.templates.forEach(function (data, index) {
         // Produce the doT functions
         templateCode += dottemplates
-            .produceFunction("droppy.templates." + caching.files.templates[index].replace(/\.dotjs$/, "")
+            .produceFunction("droppy.templates." + resources.files.templates[index].replace(/\.dotjs$/, "")
             .split("/").slice(2).join("."), data);
     });
     templateCode += ";";
@@ -306,8 +301,8 @@ function compileResources(callback) {
     }
 
     // Read and minifiy HTML files
-    while (caching.files.html.length) {
-        var name = path.basename(caching.files.html.pop()),
+    while (resources.files.html.length) {
+        var name = path.basename(resources.files.html.pop()),
             data = resData.html.pop()
                 .replace(/\{\{version\}\}/gm, pkg.version)
                 .replace(/\{\{name\}\}/gm, pkg.name);
@@ -324,7 +319,7 @@ function compileResources(callback) {
     resCache["style.css"] = {data: new Buffer(out.css), etag: etag, mime: mime.lookup("css")};
 
     // Read misc files
-    caching.files.other.forEach(function (file) {
+    resources.files.other.forEach(function (file) {
         var data, date,
             name     = path.basename(file),
             fullPath = path.join(paths.mod, file);
@@ -345,4 +340,4 @@ function compileResources(callback) {
     callback(null, resCache);
 }
 
-exports = module.exports = caching;
+exports = module.exports = resources;

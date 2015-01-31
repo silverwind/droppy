@@ -1,7 +1,7 @@
 "use strict";
 
 var pkg        = require("./../package.json"),
-    caching    = require("./lib/caching.js"),
+    resources  = require("./lib/resources.js"),
     cfg        = require("./lib/cfg.js"),
     demo       = require("./lib/demo.js"),
     db         = require("./lib/db.js"),
@@ -65,7 +65,7 @@ var droppy = function droppy(options, isStandalone, callback) {
             function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
             function (cb) {
                 log.simple("Preparing resources ...");
-                caching.init(!config.debug, function (err, c) {
+                resources.init(!config.debug, function (err, c) {
                     if (err) return callback(err);
                     cache = c;
                     cb();
@@ -822,7 +822,6 @@ function handleResourceRequest(req, res, resourceName) {
         } else {
             var headers = {}, status = 200;
 
-            // Caching
             if (req.url === "/" || /\?\!\/content/.test(req.url)) {
                 if (!config.debug)
                     headers["X-Frame-Options"] = "DENY";
@@ -1305,7 +1304,7 @@ function updateCSS(event, filename, cb) {
         setTimeout(function () { // Short timeout in case Windows still has the file locked
             var css = "";
 
-            caching.files.css.forEach(function (file) {
+            resources.files.css.forEach(function (file) {
                 css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
             });
 
