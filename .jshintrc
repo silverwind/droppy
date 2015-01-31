@@ -56,5 +56,6 @@
     // Environments
     "browser"       : true,      // Web Browser (window, document, etc)
     "devel"         : true,      // Development/debugging (alert, confirm, etc)
-    "node"          : true       // Node.js
+    "node"          : true,      // Node.js
+    "jquery"        : true       // jQuery
 }

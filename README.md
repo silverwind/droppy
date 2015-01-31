@@ -19,7 +19,7 @@ droppy is a self-hosted file server with an interface similar to many desktop fi
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
-By default, droppy's home folder will be created in `~/.droppy`. For how to change this path, as well as other options, see `droppy help`. To edit the config, run `droppy config` after the server has stared up once to generate the config file.
+By default, droppy's home folder will be created in `~/.droppy`. For how to change this path, as well as other options, see `droppy help`. To edit the config, run `droppy config` after the server has started up at least once to generate the config file.
 
 Once intialized, the server will listen on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for a username and password for the first account will appear.
 

@@ -1,8 +1,9 @@
 "use strict";
 
-var paths = {},
-    path  = require("path"),
-    root  = "~/.droppy";
+var paths     = {},
+    path      = require("path"),
+    untildify = require("untildify"),
+    root      = "~/.droppy";
 
 paths.get = function get() {
     return {
@@ -31,16 +32,5 @@ paths.seed = function seed(home) {
 exports = module.exports = paths;
 
 function resolve(str) {
-    if (/^~/.test(str)) {
-        var home;
-        if (process.platform === "win32") {
-            home = process.env.USERPROFILE || process.env.HOMEDRIVE + process.env.HOMEPATH;
-            return path.resolve(path.join(home, str.replace(/^~[\\\/]?/, "")));
-        } else {
-            home = process.env.HOME;
-            return path.resolve(path.join(home, str.replace(/^~[\/]?/, "")));
-        }
-    } else {
-        return path.resolve(str);
-    }
+    return path.resolve(/^~/.test(str) ? untildify(str) : str);
 }
