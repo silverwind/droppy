@@ -3,6 +3,7 @@
 var pkg        = require("./../package.json"),
     resources  = require("./lib/resources.js"),
     cfg        = require("./lib/cfg.js"),
+    cookies    = require("./lib/cookies.js"),
     demo       = require("./lib/demo.js"),
     db         = require("./lib/db.js"),
     log        = require("./lib/log.js"),
@@ -275,7 +276,7 @@ function setupSocket(server) {
     });
     wss.on("request", function (request) {
         var ws     = request.accept(),
-            cookie = getCookie(request.cookies);
+            cookie = cookies.get(request.cookies);
 
         if (!cookie && !config.public) {
             ws.close(4000);
@@ -679,11 +680,11 @@ function handleGET(req, res) {
 
     if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid GET: " + req.url);
 
-    if (config.public && !getCookie(req.headers.cookie))
-        freeCookie(req, res);
+    if (config.public && !cookies.get(req.headers.cookie))
+        cookies.free(req, res);
 
     if (/^\/\?!\/content/.test(URI)) {
-        if (getCookie(req.headers.cookie) || config.public) {
+        if (cookies.get(req.headers.cookie) || config.public) {
             res.setHeader("X-Page-Type", "main");
             handleResourceRequest(req, res, "main.html");
         } else if (firstRun) {
@@ -719,7 +720,7 @@ function handlePOST(req, res) {
     if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid POST: " + req.url);
 
     if (/\/upload/.test(URI)) {
-        if (!getCookie(req.headers.cookie)) {
+        if (!cookies.get(req.headers.cookie)) {
             res.statusCode = 401;
             res.end();
             log.info(req, res);
@@ -743,7 +744,7 @@ function handlePOST(req, res) {
         req.on("end", function () {
             var postData = qs.parse(body);
             if (db.authUser(postData.username, postData.password)) {
-                createCookie(req, res, postData);
+                cookies.create(req, res, postData);
                 endReq(req, res, true);
                 log.info(req, res, "User ", postData.username, chalk.green(" authenticated"));
             } else {
@@ -757,7 +758,7 @@ function handlePOST(req, res) {
             var postData = qs.parse(body);
             if (postData.username !== "" && postData.password !== "") {
                 db.addOrUpdateUser(postData.username, postData.password, true);
-                createCookie(req, res, postData);
+                cookies.create(req, res, postData);
                 firstRun = false;
                 endReq(req, res, true);
             } else {
@@ -880,7 +881,7 @@ function handleFileRequest(req, res, download) {
     }
 
     // Validate the cookie for the remaining requests
-    if (!getCookie(req.headers.cookie) && !shareLink) {
+    if (!cookies.get(req.headers.cookie) && !shareLink) {
         res.writeHead(301, {"Location": "/"});
         res.end();
         log.info(req, res);
@@ -965,7 +966,7 @@ function handleUploadRequest(req, res) {
     var busboy, opts,
         done     = false,
         files    = {},
-        cookie   = getCookie(req.headers.cookie);
+        cookie   = cookies.get(req.headers.cookie);
 
     req.query = qs.parse(req.url.substring("/upload?".length));
     log.info(req, res, "Upload started");
@@ -1197,62 +1198,6 @@ function streamArchive(req, res, zipPath) {
             log.info(req, res);
         }
     });
-}
-
-//-----------------------------------------------------------------------------
-// Cookie functions
-function getCookie(cookie) {
-    var cookies = {};
-    if (Array.isArray(cookie) && cookie.length) {
-        cookie.forEach(function (c) {
-            cookies[c.name] = c.value;
-        });
-        return validate(cookies);
-    } else if (typeof cookie === "string" && cookie.length) {
-        cookie.split("; ").forEach(function(entry) {
-            var parts = entry.trim().split("=");
-            cookies[parts[0]] = parts[1];
-        });
-        return validate(cookies);
-    } else {
-        return false;
-    }
-}
-
-function validate(cookies) {
-    if (!cookies || !cookies.s) return false;
-    var found, sessions = db.get("sessions");
-    Object.keys(sessions).some(function(session) {
-        if (session === cookies.s) {
-            sessions[session].lastSeen = Date.now();
-            db.set("sessions", sessions);
-            found = session;
-            return true;
-        }
-    });
-    return found;
-}
-
-function freeCookie(req, res) {
-    var sessions  = db.get("sessions"),
-        sessionID = utils.getSid();
-
-    res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + new Date(Date.now() + 31536000000).toUTCString() + ";path=/");
-    sessions[sessionID] = {privileged : true, lastSeen : Date.now()};
-    db.set("sessions", sessions);
-}
-
-function createCookie(req, res, postData) {
-    var sessions  = db.get("sessions"),
-        sessionID = utils.getSid();
-
-    if (postData.remember) // Create a semi-permanent cookie
-        res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + new Date(Date.now() + 31536000000).toUTCString() + ";path=/");
-    else // Create a single-session cookie
-        res.setHeader("Set-Cookie", "s=" + sessionID + ";path=/");
-
-    sessions[sessionID] = {privileged : db.get("users")[postData.username].privileged, lastSeen : Date.now()};
-    db.set("sessions", sessions);
 }
 
 //-----------------------------------------------------------------------------
