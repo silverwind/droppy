@@ -636,15 +636,6 @@
                     path = files[i].webkitRelativePath;
                     name = files[i].name;
                     if (path) {
-                        if (!rootAdded) { // Add the root folder for preview purpose
-                            var split = path.split("/");
-                            if (split.length > 1) {
-                                obj[split[0]] = {};
-                                rootAdded = true;
-                            }
-                        } else {
-                            obj[path] = files[i];
-                        }
                         obj[path] = files[i];
                     } else {
                         obj[name] = files[i];
@@ -802,11 +793,6 @@
             for (var i = 0, len = data.length; i < len; i++) {
                 if (isOverLimit(view, data[i].size)) return;
                 numFiles++;
-                view[0].currentData[data[i].name] = {
-                    size : data[i].size,
-                    type : "nf",
-                    mtime : Date.now()
-                };
                 // Don't include Zero-Byte files as uploads will freeze in IE if we attempt to upload them
                 // https://github.com/silverwind/droppy/issues/10
                 if (data[i].size === 0) {
@@ -824,9 +810,6 @@
                     if (isOverLimit(view, data[entry].size)) return;
                     numFiles++;
                     formLength++;
-                    if (!addedDirs[name]) {
-                        view[0].currentData[name] = {size: data[entry].size, type: "nf", mtime: Date.now()};
-                    }
                     formData.append(entry, data[entry], encodeURIComponent(entry));
                 } else {
                     if (!addedDirs[name]) {
@@ -938,7 +921,6 @@
     }
 
     function uploadCancel(view) {
-        $(".uploading").remove(); // Remove preview elements
         uploadFinish(view);
         sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
@@ -1847,14 +1829,7 @@
         };
     };
     droppy.templates.fn.sortKeysByProperty = function (entries, by) {
-        var filenames = Object.keys(entries);
-        if (by === "type") { // Treat new files from uploads equally for sorting purpose
-            filenames.forEach(function (entry) {
-                if (entries[entry].type === "nf") entries[entry].type = "f";
-                if (entries[entry].type === "nd") entries[entry].type = "d";
-            });
-        }
-        return filenames.sort(droppy.templates.fn.compare2(entries, by));
+        return Object.keys(entries).sort(droppy.templates.fn.compare2(entries, by));
     };
 
     function closeDoc(view) {

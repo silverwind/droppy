@@ -8,7 +8,7 @@ it = {
     sortAsc: Boolean // Ascending or descending
     entries: {
         filename: { // obj
-            type: String // type of entry = "f" | "nf" | "d" | "nd"
+            type: String // type of entry = "f" (file) | "d" (directory)
             mtime: Number // Last modified in ms
             size: Number // Size in bytes
         }
@@ -68,10 +68,7 @@ it = {
                     temp.id = folder + entryname;
                     temp.spriteClass = droppy.templates.fn.getSpriteClass(entryExt);
                     temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;
-                if (obj.type === "nd" || obj.type === "nf") {
-                    temp.classes = " uploading";
-                    temp.svgIcon = '<span class="icon-uploading">' + droppy.svg["up-arrow"] + '</span>';
-                } else if (Object.keys(droppy.audioTypes).indexOf(getExt(entryname)) !== -1) {
+                if (Object.keys(droppy.audioTypes).indexOf(getExt(entryname)) !== -1) {
                     temp.classes = " playable";
                     temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
                 } else {
@@ -79,9 +76,9 @@ it = {
                     temp.svgIcon = "";
                 };
             }}
-            {{? obj.type === "f" || obj.type === "nf" }}
+            {{? obj.type === "f" }}
                 {{#def.fileLink}}
-            {{?? obj.type === "d" || obj.type === "nd" }}
+            {{?? obj.type === "d" }}
                 {{#def.folderLink}}
             {{?}}
         {{~}}
