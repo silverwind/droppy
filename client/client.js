@@ -1302,6 +1302,7 @@
                 targetRow = target;
             else
                 targetRow = target.parents(".data-row");
+            if (targetRow.data("type") === "error") return;
             showEntryMenu(targetRow, event.clientX);
             event.preventDefault();
             event.stopPropagation();

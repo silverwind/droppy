@@ -456,7 +456,7 @@ input:-webkit-autofill {
    50%      { transform: translateY(3px) }
 }
 
-.entry-link {
+.entry-link, .error-link {
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: top;
@@ -464,7 +464,12 @@ input:-webkit-autofill {
     cursor: pointer;
 }
 
-.entry-link, .inline-namer {
+.error-link {
+    cursor: auto !important;
+    color: #f44 !important;
+}
+
+.entry-link, .error-link, .inline-namer {
     padding: 0 .25em;
     flex: 1 1;
     display: inline-block;

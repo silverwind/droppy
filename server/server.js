@@ -1074,11 +1074,15 @@ function handleUploadRequest(req, res) {
 
 //-----------------------------------------------------------------------------
 // Read a path, return type and info
-// @callback : function (error, info)
+// @callback : function (err, info)
 function readPath(root, callback) {
-    fs.stat(utils.addFilesPath(root), function (error, stats) {
-        if (error) {
-            callback(error);
+    fs.stat(utils.addFilesPath(root), function (err, stats) {
+        if (err) {
+            callback(null, {
+                type: "e",
+                size: 0,
+                mtime: 0
+            });
         } else if (stats.isFile()) {
             callback(null, {
                 type: "f",
@@ -1092,8 +1096,6 @@ function readPath(root, callback) {
                 size: 0,
                 mtime: stats.mtime.getTime() || 0
             });
-        } else {
-            callback(new Error("Path neither directory or file!"));
         }
     });
 }
