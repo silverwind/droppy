@@ -1063,7 +1063,7 @@
     // Update the page title and trim a path to its basename
     function updateTitle(text) {
         if (text === "") text = "/";
-        document.title = text + " - droppy";
+        document.title = text;
     }
 
     // Listen for popstate events, which indicate the user navigated back
