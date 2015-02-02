@@ -1151,8 +1151,7 @@ function generateDirSizes(root, dirContents, callback) {
 // TODO: caching of results
 function du(dir, callback) {
     fs.stat(dir, function (error, stat) {
-        if (error) { return callback(error); }
-        if (!stat) return callback(null, 0);
+        if (error || !stat) return callback(null, 0);
         if (!stat.isDirectory()) return callback(null, stat.size);
         fs.readdir(dir, function (error, list) {
             if (error) return callback(error);
