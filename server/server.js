@@ -1153,15 +1153,14 @@ function du(dir, callback) {
     fs.stat(dir, function (error, stat) {
         if (error || !stat) return callback(null, 0);
         if (!stat.isDirectory()) return callback(null, stat.size);
-        fs.readdir(dir, function (error, list) {
-            if (error) return callback(error);
-            async.map(list.map(function (f) { return path.join(dir, f); }), function (f, callback) { return du(f, callback); },
-                function (error, sizes) {
-                    callback(error, sizes && sizes.reduce(function (p, s) {
-                        return p + s;
-                    }, stat.size));
-                }
-            );
+        fs.readdir(dir, function (error, files) {
+            if (error || !files || files.length === 0) return callback(null, 0);
+            files = files.map(function (file) { return path.join(dir, file); });
+            async.map(files, du, function (error, sizes) {
+                callback(error, sizes && sizes.reduce(function (p, s) {
+                    return p + s;
+                }, stat.size));
+            });
         });
     });
 }
