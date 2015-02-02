@@ -625,7 +625,7 @@
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
-            var files, path, name, rootAdded,
+            var files, path, name,
                 view = getView(fileInput[0].targetView),
                 obj  = {};
 
@@ -1060,10 +1060,9 @@
         }
     }
 
-    // Update the page title and trim a path to its basename
+    // Update the page title
     function updateTitle(text) {
-        if (text === "") text = "/";
-        document.title = text;
+        document.title = text || "droppy";
     }
 
     // Listen for popstate events, which indicate the user navigated back
@@ -2071,8 +2070,10 @@
             url: "?_" + entryId,
             dataType: "text"
         }).done(function (data) {
+            var filename = basename(entryId);
+            updateTitle(filename);
             loadTheme(droppy.get("theme"), function () {
-                loadCM(data, basename(entryId));
+                loadCM(data, filename);
             });
         }).fail(function () {
             closeDoc(view);
