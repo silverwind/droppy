@@ -538,14 +538,14 @@
         });
 
         // Return submits the form
-        $("#pass").register("keyup", function (event) {
+        $("#pass").register("keydown", function (event) {
             if (event.keyCode === 13) {
                 form.submit();
             }
         });
 
         // Spacebar toggles the checkbox
-        $("#remember").register("keyup", function (event) {
+        $("#remember").register("keydown", function (event) {
             if (event.keyCode === 32)
                 checkbox.prop("checked", !checkbox.prop("checked"));
         });
@@ -596,7 +596,7 @@
                 }, 100);
             })
             // Bind escape for hiding modals
-            .register("keyup", function (event) {
+            .register("keydown", function (event) {
                 if (event.keyCode === 27)
                     $("#click-catcher").click();
             })
@@ -1003,7 +1003,7 @@
                 entry.addClass("invalid");
             else
                 entry.removeClass("invalid");
-        }).register("keyup", function (event) {
+        }).register("keydown", function (event) {
             if (event.keyCode === 27) stopEdit(view); // Escape Key
             if (event.keyCode === 13) submitEdit(view, false, callback); // Return Key
         }).register("focusout", function () {
@@ -2135,7 +2135,7 @@
                         if (change.origin !== "setValue")
                             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
                     });
-                    editor.on("keyup", function (cm, event) { // Keyboard shortcuts
+                    editor.on("keydown", function (cm, event) { // Keyboard shortcuts
                         if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
                             var view = getCMView(cm);
                             event.preventDefault();
@@ -2901,7 +2901,7 @@
         box.find("svg").replaceWith(droppy.svg.link);
         input
             .val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link)
-            .register("keyup", function (event) {
+            .register("keydown", function (event) {
                 if (event.keyCode === 27 || event.keyCode === 13)
                     $("#click-catcher").click();
             });
