@@ -11,8 +11,73 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#181818">
-    <!-- minified css included here until a dependency issue gets resolved in the next htmlminifier update -->
-    <style>body,div,p{box-sizing:border-box;border:0;margin:0;padding:0}html{font:1.5em/1 Roboto,Helvetica,sans-serif;text-rendering:geometricPrecision;-webkit-backface-visibility:hidden}body{background:#181818;left:0;right:0;top:0;bottom:0;overflow:hidden;position:absolute}.loading{position:absolute;animation:spin 1s infinite linear;border-bottom:5px solid #18f;border-left:5px solid #000;border-right:5px solid #000;border-top:5px solid #f1a;border-radius:100%;box-shadow:0 0 10px #000,inset 0 0 10px #000;height:200px;width:200px;left:calc(50% - 100px);top:calc(50% - 100px)}.loading-logo{position:absolute;fill:#eee;stroke:#888;stroke-width:8;width:200px;height:200px;left:calc(50% - 100px);top:calc(50% - 100px)}@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(359deg)}}#noscript{background:rgba(0,0,0,.75);width:100%;height:100%;left:0;top:0;position:relative}#noscript p{color:#ccc;font-size:1.5rem;text-align:center;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}</style>
+    <style>
+      body, div, p {
+        box-sizing: border-box;
+        border: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-weight: 300;
+        font: 1.5em/1 "Roboto", Helvetica, sans-serif;
+        text-rendering: geometricPrecision;
+        -webkit-backface-visibility: hidden;
+      }
+
+      body {
+        background: #181818;
+        left: 0; right: 0; top: 0; bottom:0;
+        overflow: hidden;
+        position: absolute;
+      }
+
+      .loading {
+        position: absolute;
+        animation: spin 1s infinite linear;
+        border-bottom : 5px solid #18f;
+        border-left   : 5px solid #000;
+        border-right  : 5px solid #000;
+        border-top    : 5px solid #f1a;
+        border-radius: 100%;
+        box-shadow: 0 0 10px #000, inset 0 0 10px #000;
+        height: 200px;
+        width: 200px;
+        left: calc(50% - 100px);
+        top:  calc(50% - 100px);
+      }
+
+      .loading-logo {
+        position: absolute;
+        fill: #eee;
+        stroke: #888;
+        stroke-width: 8;
+        width: 200px;
+        height: 200px;
+        left: calc(50% - 100px);
+        top:  calc(50% - 100px);
+      }
+
+      @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(359deg) } }
+
+      #noscript {
+        background: rgba(0,0,0,.75);
+        width: 100%; height: 100%;
+        left: 0; top: 0;
+        position: relative;
+      }
+
+      #noscript p {
+        color: #ccc;
+        font-size: 1.5rem;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+      }
+    </style>
   </head>
   <body>
     <div id="page" class="in">

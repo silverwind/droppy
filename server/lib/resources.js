@@ -48,7 +48,7 @@ var minfierOptions = {
             removeOptionalTags: true,
             removeRedundantAttributes: true,
             caseSensitive: true,
-            minifyCSS: false
+            minifyCSS: cleanCSS
         };
     }
 };
