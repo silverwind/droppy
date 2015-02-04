@@ -65,8 +65,9 @@
     "src": "src"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "2.x.x"
+    "node": ">0.10.0",
+    "iojs": ">1.1.0",
+    "npm": ">2.0.0"
   },
   "keywords": [
     "personal",
