@@ -115,20 +115,11 @@ droppy._onRequest = onRequest;
 exports = module.exports = droppy;
 
 function printLogo() {
-    log.plain([
-            "....__..............................\n",
-            ".--|  |----.-----.-----.-----.--.--.\n",
-            "|  _  |   _|  _  |  _  |  _  |  |  |\n",
-            "|_____|__| |_____|   __|   __|___  |\n",
-            ".................|__|..|__|..|_____|\n",
-        ].join("").replace(/\./gm, chalk.black("."))
-                  .replace(/\_/gm, chalk.magenta("_"))
-                  .replace(/\-/gm, chalk.magenta("-"))
-                  .replace(/\|/gm, chalk.magenta("|"))
-    );
-    log.simple(chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-               chalk.blue(process.argv[0] || "node"), " ", chalk.green(process.version.substring(1)));
-    log.simple(chalk.blue("home"), " is at ", chalk.green(paths.home), "\n");
+    log.logo();
+    log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version),
+               " running on ", chalk.blue(process.argv[0] || "node"), " ",
+               chalk.green(process.version.substring(1)), "\n ",
+               chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
 }
 
 function startListeners(callback) {

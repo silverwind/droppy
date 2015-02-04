@@ -132,4 +132,14 @@ log.timestamp = function timestamp() {
     return chalk.yellow(year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs);
 };
 
+log.logo = function logo() {
+    log.plain(chalk.blue([
+        "    __                              \n",
+        " --|  |---- ----- ----- ----- -- -- \n",
+        "|  _  |   _|  _  |  _  |  _  |  |  |\n",
+        "|_____|__| |_____|   __|   __|___  |\n",
+        "                 |__|  |__|  |_____|\n",
+    ].join("")));
+};
+
 exports = module.exports = log;
