@@ -95,20 +95,20 @@
     };
 
     // Class swapping helper
-    $.fn.replaceClass = function (match, replacement) {
-        var elem, classes, classMatch,
-            i = this.length - 1,
+    $.fn.replaceClass = function (search, replacement) {
+        var elem, classes, matches,
+            i = this.length,
             hasClass = false;
-        for (; i >= 0; i--) {
+        while(--i >= 0) {
             elem = this[i];
             if (typeof elem === "undefined") return false;
             classes = elem.className.split(" ").filter(function (className) {
-                if (className === match) return false;
+                if (className === search) return false;
                 if (className === replacement) hasClass = true;
 
-                classMatch = className.match(match);
+                matches = search instanceof RegExp ? search.exec(className) : className.match(search);
                 // filter out if the entire capture matches the entire className
-                if (classMatch) return classMatch[0] !== className || classMatch[0] === replacement;
+                if (matches) return matches[0] !== className || matches[0] === replacement;
                 else return true;
             });
             if (!hasClass) classes.push(replacement);
@@ -1771,13 +1771,10 @@
 
     function showEntryMenu(entry, x) {
         var menuTop, menuMaxTop,
-            type = entry.find(".sprite").attr("class"),
+            type = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1],
             button = entry.find(".entry-menu"),
             menu = $("#entry-menu"),
             emWidth = parseFloat($("#entry-menu").css("font-size")); // width of 1em
-
-        type = type.match(/sprite\-(\w+)/);
-        if (type) type = type[1];
 
         menu.attr("class", "in").data("target", entry).addClass("type-" + type);
         if (x)
@@ -1798,14 +1795,14 @@
     }
 
     function sortByHeader(view, header) {
-        view[0].sortBy = header[0].className.match(/header\-(\w+)/)[1];
+        view[0].sortBy = /header\-(\w+)/.exec(header[0].className)[1];
         view[0].sortAsc = header.hasClass("down");
         header.attr("class", "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
         var sortedEntries = droppy.templates.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         if (view[0].sortAsc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            view.find("[data-entryname='" + sortedEntries[index] + "']:first").css({
+            view.find("[data-name='" + sortedEntries[index] + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index)
             }).attr("order", index);

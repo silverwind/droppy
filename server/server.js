@@ -686,7 +686,7 @@ function handleGET(req, res) {
             handleResourceRequest(req, res, "auth.html");
         }
     } else if (/^\/\?!\//.test(URI)) {
-        handleResourceRequest(req, res, URI.match(/\?!\/([\s\S]+)$/)[1]);
+        handleResourceRequest(req, res, (/\?!\/([\s\S]+)$/.exec(URI)[1]));
     } else if (/^\/\?[~\$]\//.test(URI)) {
         handleFileRequest(req, res, true);
     } else if (/^\/\?\?\//.test(URI)) {
@@ -863,7 +863,7 @@ function handleFileRequest(req, res, download) {
     var URI = decodeURIComponent(req.url), shareLink, filepath;
 
     // Check for a shareLink
-    filepath = URI.match(/\?([\$~_])\/([\s\S]+)$/);
+    filepath = /\?([\$~_])\/([\s\S]+)$/.exec(URI);
     if (filepath[1] === "$") {
         shareLink = true;
         filepath = utils.addFilesPath(db.get("sharelinks")[filepath[2]]);

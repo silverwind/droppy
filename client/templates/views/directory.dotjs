@@ -7,7 +7,7 @@ it = {
     sortBy: String // What property to sort the entries by
     sortAsc: Boolean // Ascending or descending
     entries: {
-        filename: { // obj
+        filename: { // entry details
             type: String // type of entry = "f" (file) | "d" (directory) | "e" (error, probably no permission)
             mtime: Number // Last modified in ms
             size: Number // Size in bytes
@@ -18,75 +18,75 @@ it = {
 #}}
 {{##def.directoryHeader:
     <div class="file-header">
-        <span data-sort="type" class="header-name {{= temp.sort.type }}">Name {{= droppy.svg.triangle }}</span>
-        <span data-sort="mtime" class="header-mtime {{= temp.sort.mtime }}">Modified {{= droppy.svg.triangle }}</span>
-        <span data-sort="size" class="header-size {{= temp.sort.size }}">Size {{= droppy.svg.triangle }}</span>
+        <span data-sort="type" class="header-name {{= entry.sort.type }}">Name {{= droppy.svg.triangle }}</span>
+        <span data-sort="mtime" class="header-mtime {{= entry.sort.mtime }}">Modified {{= droppy.svg.triangle }}</span>
+        <span data-sort="size" class="header-size {{= entry.sort.size }}">Size {{= droppy.svg.triangle }}</span>
         <span class="header-spacer"></span>
     </div>
 #}}
 {{##def.folder:
-    <li class="data-row{{= temp.classes }}" data-type="folder" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
-        <span class="sprite sprite-folder">{{= temp.svgIcon }}</span>
-        <a class="folder-link entry-link">{{= temp.entryname }}</a>
-        <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= droppy.templates.fn.timeDifference(obj.mtime) }}</span>
-        <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
+    <li class="data-row{{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.name }}">
+        <span class="sprite sprite-folder">{{= entry.svgIcon }}</span>
+        <a class="folder-link entry-link">{{= entry.name }}</a>
+        <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
+        <span class="size" data-size="{{= entry.size }}">{{= entry.size }}</span>
         <span class="sharelink faux-button" title="Share folder download link">{{= droppy.svg.link }}</span>
-        <span><a class="zip" title="Download as Zip" href="?~~{{= temp.id }}" target="nope" download="{{= temp.entryname }}.zip">{{= droppy.svg.download }}</a></span>
+        <span><a class="zip" title="Download as Zip" href="?~~{{= entry.id }}" target="nope" download="{{= entry.name }}.zip">{{= droppy.svg.download }}</a></span>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </li>
 #}}
 {{##def.file:
-    <li class="data-row{{= temp.classes }}" data-type="file" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
-        <span class="sprite {{= temp.spriteClass}}">{{= temp.svgIcon }}</span>
-        <a class="file-link entry-link" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}">{{= temp.entryname }}</a>
-        <span class="mtime" data-timestamp="{{= obj.mtime }}">{{= droppy.templates.fn.timeDifference(obj.mtime) }}</span>
-        <span class="size" data-size="{{= obj.size }}">{{= temp.size }}</span>
+    <li class="data-row{{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.name }}">
+        <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
+        <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
+        <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
+        <span class="size" data-size="{{= entry.size }}">{{= entry.size }}</span>
         <span class="sharelink faux-button" title="Share file download link">{{= droppy.svg.link }}</span>
-        <a class="download faux-button" href="?~{{= temp.id }}" target="nope" download="{{= temp.entryname }}" title="Download File">{{= droppy.svg.download }}</a>
+        <a class="download faux-button" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}" title="Download File">{{= droppy.svg.download }}</a>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </li>
 #}}
 {{##def.error:
-    <li class="data-row{{= temp.classes }}" data-type="error" data-id="{{= temp.id }}" data-entryname="{{= temp.entryname }}">
-        <span class="sprite {{= temp.spriteClass}}">{{= temp.svgIcon }}</span>
-        <a class="error-link">{{= temp.entryname }}</a>
+    <li class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.name }}">
+        <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
+        <a class="error-link">{{= entry.name }}</a>
     </li>
 #}}
 {{? Object.keys(it.entries).length === 0 }}
     <div id="empty" class="empty">{{= droppy.svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
     {{  if (it.sortBy === "name") it.sortBy = "type";
-        var folder = (it.folder === "/") ? "/" : it.folder + "/",
-            sortedEntries = droppy.templates.fn.sortKeysByProperty(it.entries, it.sortBy),
-            extRE = /[^.]*$/,
-            entryExt,
-            temp = {};
+        var entry = {},
+            folder = (it.folder === "/") ? "/" : it.folder + "/",
+            sortedEntries = droppy.templates.fn.sortKeysByProperty(it.entries, it.sortBy);
+
         if(it.sortAsc) sortedEntries.reverse();
-        temp.sort = { type: "", mtime: "", size: "" };
-        temp.sort[it.sortBy] = "active " + (it.sortAsc ? "up" : "down");
+        entry.sort = { type: "", mtime: "", size: "" };
+        entry.sort[it.sortBy] = "active " + (it.sortAsc ? "up" : "down");
     }}
     <ul>
         {{#def.directoryHeader}}
-        {{~sortedEntries :entryname}}
-            {{  var obj = it.entries[entryname],
-                    entryExt = entryname.match(extRE)[0];
-                    temp.size = prettyBytes(obj.size);
-                    temp.id = folder + entryname;
-                    temp.spriteClass = droppy.templates.fn.getSpriteClass(entryExt);
-                    temp.entryname = it.isUpload ? decodeURIComponent(entryname) : entryname;
-                if (Object.keys(droppy.audioTypes).indexOf(getExt(entryname)) !== -1) {
-                    temp.classes = " playable";
-                    temp.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
+        {{~sortedEntries :name}}
+            {{  entry.type = it.entries[name].type;
+                entry.mtime = it.entries[name].mtime;
+                entry.size = prettyBytes(it.entries[name].size);
+                entry.id = folder + name;
+                entry.sprite = droppy.templates.fn.getSpriteClass(/[^.]*$/.exec(name)[0]);
+                entry.name = it.isUpload ? decodeURIComponent(name) : name;
+
+                if (Object.keys(droppy.audioTypes).indexOf(getExt(name)) !== -1) {
+                    entry.classes = " playable";
+                    entry.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
                 } else {
-                    temp.classes = "";
-                    temp.svgIcon = "";
+                    entry.classes = "";
+                    entry.svgIcon = "";
                 };
             }}
-            {{? obj.type === "f" }}
+            {{? entry.type === "f" }}
                 {{#def.file}}
-            {{?? obj.type === "d" }}
+            {{?? entry.type === "d" }}
                 {{#def.folder}}
-            {{?? obj.type === "e" }}
+            {{?? entry.type === "e" }}
                 {{#def.error}}
             {{?}}
         {{~}}
