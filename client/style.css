@@ -880,7 +880,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .sidebar svg {
-    fill: #777;
+    fill: rgba(96,96,96,.4);
     height: 1em;
     width: 1em;
     margin-left: .75em;
@@ -896,13 +896,13 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .sidebar > li:hover         { cursor: pointer }
-.sidebar > li:hover span    { color: #fff }
-.sidebar > .exit:hover svg  { fill:  #c33 }
-.sidebar > .exit:hover span { background: #c33; opacity: 1 }
-.sidebar > .save:hover svg  { fill:  #169 }
-.sidebar > .save:hover span { background: #169; opacity: 1 }
-.sidebar > .ww:hover svg    { fill:  #5c5 }
-.sidebar > .ww:hover span   { background: #5c5; opacity: 1 }
+.sidebar > li:hover span    { color: #fff; opacity: 1 }
+.sidebar > .exit:hover svg  {  fill: #d44 }
+.sidebar > .exit:hover span { color: #d44 }
+.sidebar > .save:hover svg  {  fill: #5c5 }
+.sidebar > .save:hover span { color: #5c5 }
+.sidebar > .ww:hover svg    {  fill: #18f }
+.sidebar > .ww:hover span   { color: #18f }
 
 .doc.readonly > .sidebar > .save { display: none }
 
