@@ -420,8 +420,11 @@
                 else
                     uploadFinish(view);
                 break;
-            case "UPDATE_CSS":
-                reloadCSS(msg.css);
+            case "RELOAD":
+                if (msg.css) {
+                    $("#css").remove();
+                    $("<style id='css'></style>").text(msg.css).appendTo($("head"));
+                } else window.location.reload(true);
                 break;
             case "SHARELINK":
                 showLinkBox(getView(vId), msg.link);
@@ -2850,12 +2853,6 @@
             droppy.set("theme", theme);
             if (callback) callback();
         });
-    }
-
-    function reloadCSS(css) {
-        if (!droppy.debug) return;
-        $("#css").remove();
-        $("<style id='css'></style>").text(css).appendTo($("head"));
     }
 
     function showSpinner(view) {

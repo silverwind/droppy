@@ -11,23 +11,38 @@ var interval, update,
     paths    = require("./paths.js").get(),
     utils    = require("./utils.js");
 
-watcher.init = function init(intervalValue, updateFunc, cb) {
-    interval = intervalValue;
-    update = updateFunc;
-    cb();
+var opts = {
+    files: {
+        cwd           : paths.files,
+        alwaysStat    : true,
+        depth         : 0,
+        ignoreInitial : true
+    },
+    client: {
+        cwd           : paths.client,
+        alwaysStat    : true,
+        ignoreInitial : true
+    }
 };
 
-var chokidarOpts = {
-    ignoreInitial : true,
-    depth         : 1,
-    cwd           : paths.files
+watcher.init = function init(intervalValue, updateFunc) {
+    interval = intervalValue;
+    update = updateFunc;
+};
+
+watcher.watchResources = function watchResources(cb) {
+    chokidar.watch(".", opts.client)
+        .on("error", log.error)
+        .on("change", _.throttle(cb, interval, {leading: true, trailing: true}));
 };
 
 //-----------------------------------------------------------------------------
 // Watch the directory for changes and send them to the appropriate clients.
 watcher.createWatcher = function createWatcher(dir) {
     log.debug(chalk.green("Adding Watcher: ") + dir);
-    watchers[dir] = chokidar.watch(dir, chokidarOpts).on("all", _.throttle(update, interval, {leading: false, trailing: true}));
+    watchers[dir] = chokidar.watch(dir, opts.files)
+        .on("error", log.error)
+        .on("all", _.throttle(update, interval, {leading: false, trailing: true}));
 };
 
 //-----------------------------------------------------------------------------

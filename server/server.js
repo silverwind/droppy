@@ -55,7 +55,7 @@ var droppy = function droppy(options, isStandalone, callback) {
                 config = conf; cb(err);
             });
         },
-        function (cb) { watcher.init(config.readInterval, watcherUpdate, cb); },
+        function (cb) { watcher.init(config.readInterval, watcherUpdate); cb(); },
         function (cb) { db.init(cb); },
     ], function (err) {
         if (err) return callback(err);
@@ -74,8 +74,8 @@ var droppy = function droppy(options, isStandalone, callback) {
             },
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); cb(); }); else cb(); },
-            function (cb) { if (config.debug) { watchCSS(); updateCSS(null, null, cb); } else cb(); }
+            function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); }); cb(); },
+            function (cb) { if (config.debug) watcher.watchResources(clientUpdate); cb(); }
         ], function (err) {
             if (err) return callback(err);
             if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
@@ -616,7 +616,7 @@ function send(ws, data) {
                 var debugData = JSON.parse(data);
                 // Remove some spammy logging
                 if (debugData.type === "UPDATE_DIRECTORY") debugData.data = {"...": "..."};
-                if (debugData.type === "UPDATE_CSS") debugData.css = {"...": "..."};
+                if (debugData.type === "RELOAD" && debugData.css) debugData.css = {"...": "..."};
                 log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
             }
             ws.sendUTF(data);
@@ -774,19 +774,6 @@ function handlePOST(req, res) {
 function handleResourceRequest(req, res, resourceName) {
     var resource;
 
-    // CSS debugging
-    if (config.debug && resourceName === "style.css") {
-        res.writeHead(200, {
-            "Content-Type"   : "text/css; charset=utf-8",
-            "Cache-Control"  : "private, max-age=0",
-            "Expires"        : "0",
-            "Content-Length" : cache.css.length
-        });
-        res.end(cache.css);
-        log.info(req, res);
-        return;
-    }
-
     // Assign filename, must be unique for resource requests
     if (/^\/\?!\/theme\//.test(req.url)) {
         resource = cache.themes[req.url.substring("/?!/theme/".length)];
@@ -841,7 +828,7 @@ function handleResourceRequest(req, res, resourceName) {
 
             // Encoding, Length
             var acceptEncoding = req.headers["accept-encoding"] || "";
-            if ((/\bgzip\b/.test(acceptEncoding) || req.isSpdy) && resource.gzip !== undefined) {
+            if ((/\bgzip\b/.test(acceptEncoding) || req.isSpdy) && resource.gzip && !config.debug) {
                 headers["Content-Encoding"] = "gzip";
                 headers["Content-Length"] = resource.gzip.length;
                 headers["Vary"] = "Accept-Encoding";
@@ -1231,36 +1218,25 @@ function watcherUpdate(event, p) {
 
 //-----------------------------------------------------------------------------
 // Watch and update style.css for debugging
-function watchCSS() {
-    fs.watch(path.join(paths.client, "/style.css"), updateCSS);
-}
-
-var lastUpdates = {};
-function updateCSS(event, filename, cb) {
-    if (!lastUpdates[filename] || Date.now() - lastUpdates[filename] > 1000) {
-        lastUpdates[filename] = Date.now();
-        setTimeout(function () { // Short timeout in case Windows still has the file locked
-            var css = "";
-
-            resources.files.css.forEach(function (file) {
-                css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
+function clientUpdate(filepath) {
+    setTimeout(function () { // prevent EBUSY on win32
+        if (/css$/.test(filepath)) {
+            cache.res["style.css"] = resources.compileCSS();
+            Object.keys(clients).forEach(function (cookie) {
+                send(clients[cookie].ws, JSON.stringify({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")}));
             });
-
-            css = ap.process(css).css;
-            cache.css = css;
-
-            if (typeof cb === "function") { // Initial cache seeding
-                cb();
-            } else {
-                Object.keys(clients).forEach(function (cookie) {
-                    send(clients[cookie].ws, JSON.stringify({
-                        "type"  : "UPDATE_CSS",
-                        "css"   : cache.css
-                    }));
-                });
-            }
-        }, 200);
-    }
+        } else if (/js$/.test(filepath)) {
+            cache.res["client.js"] = resources.compileJS();
+            Object.keys(clients).forEach(function (cookie) {
+                send(clients[cookie].ws, JSON.stringify({type: "RELOAD"}));
+            });
+        } else if (/html$/.test(filepath)) {
+            resources.compileHTML(cache.res);
+            Object.keys(clients).forEach(function (cookie) {
+                send(clients[cookie].ws, JSON.stringify({type: "RELOAD"}));
+            });
+        }
+    }, 100);
 }
 
 //-----------------------------------------------------------------------------

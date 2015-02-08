@@ -19,11 +19,10 @@ var async        = require("async"),
     zlib         = require("zlib");
 
 var doMinify,
-    etag         = crypto.createHash("md5").update(String(Date.now())).digest("hex"),
     themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 
-var minfierOptions = {
+var opts = {
     get uglify() {
         return {
             fromString: true,
@@ -53,7 +52,7 @@ var minfierOptions = {
     }
 };
 
-cleanCSS = new cleanCSS(minfierOptions.cleanCSS);
+cleanCSS = new cleanCSS(opts.cleanCSS);
 
 resources.files = {
         css: [
@@ -119,15 +118,15 @@ resources.init = function init(minify, callback) {
         var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
 
         Object.keys(results[1]).forEach(function (theme) {
-            cache.themes[theme] = {data: results[1][theme], etag: etag, mime: mime.lookup("css")};
+            cache.themes[theme] = {data: results[1][theme], etag: etag(), mime: mime.lookup("css")};
         });
 
         Object.keys(results[2]).forEach(function (mode) {
-            cache.modes[mode] = {data: results[2][mode], etag: etag, mime: mime.lookup("js")};
+            cache.modes[mode] = {data: results[2][mode], etag: etag(), mime: mime.lookup("js")};
         });
 
         Object.keys(results[3]).forEach(function (file) {
-            cache.lib[file] = {data: results[3][file], etag: etag, mime: mime.lookup(path.basename(file))};
+            cache.lib[file] = {data: results[3][file], etag: etag(), mime: mime.lookup(path.basename(file))};
         });
 
         addGzip(cache, function (err, cache) {
@@ -219,7 +218,7 @@ function readModes(callback) {
 
         async.map(Object.keys(modes), function (mode, cb) {
             fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
-                cb(err, doMinify ? new Buffer(uglify.minify(data.toString(), minfierOptions.uglify).code) : data);
+                cb(err, doMinify ? new Buffer(uglify.minify(data.toString(), opts.uglify).code) : data);
             });
         }, function (err, result) {
             Object.keys(modes).forEach(function (mode, i) {
@@ -242,81 +241,71 @@ function readLibs(callback) {
     });
 }
 
-function compileAll(callback) {
-    var resData  = {}, resCache = {},
-        out      = { css : "", js  : "" };
-
-    // Read resources
-    Object.keys(resources.files).forEach(function (type) {
-        resData[type] = resources.files[type].map(function read(file) {
-            var data;
-            try {
-                data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
-            } catch (error) {
-                return callback(error);
-            }
-            return data;
-        });
-    });
-
-    // Concatenate CSS
-    resData.css.forEach(function (data) {
-        out.css += data;
-    });
-
-    // Concatenate JS
-    resData.js.forEach(function (data) {
-        out.js += data + ";";
+resources.compileJS = function compileJS(minify) {
+    var js = "";
+    resources.files.js.forEach(function (file) {
+        js += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + ";";
     });
 
     // Add SVG object
-    var svgDir = paths.svg, svgData = {};
-    fs.readdirSync(svgDir).forEach(function (name) {
-        svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(svgDir, name), "utf8");
+    var svgData = {};
+    fs.readdirSync(paths.svg).forEach(function (name) {
+        svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(paths.svg, name), "utf8");
     });
-    out.js = out.js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
+    js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
     // Insert Templates Code
     var templateCode = "droppy.templates = {fn:{},views:{}};";
-    resData.templates.forEach(function (data, index) {
+    resources.files.templates.forEach(function (file, index) {
+        var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
         // Produce the doT functions
         templateCode += dottemplates
             .produceFunction("droppy.templates." + resources.files.templates[index].replace(/\.dotjs$/, "")
-            .split("/").slice(2).join("."), data);
+            .split("/").slice(2).join("."), data) + ";";
     });
-    templateCode += ";";
-    out.js = out.js.replace("/* {{ templates }} */", templateCode);
+    js = js.replace("/* {{ templates }} */", templateCode);
 
-    // Add CSS vendor prefixes
-    try {
-        out.css = autoprefixer.process(out.css).css;
-    } catch (e) {
-        return callback(e);
-    }
+    // Minify
+    if (minify) js = uglify.minify(js, opts.uglify).code;
 
-    // Minify JS and CSS
-    if (doMinify) {
-        out.js  = uglify.minify(out.js, minfierOptions.uglify).code;
-        out.css = cleanCSS.minify(out.css).styles;
-    }
+    return {data: new Buffer(js), etag: etag(), mime: mime.lookup("js")};
+};
 
-    // Read and minifiy HTML files
-    while (resources.files.html.length) {
-        var name = path.basename(resources.files.html.pop()),
-            data = resData.html.pop()
-                .replace(/\{\{version\}\}/gm, pkg.version)
-                .replace(/\{\{name\}\}/gm, pkg.name);
+resources.compileCSS = function compileCSS(minify) {
+    var css = "";
+    resources.files.css.forEach(function (file) {
+        css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + "\n";
+    });
 
-        if (doMinify) {
-            data = htmlMinifier.minify(data, minfierOptions.htmlMinifier);
-        }
+    // Venodor prefixes
+    css = autoprefixer.process(css).css;
 
-        resCache[name] = {data: new Buffer(data), etag: etag, mime: mime.lookup("html")};
-    }
+    // Minify
+    if (minify) css = cleanCSS.minify(css).styles;
 
+    return {data: new Buffer(css), etag: etag(), mime: mime.lookup("css")};
+};
 
-    resCache["client.js"] = {data: new Buffer(out.js), etag: etag, mime: mime.lookup("js")};
-    resCache["style.css"] = {data: new Buffer(out.css), etag: etag, mime: mime.lookup("css")};
+resources.compileHTML = function compileHTML(res, minify) {
+    resources.files.html.forEach(function (file) {
+        var name = path.basename(file);
+        var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
+            .replace(/\{\{version\}\}/gm, pkg.version)
+            .replace(/\{\{name\}\}/gm, pkg.name);
+
+        // Minify
+        if (minify) data = htmlMinifier.minify(data, opts.htmlMinifier);
+
+        res[name] = {data: new Buffer(data), etag: etag(), mime: mime.lookup("html")};
+    });
+    return res;
+};
+
+function compileAll(callback) {
+    var res = {};
+    res["client.js"] = resources.compileJS(doMinify);
+    res["style.css"] = resources.compileCSS(doMinify);
+    res = resources.compileHTML(res, doMinify);
 
     // Read misc files
     resources.files.other.forEach(function (file) {
@@ -331,13 +320,17 @@ function compileAll(callback) {
             callback(err);
         }
 
-        resCache[name] = {
+        res[name] = {
             data: data,
             etag: crypto.createHash("md5").update(String(date)).digest("hex"),
             mime: mime.lookup(name)
         };
     });
-    callback(null, resCache);
+    callback(null, res);
+}
+
+function etag () {
+    return crypto.createHash("md5").update(String(Date.now())).digest("hex");
 }
 
 exports = module.exports = resources;
