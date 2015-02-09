@@ -535,7 +535,7 @@
             if (event.keyCode === 13) form.submit();
         });
 
-        $(".remember").register("click", function (event) {
+        $(".remember").register("click", function () {
             $(".remember").toggleClass("checked");
             $("[name=remember]").attr("value", $(".remember").hasClass("checked") ? "1" : "");
         });
