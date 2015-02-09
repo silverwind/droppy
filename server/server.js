@@ -287,7 +287,7 @@ function setupSocket(server) {
 
             switch (msg.type) {
             case "REQUEST_SETTINGS":
-                send(clients[cookie].ws, JSON.stringify({ type : "SETTINGS", vId : vId, settings: {
+                sendObj(cookie, {type: "SETTINGS", vId: vId, settings: {
                     "debug"         : config.debug,
                     "demoMode"      : isDemo,
                     "public"        : config.public,
@@ -295,7 +295,7 @@ function setupSocket(server) {
                     "themes"        : Object.keys(cache.themes),
                     "modes"         : Object.keys(cache.modes),
                     "caseSensitive" : process.platform !== "win32"
-                }}));
+                }});
                 break;
             case "REQUEST_UPDATE":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
@@ -309,13 +309,13 @@ function setupSocket(server) {
                         return;
                     } else if (info.type === "f") {
                         clients[cookie].views[vId] = { file: path.basename(msg.data), directory: path.dirname(msg.data) };
-                        send(clients[cookie].ws, JSON.stringify({
+                        sendObj(cookie, {
                             type: "UPDATE_BE_FILE",
                             file: clients[cookie].views[vId].file,
                             folder: clients[cookie].views[vId].directory,
                             isFile: true,
                             vId: vId,
-                        }));
+                        });
                     } else {
                         clients[cookie].views[vId] = { file: null, directory: msg.data };
                         updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
@@ -341,28 +341,21 @@ function setupSocket(server) {
                 break;
             case "REQUEST_SHARELINK":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid share link request: " + msg.data);
-                var link,
-                    links = db.get("sharelinks");
+                var link, links = db.get("sharelinks");
 
                 // Check if we already have a link for that file
-                for (var l in links) {
-                    if (msg.data === links[l]) {
-                        sendLink(cookie, l, vId);
-                        return;
+                var hadLink = Object.keys(links).some(function (link) {
+                    if (msg.data === links[link]) {
+                        sendObj(cookie, {type: "SHARELINK", vId: vId, link: link});
+                        return true;
                     }
-                }
+                });
+                if (hadLink) break;
 
-                // Get a pseudo-random n-character lowercase string. The characters
-                // "l", "1", "i", "o", "0" characters are skipped for easier communication of links.
-                var chars = "abcdefghjkmnpqrstuvwxyz23456789";
-                do {
-                    link = "";
-                    while (link.length < config.linkLength)
-                        link += chars.charAt(Math.floor(Math.random() * chars.length));
-                } while (links[link]); // In case the RNG generates an existing link, go again
-                log.info(ws, null, "shareLink created: " + link + " -> " + msg.data);
+                link = utils.getLink(links, config.linkLength);
+                log.info(ws, null, "Share link created: " + link + " -> " + msg.data);
+                sendObj(cookie, {type: "SHARELINK", vId: vId, link: link});
                 links[link] = msg.data;
-                sendLink(cookie, link, vId);
                 db.set("sharelinks", links);
                 break;
             case "DELETE_FILE":
@@ -391,7 +384,7 @@ function setupSocket(server) {
                     if (error && error.code !== "ENOENT") {
                         log.error("Error saving " + msg.data.to);
                         log.error(error);
-                        send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Error saving " + msg.data.to + ": " + error}));
+                        sendObj(cookie, {type: "ERROR", vId: vId, text: "Error saving " + msg.data.to + ": " + error});
                     } else {
                         fs.writeFile(msg.data.to, msg.data.value, function (error) {
                             if (error) {
@@ -411,7 +404,7 @@ function setupSocket(server) {
                 if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
                 if (msg.data.to.indexOf(msg.data.from + "/") !== -1 && msg.data.to !== msg.data.from) {
                     log.error("Can't copy directory into itself");
-                    send(clients[cookie].ws, JSON.stringify({ vId: vId, type: "ERROR", text: "Can't copy directory into itself."}));
+                    sendObj(cookie, {type: "ERROR", vId: vId, text: "Can't copy directory into itself."});
                     return;
                 }
 
@@ -449,7 +442,7 @@ function setupSocket(server) {
                 // Disallow whitespace-only and empty strings in renames
                 if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
                     log.info(ws, null, "Invalid rename request: " + msg.data.new);
-                    send(clients[cookie].ws, JSON.stringify({ type: "ERROR", text: "Invalid rename request"}));
+                    sendObj(cookie, {type: "ERROR", text: "Invalid rename request"});
                     return;
                 }
                 fs.rename(utils.addFilesPath(msg.data.old), utils.addFilesPath(msg.data.new), function (error) {
@@ -462,7 +455,7 @@ function setupSocket(server) {
                     sendUsers(cookie);
                 } else {
                     // Send an empty user list so the client know not to display the management options
-                    send(clients[cookie].ws, JSON.stringify({ type : "USER_LIST", users : {} }));
+                    sendObj(cookie, {type: "USER_LIST", users: {}});
                 }
                 break;
             case "UPDATE_USER":
@@ -501,7 +494,7 @@ function setupSocket(server) {
                         });
                     }, function (err) {
                         if (err) log.error(ws, null, err);
-                        if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                        if (msg.data.isUpload) sendObj(cookie,{type: "UPLOAD_DONE", vId: vId});
                     }
                 );
                 break;
@@ -513,7 +506,7 @@ function setupSocket(server) {
                         utils.mkdir(utils.addFilesPath(folder), callback);
                     }, function (err) {
                         if (err) log.error(ws, null, err);
-                        if (msg.data.isUpload) send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : vId }));
+                        if (msg.data.isUpload) sendObj(cookie, {type: "UPLOAD_DONE", vId: vId});
                     }
                 );
                 break;
@@ -564,35 +557,34 @@ function sendFiles(cookie, vId, eventType, sizes) {
             data   : dirs[dir]
         };
     if (sizes) data.sizes = true;
-    send(clients[cookie].ws, JSON.stringify(data));
-}
-
-//-----------------------------------------------------------------------------
-// Send a file link to a client
-function sendLink(cookie, link, vId) {
-    if (!clients[cookie] || !clients[cookie].ws) return;
-    send(clients[cookie].ws, JSON.stringify({
-        vId  : vId,
-        type : "SHARELINK",
-        link : link
-    }));
+    sendObj(cookie, data);
 }
 
 //-----------------------------------------------------------------------------
 // Send a list of users on the server
 function sendUsers(cookie) {
-    if (!clients[cookie] || !clients[cookie].ws) return;
     var userDB   = db.get("users"),
         userlist = {};
 
     Object.keys(userDB).forEach(function (user) {
         userlist[user] = userDB[user].privileged || false;
     });
+    sendObj(cookie, {type: "USER_LIST", users: userlist});
+}
 
-    send(clients[cookie].ws, JSON.stringify({
-        type  : "USER_LIST",
-        users : userlist
-    }));
+//-----------------------------------------------------------------------------
+// Send js object to single client identified by its session cooke
+function sendObj(cookie, data) {
+    if (!clients[cookie] || !clients[cookie].ws) return;
+    send(clients[cookie].ws, JSON.stringify(data));
+}
+
+//-----------------------------------------------------------------------------
+// Send js object to all clients
+function sendObjAll(data) {
+    Object.keys(clients).forEach(function (cookie) {
+        send(clients[cookie].ws, JSON.stringify(data));
+    });
 }
 
 //-----------------------------------------------------------------------------
@@ -1046,7 +1038,7 @@ function handleUploadRequest(req, res) {
         res.setHeader("Content-Type", "text/plain");
         res.setHeader("Connection", "close");
         res.end();
-        send(clients[cookie].ws, JSON.stringify({ type : "UPLOAD_DONE", vId : parseInt(req.query.vId, 10) }));
+        sendObj(cookie, {type: "UPLOAD_DONE", vId: parseInt(req.query.vId, 10)});
     }
 }
 
@@ -1222,19 +1214,13 @@ function clientUpdate(filepath) {
     setTimeout(function () { // prevent EBUSY on win32
         if (/css$/.test(filepath)) {
             cache.res["style.css"] = resources.compileCSS();
-            Object.keys(clients).forEach(function (cookie) {
-                send(clients[cookie].ws, JSON.stringify({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")}));
-            });
+            sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
         } else if (/js$/.test(filepath)) {
             cache.res["client.js"] = resources.compileJS();
-            Object.keys(clients).forEach(function (cookie) {
-                send(clients[cookie].ws, JSON.stringify({type: "RELOAD"}));
-            });
+            sendObjAll({type: "RELOAD"});
         } else if (/html$/.test(filepath)) {
             resources.compileHTML(cache.res);
-            Object.keys(clients).forEach(function (cookie) {
-                send(clients[cookie].ws, JSON.stringify({type: "RELOAD"}));
-            });
+            sendObjAll({type: "RELOAD"});
         }
     }, 100);
 }

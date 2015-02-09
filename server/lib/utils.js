@@ -91,6 +91,19 @@ utils.getExt = function getExt(filename) {
         return filename;
 };
 
+// Get a pseudo-random n-character lowercase string. The characters
+// "l", "1", "i", "o", "0" characters are skipped for easier communication of links.
+utils.getLink = function getLink(links, length) {
+    var chars = "abcdefghjkmnpqrstuvwxyz23456789", link = "";
+    do {
+        while (link.length < length) {
+            link += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+    } while (links[link]); // In case the RNG generates an existing link, go again
+
+    return link;
+};
+
 utils.getNewPath = function getNewPath(origPath, callback) {
     fs.stat(origPath, function (err, stats) {
         if (err) callback(origPath);
