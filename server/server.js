@@ -13,8 +13,7 @@ var pkg        = require("./../package.json"),
     utils      = require("./lib/utils.js"),
     watcher    = require("./lib/watcher.js");
 
-var ap         = require("autoprefixer-core"),
-    async      = require("async"),
+var async      = require("async"),
     Busboy     = require("busboy"),
     chalk      = require("chalk"),
     cpr        = require("cpr"),
@@ -55,7 +54,6 @@ var droppy = function droppy(options, isStandalone, callback) {
                 config = conf; cb(err);
             });
         },
-        function (cb) { watcher.init(config.readInterval, watcherUpdate); cb(); },
         function (cb) { db.init(cb); },
     ], function (err) {
         if (err) return callback(err);
@@ -75,7 +73,8 @@ var droppy = function droppy(options, isStandalone, callback) {
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
             function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); }); cb(); },
-            function (cb) { if (config.debug) watcher.watchResources(clientUpdate); cb(); }
+            function (cb) { if (config.debug) watcher.watchResources(config.readInterval, clientUpdate); cb(); },
+            function (cb) { watcher.watchFiles(config.readInterval, filesUpdate); cb(); },
         ], function (err) {
             if (err) return callback(err);
             if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
@@ -321,23 +320,17 @@ function setupSocket(server) {
                         updateDirectory(clients[cookie].views[vId].directory, function (sizes) {
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                         });
-                        watcher.updateWatchers(clients[cookie].views[vId].directory, clients, function (success) {
-                            // Send client back to / in case the directory can't be read
-                            if (!success) sendToRoot(cookie, vId);
-                        });
                     }
                     function sendToRoot(cookie, vId) {
                         clients[cookie].views[vId] = { file: null, directory: "/" };
                         updateDirectory("/", function (sizes) {
                             sendFiles(cookie, vId, "UPDATE_DIRECTORY", sizes);
                         });
-                        watcher.updateWatchers("/", clients);
                     }
                 });
                 break;
             case "DESTROY_VIEW":
                 clients[cookie].views[vId] = null;
-                watcher.checkWatchedDirs(clients);
                 break;
             case "REQUEST_SHARELINK":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid share link request: " + msg.data);
@@ -1187,10 +1180,10 @@ setInterval(function hourly() {
 
 //-----------------------------------------------------------------------------
 // Update clients on file changes
-function watcherUpdate(event, p) {
-    var dir = path.dirname(p);
+function filesUpdate(p) {
+    var dir = path.dirname(p), file = path.basename(p);
     dir = (dir === ".") ? "/" : "/" + dir;
-    log.debug("Watcher event: " + chalk.blue("'" + event + "'") + " in ", chalk.blue(dir));
+    log.debug("Watcher update: " + chalk.blue(dir + ((dir !== "/") ? "/" : "")) + chalk.green(file));
     var clientsToUpdate = [];
     Object.keys(clients).forEach(function (cookie) {
         clients[cookie].views.forEach(function (view, vId) {
@@ -1209,7 +1202,7 @@ function watcherUpdate(event, p) {
 }
 
 //-----------------------------------------------------------------------------
-// Watch and update style.css for debugging
+// Update client directory on changes
 function clientUpdate(filepath) {
     setTimeout(function () { // prevent EBUSY on win32
         if (/css$/.test(filepath)) {
