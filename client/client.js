@@ -306,7 +306,7 @@
             initAuthPage(type === "firstrun");
             raf(function () {
                 oldPage.replaceClass("in", "out").end(function () {
-                    $("#center-box").replaceClass("out", "in"); // remove out class
+                    $("#login-box").replaceClass("out", "in"); // remove out class
                 });
                 if (type === "firstrun") {
                     $("#login-info").text("Hello! Choose your creditentials.");
@@ -527,52 +527,30 @@
 //  Authentication page
 // ============================================================================
     function initAuthPage(firstrun) {
-        var submit    = $("#submit"),
-            checkbox  = $("#remember-checkbox"),
-            form      = $("#form");
+        var form = $("#form");
 
-        // Auto-focus the user input on load
         $("#user").focus();
 
-        // Remove invalid class on user action
-        $(".login-input").register("click keydown", function () {
-            $("#login-info-box").removeClass("link error");
-            $("#login-info").text("droppy");
-        });
-
-        // Return submits the form
         $("#pass").register("keydown", function (event) {
-            if (event.keyCode === 13) {
-                form.submit();
-            }
+            if (event.keyCode === 13) form.submit();
         });
 
-        // Spacebar toggles the checkbox
-        $("#remember").register("keydown", function (event) {
-            if (event.keyCode === 32)
-                checkbox.prop("checked", !checkbox.prop("checked"));
-        });
-        // Catch clicks outside the label
-        $("#remember").register("click", function (event) {
-            if ($(event.target).attr("id") === "remember")
-                checkbox.prop("checked", !checkbox.prop("checked"));
+        $(".remember").register("click", function (event) {
+            $(".remember").toggleClass("checked");
+            $("[name=remember]").attr("value", $(".remember").hasClass("checked") ? "1" : "");
         });
 
-        submit.register("click", function () { form.submit(); });
-        form.register("submit", function () {
+        $(".submit").register("click", function () {
+            form.submit();
+        });
+
+        $("#form").register("submit", function () {
             $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
                 if (xhr.status  === 202) {
                     window.location.reload(true);
                 } else if (xhr.status === 401) {
                     $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
-                    if ($("#login-info-box").hasClass("error")) {
-                        $("#login-info").addClass("shake");
-                        setTimeout(function () {
-                            $("#login-info").removeClass("shake");
-                        }, 500);
-                    } else {
-                        $("#login-info-box").attr("class", "error");
-                    }
+                    $("#login-info-box").attr("class", "error");
                     if (!firstrun) $("#pass").val("").focus();
                 }
             });
