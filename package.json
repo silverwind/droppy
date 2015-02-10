@@ -59,11 +59,12 @@
     "grunt-contrib-jshint": "^0.11.0",
     "grunt-shell": "^1.1.1"
   },
-  "directories": {
-    "lib": "lib",
-    "res": "res",
-    "src": "src"
-  },
+  "files" : [
+    "client",
+    "server",
+    "droppy.js",
+    "exports.js"
+  ],
   "engines": {
     "node": ">0.10.0",
     "iojs": ">1.1.0",
