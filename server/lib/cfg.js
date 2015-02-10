@@ -40,6 +40,7 @@ cfg.init = function (config, callback) {
                 }
             ],
             "public"     : true,
+            "logLevel"   : 3,
             "timestamps" : false
         }, defaults);
         callback(null, config);
