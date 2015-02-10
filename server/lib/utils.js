@@ -104,6 +104,12 @@ utils.getLink = function getLink(links, length) {
     return link;
 };
 
+// Get a unique string, used to identify websocket session
+utils.newSid = function getSid() {
+    var hrtime = process.hrtime();
+    return String(hrtime[0] + hrtime[1]);
+};
+
 utils.getNewPath = function getNewPath(origPath, callback) {
     fs.stat(origPath, function (err, stats) {
         if (err) callback(origPath);
