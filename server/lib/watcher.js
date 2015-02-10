@@ -34,6 +34,10 @@ watcher.watchResources = function watchResources(interval, cb) {
 watcher.watchFiles = function watchFiles(interval, cb) {
     cb = _.throttle(cb, interval, {leading: false, trailing: true});
 
+    if (process.env.NODE_ENV === "droppydemo") {
+        opts.files.usePolling = true;
+    }
+
     chokidar.watch(".", opts.files)
         .on("add", cb)
         .on("addDir", cb)
