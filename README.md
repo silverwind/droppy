@@ -20,7 +20,7 @@ $ droppy start
 ```
 droppy's home folder will be created in `~/.droppy` unless the `--home` option is provided. To edit the config, run `droppy config` after the server has started up at least once to generate the config file.
 
-Once intialized, the server will listen by default on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
+Once initialized, the server will by default listen on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
 
 ### Configuration
 `config/config.json` is created with these defaults:
