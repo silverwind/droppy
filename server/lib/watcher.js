@@ -32,7 +32,7 @@ watcher.watchResources = function watchResources(interval, usePolling, cb) {
 };
 
 watcher.watchFiles = function watchFiles(interval, usePolling, cb) {
-    cb = _.throttle(cb, interval, {leading: false, trailing: true});
+    cb = _.throttle(cb, interval, {leading: true, trailing: true});
 
     opts.files.usePolling = usePolling;
 
