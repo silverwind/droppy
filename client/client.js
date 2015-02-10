@@ -819,11 +819,19 @@
         // Create the XHR2 and bind the progress events
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", function (event) { uploadProgress(view, event); });
-        xhr.upload.addEventListener("load", function () { uploadDone(view); });
         xhr.upload.addEventListener("error", function (event) {
             if (event && event.message) console.info(event.message);
             showError(view, "An error occured during upload");
             uploadCancel(view);
+        });
+        xhr.addEventListener("readystatechange", function () {
+            if (xhr.readyState !== 4) return;
+            if (xhr.status === 200) {
+                uploadDone(view);
+            } else {
+                showError(view, "Server responded with HTTP " + xhr.status);
+                uploadCancel(view);
+            }
         });
 
         $(".upload-cancel").register("click", function () {
