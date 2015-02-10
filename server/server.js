@@ -27,7 +27,7 @@ var crypto     = require("crypto"),
     qs         = require("querystring");
 
 var cache      = {},
-    clients    = [],
+    clients    = {},
     dirs       = {},
     config     = null,
     firstRun   = null,
@@ -922,7 +922,7 @@ function handleUploadRequest(req, res) {
 
     req.query = qs.parse(req.url.substring("/upload?".length));
 
-    if (!cookies.get(cookie) && !config.public) {
+    if (!cookie && !config.public) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();
@@ -1022,7 +1022,7 @@ function handleUploadRequest(req, res) {
         res.end();
 
         // find websocket sid of the client and send the final event
-        clients.forEach(function (sid) {
+        Object.keys(clients).forEach(function (sid) {
             if (clients[sid].cookie === cookie) {
                 sendObj(sid, {type: "UPLOAD_DONE", vId: parseInt(req.query.vId, 10)});
             }
