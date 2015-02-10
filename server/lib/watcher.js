@@ -20,7 +20,9 @@ var opts = {
     }
 };
 
-watcher.watchResources = function watchResources(interval, cb) {
+watcher.watchResources = function watchResources(interval, usePolling, cb) {
+    opts.client.usePolling = usePolling;
+
     chokidar.watch(".", opts.client)
         .on("error", log.error)
         .on("change", _.throttle(cb, interval, {leading: true, trailing: true}))
@@ -29,14 +31,10 @@ watcher.watchResources = function watchResources(interval, cb) {
         });
 };
 
-
-
-watcher.watchFiles = function watchFiles(interval, cb) {
+watcher.watchFiles = function watchFiles(interval, usePolling, cb) {
     cb = _.throttle(cb, interval, {leading: false, trailing: true});
 
-    if (process.env.NODE_ENV === "droppydemo") {
-        opts.files.usePolling = true;
-    }
+    opts.files.usePolling = usePolling;
 
     chokidar.watch(".", opts.files)
         .on("add", cb)

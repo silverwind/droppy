@@ -41,7 +41,8 @@ Once intialized, the server will listen by default on [http://localhost:8989/](h
   "maxOpen"      : 256,
   "public"       : false,
   "readInterval" : 250,
-  "timestamps"   : true
+  "timestamps"   : true,
+  "usePolling"   : false
 }
 ```
 ### Options
@@ -54,7 +55,8 @@ Once intialized, the server will listen by default on [http://localhost:8989/](h
 - `maxOpen` {Number} - The maximum number of concurrently opened files. This number should only be of concern on Windows.
 - `public` {Boolean} - When enabled, no authentication is performed.
 - `readInterval` {Number} - The minimum time gap in milliseconds in which updates to a single directory are sent.
-- `timestamps` {Boolean} -When enabled, adds timestamps to log output.
+- `timestamps` {Boolean} - When enabled, adds timestamps to log output.
+- `usePolling` {Boolean} - On certain conditions (home mounted through NFS, or running on hosted node), realtime updates may not work. This switch should make it more reliable in these cases, at the cost of CPU cycles.
 
 <a name="listener" />
 ### Listener Object

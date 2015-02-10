@@ -22,6 +22,7 @@ var cfg        = {},
         "maxOpen"      : 256,
         "public"       : false,
         "readInterval" : 250,
+        "usePolling"   : false,
         "timestamps"   : true
     };
 
@@ -41,7 +42,8 @@ cfg.init = function (config, callback) {
             ],
             "public"     : true,
             "logLevel"   : 3,
-            "timestamps" : false
+            "timestamps" : false,
+            "usePolling" : true
         }, defaults);
         callback(null, config);
     } else {
