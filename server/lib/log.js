@@ -108,10 +108,12 @@ log.error = function error(err) {
 };
 
 log.simple = function simple() {
+    if (opts && opts.logLevel < 2) return;
     log(null, null, 0, chalk.magenta("->> ") + Array.prototype.slice.call(arguments, 0).join(""));
 };
 
 log.plain = function plain() {
+    if (opts && opts.logLevel < 2) return;
     log(null, null, 0, Array.prototype.slice.call(arguments, 0).join(""));
 };
 

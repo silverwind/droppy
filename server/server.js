@@ -51,7 +51,8 @@ var droppy = function droppy(options, isStandalone, callback) {
                         callback(err);
                     }
                 }
-                config = conf; cb(err);
+                config = conf;
+                cb(err);
             });
         },
         function (cb) { db.init(cb); },
