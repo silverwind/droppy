@@ -444,7 +444,7 @@ function setupSocket(server) {
                 });
                 break;
             case "GET_USERS":
-                if (db.get("sessions")[sid].privileged) {
+                if (db.get("sessions")[cookie] && db.get("sessions")[cookie].privileged) {
                     sendUsers(sid);
                 } else {
                     // Send an empty user list so the client know not to display the management options
