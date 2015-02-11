@@ -118,7 +118,7 @@ app.listen(8000);
 Returns `function onRequest(req, res)`. All arguments are optional.
 
 ### Proxying
-droppy can also be ran behind any reverse proxy, as long as WebSockets are supported. For examples of an fitting nginx configuration, see the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation) installations.
+droppy canbe ran behind a reverse proxy as long as WebSockets are passing through. For examples of an fitting nginx configuration, see the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
 
 ### **wget** compatibilty
 For shared links to be compatible with wget, set `content-disposition = on` in `~/.wgetrc`.
