@@ -1175,10 +1175,25 @@ setInterval(function hourly() {
 
 //-----------------------------------------------------------------------------
 // Update clients on file changes
-function filesUpdate(p) {
-    var dir = path.dirname(p), file = path.basename(p);
-    dir = (dir === ".") ? "/" : "/" + dir;
-    log.debug("Watcher update: " + chalk.blue(dir + ((dir !== "/") ? "/" : "")) + chalk.green(file));
+function filesUpdate(type, event, p) {
+    p = utils.normalizePath(p);              // Remove OS inconsistencies
+    p = (p === ".") ? "/" : "/" + p;         // Prefix "/"
+
+    log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(p));
+
+    var dirToUpdate;
+    if (type === "dir") { // "addDir" or "unlinkDir" - update the parent folder
+        if (p === "/") return; // Should never happen
+        dirToUpdate = path.resolve(p, "..");
+    } else { // "add", "unlink" or "change" - update the parent folder
+        dirToUpdate = path.dirname(p);
+    }
+    updateClientsInDir(dirToUpdate);
+}
+
+//-----------------------------------------------------------------------------
+// Update all clients in specified dir
+function updateClientsInDir(dir) {
     var clientsToUpdate = [];
     Object.keys(clients).forEach(function (sid) {
         clients[sid].views.forEach(function (view, vId) {

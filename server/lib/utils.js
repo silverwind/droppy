@@ -163,20 +163,20 @@ utils.copyFile = function copyFile(source, target, cb) {
     }
 };
 
-function normalize(p) {
+utils.normalizePath = function normalizePath(p) {
     return p.replace(/[\\|\/]+/g, "/");
-}
+};
 
 utils.addFilesPath = function addFilesPath(p) {
     return path.join(paths.files + "/" + p);
 };
 
 utils.removeFilesPath = function removeFilesPath(p) {
-    return normalize("/" + path.relative(paths.files, p));
+    return utils.normalizePath("/" + path.relative(paths.files, p));
 };
 
 utils.relativeZipPath = function removeFilesPath(p) {
-    return normalize(path.relative(normalize(paths.files), normalize(p)));
+    return utils.normalizePath(path.relative(utils.normalizePath(paths.files), utils.normalizePath(p)));
 };
 
 utils.isPathSane = function isPathSane(name) {

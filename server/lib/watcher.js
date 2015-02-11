@@ -18,7 +18,6 @@ var opts = {
         alwaysStat    : true,
         ignoreInitial : true
     },
-    interval: 50
 };
 
 watcher.watchResources = function watchResources(usePolling, cb) {
@@ -26,23 +25,21 @@ watcher.watchResources = function watchResources(usePolling, cb) {
 
     chokidar.watch(".", opts.client)
         .on("error", log.error)
-        .on("change", _.throttle(cb, opts.interval, {leading: true, trailing: true}))
+        .on("change", cb)
         .on("ready", function () {
             log.info("Watching " + chalk.blue(opts.client.cwd) + " for changes.");
         });
 };
 
 watcher.watchFiles = function watchFiles(usePolling, cb) {
-    cb = _.throttle(cb, opts.interval, {leading: true, trailing: true});
-
     opts.files.usePolling = usePolling;
 
     chokidar.watch(".", opts.files)
-        .on("add", cb)
-        .on("addDir", cb)
-        .on("change", cb)
-        .on("unlink", cb)
-        .on("unlinkDir", cb)
+        .on("add", cb.bind(null, "file", "add"))
+        .on("unlink", cb.bind(null, "file", "unlink"))
+        .on("change", cb.bind(null, "file", "change"))
+        .on("addDir", cb.bind(null, "dir", "addDir"))
+        .on("unlinkDir", cb.bind(null, "dir", "unlinkDir"))
         .on("error", log.error)
         .on("ready", function () {
             log.info("Watching " + chalk.blue(opts.files.cwd) + " for changes.");
