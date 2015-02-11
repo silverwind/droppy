@@ -1171,23 +1171,26 @@ html:not(.mobile) .vjs-big-play-button {
 #about-box.out { transform: translate(-50%, -50%) scale(1.1); opacity: 0; visibility: hidden }
 
 #about-content {
+    color: #333;
     margin-left: 5%;
     width: 90%;
+    text-align: center;
 }
 
 #about-title {
-    color: #333;
-    font-size: 1.5em;
-    margin-top: .6em;
-    margin-bottom: .25em;
-    width: 100%;
-    text-align: center;
+    font-size: 1.2em;
+    margin-top: .33em;
+}
+
+#about-engine {
+    font-size: .7em;
+    margin: .33em 0;
 }
 
 #about-copy {
     bottom: 0;
     font-size: .6em;
-    margin-bottom: 6px;
+    margin-bottom: .5em;
     position: absolute;
 }
 
@@ -1198,16 +1201,21 @@ html:not(.mobile) .vjs-big-play-button {
     height: 1em;
     margin-bottom: 0.25em;
 }
-#about-box #about-copy a { color: #555 }
-#about-box #about-copy a:hover { text-decoration: underline; }
+#about-box #about-copy a {
+    padding: 0 .2em;
+    border: 1px solid transparent;
+}
 
 #about-fork {
     font-size: .66em;
     color: #333;
-    padding: .1em .5em .1em 0;
-    border-radius: .5em;
+    padding-right: .4em;
+    border-radius: .4em;
 }
-#about-fork:hover { border: 1px solid #999; background: #fff; }
+#about-fork:hover, #about-box #about-copy a:hover {
+    background: #fff;
+    border-radius: .4em;
+}
 
 /* ================================= Prefs ================================ */
 

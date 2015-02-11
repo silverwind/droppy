@@ -17,6 +17,7 @@ var async      = require("async"),
     Busboy     = require("busboy"),
     chalk      = require("chalk"),
     cpr        = require("cpr"),
+    engine     = require("detect-engine"),
     fs         = require("graceful-fs"),
     mv         = require("mv"),
     Wss        = require("websocket").server,
@@ -36,7 +37,13 @@ var cache      = {},
     isDemo     = process.env.NODE_ENV === "droppydemo";
 
 var droppy = function droppy(options, isStandalone, callback) {
-    if (isStandalone) printLogo();
+    if (isStandalone) {
+        log.logo();
+        log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
+                chalk.blue(engine), " ", chalk.green(process.version.substring(1)), "\n ",
+                chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
+    }
+
     setupProcess(isStandalone);
 
     async.series([
@@ -113,14 +120,6 @@ function onRequest(req, res, next) {
 
 droppy._onRequest = onRequest;
 exports = module.exports = droppy;
-
-function printLogo() {
-    log.logo();
-    log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version),
-               " running on ", chalk.blue(process.argv[0] || "node"), " ",
-               chalk.green(process.version.substring(1)), "\n ",
-               chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
-}
 
 function startListeners(callback) {
     var listeners = config.listeners, sockets = [];

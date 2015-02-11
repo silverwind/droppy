@@ -291,7 +291,8 @@ resources.compileHTML = function compileHTML(res, minify) {
         var name = path.basename(file);
         var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
             .replace(/\{\{version\}\}/gm, pkg.version)
-            .replace(/\{\{name\}\}/gm, pkg.name);
+            .replace(/\{\{name\}\}/gm, pkg.name)
+            .replace(/\{\{engine\}\}/gm, require("detect-engine") + " " + process.version.substring(1));
 
         // Minify
         if (minify) data = htmlMinifier.minify(data, opts.htmlMinifier);
