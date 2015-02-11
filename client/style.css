@@ -68,7 +68,7 @@ input:-webkit-autofill {
     order: 1;
     flex: 0 0 auto;
     z-index: 2;
-    transition: transform .3s ease;
+    transition: transform .3s ease, filter .15s ease;
 }
 
 #navigation.out {
@@ -131,7 +131,6 @@ input:-webkit-autofill {
 #view-container {
     flex: 1 1;
     order: 2;
-    transition: all .2s ease;
     overflow-y: auto;
 }
 
@@ -148,6 +147,7 @@ input:-webkit-autofill {
     width: 100%;
     height: 100%;
     position: relative;
+    transition: filter .15s ease;
     flex: 1;
     order: 2;
 }
@@ -204,6 +204,8 @@ input:-webkit-autofill {
     flex-direction: column;
 }
 
+.blur { filter: blur(2px) }
+
 /* ================================== Path ================================= */
 
 .path {
@@ -212,6 +214,7 @@ input:-webkit-autofill {
    white-space: nowrap;
    width: 100%;
    position: absolute;
+   transition: filter .15s ease;
    z-index: 1;
    flex: 0 0 1.5rem;
    order: 1;
@@ -348,8 +351,8 @@ input:-webkit-autofill {
     user-select: none;
 }
 
-#click-catcher.out { opacity: 0  ; visibility: hidden }
-#click-catcher.in  { opacity: .25 ; visibility: visible }
+#click-catcher.out { opacity: 0   ; visibility: hidden  }
+#click-catcher.in  { opacity: .33 ; visibility: visible }
 
 .file-header {
     display: flex;
@@ -1056,7 +1059,7 @@ html:not(.mobile) .vjs-big-play-button {
     order: 3;
     display: flex;
     position: relative;
-    transition: flex-basis .2s ease;
+    transition: flex-basis .2s ease, filter .15s ease;
     width: 100%;
     user-select: none;
     overflow: hidden;

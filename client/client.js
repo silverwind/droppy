@@ -604,6 +604,18 @@
             });
         });
 
+
+        if ("MutationObserver" in window) {
+            new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === "class") {
+                        var action = $("#click-catcher").hasClass("in") ? "addClass" : "removeClass";
+                        $("#navigation, .path, .content-container, .audio-bar")[action]("blur");
+                    }
+                });
+            }).observe(document.querySelector("#click-catcher"), {attributes: true});
+        }
+
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
             var files, path, name,
