@@ -1,7 +1,6 @@
 "use strict";
 
 var watcher  = {},
-    _        = require("lodash"),
     chokidar = require("chokidar"),
     chalk    = require("chalk"),
     log      = require("./log.js"),
