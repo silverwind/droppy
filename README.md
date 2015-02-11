@@ -45,7 +45,7 @@ Once initialized, the server will by default listen on [http://localhost:8989/](
 }
 ```
 ### Options
-- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See the [`listener` object](#listener) below for details. `listeners` has no effect when droppy is used as a module.
+- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See the details of the [listener object](#listener-object) below. `listeners` has no effect when droppy is used as a module.
 - `debug` {Boolean} - When enabled, skips resource minification and enables CSS reloading.
 - `keepAlive` {Number} - The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
 - `linkLength` {Number} - The amount of characters in a share link.
@@ -56,7 +56,7 @@ Once initialized, the server will by default listen on [http://localhost:8989/](
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
 - `usePolling` {Boolean} - On certain conditions (home mounted through NFS, or running on hosted node), realtime updates may not work. This switch should make it more reliable in these cases, at the cost of CPU cycles.
 
-<a name="listener" />
+<a name="listener-object" />
 ### Listener Object
 
 `listeners` defines on which interfaces, ports and protcol the server will listen. For example:
