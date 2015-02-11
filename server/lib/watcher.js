@@ -17,22 +17,23 @@ var opts = {
         cwd           : paths.client,
         alwaysStat    : true,
         ignoreInitial : true
-    }
+    },
+    interval: 50
 };
 
-watcher.watchResources = function watchResources(interval, usePolling, cb) {
+watcher.watchResources = function watchResources(usePolling, cb) {
     opts.client.usePolling = usePolling;
 
     chokidar.watch(".", opts.client)
         .on("error", log.error)
-        .on("change", _.throttle(cb, interval, {leading: true, trailing: true}))
+        .on("change", _.throttle(cb, opts.interval, {leading: true, trailing: true}))
         .on("ready", function () {
             log.info("Watching " + chalk.blue(opts.client.cwd) + " for changes.");
         });
 };
 
-watcher.watchFiles = function watchFiles(interval, usePolling, cb) {
-    cb = _.throttle(cb, interval, {leading: true, trailing: true});
+watcher.watchFiles = function watchFiles(usePolling, cb) {
+    cb = _.throttle(cb, opts.interval, {leading: true, trailing: true});
 
     opts.files.usePolling = usePolling;
 

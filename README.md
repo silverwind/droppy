@@ -40,13 +40,12 @@ Once initialized, the server will by default listen on [http://localhost:8989/](
   "maxFileSize"  : 0,
   "maxOpen"      : 256,
   "public"       : false,
-  "readInterval" : 250,
   "timestamps"   : true,
   "usePolling"   : false
 }
 ```
 ### Options
-- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See [`listener` object](#listener) below for details. `listeners` has no effect when droppy is used as a module.
+- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See the [`listener` object](#listener) below for details. `listeners` has no effect when droppy is used as a module.
 - `debug` {Boolean} - When enabled, skips resource minification and enables CSS reloading.
 - `keepAlive` {Number} - The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
 - `linkLength` {Number} - The amount of characters in a share link.
@@ -54,7 +53,6 @@ Once initialized, the server will by default listen on [http://localhost:8989/](
 - `maxFileSize` {Number} - The maximum file size in bytes a user can upload in a single file.
 - `maxOpen` {Number} - The maximum number of concurrently opened files. This number should only be of concern on Windows.
 - `public` {Boolean} - When enabled, no authentication is performed.
-- `readInterval` {Number} - The minimum time gap in milliseconds in which updates to a single directory are sent.
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
 - `usePolling` {Boolean} - On certain conditions (home mounted through NFS, or running on hosted node), realtime updates may not work. This switch should make it more reliable in these cases, at the cost of CPU cycles.
 

@@ -21,7 +21,6 @@ var cfg        = {},
         "maxFileSize"  : 0,
         "maxOpen"      : 256,
         "public"       : false,
-        "readInterval" : 250,
         "usePolling"   : false,
         "timestamps"   : true
     };
@@ -95,7 +94,7 @@ function write(config, callback) {
 }
 
 function migrate(config) {
-    var oldProps = ["host", "port", "useTLS", "useSPDY", "useHSTS"];
+    var oldProps = ["host", "port", "useTLS", "useSPDY", "useHSTS", "readInterval"];
 
     var needToMigrate = oldProps.every(function (prop) {
         return config.hasOwnProperty(prop);
@@ -108,13 +107,11 @@ function migrate(config) {
             "protocol" : config.useSPDY ? "spdy" : config.useTLS ? "https" : "http",
             "hsts"     : config.useHSTS ? 31536000 : 0
         }];
-        oldProps.forEach(function (prop) {
-            delete config[prop];
-        });
-        return config;
-    } else {
-        return config;
     }
+    oldProps.forEach(function (prop) {
+        delete config[prop];
+    });
+    return config;
 }
 
 exports = module.exports = cfg;

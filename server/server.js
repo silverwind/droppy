@@ -74,8 +74,8 @@ var droppy = function droppy(options, isStandalone, callback) {
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
             function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); }); cb(); },
-            function (cb) { if (config.debug) watcher.watchResources(config.readInterval, config.usePolling, clientUpdate); cb(); },
-            function (cb) { watcher.watchFiles(config.readInterval, config.usePolling, filesUpdate); cb(); },
+            function (cb) { if (config.debug) watcher.watchResources(config.usePolling, clientUpdate); cb(); },
+            function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); },
         ], function (err) {
             if (err) return callback(err);
             if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
