@@ -13,7 +13,8 @@ var pkg        = require("./../package.json"),
     utils      = require("./lib/utils.js"),
     watcher    = require("./lib/watcher.js");
 
-var async      = require("async"),
+var _          = require("lodash"),
+    async      = require("async"),
     Busboy     = require("busboy"),
     chalk      = require("chalk"),
     cpr        = require("cpr"),
@@ -27,14 +28,17 @@ var crypto     = require("crypto"),
     path       = require("path"),
     qs         = require("querystring");
 
-var cache      = {},
-    clients    = {},
-    dirs       = {},
-    config     = null,
-    firstRun   = null,
-    hasServer  = null,
-    ready      = false,
-    isDemo     = process.env.NODE_ENV === "droppydemo";
+var cache         = {},
+    clients       = {},
+    clientsPerDir = {},
+    dirs          = {},
+    config        = null,
+    firstRun      = null,
+    hasServer     = null,
+    ready         = false,
+    isDemo        = process.env.NODE_ENV === "droppydemo";
+
+var UPDATE_THROTTLE = 500;
 
 var droppy = function droppy(options, isStandalone, callback) {
     if (isStandalone) {
@@ -301,33 +305,29 @@ function setupSocket(server) {
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
                 if (!clients[sid]) clients[sid] = { views: [], ws: ws }; // This can happen when the server restarts
                 readPath(msg.data, function (error, info) {
-                    if (error) {
-                        // Send client back to root when the requested path doesn't exist
+                    var clientDir, clientFile;
+                    if (error) { // Send client back to root when the requested path doesn't exist
+                        clientDir = "/";
+                        clientFile = null;
                         log.error(error);
                         log.info(ws, null, "Non-existing update request, sending client to / : " + msg.data);
-                        sendToRoot(sid, vId);
-                        return;
-                    } else if (info.type === "f") {
-                        clients[sid].views[vId] = { file: path.basename(msg.data), directory: path.dirname(msg.data) };
-                        sendObj(sid, {
-                            type: "UPDATE_BE_FILE",
-                            file: clients[sid].views[vId].file,
-                            folder: clients[sid].views[vId].directory,
-                            isFile: true,
-                            vId: vId,
-                        });
-                    } else {
-                        clients[sid].views[vId] = { file: null, directory: msg.data };
-                        updateDirectory(clients[sid].views[vId].directory, function (sizes) {
-                            sendFiles(sid, vId, "UPDATE_DIRECTORY", sizes);
-                        });
-                    }
-                    function sendToRoot(sid, vId) {
-                        clients[sid].views[vId] = { file: null, directory: "/" };
                         updateDirectory("/", function (sizes) {
                             sendFiles(sid, vId, "UPDATE_DIRECTORY", sizes);
                         });
+                        return;
+                    } else if (info.type === "f") {
+                        clientDir = path.dirname(msg.data);
+                        clientFile = path.basename(msg.data);
+                        sendObj(sid, {type: "UPDATE_BE_FILE", file: clientFile, folder: clientDir, isFile: true, vId: vId});
+                    } else {
+                        clientDir = msg.data;
+                        clientFile = null;
+                        updateDirectory(clientDir, function (sizes) {
+                            sendFiles(sid, vId, "UPDATE_DIRECTORY", sizes);
+                        });
                     }
+                    clients[sid].views[vId] = { file: clientFile, directory: clientDir };
+                    if (!clientFile) updateClientsPerDir(clientDir, sid, vId);
                 });
                 break;
             case "DESTROY_VIEW":
@@ -530,6 +530,7 @@ function setupSocket(server) {
             } else if (code === 1001) {
                 reason = "(Going away)";
             }
+            removeClientPerDir(sid);
             delete clients[sid];
             log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
         });
@@ -1174,41 +1175,61 @@ setInterval(function hourly() {
 }, 60 * 60 * 1000);
 
 //-----------------------------------------------------------------------------
-// Update clients on file changes
+// Watcher callback for files
 function filesUpdate(type, event, p) {
     p = utils.normalizePath(p);              // Remove OS inconsistencies
     p = (p === ".") ? "/" : "/" + p;         // Prefix "/"
 
     log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(p));
 
-    var dirToUpdate;
-    if (type === "dir") { // "addDir" or "unlinkDir" - update the parent folder
+    var dir;
+    if (type === "dir") { // "addDir", "unlinkDir"
         if (p === "/") return; // Should never happen
-        dirToUpdate = path.resolve(p, "..");
-    } else { // "add", "unlink" or "change" - update the parent folder
-        dirToUpdate = path.dirname(p);
+        dir = path.resolve(p, "..");
+    } else { // "add", "unlink",  "change"
+        dir = path.dirname(p);
     }
-    updateClientsInDir(dirToUpdate);
-}
 
-//-----------------------------------------------------------------------------
-// Update all clients in specified dir
-function updateClientsInDir(dir) {
-    var clientsToUpdate = [];
-    Object.keys(clients).forEach(function (sid) {
-        clients[sid].views.forEach(function (view, vId) {
-            if (view && view.directory === dir) {
-                clientsToUpdate.push({sid: sid, vId: vId});
-            }
+    if (!clientsPerDir[dir]) return;
+
+    // read the dir and push updates
+    updateDirectory(dir, function (sizes) {
+        clientsPerDir[dir].forEach(function (client) {
+            client.update(sizes);
         });
     });
-    if (clientsToUpdate.length > 0) {
-        updateDirectory(dir, function (sizes) {
-            clientsToUpdate.forEach(function (cl) {
-                sendFiles(cl.sid, cl.vId, "UPDATE_DIRECTORY", sizes);
-            });
+}
+
+function updateClientsPerDir(dir, sid, vId) {
+    // remove current client from any previous dirs
+    removeClientPerDir(sid, vId);
+
+    // and add client back
+    if (!clientsPerDir[dir]) clientsPerDir[dir] = [];
+    clientsPerDir[dir].push({
+        sid    : sid,
+        vId    : vId,
+        update : _.throttle(function (sizes) {
+           sendFiles(this.sid, this.vId, "UPDATE_DIRECTORY", sizes);
+        }, UPDATE_THROTTLE, {leading: true, trailing: true})
+    });
+}
+
+function removeClientPerDir(sid, vId) {
+    Object.keys(clientsPerDir).forEach(function(dir) {
+        var removeAt = [];
+        clientsPerDir[dir].forEach(function(client, i) {
+            if (client.sid === sid && (typeof vId === "number" ? client.vId === vId : true)) {
+                removeAt.push(i);
+            }
         });
-    }
+        removeAt.reverse().forEach(function(pos) {
+            clientsPerDir[dir].splice(pos, 1);
+        });
+
+        // purge dirs with no clients
+        if (!clientsPerDir[dir].length) delete clientsPerDir[dir];
+    });
 }
 
 //-----------------------------------------------------------------------------
@@ -1285,11 +1306,11 @@ function setupProcess(standalone) {
 function endProcess(signal) {
     var count = 0;
     log.simple("Received " + chalk.red(signal) + " - Shutting down ...");
-    Object.keys(clients).forEach(function (client) {
-        if (!clients[client] || !clients[client].ws) return;
-        if (clients[client].ws.state === "open" || clients[client].ws.state === "connecting") {
+    Object.keys(clients).forEach(function (sid) {
+        if (!clients[sid] || !clients[sid].ws) return;
+        if (clients[sid].ws.state === "open" || clients[sid].ws.state === "connecting") {
             count++;
-            clients[client].ws.drop(1001);
+            clients[sid].ws.drop(1001);
         }
     });
     if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
