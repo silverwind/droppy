@@ -15,7 +15,7 @@ body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figca
     -webkit-touch-callout: none;
     border: 0;
     box-sizing: border-box;
-    letter-spacing: .05px;
+    font-variant-ligatures: none;
     font-size: 100%;
     font-weight: inherit;
     margin: 0;
