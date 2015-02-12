@@ -230,6 +230,8 @@ function createListener(handler, opts, callback) {
             if (/^v0.10/.test(process.version)) {
                 tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
                 tlsOptions.secureProtocol = "SSLv23_server_method";
+            } else {
+                tlsOptions.ciphers = "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:HIGH:!RC4:!MD5:!aNULL";
             }
 
             tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
