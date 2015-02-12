@@ -75,7 +75,8 @@ Once initialized, the server will by default listen on [http://localhost:8989/](
         "hsts"     : 31536000,
         "key"      : "config/tls.key",
         "cert"     : "config/tls.crt",
-        "ca"       : "config/tls.ca"
+        "ca"       : "config/tls.ca",
+        "dhparam"  : "config/tls.dhparam"
     },
     {
         "host"     : "::",
@@ -95,9 +96,10 @@ A listener object accepts these options:
 - `port` {Number/Array} - Port(s) to listen on. Use an array for multiple ports.
 - `protocol` {String} - Protocol to use. Can be either `http`, `https` or `spdy`.
 - `hsts` {Number} - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
-- `key` {String} - Path to the SSL/TLS private key file.
-- `cert` {String} - Path to the SSL/TLS certificate file.
-- `ca` {String} - Path to the SSL/TLS intermediate certificate file.
+- `key` {String} - Path to the SSL/TLS private key file. Required for functional SSL/TLS.
+- `cert` {String} - Path to the SSL/TLS certificate file. Required for functional SSL/TLS.
+- `ca` {String} - Path to the SSL/TLS intermediate certificate file. Optional.
+- `dhparam` {String} - Path to the SSL/TLS DH parameters file. Optional.
 
 *Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
 

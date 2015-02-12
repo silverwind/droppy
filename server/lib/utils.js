@@ -209,20 +209,24 @@ utils.tlsInit = function tlsInit(opts, callback) {
         var certPaths = [
             path.resolve(paths.home, opts.key),
             path.resolve(paths.home, opts.cert),
-            opts.ca ? path.resolve(paths.home, opts.ca) : undefined
+            opts.ca ? path.resolve(paths.home, opts.ca) : undefined,
+            opts.dhparam ? path.resolve(paths.home, opts.dhparam) : undefined
         ];
 
         async.map(certPaths, readFile, function (err, data) {
             var certStart = "-----BEGIN CERTIFICATE-----";
             var certEnd   = "-----END CERTIFICATE-----";
 
-            var key  = data[0],
-                cert = data[1],
-                ca   = data[2];
+            var key     = data[0],
+                cert    = data[1],
+                ca      = data[2],
+                dhparam = data[3];
+
 
             if (!key)  return callback(new Error("Unable to read TLS key: " + certPaths[0]));
             if (!cert) return callback(new Error("Unable to read TLS certificate: " + certPaths[1]));
             if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
+            if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
             // Split combined certificate and intermediate
             if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
@@ -234,7 +238,8 @@ utils.tlsInit = function tlsInit(opts, callback) {
                 selfsigned : false,
                 key        : key,
                 cert       : cert,
-                ca         : ca
+                ca         : ca,
+                dhparam    : dhparam
             });
         });
     } else {

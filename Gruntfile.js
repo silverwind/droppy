@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                 command: "rm -rf node_modules && npm install"
             },
             heroku : {
-                command: "git push -u --tags heroku master && heroku logs -t"
+                command: "git push -u -f --tags heroku master && heroku logs -t"
             }
         },
         jshint: {

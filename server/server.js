@@ -143,11 +143,12 @@ function startListeners(callback) {
                     host  : host,
                     port  : port,
                     opts  : {
-                        proto : listener.protocol,
-                        hsts  : listener.hsts,
-                        key   : listener.key,
-                        cert  : listener.cert,
-                        ca    : listener.ca
+                        proto   : listener.protocol,
+                        hsts    : listener.hsts,
+                        key     : listener.key,
+                        cert    : listener.cert,
+                        ca      : listener.ca,
+                        dhparam : listener.dhparam
                     }
                 });
             });
@@ -220,11 +221,16 @@ function createListener(handler, opts, callback) {
                 key              : tlsData.key,
                 cert             : tlsData.cert,
                 ca               : tlsData.ca ? tlsData.ca : undefined,
+                dhparam          : tlsData.dhparam ? tlsData.dhparam : undefined,
                 honorCipherOrder : true,
-                ciphers          : "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
-                secureProtocol   : "SSLv23_server_method",
                 NPNProtocols     : []
             };
+
+            // Slightly more secure options for 0.10.x
+            if (/^v0.10/.test(process.version)) {
+                tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
+                tlsOptions.secureProtocol = "SSLv23_server_method";
+            }
 
             tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
 
