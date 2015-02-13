@@ -1183,21 +1183,18 @@ setInterval(function hourly() {
 }, 60 * 60 * 1000);
 
 //-----------------------------------------------------------------------------
-// Watcher callback for files
-function filesUpdate(type, event, p) {
-    p = utils.normalizePath(p);              // Remove OS inconsistencies
-    p = (p === ".") ? "/" : "/" + p;         // Prefix "/"
+// Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
+function filesUpdate(type, event, dir) {
+    dir = utils.normalizePath(dir);            // Remove OS inconsistencies
+    dir = (dir === ".") ? "/" : "/" + dir;     // Prefix "/"
 
-    log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(p));
+    log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
 
-    var dir;
-    if (type === "dir") { // "addDir", "unlinkDir"
-        if (p === "/") return; // Should never happen
-        dir = path.resolve(p, "..");
-    } else { // "add", "unlink",  "change"
-        dir = path.dirname(p);
-    }
+    if (dir === "/") return;                  // Should never happen
+    dir = path.dirname(dir);                  // Works on both dirs and files
 
+    console.log(dir);
+    console.log(clientsPerDir);
     if (!clientsPerDir[dir]) return;
 
     // read the dir and push updates
