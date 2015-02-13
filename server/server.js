@@ -1193,8 +1193,6 @@ function filesUpdate(type, event, dir) {
     if (dir === "/") return;                  // Should never happen
     dir = path.dirname(dir);                  // Works on both dirs and files
 
-    console.log(dir);
-    console.log(clientsPerDir);
     if (!clientsPerDir[dir]) return;
 
     // read the dir and push updates
