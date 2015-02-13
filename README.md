@@ -111,7 +111,7 @@ var app = require("express")();
 var droppy = require("./")("~/.droppy", {logLevel: 0});
 
 app.use("/", droppy);
-app.listen(8000);
+app.listen(8989);
 ```
 #### droppy([home], [options])
 - **home** {string}: The path to droppy's home folder. Defaults to `~/.droppy`.
