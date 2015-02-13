@@ -80,6 +80,7 @@ function getZip(url, dest, zipDest) {
                     log.simple(chalk.yellow("GET ") + url);
                     request({url: url, encoding: null}, function (err, _, data) {
                         if (err) return callback(err);
+                        fs.writeFile(zipDest, data, log.error);
                         unzip(data, dest, callback);
                     });
                 } else {
