@@ -66,7 +66,7 @@ var droppy = function droppy(options, isStandalone, callback) {
                 cb(err);
             });
         },
-        function (cb) { db.init(cb); },
+        function (cb) { db.init(cb); }
     ], function (err) {
         if (err) return callback(err);
         log.init({logLevel: config.logLevel, timestamps: config.timestamps});
@@ -84,9 +84,9 @@ var droppy = function droppy(options, isStandalone, callback) {
             },
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); }); cb(); },
             function (cb) { if (config.debug) watcher.watchResources(config.usePolling, clientUpdate); cb(); },
             function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); },
+            function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); }); cb(); }
         ], function (err) {
             if (err) return callback(err);
             if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
