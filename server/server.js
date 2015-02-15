@@ -618,11 +618,12 @@ function doClipboard(type, src, dst) {
                     fs.readdir(src, function (err, files) {
                         if (err) return logError(err);
                         if (files.length) {
-                            console.log("cpr");
                             cpr(src, dst, {deleteFirst: false, overwrite: true, confirm: true}, function (errs) {
                                 errs.forEach(function (err) {
-                                    if (err.code === "ENOENT" && err.syscall === "stat") {
+                                    if (err.code === "ENOENT" && err.syscall === "stat") { // cpr bug
                                         utils.mkdir(err.path);
+                                    } else {
+                                        logError(err);
                                     }
                                 });
                             });
