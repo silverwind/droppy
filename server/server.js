@@ -93,7 +93,7 @@ var droppy = function droppy(options, isStandalone, callback) {
                 } else cb();
             },
             function (cb) { updateDirectory("/", true, cb); },
-            // function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
+            function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
         ], function (err) {
             if (err) return callback(err);
             if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
