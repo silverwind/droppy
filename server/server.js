@@ -84,9 +84,16 @@ var droppy = function droppy(options, isStandalone, callback) {
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
             function (cb) { if (config.debug) watcher.watchResources(config.usePolling, clientUpdate); cb(); },
-            function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); },
-            function (cb) { if (isDemo) demo.init(function (err) { if (err) log.error(err); }); cb(); },
-            function (cb) { updateDirectory("/", cb); }
+            function (cb) {
+                if (isDemo) {
+                    demo.init(function (err) {
+                        if (err) log.error(err);
+                        cb();
+                    });
+                } else cb();
+            },
+            function (cb) { updateDirectory("/", true, cb); },
+            // function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
         ], function (err) {
             if (err) return callback(err);
             if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
@@ -1053,6 +1060,7 @@ function getPath(p, cb) {
 // -----------------------------------------------------------------------------
 // Get directory contents from cache
 function getDirContents(p) {
+    if (!dirs[p]) return;
     var entries = {};
     dirs[p].files.forEach(function (file) {
         entries[file.name] = {type: "f", size: file.size, mtime: file.mtime, mime: file.mime};
@@ -1067,7 +1075,7 @@ function getDirContents(p) {
 
 // -----------------------------------------------------------------------------
 // Update directory in cache
-function updateDirectory(dir, cb) {
+function updateDirectory(dir, initial, cb) {
     readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
         dirs[dir] = {files: []};
         if (errors) {
@@ -1080,7 +1088,7 @@ function updateDirectory(dir, cb) {
                 }
             });
             if (cb) cb();
-            return;
+            if (!initial) return;
         }
 
         // Add directories
@@ -1194,7 +1202,7 @@ setInterval(function hourly() {
 //-----------------------------------------------------------------------------
 // updateDirectory is pretty costly, debounce it
 var debouncedUpdateDirectory = _.debounce(function(dir) {
-    updateDirectory(dir);
+    updateDirectory(dir, false);
 }, 500); // TODO: magic number
 
 

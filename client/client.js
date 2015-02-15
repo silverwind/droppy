@@ -2747,7 +2747,7 @@
             msPerDay    = msPerHour * 24,
             msPerMonth  = msPerDay * 30,
             msPerYear   = msPerDay * 365,
-            elapsed     = Date.now() - previous,
+            elapsed     = Date.now() - parseInt(previous),
             result      = "";
 
         if (elapsed < 0) elapsed = 0;
@@ -2769,7 +2769,7 @@
             result = Math.round(elapsed / msPerYear);
             result += (result === 1) ? " year ago" : " years ago";
         }
-        if (isNaN(result)) result = "unknown";
+        if (isNaN(elapsed)) result = "unknown";
         return result;
     }
     droppy.templates.fn.timeDifference = timeDifference;

@@ -103,6 +103,8 @@ log.error = function error(err) {
             Object.keys(err).forEach(function (prop) {
                 log(null, null, 1, chalk.green(prop) + ":", chalk.red(err[prop]));
             });
+            if (err.stack)
+                log(null, null, 1, String(err.stack));
         } else {
             if (err.stack)
                 log(null, null, 1, String(err.stack));
