@@ -1216,8 +1216,10 @@ function filesUpdate(eventType, event, dir) {
         delete dirs[dir];
     } else if (event === "unlink") {
         dirs[parentDir].files.some(function (file, i) {
-            if (file.name === entryName)
+            if (file.name === entryName) {
                 dirs[parentDir].files.splice(i, 1);
+                return true;
+            }
         });
     } else if (event === "add") {
         stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
@@ -1234,6 +1236,15 @@ function filesUpdate(eventType, event, dir) {
             size: 0,
             mtime: stats.mtime.getTime() || 0
         };
+    } else if (event === "change") {
+        dirs[parentDir].files.some(function (file, i) {
+            if (file.name === entryName) {
+                stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
+                dirs[parentDir].files[i].size = stats.size;
+                dirs[parentDir].files[i].mtime = stats.mtime.getTime() || 0;
+                return true;
+            }
+        });
     }
 
     if (!dirs[parentDir]) // sometimes happens on recursive unlinks
