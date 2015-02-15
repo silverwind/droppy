@@ -1102,12 +1102,14 @@ function updateDirectory(dir, cb) {
             });
         });
 
+        // Calculate folder sizes
         var folders = Object.keys(dirs);
-        folders.splice(0, 1);
+        folders.splice(0, 1); // we don't care about the size of '/'
 
         var folderPaths = folders.map(function(folder) {
             return utils.addFilesPath(folder);
         });
+
         async.map(folderPaths, du, function (err, results) {
             results.forEach(function (result, i) {
                 dirs[folders[i]].size = results[i];
@@ -1143,25 +1145,28 @@ function streamArchive(req, res, zipPath) {
         if (err) {
             log.error(err);
         } else if (stats.isDirectory()) {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", mime.lookup("zip"));
-            res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
-            res.setHeader("Transfer-Encoding", "chunked");
             log.info(req, res);
             log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
-            zip = new yazl.ZipFile();
-            utils.walkDirectory(zipPath, true, function (err, files) {
-                if (err) log.error(err);
-                Object.keys(files).forEach(function (file) {
-                    var stats = files[file];
-                    if (/\/$/.test(file))
-                        zip.addEmptyDirectory(utils.relativeZipPath(file), {mtime: stats.mtime, mode: stats.mode});
-                    else
-                        zip.addFile(file, utils.relativeZipPath(file), {mtime: stats.mtime, mode: stats.mode});
-                });
-                zip.outputStream.pipe(res);
-                zip.end();
+            res.writeHead(200, {
+                "Content-Type"       : mime.lookup("zip"),
+                "Content-Disposition": utils.getDispo(zipPath + ".zip"),
+                "Transfer-Encoding"  : "chunked"
             });
+            zip = new yazl.ZipFile();
+            readdirp({root: zipPath, entryType: "both"})
+                .on("warn", log.info)
+                .on("error", log.error)
+                .on("data", function (file) {
+                    var stats = file.stat;
+                    if (stats.isDirectory())
+                        zip.addEmptyDirectory(utils.relativeZipPath(file.fullPath), {mtime: stats.mtime, mode: stats.mode});
+                    else
+                        zip.addFile(file.fullPath, utils.relativeZipPath(file.fullPath), {mtime: stats.mtime, mode: stats.mode});
+                })
+                .on("end", function () {
+                    zip.outputStream.pipe(res);
+                    zip.end();
+                });
         } else {
             res.statusCode = 404;
             res.end();
