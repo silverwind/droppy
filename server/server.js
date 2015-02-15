@@ -1079,7 +1079,7 @@ function updateDirectory(dir, cb) {
                     log.error(err);
                 }
             });
-            cb();
+            if (cb) cb();
             return;
         }
 
@@ -1114,7 +1114,7 @@ function updateDirectory(dir, cb) {
             results.forEach(function (result, i) {
                 dirs[folders[i]].size = results[i];
             });
-            cb();
+            if (cb) cb();
         });
     });
 }
@@ -1190,6 +1190,14 @@ setInterval(function hourly() {
     cache.etags = {};
 }, 60 * 60 * 1000);
 
+
+//-----------------------------------------------------------------------------
+// updateDirectory is pretty costly, debounce it
+var debouncedUpdateDirectory = _.debounce(function(dir) {
+    updateDirectory(dir);
+}, 500); // TODO: magic number
+
+
 //-----------------------------------------------------------------------------
 // Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
 function filesUpdate(eventType, event, dir) {
@@ -1201,21 +1209,47 @@ function filesUpdate(eventType, event, dir) {
     if (dir === "/") return;                  // Should never happen
 
     var parentDir = path.dirname(dir);        // Works on both dirs and files
+    var entryName = path.basename(dir);
+    var stats;
 
-    if (event === "unlinkDir")                // unlinkDir fires before the files
+    if (event === "unlinkDir") {              // unlinkDir fires before the files
         delete dirs[dir];
+    } else if (event === "unlink") {
+        dirs[parentDir].files.some(function (file, i) {
+            if (file.name === entryName)
+                dirs[parentDir].files.splice(i, 1);
+        });
+    } else if (event === "add") {
+        stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
+        dirs[parentDir].files.push({
+            name: entryName,
+            size: stats.size,
+            mtime: stats.mtime.getTime() || 0,
+            mime: mime.lookup(entryName)
+        });
+    } else if (event === "addDir") {
+        stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
+        dirs[dir] = {
+            files: [],
+            size: 0,
+            mtime: stats.mtime.getTime() || 0
+        };
+    }
 
-    if (!dirs[parentDir])
+    if (!dirs[parentDir]) // sometimes happens on recursive unlinks
         return;
 
-    // read the dir and push updates
-    updateDirectory(parentDir, function (sizes) {
-        if (!clientsPerDir[parentDir]) return;
-        clientsPerDir[parentDir].forEach(function (client) {
-            client.update(sizes);
-        });
+    if (!clientsPerDir[parentDir]) // clients never seen these
+        return;
+
+    clientsPerDir[parentDir].forEach(function (client) {
+        client.update();
     });
+
+    // read the dir for folder size updates
+    debouncedUpdateDirectory(parentDir);
 }
+
 
 function updateClientsPerDir(dir, sid, vId) {
     // remove current client from any previous dirs
@@ -1226,7 +1260,9 @@ function updateClientsPerDir(dir, sid, vId) {
     clientsPerDir[dir].push({
         sid    : sid,
         vId    : vId,
-        update : _.throttle(sendFiles.bind(null, sid, vId), config.updateInterval, {leading: true, trailing: true})
+        update : _.throttle(function() {
+            sendFiles(this.sid, this.vId);
+        }, config.updateInterval, {leading: true, trailing: true})
     });
 }
 
