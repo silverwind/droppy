@@ -2834,7 +2834,7 @@
             clearTimeout(view[0].stuckTimeout);
             view[0].stuckTimeout = setTimeout(function () {
                 sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
-            }, 5000);
+            }, 2000);
         }
     }
 
