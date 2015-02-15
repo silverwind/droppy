@@ -41,7 +41,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
   "maxOpen"        : 256,
   "public"         : false,
   "timestamps"     : true,
-  "updateInterval" : 250
+  "updateInterval" : 1000
   "usePolling"     : false
 }
 ```

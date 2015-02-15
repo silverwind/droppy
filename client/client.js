@@ -1798,7 +1798,7 @@
         var sortedEntries = droppy.templates.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
         if (view[0].sortAsc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            view.find("[data-name='" + cssEscape(sortedEntries[index]) + "']:first").css({
+            view.find("[data-name='" + sortedEntries[index].replace(/['"]/g,"_") + "']:first").css({
                 "order": index,
                 "-ms-flex-order": String(index)
             }).attr("order", index);
@@ -2926,11 +2926,6 @@
         if (x.length) return -1;
         if (y.length) return +1;
         return 0;
-    }
-
-    // Replace quotes in CSS selectors with their escaped variant
-    function cssEscape(str) {
-        return str.replace(/'/g,"\'").replace(/"/g,'\"');
     }
 
     // Get the path to droppy's root, ensuring a trailing slash

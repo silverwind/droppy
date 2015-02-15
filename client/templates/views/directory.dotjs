@@ -25,7 +25,7 @@ it = {
     </div>
 #}}
 {{##def.folder:
-    <li class="data-row{{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.name }}">
+    <li class="data-row{{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite sprite-folder">{{= entry.svgIcon }}</span>
         <a class="folder-link entry-link">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
@@ -36,7 +36,7 @@ it = {
     </li>
 #}}
 {{##def.file:
-    <li class="data-row{{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.name }}">
+    <li class="data-row{{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
@@ -47,7 +47,7 @@ it = {
     </li>
 #}}
 {{##def.error:
-    <li class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.name }}">
+    <li class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="error-link">{{= entry.name }}</a>
     </li>
@@ -73,6 +73,7 @@ it = {
                 entry.id = folder + name;
                 entry.sprite = droppy.templates.fn.getSpriteClass(/[^.]*$/.exec(name)[0]);
                 entry.name = it.isUpload ? decodeURIComponent(name) : name;
+                entry.sortname = entry.name.replace(/['"]/g, "_");
 
                 if (Object.keys(droppy.audioTypes).indexOf(getExt(name)) !== -1) {
                     entry.classes = " playable";

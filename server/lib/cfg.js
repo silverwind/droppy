@@ -21,7 +21,7 @@ var cfg        = {},
         "maxFileSize"    : 0,
         "maxOpen"        : 256,
         "public"         : false,
-        "updateInterval" : 250,
+        "updateInterval" : 1000,
         "usePolling"     : false,
         "timestamps"     : true
     };
