@@ -33,15 +33,16 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
           "protocol" : "http"
       }
   ],
-  "debug"        : false,
-  "keepAlive"    : 20000,
-  "linkLength"   : 5,
-  "logLevel"     : 2,
-  "maxFileSize"  : 0,
-  "maxOpen"      : 256,
-  "public"       : false,
-  "timestamps"   : true,
-  "usePolling"   : false
+  "debug"          : false,
+  "keepAlive"      : 20000,
+  "linkLength"     : 5,
+  "logLevel"       : 2,
+  "maxFileSize"    : 0,
+  "maxOpen"        : 256,
+  "public"         : false,
+  "timestamps"     : true,
+  "updateInterval" : 250
+  "usePolling"     : false
 }
 ```
 ### Options
@@ -54,6 +55,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `maxOpen` {Number} - The maximum number of concurrently opened files. This number should only be of concern on Windows.
 - `public` {Boolean} - When enabled, no authentication is performed.
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
+- `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file tree, in milliseconds.
 - `usePolling` {Boolean} - On certain conditions (home mounted through NFS, or running on hosted node), realtime updates may not work. This switch should make it more reliable in these cases, at the cost of CPU cycles.
 
 <a name="listener-object" />

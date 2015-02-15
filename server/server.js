@@ -39,8 +39,6 @@ var cache         = {},
     ready         = false,
     isDemo        = process.env.NODE_ENV === "droppydemo";
 
-var UPDATE_THROTTLE = 500;
-
 var droppy = function droppy(options, isStandalone, callback) {
     if (isStandalone) {
         log.logo();
@@ -1220,9 +1218,7 @@ function updateClientsPerDir(dir, sid, vId) {
     clientsPerDir[dir].push({
         sid    : sid,
         vId    : vId,
-        update : _.throttle(function (sizes) {
-           sendFiles(this.sid, this.vId);
-        }, UPDATE_THROTTLE, {leading: true, trailing: true})
+        update : _.throttle(sendFiles.bind(null, sid, vId), config.updateInterval, {leading: true, trailing: true})
     });
 }
 

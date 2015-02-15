@@ -14,15 +14,16 @@ var cfg        = {},
                 "protocol" : "http"
             }
         ],
-        "debug"        : false,
-        "keepAlive"    : 20000,
-        "linkLength"   : 5,
-        "logLevel"     : 2,
-        "maxFileSize"  : 0,
-        "maxOpen"      : 256,
-        "public"       : false,
-        "usePolling"   : false,
-        "timestamps"   : true
+        "debug"          : false,
+        "keepAlive"      : 20000,
+        "linkLength"     : 5,
+        "logLevel"       : 2,
+        "maxFileSize"    : 0,
+        "maxOpen"        : 256,
+        "public"         : false,
+        "updateInterval" : 250,
+        "usePolling"     : false,
+        "timestamps"     : true
     };
 
 cfg.init = function (config, callback) {
