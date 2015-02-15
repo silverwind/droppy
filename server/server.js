@@ -615,22 +615,8 @@ function doClipboard(type, src, dst) {
                 if (stats.isFile()) {
                     utils.copyFile(src, dst, logError);
                 } else {
-                    fs.readdir(src, function (err, files) {
-                        if (err) return logError(err);
-                        if (files.length) {
-                            cpr(src, dst, {deleteFirst: false, overwrite: true, confirm: true}, function (errs) {
-                                if (!errs) return;
-                                errs.forEach(function (err) {
-                                    if (err.code === "ENOENT" && err.syscall === "stat") { // cpr bug
-                                        utils.mkdir(err.path);
-                                    } else {
-                                        logError(err);
-                                    }
-                                });
-                            });
-                        } else {
-                            utils.mkdir(dst);
-                        }
+                    cpr(src, dst, {deleteFirst: false, overwrite: true, confirm: true}, function (errs) {
+                        if (errs) errs.forEach(logError);
                     });
                 }
             }
