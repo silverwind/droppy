@@ -619,6 +619,7 @@ function doClipboard(type, src, dst) {
                         if (err) return logError(err);
                         if (files.length) {
                             cpr(src, dst, {deleteFirst: false, overwrite: true, confirm: true}, function (errs) {
+                                if (!errs) return;
                                 errs.forEach(function (err) {
                                     if (err.code === "ENOENT" && err.syscall === "stat") { // cpr bug
                                         utils.mkdir(err.path);
@@ -637,6 +638,7 @@ function doClipboard(type, src, dst) {
     });
 
     function logError(err) {
+        if (!err) return;
         log.error("Error " + (type === "cut" ? "moving" : "copying") + " from " + chalk.blue(src) + " to " + chalk.magenta(dst));
         log.error(err);
     }
@@ -1081,8 +1083,21 @@ function getDirContents(p) {
 // Update directory in cache
 function updateDirectory(dir, cb) {
     readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
-        if (errors) errors.forEach(log.error);
         dirs[dir] = {files: []};
+        if (errors) {
+            errors.forEach(function (err) {
+                // "unlinkDir" can happen out of order
+                if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
+                    delete dirs[utils.removeFilesPath(err.path)];
+                } else {
+                    log.error(err);
+                }
+            });
+            cb();
+            return;
+        }
+
+        // Add directories
         results.directories.forEach(function (d) {
             dirs[utils.removeFilesPath(d.fullPath)] = {
                 files: [],
@@ -1090,6 +1105,8 @@ function updateDirectory(dir, cb) {
                 mtime: d.stat.mtime.getTime() || 0
             };
         });
+
+        // Add files
         results.files.forEach(function (file) {
             dirs[utils.removeFilesPath(file.fullParentDir)].files.push({
                 name: file.name,

@@ -98,12 +98,19 @@ log.error = function error(err) {
     if (typeof err === "string") {
         log(null, null, 1, Array.prototype.slice.call(arguments, 0).join(""));
     } else {
-        if (err.stack)
-            log(null, null, 1, String(err.stack));
-        else if (err.message)
-            log(null, null, 1, String(err.message));
-        else
-            log(null, null, 1, String(err));
+        if (typeof err === "object") {
+            log(null, null, 1, chalk.red(String(err)));
+            Object.keys(err).forEach(function (prop) {
+                log(null, null, 1, chalk.green(prop) + ":", chalk.red(err[prop]));
+            });
+        } else {
+            if (err.stack)
+                log(null, null, 1, String(err.stack));
+            else if (err.message)
+                log(null, null, 1, String(err.message));
+            else
+                log(null, null, 1, String(err));
+        }
     }
 };
 
