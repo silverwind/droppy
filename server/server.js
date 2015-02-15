@@ -1202,7 +1202,11 @@ setInterval(function hourly() {
 //-----------------------------------------------------------------------------
 // updateDirectory is pretty costly, debounce it
 var debouncedUpdateDirectory = _.debounce(function(dir) {
-    updateDirectory(dir, false);
+    updateDirectory(dir, false, function () {
+        clientsPerDir[dir].forEach(function (client) {
+            client.update();
+        });
+    });
 }, 500); // TODO: magic number
 
 
