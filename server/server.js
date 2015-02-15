@@ -605,22 +605,29 @@ function send(ws, data) {
 }
 //-----------------------------------------------------------------------------
 // Perform clipboard operation, copy/paste or cut/paste
-function doClipboard(type, from, to) {
-    fs.stat(from, function (error, stats) {
-        if (error) return logError(error);
+function doClipboard(type, src, dst) {
+    fs.stat(src, function (err, stats) {
+        if (err) return logError(err);
         if (stats) {
             if (type === "cut") {
-                mv(from, to, logError);
+                mv(src, dst, logError);
             } else {
                 if (stats.isFile()) {
-                    utils.copyFile(from, to, logError);
+                    utils.copyFile(src, dst, logError);
                 } else {
-                    fs.readdir(from, function (error, files) {
-                        if (error) return logError(error);
+                    fs.readdir(src, function (err, files) {
+                        if (err) return logError(err);
                         if (files.length) {
-                            cpr(from, to, {deleteFirst: false, overwrite: true, confirm: true}, logError);
+                            console.log("cpr");
+                            cpr(src, dst, {deleteFirst: false, overwrite: true, confirm: true}, function (errs) {
+                                errs.forEach(function (err) {
+                                    if (err.code === "ENOENT" && err.syscall === "stat") {
+                                        utils.mkdir(err.path);
+                                    }
+                                });
+                            });
                         } else {
-                            utils.mkdir(to);
+                            utils.mkdir(dst);
                         }
                     });
                 }
@@ -628,18 +635,9 @@ function doClipboard(type, from, to) {
         }
     });
 
-    function logError(error) {
-        if (!error) return;
-        if (type === "cut")
-            log.error("Error moving from \"" + from + "\" to \"" + to + "\"");
-        else  {
-            if (error === "no files to copy") {
-                utils.mkdir(to);
-            } else {
-                log.error("Error copying from \"" + from + "\" to \"" + to + "\"");
-            }
-        }
-        log.error(error);
+    function logError(err) {
+        log.error("Error " + (type === "cut" ? "moving" : "copying") + " from " + chalk.blue(src) + " to " + chalk.magenta(dst));
+        log.error(err);
     }
 }
 
@@ -1197,13 +1195,19 @@ function filesUpdate(eventType, event, dir) {
     log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
 
     if (dir === "/") return;                  // Should never happen
-    dir = path.dirname(dir);                  // Works on both dirs and files
 
+    var parentDir = path.dirname(dir);        // Works on both dirs and files
+
+    if (event === "unlinkDir")                // unlinkDir fires before the files
+        delete dirs[dir];
+
+    if (!dirs[parentDir])
+        return;
 
     // read the dir and push updates
-    updateDirectory(dir, function (sizes) {
-        if (!clientsPerDir[dir]) return;
-        clientsPerDir[dir].forEach(function (client) {
+    updateDirectory(parentDir, function (sizes) {
+        if (!clientsPerDir[parentDir]) return;
+        clientsPerDir[parentDir].forEach(function (client) {
             client.update(sizes);
         });
     });
