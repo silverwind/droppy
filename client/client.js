@@ -2769,6 +2769,7 @@
             result = Math.round(elapsed / msPerYear);
             result += (result === 1) ? " year ago" : " years ago";
         }
+        if (isNaN(result)) result = "unknown";
         return result;
     }
     droppy.templates.fn.timeDifference = timeDifference;
