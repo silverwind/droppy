@@ -1077,53 +1077,55 @@ function getDirContents(p) {
 // Update directory in cache
 function updateDirectory(dir, initial, cb) {
     log.debug("Updating", chalk.blue(dir));
-    readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
-        dirs[dir] = {files: []};
-        if (errors) {
-            errors.forEach(function (err) {
-                if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
-                    // "unlinkDir" can happen out of order
-                    delete dirs[utils.removeFilesPath(err.path)];
-                } else {
-                    log.error(err);
-                }
-            });
-            if (cb) cb();
-            if (!initial) return;
-        }
+    fs.stat(utils.addFilesPath(dir), function (err, stats) {
+       readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
+           dirs[dir] = {files: [], mtime: stats ? stats.mtime.getTime() : Date.now()};
+           if (errors) {
+               errors.forEach(function (err) {
+                   if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
+                       // "unlinkDir" can happen out of order
+                       delete dirs[utils.removeFilesPath(err.path)];
+                   } else {
+                       log.error(err);
+                   }
+               });
+               if (cb) cb();
+               if (!initial) return;
+           }
 
-        // Add directories
-        results.directories.forEach(function (d) {
-            dirs[utils.removeFilesPath(d.fullPath)] = {
-                files: [],
-                size: 0,
-                mtime: d.stat.mtime.getTime() || 0
-            };
-        });
+           // Add directories
+           results.directories.forEach(function (d) {
+               dirs[utils.removeFilesPath(d.fullPath)] = {
+                   files: [],
+                   size: 0,
+                   mtime: d.stat.mtime.getTime() || 0
+               };
+           });
 
-        // Add files
-        results.files.forEach(function (file) {
-            dirs[utils.removeFilesPath(file.fullParentDir)].files.push({
-                name: file.name,
-                size: file.stat.size,
-                mtime: file.stat.mtime.getTime() || 0
-            });
-        });
+           // Add files
+           results.files.forEach(function (file) {
+               dirs[utils.removeFilesPath(file.fullParentDir)].files.push({
+                   name: file.name,
+                   size: file.stat.size,
+                   mtime: file.stat.mtime.getTime() || 0
+               });
+           });
 
-        // Calculate folder sizes
-        var folders = Object.keys(dirs);
-        folders.splice(0, 1); // we don't care about the size of '/'
+           // Calculate folder sizes
+           var folders = Object.keys(dirs);
+           folders.splice(0, 1); // we don't care about the size of '/'
 
-        var folderPaths = folders.map(function(folder) {
-            return utils.addFilesPath(folder);
-        });
+           var folderPaths = folders.map(function(folder) {
+               return utils.addFilesPath(folder);
+           });
 
-        async.map(folderPaths, du, function (err, results) {
-            results.forEach(function (result, i) {
-                dirs[folders[i]].size = results[i];
-            });
-            if (cb) cb();
-        });
+           async.map(folderPaths, du, function (err, results) {
+               results.forEach(function (result, i) {
+                   dirs[folders[i]].size = results[i];
+               });
+               if (cb) cb();
+           });
+       });
     });
 }
 
@@ -1155,8 +1157,8 @@ var debouncedUpdateDirectory = _.debounce(function(dir) {
     });
 }, 1000); // TODO: magic number
 
-function checkExists(dir) {
-    if (!dirs[dir]) dirs[dir] = {files: []};
+function checkExists(dir,stats) {
+    if (!dirs[dir]) dirs[dir] = {files: [], mtime: stats ? stats.mtime.getTime() : Date.now()};
 }
 
 //-----------------------------------------------------------------------------
@@ -1174,16 +1176,20 @@ function filesUpdate(eventType, event, dir) {
 
     if (event === "unlinkDir") {
         delete dirs[dir];
+        updateClients(parentDir);
     } else if (event === "unlink") {
-        dirs[parentDir].files.some(function (file, i) {
-            if (file.name === entryName) {
-                dirs[parentDir].files.splice(i, 1);
-                return true;
-            }
-        });
+        if (dirs[parentDir]) {
+            dirs[parentDir].files.some(function (file, i) {
+                if (file.name === entryName) {
+                    dirs[parentDir].files.splice(i, 1);
+                    return true;
+                }
+            });
+        }
+        updateClients(parentDir);
     } else if (event === "add") {
-        checkExists(parentDir);
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
+            checkExists(parentDir, stats);
             dirs[parentDir].files.push({
                 name: entryName,
                 size: stats.size,
@@ -1192,8 +1198,8 @@ function filesUpdate(eventType, event, dir) {
             updateClients(parentDir);
         });
     } else if (event === "addDir") {
-        checkExists(parentDir);
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
+            checkExists(parentDir, stats);
             dirs[dir] = {
                 files: [],
                 size: 0,
@@ -1202,8 +1208,8 @@ function filesUpdate(eventType, event, dir) {
             updateClients(parentDir);
         });
     } else if (event === "change") {
-        checkExists(parentDir);
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
+            checkExists(parentDir, stats);
             dirs[parentDir].files.some(function (file, i) {
                 if (file.name === entryName) {
                     dirs[parentDir].files[i].size = stats.size;
