@@ -83,7 +83,7 @@ var droppy = function droppy(options, isStandalone, callback) {
             },
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
-            function (cb) { if (config.debug) watcher.watchResources(config.usePolling, clientUpdate); cb(); },
+            function (cb) { if (config.debug) watcher.watchResources(config.usePolling, debugUpdate); cb(); },
             function (cb) {
                 if (isDemo) {
                     demo.init(function (err) {
@@ -1076,12 +1076,13 @@ function getDirContents(p) {
 // -----------------------------------------------------------------------------
 // Update directory in cache
 function updateDirectory(dir, initial, cb) {
+    log.debug("Updating", chalk.blue(dir));
     readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
         dirs[dir] = {files: []};
         if (errors) {
             errors.forEach(function (err) {
-                // "unlinkDir" can happen out of order
                 if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
+                    // "unlinkDir" can happen out of order
                     delete dirs[utils.removeFilesPath(err.path)];
                 } else {
                     log.error(err);
@@ -1105,8 +1106,7 @@ function updateDirectory(dir, initial, cb) {
             dirs[utils.removeFilesPath(file.fullParentDir)].files.push({
                 name: file.name,
                 size: file.stat.size,
-                mtime: file.stat.mtime.getTime() || 0,
-                mime: mime.lookup(file.name)
+                mtime: file.stat.mtime.getTime() || 0
             });
         });
 
@@ -1144,6 +1144,175 @@ function du(dir, callback) {
         });
     });
 }
+
+//-----------------------------------------------------------------------------
+// updateDirectory is pretty costly, debounce it
+var debouncedUpdateDirectory = _.debounce(function(dir) {
+    updateDirectory(dir, false, function () {
+        clientsPerDir[dir].forEach(function (client) {
+            client.update();
+        });
+    });
+}, 1000); // TODO: magic number
+
+function checkExists(dir) {
+    if (!dirs[dir]) dirs[dir] = {files: []};
+}
+
+//-----------------------------------------------------------------------------
+// Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
+function filesUpdate(eventType, event, dir) {
+    dir = utils.normalizePath(dir);            // Remove OS inconsistencies
+    dir = (dir === ".") ? "/" : "/" + dir;     // Prefix "/"
+
+    log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
+
+    if (dir === "/") return;                  // Should never happen
+
+    var parentDir = path.dirname(dir);
+    var entryName = path.basename(dir);
+
+    if (event === "unlinkDir") {
+        delete dirs[dir];
+    } else if (event === "unlink") {
+        dirs[parentDir].files.some(function (file, i) {
+            if (file.name === entryName) {
+                dirs[parentDir].files.splice(i, 1);
+                return true;
+            }
+        });
+    } else if (event === "add") {
+        checkExists(parentDir);
+        fs.stat(utils.addFilesPath(dir), function (err, stats) {
+            dirs[parentDir].files.push({
+                name: entryName,
+                size: stats.size,
+                mtime: stats.mtime.getTime() || 0
+            });
+            updateClients(parentDir);
+        });
+    } else if (event === "addDir") {
+        checkExists(parentDir);
+        fs.stat(utils.addFilesPath(dir), function (err, stats) {
+            dirs[dir] = {
+                files: [],
+                size: 0,
+                mtime: stats.mtime.getTime() || 0
+            };
+            updateClients(parentDir);
+        });
+    } else if (event === "change") {
+        checkExists(parentDir);
+        fs.stat(utils.addFilesPath(dir), function (err, stats) {
+            dirs[parentDir].files.some(function (file, i) {
+                if (file.name === entryName) {
+                    dirs[parentDir].files[i].size = stats.size;
+                    dirs[parentDir].files[i].mtime = stats.mtime.getTime() || 0;
+                    updateClients(parentDir);
+                    return true;
+                }
+            });
+        });
+    }
+}
+
+function updateClients(dir) {
+    if (!dirs[dir]) return;           // sometimes happens on recursive unlinks
+    if (!clientsPerDir[dir]) return;  // clients never seen these
+
+    clientsPerDir[dir].forEach(function (client) {
+        client.update();
+    });
+
+    debouncedUpdateDirectory(dir);  // read the dir for folder size updates
+}
+
+
+function updateClientsPerDir(dir, sid, vId) {
+    // remove current client from any previous dirs
+    removeClientPerDir(sid, vId);
+
+    // and add client back
+    if (!clientsPerDir[dir]) clientsPerDir[dir] = [];
+    clientsPerDir[dir].push({
+        sid    : sid,
+        vId    : vId,
+        update : _.throttle(function() {
+            sendFiles(this.sid, this.vId);
+        }, config.updateInterval, {leading: true, trailing: true})
+    });
+}
+
+function removeClientPerDir(sid, vId) {
+    Object.keys(clientsPerDir).forEach(function(dir) {
+        var removeAt = [];
+        clientsPerDir[dir].forEach(function(client, i) {
+            if (client.sid === sid && (typeof vId === "number" ? client.vId === vId : true)) {
+                removeAt.push(i);
+            }
+        });
+        removeAt.reverse().forEach(function(pos) {
+            clientsPerDir[dir].splice(pos, 1);
+        });
+
+        // purge dirs with no clients
+        if (!clientsPerDir[dir].length) delete clientsPerDir[dir];
+    });
+}
+
+//-----------------------------------------------------------------------------
+// Update client directory on changes
+function debugUpdate(filepath) {
+    setTimeout(function () { // prevent EBUSY on win32
+        if (/css$/.test(filepath)) {
+            cache.res["style.css"] = resources.compileCSS();
+            sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
+        } else if (/js$/.test(filepath)) {
+            cache.res["client.js"] = resources.compileJS();
+            sendObjAll({type: "RELOAD"});
+        } else if (/html$/.test(filepath)) {
+            resources.compileHTML(cache.res);
+            sendObjAll({type: "RELOAD"});
+        }
+    }, 100);
+}
+
+//-----------------------------------------------------------------------------
+// Clean up the directory for incoming files
+// Needs to be synchronous for process.on("exit")
+function cleanupTemp() {
+    fs.readdirSync(paths.temp).forEach(function (file) {
+        utils.rmSync(path.join(paths.temp, file));
+    });
+}
+
+//-----------------------------------------------------------------------------
+// Clean up our shortened links by removing links to nonexistant files
+function cleanupLinks(callback) {
+    var linkcount = 0, cbcount = 0;
+    var links = db.get("sharelinks");
+    if (Object.keys(links).length === 0)
+        callback();
+    else {
+        Object.keys(links).forEach(function (link) {
+            linkcount++;
+            (function (shareLink, location) {
+                fs.stat(path.join(paths.files, location), function (error, stats) {
+                    cbcount++;
+                    if (!stats || error) {
+                        delete links[shareLink];
+                    }
+                    if (cbcount === linkcount) {
+                        db.set("sharelinks", links, function () {
+                            callback();
+                        });
+                    }
+                });
+            })(link, links[link]);
+        });
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
@@ -1197,167 +1366,6 @@ setInterval(function hourly() {
     // Clean up Etag cache
     cache.etags = {};
 }, 60 * 60 * 1000);
-
-
-//-----------------------------------------------------------------------------
-// updateDirectory is pretty costly, debounce it
-var debouncedUpdateDirectory = _.debounce(function(dir) {
-    updateDirectory(dir, false, function () {
-        clientsPerDir[dir].forEach(function (client) {
-            client.update();
-        });
-    });
-}, 500); // TODO: magic number
-
-
-//-----------------------------------------------------------------------------
-// Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
-function filesUpdate(eventType, event, dir) {
-    dir = utils.normalizePath(dir);            // Remove OS inconsistencies
-    dir = (dir === ".") ? "/" : "/" + dir;     // Prefix "/"
-
-    log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
-
-    if (dir === "/") return;                  // Should never happen
-
-    var parentDir = path.dirname(dir);        // Works on both dirs and files
-    var entryName = path.basename(dir);
-    var stats;
-
-    if (event === "unlinkDir") {              // unlinkDir fires before the files
-        delete dirs[dir];
-    } else if (event === "unlink") {
-        dirs[parentDir].files.some(function (file, i) {
-            if (file.name === entryName) {
-                dirs[parentDir].files.splice(i, 1);
-                return true;
-            }
-        });
-    } else if (event === "add") {
-        stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
-        dirs[parentDir].files.push({
-            name: entryName,
-            size: stats.size,
-            mtime: stats.mtime.getTime() || 0,
-            mime: mime.lookup(entryName)
-        });
-    } else if (event === "addDir") {
-        stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
-        dirs[dir] = {
-            files: [],
-            size: 0,
-            mtime: stats.mtime.getTime() || 0
-        };
-    } else if (event === "change") {
-        dirs[parentDir].files.some(function (file, i) {
-            if (file.name === entryName) {
-                stats = fs.statSync(utils.addFilesPath(dir)); // TODO: async
-                dirs[parentDir].files[i].size = stats.size;
-                dirs[parentDir].files[i].mtime = stats.mtime.getTime() || 0;
-                return true;
-            }
-        });
-    }
-
-    if (!dirs[parentDir]) // sometimes happens on recursive unlinks
-        return;
-
-    if (!clientsPerDir[parentDir]) // clients never seen these
-        return;
-
-    clientsPerDir[parentDir].forEach(function (client) {
-        client.update();
-    });
-
-    // read the dir for folder size updates
-    debouncedUpdateDirectory(parentDir);
-}
-
-
-function updateClientsPerDir(dir, sid, vId) {
-    // remove current client from any previous dirs
-    removeClientPerDir(sid, vId);
-
-    // and add client back
-    if (!clientsPerDir[dir]) clientsPerDir[dir] = [];
-    clientsPerDir[dir].push({
-        sid    : sid,
-        vId    : vId,
-        update : _.throttle(function() {
-            sendFiles(this.sid, this.vId);
-        }, config.updateInterval, {leading: true, trailing: true})
-    });
-}
-
-function removeClientPerDir(sid, vId) {
-    Object.keys(clientsPerDir).forEach(function(dir) {
-        var removeAt = [];
-        clientsPerDir[dir].forEach(function(client, i) {
-            if (client.sid === sid && (typeof vId === "number" ? client.vId === vId : true)) {
-                removeAt.push(i);
-            }
-        });
-        removeAt.reverse().forEach(function(pos) {
-            clientsPerDir[dir].splice(pos, 1);
-        });
-
-        // purge dirs with no clients
-        if (!clientsPerDir[dir].length) delete clientsPerDir[dir];
-    });
-}
-
-//-----------------------------------------------------------------------------
-// Update client directory on changes
-function clientUpdate(filepath) {
-    setTimeout(function () { // prevent EBUSY on win32
-        if (/css$/.test(filepath)) {
-            cache.res["style.css"] = resources.compileCSS();
-            sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
-        } else if (/js$/.test(filepath)) {
-            cache.res["client.js"] = resources.compileJS();
-            sendObjAll({type: "RELOAD"});
-        } else if (/html$/.test(filepath)) {
-            resources.compileHTML(cache.res);
-            sendObjAll({type: "RELOAD"});
-        }
-    }, 100);
-}
-
-//-----------------------------------------------------------------------------
-// Clean up the directory for incoming files
-// Needs to be synchronous for process.on("exit")
-function cleanupTemp() {
-    fs.readdirSync(paths.temp).forEach(function (file) {
-        utils.rmSync(path.join(paths.temp, file));
-    });
-}
-
-//-----------------------------------------------------------------------------
-// Clean up our shortened links by removing links to nonexistant files
-function cleanupLinks(callback) {
-    var linkcount = 0, cbcount = 0;
-    var links = db.get("sharelinks");
-    if (Object.keys(links).length === 0)
-        callback();
-    else {
-        Object.keys(links).forEach(function (link) {
-            linkcount++;
-            (function (shareLink, location) {
-                fs.stat(path.join(paths.files, location), function (error, stats) {
-                    cbcount++;
-                    if (!stats || error) {
-                        delete links[shareLink];
-                    }
-                    if (cbcount === linkcount) {
-                        db.set("sharelinks", links, function () {
-                            callback();
-                        });
-                    }
-                });
-            })(link, links[link]);
-        });
-    }
-}
 
 //-----------------------------------------------------------------------------
 // Process startup

@@ -15,7 +15,7 @@ var demo    = {},
 demo.init = function init(doneCallback) {
     async.series([
         function (callback) {
-            log.simple("Cleaning up ...");
+            log.simple("Demo initializing ...");
             utils.rm(paths.files, function () {
                 utils.mkdir(paths.files, function () {
                     callback(null);
@@ -23,7 +23,6 @@ demo.init = function init(doneCallback) {
             });
         },
         function (callback) {
-            log.simple("Copying code to samples ...");
             async.parallel([
                 function (cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
                 function (cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
@@ -39,11 +38,7 @@ demo.init = function init(doneCallback) {
         // Get audio samples - Provided by http://sampleswap.org/mp3/creative-commons/free-music.php
         get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/audio/Earthling - Room To Breath.mp3"),
         get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/audio/Joevirus - Tenchu.mp3"),
-        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3"),
-        function (callback) {
-            log.simple("Demo files ready!");
-            callback();
-        }
+        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3")
     ], doneCallback);
 };
 
@@ -95,7 +90,6 @@ function getZip(url, dest, zipDest) {
 }
 
 function unzip(data, dest, callback) {
-    log.simple("Unzipping ...");
     yauzl.fromBuffer(data, function(err, zipfile) {
         var done, count = 0, written = 0;
         if (err) callback(err);
@@ -111,7 +105,6 @@ function unzip(data, dest, callback) {
                     ws.on("finish", function() {
                         written++;
                         if (done && (written === count)) {
-                            log.simple("Unzipped " + count + " files!");
                             callback(null);
                         }
                     });
