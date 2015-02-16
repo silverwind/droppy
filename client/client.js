@@ -1393,10 +1393,13 @@
         $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
 
-        if (event.shiftKey) {
-            sendDrop(view, "cut", from, to, spinner);
-        } else if (event.ctrlKey || event.metaKey || event.altKey) {
+        var dragAction = view[0].dragAction;
+        delete view[0].dragAction;
+
+        if (dragAction === "copy" || event.ctrlKey || event.metaKey || event.altKey) {
             sendDrop(view, "copy", from, to, spinner);
+        } else if (dragAction === "cut" || event.shiftKey) {
+            sendDrop(view, "cut", from, to, spinner);
         } else {
             // Keep the drop-select in view
             var limit = dropSelect[0].offsetWidth / 2 - 20, left;
@@ -1444,6 +1447,12 @@
         view.find(".data-row .entry-link").attr("draggable", "true");
         view.register("dragstart", function (event) {
             var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
+
+            if (event.ctrlKey || event.metaKey || event.altKey)
+                view[0].dragAction = "copy";
+            else if (event.shiftKey)
+                view[0].dragAction = "cut";
+
             droppy.dragTimer.refresh(row.data("id"));
             event.dataTransfer.setData("text", JSON.stringify({
                 type: row.attr("data-type"),
