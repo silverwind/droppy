@@ -379,7 +379,7 @@ function setupSocket(server) {
                                 log.error("Error deleting " + msg.data);
                                 log.error(error);
                             }
-                            delete dirs[msg.data];
+                            if (stats.isDirectory()) delete dirs[msg.data];
                         });
                     }
                 });
