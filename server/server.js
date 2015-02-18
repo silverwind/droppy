@@ -1224,8 +1224,7 @@ function filesUpdate(eventType, event, dir) {
 }
 
 function updateClients(dir) {
-    if (!dirs[dir]) return;           // sometimes happens on recursive unlinks
-    if (!clientsPerDir[dir]) return;  // clients never seen these
+    if (!dirs[dir]) return; // sometimes happens on recursive unlinks
 
     clientsPerDir[dir].forEach(function (client) {
         client.update();
