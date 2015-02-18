@@ -20,7 +20,7 @@ demo.init = function init (cb) {
         // keeping the dyno awake
         request("http://droppy-demo.silverwind.io", function (err) {
             if (err) log.err(err);
-            setTimeout(demo.init, 30 * 1 * 1000);
+            setTimeout(demo.init, 30 * 60 * 1000);
             if (cb) cb();
         });
     });

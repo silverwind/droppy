@@ -4,7 +4,6 @@ var pkg        = require("./../package.json"),
     resources  = require("./lib/resources.js"),
     cfg        = require("./lib/cfg.js"),
     cookies    = require("./lib/cookies.js"),
-    demo       = require("./lib/demo.js"),
     db         = require("./lib/db.js"),
     log        = require("./lib/log.js"),
     manifest   = require("./lib/manifest.js"),
@@ -86,7 +85,7 @@ var droppy = function droppy(options, isStandalone, callback) {
             function (cb) { if (config.debug) watcher.watchResources(config.usePolling, debugUpdate); cb(); },
             function (cb) {
                 if (isDemo) {
-                    demo.init(function (err) {
+                    require("./lib/demo.js").init(function (err) {
                         if (err) log.error(err);
                         cb();
                     });
