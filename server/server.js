@@ -96,7 +96,7 @@ var droppy = function droppy(options, isStandalone, callback) {
             function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
         ], function (err) {
             if (err) return callback(err);
-            if (isDemo) setInterval(demo.init, 30 * 60 * 1000);
+
             ready = true;
             log.simple("Ready for requests!");
             callback();
@@ -1077,7 +1077,7 @@ function getDirContents(p) {
 // -----------------------------------------------------------------------------
 // Update directory in cache
 function updateDirectory(dir, initial, cb) {
-    log.debug("Updating", chalk.blue(dir));
+    log.debug("Updating " + chalk.blue(dir));
     fs.stat(utils.addFilesPath(dir), function (err, stats) {
        readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
            dirs[dir] = {files: [], mtime: stats ? stats.mtime.getTime() : Date.now()};
@@ -1152,9 +1152,11 @@ function du(dir, callback) {
 // updateDirectory is pretty costly, debounce it
 var debouncedUpdateDirectory = _.debounce(function(dir) {
     updateDirectory(dir, false, function () {
-        clientsPerDir[dir].forEach(function (client) {
-            client.update();
-        });
+        if (clientsPerDir[dir]) {
+            clientsPerDir[dir].forEach(function (client) {
+                client.update();
+            });
+        }
     });
 }, 1000); // TODO: magic number
 
@@ -1226,9 +1228,11 @@ function filesUpdate(eventType, event, dir) {
 function updateClients(dir) {
     if (!dirs[dir]) return; // sometimes happens on recursive unlinks
 
-    clientsPerDir[dir].forEach(function (client) {
-        client.update();
-    });
+    if (clientsPerDir[dir]) {
+        clientsPerDir[dir].forEach(function (client) {
+            client.update();
+        });
+    }
 
     debouncedUpdateDirectory(dir);  // read the dir for folder size updates
 }

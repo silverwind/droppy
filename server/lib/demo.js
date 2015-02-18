@@ -12,7 +12,22 @@ var demo    = {},
     utils   = require("./utils.js"),
     yauzl   = require("yauzl");
 
-demo.init = function init(doneCallback) {
+
+
+demo.init = function init (cb) {
+    // reload resources
+    demo.refresh(function () {
+        // keeping the dyno awake
+        request("http://droppy-demo.silverwind.io", function (err) {
+            if (err) log.err(err);
+            setTimeout(demo.init, 30 * 1 * 1000);
+            if (cb) cb();
+        });
+    });
+};
+
+
+demo.refresh = function refresh(doneCallback) {
     async.series([
         function (callback) {
             log.simple("Demo initializing ...");
@@ -39,7 +54,9 @@ demo.init = function init(doneCallback) {
         get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/audio/Earthling - Room To Breath.mp3"),
         get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/audio/Joevirus - Tenchu.mp3"),
         get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3")
-    ], doneCallback);
+    ], function () {
+        doneCallback();
+    });
 };
 
 function get(url, dest) {
