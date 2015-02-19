@@ -1226,11 +1226,16 @@ function updateClients(dir) {
             client.update();
         });
     }
-    var parent = path.dirname(dir);
-    if (clientsPerDir[parent] && dir !== parent) {
-        clientsPerDir[parent].forEach(function (client) {
-            client.update();
-        });
+
+    var parent = dir;
+    while (true) {
+        parent = path.dirname(parent);
+        if (clientsPerDir[parent]) {
+            clientsPerDir[parent].forEach(function (client) {
+                client.update();
+            });
+        }
+        if (parent === "/") break;
     }
 }
 
