@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "autoprefixer-core": "^5.1.5",
+    "autoprefixer-core": "^5.1.6",
     "busboy": "^0.2.9",
     "chalk": "^0.5.1",
     "chokidar": "^1.0.0-rc3",
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-bump": "^0.2.0",
+    "grunt-bump": "^0.3.0",
     "grunt-contrib-jshint": "^0.11.0",
     "grunt-shell": "^1.1.1"
   },
