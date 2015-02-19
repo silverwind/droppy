@@ -622,9 +622,7 @@ function doClipboard(type, src, dst) {
                 if (stats.isFile()) {
                     utils.copyFile(src, dst, logError);
                 } else {
-                    cpr(src, dst, {deleteFirst: false, overwrite: true, confirm: true}, function (errs) {
-                        if (errs) errs.forEach(logError);
-                    });
+                    cpr(src, dst, {overwrite: true}, logError);
                 }
             }
         }
@@ -633,7 +631,12 @@ function doClipboard(type, src, dst) {
     function logError(err) {
         if (!err) return;
         log.error("Error " + (type === "cut" ? "moving" : "copying") + " from " + chalk.blue(src) + " to " + chalk.magenta(dst));
-        log.error(err);
+        if (Array.isArray(err))
+            err.forEach(log.error);
+        else if (err.list)
+            err.list.forEach(log.error);
+        else if (err instanceof Error)
+            log.error(err);
     }
 }
 
