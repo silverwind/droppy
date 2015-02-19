@@ -1186,8 +1186,12 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #about-engine {
-    font-size: .7em;
-    margin: .33em 0;
+    font-size: 0.7em;
+    margin-top: 0.33em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: .1em;
 }
 
 #about-copy {
