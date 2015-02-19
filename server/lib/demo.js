@@ -32,18 +32,9 @@ demo.refresh = function refresh(doneCallback) {
         function (callback) {
             log.simple("Demo initializing ...");
             utils.rm(paths.files, function () {
-                utils.mkdir(paths.files, function () {
-                    callback(null);
-                });
+                utils.mkdir(paths.files, callback);
             });
         },
-        function (callback) {
-            async.parallel([
-                function (cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
-                function (cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
-            ], callback);
-        },
-
         // Get image samples
         getZip("https://silverwind.io/droppy-samples.zip", "/images", path.join(paths.home, "/demoTemp/img.zip")),
 
@@ -53,7 +44,13 @@ demo.refresh = function refresh(doneCallback) {
         // Get audio samples - Provided by http://sampleswap.org/mp3/creative-commons/free-music.php
         get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/audio/Earthling - Room To Breath.mp3"),
         get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/audio/Joevirus - Tenchu.mp3"),
-        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3")
+        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3"),
+        function (callback) {
+            async.parallel([
+                function (cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
+                function (cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
+            ], callback);
+        }
     ], function () {
         doneCallback();
     });
