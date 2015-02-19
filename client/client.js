@@ -2119,9 +2119,10 @@
                     view.find(".syntax")[action]("in");
                     view.find(".mode-select").on("change", function () {
                         var mode = $(this).val();
-                        console.log(mode);
                         CodeMirror.autoLoadMode(editor, mode);
                         editor.setOption("mode", mode);
+                        view.find(".syntax").removeClass("in");
+                        view.find(".mode-select").removeClass("in");
                     });
                 });
 
