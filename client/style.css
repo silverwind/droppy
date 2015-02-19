@@ -871,7 +871,6 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar {
     position: absolute;
     top: .5em;
-    bottom: 1em;
     right: .5em;
     width: 2.5em;
     user-select: none;
@@ -883,7 +882,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .sidebar svg {
-    fill: rgba(96,96,96,.4);
+    fill: rgba(96,96,96,.5);
     height: 1em;
     width: 1em;
     margin-left: .75em;
@@ -893,9 +892,7 @@ html:not(.mobile) .vjs-big-play-button {
     display: block;
     text-align: center;
     opacity: 0;
-    font-size: .8em;
-    padding: 2px 0 ;
-    border-radius: 3px;
+    font-size: .7em;
 }
 
 .sidebar > li:hover         { cursor: pointer }
@@ -906,8 +903,26 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar > .save:hover span { color: #5c5 }
 .sidebar > .ww:hover svg    {  fill: #18f }
 .sidebar > .ww:hover span   { color: #18f }
+.sidebar > .syntax:hover svg  {  fill: #f82 }
+.sidebar > .syntax:hover span { color: #f82 }
 
-.doc.readonly > .sidebar > .save { display: none }
+
+.mode-select {
+    position: absolute;
+    margin-top: -2.6em;
+    padding: .5em 3em .5em .25em;
+    font-size: .8em;
+    right:0;
+    background: #282828;
+    border: none;
+    box-shadow: 0 0 15px rgba(0,0,0,.6);
+    color: #ccc;
+    z-index: 4;
+    visibility: hidden;
+}
+.mode-select.in { visibility: visible }
+.sidebar > .syntax.in svg { fill: #f82 }
+.sidebar > .syntax.in span { color: #fff; opacity: 1 }
 
 /* ============================ Text Editor ============================ */
 

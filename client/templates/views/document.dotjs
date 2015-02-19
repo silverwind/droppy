@@ -1,7 +1,7 @@
 {{##def.data:
 <script>
 it = {
-    readOnly: Boolean
+    modes: Array
 }
 </script>
 #}}
@@ -9,7 +9,13 @@ it = {
     <li class="exit">{{= droppy.svg.remove}}<span>Close</span></li>
     <li class="save">{{= droppy.svg.disk}}<span>Save</span></li>
     <li class="ww">{{= droppy.svg.wordwrap}}<span>Wrap</span></li>
+    <li class="syntax">{{= droppy.svg.code}}<span>Syntax</span></li>
+    <select class="mode-select">
+        {{~it.modes :value:index}}
+        <option value="{{= value}}">{{= value}}</option>
+        {{~}}
+    </select>
 </ul>
-<div class="doc {{? it.readOnly }}readonly{{??}}editing{{?}}">
+<div class="doc">
     <div class="text-editor"></div>
 </div>
