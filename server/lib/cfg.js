@@ -105,7 +105,7 @@ function migrate(config) {
         config.listeners = [{
             "host"     : config.host,
             "port"     : config.port,
-            "protocol" : config.useSPDY ? "spdy" : config.useTLS ? "https" : "http",
+            "protocol" : (config.useSPDY || config.useTLS) ? "https" : "http",
             "hsts"     : config.useHSTS ? 31536000 : 0
         }];
     }

@@ -213,12 +213,10 @@ function createListener(handler, opts, callback) {
     if (opts.proto === "http") {
         callback(null, http.createServer(handler));
     } else {
-        if (opts.proto === "https")
-            tlsModule = require("tls");
-        else if (opts.proto === "spdy")
+        if (opts.proto === "https" || opts.proto === "spdy")
             tlsModule = require("spdy").server;
         else
-            return callback(new Error("Config error: Unknown protocol type: " + opts.proto));
+            return callback(new Error("Config error: Unknown protocol: " + opts.proto));
 
         utils.tlsInit(opts, function (err, tlsData) {
             if (err) return callback(err);
@@ -229,7 +227,7 @@ function createListener(handler, opts, callback) {
                 ca               : tlsData.ca ? tlsData.ca : undefined,
                 dhparam          : tlsData.dhparam ? tlsData.dhparam : undefined,
                 honorCipherOrder : true,
-                NPNProtocols     : []
+                windowSize       : 4 * 1024 * 1024
             };
 
             // Slightly more secure options for 0.10.x
@@ -241,10 +239,8 @@ function createListener(handler, opts, callback) {
                     "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA";
             }
 
-            tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
-
-            // Protocol-specific options
-            if (opts.proto === "spdy") tlsOptions.windowSize = 1024 * 1024;
+            // Disable insecure client renegotiation
+            tlsModule.CLIENT_RENEG_LIMIT = 0;
 
             server = new tlsModule.Server(tlsOptions, http._connectionListener);
             server.httpAllowHalfOpen = false;

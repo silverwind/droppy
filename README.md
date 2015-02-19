@@ -79,27 +79,20 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
         "cert"     : "config/tls.crt",
         "ca"       : "config/tls.ca",
         "dhparam"  : "config/tls.dhparam"
-    },
-    {
-        "host"     : "::",
-        "port"     : [1443, 2443],
-        "protocol" : "spdy",
-        "hsts"     : 0
     }
 ]
 ```
 Above configuration will result in:
 - HTTP listening on all IPv4 and IPv6 interfaces, port 80.
 - HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
-- SPDY listening on all IPv6 interfaces, ports 1443 and 2443, with HSTS disabled, using a self-signed certificate.
 
 A listener object accepts these options:
 - `host` {String/Array} - Network interface(s) to listen on. Use an array for multiple hosts.
 - `port` {Number/Array} - Port(s) to listen on. Use an array for multiple ports.
-- `protocol` {String} - Protocol to use. Can be either `http`, `https` or `spdy`.
+- `protocol` {String} - Protocol to use, `http` or `https`. `https` includes SPDY through NPN.
 - `hsts` {Number} - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
-- `key` {String} - Path to the SSL/TLS private key file. Required for functional SSL/TLS.
-- `cert` {String} - Path to the SSL/TLS certificate file. Required for functional SSL/TLS.
+- `key` {String} - Path to the SSL/TLS private key file. If ommitted, uses self-generated key.
+- `cert` {String} - Path to the SSL/TLS certificate file. If ommitted, uses self-signed certificate.
 - `ca` {String} - Path to the SSL/TLS intermediate certificate file. Optional.
 - `dhparam` {String} - Path to the SSL/TLS DH parameters file. Optional.
 
