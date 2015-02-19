@@ -337,7 +337,7 @@ function setupSocket(server) {
                     }
                     clients[sid].views[vId] = { file: clientFile, directory: clientDir };
                     if (!clientFile) {
-                        updateClientsPerDir(clientDir, sid, vId);
+                        updateCachePerDir(clientDir, sid, vId);
                         sendFiles(sid, vId);
                     }
                 });
@@ -1113,7 +1113,7 @@ function updateDirectory(dir, initial, cb) {
 
            // Calculate folder sizes
            var folders = Object.keys(dirs);
-           folders.splice(0, 1); // we don't care about the size of '/'
+           folders.splice(0, 1); // We don't care about the size of '/'
 
            var folderPaths = folders.map(function(folder) {
                return utils.addFilesPath(folder);
@@ -1151,11 +1151,7 @@ function du(dir, callback) {
 // updateDirectory is pretty costly, debounce it
 var debouncedUpdateDirectory = _.debounce(function(dir) {
     updateDirectory(dir, false, function () {
-        if (clientsPerDir[dir]) {
-            clientsPerDir[dir].forEach(function (client) {
-                client.update();
-            });
-        }
+        updateClients(dir);
     });
 }, 1000); // TODO: magic number
 
@@ -1178,7 +1174,7 @@ function filesUpdate(eventType, event, dir) {
 
     if (event === "unlinkDir") {
         delete dirs[dir];
-        updateClients(parentDir);
+        updateCache(parentDir);
     } else if (event === "unlink") {
         if (dirs[parentDir]) {
             dirs[parentDir].files.some(function (file, i) {
@@ -1188,7 +1184,7 @@ function filesUpdate(eventType, event, dir) {
                 }
             });
         }
-        updateClients(parentDir);
+        updateCache(parentDir);
     } else if (event === "add") {
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
             checkExists(parentDir, stats);
@@ -1197,7 +1193,7 @@ function filesUpdate(eventType, event, dir) {
                 size: stats.size,
                 mtime: stats.mtime.getTime() || 0
             });
-            updateClients(parentDir);
+            updateCache(parentDir);
         });
     } else if (event === "addDir") {
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
@@ -1207,7 +1203,7 @@ function filesUpdate(eventType, event, dir) {
                 size: 0,
                 mtime: stats.mtime.getTime() || 0
             };
-            updateClients(parentDir);
+            updateCache(parentDir);
         });
     } else if (event === "change") {
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
@@ -1216,7 +1212,7 @@ function filesUpdate(eventType, event, dir) {
                 if (file.name === entryName) {
                     dirs[parentDir].files[i].size = stats.size;
                     dirs[parentDir].files[i].mtime = stats.mtime.getTime() || 0;
-                    updateClients(parentDir);
+                    updateCache(parentDir);
                     return true;
                 }
             });
@@ -1225,19 +1221,27 @@ function filesUpdate(eventType, event, dir) {
 }
 
 function updateClients(dir) {
-    if (!dirs[dir]) return; // sometimes happens on recursive unlinks
-
     if (clientsPerDir[dir]) {
         clientsPerDir[dir].forEach(function (client) {
             client.update();
         });
     }
+    var parent = path.dirname(dir);
+    if (clientsPerDir[parent] && dir !== parent) {
+        clientsPerDir[parent].forEach(function (client) {
+            client.update();
+        });
+    }
+}
 
+function updateCache(dir) {
+    if (!dirs[dir]) return; // sometimes happens on recursive unlinks
+
+    updateClients(dir);
     debouncedUpdateDirectory(dir);  // read the dir for folder size updates
 }
 
-
-function updateClientsPerDir(dir, sid, vId) {
+function updateCachePerDir(dir, sid, vId) {
     // remove current client from any previous dirs
     removeClientPerDir(sid, vId);
 
