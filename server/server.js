@@ -237,7 +237,8 @@ function createListener(handler, opts, callback) {
                 tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
                 tlsOptions.secureProtocol = "SSLv23_server_method";
             } else {
-                tlsOptions.ciphers = "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:HIGH:!RC4:!MD5:!aNULL";
+                tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:" +
+                    "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA";
             }
 
             tlsModule.CLIENT_RENEG_LIMIT = 0; // No client renegotiation
