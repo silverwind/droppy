@@ -337,7 +337,7 @@ function setupSocket(server) {
                     }
                     clients[sid].views[vId] = { file: clientFile, directory: clientDir };
                     if (!clientFile) {
-                        updateCachePerDir(clientDir, sid, vId);
+                        updateClientLocation(clientDir, sid, vId);
                         sendFiles(sid, vId);
                     }
                 });
@@ -1132,8 +1132,14 @@ function updateDirectory(dir, initial, cb) {
     });
 }
 
-// //-----------------------------------------------------------------------------
-// // Get a directory's size (the sum of all files inside it)
+var debouncedUpdateDirectory = _.debounce(function(dir) {
+    updateDirectory(dir, false, function () {
+        updateClients(dir);
+    });
+}, 500); // TODO: magic number
+
+// -----------------------------------------------------------------------------
+//  Get a directory's size (the sum of all files inside it)
 function du(dir, callback) {
     fs.stat(dir, function (error, stat) {
         if (error || !stat) return callback(null, 0);
@@ -1149,14 +1155,6 @@ function du(dir, callback) {
         });
     });
 }
-
-//-----------------------------------------------------------------------------
-// updateDirectory is pretty costly, debounce it
-var debouncedUpdateDirectory = _.debounce(function(dir) {
-    updateDirectory(dir, false, function () {
-        updateClients(dir);
-    });
-}, 1000); // TODO: magic number
 
 function checkExists(dir,stats) {
     if (!dirs[dir]) dirs[dir] = {files: [], mtime: stats ? stats.mtime.getTime() : Date.now()};
@@ -1223,6 +1221,11 @@ function filesUpdate(eventType, event, dir) {
     }
 }
 
+function updateCache(dir) {
+    if (!dirs[dir]) return; // sometimes happens on recursive unlinks
+    debouncedUpdateDirectory(dir); // read the dir for folder size updates
+}
+
 function updateClients(dir) {
     if (clientsPerDir[dir]) {
         clientsPerDir[dir].forEach(function (client) {
@@ -1242,14 +1245,7 @@ function updateClients(dir) {
     }
 }
 
-function updateCache(dir) {
-    if (!dirs[dir]) return; // sometimes happens on recursive unlinks
-
-    updateClients(dir);
-    debouncedUpdateDirectory(dir);  // read the dir for folder size updates
-}
-
-function updateCachePerDir(dir, sid, vId) {
+function updateClientLocation(dir, sid, vId) {
     // remove current client from any previous dirs
     removeClientPerDir(sid, vId);
 
@@ -1333,7 +1329,6 @@ function cleanupLinks(callback) {
         });
     }
 }
-
 
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client

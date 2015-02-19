@@ -599,7 +599,6 @@
             });
         });
 
-
         if ("MutationObserver" in window) {
             new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
@@ -2709,7 +2708,6 @@
                     '<span class="header-spacer"></span>' +
                 '</div>';
     }
-
 
     function fullScreenElement() {
         var el;
