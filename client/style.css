@@ -53,6 +53,7 @@ input:-webkit-autofill {
   background-image: none !important;
   color: #fff !important;
 }
+select:-moz-focusring { color: transparent; text-shadow: 0 0 0 #000 }
 
 /* ============================ Main Page Layout =========================== */
 #flex-container {
@@ -920,8 +921,8 @@ html:not(.mobile) .vjs-big-play-button {
     visibility: hidden;
     z-index: 4;
     -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+       -moz-appearance: none;
+            appearance: none;
 }
 
 .mode-select.in { visibility: visible }
@@ -1298,9 +1299,9 @@ html:not(.mobile) .vjs-big-play-button {
     }
 }
 
-#prefs-box .customSelect {
-    width: 50%;
-    padding: .25em;
+#prefs-box select {
+    /*width: 50%;*/
+    padding: 0 .25em;
     border-radius: 3px;
     border: 1px solid #ccc;
     background-color: #fff;
@@ -1308,13 +1309,15 @@ html:not(.mobile) .vjs-big-play-button {
     background-size: 1em;
     background-repeat: no-repeat;
     background-position: right;
+    flex: 1;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
 }
 
-#prefs-box .customSelectInner {
-    white-space: nowrap;
+*:focus {
+    outline: 0;
 }
-
-#prefs-box select { flex: 1 }
 
 #prefs-box .list-user:before {
     content: "Users";
@@ -1354,20 +1357,19 @@ html:not(.mobile) .vjs-big-play-button {
 #prefs-box .add-user {
     line-height: 2em;
     text-align: center;
-    border-radius: 4px;
     cursor: pointer;
     width: 10em;
     margin: .25em auto;
 }
-#prefs-box .list-user .add-user:hover { background: #18f; color: #fff }
-#prefs-box .list-user .add-user:hover svg { fill: #fff }
+#prefs-box .list-user .add-user:hover { color: #333 }
+#prefs-box .list-user .add-user:hover svg { fill: #333 }
 
 #prefs-box .list-user .add-user svg {
-    height: 1.25em;
-    width: 1.25em;
+    height: 1em;
+    width: 1em;
     position: relative;
-    top: .25em;
-    margin-right: .5em;
+    top: .125em;
+    margin-right: .25em;
     fill: #666;
 }
 

@@ -62,7 +62,6 @@ resources.files = {
         ],
         js: [
             "node_modules/jquery/dist/jquery.js",
-            "client/lib/jquery.customSelect.min.js",
             "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
             "node_modules/pretty-bytes/pretty-bytes.js",
             "node_modules/codemirror/lib/codemirror.js",

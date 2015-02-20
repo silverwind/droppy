@@ -2208,8 +2208,6 @@
                 });
             });
         }
-        // Transform the select box, width is needed for the dropdown to behave correctly
-        $("#prefs-box select").width($(".list-prefs li").eq(0).width() * 0.6).customSelect();
     }
 
     function showPrefs() {
@@ -2239,8 +2237,8 @@
         toggleCatcher();
         $("#click-catcher").one("click", function () {
             box.find("select").each(function () {
-                var option = $(this).attr("class").replace(" hasCustomSelect", ""),
-                    value = $(this).val();
+                var option = $(this).attr("class"),
+                    value  = $(this).val();
 
                 if (value === "true") value = true;
                 else if (value === "false") value = false;
