@@ -18,9 +18,9 @@ droppy is a self-hosted file server with an interface similar to many desktop fi
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
-droppy's home folder will be created in `~/.droppy` unless the `--home` option is provided.
+droppy's home folder will be created in `~/.droppy` unless the `--home` switch is provided.
 
-Once initialized, the server will by default listen on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
+By default the server listens on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
 
 ### Configuration
 Run `droppy config` to edit `config/config.json`, which is created with these defaults:
@@ -82,19 +82,19 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
     }
 ]
 ```
-Above configuration will result in:
+The above configuration will result in:
 - HTTP listening on all IPv4 and IPv6 interfaces, port 80.
 - HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
 
 A listener object accepts these options:
-- `host` {String/Array} - Network interface(s) to listen on. Use an array for multiple hosts.
+- `host` {String/Array} - Network interface(s) to listen on. Use an array for multiple interfaces.
 - `port` {Number/Array} - Port(s) to listen on. Use an array for multiple ports.
 - `protocol` {String} - Protocol to use, `http` or `https`. `https` includes SPDY through NPN.
 - `hsts` {Number} - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 - `key` {String} - Path to the SSL/TLS private key file. If ommitted, uses self-generated key.
 - `cert` {String} - Path to the SSL/TLS certificate file. If ommitted, uses self-signed certificate.
 - `ca` {String} - Path to the SSL/TLS intermediate certificate file. Optional.
-- `dhparam` {String} - Path to the SSL/TLS DH parameters file. Optional.
+- `dhparam` {String} - Path to the SSL/TLS Diffie Hellman parameters file. Optional.
 
 *Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
 
@@ -103,7 +103,7 @@ droppy can be used as a module, for example with [express](http://expressjs.com/
 ```js
 "use strict";
 var app = require("express")();
-var droppy = require("./")("~/.droppy", {logLevel: 0});
+var droppy = require("droppy")("~/.droppy", {logLevel: 0});
 
 app.use("/", droppy);
 app.listen(8989);
@@ -115,7 +115,7 @@ app.listen(8989);
 Returns `function onRequest(req, res)`. All arguments are optional.
 
 ### Proxying
-droppy canbe ran behind a reverse proxy as long as WebSockets are passing through. For examples of an fitting nginx configuration, see the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
+droppy can run behind a reverse proxy as long as WebSockets are passing through. For examples of an fitting nginx configuration, see the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
 
 ### wget
 For correct filenames of shared links, use `--content-disposition` or add the following to `~/.wgetrc`:
