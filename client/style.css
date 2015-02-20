@@ -903,22 +903,27 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar > .save:hover span { color: #5c5 }
 .sidebar > .ww:hover svg    {  fill: #18f }
 .sidebar > .ww:hover span   { color: #18f }
-.sidebar > .syntax:hover svg, .sidebar > .syntax.in svg   {  fill: #f82 }
-.sidebar > .syntax:hover span, .sidebar > .syntax.in span { color: #f82 }
+.sidebar > .syntax:hover svg,  .sidebar > .syntax.in svg  {  fill: #f82 }
+.sidebar > .syntax:hover span, .sidebar > .syntax.in span { color: #f82; opacity: 1 }
 
 .mode-select {
     background: #282828;
     border: none;
     box-shadow: 0 0 15px rgba(0,0,0,.6);
+    border-radius: 3px !important;
     color: #ccc;
     font-size: .8em;
-    margin-top: -2.6em;
-    padding: .5em 3em .5em .25em;
+    margin-top: -2.55em;
+    padding: .5em 3.25em .5em .5em;
     position: absolute;
     right: 0;
     visibility: hidden;
     z-index: 4;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
+
 .mode-select.in { visibility: visible }
 
 /* ============================ Text Editor ============================ */
@@ -1293,7 +1298,7 @@ html:not(.mobile) .vjs-big-play-button {
     }
 }
 
-.customSelect {
+#prefs-box .customSelect {
     width: 50%;
     padding: .25em;
     border-radius: 3px;
@@ -1305,7 +1310,7 @@ html:not(.mobile) .vjs-big-play-button {
     background-position: right;
 }
 
-.customSelectInner {
+#prefs-box .customSelectInner {
     white-space: nowrap;
 }
 
