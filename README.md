@@ -101,12 +101,10 @@ A listener object accepts these options:
 ### API
 droppy can be used as a module, for example with [express](http://expressjs.com/):
 ```js
-"use strict";
-var app = require("express")();
-var droppy = require("droppy")("~/.droppy", {logLevel: 0});
+var app    = require("express")();
+var droppy = require("droppy")("droppy", {logLevel: 0});
 
-app.use("/", droppy);
-app.listen(8989);
+app.use("/", droppy).listen(8989);
 ```
 #### droppy([home], [options])
 - **home** {string}: The path to droppy's home folder. Defaults to `~/.droppy`.
