@@ -2127,6 +2127,10 @@
                         view.find(".mode-select").removeClass("in");
                     });
                 });
+                doc.find(".find").register("click", function () {
+                    CodeMirror.commands.find(editor);
+                    view.find(".CodeMirror-search-field").eq(0).focus();
+                });
                 doc.find(".full").register("click", function () {
                     toggleFullscreen($(this).parents(".content")[0]);
                 });

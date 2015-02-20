@@ -15,6 +15,7 @@ it = {
         <option value="{{= value}}">{{= value}}</option>
         {{~}}
     </select>
+    <li class="find">{{= droppy.svg.find}}<span>Find</span></li>
     <li class="full">{{= droppy.svg.fullscreen}}<span>Full</span></li>
 </ul>
 <div class="doc">
