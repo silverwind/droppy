@@ -906,6 +906,8 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar > .ww:hover span   { color: #18f }
 .sidebar > .syntax:hover svg,  .sidebar > .syntax.in svg  {  fill: #f82 }
 .sidebar > .syntax:hover span, .sidebar > .syntax.in span { color: #f82; opacity: 1 }
+.sidebar > .full:hover svg  {  fill: #cc4 }
+.sidebar > .full:hover span { color: #cc4 }
 
 .mode-select {
     background: #282828;

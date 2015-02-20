@@ -595,9 +595,11 @@
                     addKey([37, 38], function () { swapMedia(view, "left");  });
                     addKey([39, 40], function () { swapMedia(view, "right"); });
                     view.find(".fs").html(droppy.svg.unfullscreen);
+                    view.find(".full svg").replaceWith(droppy.svg.unfullscreen);
                 } else {
                     removeKey([32, 37, 38, 39, 40]);
                     $(".fs").html(droppy.svg.fullscreen);
+                    $(".full svg").replaceWith(droppy.svg.fullscreen);
                 }
             });
         });
@@ -2124,6 +2126,9 @@
                         view.find(".syntax").removeClass("in");
                         view.find(".mode-select").removeClass("in");
                     });
+                });
+                doc.find(".full").register("click", function () {
+                    toggleFullscreen($(this).parents(".content")[0]);
                 });
 
                 // Disable New-Tab browser shortcut in keymap
