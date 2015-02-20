@@ -36,12 +36,13 @@
       .loading {
         position: absolute;
         animation: spin 1s infinite linear;
+        -webkit-animation: spin 1s infinite linear;
         border-bottom : 5px solid #18f;
         border-left   : 5px solid #000;
         border-right  : 5px solid #000;
         border-top    : 5px solid #f1a;
-        border-radius: 100%;
-        box-shadow: 0 0 10px #000, inset 0 0 10px #000;
+        border-radius : 100%;
+        background: #000;
         height: 200px;
         width: 200px;
         left: calc(50% - 100px);
@@ -51,8 +52,9 @@
       .loading-logo {
         position: absolute;
         fill: #eee;
-        stroke: #888;
-        stroke-width: 8;
+        stroke: #666;
+        stroke-width: 6;
+        stroke-linejoin: round;
         width: 200px;
         height: 200px;
         left: calc(50% - 100px);

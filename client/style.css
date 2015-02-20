@@ -1300,7 +1300,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #prefs-box select {
-    /*width: 50%;*/
     padding: 0 .25em;
     border-radius: 3px;
     border: 1px solid #ccc;
@@ -1561,7 +1560,6 @@ html:not(.mobile) .vjs-big-play-button {
     display: block;
     width: 100%;
     padding: .25em .1em;
-    /*box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .1);*/
     border: 1px solid #ccc;
     border-radius:  4px;
 }
