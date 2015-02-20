@@ -116,7 +116,7 @@ Returns `function onRequest(req, res)`. All arguments are optional.
 droppy can run behind a reverse proxy as long as WebSockets are passing through. For examples of an fitting nginx configuration, see the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
 
 ### wget
-For correct filenames of shared links, use `--content-disposition` or add the following to `~/.wgetrc`:
+For correct filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
 
 ```ini
 content-disposition = on
