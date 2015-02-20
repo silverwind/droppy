@@ -232,10 +232,8 @@ function createListener(handler, opts, callback) {
 
             // Slightly more secure options for 0.10.x
             if (engine === "node" && /^v0\.10/.test(process.version)) {
-                tlsOptions.secureProtocol = "SSLv23_server_method";
                 tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
             } else {
-                tlsOptions.secureProtocol = "TLSv1_server_method";
                 tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:" +
                     "ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA";
             }
