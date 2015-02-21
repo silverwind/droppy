@@ -2096,6 +2096,7 @@
                     showCursorWhenSelecting: true,
                     styleSelectedText: true,
                     styleActiveLine: true,
+                    tabSize: droppy.get("indentUnit"),
                     theme: droppy.get("theme"),
                     mode: "text/plain"
                 });
@@ -2254,9 +2255,13 @@
                 else if (/^-?\d*(\.\d+)?$/.test(value)) value = parseFloat(value);
 
                 droppy.set(option, value);
+                if (option === "indentUnit") droppy.set("tabSize", value);
 
                 $(".view").each(function () {
-                    if (this.editor) this.editor.setOption(option, value);
+                    if (this.editor) {
+                        this.editor.setOption(option, value);
+                        if (option === "indentUnit") this.editor.setOption("tabSize", value);
+                    }
                 });
             });
         });
