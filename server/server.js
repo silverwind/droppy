@@ -462,7 +462,7 @@ function setupSocket(server) {
                 break;
             case "UPDATE_USER":
                 var name = msg.data.name, pass = msg.data.pass;
-                if (!db.get("sessions")[sid].privileged) return;
+                if (!db.get("sessions")[cookie].privileged) return;
                 if (pass === "") {
                     if (!db.get("users")[name]) return;
                     db.delUser(msg.data.name, function () {
@@ -479,7 +479,7 @@ function setupSocket(server) {
                         sendUsers(sid);
                     });
                 }
-                if (db.get("sessions")[sid].privileged) sendUsers(sid);
+                if (db.get("sessions")[cookie].privileged) sendUsers(sid);
                 break;
             case "CREATE_FILES":
                 var files = Array.isArray(msg.data.files) ? msg.data.files : [msg.data.files];

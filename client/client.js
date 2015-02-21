@@ -648,7 +648,7 @@
         } else {
             // No directory upload support - disable the button
             $("#upload-folder-button").addClass("disabled").on("click", function () {
-                showError(getView(0), "Sorry, your browser doesn't support directory uploading yet!");
+                showError(getView(0), "Sorry, your browser doesn't support directory uploading.");
             });
         }
 
@@ -854,7 +854,7 @@
 
         function isOverLimit(view, size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
-                showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize));
+                showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize) + ".");
                 uploadCancel(view);
                 return true;
             }
@@ -1858,7 +1858,7 @@
                 dataType: "text"
             }).done(function (data, textStatus, request) {
                 if (request.status !== 200) {
-                    showError(view, "Couldn't open/read the file.");
+                    showError(view, "Couldn't open or read the file.");
                     hideSpinner(view);
                 } else if (data === "text") { // Non-Binary content
                     view[0].currentFile = file;
@@ -2168,7 +2168,7 @@
     function createUserList(users) {
         var output = "<div class='list-user'>";
         Object.keys(users).forEach(function (user) {
-            output += '<li><span class="username">' + user + "</span>" + droppy.svg.remove + '</li>';
+            output += '<li><span class="username">' + user + "</span>" + droppy.svg.trash + '</li>';
         });
         output += "</ul>";
         output += "<div class='add-user'>" + droppy.svg.plus + "Add User</div>";
@@ -2193,7 +2193,7 @@
                     priv: true
                 });
             });
-            list.find(".remove").register("click", function (event) {
+            list.find(".trash").register("click", function (event) {
                 event.stopPropagation();
                 sendMessage(null, "UPDATE_USER", {
                     name: $(this).parents("li").children(".username").text(),

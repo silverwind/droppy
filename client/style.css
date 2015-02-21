@@ -377,8 +377,8 @@ input::-webkit-input-placeholder       { color: #999 }
     left: -.3em;
 }
 
-.file-header .down .triangle { transform: rotate(90deg);  top: -.2em;  left: -.2em }
-.file-header .up   .triangle { transform: rotate(270deg); top: -.05em; left: -.2em }
+.file-header .down .triangle { transform: rotate(90deg);  top: -.1em }
+.file-header .up   .triangle { transform: rotate(270deg); top: -.1em }
 
 .file-header .active  { color: #000 }
 .file-header .active .triangle { fill: #000 }
@@ -1323,7 +1323,7 @@ html:not(.mobile) .vjs-big-play-button {
     }
 }
 
-#prefs-box .list-user li svg.remove {
+#prefs-box .list-user li .trash {
     position: relative;
     top: .33em;
     right: 0;
@@ -1334,7 +1334,7 @@ html:not(.mobile) .vjs-big-play-button {
     cursor: pointer;
 }
 
-#prefs-box .list-user li svg.remove:hover {
+#prefs-box .list-user li .trash:hover {
     fill: #f44;
 }
 
