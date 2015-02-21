@@ -40,24 +40,11 @@
             });
             return types;
         })(),
-        webp: (function () {
-            var img = new Image();
-            img.onload = img.onerror = function () {
-                if (img.height === 2) droppy.imageTypes.webp = "image/webp";
-            };
-            img.src = "data:image/webp;base64,UklGRi4AAABXRUJQVlA4TCEAAAAvAUAAEB8wAiMwAgSSNtse/cXjxyCCmrYNWPwmHRH9jwMA";
-        })(),
-        notification: (function () {
-            return "Notification" in window;
-        })(),
-        mobile: (function () {
-            return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent);
-        })(),
-        mac: (function () {
-            return /Mac/.test(navigator.platform);
-        })()
+        webp: document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0,
+        notification: "Notification" in window,
+        mobile: (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent),
+        mac: /Mac/.test(navigator.platform)
     };
-
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
@@ -2695,6 +2682,7 @@
             "bmp" : "image/bmp",
             "ico" : "image/x-icon"
         };
+        if (droppy.detects.webp) droppy.imageTypes.webp = "image/webp";
     }
 
     // SVG preprocessing
