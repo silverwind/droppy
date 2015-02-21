@@ -852,14 +852,40 @@ html:not(.mobile) .vjs-big-play-button {
     display: none !important;
 }
 
-/* ============================ Document Previewer ============================ */
-.doc, .doc > .text-editor {
-    width: 100%;
+/* ============================ Document  ============================ */
+
+.CodeMirror {
+    font-size: .65em;
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+    line-height: 1.2em;
     height: 100%;
+    width: 100%;
 }
 
-.doc {
-    box-shadow: 0 0 10px rgba(0,0,0,.3);
+.CodeMirror-scrollbar-filler { background: transparent !important }
+.CodeMirror-lines { padding: 0 !important }
+
+.CodeMirror-dialog-top { border-bottom: 1px solid #383838; top: 0 }
+.CodeMirror-dialog-bottom { border-top: 1px solid #383838; bottom: 0 }
+
+.CodeMirror-dialog {
+    position: absolute;
+    left: 0; right: 0;
+    background: #282828;
+    z-index: 15;
+    padding: .1em .8em;
+    overflow: hidden;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.CodeMirror-dialog input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 20em !important;
+    color: #eee;
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
 }
 
 .sidebar {
@@ -921,45 +947,7 @@ html:not(.mobile) .vjs-big-play-button {
        -moz-appearance: none;
             appearance: none;
 }
-
 .mode-select.in { visibility: visible }
-
-/* ============================ Text Editor ============================ */
-
-.doc > .text-editor > .CodeMirror {
-    font-size: .65em;
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
-    line-height: 1.2em;
-    height: 100%;
-    width: 100%;
-    position: relative;
-}
-
-.CodeMirror-scrollbar-filler { background: transparent !important }
-.CodeMirror-lines { padding: 0 !important }
-
-.CodeMirror-dialog-top { border-bottom: 1px solid #383838; top: 0 }
-.CodeMirror-dialog-bottom { border-top: 1px solid #383838; bottom: 0 }
-
-.CodeMirror-dialog {
-    position: absolute;
-    left: 0; right: 0;
-    background: #282828;
-    z-index: 15;
-    padding: .1em .8em;
-    overflow: hidden;
-    color: #aaa;
-    white-space: nowrap;
-}
-
-.CodeMirror-dialog input {
-    border: none;
-    outline: none;
-    background: transparent;
-    width: 20em !important;
-    color: #eee;
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
-}
 
 /* ============================ Upload Progress ============================ */
 

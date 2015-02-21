@@ -2085,7 +2085,7 @@
         function loadCM(data, filename) {
             loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
-                view[0].editor = editor = CodeMirror(doc.find(".text-editor")[0], {
+                view[0].editor = editor = CodeMirror(view.find(".document")[0], {
                     autofocus: true,
                     dragDrop: false,
                     indentUnit: droppy.get("indentUnit"),
