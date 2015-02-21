@@ -965,7 +965,7 @@ html:not(.mobile) .vjs-big-play-button {
     background: transparent;
     width: 20em !important;
     color: #eee;
-    font-family: monospace;
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
 }
 
 /* ============================ Upload Progress ============================ */
