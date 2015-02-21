@@ -13,11 +13,8 @@
     "type": "git",
     "url": "https://github.com/silverwind/droppy.git"
   },
-  "main": "exports.js",
   "preferGlobal": true,
-  "bin": {
-    "droppy": "./droppy.js"
-  },
+  "bin": "./droppy.js",
   "scripts": {
     "start": "node droppy.js start"
   },
@@ -65,7 +62,7 @@
     "client",
     "server",
     "droppy.js",
-    "exports.js"
+    "index.js"
   ],
   "engines": {
     "node": ">0.10.0",
@@ -80,6 +77,9 @@
     "https",
     "web",
     "interface",
-    "media"
+    "media",
+    "cloud",
+    "storage",
+    "codemirror"
   ]
 }
