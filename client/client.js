@@ -7,6 +7,8 @@
     /* The lines below will get replaced during compilation by the server */
     /* {{ svg }} */
     /* {{ templates }} */
+
+    initVariables();
 // ============================================================================
 //  Feature Detects
 // ============================================================================
@@ -46,8 +48,6 @@
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
-    initVariables();
-
     // Add the dataTransfer property to the drag-and-drop events
     $.event.props.push("dataTransfer");
 
@@ -148,17 +148,14 @@
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 
-    // Add certain classes to the html tag based on UA
     if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
         $("html").addClass("firefox"); // https://bugzilla.mozilla.org/show_bug.cgi?id=878058
-    else if (navigator.userAgent.toLowerCase().indexOf("msie") > -1)
-        $("html").addClass("ie");
-
     if (droppy.detects.mobile)
         $("html").addClass("mobile");
     if (!droppy.detects.fullscreen)
         $("html").addClass("nofullscreen");
-
+    if (droppy.detects.webp)
+        droppy.imageTypes.webp = "image/webp";
 // ============================================================================
 //  localStorage wrapper functions
 // ============================================================================
@@ -2682,7 +2679,6 @@
             "bmp" : "image/bmp",
             "ico" : "image/x-icon"
         };
-        if (droppy.detects.webp) droppy.imageTypes.webp = "image/webp";
     }
 
     // SVG preprocessing
