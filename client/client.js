@@ -7,8 +7,6 @@
     /* The lines below will get replaced during compilation by the server */
     /* {{ svg }} */
     /* {{ templates }} */
-
-    initVariables();
 // ============================================================================
 //  Feature Detects
 // ============================================================================
@@ -48,6 +46,8 @@
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
+    initVariables();
+
     // Add the dataTransfer property to the drag-and-drop events
     $.event.props.push("dataTransfer");
 
