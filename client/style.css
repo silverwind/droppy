@@ -169,6 +169,10 @@ input::-webkit-input-placeholder       { color: #999 }
     border-radius: 0;
 }
 
+.content:fullscreen          { top:0; height: 100% }
+.content:-webkit-full-screen { top:0; height: 100% }
+.content:-moz-full-screen    { top:0; height: 100% }
+
 /* Bottom padding fix for Firefox, see https://bugzilla.mozilla.org/show_bug.cgi?id=878058 */
 .firefox .content.directory:after {
     bottom: 0;
