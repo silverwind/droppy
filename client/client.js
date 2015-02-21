@@ -2118,8 +2118,7 @@
                 });
                 doc.find(".syntax").register("click", function () {
                     var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
-                    var action = shown ? "addClass" : "removeClass";
-                    view.find(".syntax")[action]("in");
+                    view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
                     view.find(".mode-select").on("change", function () {
                         var mode = $(this).val();
                         CodeMirror.autoLoadMode(editor, mode);

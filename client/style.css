@@ -8,7 +8,7 @@
   src: local("Roboto Light"), local("Roboto-Light"), url("?!/Roboto.woff") format("woff");
 }
 
-/* ================================= Reset ================================= */
+/* ============================= Global styles ============================= */
 
 body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
     -webkit-text-size-adjust: 100%;
@@ -26,8 +26,6 @@ body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figca
 li { list-style: none }
 a  { text-decoration: none; background: transparent }
 :focus, a:active, a:hover { outline: none }
-::-moz-focus-outer { border: none }
-::-moz-focus-inner { border: none; padding: none; outline: none }
 input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0 }
 button, input { font-family: inherit; font-size: 100%; margin: none; line-height: normal; border: none }
 button, html input[type="button"] { cursor: pointer }
@@ -35,25 +33,20 @@ button, html input[type="button"], input[type="reset"], input[type="submit"] { -
 button, input, select, textarea { font-family: inherit; font-size: 100%; margin: 0 }
 button, input { line-height: normal }
 
-/* ============================ Global styles / fonts ============================= */
+::-moz-focus-inner { border: none; padding: none; outline: none }
+::-moz-focus-outer { border: none }
+
+::-webkit-scrollbar, ::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar-thumb      { background: #888 }
+::-webkit-scrollbar:horizontal { height: 4px }
+::-webkit-scrollbar:vertical   { width:  4px }
 
 ::selection      { background: #18f; color: #fff }
 ::-moz-selection { background: #18f; color: #fff }
 
-::-webkit-scrollbar, ::-webkit-scrollbar-track { background: transparent }
-::-webkit-scrollbar:vertical   { width:  4px }
-::-webkit-scrollbar:horizontal { height: 4px }
-::-webkit-scrollbar-thumb      { background: #888 }
-
 input::-moz-placeholder                { color: #999; opacity: 1 }
 input:-ms-input-placeholder            { color: #999 }
 input::-webkit-input-placeholder       { color: #999 }
-input:-webkit-autofill {
-  background-color: #221 !important;
-  background-image: none !important;
-  color: #fff !important;
-}
-select:-moz-focusring { color: transparent; text-shadow: 0 0 0 #000 }
 
 /* ============================ Main Page Layout =========================== */
 #flex-container {
@@ -915,7 +908,7 @@ html:not(.mobile) .vjs-big-play-button {
     background: #282828;
     border: none;
     box-shadow: 0 0 15px rgba(0,0,0,.6);
-    border-radius: 3px !important;
+    border-radius: 2px;
     color: #ccc;
     font-size: .8em;
     margin-top: -2.55em;
