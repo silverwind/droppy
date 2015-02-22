@@ -7,7 +7,7 @@ var pkg = require("./../../package.json");
 exports = module.exports = function manifest(req) {
     var data = {
         "name": pkg.name,
-        "display": "minimal-ui",
+        "display": "fullscreen",
         "orientation": "any",
         "icons": [
             { "src": "?!/icon_16.png",  "sizes": "16x16",   "type": "image/png" },
