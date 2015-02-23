@@ -1493,7 +1493,7 @@ html:not(.mobile) .vjs-big-play-button {
 /* =============================== Info Box ================================ */
 
 .info-box {
-    border-radius: 4px;
+    border-radius: 6px;
     left: 50%;
     top: 50%;
     transform:  translate(-50%, -50%);
@@ -1527,7 +1527,7 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box.link span   { display: none }
 .info-box.error input { display: none }
 .info-box.link  svg { background: #f81; height: 2.5em }
-.info-box.error svg { background: #f44; height: 100%  }
+.info-box.error svg { background: #f44; height: calc(100% - .5em) }
 
 .info-box span, .info-box input {
     display: block;
