@@ -2050,7 +2050,7 @@
         showSpinner(view);
         var editor, doc = $(droppy.templates.views.document({modes: droppy.modes}));
         view.data("type", "document");
-        view[0].animDirection = "forward";
+        view[0].animDirection = "center";
 
         $.ajax({
             type: "GET",
