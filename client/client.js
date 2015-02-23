@@ -2220,9 +2220,11 @@
 
         $("select.theme").register("change", function () {
             var theme = $(this).val();
-            loadTheme(theme);
-            $(".view").each(function () {
-                if (this.editor) this.editor.setOption("theme", theme);
+            loadTheme(theme, function () {
+                droppy.set("theme", theme);
+                $(".view").each(function () {
+                    if (this.editor) this.editor.setOption("theme", theme);
+                });
             });
         });
 
@@ -2829,14 +2831,14 @@
         }
     }
 
-    function loadTheme(theme, callback) {
-        $.get("?!/theme/" + theme).then(function (data) {
-            var className = theme.replace(/[^a-z]/gim, "");
-            if (!$("." + className).length) $('<style class="' + className + '"></style>').appendTo("head");
-            $("." + className).text(data);
-            droppy.set("theme", theme);
-            if (callback) callback();
-        });
+    function loadTheme(theme, cb) {
+        var className = theme.replace(/[^a-z]/gim, "");
+        if (!$("." + className).length) {
+            $.get("?!/theme/" + theme).then(function (data) {
+                $('<style class="' + className + '">' + data + '</style>').appendTo("head");
+                cb();
+            });
+        } else cb();
     }
 
     function showSpinner(view) {
