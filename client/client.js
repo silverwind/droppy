@@ -2831,8 +2831,9 @@
 
     function loadTheme(theme, callback) {
         $.get("?!/theme/" + theme).then(function (data) {
-            if (!$("#cmTheme").length) $('<style id="cmTheme"></style>').appendTo("head");
-            $("#cmTheme").text(data);
+            var className = theme.replace(/[^a-z]/gim, "");
+            if (!$("." + className).length) $('<style class="' + className + '"></style>').appendTo("head");
+            $("." + className).text(data);
             droppy.set("theme", theme);
             if (callback) callback();
         });
