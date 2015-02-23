@@ -202,7 +202,7 @@ input::-webkit-input-placeholder       { color: #999 }
     flex-direction: column;
 }
 
-.blur { filter: blur(2px) }
+.blur { filter: blur(1.5px) }
 
 /* ================================== Path ================================= */
 
@@ -1177,8 +1177,8 @@ html:not(.mobile) .vjs-big-play-button {
     z-index: 32;
 }
 
-#about-box.in  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-#about-box.out { transform: translate(-50%, -50%) scale(1.1); opacity: 0; visibility: hidden }
+#about-box.in  { transform: translate(-50%, -50%); opacity: 1; }
+#about-box.out { transform: translate(-50%, -50%); opacity: 0; visibility: hidden }
 
 #about-content {
     color: #333;
@@ -1255,8 +1255,8 @@ html:not(.mobile) .vjs-big-play-button {
 @media (max-width: 1023px) { #prefs-box { font-size: .7em } }
 @media (max-width:  799px) { #prefs-box { font-size: .6em } }
 
-#prefs-box.in  { transform: translate(-50%, -50%) scale(1);   opacity: 1; visibility: visible }
-#prefs-box.out { transform: translate(-50%, -50%) scale(1.1); opacity: 0; visibility: hidden  }
+#prefs-box.in  { transform: translate(-50%, -50%); opacity: 1; visibility: visible }
+#prefs-box.out { transform: translate(-50%, -50%); opacity: 0; visibility: hidden  }
 
 #prefs-box > div { width: 100% }
 
@@ -1379,8 +1379,8 @@ html:not(.mobile) .vjs-big-play-button {
     z-index: 0;
 }
 
-#login-box.in  { transform: translate(-50%, -50%) scale(1);   opacity: 1 }
-#login-box.out { transform: translate(-50%, -50%) scale(1.1); opacity: 0 }
+#login-box.in  { transform: translate(-50%, -50%); opacity: 1 }
+#login-box.out { transform: translate(-50%, -50%); opacity: 0 }
 
 @media (max-width: 639px), (max-height: 399px) {
     #login-box {
@@ -1493,67 +1493,51 @@ html:not(.mobile) .vjs-big-play-button {
 /* =============================== Info Box ================================ */
 
 .info-box {
-    border-radius: 6px;
+    border-radius: 4px;
     left: 50%;
     top: 50%;
-    transform:  translate(-50%, -50%) scale(1.1);
+    transform:  translate(-50%, -50%);
     position: absolute;
     transition: all .3s ease;
-    z-index: 66;
-    overflow-y: auto;
+    text-align: center;
+    z-index: 40;
+    overflow: hidden;
     opacity: 0;
     color: #333;
     background: #eee;
     visibility: hidden;
     box-shadow: 0 0 30px rgba(0,0,0,.4);
+    width: auto;
 }
-.info-box.in { visibility: visible; transform: translate(-50%, -50%) scale(1); opacity: 1; }
+.info-box.in { visibility: visible; transform: translate(-50%, -50%); opacity: 1; }
 
 @media (min-width: 1024px) { .info-box { font-size: .9em } }
 @media (max-width: 1023px) { .info-box { font-size: .8em } }
 @media (max-width:  799px) { .info-box { font-size: .7em } }
-@media (max-width:  639px) { .info-box { width: 60%; } }
-@media (max-width:  319px) { .info-box { width: 90%; } }
-
-.info-box > .box-icon {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3em;
-}
+@media (max-width:  639px) { .info-box { max-width: 90%  } }
 
 .info-box svg {
     position: absolute;
     left: 0;
-    height: 75%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3em;
+    width: 2.5em;
+    padding: .25em;
     fill: #fff;
 }
-.info-box.link .box-icon  { background: #f81; }
-.info-box.error .box-icon { background: #f44; }
 
-.info-box > span {
-    display: block;
-    line-height: 1.5em;
-    padding-left: 3.5em;
-    padding-right: .5em;
-    padding-top: .5em;
-    padding-bottom: .5em;
-}
-
-.info-box.link input {
-    text-align: center;
-    display: block;
-    width: 100%;
-    padding: .25em .1em;
-    border: 1px solid #ccc;
-    border-radius:  4px;
-}
-
+.info-box.link span   { display: none }
 .info-box.error input { display: none }
+.info-box.link  svg { background: #f81; height: 2.5em }
+.info-box.error svg { background: #f44; height: 100%  }
+
+.info-box span, .info-box input {
+    display: block;
+    padding: .25em;
+    padding-left: 3.25em;
+    color: #444;
+}
+
+.info-box span  { line-height: 1.5em }
+.info-box input { line-height: 2.5em }
 
 /* =========================== Drop Select Menu ============================ */
 

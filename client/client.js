@@ -216,7 +216,7 @@
                         "<ul class='path'></ul>" +
                         "<div class='content-container'><div class='content'></div></div>" +
                         "<div class='dropzone'></div>" +
-                        "<div class='info-box'><div class='box-icon'><svg></svg></div><span><input></span></div>" +
+                        "<div class='info-box'><svg></svg><span></span><input></div>" +
                         "<div class='audio-bar out'>" +
                           "<div class='audio-icon volume'>" + droppy.svg["volume-medium"] + "</div>" +
                           "<div class='volume-slider out'>" +

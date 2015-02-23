@@ -780,15 +780,14 @@ function handleResourceRequest(req, res, resourceName) {
             }
 
             if (/.+\.(png|ico|svg|woff)$/.test(resourceName)) {
-                headers["Cache-Control"] = "public, max-age=604800";
-                headers["Expires"] = new Date(Date.now() + 604800000).toUTCString();
+                headers["Cache-Control"] = "public, max-age=86400";
+                headers["Expires"] = new Date(Date.now() + 86400000).toUTCString();
             } else {
+                if (resource.etag && !/\?\!\/content/.test(req.url)) {
+                    headers["ETag"] = '"' + resource.etag + '"';
+                }
                 headers["Cache-Control"] = "private, max-age=0";
                 headers["Expires"] = "0";
-            }
-
-            if (resource.etag && !/\?\!\/content/.test(req.url)) {
-                headers["ETag"] = '"' + resource.etag + '"';
             }
 
             // Content-Type
