@@ -22,7 +22,7 @@
     "async": "^0.9.0",
     "autoprefixer-core": "^5.1.7",
     "busboy": "^0.2.9",
-    "chalk": "^0.5.1",
+    "chalk": "^1.0.0",
     "chokidar": "^1.0.0-rc3",
     "clean-css": "^3.0.10",
     "codemirror": "^5.0.0",
