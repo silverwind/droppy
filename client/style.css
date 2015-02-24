@@ -141,7 +141,6 @@ input::-webkit-input-placeholder       { color: #999 }
     width: 100%;
     height: 100%;
     position: relative;
-    transition: filter .15s ease;
     flex: 1;
     order: 2;
 }
@@ -212,7 +211,6 @@ input::-webkit-input-placeholder       { color: #999 }
    white-space: nowrap;
    width: 100%;
    position: absolute;
-   transition: filter .15s ease;
    z-index: 1;
    flex: 0 0 1.5rem;
    order: 1;
@@ -346,11 +344,12 @@ input::-webkit-input-placeholder       { color: #999 }
     left: 0; right: 0; top: 0; bottom: 0;
     transition: opacity 0.15s ease;
     z-index: 31;
+    opacity: 0;
+    visibility: hidden;
     user-select: none;
 }
 
-#click-catcher.out { opacity: 0   ; visibility: hidden  }
-#click-catcher.in  { opacity: .33 ; visibility: visible }
+#click-catcher.in { opacity: .3; visibility: visible }
 
 .file-header {
     display: flex;
@@ -662,7 +661,6 @@ input::-webkit-input-placeholder       { color: #999 }
     background: #f81;
     color: #fff;
     cursor: pointer;
-    box-shadow: inset 0 0 10px rgba(0,0,0,.15);
 }
 
 #entry-menu > .radius-wrap > a:hover svg {

@@ -561,7 +561,7 @@
             // Bind escape for hiding modals
             .register("keydown", function (event) {
                 if (event.keyCode === 27)
-                    $("#click-catcher").click();
+                    toggleCatcher(false);
             })
             // Stop CTRL-S from showing a save dialog
             .register("keydown", function (event) {
@@ -587,17 +587,6 @@
                 }
             });
         });
-
-        if ("MutationObserver" in window) {
-            new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.attributeName === "class") {
-                        var action = $("#click-catcher").hasClass("in") ? "addClass" : "removeClass";
-                        $("#navigation, .path, .content-container, .audio-bar")[action]("blur");
-                    }
-                });
-            }).observe(document.querySelector("#click-catcher"), {attributes: true});
-        }
 
         var fileInput = $("#file");
         fileInput.register("change", function (event) {
@@ -744,15 +733,6 @@
             sendMessage(null, "GET_USERS");
         });
 
-        // Hide modals when clicking outside their box
-        $("#click-catcher").register("click", function () {
-            $("#prefs-box").replaceClass("in", "out");
-            $("#about-box").replaceClass("in", "out");
-            $("#entry-menu").replaceClass("in", "out");
-            $("#drop-select").removeAttr("class");
-            $(".info-box").replaceClass("in", "out");
-            toggleCatcher();
-        });
     }
     // ============================================================================
     //  Upload functions
@@ -966,7 +946,7 @@
         });
 
         // Hide menu, click-catcher and the original link, stop any previous edits
-        $("#click-catcher").trigger("mousemove");
+        toggleCatcher(false);
         link = entry.find(".entry-link");
 
         // Add inline elements
@@ -1030,18 +1010,21 @@
         }
     }
 
-    // Toggle the full-screen click catching frame if any modals are shown
-    function toggleCatcher() {
-        if ($("#about-box").hasClass("in") ||
-            $("#prefs-box").hasClass("in") ||
-            $(".info-box").hasClass("in") ||
-            $("#entry-menu").hasClass("in") ||
-            $("#drop-select").hasClass("in")
-        ) {
-            $("#click-catcher").attr("class", "in");
-        } else {
-            $("#click-catcher").attr("class", "out");
-        }
+    function toggleCatcher(show) {
+        var cc     = $("#click-catcher"),
+            modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"],
+            toBlur = ["#navigation, .path, .content-container, .audio-bar"];
+
+        if (show === undefined) show = modals.some(function (selector) { return $(selector).hasClass("in"); });
+
+        toBlur.forEach(function (selector) {
+            $(selector)[show ? "addClass" : "removeClass"]("blur");
+        });
+
+        if (!show) modals.forEach(function (selector) { $(selector).replaceClass("in", "out"); });
+
+        cc.register("click", toggleCatcher.bind(null, false));
+        cc[show ? "addClass" : "removeClass"]("in");
     }
 
     // Update the page title
@@ -1377,8 +1360,7 @@
     }
 
     function handleDrop(view, event, from, to, spinner) {
-        var catcher = $("#click-catcher"),
-            dropSelect = $("#drop-select");
+        var dropSelect = $("#drop-select");
         droppy.dragTimer.clear();
         $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
@@ -1404,18 +1386,18 @@
                 left: left,
                 top:  event.originalEvent.clientY
             });
-            toggleCatcher();
+            toggleCatcher(true);
             dropSelect.children(".movefile").off("click").one("click", function () {
                 sendDrop(view, "cut", from, to, spinner);
-                catcher.off("mousemove").trigger("click");
+                toggleCatcher(false);
             });
             dropSelect.children(".copyfile").off("click").one("click", function () {
                 sendDrop(view, "copy", from, to, spinner);
-                catcher.off("mousemove").trigger("click");
+                toggleCatcher(false);
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
                 updateLocation(view, from);
-                catcher.off("mousemove").trigger("click");
+                toggleCatcher(false);
             });
             return;
         }
@@ -1674,7 +1656,7 @@
 
             event.stopPropagation();
             play(view, entry.data("id"));
-            $("#click-catcher").trigger("click");
+            toggleCatcher(false);
         });
 
         $("#entry-menu .edit").register("click", function (event) {
@@ -1682,8 +1664,7 @@
                 entry = $("#entry-menu").data("target"),
                 view  = entry.parents(".view");
 
-            $("#click-catcher").trigger("click");
-
+            toggleCatcher(false);
             view[0].currentFile = entry.find(".file-link").text();
             location = join(view[0].currentFolder, view[0].currentFile);
             pushHistory(view, location);
@@ -1696,7 +1677,8 @@
         $("#entry-menu .openfile").register("click", function (event) {
             var entry  = $("#entry-menu").data("target"),
                 view   = entry.parents(".view");
-            $("#click-catcher").trigger("click");
+
+            toggleCatcher(false);
             openFile(view, view[0].currentFolder, entry.find(".file-link").text());
             event.stopPropagation();
         });
@@ -1706,7 +1688,8 @@
             var entry = $("#entry-menu").data("target"),
                 view  = entry.parents(".view");
             if (droppy.socketWait) return;
-            $("#click-catcher").trigger("click");
+
+            toggleCatcher(false);
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner(view);
@@ -1719,8 +1702,9 @@
         // Copy/cut a file/folder
         $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
             var entry = $("#entry-menu").data("target");
+
+            toggleCatcher(false);
             droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
-            $("#click-catcher").trigger("click");
             $(".view").each(function () {
                 var view = $(this);
                 if (!view.children(".paste-button").length) {
@@ -1745,7 +1729,7 @@
                         throw new Error("Clipboard was empty!");
                     }
                     droppy.clipboard = null;
-                    $("#click-catcher").trigger("click");
+                    toggleCatcher(false);
                     $(".paste-button").replaceClass("in", "out");
                 });
                 $(".paste-button").setTransitionClass("out", "in");
@@ -1757,10 +1741,11 @@
         $("#entry-menu .delete").register("click", function (event) {
             event.stopPropagation();
             if (droppy.socketWait) return;
+
+            toggleCatcher(false);
             var entry = $("#entry-menu").data("target");
             showSpinner(entry.parents(".view"));
             sendMessage(null, "DELETE_FILE", entry.data("id"));
-            $("#click-catcher").trigger("click");
         });
     }
 
@@ -1781,11 +1766,10 @@
         menuTop = entry.offset().top;
         if (menuTop > menuMaxTop) menuTop = menuMaxTop;
         menu.css("top", menuTop + "px");
-        toggleCatcher();
 
+        toggleCatcher(true);
         $("#click-catcher").one("click", function () {
             menu.attr("class", "out");
-            toggleCatcher();
         });
     }
 
@@ -2209,6 +2193,7 @@
 
     function showPrefs() {
         var box = $("#prefs-box");
+        box[0].style.willChange = "transform, opacity, visibility";
         box.empty().append(function () {
             return $("<div class='list-prefs'>").append(droppy.templates.options({
                 droppy: droppy,
@@ -2232,8 +2217,11 @@
             });
         });
 
-        $("#prefs-box").replaceClass("out", "in");
-        toggleCatcher();
+        box.replaceClass("out", "in").end(function () {
+            this.style.willChange = "auto";
+        });
+
+        toggleCatcher(true);
         $("#click-catcher").one("click", function () {
             box.find("select").each(function () {
                 var option = $(this).attr("class"),
@@ -2887,7 +2875,7 @@
             .val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link)
             .register("keydown", function (event) {
                 if (event.keyCode === 27 || event.keyCode === 13)
-                    $("#click-catcher").click();
+                    toggleCatcher(false);
             });
         box.attr("class", "info-box link in").end(function () {
             input[0].select();
