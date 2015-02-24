@@ -1,12 +1,4 @@
 @charset "UTF-8";
-/* ================================= Fonts ================================= */
-
-@font-face {
-  font-family: "Roboto";
-  font-style: normal;
-  font-weight: 300;
-  src: local("Roboto Light"), local("Roboto-Light"), url("?!/Roboto.woff") format("woff");
-}
 
 /* ============================= Global styles ============================= */
 
@@ -49,6 +41,7 @@ input:-ms-input-placeholder            { color: #999 }
 input::-webkit-input-placeholder       { color: #999 }
 
 /* ============================ Main Page Layout =========================== */
+
 #flex-container {
     position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
@@ -766,6 +759,7 @@ input::-webkit-input-placeholder       { color: #999 }
     max-height: 100%; max-width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
+    object-fit: contain;
 }
 .nofullscreen .media-container video {
     position: absolute; width: auto;
