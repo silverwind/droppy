@@ -1112,14 +1112,14 @@
                     var viewLoc = getViewLocation(view);
                     showSpinner(view);
                     // Find the direction in which we should animate
-                    if (!viewLoc)
+                    if (!viewLoc || viewDest.length === viewLoc.length)
                         view[0].animDirection = "center";
                     else if (viewDest.length > viewLoc.length)
                         view[0].animDirection = "forward";
-                    else if (viewDest.length === viewLoc.length)
-                        view[0].animDirection = "center";
                     else
                         view[0].animDirection = "back";
+
+                    view.find(".content")[0].style.willChange = "auto";
                     sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
                     // Skip the push if we're already navigating through history
@@ -1348,6 +1348,7 @@
             finish();
         } else {
             view.children(".content-container").append(content);
+            view.find(".content")[0].style.willChange = "transform";
             view.find(".new").data("root", view[0].currentFolder);
             view[0].isAnimating = true;
             view.find(".data-row").addClass("animating");
@@ -1360,6 +1361,7 @@
         function finish() {
             view[0].isAnimating = false;
             view.find(".content:not(.new)").remove();
+            view.find(".content")[0].style.willChange = "auto";
             view.find(".new").removeClass("new");
             view.find(".data-row").removeClass("animating");
             if (view.data("type") === "directory") {
@@ -1932,18 +1934,19 @@
     }
 
     function swapMedia(view, dir) {
+        view.find(".media-wrapper")[0].style.willChange = "transform";
         var b, a = view.find(".media-wrapper"),
             nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view),
             isImage = Object.keys(droppy.imageTypes).indexOf(getExt(nextFile)) !== -1,
             src = getMediaSrc(view, nextFile);
 
         if (isImage) {
-            b = $("<div class='media-wrapper new-media " + dir + "'><img src='" + src + "'></div>");
+            b = $("<div class='media-wrapper new-media " + dir + "'><img class='media' src='" + src + "'></div>");
             b.find("img").one("load", function () {
                 aspectScale();
             });
         } else {
-            b = $("<div class='media-wrapper new-media " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
+            b = $("<div class='media-wrapper new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
         }
 
@@ -1952,6 +1955,7 @@
         b.setTransitionClass(/(left|right)/, "").end(function () {
             b.removeClass("new-media");
             a.remove();
+            view.find(".media-wrapper")[0].style.willChange = "auto";
             if (!isImage) initVideoJS(b.find("video")[0]);
             makeMediaDraggable(b[0]);
             $(b[0]).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
