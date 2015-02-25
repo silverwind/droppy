@@ -222,6 +222,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (dhparam) {
                 finish();
             } else {
+                log.simple("Generating " + DHPARAM_BITS + " Diffie Hellman parameters. This will take a while...");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
                    if (err) return callback(err);
                    dhparam = data;
