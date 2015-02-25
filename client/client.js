@@ -219,7 +219,7 @@
                         "<div class='info-box'><svg></svg><span></span><input></div>" +
                         "<div class='audio-bar out'>" +
                           "<div class='audio-icon volume'>" + droppy.svg["volume-medium"] + "</div>" +
-                          "<div class='volume-slider out'>" +
+                          "<div class='volume-slider'>" +
                             "<div class='volume-slider-inner'></div>" +
                           "</div>" +
                           "<div class='audio-icon previous'>" + droppy.svg.previous + "</div>" +
@@ -282,7 +282,7 @@
             initEntryMenu();
             raf(function () {
                 oldPage.replaceClass("in", "out").end(function () {
-                    $("#navigation").removeAttr("class"); // remove out class
+                    $("#navigation").addClass("in");
                 });
                 finalize();
             });
@@ -290,7 +290,7 @@
             initAuthPage(type === "firstrun");
             raf(function () {
                 oldPage.replaceClass("in", "out").end(function () {
-                    $("#login-box").replaceClass("out", "in"); // remove out class
+                    $("#login-box").addClass("in");
                 });
                 if (type === "firstrun") {
                     $("#login-info").text("Hello! Choose your creditentials.");
@@ -801,6 +801,7 @@
             if (xhr.status === 200) {
                 uploadDone(view);
             } else {
+                if (xhr.status === 0) return; // cancelled by user
                 showError(view, "Server responded with HTTP " + xhr.status);
                 uploadCancel(view);
             }
@@ -850,7 +851,7 @@
     }
 
     function uploadInit(view) {
-        var uploadInfo = '<div class="upload-info out">' +
+        var uploadInfo = '<div class="upload-info">' +
                 '<div class="upload-bar"></div>' +
                 '<span class="upload-title"></span>' +
                 '<span class="upload-speed">' +
@@ -868,7 +869,7 @@
             '</div>';
 
         if (!view.find(".upload-info").length) view.append(uploadInfo);
-        view.find(".upload-info").setTransitionClass("out", "in");
+        view.find(".upload-info").setTransitionClass("in");
         view.find(".upload-bar").css("width", "0%");
         view.find(".upload-time-left, .upload-speed > span").text("");
         view.find(".upload-title").text("Reading files ...");
@@ -890,7 +891,7 @@
         view[0].isUploading = false;
         hideSpinner(view);
         updateTitle(basename(view[0].currentFolder));
-        view.find(".upload-info").setTransitionClass("in", "out");
+        view.find(".upload-info").removeClass("in");
         view.find(".data-row.uploading").removeClass("uploading");
         view.find(".icon-uploading").remove();
         if (view[0].uploadSuccess) {
@@ -1178,13 +1179,13 @@
 
         function removePart(i) {
             var toRemove = view.find(".path li").slice(i);
-            toRemove.setTransitionClass("in", "out gone").end(function () {
+            toRemove.setTransitionClass("in", "gone").end(function () {
                 $(this).remove();
             });
         }
 
         function finalize() {
-            view.find(".path li.out:not(.gone)").setTransitionClass("out", "in");
+            view.find(".path li.out:not(.gone)").setTransitionClass("in");
             setTimeout(function () {checkPathOverflow(view); }, 400);
         }
     }
@@ -1705,7 +1706,7 @@
                 var view = $(this);
                 if (!view.children(".paste-button").length) {
                     view.append(
-                        '<div class="paste-button ' + (droppy.clipboard ? "in" : "out") + '">' + droppy.svg.paste +
+                        '<div class="paste-button ' + (droppy.clipboard && "in") + '">' + droppy.svg.paste +
                             '<span>Paste <span class="filename">' +
                                 (droppy.clipboard ? basename(droppy.clipboard.from) : "") +
                             '</span></span>' +
@@ -1726,9 +1727,9 @@
                     }
                     droppy.clipboard = null;
                     toggleCatcher(false);
-                    $(".paste-button").replaceClass("in", "out");
+                    $(".paste-button").removeClass("in");
                 });
-                $(".paste-button").setTransitionClass("out", "in");
+                $(".paste-button").setTransitionClass("in");
             });
             event.stopPropagation();
         });
@@ -2286,7 +2287,7 @@
             title      = basename(player.src).replace(/\..+$/, "").replace(/_/g, " ").replace(/\s+/, " ");
 
         title = decodeURIComponent(title);
-        view.find(".audio-bar").replaceClass("out", "in");
+        view.find(".audio-bar").addClass("in");
         view.find(".audio-title").text(title);
         updateTitle(title);
 
@@ -2379,7 +2380,7 @@
                 view[0].audioUpdater = null;
             }
             updateTitle(basename(getView()[0].currentFolder));
-            bar.replaceClass("in", "out");
+            bar.removeClass("in");
             event.stopPropagation();
         });
         bar.find(".shuffle").register("click", function (event) {
@@ -2399,7 +2400,7 @@
         volumeIcon[0].addEventListener("mousewheel", onWheel);
         volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
         volumeIcon.register("click", function (event) {
-            slider.replaceClass(/in|out/, slider.hasClass("in") ? "out" : "in");
+            slider.toggleClass("in");
             volumeIcon.toggleClass("active");
             event.stopPropagation();
         });
@@ -2827,12 +2828,11 @@
     }
 
     function showSpinner(view) {
-        var spinner;
         if (!view.find(".spinner").length)
             view.find(".path").append('<div class="spinner"></div>');
 
-        spinner = view.find(".spinner");
-        if (spinner.hasClass("out")) spinner.removeClass("out");
+        var spinner = view.find(".spinner");
+        spinner.addClass("in");
 
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.data("type") === "directory") {
@@ -2845,8 +2845,7 @@
 
     function hideSpinner(view) {
         var spinner = view.find(".spinner");
-        if (spinner.length && !spinner.hasClass("out"))
-            spinner.addClass("out");
+        if (spinner.length) spinner.removeClass("in");
         if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
     }
 
