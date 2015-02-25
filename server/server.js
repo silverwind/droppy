@@ -82,6 +82,7 @@ var droppy = function droppy(options, isStandalone, callback) {
             },
             function (cb) { cleanupTemp(); cb(); },
             function (cb) { cleanupLinks(cb); },
+            function (cb) { updateDirectory("/", true, cb); },
             function (cb) { if (config.debug) watcher.watchResources(config.usePolling, debugUpdate); cb(); },
             function (cb) {
                 if (isDemo) {
@@ -91,7 +92,6 @@ var droppy = function droppy(options, isStandalone, callback) {
                     });
                 } else cb();
             },
-            function (cb) { updateDirectory("/", true, cb); },
             function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
         ], function (err) {
             if (err) return callback(err);

@@ -6,6 +6,7 @@ var utils  = {},
     crypto = require("crypto"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
+    log    = require("./log.js"),
     mkdirp = require("mkdirp"),
     path   = require("path"),
     paths  = require("./paths.js").get(),
@@ -16,6 +17,9 @@ var utils  = {},
         "eps",
         "ai"
     ];
+
+var DHPARAM_BITS = 2048;
+var CERT_DAYS = 365;
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
@@ -194,37 +198,54 @@ utils.tlsInit = function tlsInit(opts, callback) {
                 ca      = data[2],
                 dhparam = data[3];
 
-
             if (!key)  return callback(new Error("Unable to read TLS key: " + certPaths[0]));
             if (!cert) return callback(new Error("Unable to read TLS certificate: " + certPaths[1]));
             if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
             if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
-            // Split combined certificate and intermediate
-            if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
-                ca   = cert.substring(cert.lastIndexOf(certStart));
-                cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
-            }
+            var finish = function () {
+                // Split combined certificate and intermediate
+                if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
+                    ca   = cert.substring(cert.lastIndexOf(certStart));
+                    cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
+                }
 
-            callback(null, {
-                selfsigned : false,
-                key        : key,
-                cert       : cert,
-                ca         : ca,
-                dhparam    : dhparam
-            });
+                callback(null, {
+                    selfsigned : false,
+                    key        : key,
+                    cert       : cert,
+                    ca         : ca,
+                    dhparam    : dhparam
+                });
+            };
+
+            if (dhparam) {
+                finish();
+            } else {
+                require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
+                   if (err) return callback(err);
+                   dhparam = data;
+                   require("./db.js").set("dhparam", result.dhparam);
+                   finish();
+                });
+            }
         });
     } else {
         // Use self-signed certs
-        require("pem").createCertificate({ days: 365, selfSigned: true }, function (err, keys) {
-            callback(null, {
-                selfsigned : true,
-                key        : keys.serviceKey,
-                cert       : keys.certificate
+        require("pem").createCertificate({ days: CERT_DAYS, selfSigned: true }, function (err, keys) {
+            log.simple("Generating " + DHPARAM_BITS + " Diffie Hellman parameters. This will take a while...");
+            require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
+               if (err) return callback(err);
+               require("./db.js").set("dhparam", result.dhparam);
+               callback(null, {
+                   selfsigned : true,
+                   key        : keys.serviceKey,
+                   cert       : keys.certificate,
+                   dhparam    : result.dhparam
+               });
             });
         });
     }
-
 };
 
 function readFile(p, cb) {
