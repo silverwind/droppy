@@ -406,7 +406,7 @@
                 } else window.location.reload(true);
                 break;
             case "SHARELINK":
-                showLinkBox(getView(vId), msg.link);
+                showLink(getView(vId), msg.link);
                 toggleCatcher();
                 break;
             case "USER_LIST":
@@ -722,17 +722,14 @@
         };
 
         $("#about-button").register("click", function () {
-            raf(function () {
-                $("#about-box").attr("class", $("#about-box").attr("class") !== "in" ? "in" : "out");
-                toggleCatcher();
-            });
+            $("#about-box").addClass("in");
+            toggleCatcher();
         });
 
         $("#prefs-button").register("click", function () {
             showPrefs();
             sendMessage(null, "GET_USERS");
         });
-
     }
     // ============================================================================
     //  Upload functions
@@ -1013,15 +1010,17 @@
     function toggleCatcher(show) {
         var cc     = $("#click-catcher"),
             modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"],
-            toBlur = ["#navigation, .path, .content-container, .audio-bar"];
+            toBlur = ["#navigation", ".path", ".content-container", ".audio-bar"];
 
-        if (show === undefined) show = modals.some(function (selector) { return $(selector).hasClass("in"); });
+        if (show === undefined)
+            show = modals.some(function (selector) { return $(selector).hasClass("in"); });
 
         toBlur.forEach(function (selector) {
             $(selector)[show ? "addClass" : "removeClass"]("blur");
         });
 
-        if (!show) modals.forEach(function (selector) { $(selector).replaceClass("in", "out"); });
+        if (!show)
+            modals.forEach(function (selector) { $(selector)[show ? "addClass" : "removeClass"]("in"); });
 
         cc.register("click", toggleCatcher.bind(null, false));
         cc[show ? "addClass" : "removeClass"]("in");
@@ -1382,10 +1381,7 @@
             else
                 left = event.originalEvent.clientX;
 
-            dropSelect.attr("class", "in").css({
-                left: left,
-                top:  event.originalEvent.clientY
-            });
+            dropSelect.css({left: left, top: event.originalEvent.clientY}).addClass("in");
             toggleCatcher(true);
             dropSelect.children(".movefile").off("click").one("click", function () {
                 sendDrop(view, "cut", from, to, spinner);
@@ -1751,9 +1747,9 @@
 
     function showEntryMenu(entry, x) {
         var menuTop, menuMaxTop,
-            type = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1],
-            button = entry.find(".entry-menu"),
-            menu = $("#entry-menu"),
+            type    = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1],
+            button  = entry.find(".entry-menu"),
+            menu    = $("#entry-menu"),
             emWidth = parseFloat($("#entry-menu").css("font-size")); // width of 1em
 
         menu.attr("class", "in").data("target", entry).addClass("type-" + type);
@@ -1768,9 +1764,6 @@
         menu.css("top", menuTop + "px");
 
         toggleCatcher(true);
-        $("#click-catcher").one("click", function () {
-            menu.attr("class", "out");
-        });
     }
 
     function sortByHeader(view, header) {
@@ -2217,7 +2210,7 @@
             });
         });
 
-        box.replaceClass("out", "in").end(function () {
+        box.addClass("in").end(function () {
             this.style.willChange = "auto";
         });
 
@@ -2863,13 +2856,12 @@
         box.children("span").text(text);
         box.attr("class", "info-box error in");
         setTimeout(function () {
-            box.replaceClass("in", "out");
+            box.removeClass("in");
         }, 3000);
     }
 
-    function showLinkBox(view, link) {
-        var box   = view.find(".info-box"),
-            input = box.find("input");
+    function showLink(view, link) {
+        var box = view.find(".info-box"), input = box.find("input");
         box.find("svg").replaceWith(droppy.svg.link);
         input
             .val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link)

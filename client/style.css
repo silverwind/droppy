@@ -628,7 +628,11 @@ input::-webkit-input-placeholder       { color: #999 }
     color: #333;
     z-index: 32;
     user-select: none;
+    opacity: 0;
+    visibility: hidden;
 }
+#entry-menu.in { opacity: 1; visibility: visible }
+
 @media (min-width: 1024px) { #entry-menu { font-size: .9em } }
 @media (max-width: 1023px) { #entry-menu { font-size: .8em } }
 @media (max-width:  639px) { #entry-menu { font-size: .7em } }
@@ -638,11 +642,6 @@ input::-webkit-input-placeholder       { color: #999 }
     background: #eee;
     border-radius: 4px;
     overflow: hidden;
-}
-
-#entry-menu.out {
-    opacity: 0;
-    visibility: hidden;
 }
 
 #entry-menu > .radius-wrap > div {
@@ -1162,15 +1161,16 @@ html:not(.mobile) .vjs-big-play-button {
     height: 120px;
     left: 50%;
     top: 50%;
+    opacity: 0;
+    visibility: hidden;
     position: fixed;
     transition: all .3s ease;
+    transform: translate(-50%, -50%);
     width: 300px;
     text-align: center;
     z-index: 32;
 }
-
-#about-box.in  { transform: translate(-50%, -50%); opacity: 1; }
-#about-box.out { transform: translate(-50%, -50%); opacity: 0; visibility: hidden }
+#about-box.in { opacity: 1; visibility: visible }
 
 #about-content {
     color: #333;
@@ -1235,10 +1235,14 @@ html:not(.mobile) .vjs-big-play-button {
     top: 50%;
     position: fixed;
     transition: all .3s ease;
+    transform: translate(-50%, -50%);
     z-index: 32;
     padding: .66em;
     overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
 }
+#prefs-box.in { opacity: 1; visibility: visible }
 
 @media (min-width: 800px) { #prefs-box { width: 24em;} }
 @media (max-width: 799px) { #prefs-box { width: 80%; } }
@@ -1246,9 +1250,6 @@ html:not(.mobile) .vjs-big-play-button {
 @media (min-width: 1024px) { #prefs-box { font-size: .8em } }
 @media (max-width: 1023px) { #prefs-box { font-size: .7em } }
 @media (max-width:  799px) { #prefs-box { font-size: .6em } }
-
-#prefs-box.in  { transform: translate(-50%, -50%); opacity: 1; visibility: visible }
-#prefs-box.out { transform: translate(-50%, -50%); opacity: 0; visibility: hidden  }
 
 #prefs-box > div { width: 100% }
 
@@ -1501,7 +1502,7 @@ html:not(.mobile) .vjs-big-play-button {
     box-shadow: 0 0 30px rgba(0,0,0,.4);
     width: auto;
 }
-.info-box.in { visibility: visible; transform: translate(-50%, -50%); opacity: 1; }
+.info-box.in { opacity: 1; visibility: visible }
 
 @media (min-width: 1024px) { .info-box { font-size: .9em } }
 @media (max-width: 1023px) { .info-box { font-size: .8em } }
@@ -1545,11 +1546,12 @@ html:not(.mobile) .vjs-big-play-button {
     box-shadow: 0 0 30px rgba(0,0,0,.4);
     border-radius: 6px;
     visibility: hidden;
-    transition: visibilty .3s ease, opacity .3s ease;
+    transition: opacity .3s ease, visibilty .3s ease;
     opacity: 0;
     display: flex;
     flex-direction: row;
 }
+#drop-select.in { opacity: 1; visibility: visible }
 
 #drop-select span {
     cursor: pointer;
@@ -1564,7 +1566,6 @@ html:not(.mobile) .vjs-big-play-button {
     background: #f81; color: #fff;
 }
 
-#drop-select.in { visibility: visible; opacity: 1 }
 #drop-select .movefile:hover { border-radius: 6px 0 0 6px }
 #drop-select .viewfile:hover { border-radius: 0 6px 6px 0 }
 
