@@ -225,7 +225,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             } else {
                 var saved = db.get("dhparam");
                 if (saved) return finish(saved);
-                log.simple("Generating " + DHPARAM_BITS + "bits Diffie Hellman parameters. This will take a while...");
+                log.simple("Generating " + DHPARAM_BITS + " bit Diffie Hellman parameters. This will take a while...");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
                    if (err) return callback(err);
                    db.set("dhparam", result.dhparam);
@@ -245,7 +245,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (data.dhparam) {
                 callback(null, data);
             } else {
-                log.simple("Generating " + DHPARAM_BITS + "bits Diffie Hellman parameters. This will take a while...");
+                log.simple("Generating " + DHPARAM_BITS + " bit Diffie Hellman parameters. This will take a while...");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
                    if (err) return callback(err);
                    data.dhparam = result.dhparam;
