@@ -86,8 +86,8 @@ input::-webkit-input-placeholder       { color: #999 }
     display: inline-block;
     height: .8rem;
     width: .8rem;
-    position: relative;
-    top: .15rem;
+    vertical-align: middle;
+    margin-right: .25rem;
 }
 
 #upload-file-button:hover   { background: rgba(102, 166, 255, .15) }
