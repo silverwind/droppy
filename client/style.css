@@ -1067,6 +1067,7 @@ html:not(.mobile) .vjs-big-play-button {
     z-index: 4;
     flex: 0 0 1.5em;
 }
+.audio-icon:first-of-type { margin-left: .25em }
 @media (max-width: 639px) { .audio-icon { flex-basis: 1.25em; } }
 
 
