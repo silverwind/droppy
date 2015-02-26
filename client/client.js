@@ -230,7 +230,7 @@
                           "<div class='audio-title'></div>" +
                           "<div class='time'>" +
                             "<span class='time-cur'></span>" +
-                            "<span> / </span>" +
+                            "<span class='time-sep'> / </span>" +
                             "<span class='time-max'></span>" +
                           "</div>" +
                           "<div class='seekbar'>" +

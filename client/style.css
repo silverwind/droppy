@@ -33,8 +33,8 @@ button, input { line-height: normal }
 ::-webkit-scrollbar:horizontal { height: 4px }
 ::-webkit-scrollbar:vertical   { width:  4px }
 
-::selection      { background: #18f; color: #fff }
-::-moz-selection { background: #18f; color: #fff }
+::selection      { background: #16b; color: #fff }
+::-moz-selection { background: #16b; color: #fff }
 
 input::-moz-placeholder                { color: #999; opacity: 1 }
 input:-ms-input-placeholder            { color: #999 }
@@ -53,42 +53,39 @@ input::-webkit-input-placeholder       { color: #999 }
     background: #181818;
     text-align: center;
     order: 1;
-    flex: 0 0 auto;
+    flex: 0 0 1.5rem;
     z-index: 2;
     transition: transform .3s ease, filter .15s ease;
     transform: translateY(-100%);
+    display: flex;
+    white-space: nowrap;
+    user-select: none;
 }
 #navigation.in { transform: none }
 
 /* ============================= Header Buttons ============================ */
 
-#buttons {
-    display: flex;
-    white-space: nowrap;
-    user-select: none;
-    align-items: center;
-}
-
 .button {
+    color: #999;
     line-height: 1.5rem;
-    color: #aaa;
     cursor: pointer;
     flex: 1;
 }
-.button:not(.disabled):hover { color: #fff;}
+.button:not(.disabled):hover { color: #fff }
 
 @media (min-width: 1024px) { .button { font-size: .7em } }
 @media (max-width: 1023px) { .button { font-size: .7em } }
-@media (max-width:  750px) { #buttons span { display: none } }
+@media (max-width:  750px) { .button span { display: none } }
 
 .button svg {
-    fill: #aaa;
-    display: inline-block;
+    fill: #999;
     height: .8rem;
     width: .8rem;
-    vertical-align: middle;
-    margin-right: .25rem;
+    margin-right: .2rem;
+    position: relative;
+    top: .15rem;
 }
+@media (max-width:  750px) { .button svg { margin-right: 0 } }
 
 #upload-file-button:hover   { background: rgba(102, 166, 255, .15) }
 #upload-folder-button:hover { background: rgba(255, 102, 252, .15) }
@@ -132,6 +129,7 @@ input::-webkit-input-placeholder       { color: #999 }
     width: 100%;
     height: 100%;
     position: relative;
+    transition: filter .1s ease;
     flex: 1;
     order: 2;
 }
@@ -202,6 +200,7 @@ input::-webkit-input-placeholder       { color: #999 }
    white-space: nowrap;
    width: 100%;
    position: absolute;
+   transition: filter .15s ease;
    z-index: 1;
    flex: 0 0 1.5rem;
    order: 1;
@@ -410,7 +409,7 @@ input::-webkit-input-placeholder       { color: #999 }
 .data-row.editing .entry-link { display: none; }
 
 .data-row.drop-hover {
-    background: #f81;
+    background: #16b;
     border-radius: 3px;
 }
 
@@ -423,7 +422,7 @@ input::-webkit-input-placeholder       { color: #999 }
     border-radius: 3px;
 }
 
-.data-row.playing { background: #18f }
+.data-row.playing { background: #16b }
 .data-row.playing a.entry-link, .playing span { color: #fff }
 .data-row.playing svg { fill: #fff !important }
 .data-row.playing svg:hover { background: #08d !important }
@@ -648,7 +647,7 @@ input::-webkit-input-placeholder       { color: #999 }
 }
 
 #entry-menu > .radius-wrap>a:hover {
-    background: #f81;
+    background: #16b;
     color: #fff;
     cursor: pointer;
 }
@@ -1026,7 +1025,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .upload-bar {
     position: absolute;
-    background: #18f;
+    background: #16b;
     top: 0; bottom: 0; left: 0;
     transition: width .2s ease;
     width: 0;
@@ -1068,18 +1067,21 @@ html:not(.mobile) .vjs-big-play-button {
     z-index: 4;
     flex: 0 0 1.5em;
 }
+@media (max-width: 639px) { .audio-icon { flex-basis: 1.25em; } }
+
 
 .audio-icon svg {
     cursor: pointer;
-    fill: #bbb;
-    height: 1em;
-    width: 1em;
-    margin: .25em .25em;
+    fill: #aaa;
+    height: 1.25em;
+    width: 1.25em;
+    margin: .125em;
     pointer-events: none;
 }
-.audio-icon:hover svg, .audio-icon.active svg {
-    fill: #fff;
-}
+@media (max-width: 639px) { .audio-icon svg { height: 1em; width: 1em; margin: .25em 0 } }
+
+.audio-icon:hover svg  { fill: #ddd }
+.audio-icon.active svg { fill: #fff }
 
 .volume-slider {
     z-index: 4;
@@ -1117,7 +1119,7 @@ html:not(.mobile) .vjs-big-play-button {
 .seekbar-played {
     position: absolute;
     width: 0;
-    background: #18f;
+    background: #16b;
     height: 100%;
     z-index: 2;
 }
@@ -1126,7 +1128,7 @@ html:not(.mobile) .vjs-big-play-button {
     position: absolute;
     width: 0;
     height: 100%;
-    background: #333;
+    background: #383838;
     z-index: 1;
 }
 
@@ -1140,9 +1142,11 @@ html:not(.mobile) .vjs-big-play-button {
     line-height: 1.5em;
     cursor: default;
 }
+@media (max-width: 639px) { .audio-bar .time { flex-basis: 2em; } }
 
 .time > * { pointer-events: none }
 .time-cur, .time-max { color: #fff }
+@media (max-width: 639px) { .time-max, .time-sep { visibility: hidden } }
 
 /* =============================== About box =============================== */
 
@@ -1511,7 +1515,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .info-box.link span   { display: none }
 .info-box.error input { display: none }
-.info-box.link  svg { background: #f81; height: 2.5em }
+.info-box.link  svg { background: #16b; height: 2.5em }
 .info-box.error svg { background: #f44; height: calc(100% - .5em) }
 
 .info-box span, .info-box input {
@@ -1555,7 +1559,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #drop-select span:hover {
-    background: #f81; color: #fff;
+    background: #16b; color: #fff;
 }
 
 #drop-select .movefile:hover { border-radius: 6px 0 0 6px }
@@ -1580,7 +1584,7 @@ html:not(.mobile) .vjs-big-play-button {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    background: #f81;
+    background: #16b;
     transition: opacity .2s ease;
 }
 
