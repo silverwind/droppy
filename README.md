@@ -94,7 +94,7 @@ A listener object accepts these options:
 - `key` {String} - Path to the SSL/TLS private key file. If ommitted, uses self-generated key.
 - `cert` {String} - Path to the SSL/TLS certificate file. If ommitted, uses self-signed certificate.
 - `ca` {String} - Path to the SSL/TLS intermediate certificate file. Optional.
-- `dhparam` {String} - Path to the SSL/TLS Diffie Hellman parameters file. Optional. If not provided, a new 2048 bit will auto-created and saved for later use.
+- `dhparam` {String} - Path to the SSL/TLS Diffie Hellman parameters file. Optional. If ommitted, new 2048 bit parameters will created and saved for later use.
 
 *Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
 
