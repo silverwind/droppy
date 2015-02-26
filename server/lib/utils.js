@@ -4,6 +4,7 @@ var utils  = {},
     async  = require("async"),
     cd     = require("content-disposition"),
     crypto = require("crypto"),
+    db     = require("./db.js"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
     log    = require("./log.js"),
@@ -203,7 +204,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
             if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
-            var finish = function () {
+            var finish = function (dhparam) {
                 // Split combined certificate and intermediate
                 if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
                     ca   = cert.substring(cert.lastIndexOf(certStart));
@@ -222,29 +223,36 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (dhparam) {
                 finish();
             } else {
-                log.simple("Generating " + DHPARAM_BITS + " Diffie Hellman parameters. This will take a while...");
+                var saved = db.get("dhparam");
+                if (saved) return finish(saved);
+                log.simple("Generating " + DHPARAM_BITS + "bits Diffie Hellman parameters. This will take a while...");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
                    if (err) return callback(err);
-                   dhparam = data;
-                   require("./db.js").set("dhparam", result.dhparam);
-                   finish();
+                   db.set("dhparam", result.dhparam);
+                   finish(result.dhparam);
                 });
             }
         });
-    } else {
-        // Use self-signed certs
+    } else { // Use self-signed certs
         require("pem").createCertificate({ days: CERT_DAYS, selfSigned: true }, function (err, keys) {
-            log.simple("Generating " + DHPARAM_BITS + " Diffie Hellman parameters. This will take a while...");
-            require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
-               if (err) return callback(err);
-               require("./db.js").set("dhparam", result.dhparam);
-               callback(null, {
-                   selfsigned : true,
-                   key        : keys.serviceKey,
-                   cert       : keys.certificate,
-                   dhparam    : result.dhparam
-               });
-            });
+            if (err) return callback(err);
+            var data = {
+                selfsigned : true,
+                key        : keys.serviceKey,
+                cert       : keys.certificate,
+                dhparam    : db.get("dhparam")
+            };
+            if (data.dhparam) {
+                callback(null, data);
+            } else {
+                log.simple("Generating " + DHPARAM_BITS + "bits Diffie Hellman parameters. This will take a while...");
+                require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
+                   if (err) return callback(err);
+                   data.dhparam = result.dhparam;
+                   db.set("dhparam", result.dhparam);
+                   callback(null, data);
+                });
+            }
         });
     }
 };
