@@ -202,7 +202,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (!key)  return callback(new Error("Unable to read TLS key: " + certPaths[0]));
             if (!cert) return callback(new Error("Unable to read TLS certificate: " + certPaths[1]));
             if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
-            if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
+            if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS Diffie-Hellman parameter file: " + certPaths[3]));
 
             var finish = function (dhparam) {
                 // Split combined certificate and intermediate
@@ -221,11 +221,11 @@ utils.tlsInit = function tlsInit(opts, callback) {
             };
 
             if (dhparam) {
-                finish();
+                finish(dhparam);
             } else {
                 var saved = db.get("dhparam");
                 if (saved) return finish(saved);
-                log.simple("Generating " + DHPARAM_BITS + " bit Diffie Hellman parameters. This will take a while...");
+                log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a while.");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
                    if (err) return callback(err);
                    db.set("dhparam", result.dhparam);
@@ -245,7 +245,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (data.dhparam) {
                 callback(null, data);
             } else {
-                log.simple("Generating " + DHPARAM_BITS + " bit Diffie Hellman parameters. This will take a while...");
+                log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a while.");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
                    if (err) return callback(err);
                    data.dhparam = result.dhparam;
