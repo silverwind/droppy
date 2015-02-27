@@ -1676,7 +1676,10 @@
                 view   = entry.parents(".view");
 
             toggleCatcher(false);
-            openFile(view, view[0].currentFolder, entry.find(".file-link").text());
+            if (entry.data("type") === "folder")
+                updateLocation(view, entry.data("id"));
+            else
+                openFile(view, view[0].currentFolder, entry.find(".file-link").text());
             event.stopPropagation();
         });
 
