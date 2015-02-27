@@ -338,7 +338,7 @@ input::-webkit-input-placeholder       { color: #999 }
     user-select: none;
 }
 
-#click-catcher.in { opacity: .3; visibility: visible }
+#click-catcher.in { opacity: .4; visibility: visible }
 
 .file-header {
     display: flex;
