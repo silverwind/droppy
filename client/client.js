@@ -1158,7 +1158,7 @@
         view[0].savedParts = parts;
 
         function addPart(name, path) {
-            var li = $("<li class='out'><a>" + name + "</a></li>");
+            var li = $("<li><a>" + name + "</a></li>");
             li.data("destination", path);
             li.register("click", function (event) {
                 var view = $(event.target).parents(".view");
@@ -1185,7 +1185,7 @@
         }
 
         function finalize() {
-            view.find(".path li.out:not(.gone)").setTransitionClass("in");
+            view.find(".path li:not(.gone)").setTransitionClass("in");
             setTimeout(function () {checkPathOverflow(view); }, 400);
         }
     }
