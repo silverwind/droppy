@@ -1750,24 +1750,26 @@
     }
 
     function showEntryMenu(entry, x) {
-        var menuTop, menuMaxTop,
+        var left, top, maxTop,
             type    = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1],
             button  = entry.find(".entry-menu"),
-            menu    = $("#entry-menu"),
-            emWidth = parseFloat($("#entry-menu").css("font-size")); // width of 1em
+            menu    = $("#entry-menu");
 
-        menu.attr("class", "in").data("target", entry).addClass("type-" + type);
+        menu.addClass("type-" + type);
+
         if (x)
-            menu.css("left", (x + emWidth - menu.width()) + "px");
+            left = x - menu.width() / 2;
         else
-            menu.css("left", (button.offset().left + button.width() - menu.width()) + "px");
+            left = button.offset().left + button.width() - menu.width();
 
-        menuMaxTop = $(document).height() - $("#entry-menu").height();
-        menuTop = entry.offset().top;
-        if (menuTop > menuMaxTop) menuTop = menuMaxTop;
-        menu.css("top", menuTop + "px");
+        top = entry.offset().top;
+        maxTop = $(document).height() - menu.height();
 
         toggleCatcher(true);
+        menu.css({
+            left: (left > 0 ? left : 0) + "px",
+            top: (top > maxTop ? maxTop : top) + "px"
+        }).data("target", entry).attr("class", "in");
     }
 
     function sortByHeader(view, header) {
