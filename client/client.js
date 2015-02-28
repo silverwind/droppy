@@ -273,40 +273,21 @@
 
     // Switch the page content with an animation
     function loadPage(type, data) {
-        var newPage, oldPage;
-        $("body").append('<div id="newpage">' + data + '</div>');
-        newPage = $("#newpage");
-        oldPage = $("#page");
+        $("#page").html(data);
         if (type === "main") {
             initMainPage();
-            raf(function () {
-                oldPage.replaceClass("in", "out").end(function () {
-                    $("#navigation").addClass("in");
-                });
-                finalize();
-            });
+            $("#navigation").setTransitionClass("in");
         } else if (type === "auth" || type === "firstrun") {
             initAuthPage(type === "firstrun");
-            raf(function () {
-                oldPage.replaceClass("in", "out").end(function () {
-                    $("#login-box").addClass("in");
-                });
-                if (type === "firstrun") {
-                    $("#login-info").text("Hello! Choose your creditentials.");
-                    $("#login-info-box").addClass("info");
-                } else if (droppy.get("hasLoggedOut")) {
-                    $("#login-info").text("Logged out!");
-                    $("#login-info-box").addClass("info");
-                    droppy.set("hasLoggedOut", false);
-                }
-                finalize();
-            });
-        }
-
-        // Switch ID of #newpage for further animation
-        function finalize() {
-            oldPage.remove();
-            newPage.attr("id", "page");
+            $("#login-box").setTransitionClass("in");
+            if (type === "firstrun") {
+                $("#login-info").text("Hello! Choose your creditentials.");
+                $("#login-info-box").addClass("info");
+            } else if (droppy.get("hasLoggedOut")) {
+                $("#login-info").text("Logged out!");
+                $("#login-info-box").addClass("info");
+                droppy.set("hasLoggedOut", false);
+            }
         }
     }
 
