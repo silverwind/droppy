@@ -1,7 +1,7 @@
 {
   "name": "droppy",
   "description": "Personal file server with a modern web interface",
-  "version": "1.9.20",
+  "version": "1.9.21",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
@@ -47,7 +47,7 @@
     "spdy": "^1.30.2",
     "uglify-js": "^2.4.16",
     "untildify": "^2.0.0",
-    "video.js": "^4.12.2",
+    "video.js": "^4.12.3",
     "websocket": "^1.0.17",
     "yauzl": "^2.2.1",
     "yazl": "^2.1.0"
