@@ -66,7 +66,7 @@ input::-webkit-input-placeholder       { color: #999 }
 /* ============================= Header Buttons ============================ */
 
 .button {
-    color: #999;
+    color: #888;
     line-height: 1.5rem;
     cursor: pointer;
     flex: 1;
@@ -78,7 +78,7 @@ input::-webkit-input-placeholder       { color: #999 }
 @media (max-width:  750px) { .button span { display: none } }
 
 .button svg {
-    fill: #999;
+    fill: #888;
     height: .8rem;
     width: .8rem;
     margin-right: .2rem;
@@ -236,7 +236,7 @@ input::-webkit-input-placeholder       { color: #999 }
 
 .path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.875rem }
 @media (max-width:  639px) {
-    .path .triangle { height: 1.25rem; width: 1.25rem; right: -.75rem }
+    .path .triangle { height: 1.25rem; width: 1.25rem; right: -.74rem }
 }
 
 .path .home {
@@ -582,28 +582,19 @@ input::-webkit-input-placeholder       { color: #999 }
     cursor: pointer;
     fill: #333;
 }
-
-
 .spinner {
-    float: right;
-    animation: spin .75s infinite linear;
-    border-bottom-color : #18f;
-    border-left-color   : #222;
-    border-right-color  : #222;
-    border-top-color    : #f1a;
-    margin-top: .2rem;
-    margin-right: .2rem;
-    border-style: solid;
-    border-radius: 100%;
-    border-width: 3px;
+    position: absolute;
+    right: 0;
     z-index: 32;
-    height: 1.1rem;
-    width: 1.1rem;
+    height: 1.5rem;
+    width: 1.5rem;
     visibility: hidden;
+    pointer-events: none;
+    fill: #ccc;
 }
-.spinner.in { visibility: visible }
+.spinner.in { visibility: visible; animation: spin .75s infinite linear }
 
-@media (max-width:  639px) { .spinner { height: 0.9rem; width: 0.9rem; border-width: 2.5px } }
+@media (max-width:  639px) { .spinner { height: 1.25rem; width: 1.25rem; top: 0 } }
 
 @keyframes spin {
  from { transform: rotate(0deg)   }

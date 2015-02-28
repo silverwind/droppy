@@ -279,7 +279,6 @@
         oldPage = $("#page");
         if (type === "main") {
             initMainPage();
-            initEntryMenu();
             raf(function () {
                 oldPage.replaceClass("in", "out").end(function () {
                     $("#navigation").addClass("in");
@@ -730,6 +729,7 @@
             showPrefs();
             sendMessage(null, "GET_USERS");
         });
+        initEntryMenu();
     }
     // ============================================================================
     //  Upload functions
@@ -2834,10 +2834,9 @@
 
     function showSpinner(view) {
         if (!view.find(".spinner").length)
-            view.find(".path").append('<div class="spinner"></div>');
+            view.find(".path").append(droppy.svg.spinner);
 
-        var spinner = view.find(".spinner");
-        spinner.addClass("in");
+        view.find(".spinner").attr("class", "spinner in");
 
         // HACK: Safeguard so a view won't get stuck in loading state
         if (view.data("type") === "directory") {
@@ -2850,7 +2849,7 @@
 
     function hideSpinner(view) {
         var spinner = view.find(".spinner");
-        if (spinner.length) spinner.removeClass("in");
+        if (spinner.length) spinner.attr("class", "spinner");
         if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
     }
 
