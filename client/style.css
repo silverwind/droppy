@@ -60,7 +60,7 @@ input::-webkit-input-placeholder       { color: #999 }
     white-space: nowrap;
     user-select: none;
 }
-#navigation.in { transform: none }
+#navigation.in { transform: none; visibility: visible !important }
 @media (min-width: 1024px) { #navigation { font-size: 1.1em } }
 
 /* ============================= Header Buttons ============================ */
