@@ -1,5 +1,4 @@
-/*global CodeMirror, prettyBytes, videojs, Draggabilly */
-
+/* global CodeMirror, prettyBytes, videojs, Draggabilly */
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -164,6 +163,7 @@
             volume : 0.5,
             videoVolume : 0.5,
             theme: "droppy",
+            editorFontSize: 16,
             indentWithTabs : false,
             indentUnit : 4,
             lineWrapping: false,
@@ -258,9 +258,8 @@
     function contentWrap(view) {
         return $('<div class="new content ' + view[0].animDirection + '"></div>');
     }
-
 // ============================================================================
-//  Page loading functions
+//  Page load
 // ============================================================================
     $(getPage);
 
@@ -290,9 +289,8 @@
             }
         }
     }
-
 // ============================================================================
-//  WebSocket functions
+//  WebSocket handling
 // ============================================================================
     var retries = 5, retryTimeout = 4000;
     function openSocket() {
@@ -2027,6 +2025,7 @@
         }).done(function (data) {
             var filename = basename(entryId);
             updateTitle(filename);
+            setEditorFontSize(droppy.get("editorFontSize"));
             loadTheme(droppy.get("theme"), function () {
                 loadCM(data, filename);
             });
@@ -2052,6 +2051,7 @@
                     theme: droppy.get("theme"),
                     mode: "text/plain"
                 });
+
                 doc.find(".exit").register("click", function () {
                     closeDoc($(this).parents(".view"));
                     editor = null;
@@ -2175,12 +2175,15 @@
         var box = $("#prefs-box");
         box[0].style.willChange = "transform, opacity, visibility";
         box.empty().append(function () {
+            var fontSizes    = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30];
+            var indentWidths = [1, 2, 4, 8];
             return $("<div class='list-prefs'>").append(droppy.templates.options({
                 droppy: droppy,
                 prefs: [
-                    ["indentWithTabs", "Indentation Mode", [true, false], ["Tabs", "Spaces"]],
-                    ["indentUnit", "Indentation Unit", [2, 4, 8], [2, 4, 8]],
                     ["theme", "Editor Theme", droppy.themes, droppy.themes],
+                    ["editorFontSize", "Editor Font Size", fontSizes, fontSizes],
+                    ["indentWithTabs", "Indentation", [true, false], ["Tabs", "Spaces"]],
+                    ["indentUnit", "Indentation Width", indentWidths, indentWidths],
                     ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
                     ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
                 ]
@@ -2195,6 +2198,10 @@
                     if (this.editor) this.editor.setOption("theme", theme);
                 });
             });
+        });
+
+        $("select.editorFontSize").register("change", function () {
+            setEditorFontSize($(this).val());
         });
 
         box.addClass("in").end(function () {
@@ -2811,6 +2818,20 @@
                 cb();
             });
         } else cb();
+    }
+
+    function setEditorFontSize(size) {
+        [].slice.call(document.styleSheets).some(function (sheet) {
+            if (sheet.ownerNode.id === "css") {
+                [].slice.call(sheet.cssRules).some(function (rule) {
+                    if (rule.selectorText === ".CodeMirror" && /font-size/.test(rule.cssText)) {
+                        rule.style.fontSize =  size + "px";
+                        return true;
+                    }
+                });
+                return true;
+            }
+        });
     }
 
     function showSpinner(view) {

@@ -829,8 +829,8 @@ html:not(.mobile) .vjs-big-play-button {
 /* ============================ Document  ============================ */
 
 .CodeMirror {
-    font-size: .65em;
     font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+    font-size: 16px;
     line-height: 1.2em;
     height: 100%;
     width: 100%;
