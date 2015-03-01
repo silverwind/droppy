@@ -203,12 +203,11 @@
         } else {
             initAuthPage(type === "firstrun");
             $("#login-box").setTransitionClass("in");
+            $("#login-info-box").addClass("info");
             if (type === "firstrun") {
                 $("#login-info").text("Hello! Choose your credentials.");
-                $("#login-info-box").addClass("info");
             } else if (droppy.get("hasLoggedOut")) {
                 $("#login-info").text("Logged out!");
-                $("#login-info-box").addClass("info");
                 droppy.set("hasLoggedOut", false);
             }
         }

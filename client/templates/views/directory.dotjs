@@ -25,7 +25,7 @@ it = {
     </div>
 #}}
 {{##def.folder:
-    <li class="data-row{{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
+    <div class="data-row{{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite sprite-folder">{{= entry.svgIcon }}</span>
         <a class="folder-link entry-link">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
@@ -33,10 +33,10 @@ it = {
         <span class="sharelink faux-button" title="Share folder download link">{{= droppy.svg.link }}</span>
         <span><a class="zip" title="Download as Zip" href="?~~{{= entry.id }}" target="nope" download="{{= entry.name }}.zip">{{= droppy.svg.download }}</a></span>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
-    </li>
+    </div>
 #}}
 {{##def.file:
-    <li class="data-row{{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
+    <div class="data-row{{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
@@ -44,13 +44,13 @@ it = {
         <span class="sharelink faux-button" title="Share file download link">{{= droppy.svg.link }}</span>
         <a class="download faux-button" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}" title="Download File">{{= droppy.svg.download }}</a>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
-    </li>
+    </div>
 #}}
 {{##def.error:
-    <li class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
+    <div class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="error-link">{{= entry.name }}</a>
-    </li>
+    </div>
 #}}
 {{? Object.keys(it.entries).length === 0 }}
     <div id="empty" class="empty">{{= droppy.svg["upload-cloud"] }}<div class="text">Add files</div></div>
@@ -64,33 +64,31 @@ it = {
         entry.sort = { type: "", mtime: "", size: "" };
         entry.sort[it.sortBy] = "active " + (it.sortAsc ? "up" : "down");
     }}
-    <ul>
-        {{#def.directoryHeader}}
-        {{~sortedEntries :name}}
-            {{  entry.type = it.entries[name].type;
-                entry.mtime = it.entries[name].mtime;
-                entry.size = it.entries[name].size;
-                entry.prettysize = prettyBytes(it.entries[name].size);
-                entry.id = folder + name;
-                entry.sprite = droppy.templates.fn.getSpriteClass(/[^.]*$/.exec(name)[0]);
-                entry.name = it.isUpload ? decodeURIComponent(name) : name;
-                entry.sortname = entry.name.replace(/['"]/g, "_");
+    {{#def.directoryHeader}}
+    {{~sortedEntries :name}}
+        {{  entry.type = it.entries[name].type;
+            entry.mtime = it.entries[name].mtime;
+            entry.size = it.entries[name].size;
+            entry.prettysize = prettyBytes(it.entries[name].size);
+            entry.id = folder + name;
+            entry.sprite = droppy.templates.fn.getSpriteClass(/[^.]*$/.exec(name)[0]);
+            entry.name = it.isUpload ? decodeURIComponent(name) : name;
+            entry.sortname = entry.name.replace(/['"]/g, "_");
 
-                if (Object.keys(droppy.audioTypes).indexOf(getExt(name)) !== -1) {
-                    entry.classes = " playable";
-                    entry.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
-                } else {
-                    entry.classes = "";
-                    entry.svgIcon = "";
-                };
-            }}
-            {{? entry.type === "f" }}
-                {{#def.file}}
-            {{?? entry.type === "d" }}
-                {{#def.folder}}
-            {{?? entry.type === "e" }}
-                {{#def.error}}
-            {{?}}
-        {{~}}
-    </ul>
+            if (Object.keys(droppy.audioTypes).indexOf(getExt(name)) !== -1) {
+                entry.classes = " playable";
+                entry.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
+            } else {
+                entry.classes = "";
+                entry.svgIcon = "";
+            };
+        }}
+        {{? entry.type === "f" }}
+            {{#def.file}}
+        {{?? entry.type === "d" }}
+            {{#def.folder}}
+        {{?? entry.type === "e" }}
+            {{#def.error}}
+        {{?}}
+    {{~}}
 {{?}}
