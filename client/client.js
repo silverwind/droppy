@@ -147,8 +147,6 @@
                function (callback) { setTimeout(callback, 1000 / 60); };
     })();
 
-    if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1)
-        $("html").addClass("firefox"); // https://bugzilla.mozilla.org/show_bug.cgi?id=878058
     if (droppy.detects.mobile)
         $("html").addClass("mobile");
     if (!droppy.detects.fullscreen)
@@ -199,17 +197,21 @@
         var type = $("html").data("type");
         if (type === "main") {
             initMainPage();
-            $("#navigation").setTransitionClass("in");
+            raf(function () {
+                $("#navigation").setTransitionClass("in");
+            });
         } else {
             initAuthPage(type === "firstrun");
-            $("#login-box").setTransitionClass("in");
-            $("#login-info-box").addClass("info");
-            if (type === "firstrun") {
-                $("#login-info").text("Hello! Choose your credentials.");
-            } else if (droppy.get("hasLoggedOut")) {
-                $("#login-info").text("Logged out!");
-                droppy.set("hasLoggedOut", false);
-            }
+            raf(function () {
+               $("#login-box").setTransitionClass("in");
+               $("#login-info-box").addClass("info");
+               if (type === "firstrun") {
+                   $("#login-info").text("Hello! Choose your credentials.");
+               } else if (droppy.get("hasLoggedOut")) {
+                   $("#login-info").text("Logged out!");
+                   droppy.set("hasLoggedOut", false);
+               }
+            });
         }
     });
 // ============================================================================
@@ -1880,7 +1882,7 @@
 
         // Show arrows for three seconds so they won't have to be discovered
         arrows.addClass("in");
-        setTimeout(function () {arrows.removeClass("in"); }, 3000);
+        setTimeout(function () {arrows.removeClass("in"); }, 2000);
     }
 
     function swapMedia(view, dir) {

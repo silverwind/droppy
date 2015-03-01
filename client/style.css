@@ -61,6 +61,7 @@ input::-webkit-input-placeholder       { color: #999 }
     user-select: none;
 }
 #navigation.in { transform: none }
+@media (min-width: 1024px) { #navigation { font-size: 1.1em } }
 
 /* ============================= Header Buttons ============================ */
 
@@ -123,8 +124,10 @@ input::-webkit-input-placeholder       { color: #999 }
     flex-direction: column;
     transition: left .2s ease, right .2s ease;
 }
+
 .content-container {
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: 100%;
     height: 100%;
     position: relative;
@@ -134,16 +137,14 @@ input::-webkit-input-placeholder       { color: #999 }
 
 .view.left  { left:0; right:50% }
 .view.right { left:50%; right:0 }
-.view.left .content { border-right: 1px solid #ccc }
+.view.left .content.directory { border-right: 1px solid #ccc }
 
 .content {
     left: 0;
     width: 100%;
     transition: transform .175s ease-in;
     position: absolute;
-    overflow-y: scroll;
     top: 1.5rem;
-    max-height: calc(100% - 1.5rem);
 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
@@ -349,8 +350,8 @@ input::-webkit-input-placeholder       { color: #999 }
     left: -.3em;
 }
 
-.file-header .down .triangle { transform: rotate(90deg);  top: -.1em }
-.file-header .up   .triangle { transform: rotate(270deg); top: -.1em }
+.file-header .down .triangle { transform: rotate(90deg);  top: -.1em  }
+.file-header .up   .triangle { transform: rotate(270deg); top: -.05em }
 
 .file-header .active  { color: #000 }
 .file-header .active .triangle { fill: #000 }
@@ -367,7 +368,7 @@ input::-webkit-input-placeholder       { color: #999 }
     text-align: right;
 }
 .header-size {
-    flex: 0 0 6em;
+    flex: 0 0 5.5em;
     display: inline-block;
     text-align: right;
 }
@@ -380,8 +381,8 @@ input::-webkit-input-placeholder       { color: #999 }
 .data-row {
     display: flex;
     align-items: center;
-    padding: 0 .25em;
-    line-height: 1.4em;
+    padding: 0 .5em;
+    line-height: 1.5em;
 }
 
 .data-row.editing { background: #fff }
@@ -449,7 +450,7 @@ input::-webkit-input-placeholder       { color: #999 }
 .size {
     text-align: right;
     white-space: nowrap;
-    flex: 0 0 6em;
+    flex: 0 0 5.5em;
     margin-right: 1em;
     display: inline-block;
 }
@@ -464,10 +465,10 @@ input::-webkit-input-placeholder       { color: #999 }
 .data-row svg:not(.up-arrow):not(.play) {
     display: block;
     cursor: pointer;
-    fill: #4a4a4a;
+    fill: #444;
     height: 1em;
     width: 1em;
-    padding: .125em;
+    padding: 0 .1em;
 }
 .data-row svg:not(.up-arrow):not(.play):hover { fill: #000 }
 
@@ -475,7 +476,7 @@ input::-webkit-input-placeholder       { color: #999 }
 @media (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .125em } }
 @media (max-width: 639px) { .view .header-mtime                    { display: none     } }
 @media (max-width: 639px) { .view .header-spacer                   { flex: 0 0 4em     } }
-@media (max-width: 639px) { .view .data-row                        { padding: 0 .125em } }
+@media (max-width: 639px) { .view .data-row                        { padding: 0 .25em  } }
 @media (max-width: 639px) { .view .header-size                     { flex: 0 0 3em;    } }
 @media (max-width: 319px) { .view .header-size                     { display: none     } }
 @media (max-width: 639px) { .view .data-row .mtime                 { display: none     } }
@@ -536,16 +537,17 @@ input::-webkit-input-placeholder       { color: #999 }
 /* ================================= Icons ================================= */
 
 .sprite {
-    background-repeat: no-repeat;
     flex: 0 0 24px;
     display: inline-block;
+    background-clip: content-box;
     width: 24px; height: 24px;
     background-size: 240px 216px;
+    margin: 0 2px;
 }
 
-@media (min-width: 1024px) { .sprite { transform: scale(.95) } }
-@media (max-width: 1023px) { .sprite { transform: scale(.90) } }
-@media (max-width:  639px) { .sprite { transform: scale(.85) } }
+@media (min-width: 1024px) { .sprite { transform: scale(1.25) } }
+@media (max-width: 1023px) { .sprite { transform: scale(1.2)  } }
+@media (max-width:  639px) { .sprite { transform: scale(1.0)  } }
 
 .data-row.playable:not(.playing):hover .sprite {
     background: none;
@@ -556,7 +558,7 @@ input::-webkit-input-placeholder       { color: #999 }
 }
 
 .icon-play svg {
-    width: 24px; height: 24px;
+    width: 1em; height: 1em;
     visibility: hidden;
     cursor: pointer;
     fill: #333;
