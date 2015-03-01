@@ -933,7 +933,7 @@ html:not(.mobile) .vjs-big-play-button {
     width: 100%;
     position: relative;
     display: flex;
-    flex: 0 0 0;
+    flex: 0 0 0px;
     order: 4;
     align-items: stretch;
     justify-content: space-between;
@@ -1031,7 +1031,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .audio-bar {
     background: #181818;
-    flex: 0 0 0;
+    flex: 0 0 0px;
     order: 3;
     display: flex;
     position: relative;
@@ -1051,7 +1051,7 @@ html:not(.mobile) .vjs-big-play-button {
     flex: 0 0 1.5em;
 }
 .audio-icon:first-of-type { margin-left: .25em }
-@media (max-width: 639px) { .audio-icon { flex-basis: 1.25em; } }
+@media (max-width: 639px) { .audio-icon { flex-basis: 1.25em } }
 
 
 .audio-icon svg {
@@ -1071,7 +1071,7 @@ html:not(.mobile) .vjs-big-play-button {
     z-index: 4;
     height: .75em;
     transition: flex-basis .2s ease;
-    flex: 0 0 0;
+    flex: 0 0 0px;
     margin: .375em 0;
 }
 .volume-slider.in { flex-basis: 4em; box-shadow: 0 0 0 1px #eee }
