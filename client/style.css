@@ -3,16 +3,15 @@
 /* ============================= Global styles ============================= */
 
 body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
-    -webkit-text-size-adjust: 100%;
-    -webkit-touch-callout: none;
-    border: 0;
     box-sizing: border-box;
-    font-variant-ligatures: none;
     font-size: 100%;
     font-weight: inherit;
+    text-size-adjust: 100%;
+    vertical-align: baseline;
+    -webkit-touch-callout: none;
     margin: 0;
     padding: 0;
-    vertical-align: baseline;
+    border: 0;
 }
 
 li { list-style: none }
