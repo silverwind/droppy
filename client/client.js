@@ -612,16 +612,16 @@
         $("#create-folder-button").register("click", function () {
             var dummyFolder, wasEmpty,
                 view      = getView(), // TODO: Create folder in last active view
-                dummyHtml = '<li class="data-row new-folder" data-type="folder">' +
+                dummyHtml = '<div class="data-row new-folder" data-type="folder">' +
                                 '<span class="sprite sprite-folder"></span>' +
                                 '<a class="folder-link entry-link"></a>' +
-                            '</li>';
+                            '</div>';
 
             if (view.find(".empty").length > 0) {
-                view.find(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+                view.find(".content").html(getHeaderHTML() + dummyHtml);
                 wasEmpty = true;
             } else {
-                view.find(".content ul").prepend(dummyHtml);
+                view.find(".content").prepend(dummyHtml);
             }
             dummyFolder = $(".data-row.new-folder");
             view.find(".content").scrollTop(0);
@@ -637,16 +637,16 @@
         $("#create-file-button").register("click", function () {
             var dummyFile, wasEmpty,
                 view      = getView(), // TODO: Create folder in last active view
-                dummyHtml = '<li class="data-row new-file" data-type="file">' +
+                dummyHtml = '<div class="data-row new-file" data-type="file">' +
                                 '<span class="sprite sprite-default"></span>' +
                                 '<a class="file-link entry-link"></a>' +
-                            '</li>';
+                            '</div>';
 
             if (view.find(".empty").length > 0) {
-                view.find(".content").html("<ul>" + getHeaderHTML() + dummyHtml + "</ul>");
+                view.find(".content").html(getHeaderHTML() + dummyHtml);
                 wasEmpty = true;
             } else {
-                view.find(".content ul").prepend(dummyHtml);
+                view.find(".content").prepend(dummyHtml);
             }
             dummyFile = $(".data-row.new-file");
             view.find(".content").scrollTop(0);
@@ -1071,7 +1071,7 @@
                     else
                         view[0].animDirection = "back";
 
-                    view.find(".content")[0].style.willChange = "auto";
+                    view.find(".content")[0].style.willChange = "transform";
                     sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
                     // Skip the push if we're already navigating through history
