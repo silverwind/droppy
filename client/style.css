@@ -1265,7 +1265,7 @@ html:not(.mobile) .vjs-big-play-button {
 #prefs-box .list-user:before {
     content: "Users";
     margin: 0 1em;
-    border-bottom: 1px solid #999;
+    border-bottom: 1px solid #ccc;
     padding: .25em .5em;
     display: block;
 }
@@ -1298,7 +1298,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #prefs-box .add-user {
-    line-height: 2em;
     text-align: center;
     cursor: pointer;
     width: 10em;

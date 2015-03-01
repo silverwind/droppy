@@ -46,21 +46,16 @@ var log = function log(req, res, logLevel) {
         if (req.url) elems.unshift(decodeURIComponent(decodeURIComponent(req.url))); // For some reason, this need double decoding for upload URLs
         if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
-        port =  req.socketPort || // This is used for the 'close' event on websockets
-                req.headers && req.headers["x-real-port"] ||
-                req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-port"] ||
-                req.socket && req.socket.remotePort ||
-                req._socket && req._socket.remotePort;
+        port = req.realPort || req.headers && req.headers["x-real-port"] ||
+               req.socket && req.socket.remotePort || req._socket && req._socket.remotePort;
 
-        ip   =  req.socketAddress || // This is used for the 'close' event on websockets
-                req.headers && req.headers["x-real-ip"] ||
-                req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-ip"] ||
-                req.socket && req.socket.remoteAddress ||
-                req._socket && req._socket.remoteAddress;
-        req.socketPort = port;
-        req.socketAddress = ip;
+        ip   = req.realIP || req.headers && req.headers["x-real-ip"] ||
+               req.socket && req.socket.remoteAddress || req._socket && req._socket.remoteAddress;
 
         if (ip && port) elems.unshift(chalk.cyan(ip) + ":" + chalk.blue(port));
+
+        if (req.headers && req.headers["x-real-port"]) req.realPort = req.headers["x-real-port"];
+        if (req.headers && req.headers["x-real-ip"]) req.realIP = req.headers["x-real-ip"];
     }
 
     if (logLevel > 0)
