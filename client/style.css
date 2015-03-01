@@ -188,8 +188,6 @@ input::-webkit-input-placeholder       { color: #999 }
    order: 1;
 }
 
-.view.right .path { border-left: 1px solid #333}
-
 @media (min-width: 1024px) { .path {font-size: .9em } }
 @media (max-width: 1023px) { .path {font-size: .8em } }
 @media (max-width:  639px) { .path {font-size: .7em; height: 1.25rem } }
