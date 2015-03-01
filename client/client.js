@@ -627,7 +627,7 @@
             view.find(".content").scrollTop(0);
             entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
-                    showSpinner(view);
+                    if (view.data("type") === "directory") showSpinner(view);
                     sendMessage(view[0].vId, "CREATE_FOLDER", newVal);
                 }
                 dummyFolder.remove();
@@ -652,7 +652,7 @@
             view.find(".content").scrollTop(0);
             entryRename(view, dummyFile, wasEmpty, function (success, oldVal, newVal) {
                 if (success) {
-                    showSpinner(view);
+                    if (view.data("type") === "directory") showSpinner(view);
                     sendMessage(view[0].vId, "CREATE_FILE", newVal);
                 }
                 dummyFile.remove();
