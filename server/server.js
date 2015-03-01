@@ -645,18 +645,7 @@ function handleGET(req, res) {
     if (config.public && !cookies.get(req.headers.cookie))
         cookies.free(req, res);
 
-    if (/^\/\?!\/content/.test(URI)) {
-        if (cookies.get(req.headers.cookie) || config.public) {
-            res.setHeader("X-Page-Type", "main");
-            handleResourceRequest(req, res, "main.html");
-        } else if (firstRun) {
-            res.setHeader("X-Page-Type", "firstrun");
-            handleResourceRequest(req, res, "auth.html");
-        } else {
-            res.setHeader("X-Page-Type", "auth");
-            handleResourceRequest(req, res, "auth.html");
-        }
-    } else if (/^\/\?!\//.test(URI)) {
+    if (/^\/\?!\//.test(URI)) {
         handleResourceRequest(req, res, (/\?!\/([\s\S]+)$/.exec(URI)[1]));
     } else if (/^\/\?[~\$]\//.test(URI)) {
         handleFileRequest(req, res, true);
@@ -669,7 +658,13 @@ function handleGET(req, res) {
     } else if (/^\/favicon.ico$/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
     } else {
-        handleResourceRequest(req, res, "base.html");
+        if (cookies.get(req.headers.cookie) || config.public) {
+            handleResourceRequest(req, res, "main.html");
+        } else if (firstRun) {
+            handleResourceRequest(req, res, "firstrun.html");
+        } else {
+            handleResourceRequest(req, res, "auth.html");
+        }
     }
 }
 
@@ -772,7 +767,7 @@ function handleResourceRequest(req, res, resourceName) {
         } else {
             var headers = {}, status = 200;
 
-            if (req.url === "/" || /\?\!\/content/.test(req.url)) {
+            if (/\.html$/.test(resourceName)) {
                 if (!config.debug)
                     headers["X-Frame-Options"] = "DENY";
                 if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
@@ -783,7 +778,7 @@ function handleResourceRequest(req, res, resourceName) {
                 headers["Cache-Control"] = "public, max-age=86400";
                 headers["Expires"] = new Date(Date.now() + 86400000).toUTCString();
             } else {
-                if (resource.etag && !/\?\!\/content/.test(req.url)) {
+                if (resource.etag && !/\.html$/.test(resourceName)) {
                     headers["ETag"] = '"' + resource.etag + '"';
                 }
                 headers["Cache-Control"] = "private, max-age=0";

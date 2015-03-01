@@ -1,4 +1,4 @@
-/* global CodeMirror, prettyBytes, videojs, Draggabilly */
+/* global jQuery, CodeMirror, prettyBytes, videojs, Draggabilly */
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -193,6 +193,27 @@
         };
     });
 // ============================================================================
+//  Page load
+// ============================================================================
+    $(function () {
+        var type = $("html").data("type");
+        if (type === "main") {
+            initMainPage();
+            $("#navigation").setTransitionClass("in");
+        } else {
+            initAuthPage(type === "firstrun");
+            $("#login-box").setTransitionClass("in");
+            if (type === "firstrun") {
+                $("#login-info").text("Hello! Choose your credentials.");
+                $("#login-info-box").addClass("info");
+            } else if (droppy.get("hasLoggedOut")) {
+                $("#login-info").text("Logged out!");
+                $("#login-info-box").addClass("info");
+                droppy.set("hasLoggedOut", false);
+            }
+        }
+    });
+// ============================================================================
 //  View handling
 // ============================================================================
     function getView(id) {
@@ -259,37 +280,6 @@
         return $('<div class="new content ' + view[0].animDirection + '"></div>');
     }
 // ============================================================================
-//  Page load
-// ============================================================================
-    $(getPage);
-
-    // Load HTML and replace SVG placeholders
-    function getPage() {
-        $.get("?!/content").then(function (data, textStatus, xhr) {
-            loadPage(xhr.getResponseHeader("X-Page-Type"), prepareSVG(data));
-        });
-    }
-
-    // Switch the page content with an animation
-    function loadPage(type, data) {
-        $("#page").html(data);
-        if (type === "main") {
-            initMainPage();
-            $("#navigation").setTransitionClass("in");
-        } else if (type === "auth" || type === "firstrun") {
-            initAuthPage(type === "firstrun");
-            $("#login-box").setTransitionClass("in");
-            if (type === "firstrun") {
-                $("#login-info").text("Hello! Choose your creditentials.");
-                $("#login-info-box").addClass("info");
-            } else if (droppy.get("hasLoggedOut")) {
-                $("#login-info").text("Logged out!");
-                $("#login-info-box").addClass("info");
-                droppy.set("hasLoggedOut", false);
-            }
-        }
-    }
-// ============================================================================
 //  WebSocket handling
 // ============================================================================
     var retries = 5, retryTimeout = 4000;
@@ -300,7 +290,6 @@
             retries = 5; // reset retries on connection loss
             // Request settings when droppy.debug is uninitialized, could use another variable too.
             if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
-            else if (droppy.debug) location.reload(); // if in debug mode reload to see changes to client.js
             if (droppy.queuedData)
                 sendMessage();
             else {
@@ -2660,23 +2649,6 @@
             "bmp" : "image/bmp",
             "ico" : "image/x-icon"
         };
-    }
-
-    // SVG preprocessing
-    function prepareSVG(html) {
-        var tmp;
-        // Populate droppy.svg
-        Object.keys(droppy.svg).forEach(function (name) {
-            tmp = $("<div>" + droppy.svg[name] + "</div>");
-            tmp.find("svg").attr("class", name);
-            droppy.svg[name] = tmp.html();
-        });
-        // Replace <svg>'s in the html source with the full svg data
-        tmp = $("<div>" + html + "</div>");
-        tmp.find("svg").replaceWith(function () {
-            return $(droppy.svg[$(this).attr("class")]);
-        });
-        return tmp.html();
     }
 
     // Find the corrects class for an icon sprite

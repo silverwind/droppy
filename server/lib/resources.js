@@ -1,3 +1,4 @@
+/* jshint jquery: false */
 "use strict";
 
 var resources = {};
@@ -9,6 +10,7 @@ var dottemplates = require("./dottemplates.js"),
 
 var async        = require("async"),
     autoprefixer = require("autoprefixer-core"),
+    cheerio      = require("cheerio"),
     cleanCSS     = require("clean-css"),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
@@ -18,7 +20,7 @@ var async        = require("async"),
     vm           = require("vm"),
     zlib         = require("zlib");
 
-var doMinify,
+var doMinify, svgData = {}, $,
     themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 
@@ -240,6 +242,23 @@ function readLibs(callback) {
     });
 }
 
+function readSVG() {
+    fs.readdirSync(paths.svg).forEach(function (name) {
+        var className = name.slice(0, name.length - ".svg".length);
+        $ = cheerio.load(fs.readFileSync(path.join(paths.svg, name)).toString(), {xmlMode: true});
+        $("svg").addClass(className);
+        svgData[className] = $.html();
+    });
+}
+
+function addSVG(html) {
+    $ = cheerio.load(html);
+    $("svg").each(function () {
+        $(this).replaceWith($("svg", svgData[$(this).attr("class")]));
+    });
+    return $.html();
+}
+
 resources.compileJS = function compileJS(minify) {
     var js = "";
     resources.files.js.forEach(function (file) {
@@ -247,10 +266,6 @@ resources.compileJS = function compileJS(minify) {
     });
 
     // Add SVG object
-    var svgData = {};
-    fs.readdirSync(paths.svg).forEach(function (name) {
-        svgData[name.slice(0, name.length - 4)] = fs.readFileSync(path.join(paths.svg, name), "utf8");
-    });
     js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
     // Insert Templates Code
@@ -286,23 +301,54 @@ resources.compileCSS = function compileCSS(minify) {
 };
 
 resources.compileHTML = function compileHTML(res, minify) {
+    var html = {};
     resources.files.html.forEach(function (file) {
-        var name = path.basename(file);
         var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
             .replace(/\{\{version\}\}/gm, pkg.version)
             .replace(/\{\{name\}\}/gm, pkg.name)
             .replace(/\{\{engine\}\}/gm, require("detect-engine") + " " + process.version.substring(1));
 
+        // Add SVGs
+        data = addSVG(data);
+
         // Minify
         if (minify) data = htmlMinifier.minify(data, opts.htmlMinifier);
 
-        res[name] = {data: new Buffer(data), etag: etag(), mime: mime.lookup("html")};
+        html[path.basename(file)] = data;
     });
+
+    // Combine pages
+    $ = cheerio.load(html["base.html"]);
+    $("html").attr("data-type", "main");
+    res["main.html"] = {
+        data: new Buffer($("#page").replaceWith(html["main.html"]).end().html()),
+        etag: etag(),
+        mime: mime.lookup("html")
+    };
+
+    $ = cheerio.load(html["base.html"]);
+    $("html").attr("data-type", "auth");
+    res["auth.html"] = {
+        data: new Buffer($("#page").replaceWith(html["auth.html"]).end().html()),
+        etag: etag(),
+        mime: mime.lookup("html")
+    };
+
+    $ = cheerio.load(html["base.html"]);
+    $("html").attr("data-type", "firstrun");
+    res["firstrun.html"] = {
+        data: new Buffer($("#page").replaceWith(html["auth.html"]).end().html()),
+        etag: etag(),
+        mime: mime.lookup("html")
+    };
+
     return res;
 };
 
 function compileAll(callback) {
     var res = {};
+
+    readSVG();
     res["client.js"] = resources.compileJS(doMinify);
     res["style.css"] = resources.compileCSS(doMinify);
     res = resources.compileHTML(res, doMinify);
