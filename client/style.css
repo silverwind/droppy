@@ -1144,7 +1144,7 @@ html:not(.mobile) .vjs-big-play-button {
     opacity: 0;
     visibility: hidden;
     position: fixed;
-    transition: all .3s ease;
+    transition: opacity .3s ease;
     transform: translate(-50%, -50%);
     width: 300px;
     text-align: center;
@@ -1180,16 +1180,18 @@ html:not(.mobile) .vjs-big-play-button {
     position: absolute;
 }
 
+#about-copy a {
+    padding: 0 .3em;
+    color: #000;
+    border: 1px solid transparent;
+}
+
 #about-box .github {
     fill: #333;
     display: inline-block;
     vertical-align: middle;
     height: 1em;
     margin-bottom: 0.25em;
-}
-#about-box #about-copy a {
-    padding: 0 .2em;
-    border: 1px solid transparent;
 }
 
 #about-fork {
@@ -1214,7 +1216,7 @@ html:not(.mobile) .vjs-big-play-button {
     left: 50%;
     top: 50%;
     position: fixed;
-    transition: all .3s ease;
+    transition: opacity .3s ease;
     transform: translate(-50%, -50%);
     z-index: 32;
     padding: .66em;
@@ -1470,7 +1472,7 @@ html:not(.mobile) .vjs-big-play-button {
     top: 50%;
     transform:  translate(-50%, -50%);
     position: absolute;
-    transition: all .3s ease;
+    transition: opacity .3s ease;
     text-align: center;
     z-index: 40;
     overflow: hidden;
