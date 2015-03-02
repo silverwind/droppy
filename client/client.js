@@ -638,8 +638,8 @@
             var dummyFile, wasEmpty,
                 view      = getView(), // TODO: Create folder in last active view
                 dummyHtml = '<div class="data-row new-file" data-type="file">' +
-                                '<span class="sprite sprite-default"></span>' +
-                                '<a class="file-link entry-link"></a>' +
+                                '<span class="sprite sprite-text"></span>' +
+                                '<a class="file-link entry-link">.txt</a>' +
                             '</div>';
 
             if (view.find(".empty").length > 0) {
