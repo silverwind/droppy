@@ -929,11 +929,7 @@
                 if (file === (droppy.caseSensitive ? inputText : inputText.toLowerCase())) return true;
             });
             canSubmit = valid && (!exists || inputText === namer.attr("placeholder"));
-            // TODO: Better indicator of what's wrong
-            if (!canSubmit)
-                entry.addClass("invalid");
-            else
-                entry.removeClass("invalid");
+            entry[canSubmit ? "removeClass" : "addClass"]("invalid");
         }).register("keydown", function (event) {
             if (event.keyCode === 27) stopEdit(view); // Escape Key
             if (event.keyCode === 13) submitEdit(view, false, callback); // Return Key

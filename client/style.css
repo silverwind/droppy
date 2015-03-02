@@ -17,10 +17,7 @@ body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figca
 li { list-style: none }
 a  { text-decoration: none; background: transparent }
 :focus, a:active, a:hover { outline: none }
-input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0 }
 button, input { font-family: inherit; font-size: 100%; margin: none; line-height: normal; border: none }
-button, html input[type="button"] { cursor: pointer }
-button, html input[type="button"], input[type="reset"], input[type="submit"] { -webkit-appearance: button; cursor: pointer }
 button, input, select, textarea { font-family: inherit; font-size: 100%; margin: 0 }
 button, input { line-height: normal }
 
@@ -35,9 +32,31 @@ button, input { line-height: normal }
 ::selection      { background: #16b; color: #fff }
 ::-moz-selection { background: #16b; color: #fff }
 
-input::-moz-placeholder                { color: #999; opacity: 1 }
-input:-ms-input-placeholder            { color: #999 }
-input::-webkit-input-placeholder       { color: #999 }
+input::-moz-placeholder          { color: #999; opacity: 1 }
+input:-ms-input-placeholder      { color: #999 }
+input::-webkit-input-placeholder { color: #999 }
+
+/* =============================== Animations ============================== */
+
+@keyframes nodeInserted {
+    50% { opacity: 0.99 }
+}
+@keyframes jump {
+   0%,100% { transform: translateY(-3px) }
+   50%     { transform: translateY(3px)  }
+}
+@keyframes shake {
+   0%,50%,100% { transform: translateX(-5px) }
+   25%, 75%    { transform: translateX(5px)  }
+}
+@keyframes spin {
+   from { transform: rotate(0deg)   }
+   to   { transform: rotate(359deg) }
+}
+@keyframes zoom {
+   0%,100%  { transform: scale(1.3) }
+   50%      { transform: scale(0.9) }
+}
 
 /* ============================ Main Page Layout =========================== */
 
@@ -202,7 +221,7 @@ input::-webkit-input-placeholder       { color: #999 }
     transform: translateX(-2em);
     transition: transform .3s ease, opacity .3s ease;
 }
-.path li.in { opacity: 1; visibility: visible; transform: translateX(0) }
+.path li.in { opacity: 1; transform: translateX(0) }
 
 .path li.dirty { color: #f71 !important}
 .path li.saved { background: #361 !important}
@@ -271,12 +290,12 @@ input::-webkit-input-placeholder       { color: #999 }
     right: 0;
     top: 0;
     cursor: pointer;
-    transition: opacity .4s ease, visibility .4s ease;
+    transition: opacity .3s ease, visibility 0s .3s;
     user-select: none;
     opacity: 0; visibility: hidden;
     line-height: 1.5rem;
 }
-.paste-button.in  { opacity: 1; visibility: visible }
+.paste-button.in  { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
 @media (min-width: 1024px) { .paste-button { font-size: .9em } }
 @media (max-width: 1023px) { .paste-button { font-size: .8em } }
@@ -316,7 +335,6 @@ input::-webkit-input-placeholder       { color: #999 }
     visibility: hidden;
     user-select: none;
 }
-
 #click-catcher.in { opacity: .4; visibility: visible }
 
 .file-header {
@@ -384,12 +402,9 @@ input::-webkit-input-placeholder       { color: #999 }
 }
 
 .data-row.editing { background: #fff }
-.data-row.editing.invalid { background: #fdd }
+.data-row.editing.invalid input { color: #d22 }
 .data-row.editing .entry-link { display: none }
-
-.data-row, .data-row a {
-    color: #333;
-}
+.data-row, .data-row a { color: #333 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover {
     background: #fff;
@@ -413,11 +428,6 @@ input::-webkit-input-placeholder       { color: #999 }
 
 .data-row.uploading .icon-uploading svg { fill: #777 }
 
-@keyframes jump {
-   0%,100%  { transform: translateY(-3px) }
-   50%      { transform: translateY(3px) }
-}
-
 .entry-link, .error-link {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -438,12 +448,6 @@ input::-webkit-input-placeholder       { color: #999 }
 }
 
 .inline-namer { background: transparent }
-
-@keyframes zoom {
-  0%   { transform: scale(1.3) }
-  50%  { transform: scale(0.9) }
-  100% { transform: scale(1.3) }
-}
 
 .size {
     text-align: right;
@@ -559,6 +563,9 @@ input::-webkit-input-placeholder       { color: #999 }
     width: 1em; height: 1em;
     visibility: hidden;
     cursor: pointer;
+    position: relative;
+    top: -.1em;
+    left: .05em;
     fill: #333;
 }
 .spinner {
@@ -574,11 +581,6 @@ input::-webkit-input-placeholder       { color: #999 }
 .spinner.in { visibility: visible; animation: spin .75s infinite linear }
 
 @media (max-width:  639px) { .spinner { height: 1.25rem; width: 1.25rem; top: 0 } }
-
-@keyframes spin {
- from { transform: rotate(0deg)   }
- to   { transform: rotate(359deg) }
-}
 
 /* ============================ Entry Menu ============================ */
 
@@ -1124,13 +1126,13 @@ html:not(.mobile) .vjs-big-play-button {
     opacity: 0;
     visibility: hidden;
     position: fixed;
-    transition: opacity .3s ease;
+    transition: opacity .3s ease, visibility 0s .3s;
     transform: translate(-50%, -50%);
     width: 300px;
     text-align: center;
     z-index: 32;
 }
-#about-box.in { opacity: 1; visibility: visible }
+#about-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
 #about-content {
     color: #333;
@@ -1145,8 +1147,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #about-engine {
-    font-size: 0.7em;
-    margin-top: 0.33em;
+    font-size: .7em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1156,7 +1157,7 @@ html:not(.mobile) .vjs-big-play-button {
 #about-copy {
     bottom: 0;
     font-size: .6em;
-    margin-bottom: .5em;
+    margin-bottom: .33em;
     position: absolute;
 }
 
@@ -1177,7 +1178,7 @@ html:not(.mobile) .vjs-big-play-button {
 #about-fork {
     font-size: .66em;
     color: #333;
-    padding-right: .4em;
+    padding-right: .3em;
     border-radius: .4em;
 }
 #about-fork:hover, #about-box #about-copy a:hover {
@@ -1196,7 +1197,7 @@ html:not(.mobile) .vjs-big-play-button {
     left: 50%;
     top: 50%;
     position: fixed;
-    transition: opacity .3s ease;
+    transition: opacity .3s ease, visibility 0s .3s;
     transform: translate(-50%, -50%);
     z-index: 32;
     padding: .66em;
@@ -1204,7 +1205,7 @@ html:not(.mobile) .vjs-big-play-button {
     opacity: 0;
     visibility: hidden;
 }
-#prefs-box.in { opacity: 1; visibility: visible }
+#prefs-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
 @media (min-width: 800px) { #prefs-box { width: 24em } }
 @media (max-width: 799px) { #prefs-box { width: 80%  } }
@@ -1451,7 +1452,7 @@ html:not(.mobile) .vjs-big-play-button {
     top: 50%;
     transform:  translate(-50%, -50%);
     position: absolute;
-    transition: opacity .3s ease;
+    transition: opacity .3s ease, visibility 0s .3s;
     text-align: center;
     z-index: 40;
     overflow: hidden;
@@ -1462,7 +1463,7 @@ html:not(.mobile) .vjs-big-play-button {
     box-shadow: 0 0 30px rgba(0,0,0,.3);
     width: auto;
 }
-.info-box.in { opacity: 1; visibility: visible }
+.info-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
 @media (min-width: 1024px) { .info-box { font-size: .9em } }
 @media (max-width: 1023px) { .info-box { font-size: .8em } }
@@ -1553,8 +1554,6 @@ html:not(.mobile) .vjs-big-play-button {
 
 .dropzone.in { opacity: .8; visibility: visible }
 .blur { filter: blur(1.5px) }
+.shake { animation: shake .3s ease }
+
 iframe { display: none }
-
-/* pseudo-animation for use in setTransitionClass */
-@keyframes nodeInserted { 50% { opacity: 0.99 } }
-
