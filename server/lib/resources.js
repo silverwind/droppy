@@ -254,7 +254,7 @@ function readSVG() {
 function addSVG(html) {
     $ = cheerio.load(html);
     $("svg").each(function () {
-        $(this).replaceWith($("svg", svgData[$(this).attr("class")]));
+        $(this).replaceWith(svgData[$(this).attr("class")]);
     });
     return $.html();
 }
