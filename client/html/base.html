@@ -26,12 +26,6 @@
         text-rendering: optimizeLegibility;
       }
 
-      body, div, p {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
       body {
         background: #181818;
         left: 0; right: 0; top: 0; bottom:0;
@@ -40,20 +34,14 @@
       }
 
       #noscript {
-        background: rgba(0,0,0,.75);
-        width: 100%; height: 100%;
-        left: 0; top: 0;
-        position: relative;
-      }
-
-      #noscript p {
-        color: #ccc;
-        font-size: 1.5rem;
+        color: #444;
         text-align: center;
         position: absolute;
-        left: 50%;
-        top: 50%;
+        border-radius: 6px;
+        left: 50%; top: 50%;
         transform: translate(-50%,-50%);
+        background: #eee;
+        padding: .5em 1em;
       }
 
       #navigation, #about-box, #prefs-box { visibility: hidden }
@@ -62,9 +50,7 @@
   <body>
     <div id="page"></div>
     <noscript>
-      <div id="noscript">
-        <p>Please enable JavaScript to use {{name}}!</p>
-      </div>
+      <div id="noscript">Please enable JavaScript to use {{name}}!</div>
     </noscript>
     <script async src="?!/client.js"></script>
   </body>
