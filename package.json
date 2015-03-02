@@ -51,7 +51,7 @@
     "video.js": "^4.12.3",
     "websocket": "^1.0.17",
     "yauzl": "^2.2.1",
-    "yazl": "^2.1.0"
+    "yazl": "^2.1.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
