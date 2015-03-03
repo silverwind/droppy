@@ -238,7 +238,7 @@
                         "<ul class='path'></ul>" +
                         "<div class='content-container'><div class='content'></div></div>" +
                         "<div class='dropzone'></div>" +
-                        "<div class='info-box'><svg></svg><span></span><input></div>" +
+                        "<div class='info-box'><svg></svg><span></span><div class='linkout' contenteditable></div></div>" +
                         "<div class='audio-bar out'>" +
                           "<div class='audio-icon volume'>" + droppy.svg["volume-medium"] + "</div>" +
                           "<div class='volume-slider'>" +
@@ -2835,16 +2835,21 @@
     }
 
     function showLink(view, link) {
-        var box = view.find(".info-box"), input = box.find("input");
+        var box = view.find(".info-box"), out = box.find(".linkout");
         box.find("svg").replaceWith(droppy.svg.link);
-        input
-            .val(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" +  link)
-            .register("keydown", function (event) {
-                if (event.keyCode === 27 || event.keyCode === 13)
-                    toggleCatcher(false);
+        out
+            .text(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" + link)
+            .register("copy", function () {
+                setTimeout(function () {
+                  toggleCatcher(false);
+                }, 0);
             });
         box.attr("class", "info-box link in").end(function () {
-            input[0].select();
+            var range = document.createRange(), selection = window.getSelection();
+            range.selectNodeContents(out[0]);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            out[0].focus();
         });
     }
 

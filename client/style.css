@@ -1461,7 +1461,6 @@ html:not(.mobile) .vjs-big-play-button {
     background: #eee;
     visibility: hidden;
     box-shadow: 0 0 30px rgba(0,0,0,.3);
-    width: auto;
 }
 .info-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
@@ -1478,20 +1477,22 @@ html:not(.mobile) .vjs-big-play-button {
     fill: #fff;
 }
 
-.info-box.link span   { display: none }
-.info-box.error input { display: none }
-.info-box.link  svg { background: #16b; height: 2.5em }
-.info-box.error svg { background: #f44; height: calc(100% - .5em) }
+.info-box.link span      { display: none }
+.info-box.error .linkout { display: none }
+.info-box.link  svg { height: 2.5em             }
+.info-box.error svg { height: calc(100% - .5em) }
+.info-box.link  { background: linear-gradient(to right, #16b 3em, #fff 3em) }
+.info-box.error { background: linear-gradient(to right, #f44 3em, #fff 3em) }
 
-.info-box span, .info-box input {
+.info-box span, .info-box .linkout {
     display: block;
     padding: .25em;
     padding-left: 3.25em;
     color: #444;
 }
 
-.info-box span  { line-height: 1.5em }
-.info-box input { line-height: 2.5em }
+.info-box span     { line-height: 1.5em }
+.info-box .linkout { line-height: 2.5em }
 
 /* =========================== Drop Select Menu ============================ */
 
