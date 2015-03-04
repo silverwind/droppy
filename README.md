@@ -1,6 +1,6 @@
 # droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 
-droppy is a self-hosted file server with an interface similar to many desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage, and can be run directly as a web server, optionally with strong SSL/TLS encryption and SPDY support. To minimize latency, most communication is done exclusively through WebSockets. A demo is available <a target="_blank" href="http://droppy-demo.silverwind.io/#/">here</a>.
+droppy is a self-hosted file server with an interface similar to many desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage, and can be run directly as a web server, optionally with strong SSL/TLS encryption and SPDY support. To minimize latency, most communication is done exclusively through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
 
 ### Features
 * Multi-file and folder upload
