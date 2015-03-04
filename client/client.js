@@ -1234,7 +1234,7 @@
             else
                 targetRow = target.parents(".data-row");
             if (targetRow.data("type") === "error") return;
-            showEntryMenu(targetRow, event.clientX);
+            showEntryMenu(targetRow, event.clientX, event.clientY);
             event.preventDefault();
             event.stopPropagation();
         });
@@ -1338,16 +1338,22 @@
         } else if (dragAction === "cut" || event.shiftKey) {
             sendDrop(view, "cut", from, to, spinner);
         } else {
+            var x = event.originalEvent.clientX;
+            var y = event.originalEvent.clientY;
+
             // Keep the drop-select in view
             var limit = dropSelect[0].offsetWidth / 2 - 20, left;
-            if (event.originalEvent.clientX < limit)
-                left = event.originalEvent.clientX + limit;
-            else if ((event.originalEvent.clientX + limit) > window.innerWidth)
-                left = event.originalEvent.clientX - limit;
+            if (x < limit)
+                left = x + limit;
+            else if (x + limit > window.innerWidth)
+                left = x - limit;
             else
-                left = event.originalEvent.clientX;
+                left = x;
 
             dropSelect.css({left: left, top: event.originalEvent.clientY}).addClass("in");
+            $(document.elementFromPoint(x, y)).addClass("active").one("mouseleave", function () {
+                $(this).removeClass("active");
+            });
             toggleCatcher(true);
             dropSelect.children(".movefile").off("click").one("click", function () {
                 sendDrop(view, "cut", from, to, spinner);
@@ -1714,7 +1720,7 @@
         });
     }
 
-    function showEntryMenu(entry, x) {
+    function showEntryMenu(entry, x, y) {
         var left, top, maxTop,
             type    = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1],
             button  = entry.find(".entry-menu"),
@@ -1735,6 +1741,14 @@
             left: (left > 0 ? left : 0) + "px",
             top: (top > maxTop ? maxTop : top) + "px"
         }).data("target", entry).attr("class", "in");
+
+        if (x && y) {
+            var target = document.elementFromPoint(x, y);
+            target = target.nodeName === "a" ? $(target) : $(target).parents("a");
+            target.addClass("active").one("mouseleave", function () {
+                $(this).removeClass("active");
+            });
+        }
     }
 
     function sortByHeader(view, header) {

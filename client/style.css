@@ -610,10 +610,9 @@ input::-webkit-input-placeholder { color: #999 }
     white-space: nowrap;
 }
 
-#entry-menu > .radius-wrap>a:hover {
+#entry-menu > .radius-wrap > a:hover, #entry-menu a.active {
     background: #16b;
     color: #fff;
-    cursor: pointer;
 }
 
 #entry-menu > .radius-wrap > a:hover svg {
@@ -625,6 +624,7 @@ input::-webkit-input-placeholder { color: #999 }
     text-decoration: none;
     color: #333;
     display: block;
+    cursor: pointer;
 }
 
 #entry-menu svg {
@@ -1522,7 +1522,7 @@ html:not(.mobile) .vjs-big-play-button {
     font-size: .75em;
 }
 
-#drop-select span:hover {
+#drop-select span:hover, #drop-select span.active {
     background: #16b; color: #fff;
 }
 
