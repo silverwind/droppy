@@ -803,6 +803,8 @@ input::-webkit-input-placeholder { color: #999 }
     color: #fff !important;
 }
 
+
+
 /* Non-mobile supports autoplay */
 html:not(.mobile) .vjs-big-play-button {
     display: none !important;
