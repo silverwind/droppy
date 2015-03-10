@@ -2488,12 +2488,13 @@
     // draggabilly
     function makeMediaDraggable(el) {
         if ($(el).hasClass("draggable")) return;
-        var draggie = new Draggabilly(el, {axis: "x"});
-        $(el).attr("class", "media-wrapper draggable");
-        draggie.on("dragEnd", function (instance) {
-            var view = $(instance.element).parents(".view"),
-                dragThreshold = droppy.detects.mobile ? 0.15 : 0.075;
-            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > dragThreshold) {
+        $(el).attr("class", "media-wrapper draggable").draggabilly({axis: "x"});
+        $(el).on("dragEnd", function () {
+            var instance  = $(this).data("draggabilly"),
+                view      = $(instance.element).parents(".view"),
+                threshold = droppy.detects.mobile ? 0.15 : 0.075;
+
+            if ((Math.abs(instance.position.x) / instance.element.clientWidth) > threshold) {
                 swapMedia(view, instance.position.x > 0 ? "left" : "right");
             } else {
                 $(instance.element).removeAttr("style");
@@ -2889,18 +2890,18 @@
         }
     }
 
-    function throttle(func, threshhold) {
-        if (!threshhold) threshhold = 250;
+    function throttle(func, threshold) {
+        if (!threshold) threshold = 250;
         var last, deferTimer;
         return function () {
             var now = Date.now(),
                 args = arguments;
-            if (last && now < last + threshhold) {
+            if (last && now < last + threshold) {
                 clearTimeout(deferTimer);
                 deferTimer = setTimeout(function () {
                     last = now;
                     func.apply(this, args);
-                }, threshhold);
+                }, threshold);
             } else {
                 last = now;
                 func.apply(this, args);
