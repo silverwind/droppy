@@ -185,7 +185,6 @@ input::-webkit-input-placeholder { color: #999 }
     .content.image, .content.video, .content.document { height: calc(100% - 1.25rem) }
 }
 
-.content.center  { transform: translateX(0)     }
 .content.back    { transform: translateX(-100%) }
 .content.forward { transform: translateX(100%)  }
 
@@ -779,6 +778,10 @@ input::-webkit-input-placeholder { color: #999 }
     background: transparent !important;
 }
 
+.video-js.vjs-fullscreen {
+    background: #000 !important;
+}
+
 .vjs-big-play-button {
     left: 50% !important;
     top: 50% !important;
@@ -804,7 +807,15 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .vjs-default-skin .vjs-play-progress, .vjs-default-skin .vjs-volume-level {
-    background: #16b !important;
+    background: #18f !important;
+}
+
+.vjs-default-skin:hover .vjs-progress-control {
+    font-size:.5em !important;
+}
+
+.vjs-progress-control {
+    font-size:.5em !important;
 }
 
 .vjs-default-skin .vjs-slider-handle::before {
@@ -816,7 +827,7 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .vjs-default-skin .vjs-control-bar {
-    background: #181818 !important;
+    background: rgba(16,16,16,.9) !important;
 }
 
 .vjs-default-skin {
