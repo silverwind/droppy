@@ -810,12 +810,8 @@ input::-webkit-input-placeholder { color: #999 }
     background: #18f !important;
 }
 
-.vjs-default-skin:hover .vjs-progress-control {
-    font-size:.5em !important;
-}
-
-.vjs-progress-control {
-    font-size:.5em !important;
+.vjs-progress-control, .vjs-default-skin:hover .vjs-progress-control {
+    font-size: .7em !important;
 }
 
 .vjs-default-skin .vjs-slider-handle::before {
