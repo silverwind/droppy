@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, prettyBytes, videojs, Draggabilly */
+/* global jQuery, CodeMirror, prettyBytes, videojs */
 (function ($, window, document) {
     "use strict";
     var droppy = {};
