@@ -803,7 +803,30 @@ input::-webkit-input-placeholder { color: #999 }
     color: #fff !important;
 }
 
+.vjs-default-skin .vjs-play-progress, .vjs-default-skin .vjs-volume-level {
+    background: #16b !important;
+}
 
+.vjs-default-skin .vjs-slider-handle::before {
+    display: none !important;
+}
+
+.vjs-default-skin .vjs-slider {
+    background: #333 !important;
+}
+
+.vjs-default-skin .vjs-control-bar {
+    background: #181818 !important;
+}
+
+.vjs-default-skin {
+    color: #888 !important;
+}
+
+.vjs-default-skin .vjs-control:focus::before, .vjs-default-skin .vjs-control:hover::before {
+    text-shadow: none !important;
+    color: #fff !important;
+}
 
 /* Non-mobile supports autoplay */
 html:not(.mobile) .vjs-big-play-button {
