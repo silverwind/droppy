@@ -145,10 +145,8 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .content-container {
-    overflow-y: auto;
     overflow-x: hidden;
-    width: 100%;
-    height: 100%;
+    top: 1.5rem;
     position: relative;
     flex: 1;
     order: 2;
@@ -163,7 +161,6 @@ input::-webkit-input-placeholder { color: #999 }
     width: 100%;
     transition: transform .175s ease-in;
     position: absolute;
-    top: 1.5rem;
 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
