@@ -1,7 +1,7 @@
 {
   "name": "droppy",
   "description": "Personal file server with a modern web interface",
-  "version": "1.9.30",
+  "version": "1.9.31",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
@@ -25,7 +25,7 @@
     "chalk": "^1.0.0",
     "cheerio": "^0.18.0",
     "chokidar": "^1.0.0-rc4",
-    "clean-css": "^3.1.5",
+    "clean-css": "^3.1.6",
     "codemirror": "^5.0.0",
     "content-disposition": "^0.5.0",
     "cpr": "^0.4.0",
