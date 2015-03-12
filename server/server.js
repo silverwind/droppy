@@ -1071,77 +1071,54 @@ function getDirContents(p) {
 function updateDirectory(dir, initial, cb) {
     log.debug("Updating " + chalk.blue(dir));
     fs.stat(utils.addFilesPath(dir), function (err, stats) {
-       readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
-           dirs[dir] = {files: [], mtime: stats ? stats.mtime.getTime() : Date.now()};
-           if (errors) {
-               errors.forEach(function (err) {
-                   if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
-                       // "unlinkDir" can happen out of order
-                       delete dirs[utils.removeFilesPath(err.path)];
-                   } else {
-                       log.error(err);
-                   }
-               });
-               if (cb) cb();
-               if (!initial) return;
-           }
+        readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
+            dirs[dir] = {files: [], size: 0, mtime: stats ? stats.mtime.getTime() : Date.now()};
+            if (errors) {
+                errors.forEach(function (err) {
+                    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
+                        // "unlinkDir" can happen out of order
+                        delete dirs[utils.removeFilesPath(err.path)];
+                    } else {
+                        log.error(err);
+                    }
+                });
+                if (cb) cb();
+                if (!initial) return;
+            }
 
-           // Add directories
-           results.directories.forEach(function (d) {
-               dirs[utils.removeFilesPath(d.fullPath)] = {
-                   files: [],
-                   size: 0,
-                   mtime: d.stat.mtime.getTime() || 0
-               };
-           });
-
-           // Add files
-           results.files.forEach(function (file) {
-               dirs[utils.removeFilesPath(file.fullParentDir)].files.push({
-                   name: file.name,
-                   size: file.stat.size,
-                   mtime: file.stat.mtime.getTime() || 0
-               });
-           });
-
-           // Calculate folder sizes
-           var folders = Object.keys(dirs);
-           folders.splice(0, 1); // We don't care about the size of '/'
-
-           var folderPaths = folders.map(function(folder) {
-               return utils.addFilesPath(folder);
-           });
-
-           async.map(folderPaths, du, function (err, results) {
-               results.forEach(function (result, i) {
-                   dirs[folders[i]].size = results[i];
-               });
-               if (cb) cb();
-           });
-       });
-    });
-}
-
-var debouncedUpdateDirectory = _.debounce(function(dir) {
-    updateDirectory(dir, false, function () {
-        updateClients(dir);
-    });
-}, 500); // TODO: magic number
-
-// -----------------------------------------------------------------------------
-//  Get a directory's size (the sum of all files inside it)
-function du(dir, callback) {
-    fs.stat(dir, function (error, stat) {
-        if (error || !stat) return callback(null, 0);
-        if (!stat.isDirectory()) return callback(null, stat.size);
-        fs.readdir(dir, function (error, files) {
-            if (error || !files || files.length === 0) return callback(null, 0);
-            files = files.map(function (file) { return path.join(dir, file); });
-            async.map(files, du, function (error, sizes) {
-                callback(error, sizes && sizes.reduce(function (p, s) {
-                    return p + s;
-                }, stat.size));
+            // Add directories
+            results.directories.forEach(function (d) {
+                dirs[utils.removeFilesPath(d.fullPath)] = {
+                    files: [],
+                    size: 0,
+                    mtime: d.stat.mtime.getTime() || 0
+                };
             });
+
+            // Add files
+            results.files.forEach(function (f) {
+                var filedir = utils.removeFilesPath(f.fullParentDir);
+                dirs[filedir].files.push({
+                    name: f.name,
+                    size: f.stat.size,
+                    mtime: f.stat.mtime.getTime() || 0
+                });
+                dirs[filedir].size += f.stat.size;
+            });
+
+            // Calculate folder sizes
+            var subdirs = [];
+            Object.keys(dirs).forEach(function (d) {
+                if (d.indexOf(dir) === 0 && d !== dir) subdirs.push(d);
+            });
+
+            subdirs.sort(function (a, b) {
+                return -(a.match(/\//g).length - b.match(/\//g).length);
+            }).forEach(function (d) {
+                dirs[path.dirname(d)].size += dirs[d].size;
+            });
+
+            if (cb) cb();
         });
     });
 }
@@ -1211,9 +1188,27 @@ function filesUpdate(eventType, event, dir) {
     }
 }
 
+var todoDirs = [];
+var debouncedUpdate = _.debounce(function() {
+    todoDirs.sort(function (a, b) {
+      return a.match(/\//g).length - b.match(/\//g).length;
+    }).filter(function (path, index, self) {
+      return self.every(function (another) {
+         return another === path || path.indexOf(another) !== 0;
+      });
+    }).filter(function (path, index, self) {
+      return self.indexOf(path) === index;
+    }).forEach(function (dir) {
+        updateDirectory(dir, false, updateClients.bind(null, dir));
+    });
+    todoDirs = [];
+}, 100);
+
+
 function updateCache(dir) {
     if (!dirs[dir]) return; // sometimes happens on recursive unlinks
-    debouncedUpdateDirectory(dir); // read the dir for folder size updates
+    todoDirs.push(dir);
+    debouncedUpdate(); // read the dir for folder size updates
 }
 
 function updateClients(dir) {
