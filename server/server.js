@@ -1115,7 +1115,8 @@ function updateDirectory(dir, initial, cb) {
             subdirs.sort(function (a, b) {
                 return -(a.match(/\//g).length - b.match(/\//g).length);
             }).forEach(function (d) {
-                dirs[path.dirname(d)].size += dirs[d].size;
+                if (path.dirname(d) !== "/")
+                    dirs[path.dirname(d)].size += dirs[d].size;
             });
 
             if (cb) cb();
