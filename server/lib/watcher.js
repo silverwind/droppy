@@ -4,7 +4,8 @@ var watcher  = {},
     chokidar = require("chokidar"),
     chalk    = require("chalk"),
     log      = require("./log.js"),
-    paths    = require("./paths.js").get();
+    paths    = require("./paths.js").get(),
+    _        = require("lodash");
 
 var opts = {
     files: {
@@ -33,16 +34,19 @@ watcher.watchResources = function watchResources(usePolling, cb) {
 watcher.watchFiles = function watchFiles(usePolling, cb) {
     opts.files.usePolling = usePolling;
 
+    var add       = cb.bind(null, "add"),
+        unlink    = cb.bind(null, "unlink"),
+        change    = _.throttle(cb.bind(null, "change"), 500, {trailing: true}),
+        addDir    = cb.bind(null, "addDir"),
+        unlinkDir = cb.bind(null, "unlinkDir");
+
     chokidar.watch(".", opts.files)
-        .on("add", cb.bind(null, "file", "add"))
-        .on("unlink", cb.bind(null, "file", "unlink"))
-        .on("change", cb.bind(null, "file", "change"))
-        .on("addDir", cb.bind(null, "dir", "addDir"))
-        .on("unlinkDir", cb.bind(null, "dir", "unlinkDir"))
-        .on("error", log.error)
-        .on("ready", function () {
-            log.info("Watching " + chalk.blue(opts.files.cwd) + " for changes.");
-        });
+        .on("add", add)
+        .on("unlink", unlink)
+        .on("change", change)
+        .on("addDir", addDir)
+        .on("unlinkDir", unlinkDir)
+        .on("error", log.error);
 };
 
 module.exports = watcher;

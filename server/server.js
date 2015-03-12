@@ -1130,7 +1130,7 @@ function checkExists(dir,stats) {
 
 //-----------------------------------------------------------------------------
 // Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
-function filesUpdate(eventType, event, dir) {
+function filesUpdate(event, dir) {
     dir = utils.normalizePath(dir);            // Remove OS inconsistencies
     dir = (dir === ".") ? "/" : "/" + dir;     // Prefix "/"
 
