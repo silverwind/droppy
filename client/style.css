@@ -536,11 +536,10 @@ input::-webkit-input-placeholder { color: #999 }
 
 .sprite {
     flex: 0 0 24px;
-    display: inline-block;
     background-clip: content-box;
-    width: 24px; height: 24px;
+    height: 24px;
     background-size: 240px 216px;
-    margin: 0 2px;
+    overflow: hidden;
 }
 
 @media (min-width: 1024px) { .sprite { transform: scale(1.25) } }
@@ -560,8 +559,8 @@ input::-webkit-input-placeholder { color: #999 }
     visibility: hidden;
     cursor: pointer;
     position: relative;
-    top: -.1em;
-    left: .05em;
+    top: -.15em;
+    left: 0;
     fill: #333;
 }
 .spinner {
