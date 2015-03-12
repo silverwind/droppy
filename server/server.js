@@ -1203,7 +1203,7 @@ var debouncedUpdate = _.debounce(function() {
         updateDirectory(dir, false, updateClients.bind(null, dir));
     });
     todoDirs = [];
-}, 100);
+}, 250, {trailing: true});
 
 
 function updateCache(dir) {
