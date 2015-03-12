@@ -1221,6 +1221,7 @@ function updateClients(dir) {
     var parent = dir;
     while (true) {
         parent = path.dirname(parent);
+        if (parent === dir) return;
         if (clientsPerDir[parent]) {
             clientsPerDir[parent].forEach(function (client) {
                 client.update();
