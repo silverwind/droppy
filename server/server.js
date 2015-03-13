@@ -1195,7 +1195,7 @@ var debouncedUpdate = _.debounce(function() {
       return a.match(/\//g).length - b.match(/\//g).length;
     }).filter(function (path, index, self) {
       return self.every(function (another) {
-         return another === path || path.indexOf(another) !== 0;
+         return another === path || path.indexOf(another + "/") !== 0;
       });
     }).filter(function (path, index, self) {
       return self.indexOf(path) === index;
