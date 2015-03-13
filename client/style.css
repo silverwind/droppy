@@ -151,6 +151,7 @@ input::-webkit-input-placeholder { color: #999 }
     flex: 1;
     order: 2;
 }
+@media (max-width: 639px) { .content-container { top: 1.25rem } }
 
 .view.left  { left:0; right:50% }
 .view.right { left:50%; right:0 }
@@ -165,7 +166,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
 @media (max-width: 1023px) { .content { font-size: .9em } }
-@media (max-width:  639px) { .content { font-size: .8em; top: 1.25rem; max-heigth: calc(100% - 1.25rem) } }
+@media (max-width:  639px) { .content { font-size: .8em } }
 
 .content.directory {
     background: #eee;
