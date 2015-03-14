@@ -89,24 +89,18 @@ log.info = function info(req, res) {
 };
 
 log.error = function error(err) {
-    if (err === undefined || err === null) return log(null, null, 1, "Error handler called without an argument");
-    if (typeof err === "string") {
-        log(null, null, 1, Array.prototype.slice.call(arguments, 0).join(""));
-    } else {
-        if (typeof err === "object") {
-            log(null, null, 1, chalk.red(String(err)));
-            Object.keys(err).forEach(function (prop) {
-                log(null, null, 1, chalk.green(prop) + ":", chalk.red(err[prop]));
-            });
-        } else {
-            if (err.stack)
-                log(null, null, 1, chalk.red(String(err.stack)));
-            else if (err.message)
-                log(null, null, 1, chalk.red(String(err.message)));
-            else
-                log(null, null, 1, chalk.red(String(err)));
-        }
-    }
+    var output;
+
+    if (err instanceof Error)
+        output = err.stack;
+    else if (!err)
+        output = new Error("Error handler called without an argument").stack + "\nerr = " + err;
+    else if (typeof err === "string")
+        output = err;
+    else
+        output = new Error("Unknown error type: " + typeof err).stack + "\nerr = " + err;
+
+    log(null, null, 1, chalk.red(output));
 };
 
 log.simple = function simple() {

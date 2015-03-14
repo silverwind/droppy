@@ -16,7 +16,6 @@ var _          = require("lodash"),
     async      = require("async"),
     Busboy     = require("busboy"),
     chalk      = require("chalk"),
-    cpr        = require("cpr"),
     engine     = require("detect-engine"),
     fs         = require("graceful-fs"),
     mv         = require("mv"),
@@ -28,15 +27,18 @@ var crypto     = require("crypto"),
     path       = require("path"),
     qs         = require("querystring");
 
-var cache         = {},
-    clients       = {},
-    clientsPerDir = {},
-    dirs          = {},
-    config        = null,
-    firstRun      = null,
-    hasServer     = null,
-    ready         = false,
-    isDemo        = process.env.NODE_ENV === "droppydemo";
+var cache           = {},
+    clients         = {},
+    clientsPerDir   = {},
+    dirs            = {},
+    ignoreEvents    = {},
+    todoDirs        = [],
+    config          = null,
+    firstRun        = null,
+    hasServer       = null,
+    debouncedUpdate = null,
+    ready           = false,
+    isDemo          = process.env.NODE_ENV === "droppydemo";
 
 var droppy = function droppy(options, isStandalone, callback) {
     if (isStandalone) {
@@ -363,18 +365,26 @@ function setupSocket(server) {
             case "DELETE_FILE":
                 log.info(ws, null, "Deleting: " + msg.data);
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
-                msg.data = utils.addFilesPath(msg.data);
-                fs.stat(msg.data, function (error, stats) {
+                var fullPath = utils.addFilesPath(msg.data);
+                fs.stat(fullPath, function (error, stats) {
                     if (error) {
-                        log.error("Error on stat()ing " + msg.data);
+                        log.error("Error on stating " + fullPath);
                         log.error(error);
                     } else if (stats) {
-                        utils.rm(msg.data, function (error) {
+                        if (stats.isDirectory()) ignoreEvents[msg.data] = ["unlink", "unlinkDir"];
+                        utils.rm(fullPath, function (error) {
                             if (error) {
                                 log.error("Error deleting " + msg.data);
                                 log.error(error);
                             }
-                            if (stats.isDirectory()) delete dirs[msg.data];
+                            if (stats.isDirectory()) {
+                                delete dirs[msg.data];
+                                setTimeout(function () {
+                                    delete ignoreEvents[msg.data];
+                                }, 250);
+                                todoDirs.push(path.dirname(msg.data));
+                                debouncedUpdate();
+                            }
                         });
                     }
                 });
@@ -402,26 +412,22 @@ function setupSocket(server) {
                 });
                 break;
             case "CLIPBOARD":
-                if (!utils.isPathSane(msg.data.from)) return log.info(ws, null, "Invalid clipboard source: " + msg.data.from);
-                if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid clipboard destination: " + msg.data.to);
-                if (msg.data.to.indexOf(msg.data.from + "/") !== -1 && msg.data.to !== msg.data.from) {
+                if (!utils.isPathSane(msg.data.src)) return log.info(ws, null, "Invalid clipboard src: " + msg.data.src);
+                if (!utils.isPathSane(msg.data.dst)) return log.info(ws, null, "Invalid clipboard dst: " + msg.data.dst);
+                if (msg.data.src.indexOf(msg.data.src + "/") !== -1 && msg.data.dst !== msg.data.src) {
                     log.error("Can't copy directory into itself");
-                    sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself."});
+                    sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
                     return;
                 }
 
-                var from = utils.addFilesPath(msg.data.from),
-                    to   = utils.addFilesPath(msg.data.to),
-                    type = msg.data.type;
-
-                // In case source and destination are the same, append a number to the file/foldername
-                if (from === to) {
-                    utils.getNewPath(to, function (newTo) {
-                        doClipboard(type, from, newTo);
+                if (msg.data.src === msg.data.dst) {
+                    utils.getNewPath(utils.addFilesPath(msg.data.dst), function (newDst) {
+                        clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
                     });
                 } else {
-                    doClipboard(type, from, to);
+                    clipboard(msg.data.src, msg.data.dst, msg.data.type);
                 }
+
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
@@ -606,34 +612,29 @@ function send(ws, data) {
         }
     })(ws, data, 0);
 }
+
 //-----------------------------------------------------------------------------
-// Perform clipboard operation, copy/paste or cut/paste
-function doClipboard(type, src, dst) {
-    fs.stat(src, function (err, stats) {
-        if (err) return logError(err);
-        if (stats) {
-            if (type === "cut") {
-                mv(src, dst, logError);
-            } else {
-                if (stats.isFile()) {
-                    utils.copyFile(src, dst, logError);
-                } else {
-                    cpr(src, dst, {overwrite: true}, logError);
-                }
-            }
+function clipboard(src, dst, type) {
+    var realSrc = utils.addFilesPath(src);
+    var realDst = utils.addFilesPath(dst);
+
+    fs.stat(realSrc, function (err, stats) {
+        if (err) return log.error(err);
+        if (stats.isDirectory()) {
+            if (type === "cut") ignoreEvents[src] = ["unlink", "unlinkDir"];
+            ignoreEvents[dst] = ["add", "addDir", "change"];
+            utils[type === "cut" ? "move" : "copyDir"](realSrc, realDst, function () {
+                setTimeout(function () {
+                    delete ignoreEvents[src];
+                    delete ignoreEvents[dst];
+                }, 250);
+                todoDirs.push(path.dirname(dst));
+                debouncedUpdate();
+            });
+        } else {
+            utils[type === "cut" ? "move" : "copyFile"](realSrc, realDst);
         }
     });
-
-    function logError(err) {
-        if (!err) return;
-        log.error("Error " + (type === "cut" ? "moving" : "copying") + " from " + chalk.blue(src) + " to " + chalk.magenta(dst));
-        if (Array.isArray(err))
-            err.forEach(log.error);
-        else if (err.list)
-            err.list.forEach(log.error);
-        else if (err instanceof Error)
-            log.error(err);
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -906,17 +907,27 @@ function handleTypeRequest(req, res) {
 
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
-    var busboy, opts,
+    var busboy, opts, to,
         done     = false,
         files    = {},
         cookie   = cookies.get(req.headers.cookie);
 
     req.query = qs.parse(req.url.substring("/upload?".length));
 
-    if (!cookie && !config.public) {
+    if (!req.query || !req.query.to) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();
+        log.info(req, res, "Invalid upload dst" + req.query.to);
+        log.info(req, res);
+    }
+    to = decodeURIComponent(req.query.to);
+
+    if (!cookie && !config.public) {
+        res.statusCode = 401;
+        res.setHeader("Content-Type", "text/plain");
+        res.end();
+        log.info(req, res, "Unauthorized upload request");
         log.info(req, res);
         return;
     }
@@ -930,7 +941,7 @@ function handleUploadRequest(req, res) {
 
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-            dst         = path.join(paths.files, decodeURIComponent(req.query.to), dstRelative),
+            dst         = path.join(paths.files, to, dstRelative),
             tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
             writeStream = fs.createWriteStream(tmp, { mode: "644"});
 
@@ -949,9 +960,14 @@ function handleUploadRequest(req, res) {
     });
 
     busboy.on("finish", function () {
-        var names = Object.keys(files);
+        var names = Object.keys(files), total = names.length, added = 0;
         log.info(req, res, "Received " + names.length + " files");
         done = true;
+
+        if (names.length) ignoreEvents[to] = ["add", "addDir", "change"];
+
+        var moveFuncs = [];
+
         while (names.length > 0) {
             (function (name) {
                 fs.stat(files[name].dst, function (error) {
@@ -959,33 +975,51 @@ function handleUploadRequest(req, res) {
                         fs.stat(path.dirname(files[name].dst), function (error) {
                             if (error) { // Dir doesn't exist
                                 utils.mkdir(path.dirname(files[name].dst), function () {
-                                    moveFile(files[name].src, files[name].dst);
+                                    moveFuncs.push(getMoveFunc(files[name].src, files[name].dst));
+                                    if (++added === total) run();
                                 });
                             } else {
-                                moveFile(files[name].src, files[name].dst);
+                                moveFuncs.push(getMoveFunc(files[name].src, files[name].dst));
+                                if (++added === total) run();
                             }
                         });
                     } else {
                         if (req.query.r === "true") { // Rename option from the client
                             (function (src, dst) {
                                 utils.getNewPath(dst, function (newDst) {
-                                    moveFile(src, newDst);
+                                    moveFuncs.push(getMoveFunc(src, newDst));
+                                    if (++added === total) run();
                                 });
                             })(files[name].src, files[name].dst);
 
                         } else {
-                            moveFile(files[name].src, files[name].dst);
+                            moveFuncs.push(getMoveFunc(files[name].src, files[name].dst));
+                            if (++added === total) run();
                         }
                     }
                 });
             })(names.pop());
         }
+
         closeConnection();
 
-        function moveFile(src, dst) {
-            mv(src, dst, function (err) {
-                if (err) log.error(err);
+        function run() {
+            async.series(moveFuncs, function () {
+                setTimeout(function () {
+                    delete ignoreEvents[to];
+                }, 250);
+                todoDirs.push(path.dirname(to));
+                debouncedUpdate();
             });
+        }
+
+        function getMoveFunc(src, dst) {
+            return function (cb) {
+                mv(src, dst, function (err) {
+                    if (err) log.error(err);
+                    cb(null);
+                });
+            };
         }
     });
 
@@ -1131,10 +1165,18 @@ function checkExists(dir,stats) {
 //-----------------------------------------------------------------------------
 // Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
 function filesUpdate(event, dir) {
+    var skip;
     dir = utils.normalizePath(dir);            // Remove OS inconsistencies
     dir = (dir === ".") ? "/" : "/" + dir;     // Prefix "/"
 
-    log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
+    Object.keys(ignoreEvents).some(function (p) {
+        if (dir.indexOf(p) === 0 && ignoreEvents[p].indexOf(event) !== -1) {
+            skip = true;
+            return true;
+        }
+    });
+
+    if (!skip) log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
 
     if (dir === "/") return;                  // Should never happen
 
@@ -1143,7 +1185,7 @@ function filesUpdate(event, dir) {
 
     if (event === "unlinkDir") {
         delete dirs[dir];
-        updateCache(parentDir);
+        if (!skip) updateCache(parentDir);
     } else if (event === "unlink") {
         if (dirs[parentDir]) {
             dirs[parentDir].files.some(function (file, i) {
@@ -1153,7 +1195,7 @@ function filesUpdate(event, dir) {
                 }
             });
         }
-        updateCache(parentDir);
+        if (!skip) updateCache(parentDir);
     } else if (event === "add") {
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
             checkExists(parentDir, stats);
@@ -1162,7 +1204,7 @@ function filesUpdate(event, dir) {
                 size: stats.size,
                 mtime: stats.mtime.getTime() || 0
             });
-            updateCache(parentDir);
+            if (!skip) updateCache(parentDir);
         });
     } else if (event === "addDir") {
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
@@ -1172,7 +1214,7 @@ function filesUpdate(event, dir) {
                 size: 0,
                 mtime: stats.mtime.getTime() || 0
             };
-            updateCache(parentDir);
+            if (!skip) updateCache(parentDir);
         });
     } else if (event === "change") {
         fs.stat(utils.addFilesPath(dir), function (err, stats) {
@@ -1181,7 +1223,7 @@ function filesUpdate(event, dir) {
                 if (file.name === entryName) {
                     dirs[parentDir].files[i].size = stats.size;
                     dirs[parentDir].files[i].mtime = stats.mtime.getTime() || 0;
-                    updateCache(parentDir);
+                    if (!skip) updateCache(parentDir);
                     return true;
                 }
             });
@@ -1189,8 +1231,7 @@ function filesUpdate(event, dir) {
     }
 }
 
-var todoDirs = [];
-var debouncedUpdate = _.debounce(function() {
+debouncedUpdate = _.debounce(function() {
     todoDirs.sort(function (a, b) {
       return a.match(/\//g).length - b.match(/\//g).length;
     }).filter(function (path, index, self) {
@@ -1209,7 +1250,7 @@ var debouncedUpdate = _.debounce(function() {
 function updateCache(dir) {
     if (!dirs[dir]) return; // sometimes happens on recursive unlinks
     todoDirs.push(dir);
-    debouncedUpdate(); // read the dir for folder size updates
+    debouncedUpdate();
 }
 
 function updateClients(dir) {
@@ -1381,7 +1422,7 @@ function setupProcess(standalone) {
         process.on("SIGTERM", function () { endProcess("SIGTERM"); });
         process.on("uncaughtException", function (error) {
             log.error("=============== Uncaught exception! ===============");
-            log.error(error.stack);
+            log.error(error);
         });
     }
 }

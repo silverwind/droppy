@@ -1192,7 +1192,7 @@
             isUpload : isUpload,
             sortBy   : view[0].sortBy,
             sortAsc  : view[0].sortAsc,
-            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.from) : ""
+            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.src) : ""
         }));
         // Load it
         loadContent(view, content);
@@ -1322,7 +1322,7 @@
         }
     }
 
-    function handleDrop(view, event, from, to, spinner) {
+    function handleDrop(view, event, src, dst, spinner) {
         var dropSelect = $("#drop-select");
         droppy.dragTimer.clear();
         $(".drop-hover").removeClass("drop-hover");
@@ -1332,9 +1332,9 @@
         delete view[0].dragAction;
 
         if (dragAction === "copy" || event.ctrlKey || event.metaKey || event.altKey) {
-            sendDrop(view, "copy", from, to, spinner);
+            sendDrop(view, "copy", src, dst, spinner);
         } else if (dragAction === "cut" || event.shiftKey) {
-            sendDrop(view, "cut", from, to, spinner);
+            sendDrop(view, "cut", src, dst, spinner);
         } else {
             var x = event.originalEvent.clientX;
             var y = event.originalEvent.clientY;
@@ -1354,28 +1354,28 @@
             });
             toggleCatcher(true);
             dropSelect.children(".movefile").off("click").one("click", function () {
-                sendDrop(view, "cut", from, to, spinner);
+                sendDrop(view, "cut", src, dst, spinner);
                 toggleCatcher(false);
             });
             dropSelect.children(".copyfile").off("click").one("click", function () {
-                sendDrop(view, "copy", from, to, spinner);
+                sendDrop(view, "copy", src, dst, spinner);
                 toggleCatcher(false);
             });
             dropSelect.children(".viewfile").off("click").one("click", function () {
-                updateLocation(view, from);
+                updateLocation(view, src);
                 toggleCatcher(false);
             });
             return;
         }
     }
 
-    function sendDrop(view, type, from, to, spinner) {
-        if (from !== to || type === "copy") {
+    function sendDrop(view, type, src, dst, spinner) {
+        if (src !== dst || type === "copy") {
             if (spinner) showSpinner(view);
             sendMessage(view[0].vId, "CLIPBOARD", {
                 type: type,
-                from: from,
-                to:   to
+                src: src,
+                dst: dst
             });
         }
     }
@@ -1480,16 +1480,16 @@
 
     function bindDropEvents(view) {
         view.find(".data-row").each(function () {
-            var from, to, row = $(this);
+            var src, dst, row = $(this);
             if (row.attr("data-type") === "folder") {
                 row.register("drop", function (event) {
                     event.preventDefault();
                     event.stopPropagation();
                     $(".drop-hover").removeClass("drop-hover");
                     $(".dropzone").removeClass("in");
-                    from = JSON.parse(event.dataTransfer.getData("text")).path;
-                    to = join(row.attr("data-id"), basename(from));
-                    if (from) handleDrop(view, event, from, to);
+                    src = JSON.parse(event.dataTransfer.getData("text")).path;
+                    dst = join(row.attr("data-id"), basename(src));
+                    if (src) handleDrop(view, event, src, dst);
                 });
             }
         });
@@ -1673,26 +1673,26 @@
             var entry = $("#entry-menu").data("target");
 
             toggleCatcher(false);
-            droppy.clipboard = { type: $(this).attr("class"), from: entry.data("id") };
+            droppy.clipboard = { type: $(this).attr("class"), src: entry.data("id") };
             $(".view").each(function () {
                 var view = $(this);
                 if (!view.children(".paste-button").length) {
                     view.append(
                         '<div class="paste-button ' + (droppy.clipboard && "in") + '">' + droppy.svg.paste +
                             '<span>Paste <span class="filename">' +
-                                (droppy.clipboard ? basename(droppy.clipboard.from) : "") +
+                                (droppy.clipboard ? basename(droppy.clipboard.src) : "") +
                             '</span></span>' +
                             droppy.svg.triangle +
                         '</div>');
                 } else {
-                    $(".paste-button .filename").text(basename(droppy.clipboard.from));
+                    $(".paste-button .filename").text(basename(droppy.clipboard.src));
                 }
                 view.find(".paste-button").one("click", function (event) {
                     event.stopPropagation();
                     if (droppy.socketWait) return;
                     if (droppy.clipboard) {
                         showSpinner(view);
-                        droppy.clipboard.to = join(view[0].currentFolder, basename(droppy.clipboard.from));
+                        droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
                         sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
                     } else {
                         throw new Error("Clipboard was empty!");

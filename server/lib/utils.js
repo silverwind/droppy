@@ -3,12 +3,14 @@
 var utils  = {},
     async  = require("async"),
     cd     = require("content-disposition"),
+    cpr    = require("cpr"),
     crypto = require("crypto"),
     db     = require("./db.js"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
     log    = require("./log.js"),
     mkdirp = require("mkdirp"),
+    mv     = require("mv"),
     path   = require("path"),
     paths  = require("./paths.js").get(),
     rimraf = require("rimraf"),
@@ -58,6 +60,37 @@ utils.rm = function rm(p, cb) {
 // rimraf.sync wrapper with 10 retries
 utils.rmSync = function rmSync(p) {
     rimraf.sync(p, {maxBusyTries: 10});
+};
+
+utils.move = function move(src, dst, cb) {
+    mv(src, dst, function (err) {
+        if (err) log.error(err);
+        if (cb) cb();
+    });
+};
+
+utils.copyFile = function copyFile(src, dst, cb) {
+    var cbCalled = false,
+        read     = fs.createReadStream(src),
+        write    = fs.createWriteStream(dst);
+
+    function done(err) {
+        if (cbCalled) return;
+        cbCalled = true;
+        if (cb) cb(err);
+    }
+
+    read.on("error", done);
+    write.on("error", done);
+    write.on("close", done);
+    read.pipe(write);
+};
+
+utils.copyDir = function copyDir(src, dst, cb) {
+    cpr(src, dst, {overwrite: true}, function (errs) {
+        if (errs) log.err(errs);
+        if (cb) cb();
+    });
 };
 
 utils.getExt = function getExt(filename) {
@@ -121,23 +154,6 @@ utils.getNewPath = function getNewPath(origPath, callback) {
             );
         }
     });
-};
-
-utils.copyFile = function copyFile(source, target, cb) {
-    var cbCalled = false,
-        read     = fs.createReadStream(source),
-        write    = fs.createWriteStream(target);
-
-    read.on("error", done);
-    write.on("error", done);
-    write.on("close", done);
-    read.pipe(write);
-
-    function done(err) {
-        if (cbCalled) return;
-        cbCalled = true;
-        cb(err);
-    }
 };
 
 utils.normalizePath = function normalizePath(p) {

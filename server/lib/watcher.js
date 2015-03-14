@@ -24,11 +24,8 @@ watcher.watchResources = function watchResources(usePolling, cb) {
     opts.client.usePolling = usePolling;
 
     chokidar.watch(".", opts.client)
-        .on("error", log.error)
         .on("change", cb)
-        .on("ready", function () {
-            log.info("Watching " + chalk.blue(opts.client.cwd) + " for changes.");
-        });
+        .on("error", log.error);
 };
 
 watcher.watchFiles = function watchFiles(usePolling, cb) {
