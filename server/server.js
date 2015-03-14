@@ -18,7 +18,6 @@ var _          = require("lodash"),
     chalk      = require("chalk"),
     engine     = require("detect-engine"),
     fs         = require("graceful-fs"),
-    mv         = require("mv"),
     readdirp   = require("readdirp"),
     Wss        = require("websocket").server,
     yazl       = require("yazl");
@@ -1015,7 +1014,7 @@ function handleUploadRequest(req, res) {
 
         function getMoveFunc(src, dst) {
             return function (cb) {
-                mv(src, dst, function (err) {
+                utils.move(src, dst, function (err) {
                     if (err) log.error(err);
                     cb(null);
                 });
