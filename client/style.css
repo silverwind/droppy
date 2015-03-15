@@ -606,7 +606,8 @@ input::-webkit-input-placeholder { color: #999 }
     white-space: nowrap;
 }
 
-#entry-menu > .radius-wrap > a:hover, #entry-menu a.active {
+html:not(.mobile) #entry-menu > .radius-wrap > a:hover,
+html:not(.mobile) #entry-menu a.active {
     background: #16b;
     color: #fff;
 }
@@ -1551,7 +1552,8 @@ html:not(.mobile) .vjs-big-play-button {
     font-size: .75em;
 }
 
-#drop-select span:hover, #drop-select span.active {
+html:not(.mobile) #drop-select span:hover,
+html:not(.mobile) #drop-select span.active {
     background: #16b; color: #fff;
 }
 
