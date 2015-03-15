@@ -2,7 +2,6 @@
 
 var watcher  = {},
     chokidar = require("chokidar"),
-    chalk    = require("chalk"),
     log      = require("./log.js"),
     paths    = require("./paths.js").get(),
     _        = require("lodash");
