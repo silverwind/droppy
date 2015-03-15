@@ -106,7 +106,7 @@ var droppy = require("droppy")("./droppy-home", {logLevel: 0});
 
 app.use("/", droppy).listen(8989);
 ```
-Also see the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js)
+Also see the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js).
 #### droppy([home], [options])
 - **home** {string}: The path to droppy's home folder. Defaults to `~/.droppy`.
 - **options** {object}: Custom [options](#Options). Extends [config.json](#Configuration).
