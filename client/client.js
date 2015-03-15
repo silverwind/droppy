@@ -1690,12 +1690,10 @@
                 view.find(".paste-button").one("click", function (event) {
                     event.stopPropagation();
                     if (droppy.socketWait) return;
-                    if (droppy.clipboard) {
+                    droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
+                    if (droppy.clipboard.dst !== droppy.clipboard.src) {
                         showSpinner(view);
-                        droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
                         sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
-                    } else {
-                        throw new Error("Clipboard was empty!");
                     }
                     droppy.clipboard = null;
                     toggleCatcher(false);
