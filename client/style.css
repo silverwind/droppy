@@ -464,7 +464,7 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row svg:not(.up-arrow):not(.play) {
     display: block;
     cursor: pointer;
-    fill: #444;
+    fill: #555;
     height: 1em;
     width: 1em;
     padding: 0 .1em;
@@ -581,12 +581,17 @@ input::-webkit-input-placeholder { color: #999 }
 /* ============================ Entry Menu ============================ */
 
 #entry-menu {
-    position: absolute;
+    background: #eee;
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(0,0,0,.3);
     color: #333;
-    z-index: 32;
-    user-select: none;
     opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    user-select: none;
     visibility: hidden;
+    cursor: pointer;
+    z-index: 32;
 }
 #entry-menu.in { opacity: 1; visibility: visible }
 
@@ -594,34 +599,20 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width: 1023px) { #entry-menu { font-size: .8em } }
 @media (max-width:  639px) { #entry-menu { font-size: .7em } }
 
-#entry-menu > .radius-wrap {
-    box-shadow: 0 0 30px rgba(0,0,0,.3);
-    background: #eee;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-#entry-menu > .radius-wrap > div {
-    padding: .25em;
-    white-space: nowrap;
-}
-
-html:not(.mobile) #entry-menu > .radius-wrap > a:hover,
+html:not(.mobile) #entry-menu a:hover,
 html:not(.mobile) #entry-menu a.active {
     background: #16b;
     color: #fff;
 }
 
-#entry-menu > .radius-wrap > a:hover svg {
+#entry-menu a:hover svg {
    fill: #fff;
 }
 
 #entry-menu a {
-    padding: .25em;
-    text-decoration: none;
+    padding: .25em .35em;
     color: #333;
     display: block;
-    cursor: pointer;
 }
 
 #entry-menu svg {
