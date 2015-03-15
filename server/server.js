@@ -40,67 +40,40 @@ var cache           = {},
     isDemo          = process.env.NODE_ENV === "droppydemo";
 
 var droppy = function droppy(options, isStandalone, callback) {
-    if (isStandalone) {
-        log.logo();
-        log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-                chalk.blue(engine), " ", chalk.green(process.version.substring(1)), "\n ",
-                chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
-    }
+    log.logo();
+    log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
+            chalk.blue(engine), " ", chalk.green(process.version.substring(1)), "\n ",
+            chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
 
     setupProcess(isStandalone);
 
     async.series([
         function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
         function (cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
-        function (cb) { cfg.init(options, function (err, conf) {
-                if (err && err instanceof SyntaxError) {
-                    if (isStandalone) {
-                        log.error("config.json contains invalid JSON: ", err.message);
-                        process.exit(1);
-                    } else {
-                        callback(err);
-                    }
-                }
-                config = conf;
-                cb(err);
-            });
+        function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
+        function (cb) { db.init(cb); },
+        function (cb) {
+            log.init({logLevel: config.logLevel, timestamps: config.timestamps});
+            fs.MAX_OPEN = config.maxOpen;
+            firstRun = Object.keys(db.get("users")).length === 0;
+            cb();
         },
-        function (cb) { db.init(cb); }
+        function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
+        function (cb) {
+            log.simple("Preparing resources ...");
+            resources.init(!config.debug, function (err, c) { cache = c; cb(err); });
+        },
+        function (cb) { cleanupTemp(); cb(); },
+        function (cb) { cleanupLinks(cb); },
+        function (cb) { if (config.debug) watcher.watchResources(config.usePolling, debugUpdate); cb(); },
+        function (cb) { if (isDemo) { require("./lib/demo.js").init(cb); } else cb(); },
+        function (cb) { updateDirectory("/", true, cb); },
+        function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
     ], function (err) {
         if (err) return callback(err);
-        log.init({logLevel: config.logLevel, timestamps: config.timestamps});
-        fs.MAX_OPEN = config.maxOpen;
-        firstRun = Object.keys(db.get("users")).length === 0;    // Allow user creation when no users exist
-        async.series([
-            function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
-            function (cb) {
-                log.simple("Preparing resources ...");
-                resources.init(!config.debug, function (err, c) {
-                    if (err) return callback(err);
-                    cache = c;
-                    cb();
-                });
-            },
-            function (cb) { cleanupTemp(); cb(); },
-            function (cb) { cleanupLinks(cb); },
-            function (cb) { if (config.debug) watcher.watchResources(config.usePolling, debugUpdate); cb(); },
-            function (cb) {
-                if (isDemo) {
-                    require("./lib/demo.js").init(function (err) {
-                        if (err) log.error(err);
-                        cb();
-                    });
-                } else cb();
-            },
-            function (cb) { updateDirectory("/", true, cb); },
-            function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
-        ], function (err) {
-            if (err) return callback(err);
-
-            ready = true;
-            log.simple("Ready for requests!");
-            callback();
-        });
+        ready = true;
+        log.simple("Ready for requests!");
+        callback();
     });
 };
 

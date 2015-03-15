@@ -59,7 +59,7 @@ if (cmds[cmd]) {
     switch (cmd) {
     case "start":
         require("./server/server.js")(null, true, function (err) {
-            if (err) console.error(err);
+            if (err) { console.error(err); process.exit(1); }
         });
         break;
     case "version":

@@ -99,13 +99,14 @@ A listener object accepts these options:
 *Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
 
 ### API
-droppy can be used as a module, for example with [express](http://expressjs.com/):
+droppy can be used as a module too, for example with [express](https://github.com/strongloop/express):
 ```js
 var app    = require("express")();
-var droppy = require("droppy")("droppy", {logLevel: 0});
+var droppy = require("droppy")("./droppy-home", {logLevel: 0});
 
 app.use("/", droppy).listen(8989);
 ```
+Also see the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js)
 #### droppy([home], [options])
 - **home** {string}: The path to droppy's home folder. Defaults to `~/.droppy`.
 - **options** {object}: Custom [options](#Options). Extends [config.json](#Configuration).
