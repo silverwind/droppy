@@ -15,7 +15,7 @@ var cmds = {
     list    : "list                 List users",
     add     : "add <user> <pass>    Add a user",
     del     : "del <user>           Delete a user",
-    version : "version              Print version"
+    version : "version, -v          Print version"
 };
 
 var opts = {
@@ -53,7 +53,10 @@ if (cmd === "--color") {
         cmd = args.splice(0, 1)[0];
     } else { return printHelp(); }
 }
-
+if (cmd === "-v" || cmd === "--version") {
+    console.info(pkg.version);
+    process.exit(0);
+}
 
 if (cmds[cmd]) {
     switch (cmd) {
