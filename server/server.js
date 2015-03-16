@@ -977,10 +977,7 @@ function handleUploadRequest(req, res) {
 
         function run() {
             async.series(moveFuncs, function () {
-                setTimeout(function () {
-                    delete ignoreEvents[to];
-                }, 250);
-                todoDirs.push(path.dirname(to));
+                delete ignoreEvents[to];
                 todoDirs.push(to);
                 debouncedUpdate();
             });
