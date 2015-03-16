@@ -981,6 +981,7 @@ function handleUploadRequest(req, res) {
                     delete ignoreEvents[to];
                 }, 250);
                 todoDirs.push(path.dirname(to));
+                todoDirs.push(to);
                 debouncedUpdate();
             });
         }
