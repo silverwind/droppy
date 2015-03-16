@@ -2859,7 +2859,7 @@
     }
 
     function showNotification(msg, body) {
-        if (droppy.detects.notification) {
+        if (droppy.detects.notification && document.hidden) {
             var show = function (msg, body) {
                 var opts = {icon: "?!/logo192.png"};
                 if (body) opts.body = body;
