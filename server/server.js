@@ -1343,16 +1343,19 @@ function streamArchive(req, res, zipPath) {
                 "Content-Disposition": utils.getDispo(zipPath + ".zip"),
                 "Transfer-Encoding"  : "chunked"
             });
+
             zip = new yazl.ZipFile();
+            var basePath = path.dirname(utils.removeFilesPath(zipPath));
             readdirp({root: zipPath, entryType: "both"})
                 .on("warn", log.info)
                 .on("error", log.error)
                 .on("data", function (file) {
                     var stats = file.stat;
+                    var relPath = utils.relativeZipPath(file.fullPath, basePath);
                     if (stats.isDirectory())
-                        zip.addEmptyDirectory(utils.relativeZipPath(file.fullPath), {mtime: stats.mtime, mode: stats.mode});
+                        zip.addEmptyDirectory(relPath, {mtime: stats.mtime, mode: stats.mode});
                     else
-                        zip.addFile(file.fullPath, utils.relativeZipPath(file.fullPath), {mtime: stats.mtime, mode: stats.mode});
+                        zip.addFile(file.fullPath, relPath, {mtime: stats.mtime, mode: stats.mode});
                 })
                 .on("end", function () {
                     zip.outputStream.pipe(res);

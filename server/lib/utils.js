@@ -168,8 +168,8 @@ utils.removeFilesPath = function removeFilesPath(p) {
     return utils.normalizePath("/" + path.relative(paths.files, p));
 };
 
-utils.relativeZipPath = function removeFilesPath(p) {
-    return utils.normalizePath(path.relative(utils.normalizePath(paths.files), utils.normalizePath(p)));
+utils.relativeZipPath = function removeFilesPath(p, base) {
+    return utils.normalizePath(path.relative(utils.normalizePath(utils.addFilesPath(base)), utils.normalizePath(p)));
 };
 
 utils.isPathSane = function isPathSane(name) {
