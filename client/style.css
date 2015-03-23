@@ -403,7 +403,8 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row.editing .entry-link { display: none }
 .data-row, .data-row a { color: #333 }
 
-.data-row:not(.playing):not(.animating):not(.editing):hover {
+.data-row:not(.playing):not(.animating):not(.editing):hover,
+.data-row:not(.playing):not(.animating):not(.editing).active {
     background: #fff;
 }
 
@@ -1579,7 +1580,6 @@ html:not(.mobile) #drop-select span.active {
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
 
 .dropzone.in { opacity: .8; visibility: visible }
-.blur { filter: blur(1.5px) }
 .shake { animation: shake .3s ease }
 
 iframe { display: none }

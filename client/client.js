@@ -973,18 +973,16 @@
 
     function toggleCatcher(show) {
         var cc     = $("#click-catcher"),
-            modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"],
-            toBlur = ["#navigation", ".path", ".content-container", ".audio-bar"];
+            modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
         if (show === undefined)
             show = modals.some(function (selector) { return $(selector).hasClass("in"); });
 
-        toBlur.forEach(function (selector) {
-            $(selector)[show ? "addClass" : "removeClass"]("blur");
-        });
-
-        if (!show)
+        if (!show) {
             modals.forEach(function (selector) { $(selector)[show ? "addClass" : "removeClass"]("in"); });
+            $(".data-row.active").removeClass("active");
+        }
+
 
         cc.register("click", toggleCatcher.bind(null, false));
         cc[show ? "addClass" : "removeClass"]("in");
@@ -1728,6 +1726,7 @@
         top    = entry.offset().top;
         maxTop = $(document).height() - menu.height() - entry.height();
 
+        entry.addClass("active");
         toggleCatcher(true);
         menu.css({
             left: (left > 0 ? left : 0) + "px",
