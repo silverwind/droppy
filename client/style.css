@@ -155,7 +155,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .view.left  { left:0; right:50% }
 .view.right { left:50%; right:0 }
-.view.left .content.directory { border-right: 1px solid #ccc }
+.view.right .content.directory { border-left: 1px solid #ccc }
 
 .content {
     left: 0;
@@ -171,7 +171,6 @@ input::-webkit-input-placeholder { color: #999 }
 .content.directory {
     background: #eee;
     display: flex;
-    padding: .25em 0;
     flex-direction: column;
 }
 
@@ -339,8 +338,7 @@ input::-webkit-input-placeholder { color: #999 }
     order: -1;
     color: #666;
     border-bottom: 1px solid #ccc;
-    padding-bottom: .1em;
-    margin-bottom: .1em;
+    padding: .1em 0;
     user-select: none;
 }
 
@@ -606,7 +604,9 @@ html:not(.mobile) #entry-menu a.active {
     background: #16b;
     color: #fff;
 }
-html:not(.mobile) #entry-menu a:hover svg {
+
+html:not(.mobile) #entry-menu a:hover svg,
+html:not(.mobile) #entry-menu a.active svg {
    fill: #fff;
 }
 

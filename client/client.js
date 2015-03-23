@@ -2195,31 +2195,32 @@
             setEditorFontSize($(this).val());
         });
 
-        box.addClass("in").end(function () {
-            this.style.willChange = "auto";
-        });
+        setTimeout(function () {
+            box.addClass("in").end(function () {
+                $(this).removeAttr("style");
+            });
+            toggleCatcher(true);
+            $("#click-catcher").one("click", function () {
+                box.find("select").each(function () {
+                    var option = $(this).attr("class"),
+                        value  = $(this).val();
 
-        toggleCatcher(true);
-        $("#click-catcher").one("click", function () {
-            box.find("select").each(function () {
-                var option = $(this).attr("class"),
-                    value  = $(this).val();
+                    if (value === "true") value = true;
+                    else if (value === "false") value = false;
+                    else if (/^-?\d*(\.\d+)?$/.test(value)) value = parseFloat(value);
 
-                if (value === "true") value = true;
-                else if (value === "false") value = false;
-                else if (/^-?\d*(\.\d+)?$/.test(value)) value = parseFloat(value);
+                    droppy.set(option, value);
+                    if (option === "indentUnit") droppy.set("tabSize", value);
 
-                droppy.set(option, value);
-                if (option === "indentUnit") droppy.set("tabSize", value);
-
-                $(".view").each(function () {
-                    if (this.editor) {
-                        this.editor.setOption(option, value);
-                        if (option === "indentUnit") this.editor.setOption("tabSize", value);
-                    }
+                    $(".view").each(function () {
+                        if (this.editor) {
+                            this.editor.setOption(option, value);
+                            if (option === "indentUnit") this.editor.setOption("tabSize", value);
+                        }
+                    });
                 });
             });
-        });
+        },0)
     }
 
     // ============================================================================
