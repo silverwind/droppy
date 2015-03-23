@@ -1909,7 +1909,7 @@
             a.remove();
             view.find(".media-wrapper")[0].style.willChange = "auto";
             if (!isImage) initVideoJS(b.find("video")[0]);
-            makeMediaDraggable(b[0]);
+            makeMediaDraggable(b[0], !isImage);
             $(b[0]).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
             view[0].currentFile = nextFile;
             populateMediaCache(view, view[0].currentData);
@@ -1988,11 +1988,11 @@
             });
             view.find(".media-container img").each(function () {
                 aspectScale();
-                makeMediaDraggable(this.parentNode);
+                makeMediaDraggable(this.parentNode, false);
             });
             view.find(".media-container video").each(function () {
                 initVideoJS(this, function () {
-                    makeMediaDraggable(view.find(".media-wrapper")[0]);
+                    makeMediaDraggable(view.find(".media-wrapper")[0], true);
                     bindVideoEvents(view.find("video")[0]);
                 });
             });
@@ -2476,9 +2476,10 @@
     }
 
     // draggabilly
-    function makeMediaDraggable(el) {
+    function makeMediaDraggable(el, isVideo) {
         if ($(el).hasClass("draggable")) return;
-        $(el).attr("class", "media-wrapper draggable").draggabilly({axis: "x"});
+        var opts = isVideo ? {axis: "x", handle: "video"} : {axis: "x"};
+        $(el).attr("class", "media-wrapper draggable").draggabilly(opts);
         $(el).on("dragEnd", function () {
             var instance  = $(this).data("draggabilly"),
                 view      = $(instance.element).parents(".view"),

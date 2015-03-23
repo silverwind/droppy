@@ -810,6 +810,10 @@ html:not(.mobile) #entry-menu a:hover svg {
     background: #333 !important;
 }
 
+.vjs-default-skin .vjs-slider:focus {
+    box-shadow: 0px 0px 0 .5em rgba(255,255,255,.08) !important;
+}
+
 .vjs-default-skin .vjs-control-bar {
     background: rgba(16,16,16,.9) !important;
 }
