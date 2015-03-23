@@ -915,7 +915,7 @@
         link = entry.find(".entry-link");
 
         // Add inline elements
-        namer = $('<input class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '">');
+        namer = $('<input type="text" class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '">');
         link.after(namer);
         entry.addClass("editing");
 
