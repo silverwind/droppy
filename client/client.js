@@ -1722,15 +1722,17 @@
             button  = entry.find(".entry-menu"),
             menu    = $("#entry-menu");
 
+        menu.attr("class", "type-" + type);
+
         left   = x ? (x - menu.width() / 2) : (button.offset().left + button.width() - menu.width());
         top    = entry.offset().top;
-        maxTop = $(document).height() - menu.height();
+        maxTop = $(document).height() - menu.height() - entry.height();
 
         toggleCatcher(true);
         menu.css({
             left: (left > 0 ? left : 0) + "px",
             top: (top > maxTop ? maxTop : top) + "px"
-        }).data("target", entry).attr("class", "type-" + type + " in");
+        }).data("target", entry).addClass("in");
 
         if (x && y) {
             var target = document.elementFromPoint(x, y);
