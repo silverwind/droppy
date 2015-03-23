@@ -30,7 +30,7 @@ it = {
         <a class="folder-link entry-link">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
         <span class="size" data-size="{{= entry.size }}">{{= entry.prettysize }}</span>
-        <span class="sharelink faux-button" title="Share folder download link">{{= droppy.svg.link }}</span>
+        <span class="sharelink faux-button" title="Share download link">{{= droppy.svg.link }}</span>
         <span><a class="zip" title="Download as Zip" href="?~~{{= entry.id }}" target="nope" download="{{= entry.name }}.zip">{{= droppy.svg.download }}</a></span>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </div>
@@ -41,7 +41,7 @@ it = {
         <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
         <span class="size" data-size="{{= entry.size }}">{{= entry.prettysize }}</span>
-        <span class="sharelink faux-button" title="Share file download link">{{= droppy.svg.link }}</span>
+        <span class="sharelink faux-button" title="Share download link">{{= droppy.svg.link }}</span>
         <a class="download faux-button" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}" title="Download File">{{= droppy.svg.download }}</a>
         <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
     </div>

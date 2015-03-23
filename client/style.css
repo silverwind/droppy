@@ -472,7 +472,7 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row svg:not(.up-arrow):not(.play):hover { fill: #000 }
 
 /* Hide certain list elements when width gets too small */
-@media (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .125em } }
+@media (max-width: 639px) { .view .entry-link, .view .inline-namer { padding: 0 .25em  } }
 @media (max-width: 639px) { .view .header-mtime                    { display: none     } }
 @media (max-width: 639px) { .view .header-spacer                   { flex: 0 0 4em     } }
 @media (max-width: 639px) { .view .data-row                        { padding: 0 .25em  } }
@@ -487,7 +487,7 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width: 1279px) {
     .view.left .entry-link, .view.left .inline-namer,
     .view.right .entry-link, .view.right .inline-namer {
-        padding: 0 .125em;
+        padding: 0 .25em;
     }
 }
 @media (max-width: 1279px) { .view.left .header-mtime,    .view.right .header-mtime    { display: none     } }
@@ -747,9 +747,9 @@ html:not(.mobile) #entry-menu a:hover svg {
     background: transparent;
 }
 .fs svg {
-    fill: #bbb;
-    height: .8em;
-    width: .8em;
+    fill: rgba(224,224,224,.5);
+    height: 1.25em;
+    width: 1.25em;
 }
 .fs:hover svg { fill: #fff }
 .video .fs, .nofullscreen .fs { display: none }
