@@ -696,7 +696,9 @@
             showPrefs();
             sendMessage(null, "GET_USERS");
         });
+
         initEntryMenu();
+        loadTheme(droppy.get("theme"));
     }
     // ============================================================================
     //  Upload functions
@@ -2788,13 +2790,15 @@
     }
 
     function loadTheme(theme, cb) {
-        var className = theme.replace(/[^a-z]/gim, "");
-        if (!$("." + className).length) {
+        var className = theme.replace(/[^a-z0-9\-]/gim, "");
+        if (!$(".theme-" + className).length) {
             $.get("?!/theme/" + theme).then(function (data) {
-                $('<style class="' + className + '">' + data + '</style>').appendTo("head");
-                cb();
+                $('<style class="theme-' + className + '">' + data + '</style>').appendTo("head");
+                if (cb) cb();
             });
-        } else cb();
+        } else {
+            if (cb) cb();
+        }
     }
 
     function setEditorFontSize(size) {
