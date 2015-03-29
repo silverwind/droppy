@@ -5,12 +5,12 @@ var pkg        = require("./../package.json"),
     cfg        = require("./lib/cfg.js"),
     cookies    = require("./lib/cookies.js"),
     db         = require("./lib/db.js"),
+    filetree   = require("./lib/filetree.js"),
     log        = require("./lib/log.js"),
     manifest   = require("./lib/manifest.js"),
     mime       = require("./lib/mime.js"),
     paths      = require("./lib/paths.js").get(),
-    utils      = require("./lib/utils.js"),
-    watcher    = require("./lib/watcher.js");
+    utils      = require("./lib/utils.js");
 
 var _          = require("lodash"),
     async      = require("async"),
@@ -29,13 +29,9 @@ var crypto     = require("crypto"),
 var cache           = {},
     clients         = {},
     clientsPerDir   = {},
-    dirs            = {},
-    ignoreEvents    = {},
-    todoDirs        = [],
     config          = null,
     firstRun        = null,
     hasServer       = null,
-    debouncedUpdate = null,
     ready           = false,
     isDemo          = process.env.NODE_ENV === "droppydemo";
 
@@ -59,16 +55,12 @@ var droppy = function droppy(options, isStandalone, callback) {
             cb();
         },
         function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
-        function (cb) {
-            log.simple("Preparing resources ...");
-            resources.init(!config.debug, function (err, c) { cache = c; cb(err); });
-        },
+        function (cb) { resources.init(!config.debug, function (err, c) { cache = c; cb(err); }); },
         function (cb) { cleanupTemp(); cb(); },
         function (cb) { cleanupLinks(cb); },
-        function (cb) { if (config.debug) watcher.watchResources(config.usePolling, debugUpdate); cb(); },
+        function (cb) { if (config.debug) debug(); cb(); },
         function (cb) { if (isDemo) { require("./lib/demo.js").init(cb); } else cb(); },
-        function (cb) { updateDirectory("/", true, cb); },
-        function (cb) { watcher.watchFiles(config.usePolling, filesUpdate); cb(); }
+        function (cb) { filetree.updateDir("/", cb); },
     ], function (err) {
         if (err) return callback(err);
         ready = true;
@@ -288,15 +280,14 @@ function setupSocket(server) {
             case "REQUEST_UPDATE":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
                 if (!clients[sid]) clients[sid] = { views: [], ws: ws }; // This can happen when the server restarts
-                getPath(msg.data, function (err, type) {
+                fs.stat(utils.addFilesPath(msg.data), function (err, stats) {
                     var clientDir, clientFile;
                     if (err) { // Send client back to root when the requested path doesn't exist
                         clientDir = "/";
                         clientFile = null;
                         log.error(err);
                         log.info(ws, null, "Non-existing update request, sending client to / : " + msg.data);
-                        return;
-                    } else if (type === "f") {
+                    } else if (stats.isFile()) {
                         clientDir = path.dirname(msg.data);
                         clientFile = path.basename(msg.data);
                         sendObj(sid, {type: "UPDATE_BE_FILE", file: clientFile, folder: clientDir, isFile: true, vId: vId});
@@ -337,104 +328,54 @@ function setupSocket(server) {
             case "DELETE_FILE":
                 log.info(ws, null, "Deleting: " + msg.data);
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
-                var fullPath = utils.addFilesPath(msg.data);
-                fs.stat(fullPath, function (error, stats) {
-                    if (error) {
-                        log.error("Error on stating " + fullPath);
-                        log.error(error);
-                    } else if (stats) {
-                        if (stats.isDirectory()) ignoreEvents[msg.data] = ["unlink", "unlinkDir"];
-                        utils.rm(fullPath, function (error) {
-                            if (error) {
-                                log.error("Error deleting " + msg.data);
-                                log.error(error);
-                            }
-                            if (stats.isDirectory()) {
-                                delete dirs[msg.data];
-                                setTimeout(function () {
-                                    delete ignoreEvents[msg.data];
-                                }, 250);
-                                todoDirs.push(path.dirname(msg.data));
-                                debouncedUpdate();
-                            }
-                        });
-                    }
-                });
+                filetree.del(msg.data);
                 break;
             case "SAVE_FILE":
                 log.info(ws, null, "Saving: " + msg.data.to);
                 if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
-                msg.data.to = utils.addFilesPath(msg.data.to);
-                fs.stat(msg.data.to, function (error) {
-                    if (error && error.code !== "ENOENT") {
-                        log.error("Error saving " + msg.data.to);
-                        log.error(error);
-                        sendObj(sid, {type: "ERROR", vId: vId, text: "Error saving " + msg.data.to + ": " + error});
-                    } else {
-                        fs.writeFile(msg.data.to, msg.data.value, function (error) {
-                            if (error) {
-                                log.error("Error writing " + msg.data.to);
-                                log.error(error);
-                            } else {
-                                delete cache.etags[msg.data.to];
-                            }
-                            sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : error ? 1 : 0});
-                        });
-                    }
+                filetree.save(msg.data.to, msg.data.value, function (err) {
+                    if (err)
+                        sendObj(sid, {type: "ERROR", vId: vId, text: "Error saving " + msg.data.to + ": " + err});
+                    else
+                        sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
                 });
                 break;
             case "CLIPBOARD":
+                log.info(ws, null, "Clipboard " + msg.data.type + ": " + msg.data.src + " -> " + msg.data.dst);
                 if (!utils.isPathSane(msg.data.src)) return log.info(ws, null, "Invalid clipboard src: " + msg.data.src);
                 if (!utils.isPathSane(msg.data.dst)) return log.info(ws, null, "Invalid clipboard dst: " + msg.data.dst);
-                if (msg.data.src.indexOf(msg.data.src + "/") !== -1 && msg.data.dst !== msg.data.src) {
-                    log.error("Can't copy directory into itself");
-                    sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
-                    return;
-                }
+                if (msg.data.src.indexOf(msg.data.src + "/") !== -1 && msg.data.dst !== msg.data.src)
+                    return sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
 
                 if (msg.data.src === msg.data.dst) {
                     utils.getNewPath(utils.addFilesPath(msg.data.dst), function (newDst) {
-                        clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
+                        filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
                     });
                 } else {
-                    clipboard(msg.data.src, msg.data.dst, msg.data.type);
+                    filetree.clipboard(msg.data.src, msg.data.dst, msg.data.type);
                 }
-
                 break;
             case "CREATE_FOLDER":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
-                utils.mkdir(utils.addFilesPath(msg.data), function (error) {
-                    if (error) return log.error(error);
-                    log.info(ws, null, "Created: ", msg.data);
-                });
+                filetree.mkdir(msg.data);
                 break;
             case "CREATE_FILE":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file creation request: " + msg.data);
-                fs.open(utils.addFilesPath(msg.data), "wx", function (error, fd) {
-                    if (error) return log.error(error);
-                    fs.close(fd, function (error) {
-                        if (error) log.error(error);
-                        log.info(ws, null, "Created: ", msg.data);
-                    });
-                });
+                filetree.mk(msg.data);
                 break;
             case "RENAME":
                 // Disallow whitespace-only and empty strings in renames
-                if (!utils.isPathSane(msg.data.new) || /^\s*$/.test(msg.data.to) || msg.data.to === "") {
-                    log.info(ws, null, "Invalid rename request: " + msg.data.new);
+                if (!utils.isPathSane(msg.data.dst) || /^\s*$/.test(msg.data.dst) || msg.data.dst === "" || msg.data.src === msg.data.dst) {
+                    log.info(ws, null, "Invalid rename request: " + msg.data.src + "-> " + msg.data.dst);
                     sendObj(sid, {type: "ERROR", text: "Invalid rename request"});
                     return;
                 }
-                fs.rename(utils.addFilesPath(msg.data.old), utils.addFilesPath(msg.data.new), function (error) {
-                    if (error) log.error(error);
-                    log.info(ws, null, "Renamed: ", msg.data.old, " -> ", msg.data.new);
-                });
+                filetree.move(msg.data.src, msg.data.dst);
                 break;
             case "GET_USERS":
                 if (db.get("sessions")[cookie] && db.get("sessions")[cookie].privileged) {
                     sendUsers(sid);
-                } else {
-                    // Send an empty user list so the client know not to display the management options
+                } else { // Unauthorized
                     sendObj(sid, {type: "USER_LIST", users: {}});
                 }
                 break;
@@ -460,35 +401,24 @@ function setupSocket(server) {
                 if (db.get("sessions")[cookie].privileged) sendUsers(sid);
                 break;
             case "CREATE_FILES":
-                var files = Array.isArray(msg.data.files) ? msg.data.files : [msg.data.files];
-                async.each(files,
-                    function (file, callback) {
-                        if (!utils.isPathSane(file)) return callback(new Error("Invalid empty file creation request: " + file));
-                        utils.mkdir(path.dirname(utils.addFilesPath(file)), function (err) {
-                            if (err) callback(err);
-                            fs.writeFile(utils.addFilesPath(file), "", {mode: "644"}, function (err) {
-                                if (err) return callback(err);
-                                log.info(ws, null, "Created: " + file.substring(1));
-                                callback();
-                            });
-                        });
-                    }, function (err) {
-                        if (err) log.error(ws, null, err);
-                        if (msg.data.isUpload) sendObj(sid,{type: "UPLOAD_DONE", vId: vId});
-                    }
-                );
+                async.each(msg.data.files, function (file, cb) {
+                    if (!utils.isPathSane(file)) return cb(new Error("Invalid empty file creation request: " + file));
+                    filetree.mkdir(utils.addFilesPath(path.dirname(file)), function () {
+                        filetree.mk(utils.addFilesPath(file), cb);
+                    });
+                }, function (err) {
+                    if (err) log.error(ws, null, err);
+                    if (msg.data.isUpload) sendObj(sid,{type: "UPLOAD_DONE", vId: vId});
+                });
                 break;
             case "CREATE_FOLDERS":
-                var folders = Array.isArray(msg.data.folders) ? msg.data.folders : [msg.data.folders];
-                async.each(folders,
-                    function (folder, callback) {
-                        if (!utils.isPathSane(folder)) return callback(new Error("Invalid empty file creation request: " + folder));
-                        utils.mkdir(utils.addFilesPath(folder), callback);
-                    }, function (err) {
-                        if (err) log.error(ws, null, err);
-                        if (msg.data.isUpload) sendObj(sid, {type: "UPLOAD_DONE", vId: vId});
-                    }
-                );
+                async.each(msg.data.folders, function (folder, cb) {
+                    if (!utils.isPathSane(folder)) return cb(new Error("Invalid empty file creation request: " + folder));
+                    filetree.mkdir(utils.addFilesPath(folder), cb);
+                }, function (err) {
+                    if (err) log.error(ws, null, err);
+                    if (msg.data.isUpload) sendObj(sid, {type: "UPLOAD_DONE", vId: vId});
+                });
                 break;
             case "GET_URL":
                 log.info("Attempting to download " + msg.url + " to " + msg.to);
@@ -535,7 +465,7 @@ function sendFiles(sid, vId) {
         type   : "UPDATE_DIRECTORY",
         vId    : vId,
         folder : dir,
-        data   : getDirContents(dir)
+        data   : filetree.getDirContents(dir)
     });
 }
 
@@ -583,30 +513,6 @@ function send(ws, data) {
             setTimeout(queue, 50, ws, data, time + 50);
         }
     })(ws, data, 0);
-}
-
-//-----------------------------------------------------------------------------
-function clipboard(src, dst, type) {
-    var realSrc = utils.addFilesPath(src);
-    var realDst = utils.addFilesPath(dst);
-
-    fs.stat(realSrc, function (err, stats) {
-        if (err) return log.error(err);
-        if (stats.isDirectory()) {
-            if (type === "cut") ignoreEvents[src] = ["unlink", "unlinkDir"];
-            ignoreEvents[dst] = ["add", "addDir", "change"];
-            utils[type === "cut" ? "move" : "copyDir"](realSrc, realDst, function () {
-                setTimeout(function () {
-                    delete ignoreEvents[src];
-                    delete ignoreEvents[dst];
-                }, 250);
-                todoDirs.push(path.dirname(dst));
-                debouncedUpdate();
-            });
-        } else {
-            utils[type === "cut" ? "move" : "copyFile"](realSrc, realDst);
-        }
-    });
 }
 
 //-----------------------------------------------------------------------------
@@ -807,7 +713,7 @@ function handleFileRequest(req, res, download) {
     // 304 response when Etag matches
     if (!download && ((req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"')) {
         res.writeHead(304, {
-            "Content-Type": mime.lookup(filepath)
+            "Content-Type": mime(filepath)
         });
         res.end();
         log.info(req, res);
@@ -819,7 +725,7 @@ function handleFileRequest(req, res, download) {
             if (stats.isDirectory() && shareLink) {
                 streamArchive(req, res, filepath);
             } else {
-                var headers = {"Content-Type": mime.lookup(filepath), "Content-Length": stats.size}, status = 200;
+                var headers = {"Content-Type": mime(filepath), "Content-Length": stats.size}, status = 200;
                 if (download) {
                     headers["Content-Disposition"] = utils.getDispo(filepath);
                     res.writeHead(status, headers);
@@ -879,7 +785,7 @@ function handleTypeRequest(req, res) {
 
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
-    var busboy, opts, to,
+    var busboy, opts, dstDir,
         done     = false,
         files    = {},
         cookie   = cookies.get(req.headers.cookie);
@@ -893,7 +799,7 @@ function handleUploadRequest(req, res) {
         log.info(req, res, "Invalid upload dst" + req.query.to);
         log.info(req, res);
     }
-    to = decodeURIComponent(req.query.to);
+    dstDir = decodeURIComponent(req.query.to);
 
     if (!cookie && !config.public) {
         res.statusCode = 401;
@@ -913,7 +819,7 @@ function handleUploadRequest(req, res) {
 
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-            dst         = path.join(paths.files, to, dstRelative),
+            dst         = path.join(paths.files, dstDir, dstRelative),
             tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
             writeStream = fs.createWriteStream(tmp, { mode: "644"});
 
@@ -935,8 +841,6 @@ function handleUploadRequest(req, res) {
         var names = Object.keys(files), total = names.length, added = 0;
         log.info(req, res, "Received " + names.length + " files");
         done = true;
-
-        if (names.length) ignoreEvents[to] = ["add", "addDir", "change"];
 
         var moveFuncs = [];
 
@@ -977,9 +881,8 @@ function handleUploadRequest(req, res) {
 
         function run() {
             async.series(moveFuncs, function () {
-                delete ignoreEvents[to];
-                todoDirs.push(to);
-                debouncedUpdate();
+                // TODO: Rewrite to update only what's necessary
+                filetree.updateDir(dstDir);
             });
         }
 
@@ -1019,211 +922,13 @@ function handleUploadRequest(req, res) {
         // find websocket sid of the client and send the final event
         Object.keys(clients).forEach(function (sid) {
             if (clients[sid].cookie === cookie) {
-                sendObj(sid, {type: "UPLOAD_DONE", vId: parseInt(req.query.vId, 10)});
+                sendObj(sid, {type: "UPLOAD_DONE", vId: Number(req.query.vId)});
             }
         });
     }
 }
 
-//-----------------------------------------------------------------------------
-// Check if path is a file or dir
-function getPath(p, cb) {
-    var found = Object.keys(dirs).some(function (dir) {
-        if (p === dir) {
-            cb(null, "d");
-            return true;
-        } else if (path.dirname(p) === dir) {
-            return dirs[dir].files.some(function (file) {
-                if (path.basename(p) === file.name) {
-                    cb(null, "f");
-                    return true;
-                }
-            });
-        }
-    });
-    if (found) return;
-    log.error("path not in cache, trying stat() on " + chalk.blue(p));
-    fs.lstat(utils.addFilesPath(p), function (err, stats) {
-        if (err) {
-            cb(err);
-        } else if (stats.isFile()) {
-            cb(null, "f");
-        } else if (stats.isDirectory()) {
-            cb(null, "d");
-        }
-    });
-}
-
-// -----------------------------------------------------------------------------
-// Get directory contents from cache
-function getDirContents(p) {
-    if (!dirs[p]) return;
-    var entries = {};
-    dirs[p].files.forEach(function (file) {
-        entries[file.name] = {type: "f", size: file.size, mtime: file.mtime, mime: file.mime};
-    });
-    Object.keys(dirs).forEach(function (dir) {
-        if (path.dirname(dir) === p && path.basename(dir)) {
-            entries[path.basename(dir)] = {type: "d", mtime: dirs[dir].mtime, size: dirs[dir].size};
-        }
-    });
-    return entries;
-}
-
-// -----------------------------------------------------------------------------
-// Update directory in cache
-function updateDirectory(dir, initial, cb) {
-    log.debug("Updating " + chalk.blue(dir));
-    fs.stat(utils.addFilesPath(dir), function (err, stats) {
-        readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
-            dirs[dir] = {files: [], size: 0, mtime: stats ? stats.mtime.getTime() : Date.now()};
-            if (errors) {
-                errors.forEach(function (err) {
-                    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
-                        // "unlinkDir" can happen out of order
-                        delete dirs[utils.removeFilesPath(err.path)];
-                    } else {
-                        log.error(err);
-                    }
-                });
-                if (cb) cb();
-                if (!initial) return;
-            }
-
-            // Add directories
-            results.directories.forEach(function (d) {
-                dirs[utils.removeFilesPath(d.fullPath)] = {
-                    files: [],
-                    size: 0,
-                    mtime: d.stat.mtime.getTime() || 0
-                };
-            });
-
-            // Add files
-            results.files.forEach(function (f) {
-                var filedir = utils.removeFilesPath(f.fullParentDir);
-                dirs[filedir].files.push({
-                    name: f.name,
-                    size: f.stat.size,
-                    mtime: f.stat.mtime.getTime() || 0
-                });
-                dirs[filedir].size += f.stat.size;
-            });
-
-            // Calculate folder sizes
-            var subdirs = [];
-            Object.keys(dirs).forEach(function (d) {
-                if (d.indexOf(dir) === 0 && d !== dir) subdirs.push(d);
-            });
-
-            subdirs.sort(function (a, b) {
-                return -(a.match(/\//g).length - b.match(/\//g).length);
-            }).forEach(function (d) {
-                if (path.dirname(d) !== "/")
-                    dirs[path.dirname(d)].size += dirs[d].size;
-            });
-
-            if (cb) cb();
-        });
-    });
-}
-
-function checkExists(dir,stats) {
-    if (!dirs[dir]) dirs[dir] = {files: [], mtime: stats ? stats.mtime.getTime() : Date.now()};
-}
-
-//-----------------------------------------------------------------------------
-// Watcher callback for files, event = "addDir" || "unlinkDir" || "add" || "unlink" || "change"
-function filesUpdate(event, dir) {
-    var skip;
-    dir = utils.normalizePath(dir);            // Remove OS inconsistencies
-    dir = (dir === ".") ? "/" : "/" + dir;     // Prefix "/"
-
-    Object.keys(ignoreEvents).some(function (p) {
-        if (dir.indexOf(p) === 0 && ignoreEvents[p].indexOf(event) !== -1) {
-            skip = true;
-            return true;
-        }
-    });
-
-    if (!skip) log.debug("[" + chalk.magenta("FS:" + event) + "] " + chalk.blue(dir));
-
-    if (dir === "/") return;                  // Should never happen
-
-    var parentDir = path.dirname(dir);
-    var entryName = path.basename(dir);
-
-    if (event === "unlinkDir") {
-        delete dirs[dir];
-        if (!skip) updateCache(parentDir);
-    } else if (event === "unlink") {
-        if (dirs[parentDir]) {
-            dirs[parentDir].files.some(function (file, i) {
-                if (file.name === entryName) {
-                    dirs[parentDir].files.splice(i, 1);
-                    return true;
-                }
-            });
-        }
-        if (!skip) updateCache(parentDir);
-    } else if (event === "add") {
-        fs.stat(utils.addFilesPath(dir), function (err, stats) {
-            checkExists(parentDir, stats);
-            dirs[parentDir].files.push({
-                name: entryName,
-                size: stats.size,
-                mtime: stats.mtime.getTime() || 0
-            });
-            if (!skip) updateCache(parentDir);
-        });
-    } else if (event === "addDir") {
-        fs.stat(utils.addFilesPath(dir), function (err, stats) {
-            checkExists(parentDir, stats);
-            dirs[dir] = {
-                files: [],
-                size: 0,
-                mtime: stats.mtime.getTime() || 0
-            };
-            if (!skip) updateCache(parentDir);
-        });
-    } else if (event === "change") {
-        fs.stat(utils.addFilesPath(dir), function (err, stats) {
-            checkExists(parentDir, stats);
-            dirs[parentDir].files.some(function (file, i) {
-                if (file.name === entryName) {
-                    dirs[parentDir].files[i].size = stats.size;
-                    dirs[parentDir].files[i].mtime = stats.mtime.getTime() || 0;
-                    if (!skip) updateCache(parentDir);
-                    return true;
-                }
-            });
-        });
-    }
-}
-
-debouncedUpdate = _.debounce(function() {
-    todoDirs.sort(function (a, b) {
-      return a.match(/\//g).length - b.match(/\//g).length;
-    }).filter(function (path, index, self) {
-      return self.every(function (another) {
-         return another === path || path.indexOf(another + "/") !== 0;
-      });
-    }).filter(function (path, index, self) {
-      return self.indexOf(path) === index;
-    }).forEach(function (dir) {
-        updateDirectory(dir, false, updateClients.bind(null, dir));
-    });
-    todoDirs = [];
-}, 250, {trailing: true});
-
-
-function updateCache(dir) {
-    if (!dirs[dir]) return; // sometimes happens on recursive unlinks
-    todoDirs.push(dir);
-    debouncedUpdate();
-}
-
-function updateClients(dir) {
+filetree.on("update", function (dir) {
     if (clientsPerDir[dir]) {
         clientsPerDir[dir].forEach(function (client) {
             client.update();
@@ -1241,7 +946,7 @@ function updateClients(dir) {
         }
         if (parent === "/") break;
     }
-}
+});
 
 function updateClientLocation(dir, sid, vId) {
     // remove current client from any previous dirs
@@ -1275,21 +980,25 @@ function removeClientPerDir(sid, vId) {
     });
 }
 
-//-----------------------------------------------------------------------------
-// Update client directory on changes
-function debugUpdate(filepath) {
-    setTimeout(function () { // prevent EBUSY on win32
-        if (/css$/.test(filepath)) {
-            cache.res["style.css"] = resources.compileCSS();
-            sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
-        } else if (/js$/.test(filepath)) {
-            cache.res["client.js"] = resources.compileJS();
-            sendObjAll({type: "RELOAD"});
-        } else if (/html$/.test(filepath)) {
-            resources.compileHTML(cache.res);
-            sendObjAll({type: "RELOAD"});
-        }
-    }, 100);
+function debug() {
+    require("chokidar").watch(".", {
+        cwd           : paths.client,
+        alwaysStat    : true,
+        ignoreInitial : true
+    }).on("change", function (file) {
+        setTimeout(function () { // prevent EBUSY on win32
+            if (/css$/.test(file)) {
+                cache.res["style.css"] = resources.compileCSS();
+                sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
+            } else if (/js$/.test(file)) {
+                cache.res["client.js"] = resources.compileJS();
+                sendObjAll({type: "RELOAD"});
+            } else if (/html$/.test(file)) {
+                resources.compileHTML(cache.res);
+                sendObjAll({type: "RELOAD"});
+            }
+        }, 100);
+    });
 }
 
 //-----------------------------------------------------------------------------
@@ -1331,25 +1040,21 @@ function cleanupLinks(callback) {
 //-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, zipPath) {
-    var zip;
     fs.stat(zipPath, function (err, stats) {
         if (err) {
             log.error(err);
         } else if (stats.isDirectory()) {
+            var zip = new yazl.ZipFile();
+            var basePath = path.dirname(utils.removeFilesPath(zipPath));
             log.info(req, res);
             log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
             res.writeHead(200, {
-                "Content-Type"       : mime.lookup("zip"),
+                "Content-Type"       : mime("zip"),
                 "Content-Disposition": utils.getDispo(zipPath + ".zip"),
                 "Transfer-Encoding"  : "chunked"
             });
-
-            zip = new yazl.ZipFile();
-            var basePath = path.dirname(utils.removeFilesPath(zipPath));
             readdirp({root: zipPath, entryType: "both"})
-                .on("warn", log.info)
-                .on("error", log.error)
-                .on("data", function (file) {
+                .on("warn", log.info).on("error", log.error).on("data", function (file) {
                     var stats = file.stat;
                     var relPath = utils.relativeZipPath(file.fullPath, basePath);
                     if (stats.isDirectory())
@@ -1390,9 +1095,9 @@ function setupProcess(standalone) {
     process.on("exit", cleanupTemp);
 
     if (standalone) {
-        process.on("SIGINT",  function () { endProcess("SIGINT");  });
-        process.on("SIGQUIT", function () { endProcess("SIGQUIT"); });
-        process.on("SIGTERM", function () { endProcess("SIGTERM"); });
+        process.on("SIGINT",  endProcess.bind(null, "SIGINT"));
+        process.on("SIGQUIT", endProcess.bind(null, "SIGQUIT"));
+        process.on("SIGTERM", endProcess.bind(null, "SIGTERM"));
         process.on("uncaughtException", function (error) {
             log.error("=============== Uncaught exception! ===============");
             log.error(error);
@@ -1412,11 +1117,7 @@ function endProcess(signal) {
             clients[sid].ws.drop(1001);
         }
     });
-    if (count > 0) log.simple("Closed " + count + " active WebSocket" + (count > 1 ? "s" : ""));
-
-    try {
-       fs.unlinkSync(paths.pid);
-   } catch(err) {}
-
+    if (count > 0) log.simple("Closed " + count + " WebSocket" + (count > 1 ? "s" : ""));
+    try { fs.unlinkSync(paths.pid); } catch(err) {}
     process.exit(0);
 }

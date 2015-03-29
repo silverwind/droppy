@@ -119,15 +119,15 @@ resources.init = function init(minify, callback) {
         var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
 
         Object.keys(results[1]).forEach(function (theme) {
-            cache.themes[theme] = {data: results[1][theme], etag: etag(), mime: mime.lookup("css")};
+            cache.themes[theme] = {data: results[1][theme], etag: etag(), mime: mime("css")};
         });
 
         Object.keys(results[2]).forEach(function (mode) {
-            cache.modes[mode] = {data: results[2][mode], etag: etag(), mime: mime.lookup("js")};
+            cache.modes[mode] = {data: results[2][mode], etag: etag(), mime: mime("js")};
         });
 
         Object.keys(results[3]).forEach(function (file) {
-            cache.lib[file] = {data: results[3][file], etag: etag(), mime: mime.lookup(path.basename(file))};
+            cache.lib[file] = {data: results[3][file], etag: etag(), mime: mime(path.basename(file))};
         });
 
         addGzip(cache, function (err, cache) {
@@ -282,7 +282,7 @@ resources.compileJS = function compileJS(minify) {
     // Minify
     if (minify) js = uglify.minify(js, opts.uglify).code;
 
-    return {data: new Buffer(js), etag: etag(), mime: mime.lookup("js")};
+    return {data: new Buffer(js), etag: etag(), mime: mime("js")};
 };
 
 resources.compileCSS = function compileCSS(minify) {
@@ -297,7 +297,7 @@ resources.compileCSS = function compileCSS(minify) {
     // Minify
     if (minify) css = cleanCSS.minify(css).styles;
 
-    return {data: new Buffer(css), etag: etag(), mime: mime.lookup("css")};
+    return {data: new Buffer(css), etag: etag(), mime: mime("css")};
 };
 
 resources.compileHTML = function compileHTML(res, minify) {
@@ -323,7 +323,7 @@ resources.compileHTML = function compileHTML(res, minify) {
     res["main.html"] = {
         data: new Buffer($("#page").replaceWith(html["main.html"]).end().html()),
         etag: etag(),
-        mime: mime.lookup("html")
+        mime: mime("html")
     };
 
     $ = cheerio.load(html["base.html"]);
@@ -331,7 +331,7 @@ resources.compileHTML = function compileHTML(res, minify) {
     res["auth.html"] = {
         data: new Buffer($("#page").replaceWith(html["auth.html"]).end().html()),
         etag: etag(),
-        mime: mime.lookup("html")
+        mime: mime("html")
     };
 
     $ = cheerio.load(html["base.html"]);
@@ -339,7 +339,7 @@ resources.compileHTML = function compileHTML(res, minify) {
     res["firstrun.html"] = {
         data: new Buffer($("#page").replaceWith(html["auth.html"]).end().html()),
         etag: etag(),
-        mime: mime.lookup("html")
+        mime: mime("html")
     };
 
     return res;
@@ -369,7 +369,7 @@ function compileAll(callback) {
         res[name] = {
             data: data,
             etag: crypto.createHash("md5").update(String(date)).digest("hex"),
-            mime: mime.lookup(name)
+            mime: mime(name)
         };
     });
     callback(null, res);

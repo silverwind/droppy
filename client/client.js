@@ -344,6 +344,7 @@
                         view[0].currentFile = null;
                         view[0].currentFolder = msg.folder;
                         if (view[0].vId === 0) updateTitle(basename(msg.folder));
+                        replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
                         updatePath(view);
                     }
                     view[0].switchRequest = false;
@@ -1662,7 +1663,7 @@
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner(view);
-                    sendMessage(view[0].vId, "RENAME", { "old": oldVal, "new": newVal });
+                    sendMessage(view[0].vId, "RENAME", { "src": oldVal, "dst": newVal });
                 }
             });
             event.stopPropagation();

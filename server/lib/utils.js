@@ -64,8 +64,7 @@ utils.rmSync = function rmSync(p) {
 
 utils.move = function move(src, dst, cb) {
     mv(src, dst, function (err) {
-        if (err) log.error(err);
-        if (cb) cb();
+        if (cb) cb(err);
     });
 };
 
@@ -88,7 +87,7 @@ utils.copyFile = function copyFile(src, dst, cb) {
 
 utils.copyDir = function copyDir(src, dst, cb) {
     cpr(src, dst, {overwrite: true}, function (errs) {
-        if (errs) log.err(errs);
+        if (errs) log.error(errs);
         if (cb) cb();
     });
 };

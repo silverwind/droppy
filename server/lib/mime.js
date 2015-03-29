@@ -1,14 +1,13 @@
 "use strict";
 
-var mime      = {},
-    mimeTypes = require("mime-types");
+var mimeTypes = require("mime-types");
 
 var overridesExt = {
         "m4v" : "video/mp4", // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
         "mp4v": "video/mp4"  // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
     };
 
-mime.lookup = function lookup(path) {
+module.exports = function lookup(path) {
     var ext = extractExt(path);
     if (overridesExt[ext])
         return overridesExt[ext];
@@ -24,5 +23,3 @@ function extractExt(filename) {
     else
         return parts.pop().toLowerCase();
 }
-
-exports = module.exports = mime;
