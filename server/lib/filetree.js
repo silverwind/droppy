@@ -79,11 +79,15 @@ function updateDirSizes() {
         dirs[d].size = 0;
         Object.keys(dirs[d].files).forEach(function (f) {
             dirs[d].size += dirs[d].files[f].size;
+            console.log("add", f, "to", d, "=", dirs[d].size);
         });
     });
 
     todo.forEach(function (d) {
         if (path.dirname(d) !== "/") {
+            console.log("add", d, "("+dirs[d].size+")", "to",
+                path.dirname(d),"(" + dirs[path.dirname(d)].size + ")",
+                "=", dirs[path.dirname(d)].size + dirs[d].size);
             dirs[path.dirname(d)].size += dirs[d].size;
         }
     });
@@ -195,12 +199,12 @@ filetree.mvdir = function mvdir(src, dst, cb) {
     utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
         if (err) log.error(err);
         // basedir
-        dirs[dst] = dirs[src];
+        dirs[dst] = _.clone(dirs[src], true);
         delete dirs[src];
         // subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (src !== "/" && dir.indexOf(src) === 0 && dir !== src && dir !== dst) {
-                dirs[dir.replace(new RegExp("^" + src), dst)] = dirs[dir];
+                dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
                 delete dirs[dir];
             }
         });
@@ -221,11 +225,11 @@ filetree.cp = function cp(src, dst, cb) {
 filetree.cpdir = function cpdir(src, dst, cb) {
     utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function () {
         // basedir
-        dirs[dst] = dirs[src];
+        dirs[dst] = _.clone(dirs[src], true);
         // subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (src !== "/" && dir.indexOf(src) === 0 && dir !== src && dir !== dst) {
-                dirs[dir.replace(new RegExp("^" + src), dst)] = dirs[dir];
+                dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
             }
         });
         update(path.dirname(dst));
