@@ -16,20 +16,21 @@ var log      = require("./log.js"),
 
 var debouncedUpdate = _.debounce(function() {
     todoDirs.sort(function (a, b) {
-      return a.match(/\//g).length - b.match(/\//g).length;
+        return a.match(/\//g).length - b.match(/\//g).length;
+    }).filter(function (path, _, self) {
+        return self.every(function (another) {
+            return another === path || path.indexOf(another + "/") !== 0;
+        });
     }).filter(function (path, index, self) {
-      return self.every(function (another) {
-         return another === path || path.indexOf(another + "/") !== 0;
-      });
-    }).filter(function (path, index, self) {
-      return self.indexOf(path) === index;
+        return self.indexOf(path) === index;
     }).forEach(function (dir) {
         filetree.emit("update", dir);
     });
     todoDirs = [];
-}, 250, {trailing: true});
+}, 100, {trailing: true});
 
 function update(dir) {
+    updateDirSizes();
     todoDirs.push(dir);
     debouncedUpdate();
 }
@@ -62,25 +63,29 @@ filetree.updateDir = function updateDir(dir, cb) {
                 dirs[parentDir].size += f.stat.size;
             });
 
-            updateDirSizes(dir);
             update(dir);
             if (cb) cb();
         });
     });
 };
 
-function updateDirSizes(dir) {
-    var subdirs = [];
-    dirs[dir].size = 0;
-
-    Object.keys(dirs).forEach(function (d) {
-       if (d.indexOf(dir) === 0 && d !== dir) subdirs.push(d);
+function updateDirSizes() {
+    var todo = Object.keys(dirs);
+    todo = todo.sort(function (a, b) {
+        return -(a.match(/\//g).length - b.match(/\//g).length);
     });
-    subdirs.sort(function (a, b) {
-       return -(a.match(/\//g).length - b.match(/\//g).length);
-    }).forEach(function (d) {
-       if (path.dirname(d) !== "/" && dirs[path.dirname(d)])
-           dirs[path.dirname(d)].size += dirs[d].size;
+
+    todo.forEach(function (d) {
+        dirs[d].size = 0;
+        Object.keys(dirs[d].files).forEach(function (f) {
+            dirs[d].size += dirs[d].files[f].size;
+        });
+    });
+
+    todo.forEach(function (d) {
+        if (path.dirname(d) !== "/") {
+            dirs[path.dirname(d)].size += dirs[d].size;
+        }
     });
 }
 
@@ -108,6 +113,9 @@ filetree.unlinkdir = function unlinkdir(dir) {
     utils.rm(utils.addFilesPath(dir), function (err) {
         if (err) log.error(err);
         delete dirs[dir];
+        Object.keys(dirs).forEach(function (d) {
+            if (d.indexOf(dir) === 0 && d !== dir) delete dirs[d];
+        });
         update(path.dirname(dir));
     });
 };
@@ -192,7 +200,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
         // subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (src !== "/" && dir.indexOf(src) === 0 && dir !== src && dir !== dst) {
-                dirs[dir.replace(src, dst)] = dirs[dir];
+                dirs[dir.replace(new RegExp("^" + src), dst)] = dirs[dir];
                 delete dirs[dir];
             }
         });
@@ -217,7 +225,7 @@ filetree.cpdir = function cpdir(src, dst, cb) {
         // subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (src !== "/" && dir.indexOf(src) === 0 && dir !== src && dir !== dst) {
-                dirs[dir.replace(src, dst)] = dirs[dir];
+                dirs[dir.replace(new RegExp("^" + src), dst)] = dirs[dir];
             }
         });
         update(path.dirname(dst));
