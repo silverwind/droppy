@@ -79,17 +79,12 @@ function updateDirSizes() {
         dirs[d].size = 0;
         Object.keys(dirs[d].files).forEach(function (f) {
             dirs[d].size += dirs[d].files[f].size;
-            console.log("add", f, "to", d, "=", dirs[d].size);
         });
     });
 
     todo.forEach(function (d) {
-        if (path.dirname(d) !== "/") {
-            console.log("add", d, "("+dirs[d].size+")", "to",
-                path.dirname(d),"(" + dirs[path.dirname(d)].size + ")",
-                "=", dirs[path.dirname(d)].size + dirs[d].size);
+        if (path.dirname(d) !== "/")
             dirs[path.dirname(d)].size += dirs[d].size;
-        }
     });
 }
 
