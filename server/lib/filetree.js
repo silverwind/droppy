@@ -113,7 +113,7 @@ filetree.unlinkdir = function unlinkdir(dir) {
         if (err) log.error(err);
         delete dirs[dir];
         Object.keys(dirs).forEach(function (d) {
-            if (d.indexOf(dir) === 0 && d !== dir) delete dirs[d];
+            if (new RegExp("^" + dir + "/").test(d)) delete dirs[d];
         });
         update(path.dirname(dir));
     });
@@ -198,7 +198,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
         delete dirs[src];
         // subdirs
         Object.keys(dirs).forEach(function (dir) {
-            if (src !== "/" && dir.indexOf(src) === 0 && dir !== src && dir !== dst) {
+            if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
                 dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
                 delete dirs[dir];
             }
@@ -223,7 +223,7 @@ filetree.cpdir = function cpdir(src, dst, cb) {
         dirs[dst] = _.clone(dirs[src], true);
         // subdirs
         Object.keys(dirs).forEach(function (dir) {
-            if (src !== "/" && dir.indexOf(src) === 0 && dir !== src && dir !== dst) {
+            if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
                 dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
             }
         });
