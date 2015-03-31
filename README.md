@@ -42,7 +42,6 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
   "public"         : false,
   "timestamps"     : true,
   "updateInterval" : 1000
-  "usePolling"     : false
 }
 ```
 ### Options
@@ -56,7 +55,6 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `public` {Boolean} - When enabled, no authentication is performed.
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
 - `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file tree, in milliseconds.
-- `usePolling` {Boolean} - On certain conditions (home mounted through NFS, or running on hosted node), realtime updates may not work. This switch should make it more reliable in these cases, at the cost of CPU cycles.
 
 <a name="listener-object" />
 ### Listener Object
@@ -84,12 +82,12 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 ```
 The above configuration will result in:
 - HTTP listening on all IPv4 and IPv6 interfaces, port 80.
-- HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
+- HTTPS (SPDY) listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
 
 A listener object accepts these options:
 - `host` {String/Array} - Network interface(s) to listen on. Use an array for multiple interfaces.
 - `port` {Number/Array} - Port(s) to listen on. Use an array for multiple ports.
-- `protocol` {String} - Protocol to use, `http` or `https`. `https` includes SPDY through NPN.
+- `protocol` {String} - Protocol to use, `http` or `https`. `https` includes SPDY.
 - `hsts` {Number} - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 - `key` {String} - Path to the SSL/TLS private key file. If ommitted, uses self-generated key.
 - `cert` {String} - Path to the SSL/TLS certificate file. If ommitted, uses self-signed certificate.
