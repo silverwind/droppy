@@ -361,7 +361,7 @@ input::-webkit-input-placeholder { color: #999 }
     left: -.3em;
 }
 
-.file-header .down .triangle { transform: rotate(90deg);  top: -.1em  }
+.file-header .down .triangle { transform: rotate(90deg);  top: -.15em }
 .file-header .up   .triangle { transform: rotate(270deg); top: -.05em }
 
 .file-header .active  { color: #000 }
