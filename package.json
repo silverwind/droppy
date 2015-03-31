@@ -1,7 +1,7 @@
 {
   "name": "droppy",
   "description": "Personal file server with a modern web interface",
-  "version": "1.9.38",
+  "version": "2.0.0",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
