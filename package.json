@@ -20,11 +20,11 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "autoprefixer-core": "^5.1.7",
+    "autoprefixer-core": "^5.1.8",
     "busboy": "^0.2.9",
     "chalk": "^1.0.0",
     "cheerio": "^0.19.0",
-    "chokidar": "^1.0.0-rc4",
+    "chokidar": "^1.0.0-rc5",
     "clean-css": "^3.1.8",
     "codemirror": "^5.1.0",
     "content-disposition": "^0.5.0",
@@ -46,12 +46,12 @@
     "request": "^2.54.0",
     "rimraf": "^2.3.2",
     "spdy": "^1.31.0",
-    "uglify-js": "^2.4.17",
+    "uglify-js": "^2.4.19",
     "untildify": "^2.0.0",
     "video.js": "^4.12.5",
     "websocket": "^1.0.18",
     "yauzl": "^2.2.1",
-    "yazl": "^2.2.0"
+    "yazl": "^2.2.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
