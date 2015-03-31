@@ -31,9 +31,6 @@ module.exports = function (grunt) {
             },
             modules: {
                 command: "rm -rf node_modules && npm install"
-            },
-            heroku : {
-                command: "git push -u -f --tags heroku master && heroku logs -t"
             }
         },
         jshint: {
@@ -52,7 +49,7 @@ module.exports = function (grunt) {
     grunt.registerTask("patch",  ["jshint", "bump", "shell:push", "shell:publish", "shell:heroku"]);
     grunt.registerTask("minor",  ["jshint", "bump:minor", "shell:push", "shell:publish", "shell:heroku"]);
     grunt.registerTask("major",  ["jshint", "bump:major", "shell:push", "shell:publish", "shell:heroku"]);
-    grunt.registerTask("deploy", ["shell:heroku"]);
+    grunt.registerTask("deploy", []);
     grunt.registerTask("jshint", ["jshint"]);
 
     grunt.loadNpmTasks("grunt-bump");
