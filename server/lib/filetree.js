@@ -6,12 +6,14 @@ var filetree = new (require("events").EventEmitter)(),
 
 var _        = require("lodash"),
     chalk    = require("chalk"),
+    chokidar = require("chokidar"),
     fs       = require("graceful-fs"),
     path     = require("path"),
     readdirp = require("readdirp");
 
 var log      = require("./log.js"),
     mime     = require("./mime.js"),
+    paths    = require("./paths.js").get(),
     utils    = require("./utils.js");
 
 var debouncedUpdate = _.debounce(function() {
@@ -36,6 +38,7 @@ function update(dir) {
 }
 
 filetree.updateDir = function updateDir(dir, cb) {
+    if (dir === null) { dir = "/"; dirs = {}; } // Update everything
     log.debug("Updating " + chalk.blue(dir));
     fs.stat(utils.addFilesPath(dir), function (err, stats) {
         readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
@@ -48,7 +51,7 @@ filetree.updateDir = function updateDir(dir, cb) {
                         log.error(err);
                     }
                 });
-                if (cb) cb();
+                if (typeof cb === "function") cb();
             }
 
             // Add dirs
@@ -64,7 +67,7 @@ filetree.updateDir = function updateDir(dir, cb) {
             });
 
             update(dir);
-            if (cb) cb();
+            if (typeof cb === "function") cb();
         });
     });
 };
@@ -193,10 +196,10 @@ filetree.mv = function mv(src, dst, cb) {
 filetree.mvdir = function mvdir(src, dst, cb) {
     utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
         if (err) log.error(err);
-        // basedir
+        // Basedir
         dirs[dst] = _.clone(dirs[src], true);
         delete dirs[src];
-        // subdirs
+        // Subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
                 dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
@@ -219,9 +222,9 @@ filetree.cp = function cp(src, dst, cb) {
 
 filetree.cpdir = function cpdir(src, dst, cb) {
     utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function () {
-        // basedir
+        // Basedir
         dirs[dst] = _.clone(dirs[src], true);
-        // subdirs
+        // Subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
                 dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
@@ -243,8 +246,6 @@ filetree.save = function save(dst, data, cb) {
     });
 };
 
-// -----------------------------------------------------------------------------
-// Get directory contents from cache
 filetree.getDirContents = function getDirContents(p) {
     if (!dirs[p]) return;
     var entries = {}, files = dirs[p].files;
@@ -259,25 +260,18 @@ filetree.getDirContents = function getDirContents(p) {
     return entries;
 };
 
+// local fs changes. debounced heavily but refresh everything.
+chokidar.watch(".", {
+    cwd           : paths.files,
+    alwaysStat    : true,
+    ignoreInitial : true,
+    usePolling    : true
+}).on("error", log.error).on("all", _.debounce(function () {
+    filetree.updateDir(null, function() {
+        Object.keys(dirs).forEach(function (dir) {
+            filetree.emit("update", dir);
+        });
+    });
+}, 3000));
+
 module.exports = filetree;
-
-// function watch(cb) {
-//     var add       = cb.bind(null, "add"),
-//         unlink    = cb.bind(null, "unlink"),
-//         change    = _.throttle(cb.bind(null, "change"), 500, {trailing: true}),
-//         addDir    = cb.bind(null, "addDir"),
-//         unlinkdir = cb.bind(null, "unlinkdir");
-
-//     chokidar.watch(".", {
-//         cwd           : paths.files,
-//         alwaysStat    : true,
-//         ignoreInitial : true,
-//         usePolling    : true
-//     })
-//     .on("add", add)
-//     .on("unlink", unlink)
-//     .on("change", change)
-//     .on("addDir", addDir)
-//     .on("unlinkdir", unlinkdir)
-//     .on("error", log.error);
-// };
