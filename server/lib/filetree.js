@@ -197,12 +197,12 @@ filetree.mvdir = function mvdir(src, dst, cb) {
     utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
         if (err) log.error(err);
         // Basedir
-        dirs[dst] = _.clone(dirs[src], true);
+        dirs[dst] = dirs[src];
         delete dirs[src];
         // Subdirs
         Object.keys(dirs).forEach(function (dir) {
             if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
-                dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
+                dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = dirs[dir];
                 delete dirs[dir];
             }
         });
