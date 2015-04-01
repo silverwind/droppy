@@ -29,7 +29,7 @@ paths.seed = function seed(home) {
     root = home;
 };
 
-exports = module.exports = paths;
+module.exports = paths;
 
 function resolve(str) {
     return path.resolve(/^~/.test(str) ? untildify(str) : str);

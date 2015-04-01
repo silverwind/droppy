@@ -4,7 +4,7 @@
 
 var pkg = require("./../../package.json");
 
-exports = module.exports = function manifest(req) {
+module.exports = function manifest(req) {
     var data = {
         "name": pkg.name,
         "display": "fullscreen",

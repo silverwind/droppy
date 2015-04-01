@@ -140,4 +140,4 @@ log.logo = function logo() {
     ].join("")));
 };
 
-exports = module.exports = log;
+module.exports = log;

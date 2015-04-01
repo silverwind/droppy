@@ -97,4 +97,4 @@ function updateSelf(pkg, callback) {
     }
 }
 
-exports = module.exports = updateSelf;
+module.exports = updateSelf;

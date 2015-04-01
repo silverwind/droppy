@@ -115,4 +115,4 @@ function migrate(config) {
     return config;
 }
 
-exports = module.exports = cfg;
+module.exports = cfg;

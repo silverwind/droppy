@@ -16,8 +16,8 @@ var log      = require("./log.js"),
     paths    = require("./paths.js").get(),
     utils    = require("./utils.js");
 
-var debouncedUpdate = _.debounce(function() {
-    todoDirs.sort(function (a, b) {
+function filterDirs(dirs) {
+    return dirs.sort(function (a, b) {
         return a.match(/\//g).length - b.match(/\//g).length;
     }).filter(function (path, _, self) {
         return self.every(function (another) {
@@ -25,7 +25,11 @@ var debouncedUpdate = _.debounce(function() {
         });
     }).filter(function (path, index, self) {
         return self.indexOf(path) === index;
-    }).forEach(function (dir) {
+    });
+}
+
+var debouncedUpdate = _.debounce(function() {
+    filterDirs(todoDirs).forEach(function (dir) {
         filetree.emit("update", dir);
     });
     todoDirs = [];
@@ -38,18 +42,17 @@ function update(dir) {
 }
 
 filetree.updateDir = function updateDir(dir, cb) {
-    if (dir === null) { dir = "/"; dirs = {}; } // Update everything
+    if (dir === null) { dir = "/"; dirs = {}; }
     log.debug("Updating " + chalk.blue(dir));
     fs.stat(utils.addFilesPath(dir), function (err, stats) {
-        readdirp({root: utils.addFilesPath(dir)}, function (errors, results) {
+        readdirp({root: utils.addFilesPath(dir)}, function (errs, results) {
             dirs[dir] = {files: {}, size: 0, mtime: stats ? stats.mtime.getTime() : Date.now()};
-            if (errors) {
-                errors.forEach(function (err) {
-                    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
+            if (errs) {
+                errs.forEach(function (err) {
+                    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)])
                         delete dirs[utils.removeFilesPath(err.path)];
-                    } else {
+                    else
                         log.error(err);
-                    }
                 });
                 if (typeof cb === "function") cb();
             }

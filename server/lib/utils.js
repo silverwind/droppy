@@ -287,4 +287,4 @@ function readFile(p, cb) {
     });
 }
 
-exports = module.exports = utils;
+module.exports = utils;

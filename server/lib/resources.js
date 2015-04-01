@@ -379,4 +379,4 @@ function etag () {
     return crypto.createHash("md5").update(String(Date.now())).digest("hex");
 }
 
-exports = module.exports = resources;
+module.exports = resources;

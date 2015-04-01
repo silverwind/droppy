@@ -108,4 +108,4 @@ function getHash(string) {
     return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
 }
 
-exports = module.exports = db;
+module.exports = db;

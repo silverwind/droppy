@@ -132,4 +132,4 @@ function unzip(data, dest, callback) {
     });
 }
 
-exports = module.exports = demo;
+module.exports = demo;
