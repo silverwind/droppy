@@ -139,13 +139,10 @@
         });
     });
 
-    // Alias requestAnimationFrame
-    var raf = (function () {
-        return window.requestAnimationFrame ||
-               window.mozRequestAnimationFrame ||
-               window.webkitRequestAnimationFrame ||
-               function (callback) { setTimeout(callback, 1000 / 60); };
-    })();
+    var raf = window.requestAnimationFrame ||
+              window.mozRequestAnimationFrame ||
+              window.webkitRequestAnimationFrame ||
+              function (callback) { setTimeout(callback, 1000 / 60); };
 
     if (droppy.detects.mobile)
         $("html").addClass("mobile");
