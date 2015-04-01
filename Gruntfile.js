@@ -46,9 +46,9 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask("update", ["shell:update", "shell:modules"]);
-    grunt.registerTask("patch",  ["jshint", "bump", "shell:push", "shell:publish", "shell:heroku"]);
-    grunt.registerTask("minor",  ["jshint", "bump:minor", "shell:push", "shell:publish", "shell:heroku"]);
-    grunt.registerTask("major",  ["jshint", "bump:major", "shell:push", "shell:publish", "shell:heroku"]);
+    grunt.registerTask("patch",  ["jshint", "bump", "shell:push", "shell:publish"]);
+    grunt.registerTask("minor",  ["jshint", "bump:minor", "shell:push", "shell:publish"]);
+    grunt.registerTask("major",  ["jshint", "bump:major", "shell:push", "shell:publish"]);
     grunt.registerTask("deploy", []);
     grunt.registerTask("jshint", ["jshint"]);
 
