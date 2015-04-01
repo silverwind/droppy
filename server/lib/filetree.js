@@ -107,6 +107,7 @@ filetree.del = function del(dir) {
 };
 
 filetree.unlink = function unlink(dir) {
+    lookAway();
     utils.rm(utils.addFilesPath(dir), function (err) {
         if (err) log.error(err);
         delete dirs[path.dirname(dir)].files[path.basename(dir)];
@@ -115,6 +116,7 @@ filetree.unlink = function unlink(dir) {
 };
 
 filetree.unlinkdir = function unlinkdir(dir) {
+    lookAway();
     utils.rm(utils.addFilesPath(dir), function (err) {
         if (err) log.error(err);
         delete dirs[dir];
@@ -127,22 +129,17 @@ filetree.unlinkdir = function unlinkdir(dir) {
 
 filetree.clipboard = function clipboard(src, dst, type) {
     fs.stat(utils.addFilesPath(src), function (err, stats) {
+        lookAway();
         if (err) log.error(err);
-        if(stats.isFile()) {
-            if (type === "cut")
-                filetree.mv(src, dst);
-            else
-                filetree.cp(src, dst);
-        } else if (stats.isDirectory()) {
-            if (type === "cut")
-                filetree.mvdir(src, dst);
-            else
-                filetree.cpdir(src, dst);
-        }
+        if(stats.isFile())
+            filetree[type === "cut" ? "mv" : "cp"](src, dst);
+        else if (stats.isDirectory())
+            filetree[type === "cut" ? "mvdir" : "cpdir"](src, dst);
     });
 };
 
 filetree.mk = function mk(dir, cb) {
+    lookAway();
     fs.stat(utils.addFilesPath(dir), function (err) {
         if (err && err.code === "ENOENT") {
             fs.open(utils.addFilesPath(dir), "wx", function (err, fd) {
@@ -161,6 +158,7 @@ filetree.mk = function mk(dir, cb) {
 };
 
 filetree.mkdir = function mkdir(dir, cb) {
+    lookAway();
     fs.stat(utils.addFilesPath(dir), function (err) {
         if (err && err.code === "ENOENT") {
            utils.mkdir(utils.addFilesPath(dir), function (err) {
@@ -176,6 +174,7 @@ filetree.mkdir = function mkdir(dir, cb) {
 };
 
 filetree.move = function move(src, dst, cb) {
+    lookAway();
     fs.stat(utils.addFilesPath(src), function (err, stats) {
         if (err) log.error(err);
         if (stats.isFile())
@@ -186,6 +185,7 @@ filetree.move = function move(src, dst, cb) {
 };
 
 filetree.mv = function mv(src, dst, cb) {
+    lookAway();
     utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
         if (err) log.error(err);
         dirs[path.dirname(dst)].files[path.basename(dst)] = dirs[path.dirname(src)].files[path.basename(src)];
@@ -197,6 +197,7 @@ filetree.mv = function mv(src, dst, cb) {
 };
 
 filetree.mvdir = function mvdir(src, dst, cb) {
+    lookAway();
     utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
         if (err) log.error(err);
         // Basedir
@@ -216,6 +217,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
 };
 
 filetree.cp = function cp(src, dst, cb) {
+    lookAway();
     utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), function () {
         dirs[path.dirname(dst)].files[path.basename(dst)] = dirs[path.dirname(src)].files[path.basename(src)];
         update(path.dirname(dst));
@@ -224,6 +226,7 @@ filetree.cp = function cp(src, dst, cb) {
 };
 
 filetree.cpdir = function cpdir(src, dst, cb) {
+    lookAway();
     utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function () {
         // Basedir
         dirs[dst] = _.clone(dirs[src], true);
@@ -239,6 +242,7 @@ filetree.cpdir = function cpdir(src, dst, cb) {
 };
 
 filetree.save = function save(dst, data, cb) {
+    lookAway();
     fs.stat(utils.addFilesPath(dst), function (err) {
         if (err && err.code !== "ENOENT") return cb(err);
         fs.writeFile(utils.addFilesPath(dst), data, function (err) {
@@ -264,17 +268,38 @@ filetree.getDirContents = function getDirContents(p) {
 };
 
 // local fs changes. debounced heavily but refresh everything.
-chokidar.watch(".", {
-    cwd           : paths.files,
-    alwaysStat    : true,
-    ignoreInitial : true,
-    usePolling    : true
-}).on("error", log.error).on("all", _.debounce(function () {
+var watcher;
+var watching = false;
+var timer = null;
+
+var updateAll = _.debounce(function () {
     filetree.updateDir(null, function() {
         Object.keys(dirs).forEach(function (dir) {
             filetree.emit("update", dir);
         });
     });
-}, 3000));
+}, 2000);
+
+function lookAway() {
+    unwatch();
+    clearTimeout(timer);
+    timer = setTimeout(watch, 2000);
+}
+
+function watch() {
+    watching = true;
+    watcher = chokidar.watch(paths.files, {
+        alwaysStat    : true,
+        ignoreInitial : true,
+        usePolling    : true,
+        interval      : 2000,
+        binaryInterval: 2000
+    }).on("error", log.error).on("all", updateAll);
+}
+
+function unwatch() {
+    if (!watching || !watcher) return;
+    watcher.unwatch(path.files);
+}
 
 module.exports = filetree;
