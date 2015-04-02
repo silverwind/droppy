@@ -798,7 +798,7 @@ function handleUploadRequest(req, res) {
         res.setHeader("Content-Type", "text/plain");
         res.end();
         log.info(req, res, "Invalid upload dst" + req.query.to);
-        log.info(req, res);
+        return;
     }
     dstDir = decodeURIComponent(req.query.to);
 
