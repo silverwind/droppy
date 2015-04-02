@@ -579,31 +579,39 @@
         });
 
         // File upload button
-        $("#upload-file-button").register("click", function () {
-            // Remove the directory attributes so we get a file picker dialog!
-            if (droppy.detects.inputDirectory)
-                fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
-            fileInput.click();
-        });
-
-        // Folder upload button - check if we support directory uploads
-        if (droppy.detects.inputDirectory) {
-            // Directory uploads supported - enable the button
-            $("#upload-folder-button").register("click", function () {
-                // Set the directory attribute so we get a directory picker dialog
-                fileInput.attr({
-                    directory: "directory",
-                    msdirectory: "msdirectory",
-                    mozdirectory: "mozdirectory",
-                    webkitdirectory: "webkitdirectory"
-                });
+        if (droppy.demoMode) {
+            $("#upload-file-button").addClass("disabled").attr("title", "Uploading is disabled.");
+        } else {
+            $("#upload-file-button").register("click", function () {
+                // Remove the directory attributes so we get a file picker dialog!
+                if (droppy.detects.inputDirectory)
+                    fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
                 fileInput.click();
             });
+        }
+
+        if (droppy.demoMode) {
+            $("#upload-folder-button").addClass("disabled").attr("title", "Uploading is disabled.");
         } else {
-            // No directory upload support - disable the button
-            $("#upload-folder-button").addClass("disabled").on("click", function () {
-                showError(getView(0), "Sorry, your browser doesn't support directory uploading.");
-            });
+            // Folder upload button - check if we support directory uploads
+            if (droppy.detects.inputDirectory) {
+                // Directory uploads supported - enable the button
+                $("#upload-folder-button").register("click", function () {
+                    // Set the directory attribute so we get a directory picker dialog
+                    fileInput.attr({
+                        directory: "directory",
+                        msdirectory: "msdirectory",
+                        mozdirectory: "mozdirectory",
+                        webkitdirectory: "webkitdirectory"
+                    });
+                    fileInput.click();
+                });
+            } else {
+                // No directory upload support - disable the button
+                $("#upload-folder-button").addClass("disabled").on("click", function () {
+                    showError(getView(0), "Sorry, your browser doesn't support directory uploading.");
+                });
+            }
         }
 
         $("#create-folder-button").register("click", function () {
