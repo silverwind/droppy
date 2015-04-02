@@ -1690,10 +1690,8 @@
                     event.stopPropagation();
                     if (droppy.socketWait) return;
                     droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
-                    if (droppy.clipboard.dst !== droppy.clipboard.src) {
-                        showSpinner(view);
-                        sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
-                    }
+                    showSpinner(view);
+                    sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
                     droppy.clipboard = null;
                     toggleCatcher(false);
                     $(".paste-button").removeClass("in");
