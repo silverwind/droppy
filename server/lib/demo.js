@@ -46,7 +46,7 @@ demo.refresh = function refresh(doneCallback) {
             ], callback);
         }
     ], function () {
-        doneCallback();
+        if (doneCallback) doneCallback();
     });
 };
 
