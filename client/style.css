@@ -336,8 +336,9 @@ input::-webkit-input-placeholder { color: #999 }
 .file-header {
     display: flex;
     order: -1;
-    color: #666;
-    border-bottom: 1px solid #ccc;
+    color: #555;
+    border-bottom: 1px solid #bbb;
+    background: linear-gradient(#dfdfdf,#d8d8d8);
     padding: .1em 0;
     user-select: none;
 }
@@ -355,7 +356,7 @@ input::-webkit-input-placeholder { color: #999 }
     width: .5em;
     margin-left: .25em;
     transition: all .2s ease;
-    fill: #666;
+    fill: #555;
     z-index: 2;
     top: -.1em;
     left: -.3em;
@@ -1169,7 +1170,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 #about-title {
     font-size: 1.2em;
-    margin-top: .33em;
+    margin: .2em 0;
 }
 
 #about-engine {
@@ -1346,7 +1347,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 #login-box {
     color: #222;
-    background: #e0e0e0;
+    background: #ddd;
     border-radius: 6px;
     box-shadow: 0 0 30px #000;
     height: 10rem;
@@ -1356,7 +1357,7 @@ html:not(.mobile) .vjs-big-play-button {
     text-align: center;
     top: 50%;
     left: 50%;
-    transition: transform .4s ease, opacity .4s ease;
+    transition: opacity .4s ease;
     transform: translate(-50%, -50%);
     z-index: 0;
 }
@@ -1388,7 +1389,9 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #login-info-box {
-    line-height: 30px;
+    line-height: 2rem;
+    background: linear-gradient(#ccc,#fff);
+    box-shadow: 0 0 10px rgba(0,0,0,.15);
     border-radius: 5px 5px 0 0;
     transition: background 0.2s ease;
     position: absolute;
@@ -1427,38 +1430,40 @@ html:not(.mobile) .vjs-big-play-button {
     margin-top: .3rem;
 }
 
-.remember, .submit {
-    background: #ddd;
-    bottom: 0;
-    color: #666;
-    cursor: pointer;
-    height: 1.75rem;
-    left: 0;
+#login-box .bottom {
     position: absolute;
-    user-select: none;
-    white-space: nowrap;
-    width: 50%;
+    bottom: 0;
+    width: 100%;
+    height: 2rem;
+    display: flex;
+    background: linear-gradient(#fff,#ccc);
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,.15);
 }
 
-.remember span, .submit span {
-    display: inline-block;
-    vertical-align: middle;
+.remember, .submit {
+    line-height: 2rem;
+    height: 2rem;
+    bottom: 0;
+    color: #666;
+    transition: color .2s ease;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    flex: 1;
 }
 
 .remember svg, .submit svg {
-    height: 1.25em;
+    height: 1em;
     transition: fill .2s ease;
-    margin-right: .25em;
-    vertical-align: middle;
-    width: 1.25em;
+    position: relative;
+    top: .15rem;
+    width: 1.2em;
 }
-
-.remember { border-bottom-left-radius: 5px }
-.submit   { border-bottom-right-radius: 5px; left: 50% }
 
 .remember:hover, .remember:focus { color: #222 }
 .submit:hover, .submit:focus     { color: #222 }
-.submit svg                      { fill: #666 }
+.submit svg                      { fill: #666; margin-right: .2em }
 .remember svg                    { fill: transparent }
 .remember.checked svg            { fill: #666 }
 .submit:hover svg                { fill: #222 }
