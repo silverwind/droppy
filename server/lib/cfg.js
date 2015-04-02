@@ -22,7 +22,6 @@ var cfg        = {},
         "maxOpen"        : 256,
         "public"         : false,
         "updateInterval" : 1000,
-        "usePolling"     : false,
         "timestamps"     : true
     };
 
@@ -30,21 +29,6 @@ cfg.init = function (config, callback) {
     if (typeof config === "object" && config !== null) {
         config = migrate(config);
         config = _.defaults(config, defaults); // Add missing options
-        callback(null, config);
-    } else if (process.env.NODE_ENV === "droppydemo") {
-        config = _.defaults({
-            "listeners" : [
-                {
-                    "host"     : "0.0.0.0",
-                    "port"     : process.env.PORT,
-                    "protocol" : "http"
-                }
-            ],
-            "public"     : true,
-            "logLevel"   : 3,
-            "timestamps" : false,
-            "usePolling" : true
-        }, defaults);
         callback(null, config);
     } else {
         fs.stat(configFile, function (err) {
@@ -76,7 +60,7 @@ cfg.init = function (config, callback) {
 
                     // Remove options no longer present
                     Object.keys(config).forEach(function (key) {
-                        if (typeof defaults[key] === "undefined") {
+                        if (typeof defaults[key] === "undefined" && key !== "demo") {
                             delete config[key];
                         }
                     });

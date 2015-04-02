@@ -12,17 +12,11 @@ var demo    = {},
     utils   = require("./utils.js"),
     yauzl   = require("yauzl");
 
-
-
 demo.init = function init (cb) {
-    // reload resources
+    process.title = "droppy-demo";
     demo.refresh(function () {
-        // keeping the dyno awake
-        request("http://droppy-demo.silverwind.io", function (err) {
-            if (err) log.error(err);
-            setTimeout(demo.init, 30 * 60 * 1000);
-            if (cb) cb();
-        });
+        setTimeout(demo.refresh, 10 * 60 * 1000);
+        if (cb) cb();
     });
 };
 

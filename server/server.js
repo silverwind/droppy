@@ -32,8 +32,7 @@ var cache           = {},
     config          = null,
     firstRun        = null,
     hasServer       = null,
-    ready           = false,
-    isDemo          = process.env.NODE_ENV === "droppydemo";
+    ready           = false;
 
 var droppy = function droppy(options, isStandalone, callback) {
     log.logo();
@@ -59,7 +58,7 @@ var droppy = function droppy(options, isStandalone, callback) {
         function (cb) { cleanupTemp(); cb(); },
         function (cb) { cleanupLinks(cb); },
         function (cb) { if (config.debug) debug(); cb(); },
-        function (cb) { if (isDemo) { require("./lib/demo.js").init(cb); } else cb(); },
+        function (cb) { if (config.demo) { console.log("demo"); require("./lib/demo.js").init(cb); } else cb(); },
         function (cb) { filetree.updateDir(null, cb); },
     ], function (err) {
         if (err) return callback(err);
@@ -105,7 +104,7 @@ function startListeners(callback) {
 
     listeners.forEach(function (listener) {
         ["host", "port", "protocol"].forEach(function (prop) {
-            if (typeof listener[prop] === "undefined" && !isDemo)
+            if (typeof listener[prop] === "undefined" && !config.demo)
                 return callback(new Error("Config Error: listener " + prop + " undefined"));
         });
 
@@ -269,7 +268,7 @@ function setupSocket(server) {
             case "REQUEST_SETTINGS":
                 sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
                     "debug"         : config.debug,
-                    "demoMode"      : isDemo,
+                    "demoMode"      : config.demo,
                     "public"        : config.public,
                     "maxFileSize"   : config.maxFileSize,
                     "themes"        : Object.keys(cache.themes),
@@ -794,7 +793,7 @@ function handleUploadRequest(req, res) {
 
     req.query = qs.parse(req.url.substring("/upload?".length));
 
-    if (!req.query || !req.query.to) {
+    if (!req.query || !req.query.to || config.demo) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();
