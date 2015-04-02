@@ -1,21 +1,22 @@
 "use strict";
 
-var demo    = {},
-    async   = require("async"),
-    cpr     = require("cpr"),
-    chalk   = require("chalk"),
-    fs      = require("fs"),
-    log     = require("./log.js"),
-    path    = require("path"),
-    paths   = require("./paths.js").get(),
-    request = require("request"),
-    utils   = require("./utils.js"),
-    yauzl   = require("yauzl");
+var demo     = {},
+    async    = require("async"),
+    cpr      = require("cpr"),
+    chalk    = require("chalk"),
+    fs       = require("fs"),
+    log      = require("./log.js"),
+    path     = require("path"),
+    paths    = require("./paths.js").get(),
+    request  = require("request"),
+    schedule = require("node-schedule"),
+    utils    = require("./utils.js"),
+    yauzl    = require("yauzl");
 
 demo.init = function init (cb) {
     process.title = "droppy-demo";
     demo.refresh(function () {
-        setTimeout(demo.refresh, 10 * 60 * 1000);
+        schedule.scheduleJob('*/10 * * * *', demo.refresh);
         if (cb) cb();
     });
 };

@@ -19,6 +19,7 @@ var _          = require("lodash"),
     engine     = require("detect-engine"),
     fs         = require("graceful-fs"),
     readdirp   = require("readdirp"),
+    schedule   = require("node-schedule"),
     Wss        = require("websocket").server,
     yazl       = require("yazl");
 
@@ -1077,7 +1078,7 @@ function streamArchive(req, res, zipPath) {
 
 //-----------------------------------------------------------------------------
 // Hourly tasks
-setInterval(function hourly() {
+schedule.scheduleJob('* 0 * * *', function hourly() {
     // Clean inactive sessions after 1 month of inactivity
     var sessions = db.get("sessions");
     Object.keys(sessions).forEach(function (session) {
@@ -1088,7 +1089,7 @@ setInterval(function hourly() {
     db.set("sessions", sessions);
     // Clean up Etag cache
     cache.etags = {};
-}, 60 * 60 * 1000);
+});
 
 //-----------------------------------------------------------------------------
 // Process startup
