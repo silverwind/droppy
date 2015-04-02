@@ -67,9 +67,9 @@
     "index.js"
   ],
   "engines": {
-    "node": ">0.10.0",
-    "iojs": ">1.1.0",
-    "npm": ">2.0.0"
+    "node": ">=0.10.0",
+    "iojs": ">=1.1.0",
+    "npm": ">=2.0.0"
   },
   "keywords": [
     "personal",
