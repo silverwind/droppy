@@ -1324,7 +1324,6 @@
     function handleDrop(view, event, src, dst, spinner) {
         var dropSelect = $("#drop-select");
         droppy.dragTimer.clear();
-        $(".drop-hover").removeClass("drop-hover");
         $(".dropzone").removeClass("in");
 
         var dragAction = view[0].dragAction;
@@ -1435,24 +1434,10 @@
         var dropZone = view.find(".dropzone");
         view.register("dragenter", function (event) {
             event.stopPropagation();
-            var row,
-                target = $(event.target);
+            var target = $(event.target);
             if (droppy.dragTimer.isInternal) { // internal source
-                if (target.hasClass("folder-link")) {
-                    row = target.parent();
-                    event.preventDefault();
-                    if (!row.hasClass("drop-hover")) {
-                        if (row.attr("data-id") !== droppy.dragTimer.data) {
-                            $(".drop-hover").removeClass("drop-hover");
-                            row.addClass("drop-hover");
-                        }
-                        dropZone.removeClass("in");
-                    }
-                } else {
-                    view.find(".drop-hover").removeClass("drop-hover");
-                    if (!dropZone.hasClass("in")) dropZone.addClass("in");
-                    getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
-                }
+                if (!dropZone.hasClass("in")) dropZone.addClass("in");
+                getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
             } else { // external source
                 if (target.hasClass("directory") || target.parents().hasClass("directory")) {
                     if (!dropZone.hasClass("in")) dropZone.addClass("in");
@@ -1462,36 +1447,9 @@
                 }
             }
         });
-        view.register("dragleave", function (event) {
-            var row,
-                target = $(event.target);
-            if (droppy.dragTimer.isInternal) { // internal source
-                if (target.hasClass("folder-link")) {
-                    row = target.parent();
-                    if (row.hasClass("drop-hover")) {
-                        row.removeClass("drop-hover");
-                    }
-                }
-            }
-            event.stopPropagation();
-        });
     }
 
     function bindDropEvents(view) {
-        view.find(".data-row").each(function () {
-            var src, dst, row = $(this);
-            if (row.attr("data-type") === "folder") {
-                row.register("drop", function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    $(".drop-hover").removeClass("drop-hover");
-                    $(".dropzone").removeClass("in");
-                    src = JSON.parse(event.dataTransfer.getData("text")).path;
-                    dst = join(row.attr("data-id"), basename(src));
-                    if (src) handleDrop(view, event, src, dst);
-                });
-            }
-        });
         view.register("drop", function (event) {
             var dragData,
                 view = $(event.target).parents(".view"),
@@ -1501,7 +1459,7 @@
             event.stopPropagation();
             $(".dropzone").removeClass("in");
 
-            if (event.dataTransfer.getData("text").length) { // It's a drag between views
+            if (event.dataTransfer.getData("text").length) { // drag between views
                 dragData = JSON.parse(event.dataTransfer.getData("text"));
                 if (view.data("type") === "directory") { // dropping into a directory view
                     handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);

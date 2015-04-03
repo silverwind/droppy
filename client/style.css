@@ -407,9 +407,9 @@ input::-webkit-input-placeholder { color: #999 }
     background: #fff;
 }
 
-.data-row.playing, .data-row.drop-hover { background: #16b }
-.data-row.playing a.entry-link, .data-row.drop-hover, .data-row.drop-hover a.entry-link, .playing span { color: #fff }
-.data-row.playing svg, .data-row.drop-hover svg { fill: #fff !important }
+.data-row.playing { background: #16b }
+.data-row.playing a.entry-link, .playing span { color: #fff }
+.data-row.playing svg { fill: #fff !important }
 .data-row.playing svg:hover { background: #08d !important }
 
 .data-row.uploading .sprite {
@@ -1576,7 +1576,7 @@ html:not(.mobile) #drop-select span.active {
 .dropzone {
     position: absolute;
     left: 0; right: 0; bottom: 0; top: 1.5rem;
-    z-index: -1;
+    z-index: 1;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -1585,7 +1585,7 @@ html:not(.mobile) #drop-select span.active {
 }
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
 
-.dropzone.in { opacity: .8; visibility: visible }
+.dropzone.in { opacity: .5; visibility: visible }
 .shake { animation: shake .3s ease }
 
 iframe { display: none }
