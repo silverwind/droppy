@@ -1434,18 +1434,8 @@
         var dropZone = view.find(".dropzone");
         view.register("dragenter", function (event) {
             event.stopPropagation();
-            var target = $(event.target);
-            if (droppy.dragTimer.isInternal) { // internal source
-                if (!dropZone.hasClass("in")) dropZone.addClass("in");
-                getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
-            } else { // external source
-                if (target.hasClass("directory") || target.parents().hasClass("directory")) {
-                    if (!dropZone.hasClass("in")) dropZone.addClass("in");
-                    getOtherViews(target.parents(".view")[0].vId).find(".dropzone").removeClass("in");
-                } else {
-                    $(".dropzone").removeClass("in");
-                }
-            }
+            if (!dropZone.hasClass("in")) dropZone.addClass("in");
+            getOtherViews($(event.target).parents(".view")[0].vId).find(".dropzone").removeClass("in");
         });
     }
 

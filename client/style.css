@@ -1585,7 +1585,7 @@ html:not(.mobile) #drop-select span.active {
 }
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
 
-.dropzone.in { opacity: .5; visibility: visible }
+.dropzone.in { opacity: .4; visibility: visible }
 .shake { animation: shake .3s ease }
 
 iframe { display: none }
