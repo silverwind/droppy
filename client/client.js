@@ -1272,7 +1272,7 @@
                 view[0].audioInitialized = true;
             }
 
-            play(view, $(this).parents(".data-row").data("id"));
+            play(view, $(this).parents(".data-row"));
         });
 
         content.find(".header-name, .header-mtime, .header-size").register("click", function () {
@@ -2174,14 +2174,16 @@
     //  Audio functions / events
     // ============================================================================
 
-    function play(view, path) {
-        var content, paths,
-            row    = view.find(".data-row[data-id='" + path + "']"),
-            player = view.find(".audio-player")[0],
-            source = "?_" + path;
+    function play(view, index) {
+        var row, source, content, player = view.find(".audio-player")[0];
 
-        view.find(".seekbar-played").css("width", "0%");
-        view.find(".seekbar-loaded").css("width", "0%");
+        if (typeof index === "number")
+            row = view.find('.data-row[data-playindex="' + index + '"]');
+        else
+            row = index;
+
+        source = "?_" + row.data("id");
+        view.find(".seekbar-played, .seekbar-loaded").css("width", "0%");
 
         if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
             player.src = source;
@@ -2191,23 +2193,23 @@
         } else {
             return showError(view, "Sorry, your browser can't play this file.");
         }
+
+        row.addClass("playing").siblings().removeClass("playing");
+
         if (row.length) {
             content = row.parents(".content");
-            paths   = [];
-
-            row.addClass("playing").siblings().removeClass("playing");
             if ((row[0].offsetTop < content.scrollTop()) ||
                 (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
                 row.parents(".content").scrollTop(row[0].offsetTop - 2); // keep played element in view
             }
+
+            var i = 0;
             row.parent().children(".playable").each(function () {
-                paths.push($(this).data("id"));
+                $(this).attr("data-playindex", i++);
             });
-            view[0].playlist = paths;
-            view[0].playlistIndex = paths.indexOf(path);
-        } else {
-            view[0].playlistIndex = view[0].playlist.indexOf(path);
+            view[0].playlistLength = i;
         }
+        view[0].playlistIndex = typeof index === "number" ? index : row.data("playindex");
     }
 
     function onNewAudio(view) {
@@ -2349,25 +2351,25 @@
         }
         function playRandom(view) {
             var nextIndex;
-            if (view[0].playlist.length === 1) return play(view, view[0].playlist[0]);
+            if (view[0].playlistLength === 1) return play(view, 0);
             do {
-                nextIndex = Math.floor(Math.random() * view[0].playlist.length);
+                nextIndex = Math.floor(Math.random() * view[0].playlistLength);
             } while (nextIndex === view[0].playlistIndex);
-            play(view, view[0].playlist[nextIndex]);
+            play(view, nextIndex);
         }
         function playNext(view) {
             if (view[0].shuffle) return playRandom(view);
-            if (view[0].playlistIndex < view[0].playlist.length - 1)
-                play(view, view[0].playlist[view[0].playlistIndex + 1]);
+            if (view[0].playlistIndex < view[0].playlistLength - 1)
+                play(view, view[0].playlistIndex + 1);
             else
-                play(view, view[0].playlist[0]);
+                play(view, 0);
         }
         function playPrev(view) {
             if (view[0].shuffle) return playRandom(view);
             if (view[0].playlistIndex === 0)
-                play(view, view[0].playlist[view[0].playlist.length - 1]);
+                play(view, view[0].playlistLength - 1);
             else
-                play(view, view[0].playlist[view[0].playlistIndex - 1]);
+                play(view, view[0].playlistIndex - 1);
         }
     }
 
