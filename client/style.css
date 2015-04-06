@@ -173,10 +173,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .content.image, .content.video, .content.document {
     padding: 0;
-    height: calc(100% - 1.5rem);
-}
-@media (max-width:  639px) {
-    .content.image, .content.video, .content.document { height: calc(100% - 1.25rem) }
+    height: 100%;
 }
 
 .content.back    { z-index: 0; position:absolute; transform: translateX(-100%) }
