@@ -158,7 +158,7 @@ input::-webkit-input-placeholder { color: #999 }
 .content {
     left: 0;
     width: 100%;
-    transition: transform 2.175s ease-in;
+    transition: transform .175s ease-in;
 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
