@@ -1299,12 +1299,14 @@
             view.find(".data-row").addClass("animating");
             view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
                 "back" : (view[0].animDirection === "back") ? "forward" : "center");
+            getOtherViews(view[0].vId).css("z-index", "1");
             view.find(".new").addClass(type).setTransitionClass(navRegex, "center").end(finish);
         }
         view[0].animDirection = "center";
 
         function finish() {
             view[0].isAnimating = false;
+            getOtherViews(view[0].vId).css("z-index","auto");
             view.find(".content:not(.new)").remove();
             view.find(".content")[0].style.willChange = "auto";
             view.find(".new").removeClass("new");
@@ -2187,7 +2189,6 @@
 
         if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
             player.src = source;
-            onNewAudio(view);
             player.load();
             player.play();
         } else {
@@ -2197,10 +2198,10 @@
         row.addClass("playing").siblings().removeClass("playing");
 
         if (row.length) {
-            content = row.parents(".content");
-            if ((row[0].offsetTop < content.scrollTop()) ||
-                (row[0].offsetTop + row[0].offsetHeight > content.scrollTop() + content.height())) {
-                row.parents(".content").scrollTop(row[0].offsetTop - 2); // keep played element in view
+            content = row.parents(".content-container");
+            if (row[0].offsetTop < content.scrollTop() ||
+                row[0].offsetTop > content.scrollTop() + content.height()) {
+                row[0].scrollIntoView();
             }
 
             var i = 0;
@@ -2213,11 +2214,7 @@
     }
 
     function onNewAudio(view) {
-        var player     = view.find(".audio-player")[0],
-            seekPlayed = view.find(".seekbar-played"),
-            seekLoaded = view.find(".seekbar-loaded"),
-            timeCur    = view.find(".time-cur"),
-            timeMax    = view.find(".time-max"),
+        var player     = view[0].querySelector(".audio-player"),
             title      = basename(player.src).replace(/\..+$/, "").replace(/_/g, " ").replace(/\s+/, " ");
 
         title = decodeURIComponent(title);
@@ -2225,20 +2222,21 @@
         view.find(".audio-title").text(title);
         updateTitle(title);
 
-        view[0].audioUpdater = setInterval(function updater() {
-            var progress, cur = player.currentTime, max = player.duration;
+        (function updateBuffer() {
+            var progress;
+            if (player.buffered.length)
+                progress = (player.buffered.end(0) / player.duration) * 100;
+            view[0].querySelector(".seekbar-loaded").style.width = (progress || 0) + "%";
+            if (!progress || progress < 100) setTimeout(updateBuffer, 100);
+        })();
 
-            if (player.buffered.length) {
-                progress = player.buffered.end(0) / max * 100;
-                seekLoaded.css("width", progress + "%");
-                if (progress === 100) clearInterval(view[0].audioUpdater);
-            }
-            if (cur && max) {
-                seekPlayed.css("width", (cur / max * 100)  + "%");
-                timeCur.text(secsToTime(cur));
-                timeMax.text(secsToTime(max));
-            }
-        }, 1000 / 60);
+        $(player).register("timeupdate", function () {
+            var cur = player.currentTime, max = player.duration;
+            if (!cur || !max) return;
+            view[0].querySelector(".seekbar-played").style.width = (cur / max) * 100 + "%";
+            view[0].querySelector(".time-cur").textContent = secsToTime(cur);
+            view[0].querySelector(".time-max").textContent = secsToTime(max);
+        });
     }
 
     function initAudio(view) {
@@ -2309,10 +2307,8 @@
             player.pause();
             view.find(".audio-title").html("");
             view.find(".data-row.playing").removeClass("playing");
-            if (view[0].audioUpdater) {
-                clearInterval(view[0].audioUpdater);
-                view[0].audioUpdater = null;
-            }
+            clearInterval(view[0].audioUpdateLoaded);
+            clearInterval(view[0].audioUpdatePlayed);
             updateTitle(basename(getView()[0].currentFolder));
             bar.removeClass("in");
             event.stopPropagation();

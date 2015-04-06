@@ -29,8 +29,8 @@ button, input { line-height: normal }
 ::-webkit-scrollbar:horizontal { height: 4px }
 ::-webkit-scrollbar:vertical   { width:  4px }
 
-::selection      { background: #16b; color: #fff }
-::-moz-selection { background: #16b; color: #fff }
+::selection      { background: #05a; color: #fff }
+::-moz-selection { background: #05a; color: #fff }
 
 input::-moz-placeholder          { color: #999; opacity: 1 }
 input:-ms-input-placeholder      { color: #999 }
@@ -145,13 +145,11 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .content-container {
+    background: #181818;
     overflow-x: hidden;
-    top: 1.5rem;
-    position: relative;
     flex: 1;
     order: 2;
 }
-@media (max-width: 639px) { .content-container { top: 1.25rem } }
 
 .view.left  { left:0; right:50% }
 .view.right { left:50%; right:0 }
@@ -160,8 +158,7 @@ input::-webkit-input-placeholder { color: #999 }
 .content {
     left: 0;
     width: 100%;
-    transition: transform .175s ease-in;
-    position: absolute;
+    transition: transform 2.175s ease-in;
 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
@@ -182,8 +179,8 @@ input::-webkit-input-placeholder { color: #999 }
     .content.image, .content.video, .content.document { height: calc(100% - 1.25rem) }
 }
 
-.content.back    { transform: translateX(-100%) }
-.content.forward { transform: translateX(100%)  }
+.content.back    { z-index: 0; position:absolute; transform: translateX(-100%) }
+.content.forward { z-index: 0; position:absolute; transform: translateX(100%)  }
 
 .content:fullscreen          { top: 0; height: 100% }
 .content:-webkit-full-screen { top: 0; height: 100% }
@@ -197,7 +194,6 @@ input::-webkit-input-placeholder { color: #999 }
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
-   position: absolute;
    z-index: 1;
    flex: 0 0 1.5rem;
    order: 1;
@@ -407,7 +403,7 @@ input::-webkit-input-placeholder { color: #999 }
     background: #fff;
 }
 
-.data-row.playing { background: #16b }
+.data-row.playing { background: #05a }
 .data-row.playing a.entry-link, .playing span { color: #fff }
 .data-row.playing svg { fill: #fff !important }
 .data-row.playing svg:hover { background: #08d !important }
@@ -602,7 +598,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 html:not(.mobile) #entry-menu a:hover,
 html:not(.mobile) #entry-menu a.active {
-    background: #16b;
+    background: #05a;
     color: #fff;
 }
 
@@ -1016,7 +1012,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .upload-bar {
     position: absolute;
-    background: #16b;
+    background: #05a;
     top: 0; bottom: 0; left: 0;
     transition: width .2s ease;
     width: 0;
@@ -1111,7 +1107,7 @@ html:not(.mobile) .vjs-big-play-button {
 .seekbar-played {
     position: absolute;
     width: 0;
-    background: #16b;
+    background: #05a;
     height: 100%;
     z-index: 2;
 }
@@ -1120,7 +1116,7 @@ html:not(.mobile) .vjs-big-play-button {
     position: absolute;
     width: 0;
     height: 100%;
-    background: #383838;
+    background: #282d38;
     z-index: 1;
 }
 
@@ -1512,7 +1508,7 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box.error .linkout { display: none }
 .info-box.link  svg { height: 2.5em             }
 .info-box.error svg { height: calc(100% - .5em) }
-.info-box.link  { background: linear-gradient(to right, #16b 3em, #fff 3em) }
+.info-box.link  { background: linear-gradient(to right, #05a 3em, #fff 3em) }
 .info-box.error { background: linear-gradient(to right, #f44 3em, #fff 3em) }
 
 .info-box span, .info-box .linkout {
@@ -1555,7 +1551,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 html:not(.mobile) #drop-select span:hover,
 html:not(.mobile) #drop-select span.active {
-    background: #16b; color: #fff;
+    background: #05a; color: #fff;
 }
 
 #drop-select .movefile:hover { border-radius: 6px 0 0 6px }
@@ -1580,7 +1576,7 @@ html:not(.mobile) #drop-select span.active {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    background: #16b;
+    background: #05a;
     transition: opacity .2s ease;
 }
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
