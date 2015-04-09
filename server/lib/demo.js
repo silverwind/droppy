@@ -25,7 +25,6 @@ demo.init = function init (cb) {
 demo.refresh = function refresh(doneCallback) {
     async.series([
         function (callback) {
-            log.simple("Demo initializing ...");
             utils.rm(paths.files, function () {
                 utils.mkdir(paths.files, callback);
             });
@@ -47,6 +46,7 @@ demo.refresh = function refresh(doneCallback) {
             ], callback);
         }
     ], function () {
+        log.simple("Demo refreshed");
         if (doneCallback) doneCallback();
     });
 };
