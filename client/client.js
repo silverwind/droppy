@@ -351,6 +351,7 @@
                 } else if (view.data("type") === "image" || view.data("type") === "video") {
                     view[0].currentData = msg.data;
                     populateMediaCache(view, msg.data);
+                    updateMediaMeta(view);
                     bindMediaArrows(view);
                 }
                 break;
@@ -1847,6 +1848,7 @@
             b = $(bindVideoEvents(b[0]));
         }
 
+
         a.attr("class", dir === "left" ? "media-wrapper right" : "media-wrapper left");
         b.appendTo(view.find(".media-container"));
         b.setTransitionClass(/(left|right)/, "").end(function () {
@@ -1859,9 +1861,17 @@
             view[0].currentFile = nextFile;
             populateMediaCache(view, view[0].currentData);
             replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
+            updateMediaMeta(view);
             updatePath(view);
             if (view[0].vId === 0) updateTitle(nextFile); // Only update the page's title from view 0
         });
+    }
+
+    function updateMediaMeta(view) {
+        var cur = view[0].mediaFiles.indexOf(view[0].currentFile) + 1,
+            max = view[0].mediaFiles.length;
+
+        view.find(".meta").html("<span class='index'>" + cur + "</span>/<span class='total'>" + max + "</span>");
     }
 
     // Media up/down-scaling while maintaining aspect ratio.
@@ -1943,6 +1953,7 @@
             });
 
             if (view[0].vId === 0) updateTitle(filename);
+            updateMediaMeta(view);
             hideSpinner(view);
         });
     }

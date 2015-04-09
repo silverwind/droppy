@@ -7,10 +7,11 @@ it = {
 }
 </script>
 #}}
-<button class="fs">{{= droppy.svg.fullscreen}}</button>
 <div class="previewer {{= it.type}}">
     <div class="arrow-back"> {{= droppy.svg.arrow}} </div>
     <div class="arrow-forward"> {{= droppy.svg.arrow}} </div>
+    <button class="fs">{{= droppy.svg.fullscreen}}</button>
+    <div class="meta"></div>
     <figure class="media-container">
         <div class="media-wrapper">
             {{? it.type === "video"}}
