@@ -158,7 +158,7 @@ input::-webkit-input-placeholder { color: #999 }
 .content {
     left: 0;
     width: 100%;
-    transition: transform .175s ease-in;
+    transition: transform .175s ease;
 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
@@ -166,7 +166,7 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  639px) { .content { font-size: .8em } }
 
 .content.directory {
-    background: #eee;
+    background: #e8e8e8;
     display: flex;
     flex-direction: column;
 }
@@ -397,7 +397,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-    background: #fff;
+    background: #f0f0f0;
 }
 
 .data-row.playing { background: #05a }
@@ -1058,20 +1058,19 @@ html:not(.mobile) .vjs-big-play-button {
 
 
 .audio-icon svg {
-    cursor: pointer;
-    fill: rgba(255,255,255,.5);
+    fill: rgba(255,255,255,.55);
     height: 1.125em;
     width: 1.125em;
-    margin: .125em .25em;
+    margin: .0625em .25em;
     padding: .125em;
     pointer-events: none;
 }
 @media (max-width: 639px) { .audio-icon svg { height: 1em; width: 1em; margin: .125em } }
 
-.audio-icon:hover svg  { fill: #fff }
+.audio-icon:hover svg { fill: #fff }
 .audio-icon.active svg {
     fill: #fff;
-    background: rgba(255,255,255,.4);
+    background: rgba(255,255,255,.3);
     border-radius: 4px;
 }
 

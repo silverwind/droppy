@@ -2214,10 +2214,9 @@
     }
 
     function onNewAudio(view) {
-        var player     = view[0].querySelector(".audio-player"),
-            title      = basename(player.src).replace(/\..+$/, "").replace(/_/g, " ").replace(/\s+/, " ");
+        var player = view[0].querySelector(".audio-player"),
+            title  = decodeURIComponent(removeExt(basename(player.src).replace(/_/g, " ").replace(/\s+/, " ")));
 
-        title = decodeURIComponent(title);
         view.find(".audio-bar").addClass("in");
         view.find(".audio-title").text(title);
         updateTitle(title);
@@ -2465,14 +2464,6 @@
                 "heigth"   : $(el).parents(".media-container")[0].clientHeight
             }, cb);
         });
-    }
-
-    // Extract the extension from a file name
-    function getExt(filename) {
-        if (!filename) return "";
-        var parts = filename.split(".");
-        if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
-        return parts.pop().toLowerCase();
     }
 
     function deleteCookie(name) {
@@ -2864,6 +2855,18 @@
         if (x.length) return -1;
         if (y.length) return +1;
         return 0;
+    }
+
+    // Extract the extension from a file name
+    function getExt(filename) {
+        if (!filename) return "";
+        var parts = filename.split(".");
+        if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
+        return parts.pop().toLowerCase();
+    }
+
+    function removeExt(filename) {
+        return filename.substring(0, filename.lastIndexOf("."));
     }
 
     // Get the path to droppy's root, ensuring a trailing slash
