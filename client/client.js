@@ -1287,7 +1287,7 @@
         if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
         var type = view.data("type"),
             navRegex = /(forward|back|center)/;
-        if (view[0].animDirection === "center" && type === "directory") {
+        if (view[0].animDirection === "center") {
             view.find(".content").replaceClass(navRegex, "center").before(content);
             view.find(".new").addClass(type).data("root", view[0].currentFolder);
             finish();
@@ -1931,7 +1931,7 @@
         } else { // In case we switch into an unknown folder, request its files
             sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
         }
-        view[0].animDirection = "center";
+        view[0].animDirection = "forward";
         loadContent(view, contentWrap(view).append(previewer), function (view) {
             view.find(".fs").register("click", function () {
                 toggleFullscreen($(this).parents(".content")[0]);
