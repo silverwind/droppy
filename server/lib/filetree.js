@@ -281,7 +281,7 @@ var updateAll = _.debounce(function () {
             filetree.emit("update", dir);
         });
     });
-}, 2000);
+}, 4000);
 
 function lookAway() {
     unwatch();
