@@ -1570,7 +1570,7 @@
                 view  = entry.parents(".view");
 
             event.stopPropagation();
-            play(view, entry.data("id"));
+            play(view, Number(entry.data("playindex")));
             toggleCatcher(false);
         });
 

@@ -633,7 +633,7 @@ html:not(.mobile) #entry-menu a.active svg {
     display: none;
 }
 
-#entry-menu.type-audio > div > .play {
+#entry-menu.type-audio .play {
     display: block;
 }
 
