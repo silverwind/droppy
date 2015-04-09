@@ -1267,11 +1267,6 @@
             if ($(this).parents(".data-row").hasClass("playing"))
                 return;
 
-            if (!view[0].audioInitialized) {
-                initAudio(view);
-                view[0].audioInitialized = true;
-            }
-
             play(view, $(this).parents(".data-row"));
         });
 
@@ -1570,7 +1565,7 @@
                 view  = entry.parents(".view");
 
             event.stopPropagation();
-            play(view, Number(entry.data("playindex")));
+            play(view, entry);
             toggleCatcher(false);
         });
 
@@ -2184,6 +2179,11 @@
         else
             row = index;
 
+        if (!view[0].audioInitialized) {
+            initAudio(view);
+            view[0].audioInitialized = true;
+        }
+
         source = "?_" + row.data("id");
         view.find(".seekbar-played, .seekbar-loaded").css("width", "0%");
 
@@ -2191,6 +2191,7 @@
             player.src = source;
             player.load();
             player.play();
+            onNewAudio(view);
         } else {
             return showError(view, "Sorry, your browser can't play this file.");
         }
