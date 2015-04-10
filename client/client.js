@@ -2195,6 +2195,10 @@
             view[0].audioInitialized = true;
         }
 
+        if (!row.data("id")) {
+            return endAudio(view);
+        }
+
         source = "?_" + row.data("id");
         view.find(".seekbar-played, .seekbar-loaded").css("width", "0%");
 
@@ -2248,6 +2252,16 @@
             view[0].querySelector(".time-cur").textContent = secsToTime(cur);
             view[0].querySelector(".time-max").textContent = secsToTime(max);
         });
+    }
+
+    function endAudio(view) {
+        view.find(".audio-player")[0].pause();
+        view.find(".audio-title").html("");
+        view.find(".data-row.playing").removeClass("playing");
+        clearInterval(view[0].audioUpdateLoaded);
+        clearInterval(view[0].audioUpdatePlayed);
+        updateTitle(basename(getView()[0].currentFolder));
+        view.find(".audio-bar").removeClass("in");
     }
 
     function initAudio(view) {
@@ -2312,22 +2326,14 @@
             }
             event.stopPropagation();
         });
+
         bar.find(".stop").register("click", function (event) {
-            var view   = $(this).parents(".view"),
-                player = view.find(".audio-player")[0];
-            player.pause();
-            view.find(".audio-title").html("");
-            view.find(".data-row.playing").removeClass("playing");
-            clearInterval(view[0].audioUpdateLoaded);
-            clearInterval(view[0].audioUpdatePlayed);
-            updateTitle(basename(getView()[0].currentFolder));
-            bar.removeClass("in");
+            endAudio($(this).parents(".view"));
             event.stopPropagation();
         });
         bar.find(".shuffle").register("click", function (event) {
-            var view = $(this).parents(".view");
             $(this).toggleClass("active");
-            view[0].shuffle = $(this).hasClass("active");
+            $(this).parents(".view")[0].shuffle = $(this).hasClass("active");
             event.stopPropagation();
         });
         function onWheel(event) {
