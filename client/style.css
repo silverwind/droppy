@@ -639,7 +639,6 @@ html:not(.mobile) #entry-menu a.active svg {
 
 /* ============================ Image Previewer ============================ */
 .previewer {
-    position: relative;
     text-align: center;
     height: 100%;
     overflow: hidden;
@@ -679,11 +678,6 @@ html:not(.mobile) #entry-menu a.active svg {
 .previewer .arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
 .previewer .arrow-back:hover svg    { height: 3em; width: 3em; left:  -.25em }
 .previewer .arrow-forward:hover svg { height: 3em; width: 3em; right: -.25em }
-
-.media-container {
-    position: relative;
-    height: 100%;
-}
 
 .media-wrapper {
     position: absolute;
@@ -751,20 +745,28 @@ html:not(.mobile) #entry-menu a.active svg {
     height: 1.25em;
     width: 1.25em;
 }
-.previewer .fs:hover svg { fill: #ccc }
+.previewer .fs:hover, .previewer .meta:hover {
+    background: rgba(48,48,48,.6)
+}
 
 .previewer .meta {
     position: absolute;
     right: 2.25em; bottom: .25em;
     z-index: 1;
     background: transparent;
-    color: #888;
-    background: rgba(0,0,0,.6);
+    color: #666;
+    background: rgba(0,0,0,.66);
     border-radius: .25em;
     padding: .4em;
+    cursor: pointer;
+    user-select: none;
 }
 
-.previewer .meta span { color: #ccc }
+.previewer .meta .dims    { display: none }
+.previewer .meta .dims.in { display: inline }
+
+.previewer .meta > div { display: inline }
+.previewer .meta span > span { color: #ccc }
 .video .fs, .nofullscreen .fs, .video .meta { display: none }
 /* ================================= Video.js ================================= */
 

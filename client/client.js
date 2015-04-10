@@ -1868,10 +1868,16 @@
     }
 
     function updateMediaMeta(view) {
-        var cur = view[0].mediaFiles.indexOf(view[0].currentFile) + 1,
-            max = view[0].mediaFiles.length;
+        var meta = view.find(".meta"),
+            img  = view.find("img");
 
-        view.find(".meta").html("<span class='index'>" + cur + "</span>/<span class='total'>" + max + "</span>");
+        meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
+        meta.find(".max").text(view[0].mediaFiles.length);
+        meta.find(".x").text(img[0].naturalWidth);
+        meta.find(".y").text(img[0].naturalHeight);
+        meta.register("click", function () {
+           view.find(".dims").toggleClass("in");
+        });
     }
 
     // Media up/down-scaling while maintaining aspect ratio.
