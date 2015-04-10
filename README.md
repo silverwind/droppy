@@ -111,8 +111,13 @@ Also see the [express example](https://github.com/silverwind/droppy/blob/master/
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
-### Proxying
-droppy can run behind a reverse proxy as long as WebSockets are passing through. For examples of an fitting nginx configuration, see the guides for [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation) or [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation).
+### Installing as a service / proxying
+
+See the wiki for guides on these topics:
+
+- [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)
+- [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+- [nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 
 ### wget
 For correct filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
