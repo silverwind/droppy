@@ -145,6 +145,7 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .content-container {
+    position: relative;
     background: #181818;
     overflow-x: hidden;
     flex: 1;
@@ -684,49 +685,46 @@ html:not(.mobile) #entry-menu a.active svg {
     left: 0; right: 0; top: 0; bottom: 0;
     transition: transform .2s ease, opacity .2s ease;
 }
+.media-wrapper:not(.new-media) { transition: none }
 
-.media-wrapper:not(.new-media) {
-    transition: none;
-}
-
-.media-container .media-wrapper.left  { transform: translate(-100%, 0%); opacity: 0 }
-.media-container .media-wrapper.right { transform: translate( 100%, 0%); opacity: 0 }
+.media-container .media-wrapper.left  { transform: translateX(-100%); opacity: 0 }
+.media-container .media-wrapper.right { transform: translateX(100%); opacity: 0 }
 
 /* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
 .media-container img {
     position: absolute; width: auto;
-    max-height: 100%; max-width: 100%;
+    height: 100%;width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
     object-fit: contain;
 }
 .nofullscreen .media-container video {
     position: absolute; width: auto;
-    max-height: 100%; max-width: 100%;
+    height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:fullscreen) {
     position: absolute; width: auto;
-    max-height: 100%; max-width: 100%;
+    height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:-webkit-full-screen) {
     position: absolute; width: auto;
-    max-height: 100%; max-width: 100%;
+    height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:-moz-full-screen) {
     position: absolute; width: auto;
-    max-height: 100%; max-width: 100%;
+    height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:-ms-fullscreen) {
     position: absolute; width: auto;
-    max-height: 100%; max-width: 100%;
+    height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
