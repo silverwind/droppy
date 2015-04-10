@@ -739,9 +739,11 @@ html:not(.mobile) #entry-menu a.active svg {
 
 .previewer .fs {
     position: absolute;
-    right: 0; bottom: 0;
+    right: .25em; bottom: .25em;
     z-index: 1;
-    background: transparent;
+    background: rgba(0,0,0,.5);
+    border-radius: .25em;
+    padding: .25em .25em 0 .25em;
 }
 .previewer .fs svg {
     fill: rgba(224,224,224,.4);
@@ -752,13 +754,16 @@ html:not(.mobile) #entry-menu a.active svg {
 
 .previewer .meta {
     position: absolute;
-    right: 2em; bottom: .45em;
+    right: 2.25em; bottom: .25em;
     z-index: 1;
     background: transparent;
     color: #666;
+    background: rgba(0,0,0,.5);
+    border-radius: .25em;
+    padding: .4em;
 }
 
-.previewer .meta span { color: #ccc }
+.previewer .meta span { color: #aaa }
 .video .fs, .nofullscreen .fs, .video .meta { display: none }
 /* ================================= Video.js ================================= */
 
