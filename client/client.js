@@ -1874,11 +1874,25 @@
 
         meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
         meta.find(".max").text(view[0].mediaFiles.length);
-        meta.find(".x").text(img[0].naturalWidth);
-        meta.find(".y").text(img[0].naturalHeight);
         meta.register("click", function () {
            view.find(".dims").toggleClass("in");
         });
+
+        (function addSizes(meta, img) {
+            var x = img[0].naturalWidth,
+                y = img[0].naturalHeight;
+
+            if (x && y)
+                setSize(x, y);
+            else
+                setTimeout(addSizes, 500);
+
+            function setSize(x, y) {
+                meta.find(".x").text(x);
+                meta.find(".y").text(y);
+            }
+        })(meta, img);
+
     }
 
     // Media up/down-scaling while maintaining aspect ratio.
