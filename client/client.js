@@ -1820,15 +1820,14 @@
             back    = view.find(".arrow-back"),
             arrows  = view.find(".arrow-back, .arrow-forward");
 
-        back.register("click", function ()    { swapMedia(view, "left");  });
-        forward.register("click", function () { swapMedia(view, "right"); });
+        back.register("click", swapMedia.bind(null, view, "left"));
+        forward.register("click", swapMedia.bind(null, view, "right"));
 
-        arrows
-            .register("mouseenter mousemove", function () { if (!$(this).hasClass("in")) $(this).addClass("in"); })
-            .register("mouseleave", function () { $(this).removeClass("in"); });
-
-        // Show arrows for three seconds so they won't have to be discovered
-        arrows.addClass("in");
+        arrows.register("mouseenter mousemove", function () {
+            $(this).addClass("in");
+        }).register("mouseleave", function () {
+            $(this).removeClass("in");
+        }).addClass("in");
         setTimeout(function () {arrows.removeClass("in"); }, 2000);
     }
 
