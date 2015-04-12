@@ -1,4 +1,5 @@
-/* global jQuery, CodeMirror, prettyBytes, videojs */
+/* global jQuery, CodeMirror, prettyBytes, videojs, Draggabilly */
+
 (function ($, window, document) {
     "use strict";
     var droppy = {};
@@ -2449,10 +2450,10 @@
     function makeMediaDraggable(el, isVideo) {
         if ($(el).hasClass("draggable")) return;
         var opts = isVideo ? {axis: "x", handle: "video"} : {axis: "x"};
-        $(el).attr("class", "media-wrapper draggable").draggabilly(opts);
+        $(el).attr("class", "media-wrapper draggable");
+        var instance = new Draggabilly(el, opts);
         $(el).on("dragEnd", function () {
-            var instance  = $(this).data("draggabilly"),
-                view      = $(instance.element).parents(".view"),
+            var view      = $(instance.element).parents(".view"),
                 threshold = droppy.detects.mobile ? 0.15 : 0.075;
 
             if ((Math.abs(instance.position.x) / instance.element.clientWidth) > threshold) {
