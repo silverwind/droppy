@@ -1972,22 +1972,27 @@
         if (droppy.cmLoaded) return cb();
         var reqs = [];
         $("<link/>", { rel: "stylesheet", href: "?!/lib/cm/lib/codemirror.css"}).appendTo("head");
-        ["cm/lib/codemirror.js", "cm/mode/meta.js", "cm/addon/dialog/dialog.js",
-         "cm/addon/selection/active-line.js", "cm/addon/selection/mark-selection.js",
-         "cm/addon/search/searchcursor.js", "cm/addon/edit/matchbrackets.js",
-         "cm/addon/search/search.js", "cm/keymap/sublime.js"].forEach(function (path) {
-            reqs.push($.getScript("?!/lib/" + path));
-         });
-         $.when.apply(reqs).then(function () {
-             droppy.cmLoaded = true;
 
-             (function verify() {
-                if ("CodeMirror" in window && "findModeByFileName" in window.CodeMirror)
-                    cb();
-                else
-                    setTimeout(verify, 100);
-             })();
-         });
+        $.getScript("?!/lib/cm/lib/codemirror.js").then(function () {
+            setTimeout(function () {
+                ["cm/mode/meta.js", "cm/addon/dialog/dialog.js",
+                 "cm/addon/selection/active-line.js", "cm/addon/selection/mark-selection.js",
+                 "cm/addon/search/searchcursor.js", "cm/addon/edit/matchbrackets.js",
+                 "cm/addon/search/search.js", "cm/keymap/sublime.js"].forEach(function (path) {
+                    reqs.push($.getScript("?!/lib/" + path));
+                 });
+                 $.when.apply(reqs).then(function () {
+                     droppy.cmLoaded = true;
+
+                     (function verify() {
+                        if ("CodeMirror" in window && "findModeByFileName" in window.CodeMirror)
+                            cb();
+                        else
+                            setTimeout(verify, 100);
+                     })();
+                 });
+            }, 200);
+        });
     }
 
     function openDoc(view, entryId) {
