@@ -1364,7 +1364,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 #login-box {
     color: #222;
-    background: #ddd;
+    background: #ccc;
     border-radius: 6px;
     box-shadow: 0 0 30px #000;
     height: 10rem;
@@ -1408,7 +1408,7 @@ html:not(.mobile) .vjs-big-play-button {
 #login-info-box {
     line-height: 2rem;
     background: linear-gradient(#ccc,#fff);
-    box-shadow: 0 0 10px rgba(0,0,0,.15);
+    box-shadow: 0 0 10px rgba(0,0,0,.3);
     border-radius: 5px 5px 0 0;
     transition: background 0.2s ease;
     position: absolute;
@@ -1455,7 +1455,7 @@ html:not(.mobile) .vjs-big-play-button {
     display: flex;
     background: linear-gradient(#fff,#ccc);
     border-radius: 0 0 5px 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,.15);
+    box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
 .remember, .submit {
