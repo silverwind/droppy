@@ -1833,11 +1833,11 @@
     }
 
     function swapMedia(view, dir) {
-        view.find(".media-wrapper")[0].style.willChange = "transform";
-        var b, a = view.find(".media-wrapper"),
+        if (view[0].tranistioning) return;
+        var a = view.find(".media-wrapper"), b,
             nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view),
-            isImage = Object.keys(droppy.imageTypes).indexOf(getExt(nextFile)) !== -1,
-            src = getMediaSrc(view, nextFile);
+            isImage  = Object.keys(droppy.imageTypes).indexOf(getExt(nextFile)) !== -1,
+            src      = getMediaSrc(view, nextFile);
 
         if (isImage) {
             b = $("<div class='media-wrapper new-media " + dir + "'><img class='media' src='" + src + "'></div>");
@@ -1849,28 +1849,25 @@
             b = $(bindVideoEvents(b[0]));
         }
 
-
-        a.attr("class", dir === "left" ? "media-wrapper right" : "media-wrapper left");
-        b.appendTo(view.find(".media-container"));
-        b.setTransitionClass(/(left|right)/, "").end(function () {
-            b.removeClass("new-media");
-            a.remove();
-            view.find(".media-wrapper")[0].style.willChange = "auto";
-            if (!isImage) initVideoJS(b.find("video")[0]);
-            makeMediaDraggable(b[0], !isImage);
-            $(b[0]).parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
+        a.attr("class", "media-wrapper old-media " + (dir === "left" ? "right" : "left"));
+        view[0].tranistioning = true;
+        b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
+            view[0].tranistioning = false;
+            $(".new-media").removeClass("new-media").parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
+            $(".old-media").remove();
+            if (isImage) updateMediaMeta(view); else initVideoJS(b.find("video")[0]);
+            makeMediaDraggable(this, !isImage);
             view[0].currentFile = nextFile;
             populateMediaCache(view, view[0].currentData);
             replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
-            updateMediaMeta(view);
             updatePath(view);
             if (view[0].vId === 0) updateTitle(nextFile); // Only update the page's title from view 0
         });
     }
 
     function updateMediaMeta(view) {
-        var meta = view.find(".meta"),
-            img  = view.find("img");
+        var meta = view.find(".meta"), img = view.find("img");
+        if (!img) return;
 
         meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
         meta.find(".max").text(view[0].mediaFiles.length);
@@ -1879,20 +1876,13 @@
         });
 
         (function addSizes(meta, img) {
-            var x = img[0].naturalWidth,
-                y = img[0].naturalHeight;
+            var x = img.naturalWidth, y = img.naturalHeight;
 
-            if (x && y)
-                setSize(x, y);
-            else
-                setTimeout(addSizes, 500);
-
-            function setSize(x, y) {
+            if (x && y) {
                 meta.find(".x").text(x);
                 meta.find(".y").text(y);
-            }
-        })(meta, img);
-
+            } else setTimeout(addSizes.bind(null, meta, img), 500);
+        })(meta, img[0]);
     }
 
     // Media up/down-scaling while maintaining aspect ratio.
@@ -1965,6 +1955,7 @@
             view.find(".media-container img").each(function () {
                 aspectScale();
                 makeMediaDraggable(this.parentNode, false);
+                updateMediaMeta(view);
             });
             view.find(".media-container video").each(function () {
                 initVideoJS(this, function () {
@@ -1974,7 +1965,6 @@
             });
 
             if (view[0].vId === 0) updateTitle(filename);
-            updateMediaMeta(view);
             hideSpinner(view);
         });
     }

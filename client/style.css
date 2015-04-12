@@ -146,7 +146,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .content-container {
     position: relative;
-    background: #181818;
+    background: #111;
     overflow-x: hidden;
     flex: 1;
     order: 2;
@@ -643,7 +643,7 @@ html:not(.mobile) #entry-menu a.active svg {
     text-align: center;
     height: 100%;
     overflow: hidden;
-    background: #181818;
+    background: #111;
 }
 
 .previewer .arrow-back, .previewer .arrow-forward {
@@ -683,47 +683,49 @@ html:not(.mobile) #entry-menu a.active svg {
 .media-wrapper {
     position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
-    transition: transform .2s ease, opacity .2s ease;
 }
-.media-wrapper:not(.new-media) { transition: none }
+.media-wrapper:not(.draggable) {transition: transform .25s ease, opacity .25s linear }
+.media-wrapper.left  { opacity: 0; transform: translateX(-33%) }
+.media-wrapper.right { opacity: 0; transform: translateX(33%)  }
 
-.media-container .media-wrapper.left  { transform: translateX(-100%); opacity: 0 }
-.media-container .media-wrapper.right { transform: translateX(100%); opacity: 0 }
+.media-container {
+    height: 100%; width: 100%;
+}
 
 /* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
 .media-container img {
-    position: absolute; width: auto;
-    height: 100%; width: 100%;
+    position: absolute;
+    height: 100%; width: auto;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-    object-fit: contain;
+    /*object-fit: contain;*/
 }
 .nofullscreen .media-container video {
-    position: absolute; width: auto;
+    position: absolute;
     height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:fullscreen) {
-    position: absolute; width: auto;
+    position: absolute;
     height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:-webkit-full-screen) {
-    position: absolute; width: auto;
+    position: absolute;
     height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:-moz-full-screen) {
-    position: absolute; width: auto;
+    position: absolute;
     height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
 }
 .media-container video:not(:-ms-fullscreen) {
-    position: absolute; width: auto;
+    position: absolute;
     height: 100%; width: 100%;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
@@ -744,8 +746,10 @@ html:not(.mobile) #entry-menu a.active svg {
     width: 1.25em;
 }
 .previewer .fs:hover, .previewer .meta:hover {
-    background: rgba(48,48,48,.6)
+    background: rgba(48,48,48,.6);
 }
+.previewer .fs:hover svg { fill: #fff }
+.previewer .meta:hover span > span { color: #fff}
 
 .previewer .meta {
     position: absolute;
@@ -753,7 +757,7 @@ html:not(.mobile) #entry-menu a.active svg {
     z-index: 1;
     background: transparent;
     color: #666;
-    background: rgba(0,0,0,.66);
+    background: rgba(0,0,0,.6);
     border-radius: .25em;
     padding: .4em;
     cursor: pointer;
