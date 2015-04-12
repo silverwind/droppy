@@ -656,8 +656,8 @@ function handleResourceRequest(req, res, resourceName) {
             }
 
             if (/.+\.(png|ico|svg|woff)$/.test(resourceName)) {
-                headers["Cache-Control"] = "public, max-age=86400";
-                headers["Expires"] = new Date(Date.now() + 86400000).toUTCString();
+                headers["Cache-Control"] = "public, max-age=604800";
+                headers["Expires"] = new Date(Date.now() + 604800000).toUTCString();
             } else {
                 if (resource.etag && !/\.html$/.test(resourceName)) {
                     headers["ETag"] = '"' + resource.etag + '"';
