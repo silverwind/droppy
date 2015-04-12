@@ -58,7 +58,6 @@ cleanCSS = new cleanCSS(opts.cleanCSS);
 
 resources.files = {
         css: [
-            "node_modules/codemirror/lib/codemirror.css",
             "client/style.css",
             "client/sprites.css"
         ],
@@ -66,15 +65,6 @@ resources.files = {
             "node_modules/jquery/dist/jquery.js",
             "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
             "node_modules/pretty-bytes/pretty-bytes.js",
-            "node_modules/codemirror/lib/codemirror.js",
-            "node_modules/codemirror/mode/meta.js",
-            "node_modules/codemirror/addon/dialog/dialog.js",
-            "node_modules/codemirror/addon/selection/active-line.js",
-            "node_modules/codemirror/addon/selection/mark-selection.js",
-            "node_modules/codemirror/addon/search/searchcursor.js",
-            "node_modules/codemirror/addon/edit/matchbrackets.js",
-            "node_modules/codemirror/addon/search/search.js",
-            "node_modules/codemirror/keymap/sublime.js",
             "client/client.js"
         ],
         html: [
@@ -101,15 +91,25 @@ resources.files = {
         ]
     };
 
-// On-demand loadable libs, preferably minified. Will be available as ?!/[property value]
+// On-demand loadable libs, preferably minified. Will be available as ?!/lib/[property value]
 var libs = {
-    "node_modules/video.js/dist/video-js/video.js"         : "video.js/vjs.js",
-    "node_modules/video.js/dist/video-js/video-js.min.css" : "video.js/vjs.css",
-    "node_modules/video.js/dist/video-js/video-js.swf"     : "video.js/vjs.swf",
-    "node_modules/video.js/dist/video-js/font/vjs.eot"     : "video.js/font/vjs.eot",
-    "node_modules/video.js/dist/video-js/font/vjs.svg"     : "video.js/font/vjs.svg",
-    "node_modules/video.js/dist/video-js/font/vjs.ttf"     : "video.js/font/vjs.ttf",
-    "node_modules/video.js/dist/video-js/font/vjs.woff"    : "video.js/font/vjs.woff"
+    "node_modules/video.js/dist/video-js/video.js"              : "video.js/vjs.js",
+    "node_modules/video.js/dist/video-js/video-js.min.css"      : "video.js/vjs.css",
+    "node_modules/video.js/dist/video-js/video-js.swf"          : "video.js/vjs.swf",
+    "node_modules/video.js/dist/video-js/font/vjs.eot"          : "video.js/font/vjs.eot",
+    "node_modules/video.js/dist/video-js/font/vjs.svg"          : "video.js/font/vjs.svg",
+    "node_modules/video.js/dist/video-js/font/vjs.ttf"          : "video.js/font/vjs.ttf",
+    "node_modules/video.js/dist/video-js/font/vjs.woff"         : "video.js/font/vjs.woff",
+    "node_modules/codemirror/lib/codemirror.js"                 : "cm/lib/codemirror.js",
+    "node_modules/codemirror/mode/meta.js"                      : "cm/mode/meta.js",
+    "node_modules/codemirror/addon/dialog/dialog.js"            : "cm/addon/dialog/dialog.js",
+    "node_modules/codemirror/addon/selection/active-line.js"    : "cm/addon/selection/active-line.js",
+    "node_modules/codemirror/addon/selection/mark-selection.js" : "cm/addon/selection/mark-selection.js",
+    "node_modules/codemirror/addon/search/searchcursor.js"      : "cm/addon/search/searchcursor.js",
+    "node_modules/codemirror/addon/edit/matchbrackets.js"       : "cm/addon/edit/matchbrackets.js",
+    "node_modules/codemirror/addon/search/search.js"            : "cm/addon/search/search.js",
+    "node_modules/codemirror/keymap/sublime.js"                 : "cm/keymap/sublime.js",
+    "node_modules/codemirror/lib/codemirror.css"                : "cm/lib/codemirror.css"
 };
 
 resources.init = function init(minify, callback) {

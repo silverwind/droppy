@@ -1974,22 +1974,40 @@
         view.data("type", "document");
         view[0].animDirection = "center";
 
-        $.ajax({
-            type: "GET",
-            url: "?_" + entryId,
-            dataType: "text"
-        }).done(function (data) {
-            var filename = basename(entryId);
-            updateTitle(filename);
-            setEditorFontSize(droppy.get("editorFontSize"));
-            loadTheme(droppy.get("theme"), function () {
-                loadCM(data, filename);
+        loadCM(function () {
+            $.ajax({
+                type: "GET",
+                url: "?_" + entryId,
+                dataType: "text"
+            }).done(function (data) {
+                var filename = basename(entryId);
+                updateTitle(filename);
+                setEditorFontSize(droppy.get("editorFontSize"));
+                loadTheme(droppy.get("theme"), function () {
+                    configCM(data, filename);
+                });
+            }).fail(function () {
+                closeDoc(view);
             });
-        }).fail(function () {
-            closeDoc(view);
         });
 
-        function loadCM(data, filename) {
+        function loadCM(cb) {
+            if (droppy.cmLoaded) return cb();
+            var reqs = [];
+            $("<link/>", { rel: "stylesheet", href: "?!/lib/cm/lib/codemirror.css"}).appendTo("head");
+            ["cm/lib/codemirror.js", "cm/mode/meta.js", "cm/addon/dialog/dialog.js",
+             "cm/addon/selection/active-line.js", "cm/addon/selection/mark-selection.js",
+             "cm/addon/search/searchcursor.js", "cm/addon/edit/matchbrackets.js",
+             "cm/addon/search/search.js", "cm/keymap/sublime.js"].forEach(function (path) {
+                reqs.push($.getScript("?!/lib/" + path));
+             });
+             $.when.apply(reqs).then(function () {
+                 droppy.cmLoaded = true;
+                 cb();
+             });
+        }
+
+        function configCM(data, filename) {
             loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(view.find(".document")[0], {
