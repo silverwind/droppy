@@ -54,7 +54,6 @@ var droppy = function droppy(options, isStandalone, callback) {
             firstRun = Object.keys(db.get("users")).length === 0;
             cb();
         },
-        function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
         function (cb) { resources.init(!config.debug, function (err, c) { cache = c; cb(err); }); },
         function (cb) { cleanupTemp(); cb(); },
         function (cb) { cleanupLinks(cb); },
@@ -62,9 +61,17 @@ var droppy = function droppy(options, isStandalone, callback) {
         function (cb) {
             if (config.demo || process.env.DROPPY_MODE === "demo") {
                 process.title = "droppy-demo";
+                config.demo = true;
+                config.public = true;
+                config.listeners = [{
+                    host: "0.0.0.0",
+                    port: process.env.PORT || 5000,
+                    protocol: "http"
+                }];
                 require("./lib/demo.js").init(cb);
             } else cb();
         },
+        function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
         function (cb) { filetree.updateDir(null, cb); },
     ], function (err) {
         if (err) return callback(err);
