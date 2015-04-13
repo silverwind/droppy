@@ -59,7 +59,12 @@ var droppy = function droppy(options, isStandalone, callback) {
         function (cb) { cleanupTemp(); cb(); },
         function (cb) { cleanupLinks(cb); },
         function (cb) { if (config.debug) debug(); cb(); },
-        function (cb) { if (config.demo) { require("./lib/demo.js").init(cb); } else cb(); },
+        function (cb) {
+            if (config.demo || process.env.DROPPY_MODE === "demo") {
+                process.title = "droppy-demo";
+                require("./lib/demo.js").init(cb);
+            } else cb();
+        },
         function (cb) { filetree.updateDir(null, cb); },
     ], function (err) {
         if (err) return callback(err);
