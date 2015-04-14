@@ -877,7 +877,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .sidebar svg {
-    fill: rgba(96,96,96,.5);
+    fill: rgba(128,128,128,.6);
     height: 1em;
     width: 1em;
     margin-left: .75em;
