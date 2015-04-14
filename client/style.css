@@ -173,9 +173,9 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .content.image, .content.video, .content.document {
-    padding: 0;
     height: 100%;
     background: #111;
+    position: absolute;
 }
 
 .content.back    { z-index: 0; position:absolute; transform: translateX(-100%) }
