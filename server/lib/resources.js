@@ -20,7 +20,7 @@ var async        = require("async"),
     vm           = require("vm"),
     zlib         = require("zlib");
 
-var doMinify, svgData = {}, $,
+var minify, svgData = {}, $,
     themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
     modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 
@@ -91,29 +91,31 @@ resources.files = {
         ]
     };
 
-// On-demand loadable libs, preferably minified. Will be available as ?!/lib/[property value]
+// On-demand loadable libs. Will be available as ?!/lib/[prop]
 var libs = {
-    "node_modules/video.js/dist/video-js/video.js"              : "video.js/vjs.js",
-    "node_modules/video.js/dist/video-js/video-js.min.css"      : "video.js/vjs.css",
-    "node_modules/video.js/dist/video-js/video-js.swf"          : "video.js/vjs.swf",
-    "node_modules/video.js/dist/video-js/font/vjs.eot"          : "video.js/font/vjs.eot",
-    "node_modules/video.js/dist/video-js/font/vjs.svg"          : "video.js/font/vjs.svg",
-    "node_modules/video.js/dist/video-js/font/vjs.ttf"          : "video.js/font/vjs.ttf",
-    "node_modules/video.js/dist/video-js/font/vjs.woff"         : "video.js/font/vjs.woff",
-    "node_modules/codemirror/lib/codemirror.js"                 : "cm/lib/codemirror.js",
-    "node_modules/codemirror/mode/meta.js"                      : "cm/mode/meta.js",
-    "node_modules/codemirror/addon/dialog/dialog.js"            : "cm/addon/dialog/dialog.js",
-    "node_modules/codemirror/addon/selection/active-line.js"    : "cm/addon/selection/active-line.js",
-    "node_modules/codemirror/addon/selection/mark-selection.js" : "cm/addon/selection/mark-selection.js",
-    "node_modules/codemirror/addon/search/searchcursor.js"      : "cm/addon/search/searchcursor.js",
-    "node_modules/codemirror/addon/edit/matchbrackets.js"       : "cm/addon/edit/matchbrackets.js",
-    "node_modules/codemirror/addon/search/search.js"            : "cm/addon/search/search.js",
-    "node_modules/codemirror/keymap/sublime.js"                 : "cm/keymap/sublime.js",
-    "node_modules/codemirror/lib/codemirror.css"                : "cm/lib/codemirror.css"
+    "vjs.js": "node_modules/video.js/dist/video-js/video.js",
+    "vjs.css": "node_modules/video.js/dist/video-js/video-js.min.css",
+    "vjs.swf": "node_modules/video.js/dist/video-js/video-js.swf",
+    "font/vjs.eot": "node_modules/video.js/dist/video-js/font/vjs.eot",
+    "font/vjs.svg": "node_modules/video.js/dist/video-js/font/vjs.svg",
+    "font/vjs.ttf": "node_modules/video.js/dist/video-js/font/vjs.ttf",
+    "font/vjs.woff": "node_modules/video.js/dist/video-js/font/vjs.woff",
+    "cm.js": [
+        "node_modules/codemirror/lib/codemirror.js",
+        "node_modules/codemirror/mode/meta.js",
+        "node_modules/codemirror/addon/dialog/dialog.js",
+        "node_modules/codemirror/addon/selection/active-line.js",
+        "node_modules/codemirror/addon/selection/mark-selection.js",
+        "node_modules/codemirror/addon/search/searchcursor.js",
+        "node_modules/codemirror/addon/edit/matchbrackets.js",
+        "node_modules/codemirror/addon/search/search.js",
+        "node_modules/codemirror/keymap/sublime.js"
+    ],
+    "cm.css": "node_modules/codemirror/lib/codemirror.css"
 };
 
-resources.init = function init(minify, callback) {
-    doMinify = minify;
+resources.init = function init(doMinify, callback) {
+    minify = doMinify;
     async.series([compileAll, readThemes, readModes, readLibs], function (err, results) {
         if (err) return callback(err);
         var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
@@ -191,12 +193,12 @@ function readThemes(callback) {
 
             filenames.forEach(function (name, index) {
                 var css = String(data[index]);
-                themes[name.replace(/\.css$/, "")] = new Buffer(doMinify ?  cleanCSS.minify(css).styles : css);
+                themes[name.replace(/\.css$/, "")] = new Buffer(minify ?  cleanCSS.minify(css).styles : css);
             });
 
             // add our own theme
             var css = fs.readFileSync(path.join(paths.mod, "/client/cmtheme.css"));
-            themes.droppy = new Buffer(doMinify ?  cleanCSS.minify(css).styles : css);
+            themes.droppy = new Buffer(minify ?  cleanCSS.minify(css).styles : css);
 
             callback(err, themes);
         });
@@ -219,7 +221,7 @@ function readModes(callback) {
 
         async.map(Object.keys(modes), function (mode, cb) {
             fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
-                cb(err, doMinify ? new Buffer(uglify.minify(data.toString(), opts.uglify).code) : data);
+                cb(err, minify ? new Buffer(uglify.minify(data.toString(), opts.uglify).code) : data);
             });
         }, function (err, result) {
             Object.keys(modes).forEach(function (mode, i) {
@@ -231,14 +233,32 @@ function readModes(callback) {
 }
 
 function readLibs(callback) {
-    var ret = {};
-    async.each(Object.keys(libs), function (p, cb) {
-        fs.readFile(path.join(paths.mod, p), function (err, data) {
-            ret[libs[p]] = data;
-            cb(err);
-        });
+    var out = {};
+    async.each(Object.keys(libs), function (dest, cb) {
+        if (Array.isArray(libs[dest])) {
+            async.map(libs[dest], function (p, innercb) {
+                fs.readFile(path.join(paths.mod, p), innercb);
+            }, function (err, data) {
+                out[dest] = Buffer.concat(data);
+                cb(err);
+            });
+        } else {
+            fs.readFile(path.join(paths.mod, libs[dest]), function (err, data) {
+                out[dest] = data;
+                cb(err);
+            });
+        }
     }, function (err) {
-        callback(err, ret);
+        if (minify) {
+           Object.keys(out).forEach(function (file) {
+               if (/\.js$/.test(file)) {
+                   out[file] = new Buffer(uglify.minify(out[file].toString(), opts.uglify).code);
+               } else if (/\.css$/.test(file)) {
+                   out[file] = new Buffer(cleanCSS.minify(out[file].toString()).styles);
+               }
+           });
+        }
+        callback(err, out);
     });
 }
 
@@ -259,7 +279,7 @@ function addSVG(html) {
     return $.html();
 }
 
-resources.compileJS = function compileJS(minify) {
+resources.compileJS = function compileJS() {
     var js = "";
     resources.files.js.forEach(function (file) {
         js += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + ";";
@@ -285,7 +305,7 @@ resources.compileJS = function compileJS(minify) {
     return {data: new Buffer(js), etag: etag(), mime: mime("js")};
 };
 
-resources.compileCSS = function compileCSS(minify) {
+resources.compileCSS = function compileCSS() {
     var css = "";
     resources.files.css.forEach(function (file) {
         css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + "\n";
@@ -300,7 +320,7 @@ resources.compileCSS = function compileCSS(minify) {
     return {data: new Buffer(css), etag: etag(), mime: mime("css")};
 };
 
-resources.compileHTML = function compileHTML(res, minify) {
+resources.compileHTML = function compileHTML(res) {
     var html = {};
     resources.files.html.forEach(function (file) {
         var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
@@ -349,9 +369,9 @@ function compileAll(callback) {
     var res = {};
 
     readSVG();
-    res["client.js"] = resources.compileJS(doMinify);
-    res["style.css"] = resources.compileCSS(doMinify);
-    res = resources.compileHTML(res, doMinify);
+    res["client.js"] = resources.compileJS();
+    res["style.css"] = resources.compileCSS();
+    res = resources.compileHTML(res);
 
     // Read misc files
     resources.files.other.forEach(function (file) {

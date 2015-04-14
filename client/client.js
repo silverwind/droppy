@@ -526,7 +526,6 @@
                 droppy.resizeTimer = setTimeout(function () {
                     $(".view").each(function () {
                         checkPathOverflow($(this));
-                        aspectScale();
                     });
                 }, 100);
             })
@@ -1840,9 +1839,6 @@
 
         if (isImage) {
             b = $("<div class='media-container new-media " + dir + "'><img class='media' src='" + src + "'></div>");
-            b.find("img").one("load", function () {
-                aspectScale();
-            });
         } else {
             b = $("<div class='media-container new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
@@ -1884,43 +1880,14 @@
         })(meta, img[0]);
     }
 
-    // Media up/down-scaling while maintaining aspect ratio.
-    function aspectScale() {
-        return;
-        $(".media-container").each(function () {
-            var container = $(this);
-            container.find("img, video").each(function () {
-                var dims  = {
-                        w: this.naturalWidth || this.videoWidth || this.clientWidth,
-                        h: this.naturalHeight || this.videoHeight || this.clientHeight
-                    },
-                    space = {
-                        w: container.width(),
-                        h: container.height()
-                    };
-                if (dims.w > space.w || dims.h > space.h) {
-                    $(this).css({width: "", height: ""}); // Let CSS handle the downscale
-                } else {
-                    if (dims.w / dims.h > space.w / space.h) {
-                        $(this).css({width: "100%", height: "auto"});
-                    } else {
-                        $(this).css({width: "auto", height: "100%"});
-                    }
-                }
-            });
-        });
-    }
-
     function bindVideoEvents(el) {
         var volume = droppy.get("videoVolume");
         if (volume) el.volume = volume;
-        el.addEventListener("loadedmetadata", aspectScale);
         el.addEventListener("volumechange", function () {
             droppy.set("videoVolume", this.volume);
         });
         el.addEventListener("error", function (event) {
             console.error(event);
-            aspectScale();
         });
         return el;
     }
@@ -1953,7 +1920,6 @@
                 toggleFullscreen($(this).parents(".content")[0]);
             });
             view.find("img").each(function () {
-                aspectScale();
                 makeMediaDraggable(this.parentNode, false);
                 updateMediaMeta(view);
             });
@@ -1969,57 +1935,36 @@
         });
     }
 
-    function loadCM(cb) {
-        if (droppy.cmLoaded) return cb();
-        var reqs = [];
-        $("<link/>", { rel: "stylesheet", href: "?!/lib/cm/lib/codemirror.css"}).appendTo("head");
-
-        $.getScript("?!/lib/cm/lib/codemirror.js").then(function () {
-            setTimeout(function () {
-                ["cm/mode/meta.js", "cm/addon/dialog/dialog.js",
-                 "cm/addon/selection/active-line.js", "cm/addon/selection/mark-selection.js",
-                 "cm/addon/search/searchcursor.js", "cm/addon/edit/matchbrackets.js",
-                 "cm/addon/search/search.js", "cm/keymap/sublime.js"].forEach(function (path) {
-                    reqs.push($.getScript("?!/lib/" + path));
-                 });
-                 $.when.apply(reqs).then(function () {
-                     droppy.cmLoaded = true;
-
-                     (function verify() {
-                        if ("CodeMirror" in window && "findModeByFileName" in window.CodeMirror)
-                            cb();
-                        else
-                            setTimeout(verify, 100);
-                     })();
-                 });
-            }, 200);
-        });
-    }
-
     function openDoc(view, entryId) {
-        showSpinner(view);
-        var editor, doc = $(droppy.templates.views.document({modes: droppy.modes}));
-        view.data("type", "document");
-        view[0].animDirection = "center";
+        var editor,
+            script = $.Deferred(),
+            theme  = $.Deferred(),
+            file   = $.Deferred();
 
-        loadCM(function () {
-            $.ajax({
-                type: "GET",
-                url: "?_" + entryId,
-                dataType: "text"
-            }).done(function (data) {
-                var filename = basename(entryId);
-                updateTitle(filename);
-                setEditorFontSize(droppy.get("editorFontSize"));
-                loadTheme(droppy.get("theme"), function () {
-                    configCM(data, filename);
-                });
-            }).fail(function () {
-                closeDoc(view);
-            });
+        showSpinner(view);
+
+        $.when(file, script, theme).done(function (data) {
+            view.data("type", "document");
+            updateTitle(basename(entryId));
+            setEditorFontSize(droppy.get("editorFontSize"));
+            configCM(data, basename(entryId));
+        });
+
+        initCM(script.resolve);
+        loadTheme(droppy.get("theme"), theme.resolve);
+
+        $.ajax({
+            type: "GET",
+            url: "?_" + entryId,
+            dataType: "text"
+        }).done(function (data) {
+            file.resolve(data);
+        }).fail(function () {
+            closeDoc.bind(null, view);
         });
 
         function configCM(data, filename) {
+            var doc = $(droppy.templates.views.document({modes: droppy.modes}));
             loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(view.find(".document")[0], {
@@ -2500,27 +2445,42 @@
     // video.js
     function initVideoJS(el, cb) {
         if (!$("#vjs-css").length) {
-            $.get("?!/lib/video.js/vjs.css").then(function (data) {
+            $.get("?!/lib/vjs.css").then(function (data) {
                 $('<style id="vjs-css"></style>').appendTo("head");
-                $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/video.js/font/"));
+                $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/font/"));
             });
         }
-        loadScript("vjs-js", "?!/lib/video.js/vjs.js", function init() {
-            if (!window.videojs)
-                throw new Error("videojs undefined");
+        loadScript("vjs-js", "?!/lib/vjs.js", function () {
+            (function verify() {
+                if (!("videojs" in window)) return setTimeout(verify, 200);
+                if (!el.classList.contains("video-js"))
+                    el.classList.add("video-js", "vjs-default-skin");
+                videojs.options.flash.swf = "?!/lib/vjs.swf";
+                videojs(el, {
+                    "controls" : true,
+                    "autoplay" : droppy.detects.mobile ? false : true,
+                    "preload"  : "auto",
+                    "loop"     : "loop",
+                    "width"    : $(el).parents(".media-container")[0].clientWidth,
+                    "heigth"   : $(el).parents(".media-container")[0].clientHeight
+                }, cb);
+            })();
+        });
+    }
 
-            if (!el.classList.contains("video-js"))
-                el.classList.add("video-js", "vjs-default-skin");
-
-            videojs.options.flash.swf = "?!/lib/video.js/vjs.swf";
-            videojs(el, {
-                "controls" : true,
-                "autoplay" : droppy.detects.mobile ? false : true,
-                "preload"  : "auto",
-                "loop"     : "loop",
-                "width"    : $(el).parents(".media-container")[0].clientWidth,
-                "heigth"   : $(el).parents(".media-container")[0].clientHeight
-            }, cb);
+    // CodeMirror
+    function initCM(cb) {
+        if (!$("#cm-css").length) {
+            $.get("?!/lib/cm.css").then(function (data) {
+                $('<style id="cm-css"></style>').appendTo("head");
+                $("#cm-css").text(data);
+            });
+        }
+        loadScript("cm-js", "?!/lib/cm.js", function () {
+             (function verify() {
+                if (!("CodeMirror" in window)) return setTimeout(verify, 200);
+                cb();
+             })();
         });
     }
 

@@ -62,7 +62,7 @@ if (cmds[cmd]) {
     switch (cmd) {
     case "start":
         require("./server/server.js")(null, true, function (err) {
-            if (err) { console.error(err); process.exit(1); }
+            if (err) { console.error(new Error(err.message || err).stack); process.exit(1); }
         });
         break;
     case "version":
@@ -70,7 +70,7 @@ if (cmds[cmd]) {
         break;
     case "update":
         require("./server/lib/update.js")(pkg, function (err, message) {
-            if (err) { console.error(err); process.exit(1); }
+            if (err) { console.error(new Error(err.message || err).stack); process.exit(1); }
             if (message) { console.info(message); process.exit(0); }
         });
         break;
@@ -85,7 +85,7 @@ if (cmds[cmd]) {
             if (err && err.code === "ENOENT") {
                 require("mkdirp")(paths.cfg, function () {
                     cfg.init(null, function (err) {
-                        if (err) return console.error(err);
+                        if (err) return console.error(new Error(err.message || err).stack);
                         edit();
                     });
                 });

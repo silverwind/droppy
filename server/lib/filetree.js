@@ -2,7 +2,8 @@
 
 var filetree = new (require("events").EventEmitter)(),
     dirs     = {},
-    todoDirs = [];
+    todoDirs = [],
+    initial  = true;
 
 var _        = require("lodash"),
     chalk    = require("chalk"),
@@ -43,7 +44,12 @@ function update(dir) {
 
 filetree.updateDir = function updateDir(dir, cb) {
     if (dir === null) { dir = "/"; dirs = {}; }
-    log.debug("Updating " + chalk.blue(dir));
+
+    if (initial)
+        initial = false;
+    else
+        log.debug("Updating " + chalk.blue(dir));
+
     fs.stat(utils.addFilesPath(dir), function (err, stats) {
         readdirp({root: utils.addFilesPath(dir)}, function (errs, results) {
             dirs[dir] = {files: {}, size: 0, mtime: stats ? stats.mtime.getTime() : Date.now()};

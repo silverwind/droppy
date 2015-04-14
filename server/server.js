@@ -54,7 +54,10 @@ var droppy = function droppy(options, isStandalone, callback) {
             firstRun = Object.keys(db.get("users")).length === 0;
             cb();
         },
-        function (cb) { resources.init(!config.debug, function (err, c) { cache = c; cb(err); }); },
+        function (cb) {
+            log.simple("Loading " + (!config.debug ? "and minifying " : "") + "resources ...");
+            resources.init(!config.debug, function (err, c) { cache = c; cb(err); });
+        },
         function (cb) { cleanupTemp(); cb(); },
         function (cb) { cleanupLinks(cb); },
         function (cb) { if (config.debug) debug(); cb(); },
@@ -76,7 +79,7 @@ var droppy = function droppy(options, isStandalone, callback) {
     ], function (err) {
         if (err) return callback(err);
         ready = true;
-        log.simple("Ready for requests!");
+        log.simple(chalk.green("Ready for requests!"));
         callback();
     });
 };
@@ -151,18 +154,18 @@ function startListeners(callback) {
                 if (tlsData) {
                     require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
                         if (tlsData.selfsigned || !info.commonName) {
-                            log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                            log.simple(socket.opts.proto.toUpperCase() + " listening on ",
                                        chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
                                        " (" + chalk.yellow("self-signed") + ")");
                         } else {
-                            log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                            log.simple(socket.opts.proto.toUpperCase() + " listening on ",
                                        chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
                                        " (" + chalk.yellow(info.commonName) + ")");
                         }
                         cb();
                     });
                 } else {
-                    log.simple(chalk.green(socket.opts.proto.toUpperCase()) + " listening on ",
+                    log.simple(socket.opts.proto.toUpperCase() + " listening on ",
                                chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
                     cb();
                 }
