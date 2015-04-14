@@ -175,6 +175,7 @@ input::-webkit-input-placeholder { color: #999 }
 .content.image, .content.video, .content.document {
     padding: 0;
     height: 100%;
+    background: #111;
 }
 
 .content.back    { z-index: 0; position:absolute; transform: translateX(-100%) }
@@ -199,7 +200,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 @media (min-width: 1024px) { .path {font-size: .9em } }
 @media (max-width: 1023px) { .path {font-size: .8em } }
-@media (max-width:  639px) { .path {font-size: .7em; height: 1.25rem } }
+@media (max-width:  639px) { .path {font-size: .7em; flex-basis: 1.25rem } }
 
 .path li {
     color: #ccc;
@@ -638,15 +639,8 @@ html:not(.mobile) #entry-menu a.active svg {
     display: block;
 }
 
-/* ============================ Image Previewer ============================ */
-.previewer {
-    text-align: center;
-    height: 100%;
-    overflow: hidden;
-    background: #111;
-}
-
-.previewer .arrow-back, .previewer .arrow-forward {
+/* ============================ Media View ============================ */
+.arrow-back, .arrow-forward {
     position: absolute;
     height: 6em;
     width: 6em;
@@ -660,14 +654,14 @@ html:not(.mobile) #entry-menu a.active svg {
     opacity: 0;
     transition: opacity .3s ease;
 }
-.mobile .previewer .arrow-back, .mobile .previewer .arrow-forward { display: none }
+.mobile .arrow-back, .mobile .arrow-forward { display: none }
 
-.previewer .arrow-back       { left:  0 }
-.previewer .arrow-forward    { right: 0 }
-.previewer .arrow-back.in    { opacity: 1 }
-.previewer .arrow-forward.in { opacity: 1 }
+.arrow-back       { left:  0 }
+.arrow-forward    { right: 0 }
+.arrow-back.in    { opacity: 1 }
+.arrow-forward.in { opacity: 1 }
 
-.previewer .arrow-back svg, .previewer .arrow-forward svg {
+.arrow-back svg, .arrow-forward svg {
     height: 2em;
     width: 2em;
     position: absolute;
@@ -675,63 +669,47 @@ html:not(.mobile) #entry-menu a.active svg {
     transition: all .25s ease;
 }
 
-.previewer .arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
-.previewer .arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
-.previewer .arrow-back:hover svg    { height: 3em; width: 3em; left:  -.25em }
-.previewer .arrow-forward:hover svg { height: 3em; width: 3em; right: -.25em }
-
-.media-wrapper {
-    position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-}
-.media-wrapper:not(.draggable) {transition: transform .25s ease, opacity .25s linear }
-.media-wrapper.left  { opacity: 0; transform: translateX(-33%) }
-.media-wrapper.right { opacity: 0; transform: translateX(33%)  }
+.arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
+.arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
+.arrow-back:hover svg    { height: 3em; width: 3em; left:  -.25em }
+.arrow-forward:hover svg { height: 3em; width: 3em; right: -.25em }
 
 .media-container {
-    height: 100%; width: 100%;
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    overflow: visible;
 }
+.media-container:not(.draggable) {transition: all .25s ease }
+.media-container.left  { opacity: 0; transform: translateX(-33%); }
+.media-container.right { opacity: 0; transform: translateX(33%); }
 
-/* Need to split these up so browser don't ignore rules containing invalid pseudo classes */
-.media-container img {
-    position: absolute;
-    height: 100%; width: auto;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    /*object-fit: contain;*/
-}
-.nofullscreen .media-container video {
-    position: absolute;
-    height: 100%; width: 100%;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
+.media-container img, .nofullscreen .media-container video {
+    position: absolute; height: auto; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:fullscreen) {
-    position: absolute;
-    height: 100%; width: 100%;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute; height: auto; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-webkit-full-screen) {
-    position: absolute;
-    height: 100%; width: 100%;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute; height: auto; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-moz-full-screen) {
-    position: absolute;
-    height: 100%; width: 100%;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute; height: auto; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-ms-fullscreen) {
-    position: absolute;
-    height: 100%; width: 100%;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute; height: auto; width: auto;
+    max-height: 100%; max-width: 100%;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 
-.previewer .fs {
+.fs {
     position: absolute;
     cursor: pointer;
     right: .25em; bottom: .25em;
@@ -740,18 +718,18 @@ html:not(.mobile) #entry-menu a.active svg {
     border-radius: .25em;
     padding: .25em .25em 0 .25em;
 }
-.previewer .fs svg {
+.fs svg {
     fill: #888;
     height: 1.25em;
     width: 1.25em;
 }
-.previewer .fs:hover, .previewer .meta:hover {
+.fs:hover, .meta:hover {
     background: rgba(48,48,48,.6);
 }
-.previewer .fs:hover svg { fill: #fff }
-.previewer .meta:hover span > span { color: #fff}
+.fs:hover svg { fill: #fff }
+.meta:hover span > span { color: #fff}
 
-.previewer .meta {
+.meta {
     position: absolute;
     right: 2.25em; bottom: .25em;
     z-index: 1;
@@ -764,11 +742,11 @@ html:not(.mobile) #entry-menu a.active svg {
     user-select: none;
 }
 
-.previewer .meta .dims    { display: none }
-.previewer .meta .dims.in { display: inline }
+.meta .dims    { display: none }
+.meta .dims.in { display: inline }
 
-.previewer .meta > div { display: inline }
-.previewer .meta span > span { color: #ccc }
+.meta > div { display: inline }
+.meta span > span { color: #ccc }
 .video .fs, .nofullscreen .fs, .video .meta { display: none }
 /* ================================= Video.js ================================= */
 
@@ -851,9 +829,9 @@ html:not(.mobile) .vjs-big-play-button {
 /* ============================ Document  ============================ */
 
 .CodeMirror {
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
-    font-size: 16px;
-    line-height: 1.2em;
+    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace !important;
+    font-size: 16px !important;
+    line-height: 1.2em !important;
     height: 100% !important;
     width: 100% !important;
 }

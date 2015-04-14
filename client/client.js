@@ -1833,24 +1833,24 @@
 
     function swapMedia(view, dir) {
         if (view[0].tranistioning) return;
-        var a = view.find(".media-wrapper"), b,
+        var a = view.find(".media-container"), b,
             nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view),
             isImage  = Object.keys(droppy.imageTypes).indexOf(getExt(nextFile)) !== -1,
             src      = getMediaSrc(view, nextFile);
 
         if (isImage) {
-            b = $("<div class='media-wrapper new-media " + dir + "'><img class='media' src='" + src + "'></div>");
+            b = $("<div class='media-container new-media " + dir + "'><img class='media' src='" + src + "'></div>");
             b.find("img").one("load", function () {
                 aspectScale();
             });
         } else {
-            b = $("<div class='media-wrapper new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
+            b = $("<div class='media-container new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
         }
 
-        a.attr("class", "media-wrapper old-media " + (dir === "left" ? "right" : "left"));
+        a.attr("class", "media-container old-media " + (dir === "left" ? "right" : "left"));
         view[0].tranistioning = true;
-        b.appendTo(view.find(".media-container")).setTransitionClass(/(left|right)/, "").end(function () {
+        b.appendTo(view.find(".content")).setTransitionClass(/(left|right)/, "").end(function () {
             view[0].tranistioning = false;
             $(".new-media").removeClass("new-media").parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
             $(".old-media").remove();
@@ -1886,6 +1886,7 @@
 
     // Media up/down-scaling while maintaining aspect ratio.
     function aspectScale() {
+        return;
         $(".media-container").each(function () {
             var container = $(this);
             container.find("img, video").each(function () {
@@ -1933,10 +1934,10 @@
     }
 
     function openMedia(view, type, sameFolder) {
-        var previewer,
+        var content,
             filename  = view[0].currentFile;
         view.data("type", type);
-        previewer = $(droppy.templates.views.media({
+        content = $(droppy.templates.views.media({
             type: type,
             src: getMediaSrc(view, filename),
             vid: view[0].vId
@@ -1947,18 +1948,18 @@
             sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
         }
         view[0].animDirection = "forward";
-        loadContent(view, contentWrap(view).append(previewer), function (view) {
+        loadContent(view, contentWrap(view).append(content), function (view) {
             view.find(".fs").register("click", function () {
                 toggleFullscreen($(this).parents(".content")[0]);
             });
-            view.find(".media-container img").each(function () {
+            view.find("img").each(function () {
                 aspectScale();
                 makeMediaDraggable(this.parentNode, false);
                 updateMediaMeta(view);
             });
-            view.find(".media-container video").each(function () {
+            view.find("video").each(function () {
                 initVideoJS(this, function () {
-                    makeMediaDraggable(view.find(".media-wrapper")[0], true);
+                    makeMediaDraggable(view.find(".media-container")[0], true);
                     bindVideoEvents(view.find("video")[0]);
                 });
             });
@@ -2482,7 +2483,7 @@
     function makeMediaDraggable(el, isVideo) {
         if ($(el).hasClass("draggable")) return;
         var opts = isVideo ? {axis: "x", handle: "video"} : {axis: "x"};
-        $(el).attr("class", "media-wrapper draggable");
+        $(el).attr("class", "media-container draggable");
         var instance = new Draggabilly(el, opts);
         $(el).on("dragEnd", function () {
             var view      = $(instance.element).parents(".view"),
