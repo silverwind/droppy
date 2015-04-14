@@ -1,7 +1,7 @@
 {
   "name": "droppy",
   "description": "Self-hosted file server with a convenient web interface",
-  "version": "2.0.12",
+  "version": "2.1.0",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "autoprefixer-core": "^5.1.8",
+    "autoprefixer-core": "^5.1.9",
     "busboy": "^0.2.9",
     "chalk": "^1.0.0",
     "cheerio": "^0.19.0",
@@ -47,7 +47,7 @@
     "request": "^2.55.0",
     "rimraf": "^2.3.2",
     "spdy": "^1.31.0",
-    "uglify-js": "^2.4.19",
+    "uglify-js": "^2.4.20",
     "untildify": "^2.0.0",
     "video.js": "^4.12.5",
     "websocket": "^1.0.18",
