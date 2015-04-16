@@ -1850,12 +1850,12 @@
             view[0].tranistioning = false;
             $(".new-media").removeClass("new-media").parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
             $(".old-media").remove();
-            if (isImage) updateMediaMeta(view); else initVideoJS(b.find("video")[0]);
             makeMediaDraggable(this, !isImage);
             view[0].currentFile = nextFile;
             populateMediaCache(view, view[0].currentData);
             replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
             updatePath(view);
+            if (isImage) updateMediaMeta(view); else initVideoJS(b.find("video")[0]);
             if (view[0].vId === 0) updateTitle(nextFile); // Only update the page's title from view 0
         });
     }
