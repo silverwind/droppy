@@ -526,6 +526,7 @@
                 droppy.resizeTimer = setTimeout(function () {
                     $(".view").each(function () {
                         checkPathOverflow($(this));
+                        aspectScale();
                     });
                 }, 100);
             })
@@ -1839,6 +1840,7 @@
 
         if (isImage) {
             b = $("<div class='media-container new-media " + dir + "'><img class='media' src='" + src + "'></div>");
+            b.find("img").one("load", aspectScale.bind(null));
         } else {
             b = $("<div class='media-container new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
@@ -1850,6 +1852,7 @@
             view[0].tranistioning = false;
             $(".new-media").removeClass("new-media").parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
             $(".old-media").remove();
+            aspectScale();
             makeMediaDraggable(this, !isImage);
             view[0].currentFile = nextFile;
             populateMediaCache(view, view[0].currentData);
@@ -1862,7 +1865,7 @@
 
     function updateMediaMeta(view) {
         var meta = view.find(".meta"), img = view.find("img");
-        if (!img) return;
+        if (!img.length) return;
 
         meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
         meta.find(".max").text(view[0].mediaFiles.length);
@@ -1883,12 +1886,11 @@
     function bindVideoEvents(el) {
         var volume = droppy.get("videoVolume");
         if (volume) el.volume = volume;
+        el.addEventListener("loadedmetadata", aspectScale);
         el.addEventListener("volumechange", function () {
             droppy.set("videoVolume", this.volume);
         });
-        el.addEventListener("error", function (event) {
-            console.error(event);
-        });
+        el.addEventListener("error", aspectScale.bind(null));
         return el;
     }
 
@@ -1920,11 +1922,13 @@
                 toggleFullscreen($(this).parents(".content")[0]);
             });
             view.find("img").each(function () {
+                aspectScale();
                 makeMediaDraggable(this.parentNode, false);
                 updateMediaMeta(view);
             });
             view.find("video").each(function () {
                 initVideoJS(this, function () {
+                    aspectScale();
                     makeMediaDraggable(view.find(".media-container")[0], true);
                     bindVideoEvents(view.find("video")[0]);
                 });
@@ -2837,6 +2841,35 @@
                 });
             }
         }
+    }
+
+    // Media up/down-scaling while maintaining aspect ratio.
+    function aspectScale() {
+        $(".media-container").each(function () {
+            var container = $(this);
+            container.find("img, video").each(function () {
+                // Only upscale
+                if ($(this).width() >= $(this).parent().width()) return;
+                if ($(this).height() >= $(this).parent().height()) return;
+                var dims  = {
+                        w: this.naturalWidth || this.videoWidth || this.clientWidth,
+                        h: this.naturalHeight || this.videoHeight || this.clientHeight
+                    },
+                    space = {
+                        w: container.width(),
+                        h: container.height()
+                    };
+                if (dims.w > space.w || dims.h > space.h) {
+                    $(this).css({width: "", height: ""}); // Let CSS handle the downscale
+                } else {
+                    if (dims.w / dims.h > space.w / space.h) {
+                        $(this).css({width: "100%", height: "auto"});
+                    } else {
+                        $(this).css({width: "auto", height: "100%"});
+                    }
+                }
+            });
+        });
     }
 
     function throttle(func, threshold) {
