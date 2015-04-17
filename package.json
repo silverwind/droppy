@@ -31,7 +31,7 @@
     "cpr": "^0.4.0",
     "detect-engine": "^1.0.2",
     "dot": "^1.0.3",
-    "draggabilly": "^1.2.1",
+    "draggabilly": "^1.2.3",
     "graceful-fs": "^3.0.6",
     "html-minifier": "^0.7.2",
     "isbinaryfile": "^2.0.3",
