@@ -391,6 +391,7 @@ input::-webkit-input-placeholder { color: #999 }
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
 }
+.data-row[order='0'] { border-top: none }
 
 .data-row.editing { background: #fff }
 .data-row.editing.invalid input { color: #d22 }
