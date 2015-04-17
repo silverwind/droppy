@@ -364,7 +364,7 @@ input::-webkit-input-placeholder { color: #999 }
 .header-name {
     flex: 1 1;
     display: inline-block;
-    padding-left: .3em;
+    padding-left: .5em;
 }
 
 .header-mtime {

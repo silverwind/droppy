@@ -1722,6 +1722,14 @@
         return Object.keys(entries).sort(droppy.templates.fn.compare2(entries, by));
     };
 
+    droppy.templates.fn.convert = function (entries) {
+        Object.keys(entries).forEach(function (entry) {
+            var data = entries[entry].split("|");
+            entries[entry] = { type: data[0], mtime: data[1], size: data[2]};
+        });
+        return entries;
+    };
+
     function closeDoc(view) {
         view[0].switchRequest = true;
         view[0].editor = null;

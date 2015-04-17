@@ -266,11 +266,19 @@ filetree.getDirContents = function getDirContents(p) {
     if (!dirs[p]) return;
     var entries = {}, files = dirs[p].files;
     Object.keys(files).forEach(function (file) {
-        entries[file] = {type: "f", size: files[file].size, mtime: files[file].mtime, mime: mime(file)};
+        entries[file] = [
+            "f",
+            Math.round(files[file].mtime / 1e3),
+            files[file].size
+        ].join("|");
     });
     Object.keys(dirs).forEach(function (dir) {
         if (path.dirname(dir) === p && path.basename(dir)) {
-            entries[path.basename(dir)] = {type: "d", mtime: dirs[dir].mtime, size: dirs[dir].size};
+            entries[path.basename(dir)] = [
+                "d",
+                Math.round(dirs[dir].mtime / 1e3),
+                dirs[dir].size
+            ].join("|");
         }
     });
     return entries;

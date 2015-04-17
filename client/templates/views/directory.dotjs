@@ -6,13 +6,7 @@ it = {
     isUpload: Boolean // Determines if we need to DecodeURI
     sortBy: String // What property to sort the entries by
     sortAsc: Boolean // Ascending or descending
-    entries: {
-        filename: { // entry details
-            type: String // type of entry = "f" (file) | "d" (directory) | "e" (error, probably no permission)
-            mtime: Number // Last modified in ms
-            size: Number // Size in bytes
-        }
-    }
+    entries: String // type|mtime|size
 }
 </script>
 #}}
@@ -56,9 +50,9 @@ it = {
     <div id="empty" class="empty">{{= droppy.svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
     {{  if (it.sortBy === "name") it.sortBy = "type";
-        var entry = {},
-            folder = (it.folder === "/") ? "/" : it.folder + "/",
-            sortedEntries = droppy.templates.fn.sortKeysByProperty(it.entries, it.sortBy);
+        var entries = droppy.templates.fn.convert(it.entries), entry = {};
+        var folder = (it.folder === "/") ? "/" : it.folder + "/";
+        var sortedEntries = droppy.templates.fn.sortKeysByProperty(entries, it.sortBy);
 
         if(it.sortAsc) sortedEntries.reverse();
         entry.sort = { type: "", mtime: "", size: "" };
@@ -67,9 +61,9 @@ it = {
     {{#def.directoryHeader}}
     {{~sortedEntries :name}}
         {{  entry.type = it.entries[name].type;
-            entry.mtime = it.entries[name].mtime;
-            entry.size = it.entries[name].size;
-            entry.prettysize = prettyBytes(it.entries[name].size);
+            entry.mtime = Number(it.entries[name].mtime) * 1e3;
+            entry.size = Number(it.entries[name].size);
+            entry.prettysize = prettyBytes(Number(entry.size));
             entry.id = folder + name;
             entry.sprite = droppy.templates.fn.getSpriteClass(/[^.]*$/.exec(name)[0]);
             entry.name = it.isUpload ? decodeURIComponent(name) : name;
