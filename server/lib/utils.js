@@ -1,25 +1,28 @@
 "use strict";
 
-var utils  = {},
-    async  = require("async"),
+var utils  = {};
+
+var async  = require("async"),
     cd     = require("content-disposition"),
     cpr    = require("cpr"),
     crypto = require("crypto"),
-    db     = require("./db.js"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
-    log    = require("./log.js"),
     mkdirp = require("mkdirp"),
     mv     = require("mv"),
     path   = require("path"),
-    paths  = require("./paths.js").get(),
-    rimraf = require("rimraf"),
-    forceBinaryTypes = [
-        "pdf",
-        "ps",
-        "eps",
-        "ai"
-    ];
+    rimraf = require("rimraf");
+
+var db     = require("./db.js"),
+    log    = require("./log.js"),
+    paths  = require("./paths.js").get();
+
+var forceBinaryTypes = [
+    "pdf",
+    "ps",
+    "eps",
+    "ai"
+];
 
 var DHPARAM_BITS = 2048;
 var CERT_DAYS = 365;

@@ -13,7 +13,6 @@ var _        = require("lodash"),
     readdirp = require("readdirp");
 
 var log      = require("./log.js"),
-    mime     = require("./mime.js"),
     paths    = require("./paths.js").get(),
     utils    = require("./utils.js");
 
