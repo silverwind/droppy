@@ -331,7 +331,7 @@ input::-webkit-input-placeholder { color: #999 }
 .file-header {
     display: flex;
     order: -1;
-    color: #555;
+    color: #777;
     border-bottom: 1px solid #bbb;
     background: linear-gradient(#dfdfdf,#d8d8d8);
     padding: .1em 0;
@@ -339,10 +339,8 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .file-header span {
-    position: relative;
-    cursor: pointer;
     white-space: nowrap;
-    line-height: 1.1em;
+    cursor: pointer;
 }
 
 .file-header .triangle {
@@ -351,7 +349,7 @@ input::-webkit-input-placeholder { color: #999 }
     width: .5em;
     margin-left: .25em;
     transition: all .2s ease;
-    fill: #555;
+    fill: #777;
     z-index: 2;
     top: -.1em;
     left: -.3em;
@@ -389,7 +387,9 @@ input::-webkit-input-placeholder { color: #999 }
     display: flex;
     align-items: center;
     padding: 0 .5em;
-    line-height: 1.5em;
+    line-height: 1.45em;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
 }
 
 .data-row.editing { background: #fff }
@@ -399,7 +399,8 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-    background: #f0f0f0;
+    background: #ddd;
+    border-color: #c8c8c8;
 }
 
 .data-row.playing { background: #05a }
