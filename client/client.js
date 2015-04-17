@@ -1704,17 +1704,16 @@
     }
 
     droppy.templates.fn.compare = function (a, b) {
-        if (typeof a === "number" && typeof b === "number") {
+        if (typeof a === "number" && typeof b === "number")
             return b - a;
-        } else {
-            return naturalSort(a, b);
-        }
+        else
+            return naturalSort(a.toLowerCase(), b.toLowerCase());
     };
     // Compare by property, then by key
-    droppy.templates.fn.compare2 = function (entries, property) {
+    droppy.templates.fn.compare2 = function (entries, prop) {
         var result;
         return function (a, b) {
-            result = droppy.templates.fn.compare(entries[a][property], entries[b][property]);
+            result = droppy.templates.fn.compare(entries[a][prop], entries[b][prop]);
             if (result === 0) result = droppy.templates.fn.compare(a, b);
             return result;
         };
