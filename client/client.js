@@ -731,19 +731,13 @@
                 }
             }
         } else { // We got an object for recursive folder uploads
-            var addedDirs = {};
             Object.keys(data).forEach(function (entry) {
-                var name = rootDir(entry);
                 if (Object.prototype.toString.call(data[entry]) === "[object File]") {
                     if (isOverLimit(view, data[entry].size)) return;
                     numFiles++;
                     formLength++;
                     formData.append(entry, data[entry], encodeURIComponent(entry));
                 } else {
-                    if (!addedDirs[name]) {
-                        view[0].currentData[name] = {size: 0, type: "nd", mtime: Date.now()};
-                        addedDirs[name] = true;
-                    }
                     // All folders are empty object, filter them
                     if (!$.isEmptyObject(data[entry])) {
                         formLength++;
@@ -759,9 +753,6 @@
                 }
             });
         }
-
-        // Load the new files into view
-        openDirectory(view, true);
 
         // Create the XHR2 and bind the progress events
         var xhr = new XMLHttpRequest();
@@ -2936,11 +2927,6 @@
     // turn /path/to/file to file
     function basename(path) {
         return path.replace(/^.*\//, "");
-    }
-
-    // turn /path/to/file to path
-    function rootDir(path) {
-        return path.replace(/^\//, "").replace(/\/.+$/, "");
     }
 
     // turn /path/to to file
