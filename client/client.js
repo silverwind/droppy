@@ -1250,7 +1250,7 @@
         // Request a sharelink
         content.find(".sharelink").register("click", function () {
             if (droppy.socketWait) return;
-            sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHARELINK", $(this).parent(".data-row").data("id"));
+            sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHARELINK", $(this).parents(".data-row").data("id"));
         });
 
         content.find(".icon-play").register("click", function () {
