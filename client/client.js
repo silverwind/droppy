@@ -2040,13 +2040,10 @@
 
                     if (!CodeMirror.autoLoadMode) initModeLoad();
                     var modeInfo = CodeMirror.findModeByFileName(filename);
-                    if (modeInfo) {
-                        CodeMirror.autoLoadMode(editor, modeInfo.mode);
-                        editor.setOption("mode", modeInfo.mode);
-                        view.find(".mode-select").val(modeInfo.mode);
-                    } else {
-                        view.find(".mode-select").val("plain");
-                    }
+                    var mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
+                    CodeMirror.autoLoadMode(editor, mode);
+                    editor.setOption("mode", mode);
+                    view.find(".mode-select").val(mode);
 
                     editor.on("change", function (cm, change) {
                         var view = getCMView(cm);
