@@ -11,17 +11,22 @@
 
 .cm-s-droppy .CodeMirror-matchingbracket          { color: #0f0 }
 .cm-s-droppy .CodeMirror-nonmatchingbracket       { color: #f22 }
-.cm-s-droppy .CodeMirror-selected                 { background: #333 }
 .cm-s-droppy .CodeMirror-linenumber               { color: #999; padding: 0 5px }
 .cm-s-droppy .CodeMirror-guttermarker             { color: #aaa }
 .cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
 .cm-s-droppy .CodeMirror-lines .CodeMirror-cursor { border-left: 1px solid #ccc }
-.cm-s-droppy .CodeMirror-activeline-background    { background: #262626 }
 .cm-s-droppy .CodeMirror-activeline .CodeMirror-gutter-wrapper { background: #484848 }
 .cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff }
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
 
-.cm-s-droppy .cm-searching { background: #ffff88; color: #000 !important }
+.cm-s-droppy .cm-searching { background: #ffff88; color: #000}
+
+.cm-s-droppy .CodeMirror-focused .CodeMirror-selected, .cm-s-droppy .CodeMirror-selected,
+.cm-s-droppy .CodeMirror-activeline-background {
+    background: #262626 !important
+}
+.cm-s-droppy .CodeMirror ::selection      { background: #262626}
+.cm-s-droppy .CodeMirror ::-moz-selection { background: #262626}
 
 .cm-s-droppy .cm-keyword    { color: #CDA869 }
 .cm-s-droppy .cm-atom       { color: #CF6A4C }
