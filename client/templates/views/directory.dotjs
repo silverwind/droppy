@@ -15,7 +15,7 @@ it = {
         <span data-sort="type" class="header-name {{= entry.sort.type }}">Name {{= droppy.svg.triangle }}</span>
         <span data-sort="mtime" class="header-mtime {{= entry.sort.mtime }}">Modified {{= droppy.svg.triangle }}</span>
         <span data-sort="size" class="header-size {{= entry.sort.size }}">Size {{= droppy.svg.triangle }}</span>
-        <span class="header-spacer"></span>
+        <span class="header-line-buttons"></span>
     </div>
 #}}
 {{##def.folder:
@@ -24,9 +24,11 @@ it = {
         <a class="folder-link entry-link">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
         <span class="size" data-size="{{= entry.size }}">{{= entry.prettysize }}</span>
-        <span class="sharelink faux-button" title="Share download link">{{= droppy.svg.link }}</span>
-        <span><a class="zip" title="Download as Zip" href="?~~{{= entry.id }}" target="nope" download="{{= entry.name }}.zip">{{= droppy.svg.download }}</a></span>
-        <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
+        <span class="line-buttons">
+            <span class="sharelink" title="Share download link">{{= droppy.svg.link }}</span>
+            <a class="zip" title="Download as Zip" href="?~~{{= entry.id }}" target="nope" download="{{= entry.name }}.zip">{{= droppy.svg.download }}</a>
+            <span class="entry-menu" title="Actions">{{= droppy.svg.menu }}</span>
+        </span>
     </div>
 #}}
 {{##def.file:
@@ -35,15 +37,17 @@ it = {
         <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
         <span class="size" data-size="{{= entry.size }}">{{= entry.prettysize }}</span>
-        <span class="sharelink faux-button" title="Share download link">{{= droppy.svg.link }}</span>
-        <a class="download faux-button" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}" title="Download File">{{= droppy.svg.download }}</a>
-        <span class="entry-menu faux-button" title="Actions">{{= droppy.svg.menu }}</span>
+        <span class="line-buttons">
+            <span class="sharelink" title="Share download link">{{= droppy.svg.link }}</span>
+            <a class="download" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}" title="Download File">{{= droppy.svg.download }}</a>
+            <span class="entry-menu" title="Actions">{{= droppy.svg.menu }}</span>
+        </span>
     </div>
 #}}
 {{##def.error:
     <div class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
-        <a class="error-link">{{= entry.name }}</a>
+        <a class="error-link entry-link">{{= entry.name }}</a>
     </div>
 #}}
 {{? Object.keys(it.entries).length === 0 }}

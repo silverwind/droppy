@@ -867,7 +867,6 @@
         hideSpinner(view);
         updateTitle(basename(view[0].currentFolder));
         view.find(".upload-info").removeClass("in");
-        view.find(".data-row.uploading").removeClass("uploading");
         view.find(".icon-uploading").remove();
         if (view[0].uploadSuccess) {
             showNotification("Upload finished", "Uploaded " + view[0].uploadText + " to " + view[0].currentFolder);
@@ -1670,7 +1669,7 @@
 
         left   = x ? (x - menu.width() / 2) : (button.offset().left + button.width() - menu.width());
         top    = entry.offset().top;
-        maxTop = $(document).height() - menu.height() - entry.height();
+        maxTop = $(document).height() - menu.height();
 
         entry.addClass("active");
         toggleCatcher(true);
