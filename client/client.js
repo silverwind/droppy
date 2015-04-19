@@ -2300,7 +2300,11 @@
             event.stopPropagation();
         });
         bar.register("click", function (event) {
-            player.currentTime = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
+            var time = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
+            if (!isNaN(parseFloat(time)) && isFinite(time))
+                player.currentTime = time;
+            else
+                endAudio($(this).parents(".view"));
         });
         bar.find(".previous").register("click", function (event) {
             playPrev($(event.target).parents(".view"));

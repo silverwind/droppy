@@ -190,6 +190,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .path {
    background: #181818;
+   box-shadow: 0 0 1em rgba(0,0,0,.25);
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
@@ -404,10 +405,14 @@ input::-webkit-input-placeholder { color: #999 }
     border-color: #c8c8c8;
 }
 
-.data-row.playing { background: #05a }
+.data-row.playing {
+    background: #05a;
+    border-color: #038;
+}
+
 .data-row.playing a.entry-link, .playing span { color: #fff }
-.data-row.playing svg { fill: #fff !important }
-.data-row.playing svg:hover { background: #08d !important }
+.data-row.playing svg { fill: #ccc !important }
+.data-row.playing svg:hover { fill: #fff !important }
 
 .data-row.uploading .sprite {
     background: none;
@@ -560,7 +565,7 @@ input::-webkit-input-placeholder { color: #999 }
     visibility: hidden;
     cursor: pointer;
     position: relative;
-    top: -.15em;
+    top: -.1em;
     left: 0;
     fill: #333;
 }
@@ -1033,7 +1038,8 @@ html:not(.mobile) .vjs-big-play-button {
 
 .audio-bar {
     background: #181818;
-    flex: 0 0 0px;
+    box-shadow: 0 0 1em rgba(0,0,0,.25);
+    flex: 0 0 0;
     order: 3;
     display: flex;
     position: relative;
