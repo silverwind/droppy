@@ -477,7 +477,7 @@ input::-webkit-input-placeholder { color: #999 }
     .left .line-buttons, .right .line-buttons               { flex: 0 0 3.75em }
     .left .line-buttons svg, .right .line-buttons svg       { padding: 0       }
     .left .header-size, .right .header-size,
-    .left .size, .right .size                               { font-size: 7em; flex: 0 0 5em }
+    .left .size, .right .size                               { font-size: .7em; flex: 0 0 5em }
     .left .header-mtime, .right .header-mtime,
     .left .mtime, .right .mtime                             { display: none    }
 }
