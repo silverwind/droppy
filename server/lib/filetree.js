@@ -16,6 +16,9 @@ var log      = require("./log.js"),
     paths    = require("./paths.js").get(),
     utils    = require("./utils.js");
 
+var WATCHER_DELAY = 3000;
+var POLL_INTERVAL = 2000;
+
 function filterDirs(dirs) {
     return dirs.sort(function (a, b) {
         return a.match(/\//g).length - b.match(/\//g).length;
@@ -290,7 +293,7 @@ var updateAll = _.debounce(function () {
     filetree.updateDir(null, function() {
         filetree.emit("updateall");
     });
-}, 4000);
+}, WATCHER_DELAY);
 
 function watch() {
     watching = true;
@@ -298,8 +301,8 @@ function watch() {
         alwaysStat    : true,
         ignoreInitial : true,
         usePolling    : true,
-        interval      : 2000,
-        binaryInterval: 2000
+        interval      : POLL_INTERVAL,
+        binaryInterval: POLL_INTERVAL
     }).on("error", log.error).on("all", function () {
         if (watching) updateAll();
     });
@@ -310,7 +313,7 @@ function lookAway() {
     clearTimeout(timer);
     timer = setTimeout(function () {
         watching = true;
-    }, 4000);
+    }, WATCHER_DELAY);
 }
 
 watch();
