@@ -2759,8 +2759,8 @@
         [].slice.call(document.styleSheets).some(function (sheet) {
             if (sheet.ownerNode.id === "css") {
                 [].slice.call(sheet.cssRules).some(function (rule) {
-                    if (rule.selectorText === ".CodeMirror" && /font-size/.test(rule.cssText)) {
-                        rule.style.fontSize =  size + "px";
+                    if (rule.selectorText === ".content div.CodeMirror") {
+                        rule.style.fontSize = size + "px";
                         return true;
                     }
                 });
