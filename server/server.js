@@ -945,6 +945,14 @@ function handleUploadRequest(req, res) {
     }
 }
 
+filetree.on("updateall", function () {
+    Object.keys(clientsPerDir).forEach(function (dir) {
+        clientsPerDir[dir].forEach(function (client) {
+            client.update();
+        });
+    });
+});
+
 filetree.on("update", function (dir) {
     if (clientsPerDir[dir]) {
         clientsPerDir[dir].forEach(function (client) {

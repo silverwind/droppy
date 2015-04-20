@@ -3,7 +3,7 @@
 var filetree = new (require("events").EventEmitter)(),
     dirs     = {},
     todoDirs = [],
-    initial  = true;
+    noLog    = true;
 
 var _        = require("lodash"),
     chalk    = require("chalk"),
@@ -43,11 +43,7 @@ function update(dir) {
 
 filetree.updateDir = function updateDir(dir, cb) {
     if (dir === null) { dir = "/"; dirs = {}; }
-
-    if (initial)
-        initial = false;
-    else
-        log.debug("Updating " + chalk.blue(dir));
+    if (noLog) noLog = false; else log.debug(chalk.magenta("Updating " + dir));
 
     fs.stat(utils.addFilesPath(dir), function (err, stats) {
         readdirp({root: utils.addFilesPath(dir)}, function (errs, results) {
@@ -289,18 +285,12 @@ var watching = false;
 var timer = null;
 
 var updateAll = _.debounce(function () {
+    log.debug(chalk.magenta("Updating file tree from watcher"));
+    noLog = true;
     filetree.updateDir(null, function() {
-        Object.keys(dirs).forEach(function (dir) {
-            filetree.emit("update", dir);
-        });
+        filetree.emit("updateall");
     });
 }, 4000);
-
-function lookAway() {
-    unwatch();
-    clearTimeout(timer);
-    timer = setTimeout(watch, 2000);
-}
 
 function watch() {
     watching = true;
@@ -310,12 +300,19 @@ function watch() {
         usePolling    : true,
         interval      : 2000,
         binaryInterval: 2000
-    }).on("error", log.error).on("all", updateAll);
+    }).on("error", log.error).on("all", function () {
+        if (watching) updateAll();
+    });
 }
 
-function unwatch() {
-    if (!watching || !watcher) return;
-    watcher.unwatch(path.files);
+function lookAway() {
+    watching = false;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+        watching = true;
+    }, 4000);
 }
+
+watch();
 
 module.exports = filetree;
