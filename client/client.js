@@ -1952,7 +1952,7 @@
         }).done(function (data) {
             file.resolve(data);
         }).fail(function () {
-            closeDoc.bind(null, view);
+            closeDoc(view);
         });
 
         function configCM(data, filename) {
@@ -1974,6 +1974,40 @@
                     theme: droppy.get("theme"),
                     mode: "text/plain"
                 });
+
+                // Disable New-Tab browser shortcut in keymap
+                CodeMirror.keyMap.sublime[droppy.detects.mac ? "Cmd-T" : "Ctrl-T"] = false;
+
+                if (!CodeMirror.autoLoadMode) initModeLoad();
+                var modeInfo = CodeMirror.findModeByFileName(filename);
+                var mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
+                CodeMirror.autoLoadMode(editor, mode);
+                editor.setOption("mode", mode);
+                view.find(".mode-select").val(mode);
+
+                editor.on("change", function (cm, change) {
+                    var view = getCMView(cm);
+                    if (change.origin !== "setValue")
+                        view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+                });
+                editor.on("keydown", function (cm, event) { // Keyboard shortcuts
+                    if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
+                        var view = getCMView(cm);
+                        event.preventDefault();
+                        showSpinner(view);
+                        sendMessage(view[0].vId, "SAVE_FILE", {
+                            "to": view[0].editorEntryId,
+                            "value": cm.getValue()
+                        });
+                    }
+                });
+
+                editor.setValue(data);
+                editor.clearHistory();
+
+                function getCMView(cm) {
+                    return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
+                }
 
                 doc.find(".exit").register("click", function () {
                     closeDoc($(this).parents(".view"));
@@ -2009,46 +2043,7 @@
                 doc.find(".full").register("click", function () {
                     toggleFullscreen($(this).parents(".content")[0]);
                 });
-
-                // Disable New-Tab browser shortcut in keymap
-                CodeMirror.keyMap.sublime[droppy.detects.mac ? "Cmd-T" : "Ctrl-T"] = false;
-
-                var called = false;
-                view.find(".content").end(function () {
-                    if (called) return;
-                    called = true;
-                    editor.setValue(data);
-
-                    if (!CodeMirror.autoLoadMode) initModeLoad();
-                    var modeInfo = CodeMirror.findModeByFileName(filename);
-                    var mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
-                    CodeMirror.autoLoadMode(editor, mode);
-                    editor.setOption("mode", mode);
-                    view.find(".mode-select").val(mode);
-
-                    editor.on("change", function (cm, change) {
-                        var view = getCMView(cm);
-                        if (change.origin !== "setValue")
-                            view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
-                    });
-                    editor.on("keydown", function (cm, event) { // Keyboard shortcuts
-                        if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
-                            var view = getCMView(cm);
-                            event.preventDefault();
-                            showSpinner(view);
-                            sendMessage(view[0].vId, "SAVE_FILE", {
-                                "to": view[0].editorEntryId,
-                                "value": cm.getValue()
-                            });
-                        }
-                    });
-                    editor.clearHistory();
-                    editor.refresh();
-                    hideSpinner(view);
-                    function getCMView(cm) {
-                        return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
-                    }
-                });
+                hideSpinner(view);
             });
         }
     }
