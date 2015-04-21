@@ -704,7 +704,6 @@
         });
 
         initEntryMenu();
-        loadTheme(droppy.get("theme"));
     }
     // ============================================================================
     //  Upload functions

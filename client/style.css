@@ -191,7 +191,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .path {
    background: #181818;
-   box-shadow: 0 0 .5em rgba(0,0,0,.4);
+   box-shadow: 0 0 .5em rgba(0,0,0,.3);
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
@@ -1007,7 +1007,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .audio-bar {
     background: #181818;
-    box-shadow: 0 0 .5em rgba(0,0,0,.4);
+    box-shadow: 0 0 .5em rgba(0,0,0,.3);
     flex: 0 0 0;
     order: 3;
     display: flex;
