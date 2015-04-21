@@ -1,7 +1,7 @@
 {
   "name": "droppy",
   "description": "Self-hosted file server with a convenient web interface",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
@@ -25,7 +25,7 @@
     "chalk": "^1.0.0",
     "cheerio": "^0.19.0",
     "chokidar": "^1.0.1",
-    "clean-css": "^3.2.1",
+    "clean-css": "^3.2.2",
     "codemirror": "^5.2.0",
     "content-disposition": "^0.5.0",
     "cpr": "^0.4.0",
