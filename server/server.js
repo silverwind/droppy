@@ -859,7 +859,7 @@ function handleUploadRequest(req, res) {
         log.info(req, res, "Received " + names.length + " files");
         done = true;
 
-        var moveFuncs = [];
+        var toMove = [];
 
         while (names.length > 0) {
             (function (name) {
@@ -868,11 +868,11 @@ function handleUploadRequest(req, res) {
                         fs.stat(path.dirname(files[name].dst), function (error) {
                             if (error) { // Dir doesn't exist
                                 utils.mkdir(path.dirname(files[name].dst), function () {
-                                    moveFuncs.push(getMoveFunc(files[name].src, files[name].dst));
+                                    toMove.push([files[name].src, files[name].dst]);
                                     if (++added === total) run();
                                 });
                             } else {
-                                moveFuncs.push(getMoveFunc(files[name].src, files[name].dst));
+                                toMove.push([files[name].src, files[name].dst]);
                                 if (++added === total) run();
                             }
                         });
@@ -880,13 +880,13 @@ function handleUploadRequest(req, res) {
                         if (req.query.r === "true") { // Rename option from the client
                             (function (src, dst) {
                                 utils.getNewPath(dst, function (newDst) {
-                                    moveFuncs.push(getMoveFunc(src, newDst));
+                                    toMove.push([src, newDst]);
                                     if (++added === total) run();
                                 });
                             })(files[name].src, files[name].dst);
 
                         } else {
-                            moveFuncs.push(getMoveFunc(files[name].src, files[name].dst));
+                            toMove.push([files[name].src, files[name].dst]);
                             if (++added === total) run();
                         }
                     }
@@ -897,19 +897,12 @@ function handleUploadRequest(req, res) {
         closeConnection();
 
         function run() {
-            async.series(moveFuncs, function () {
-                // TODO: Rewrite to update only what's necessary
-                filetree.updateDir(dstDir);
-            });
-        }
-
-        function getMoveFunc(src, dst) {
-            return function (cb) {
-                utils.move(src, dst, function (err) {
+            async.eachLimit(toMove, Math.floor(config.maxOpen / 3), function (pair, cb) {
+                filetree.moveTemps(pair[0], pair[1], function (err) {
                     if (err) log.error(err);
                     cb(null);
                 });
-            };
+            }, filetree.updateDir.bind(null, dstDir));
         }
     });
 
