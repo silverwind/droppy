@@ -1,12 +1,12 @@
 {{##def.data:
 <script>
 it = {
-    folder: String // folder path
-    clipboardBasename: String // basename(droppy.clipboard) || null
+    entries: String   // type|mtime|size
+    folder: String    // Folder path
     isUpload: Boolean // Determines if we need to DecodeURI
-    sortBy: String // What property to sort the entries by
-    sortAsc: Boolean // Ascending or descending
-    entries: String // type|mtime|size
+    sortBy: String    // What property to sort the entries by
+    sortAsc: Boolean  // Ascending or descending
+    playing: String   // Currently playing file
 }
 </script>
 #}}
@@ -19,7 +19,7 @@ it = {
     </div>
 #}}
 {{##def.folder:
-    <div class="data-row{{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
+    <div class="data-row {{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite sprite-folder">{{= entry.svgIcon }}</span>
         <a class="folder-link entry-link">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
@@ -32,7 +32,7 @@ it = {
     </div>
 #}}
 {{##def.file:
-    <div class="data-row{{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
+    <div class="data-row {{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
         <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
@@ -45,7 +45,7 @@ it = {
     </div>
 #}}
 {{##def.error:
-    <div class="data-row{{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
+    <div class="data-row {{= entry.classes }}" data-type="error" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="error-link entry-link">{{= entry.name }}</a>
     </div>
@@ -74,7 +74,7 @@ it = {
             entry.sortname = entry.name.replace(/['"]/g, "_");
 
             if (Object.keys(droppy.audioTypes).indexOf(getExt(name)) !== -1) {
-                entry.classes = " playable";
+                entry.classes = name === it.playing ? "playable playing" : "playable";
                 entry.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
             } else {
                 entry.classes = "";

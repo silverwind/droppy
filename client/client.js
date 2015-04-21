@@ -1163,14 +1163,6 @@
     }
     // Convert the received data into HTML
     function openDirectory(view, isUpload) {
-        // Apply directory size cache
-        if (droppy.sizeCache[view[0].currentFolder]) {
-            Object.keys(view[0].currentData).forEach(function (name) {
-                var currentEntry = view[0].currentData[name];
-                if (currentEntry.type === "d" && currentEntry.size === 0 && droppy.sizeCache[view[0].currentFolder][name])
-                    view[0].currentData[name].size = droppy.sizeCache[view[0].currentFolder][name];
-            });
-        }
 
         if (!view[0].sortBy) view[0].sortBy = "name";
         if (!view[0].sortAsc) view[0].sortAsc = false;
@@ -1182,7 +1174,7 @@
             isUpload : isUpload,
             sortBy   : view[0].sortBy,
             sortAsc  : view[0].sortAsc,
-            clipboardBasename: droppy.clipboard ? basename(droppy.clipboard.src) : ""
+            playing  : view.find(".playing").data("name")
         }));
         // Load it
         loadContent(view, content);
@@ -2497,7 +2489,6 @@
         droppy.queuedData = null;
         droppy.reopen = null;
         droppy.resizeTimer = null;
-        droppy.sizeCache = {};
         droppy.socket = null;
         droppy.socketWait = null;
         droppy.views = [];
