@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                 command: "rm -rf node_modules && npm install"
             },
             deploy: {
-                command: "git push demo master"
+                command: "git push -f demo master"
             }
         },
         jshint: {

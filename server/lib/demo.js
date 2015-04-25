@@ -5,13 +5,15 @@ var demo     = {},
     cpr      = require("cpr"),
     chalk    = require("chalk"),
     fs       = require("fs"),
-    log      = require("./log.js"),
     path     = require("path"),
-    paths    = require("./paths.js").get(),
     request  = require("request"),
     schedule = require("node-schedule"),
-    utils    = require("./utils.js"),
     yauzl    = require("yauzl");
+
+var filetree = require("./filetree.js"),
+    log      = require("./log.js"),
+    paths    = require("./paths.js").get(),
+    utils    = require("./utils.js");
 
 demo.init = function init (cb) {
     process.title = "droppy-demo";
@@ -20,7 +22,6 @@ demo.init = function init (cb) {
         if (cb) cb();
     });
 };
-
 
 demo.refresh = function refresh(doneCallback) {
     async.series([
@@ -47,6 +48,7 @@ demo.refresh = function refresh(doneCallback) {
         }
     ], function () {
         log.simple("Demo refreshed");
+        filetree.updateAll();
         if (doneCallback) doneCallback();
     });
 };

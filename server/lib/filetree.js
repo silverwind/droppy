@@ -292,7 +292,7 @@ var watcher;
 var watching = false;
 var timer = null;
 
-var updateAll = _.debounce(function () {
+filetree.updateAll = _.debounce(function updateAll() {
     log.debug(chalk.magenta("Updating file tree from watcher"));
     noLog = true;
     filetree.updateDir(null, function() {
@@ -309,7 +309,7 @@ function watch() {
         interval      : POLL_INTERVAL,
         binaryInterval: POLL_INTERVAL
     }).on("error", log.error).on("all", function () {
-        if (watching) updateAll();
+        if (watching) filetree.updateAll();
     });
 }
 
