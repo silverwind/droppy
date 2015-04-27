@@ -258,7 +258,9 @@ function setupSocket(server) {
         httpServer: server,
         keepAlive: config.keepAlive > 0,
         keepaliveInterval: config.keepAlive,
-        autoAcceptConnections: false
+        autoAcceptConnections: false,
+        maxReceivedFrameSize: Infinity,
+        maxReceivedMessageSize: Infinity
     });
     wss.on("request", function (request) {
         var ws, sid, cookie = cookies.get(request.cookies);
