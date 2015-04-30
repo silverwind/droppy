@@ -1130,7 +1130,7 @@ html:not(.mobile) .vjs-big-play-button {
     transform: translate(-50%, -50%);
     width: 300px;
     text-align: center;
-    z-index: 32;
+    z-index: 64;
 }
 #about-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
@@ -1199,7 +1199,7 @@ html:not(.mobile) .vjs-big-play-button {
     position: fixed;
     transition: opacity .3s ease, visibility 0s .3s;
     transform: translate(-50%, -50%);
-    z-index: 32;
+    z-index: 64;
     padding: .66em;
     overflow-y: auto;
     opacity: 0;
