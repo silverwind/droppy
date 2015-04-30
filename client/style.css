@@ -1120,7 +1120,7 @@ html:not(.mobile) .vjs-big-play-button {
     border-radius: 6px;
     box-shadow: 0 0 30px rgba(0,0,0,.3);
     color: #666;
-    height: 120px;
+    height: 150px;
     left: 50%;
     top: 50%;
     opacity: 0;
@@ -1142,22 +1142,22 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #about-title {
-    font-size: 1.2em;
-    margin: .2em 0;
+    font-size: 1.3em;
+    padding: .5em 0 .25em 0;
 }
 
 #about-engine {
-    font-size: .7em;
+    font-size: .8em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: .1em;
+    padding-bottom: .25em;
 }
 
 #about-copy {
     bottom: 0;
-    font-size: .6em;
-    margin-bottom: .33em;
+    font-size: .7em;
+    margin-bottom: .3em;
     position: absolute;
 }
 
@@ -1167,7 +1167,14 @@ html:not(.mobile) .vjs-big-play-button {
     border: 1px solid transparent;
 }
 
-#about-box .github {
+#about-fork {
+    font-size: .66em;
+    color: #333;
+    padding-right: .3em;
+    border-radius: .4em;
+}
+
+#about-fork .github {
     fill: #333;
     display: inline-block;
     vertical-align: middle;
@@ -1175,15 +1182,11 @@ html:not(.mobile) .vjs-big-play-button {
     margin-bottom: 0.25em;
 }
 
-#about-fork {
-    font-size: .66em;
-    color: #333;
-    padding-right: .3em;
-    border-radius: .4em;
-}
-#about-fork:hover, #about-box #about-copy a:hover {
-    background: #fff;
-    border-radius: .4em;
+#about-fork:hover, #about-fork:hover svg, #about-copy a:hover {
+    color: #05a;
+    fill: #05a;
+    border-radius: 4px;
+    text-decoration: underline;
 }
 
 /* ================================= Prefs ================================ */
