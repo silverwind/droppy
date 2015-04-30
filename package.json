@@ -6,13 +6,10 @@
   "contributors": [
     "ZombieHippie <cole@zombiehippie.com>"
   ],
+  "repository": "silverwind/droppy",
   "homepage": "https://github.com/silverwind/droppy",
   "bugs": "https://github.com/silverwind/droppy/issues",
   "license": "BSD-2-Clause",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/silverwind/droppy.git"
-  },
   "preferGlobal": true,
   "bin": "./droppy.js",
   "scripts": {
