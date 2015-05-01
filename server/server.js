@@ -286,11 +286,11 @@ function setupSocket(server) {
             case "REQUEST_SETTINGS":
                 sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
                     "debug"         : config.debug,
-                    "demoMode"      : config.demo,
+                    "demo"          : config.demo,
                     "public"        : config.public,
                     "maxFileSize"   : config.maxFileSize,
-                    "themes"        : Object.keys(cache.themes),
-                    "modes"         : Object.keys(cache.modes),
+                    "themes"        : Object.keys(cache.themes).join("|"),
+                    "modes"         : Object.keys(cache.modes).join("|"),
                     "caseSensitive" : process.platform !== "win32"
                 }});
                 break;
@@ -811,7 +811,7 @@ function handleUploadRequest(req, res) {
 
     req.query = qs.parse(req.url.substring("/upload?".length));
 
-    if (!req.query || !req.query.to || config.demo) {
+    if (!req.query || !req.query.to) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();

@@ -398,6 +398,9 @@
                     droppy[setting] = msg.settings[setting];
                 });
 
+                droppy.themes = droppy.themes.split("|");
+                droppy.modes = droppy.modes.split("|");
+
                 // Move own theme to top of theme list
                 droppy.themes.pop();
                 droppy.themes.unshift("droppy");
@@ -405,13 +408,9 @@
                 // Insert plain mode on the top
                 droppy.modes.unshift("plain");
 
-                if (droppy.demoMode) {
-                    $("#upload-file-button").addClass("disabled").attr("title", "Uploading is disabled").off("click");
-                    $("#upload-folder-button").addClass("disabled").attr("title", "Uploading is disabled").off("click");
-                }
-
-                if (droppy.demoMode || droppy.public)
-                    $("#logout-button").addClass("disabled").attr("title", "Signing out is disabled");
+                if (droppy.demo || droppy.public)
+                    $("#logout-button").addClass("disabled")
+                        .on("click", showError.bind(null, view[0], "Signing out is disabled"));
                 else
                     $("#logout-button").register("click", function () {
                         droppy.set("hasLoggedOut", true);
@@ -2466,7 +2465,7 @@
     function initVariables() {
         droppy.activeFiles = [];
         droppy.debug = null;
-        droppy.demoMode = null;
+        droppy.demo = null;
         droppy.public = null;
         droppy.queuedData = null;
         droppy.reopen = null;
