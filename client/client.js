@@ -864,11 +864,13 @@
 
         // Update progress every 250ms at most
         if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
-            var bytesSent  = event.loaded,
-                bytesTotal = event.total,
-                progress   = Math.round((bytesSent / bytesTotal) * 100) + "%",
-                speed      = prettyBytes(bytesSent / ((Date.now() - view[0].uploadStart) / 1000)),
+            var sent     = event.loaded,
+                total    = event.total,
+                progress = Math.round((sent / total) * 100) + "%",
+                speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3),
                 elapsed, secs;
+
+            speed = prettyBytes(Math.round(speed / 1e3) * 1e3);
 
             updateTitle(progress);
             view.find(".upload-bar").css("width", progress);
@@ -876,7 +878,7 @@
 
             // Calculate estimated time left
             elapsed = Date.now() - view[0].uploadStart;
-            secs = ((bytesTotal / (bytesSent / elapsed)) - elapsed) / 1000;
+            secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
             if (secs > 60)
                 view.find(".upload-time-left").text(Math.ceil(secs / 60) + " mins");
