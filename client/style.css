@@ -1468,13 +1468,14 @@ html:not(.mobile) .vjs-big-play-button {
     background: #eee;
     visibility: hidden;
     box-shadow: 0 0 30px rgba(0,0,0,.3);
+    max-width: 512px;
 }
 .info-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
-@media (min-width: 1024px) { .info-box { font-size: .9em } }
-@media (max-width: 1023px) { .info-box { font-size: .8em } }
-@media (max-width:  799px) { .info-box { font-size: .7em } }
-@media (max-width:  639px) { .info-box { max-width: 90%  } }
+@media (min-width: 1024px) { .info-box { font-size: 1em  } }
+@media (max-width: 1023px) { .info-box { font-size: .9em } }
+@media (max-width:  799px) { .info-box { font-size: .8em } }
+@media (max-width:  639px) { .info-box { width: 90%      } }
 
 .info-box svg {
     position: absolute;
@@ -1493,8 +1494,8 @@ html:not(.mobile) .vjs-big-play-button {
 
 .info-box span, .info-box .linkout {
     display: block;
-    padding: .25em;
-    padding-left: 3.25em;
+    padding: .5em;
+    padding-left: 3.5em;
     color: #444;
 }
 

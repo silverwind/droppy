@@ -410,7 +410,7 @@
 
                 if (droppy.demo || droppy.public)
                     $("#logout-button").addClass("disabled")
-                        .on("click", showError.bind(null, view[0], "Signing out is disabled"));
+                        .register("click", showError.bind(null, getView(0), "Signing out is disabled"));
                 else
                     $("#logout-button").register("click", function () {
                         droppy.set("hasLoggedOut", true);
@@ -603,7 +603,7 @@
         } else {
             // No directory upload support - disable the button
             $("#upload-folder-button").addClass("disabled").on("click", function () {
-                showError(getView(0), "Sorry, your browser doesn't support directory uploading.");
+                showError(getView(0), "Your browser doesn't support directory uploading");
             });
         }
 
@@ -788,7 +788,7 @@
 
         function isOverLimit(view, size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
-                showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize) + ".");
+                showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize));
                 uploadCancel(view);
                 return true;
             }
@@ -1716,7 +1716,7 @@
             openMedia(view, "image", oldFolder === newFolder);
         } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) { // Video
             if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
-                showError(view, "Sorry, your browser can't play this file.");
+                showError(view, "Your browser can't play this file");
                 updateLocation(view, view[0].currentFolder);
             } else {
                 view[0].currentFile = file;
@@ -1733,7 +1733,7 @@
                 dataType: "text"
             }).done(function (data, textStatus, request) {
                 if (request.status !== 200) {
-                    showError(view, "Couldn't open or read the file.");
+                    showError(view, "Couldn't open or read the file");
                     hideSpinner(view);
                 } else if (data === "text") { // Non-Binary content
                     view[0].currentFile = file;
@@ -2163,7 +2163,7 @@
             player.play();
             onNewAudio(view);
         } else {
-            return showError(view, "Sorry, your browser can't play this file.");
+            return showError(view, "Your browser can't play this file");
         }
 
         row.addClass("playing").siblings().removeClass("playing");
@@ -2763,10 +2763,11 @@
 
     function showError(view, text) {
         var box = view.find(".info-box");
+        clearTimeout(droppy.errorTimer);
         box.find("svg").replaceWith(droppy.svg.exclamation);
         box.children("span").text(text);
         box.attr("class", "info-box error in");
-        setTimeout(function () {
+        droppy.errorTimer = setTimeout(function () {
             box.removeClass("in");
         }, 3000);
     }
