@@ -191,7 +191,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .path {
    background: #181818;
-   box-shadow: 0 0 .5em rgba(0,0,0,.3);
+   box-shadow: 0 0 .5em rgba(0,0,0,.25);
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
@@ -421,15 +421,15 @@ input::-webkit-input-placeholder { color: #999 }
 }
 .data-row[order='0'] { border-top: none }
 
-.data-row.editing { background: #fff }
+.data-row.editing { background: #dedede }
 .data-row.editing.invalid input { color: #d22 }
 .data-row.editing .entry-link { display: none }
 .data-row, .data-row a { color: #333 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-    background: #ddd;
-    border-color: #c8c8c8;
+    background: #dedede;
+    border-color: #cecece;
 }
 
 .data-row.playing {
@@ -1007,7 +1007,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .audio-bar {
     background: #181818;
-    box-shadow: 0 0 .5em rgba(0,0,0,.3);
+    box-shadow: 0 0 .5em rgba(0,0,0,.25);
     flex: 0 0 0;
     order: 3;
     display: flex;
