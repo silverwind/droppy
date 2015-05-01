@@ -872,7 +872,8 @@
 
             speed = prettyBytes(Math.round(speed / 1e3) * 1e3);
 
-            updateTitle(progress);
+            updateTitle(progress + " - "+ (view[0].currentFolder !== "/" ?
+                        view[0].currentFolder.substring(1) : "droppy"));
             view.find(".upload-bar").css("width", progress);
             view.find(".upload-speed > span").text(speed + "/s");
 
