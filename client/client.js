@@ -543,8 +543,8 @@
                 if (fse) {
                     view = $(fse).parents(".view");
                     addKey(32, function (e) { swapMedia(view, e.shiftKey ? "left" : "right"); });
-                    addKey([37, 38], function () { swapMedia(view, "left");  });
-                    addKey([39, 40], function () { swapMedia(view, "right"); });
+                    addKey([37, 38], swapMedia.bind(null, view, "left"));
+                    addKey([39, 40], swapMedia.bind(null, view, "right"));
                     view.find(".fs").html(droppy.svg.unfullscreen);
                     view.find(".full svg").replaceWith(droppy.svg.unfullscreen);
                 } else {
@@ -658,35 +658,32 @@
             });
         });
 
-        $("#split-button").register("click", function () { split(); });
-
-        var split = droppy.split = function (dest) {
-            var first, second, button;
-            button = $("#split-button");
-            button.off("click");
+        var splitButton = $("#split-button"), splitting;
+        droppy.split = function (dest) {
+            var first, second;
+            if (splitting) return;
+            splitting = true;
             first = getView(0);
             if (droppy.views.length === 1) {
                 first.addClass("left");
-                if (typeof dest !== "string")
-                    dest = join(first[0].currentFolder, first[0].currentFile);
+                if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
                 second = newView(dest, 1).addClass("right");
-                button.children("span").text("Merge");
-                button.attr("title", "Merge views back into a single one");
+                splitButton.attr("title", "Merge views").children("span").text("Merge");
                 replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
             } else {
                 destroyView(1);
                 getView(0).removeClass("left");
-                button.children("span").text("Split");
-                button.attr("title", "Split the view in half");
+                splitButton.attr("title", "Split view").children("span").text("Split");
                 replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
             }
             first.end(function () {
-                button.register("click", split);
                 droppy.views.forEach(function (view) {
                     checkPathOverflow($(view));
                 });
+                splitting = false;
             });
         };
+        $("#split-button").register("click", droppy.split.bind(null, null));
 
         $("#about-button").register("click", function () {
             $("#about-box").addClass("in");
