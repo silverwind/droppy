@@ -683,7 +683,7 @@
                 splitting = false;
             });
         };
-        $("#split-button").register("click", droppy.split.bind(null, null));
+        $("#split-button").register("click", droppy.split);
 
         $("#about-button").register("click", function () {
             $("#about-box").addClass("in");
@@ -920,9 +920,7 @@
         }).register("keydown", function (event) {
             if (event.keyCode === 27) stopEdit(view); // Escape Key
             if (event.keyCode === 13) submitEdit(view, false, callback); // Return Key
-        }).register("focusout", function () {
-            submitEdit(view, true, callback);
-        });
+        }).register("focusout", submitEdit.bind(null, view, true, callback));
 
         nameLength = link.text().lastIndexOf(".");
         namer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
@@ -1498,15 +1496,14 @@
                                 entry.file(function (file) {
                                     obj[path + "/" + file.name] = file;
                                     promise.resolve();
-                                }, function () { promise.resolve(); });
+                                }, promise.resolve.bind());
                             })(entry, promise, path);
                         } else {
                             readDirectory(entry, path + "/" + entry.name, promise);
                         }
                     });
-                    $.when.apply($, promises).done(function () { // Level is done
-                        dirPromise.resolve();
-                    });
+                    // Level is done
+                    $.when.apply($, promises).done(dirPromise.resolve.bind());
                 });
             }
 
@@ -1521,15 +1518,13 @@
                         entry.file(function (file) {
                             obj[file.name] = file;
                             promise.resolve();
-                        }, function () { promise.resolve(); });
+                        }, promise.resolve.bind());
                     })(entry, promise);
                 } else if (entry.isDirectory) {
                     readDirectory(entry, null, promise);
                 }
             }
-            $.when.apply($, rootPromises).done(function () {
-                upload(view, obj);
-            });
+            $.when.apply($, rootPromises).done(upload.bind(null, view, obj));
         });
     }
 
@@ -1820,7 +1815,7 @@
 
         if (isImage) {
             b = $("<div class='media-container new-media " + dir + "'><img class='media' src='" + src + "'></div>");
-            b.find("img").one("load", aspectScale.bind(null));
+            b.find("img").one("load", aspectScale);
         } else {
             b = $("<div class='media-container new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
             b = $(bindVideoEvents(b[0]));
@@ -1870,7 +1865,7 @@
         el.addEventListener("volumechange", function () {
             droppy.set("videoVolume", this.volume);
         });
-        el.addEventListener("error", aspectScale.bind(null));
+        el.addEventListener("error", aspectScale);
         return el;
     }
 
@@ -2783,9 +2778,7 @@
         out
             .text(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" + link)
             .register("copy", function () {
-                setTimeout(function () {
-                  toggleCatcher(false);
-                }, 0);
+                setTimeout(toggleCatcher.bind(null, false), 0);
             });
         box.attr("class", "info-box link in").end(function () {
             var range = document.createRange(), selection = window.getSelection();
