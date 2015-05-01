@@ -33,7 +33,7 @@
     "html-minifier": "^0.7.2",
     "isbinaryfile": "^2.0.3",
     "jquery": "^2.1.4",
-    "lodash": "^3.7.0",
+    "lodash": "^3.8.0",
     "mime-types": "^2.0.10",
     "mkdirp": "^0.5.0",
     "mv": "^2.0.3",
