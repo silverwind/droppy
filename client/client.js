@@ -2882,7 +2882,7 @@
     // Extract the extension from a file name
     function getExt(filename) {
         if (!filename) return "";
-        if (/^\..+$/.test(filename)) return filename.substring(1);
+        if (/^\..+$/.test(filename)) return filename.substring(1).toLowerCase();
         var parts = filename.split(".");
         if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
         return parts.pop().toLowerCase();

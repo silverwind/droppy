@@ -96,11 +96,11 @@ utils.copyDir = function copyDir(src, dst, cb) {
 };
 
 utils.getExt = function getExt(filename) {
-    var dot = filename.lastIndexOf(".");
-    if (dot > -1 && dot < filename.length)
-        return filename.substring(dot + 1, filename.length);
-    else
-        return filename;
+    if (!filename) return "";
+    if (/^\..+$/.test(filename)) return filename.substring(1).toLowerCase();
+    var parts = filename.split(".");
+    if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
+    return parts.pop().toLowerCase();
 };
 
 // Get a pseudo-random n-character lowercase string. The characters
