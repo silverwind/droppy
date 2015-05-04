@@ -73,7 +73,7 @@ it = {
             entry.name = it.isUpload ? decodeURIComponent(name) : name;
             entry.sortname = entry.name.replace(/['"]/g, "_");
 
-            if (Object.keys(droppy.audioTypes).indexOf(getExt(name)) !== -1) {
+            if (Object.keys(droppy.audioTypes).indexOf(ext(name)) !== -1) {
                 entry.classes = name === it.playing ? "playable playing" : "playable";
                 entry.svgIcon = '<span class="icon-play">' + droppy.svg.play + '</span>';
             } else {

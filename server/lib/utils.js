@@ -6,6 +6,7 @@ var async  = require("async"),
     cd     = require("content-disposition"),
     cpr    = require("cpr"),
     crypto = require("crypto"),
+    ext    = require("file-extension"),
     fs     = require("graceful-fs"),
     isBin  = require("isbinaryfile"),
     mkdirp = require("mkdirp"),
@@ -95,14 +96,6 @@ utils.copyDir = function copyDir(src, dst, cb) {
     });
 };
 
-utils.getExt = function getExt(filename) {
-    if (!filename) return "";
-    if (/^\..+$/.test(filename)) return filename.substring(1).toLowerCase();
-    var parts = filename.split(".");
-    if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
-    return parts.pop().toLowerCase();
-};
-
 // Get a pseudo-random n-character lowercase string. The characters
 // "l", "1", "i", "o", "0" characters are skipped for easier communication of links.
 utils.getLink = function getLink(links, length) {
@@ -182,7 +175,7 @@ utils.isPathSane = function isPathSane(name) {
 };
 
 utils.isBinary = function isBinary(path, callback) {
-    if (forceBinaryTypes.indexOf(utils.getExt(path)) !== -1)
+    if (forceBinaryTypes.indexOf(ext(path)) !== -1)
         return callback(null, true);
 
     isBin(path, function (err, result) {

@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, prettyBytes, videojs, Draggabilly */
+/* global jQuery, CodeMirror, prettyBytes, videojs, Draggabilly, ext */
 
 (function ($, window, document) {
     "use strict";
@@ -1707,7 +1707,7 @@
     }
 
     function openFile(view, newFolder, file) {
-        var ext = getExt(file),
+        var ext = ext(file),
             oldFolder = view[0].currentFolder;
 
         // Determine filetype and how to open it
@@ -1758,7 +1758,7 @@
         var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
-            var ext = getExt(filename);
+            var ext = ext(filename);
             if (data[filename].type !== "f") return;
             if (extensions.indexOf(ext) !== -1) {
                 if (droppy.videoTypes[ext] && !droppy.detects.videoTypes[droppy.videoTypes[ext]]) return;
@@ -1769,7 +1769,7 @@
         [getPrevMedia(view), getNextMedia(view)].forEach(function (filename) {
             var src = getMediaSrc(view, filename);
             if (!src) return;
-            if (Object.keys(droppy.imageTypes).indexOf(getExt(filename)) !== -1) {
+            if (Object.keys(droppy.imageTypes).indexOf(ext(filename)) !== -1) {
                 (document.createElement("img")).src = src;
             }
         });
@@ -1812,7 +1812,7 @@
         if (view[0].tranistioning) return;
         var a = view.find(".media-container"), b,
             nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view),
-            isImage  = Object.keys(droppy.imageTypes).indexOf(getExt(nextFile)) !== -1,
+            isImage  = Object.keys(droppy.imageTypes).indexOf(ext(nextFile)) !== -1,
             src      = getMediaSrc(view, nextFile);
 
         if (isImage) {
@@ -2160,7 +2160,7 @@
         source = "?_" + row.data("id");
         view.find(".seekbar-played, .seekbar-loaded").css("width", "0%");
 
-        if (player.canPlayType(droppy.audioTypes[getExt(source)])) {
+        if (player.canPlayType(droppy.audioTypes[ext(source)])) {
             player.src = source;
             player.load();
             player.play();
@@ -2877,15 +2877,6 @@
         if (x.length) return -1;
         if (y.length) return +1;
         return 0;
-    }
-
-    // Extract the extension from a file name
-    function getExt(filename) {
-        if (!filename) return "";
-        if (/^\..+$/.test(filename)) return filename.substring(1).toLowerCase();
-        var parts = filename.split(".");
-        if (parts.length === 1 || (parts[0] === "" && parts.length === 2)) return "";
-        return parts.pop().toLowerCase();
     }
 
     function removeExt(filename) {
