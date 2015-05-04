@@ -1707,18 +1707,17 @@
     }
 
     function openFile(view, newFolder, file) {
-        var ext = ext(file),
-            oldFolder = view[0].currentFolder;
+        var e = ext(file), oldFolder = view[0].currentFolder;
 
         // Determine filetype and how to open it
-        if (Object.keys(droppy.imageTypes).indexOf(ext) !== -1) { // Image
+        if (Object.keys(droppy.imageTypes).indexOf(e) !== -1) { // Image
             view[0].currentFile = file;
             view[0].currentFolder = newFolder;
             pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
             updatePath(view);
             openMedia(view, "image", oldFolder === newFolder);
-        } else if (Object.keys(droppy.videoTypes).indexOf(ext) !== -1) { // Video
-            if (!droppy.detects.videoTypes[droppy.videoTypes[ext]]) {
+        } else if (Object.keys(droppy.videoTypes).indexOf(e) !== -1) { // Video
+            if (!droppy.detects.videoTypes[droppy.videoTypes[e]]) {
                 showError(view, "Your browser can't play this file");
                 updateLocation(view, view[0].currentFolder);
             } else {
@@ -1758,10 +1757,10 @@
         var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
-            var ext = ext(filename);
+            var e = ext(filename);
             if (data[filename].type !== "f") return;
-            if (extensions.indexOf(ext) !== -1) {
-                if (droppy.videoTypes[ext] && !droppy.detects.videoTypes[droppy.videoTypes[ext]]) return;
+            if (extensions.indexOf(e) !== -1) {
+                if (droppy.videoTypes[e] && !droppy.detects.videoTypes[droppy.videoTypes[e]]) return;
                 view[0].mediaFiles.push(filename);
             }
         });
