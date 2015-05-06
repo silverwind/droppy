@@ -153,7 +153,7 @@ function compile(cb) {
 
         addGzip(cache, function (err, cache) {
             cache.etags = {};
-            fs.writeFile(paths.cache, jb.stringify(cache));
+            if (minify) fs.writeFile(paths.cache, jb.stringify(cache));
             cb(err, cache);
         });
     });
