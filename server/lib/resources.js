@@ -15,6 +15,7 @@ var async        = require("async"),
     crypto       = require("crypto"),
     fs           = require("graceful-fs"),
     htmlMinifier = require("html-minifier"),
+    jb           = require("json-buffer"),
     path         = require("path"),
     uglify       = require("uglify-js"),
     vm           = require("vm"),
@@ -115,10 +116,27 @@ var libs = {
     "cm.css": "node_modules/codemirror/lib/codemirror.css"
 };
 
-resources.init = function init(doMinify, callback) {
+resources.init = function init(doMinify, cb) {
     minify = doMinify;
+
+    if (!minify) return compile(cb);
+
+    canUseCache(function (can) {
+        if (!can) return compile(cb);
+        fs.readFile(paths.cache, function (err, data) {
+            try {
+                var cache = jb.parse(data);
+                cb(null, cache);
+            } catch (e) {
+                compile(cb);
+            }
+        });
+    });
+};
+
+function compile(cb) {
     async.series([compileAll, readThemes, readModes, readLibs], function (err, results) {
-        if (err) return callback(err);
+        if (err) return cb(err);
         var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
 
         Object.keys(results[1]).forEach(function (theme) {
@@ -135,10 +153,11 @@ resources.init = function init(doMinify, callback) {
 
         addGzip(cache, function (err, cache) {
             cache.etags = {};
-            callback(err, cache);
+            fs.writeFile(paths.cache, jb.stringify(cache));
+            cb(err, cache);
         });
     });
-};
+}
 
 // Create gzip compressed data
 function addGzip(cache, callback) {
@@ -177,6 +196,36 @@ function gzip(data, callback) {
     zlib.gzip(data, function (err, gzipped) {
         if (err) return callback(err);
         callback(null, gzipped);
+    });
+}
+
+function canUseCache(cb) {
+    var lastChange, files = [];
+    Object.keys(resources.files).forEach(function (type) {
+        resources.files[type].forEach(function (file) {
+           files.push(path.join(paths.mod, file));
+        });
+    });
+    Object.keys(libs).forEach(function (file) {
+        if (typeof libs[file] === "string") {
+            files.push(path.join(paths.mod, libs[file]));
+        } else {
+            libs[file].forEach(function (file) {
+                files.push(path.join(paths.mod, file));
+            });
+        }
+    });
+    async.map(files, function (file, cb) {
+        fs.stat(file, function (err, stats) {
+            cb(null, err ? 0 : stats.mtime.getTime());
+        });
+    }, function(err, times) {
+        if (err) return cb(err);
+        lastChange = Math.max.apply(Math, times);
+        fs.stat(paths.cache, function (err, stats) {
+            if (err) return cb (false);
+            cb(stats.mtime.getTime() > lastChange);
+        });
     });
 }
 

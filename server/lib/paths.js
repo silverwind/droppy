@@ -11,6 +11,7 @@ paths.get = function get() {
         pid       : resolve(root + "/droppy.pid"),
         files     : resolve(root + "/files"),
         temp      : resolve(root + "/temp"),
+        cache     : resolve(root + "/cache"),
         cfg       : resolve(root + "/config"),
         cfgFile   : resolve(root + "/config/config.json"),
         db        : resolve(root + "/config/db.json"),
