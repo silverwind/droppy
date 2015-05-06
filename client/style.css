@@ -1494,7 +1494,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .info-box span, .info-box .linkout {
     display: block;
-    padding: .5em;
+    padding: .25em .5em;
     padding-left: 3.5em;
     color: #444;
 }
