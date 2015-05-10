@@ -22,7 +22,7 @@
     "chalk": "^1.0.0",
     "cheerio": "^0.19.0",
     "chokidar": "^1.0.1",
-    "clean-css": "^3.2.8",
+    "clean-css": "^3.2.9",
     "codemirror": "^5.2.0",
     "content-disposition": "^0.5.0",
     "cpr": "^0.4.0",
@@ -48,10 +48,10 @@
     "spdy": "^1.32.0",
     "uglify-js": "^2.4.21",
     "untildify": "^2.0.0",
-    "video.js": "^4.12.5",
+    "video.js": "^4.12.6",
     "websocket": "^1.0.18",
     "yauzl": "^2.3.0",
-    "yazl": "^2.2.1"
+    "yazl": "^2.2.2"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

@@ -145,8 +145,7 @@ function startListeners(callback) {
     async.each(sockets, function (socket, cb) {
         createListener(onRequest, socket.opts, function (err, server, tlsData) {
             if (err) {
-                log.error(err);
-                return cb();
+                return cb(err);
             }
 
             server.on("listening", function () {
@@ -222,7 +221,11 @@ function createListener(handler, opts, callback) {
             // Disable insecure client renegotiation
             tlsModule.CLIENT_RENEG_LIMIT = 0;
 
-            server = new tlsModule.Server(tlsOptions, http._connectionListener);
+            try {
+                server = new tlsModule.Server(tlsOptions, http._connectionListener);
+            } catch (err) {
+                return callback(err);
+            }
             server.httpAllowHalfOpen = false;
             server.timeout = 120000;
 
