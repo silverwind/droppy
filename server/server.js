@@ -153,33 +153,33 @@ function startListeners(callback) {
                 if (tlsData) {
                     require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
                         if (tlsData.selfsigned || !info.commonName) {
-                            log.simple(socket.opts.proto.toUpperCase() + " listening on ",
+                            log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
                                        chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
                                        " (" + chalk.yellow("self-signed") + ")");
                         } else {
-                            log.simple(socket.opts.proto.toUpperCase() + " listening on ",
+                            log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
                                        chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
                                        " (" + chalk.yellow(info.commonName) + ")");
                         }
                         cb();
                     });
                 } else {
-                    log.simple(socket.opts.proto.toUpperCase() + " listening on ",
+                    log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
                                chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
                     cb();
                 }
             });
 
-            server.on("error", function (error) {
-                if (error.code === "EADDRINUSE")
-                    log.simple("Failed to bind to ", chalk.cyan(socket.host), chalk.red(":"),
-                              chalk.blue(socket.port), chalk.red(". Address already in use."));
-                else if (error.code === "EACCES")
-                    log.simple("Failed to bind to ", chalk.cyan(socket.host), chalk.red(":"),
-                              chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024."));
+            server.on("error", function (err) {
+                if (err.code === "EADDRINUSE")
+                    log.simple(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+                              chalk.blue(socket.port), chalk.red(". Address already in use"));
+                else if (err.code === "EACCES")
+                    log.simple(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+                              chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024"));
                 else
-                    log.error(error);
-                cb(); // TODO: Pass error
+                    log.error(err);
+                return cb(err);
             });
             server.listen(socket.port, socket.host);
         });
