@@ -63,7 +63,8 @@ db.get = function (key) {
 
 db.set = function (key, value, callback) {
     database[key] = value;
-    write(callback);
+    write();
+    if (callback) callback();
 };
 
 db.addOrUpdateUser = function (user, password, privileged, callback) {
@@ -101,7 +102,9 @@ db.authUser = function (user, pass) {
 };
 
 function write(callback) {
-    fs.writeFile(dbFile, JSON.stringify(database, null, 2), callback);
+    fs.writeFile(dbFile, JSON.stringify(database, null, 2), function () {
+        if (callback) callback();
+    });
 }
 
 function getHash(string) {

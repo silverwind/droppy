@@ -24,16 +24,8 @@ cookies.get = function get(cookie) {
 
 cookies.validate = function validate(entries) {
     if (!entries || !entries.s) return false;
-    var found, sessions = db.get("sessions");
-    Object.keys(sessions).some(function(session) {
-        if (session === entries.s) {
-            sessions[session].lastSeen = Date.now();
-            db.set("sessions", sessions);
-            found = session;
-            return true;
-        }
-    });
-    return found;
+    if (Object.keys(db.get("sessions") || {}).indexOf(entries.s) === -1) return false;
+    return entries.s;
 };
 
 cookies.free = function free(req, res) {

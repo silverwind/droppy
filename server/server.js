@@ -556,8 +556,12 @@ function handleGET(req, res) {
     } else if (/^\/favicon.ico$/.test(URI)) {
         handleResourceRequest(req, res, "favicon.ico");
     } else {
-        if (cookies.get(req.headers.cookie) || config.public) {
+        var cookie = cookies.get(req.headers.cookie);
+        if (cookie || config.public) {
             handleResourceRequest(req, res, "main.html");
+            var sessions = db.get("sessions");
+            sessions[cookie].lastSeen = Date.now();
+            db.set("sessions", sessions);
         } else if (firstRun) {
             handleResourceRequest(req, res, "firstrun.html");
         } else {
