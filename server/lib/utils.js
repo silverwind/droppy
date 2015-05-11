@@ -43,19 +43,6 @@ utils.mkdir = function mkdir(dir, cb) {
     }
 };
 
-// mkdirp.sync wrapper with array support
-utils.mkdirSync = function mkdirSync(dir) {
-    if (Array.isArray(dir)) {
-        dir.forEach(function (p) {
-            mkdirp.sync(p, {fs: fs, mode: "755"});
-        });
-    } else if (typeof dir === "string") {
-        mkdirp.sync(dir, {fs: fs, mode: "755"});
-    } else {
-        throw new Error("mkdirSync: Wrong dir type: " + typeof dir);
-    }
-};
-
 // rimraf wrapper with 10 retries
 utils.rm = function rm(p, cb) {
     rimraf(p, {maxBusyTries: 10}, cb);

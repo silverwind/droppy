@@ -243,14 +243,15 @@ function readThemes(callback) {
 
             filenames.forEach(function (name, index) {
                 var css = String(data[index]);
-                themes[name.replace(/\.css$/, "")] = new Buffer(minify ?  cleanCSS.minify(css).styles : css);
+                themes[name.replace(/\.css$/, "")] = new Buffer(minify ? cleanCSS.minify(css).styles : css);
             });
 
             // add our own theme
-            var css = fs.readFileSync(path.join(paths.mod, "/client/cmtheme.css"));
-            themes.droppy = new Buffer(minify ?  cleanCSS.minify(css).styles : css);
-
-            callback(err, themes);
+            fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function (err, css) {
+                if (err) return callback(err);
+                themes.droppy = new Buffer(minify ? cleanCSS.minify(css).styles : css);
+                callback(null, themes);
+            });
         });
     });
 }
