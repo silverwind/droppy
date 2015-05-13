@@ -36,10 +36,12 @@ demo.refresh = function refresh(doneCallback) {
         // Get video samples - Provided by http://www.webmfiles.org
         get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/video/Big Buck Bunny.webm"),
 
-        // Get audio samples - Provided by http://sampleswap.org/mp3/creative-commons/free-music.php
-        get("http://sampleswap.org/mp3/artist/earthling/earthling_Room-To-Breath-160.mp3", "/audio/Earthling - Room To Breath.mp3"),
-        get("http://sampleswap.org/mp3/artist/joevirus/joevirus_Tenchu-160.mp3", "/audio/Joevirus - Tenchu.mp3"),
-        get("http://sampleswap.org/mp3/artist/TranceAddict/Tejaswi_Intuition-160.mp3", "/audio/Tejaswi - Intuition.mp3"),
+        // Get audio samples - Provided by http://sampleswap.org
+        get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/258%5Bkb%5D160_roll-to-the-moon-and-back.wav.mp3", "/audio/sample-1.mp3"),
+        get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/GUITARS%20BPM/1380%5Bkb%5D120_a-bleep-odyssey.aif.mp3", "/audio/sample-2.mp3"),
+        get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/517%5Bkb%5D160_tricky-bongos.wav.mp3", "/audio/sample-3.mp3"),
+        get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/SYNTH%20AND%20ELECTRONIC%20BPM/534%5Bkb%5D078_tinkles-synth.wav.mp3", "/audio/sample-4.mp3"),
+        get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/SYNTH%20AND%20ELECTRONIC%20BPM/689%5Bkb%5D120_dreamy-synth-wave.wav.mp3", "/audio/sample-5.mp3"),
         function (callback) {
             async.parallel([
                 function (cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
