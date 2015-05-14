@@ -41,6 +41,11 @@ var opts = {
             keepSpecialComments : 0
         };
     },
+    get autoprefixer() {
+        return {
+            browsers: ["last 2 versions"]
+        };
+    },
     get htmlMinifier() {
         return {
             removeComments: true,
@@ -361,8 +366,8 @@ resources.compileCSS = function compileCSS() {
         css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + "\n";
     });
 
-    // Venodor prefixes
-    css = autoprefixer.process(css).css;
+    // Vendor prefixes
+    css = autoprefixer(opts.autoprefixer).process(css).css;
 
     // Minify
     if (minify) css = cleanCSS.minify(css).styles;
