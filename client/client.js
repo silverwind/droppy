@@ -1758,7 +1758,7 @@
         view[0].mediaFiles = [];
         Object.keys(data).forEach(function (filename) {
             var e = ext(filename);
-            if (data[filename].type !== "f") return;
+            if (data[filename][0] !== "f") return;
             if (extensions.indexOf(e) !== -1) {
                 if (droppy.videoTypes[e] && !droppy.detects.videoTypes[droppy.videoTypes[e]]) return;
                 view[0].mediaFiles.push(filename);
