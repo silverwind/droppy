@@ -562,6 +562,7 @@ function handleGET(req, res) {
         var cookie = cookies.get(req.headers.cookie);
         if (cookie || config.public) {
             handleResourceRequest(req, res, "main.html");
+            if (config.public) return;
             var sessions = db.get("sessions");
             sessions[cookie].lastSeen = Date.now();
             db.set("sessions", sessions);
