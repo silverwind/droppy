@@ -32,8 +32,11 @@ module.exports = function (grunt) {
             modules: {
                 command: "rm -rf node_modules && npm install"
             },
-            deploy: {
-                command: "git push -f demo master"
+            deploy : {
+                command: [
+                    'if git ls-remote demo -ne 0 &>/dev/null; then git push -f demo master; fi',
+                    'if git ls-remote droppy -ne 0 &>/dev/null; then git push -f droppy master; fi',
+                ].join(";")
             }
         },
         jshint: {
