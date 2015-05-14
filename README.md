@@ -111,13 +111,11 @@ Also see the [express example](https://github.com/silverwind/droppy/blob/master/
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
-### Installing as a service / proxying
+### Installation guides
 
-See the wiki for guides on these topics:
-
-- [debian](https://github.com/silverwind/droppy/wiki/Debian-Installation)
-- [systemd](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
-- [nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
+- [Installation as systemd service](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+- [Installation as debian initscript](https://github.com/silverwind/droppy/wiki/Debian-Installation)
+- [Reverse proxying through nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 
 ### wget
 For correct filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
