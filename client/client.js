@@ -191,7 +191,7 @@
 // ============================================================================
 //  Page load
 // ============================================================================
-    $(function () {
+    $(window).one("load", function () {
         var type = $("html").data("type");
         if (type === "main") {
             initMainPage();
@@ -479,7 +479,7 @@
     function initAuthPage(firstrun) {
         var form = $("#form");
 
-        $("#pass").register("keydown", function (event) {
+        $("#pass, .submit").register("keydown", function (event) {
             if (event.keyCode === 13) form.submit();
         });
 

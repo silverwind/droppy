@@ -81,7 +81,6 @@ resources.files = {
             "client/templates/options.dotjs"
         ],
         other: [
-            "client/font.woff",
             "client/images/logo.svg",
             "client/images/logo16.png",
             "client/images/logo32.png",
