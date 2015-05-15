@@ -37,8 +37,9 @@ var opts = {
     },
     get cleanCSS() {
         return {
-            advanced : true,
-            keepSpecialComments : 0
+            keepSpecialComments : 0,
+            roundingPrecision: 3,
+            rebase: false
         };
     },
     get autoprefixer() {
