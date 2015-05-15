@@ -514,7 +514,7 @@
 
         // Global events
         $(window)
-            // Re-fit path line after 100ms of no resizing
+            // Re-fit path line after 50ms of no resizing
             .register("resize", function () {
                 clearTimeout(droppy.resizeTimer);
                 droppy.resizeTimer = setTimeout(function () {
@@ -522,7 +522,7 @@
                         checkPathOverflow($(this));
                         aspectScale();
                     });
-                }, 100);
+                }, 50);
             })
             // Bind escape for hiding modals
             .register("keydown", function (event) {
@@ -1900,6 +1900,7 @@
         loadContent(view, contentWrap(view).append(content), function (view) {
             view.find(".fs").register("click", function () {
                 toggleFullscreen($(this).parents(".content")[0]);
+                aspectScale();
             });
             view.find("img").each(function () {
                 aspectScale();
@@ -2822,9 +2823,6 @@
         $(".media-container").each(function () {
             var container = $(this);
             container.find("img, video").each(function () {
-                // Only upscale
-                if ($(this).width() >= $(this).parent().width()) return;
-                if ($(this).height() >= $(this).parent().height()) return;
                 var dims  = {
                         w: this.naturalWidth || this.videoWidth || this.clientWidth,
                         h: this.naturalHeight || this.videoHeight || this.clientHeight
@@ -2834,7 +2832,7 @@
                         h: container.height()
                     };
                 if (dims.w > space.w || dims.h > space.h) {
-                    $(this).css({width: "", height: ""}); // Let CSS handle the downscale
+                    $(this).removeAttr("style"); // Let CSS handle the downscale
                 } else {
                     if (dims.w / dims.h > space.w / space.h) {
                         $(this).css({width: "100%", height: "auto"});
