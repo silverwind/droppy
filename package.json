@@ -46,11 +46,11 @@
     "request": "^2.55.0",
     "rimraf": "^2.3.3",
     "spdy": "^1.32.0",
-    "uglify-js": "^2.4.21",
+    "uglify-js": "^2.4.22",
     "untildify": "^2.0.0",
     "video.js": "^4.12.6",
     "websocket": "^1.0.18",
-    "yauzl": "^2.3.0",
+    "yauzl": "^2.3.1",
     "yazl": "^2.2.2"
   },
   "devDependencies": {
