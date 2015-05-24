@@ -1,7 +1,8 @@
 /* global jQuery, CodeMirror, videojs, Draggabilly, ext */
+/* eslint-disable quotes */
+"use strict";
 
 (function ($, window, document) {
-    "use strict";
     var droppy = {};
 
     /* The lines below will get replaced during compilation by the server */
@@ -53,7 +54,7 @@
     $.event.props.push("dataTransfer");
 
     // Disable jQuery's appending of _=timestamp parameter to script requests
-    $.ajaxSetup({ cache: true });
+    $.ajaxSetup({cache: true});
 
     // Shorthand for safe event listeners
     $.fn.register = function (events, callback) {
@@ -87,7 +88,7 @@
         var elem, classes, matches,
             i = this.length,
             hasClass = false;
-        while(--i >= 0) {
+        while (--i >= 0) {
             elem = this[i];
             if (typeof elem === "undefined") return false;
             classes = elem.className.split(" ").filter(function (className) {
@@ -202,14 +203,14 @@
         } else {
             initAuthPage(type === "firstrun");
             raf(function () {
-               $("#login-box").setTransitionClass("in");
-               $("#login-info-box").addClass("info");
-               if (type === "firstrun") {
-                   $("#login-info").text("Hello! Choose your credentials.");
-               } else if (droppy.get("hasLoggedOut")) {
-                   $("#login-info").text("Logged out!");
-                   droppy.set("hasLoggedOut", false);
-               }
+                $("#login-box").setTransitionClass("in");
+                $("#login-info-box").addClass("info");
+                if (type === "firstrun") {
+                    $("#login-info").text("Hello! Choose your credentials.");
+                } else if (droppy.get("hasLoggedOut")) {
+                    $("#login-info").text("Logged out!");
+                    droppy.set("hasLoggedOut", false);
+                }
             });
         }
     });
@@ -430,7 +431,7 @@
         };
     }
     function sendMessage(vId, type, data) {
-        var sendObject = { vId: vId, type: type, data: data};
+        var sendObject = {vId: vId, type: type, data: data};
         if (droppy.socket.readyState === 1) { // open
             // Lock the UI while we wait for a socket response
             droppy.socketWait = true;
@@ -874,7 +875,7 @@
 
             speed = droppy.formatBytes(Math.round(speed / 1e3) * 1e3);
 
-            updateTitle(progress + " - "+ (view[0].currentFolder !== "/" ?
+            updateTitle(progress + " - " + (view[0].currentFolder !== "/" ?
                         view[0].currentFolder.substring(1) : "droppy"));
             view.find(".upload-bar").css("width", progress);
             view.find(".upload-speed > span").text(speed + "/s");
@@ -1058,8 +1059,7 @@
 
                     // Skip the push if we're already navigating through history
                     if (!skipPush) pushHistory(view, viewDest);
-                } else
-                    setTimeout(queue, 50, time + 50);
+                } else setTimeout(queue, 50, time + 50);
             })(time);
         }
         if (view === null) {
@@ -1151,7 +1151,7 @@
 
         raf(function () {
             view.find(".path li").animate({
-                "left": (width > space) ? space - width : 0
+                left: (width > space) ? space - width : 0
             }, {duration: 200});
         });
     }
@@ -1278,7 +1278,7 @@
 
         function finish() {
             view[0].isAnimating = false;
-            getOtherViews(view[0].vId).css("z-index","auto");
+            getOtherViews(view[0].vId).css("z-index", "auto");
             view.find(".content:not(.new)").remove();
             view.find(".content")[0].style.willChange = "auto";
             view.find(".new").removeClass("new");
@@ -1480,8 +1480,7 @@
                         setTimeout(function () {
                             readEntries(entry, dirReader, newEntries, cb);
                         }, 0);
-                    }
-                    else {
+                    } else {
                         cb(newEntries);
                     }
                 });
@@ -1580,7 +1579,7 @@
             entryRename(view, entry, false, function (success, oldVal, newVal) {
                 if (success) {
                     showSpinner(view);
-                    sendMessage(view[0].vId, "RENAME", { "src": oldVal, "dst": newVal });
+                    sendMessage(view[0].vId, "RENAME", {src: oldVal, dst: newVal});
                 }
             });
             event.stopPropagation();
@@ -1591,7 +1590,7 @@
             var entry = $("#entry-menu").data("target");
 
             toggleCatcher(false);
-            droppy.clipboard = { type: $(this).attr("class"), src: entry.data("id") };
+            droppy.clipboard = {type: $(this).attr("class"), src: entry.data("id")};
             $(".view").each(function () {
                 var view = $(this);
                 if (!view.children(".paste-button").length) {
@@ -1668,8 +1667,8 @@
         var sortedEntries = sortByProp(view[0].currentData, header.attr("data-sort"));
         if (view[0].sortAsc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            view.find("[data-name='" + sortedEntries[index].replace(/['"]/g,"_") + "']:first").css({
-                "order": index,
+            view.find("[data-name='" + sortedEntries[index].replace(/['"]/g, "_") + "']:first").css({
+                order: index,
                 "-ms-flex-order": String(index)
             }).attr("order", index);
         }
@@ -1825,7 +1824,7 @@
         meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
         meta.find(".max").text(view[0].mediaFiles.length);
         meta.register("click", function () {
-           view.find(".dims").toggleClass("in");
+            view.find(".dims").toggleClass("in");
         });
 
         (function addSizes(meta, img) {
@@ -1964,8 +1963,8 @@
                         event.preventDefault();
                         showSpinner(view);
                         sendMessage(view[0].vId, "SAVE_FILE", {
-                            "to": view[0].editorEntryId,
-                            "value": cm.getValue()
+                            to: view[0].editorEntryId,
+                            value: cm.getValue()
                         });
                     }
                 });
@@ -1985,8 +1984,8 @@
                     var view = $(this).parents(".view");
                     showSpinner(view);
                     sendMessage(view[0].vId, "SAVE_FILE", {
-                        "to": entryId,
-                        "value": editor.getValue()
+                        to: entryId,
+                        value: editor.getValue()
                     });
                 });
                 doc.find(".ww").register("click", function () {
@@ -2413,12 +2412,12 @@
                     el.classList.add("video-js", "vjs-default-skin");
                 videojs.options.flash.swf = "?!/lib/vjs.swf";
                 videojs(el, {
-                    "controls" : true,
-                    "autoplay" : droppy.detects.mobile ? false : true,
-                    "preload"  : "auto",
-                    "loop"     : "loop",
-                    "width"    : $(el).parents(".media-container")[0].clientWidth,
-                    "heigth"   : $(el).parents(".media-container")[0].clientHeight
+                    controls : true,
+                    autoplay : droppy.detects.mobile,
+                    preload  : "auto",
+                    loop     : "loop",
+                    width    : $(el).parents(".media-container")[0].clientWidth,
+                    heigth   : $(el).parents(".media-container")[0].clientHeight
                 }, cb);
             })();
         });
@@ -2433,10 +2432,10 @@
             });
         }
         loadScript("cm-js", "?!/lib/cm.js", function () {
-             (function verify() {
+            (function verify() {
                 if (!("CodeMirror" in window)) return setTimeout(verify, 200);
                 cb();
-             })();
+            })();
         });
     }
 
@@ -2465,7 +2464,7 @@
             animationstart    : ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"],
             getAsEntry        : ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"],
             requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
-            fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange" ],
+            fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange"],
             fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
             fullscreenEnabled : ["fullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled", "msFullscreenEnabled"],
             exitFullscreen    : ["exitFullscreen", "mozCancelFullScreen", "webkitExitFullscreen", "msExitFullscreen"]
@@ -2473,95 +2472,95 @@
 
         // Extension to icon mappings
         droppy.iconMap = {
-            "archive":  ["bz2", "gz", "tgz"],
-            "audio":    ["aac", "aif", "aiff", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
-            "authors":  ["authors"],
-            "bin":      ["class", "o", "so"],
-            "bmp":      ["bmp"],
-            "c":        ["c"],
-            "calc":     ["ods", "ots", "xlr", "xls", "xlsx"],
-            "cd":       ["cue", "iso"],
-            "copying":  ["copying", "license"],
-            "cpp":      ["cpp", "cc", "cxx"],
-            "css":      ["css", "less", "scss", "sass"],
-            "deb":      ["deb"],
-            "diff":     ["diff", "patch"],
-            "doc":      ["doc", "docx", "odm", "odt", "ott"],
-            "draw":     ["drw"],
-            "eps":      ["eps"],
-            "exe":      ["bat", "cmd", "exe"],
-            "gif":      ["gif"],
-            "gzip":     ["gz"],
-            "h":        ["h", "hh"],
-            "hpp":      ["hpp"],
-            "html":     ["htm", "html", "shtml"],
-            "ico":      ["ico"],
-            "image":    ["svg", "xpm", "webp"],
-            "install":  ["install", "msi"],
-            "java":     ["java"],
-            "jpg":      ["jpg", "jpeg"],
-            "js":       ["js", "es", "dart"],
-            "json":     ["json", "gyp"],
-            "log":      ["log", "changelog"],
-            "makefile": ["makefile", "pom"],
-            "markdown": ["markdown", "md"],
-            "pdf":      ["pdf"],
-            "php":      ["php"],
-            "playlist": ["m3u", "m3u8", "pls"],
-            "png":      ["png", "apng"],
-            "pres":     ["odp", "otp", "pps", "ppt", "pptx"],
-            "ps":       ["ps", "ttf", "otf", "woff", "eot"],
-            "psd":      ["psd"],
-            "py":       ["py"],
-            "rar":      ["rar"],
-            "rb":       ["rb"],
-            "readme":   ["readme"],
-            "rpm":      ["rpm"],
-            "rss":      ["rss"],
-            "rtf":      ["rtf"],
-            "script":   ["csh", "ini", "ksh", "sh", "shar", "tcl"],
-            "sql":      ["sql", "dump"],
-            "tar":      ["tar"],
-            "tex":      ["tex"],
-            "text":     ["text", "txt", "conf", "cfg"],
-            "tiff":     ["tiff"],
-            "vcal":     ["vcal"],
-            "video":    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
-            "xml":      ["xml"],
-            "zip":      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
+            archive:  ["bz2", "gz", "tgz"],
+            audio:    ["aac", "aif", "aiff", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
+            authors:  ["authors"],
+            bin:      ["class", "o", "so"],
+            bmp:      ["bmp"],
+            c:        ["c"],
+            calc:     ["ods", "ots", "xlr", "xls", "xlsx"],
+            cd:       ["cue", "iso"],
+            copying:  ["copying", "license"],
+            cpp:      ["cpp", "cc", "cxx"],
+            css:      ["css", "less", "scss", "sass"],
+            deb:      ["deb"],
+            diff:     ["diff", "patch"],
+            doc:      ["doc", "docx", "odm", "odt", "ott"],
+            draw:     ["drw"],
+            eps:      ["eps"],
+            exe:      ["bat", "cmd", "exe"],
+            gif:      ["gif"],
+            gzip:     ["gz"],
+            h:        ["h", "hh"],
+            hpp:      ["hpp"],
+            html:     ["htm", "html", "shtml"],
+            ico:      ["ico"],
+            image:    ["svg", "xpm", "webp"],
+            install:  ["install", "msi"],
+            java:     ["java"],
+            jpg:      ["jpg", "jpeg"],
+            js:       ["js", "es", "dart"],
+            json:     ["json", "gyp"],
+            log:      ["log", "changelog"],
+            makefile: ["makefile", "pom"],
+            markdown: ["markdown", "md"],
+            pdf:      ["pdf"],
+            php:      ["php"],
+            playlist: ["m3u", "m3u8", "pls"],
+            png:      ["png", "apng"],
+            pres:     ["odp", "otp", "pps", "ppt", "pptx"],
+            ps:       ["ps", "ttf", "otf", "woff", "eot"],
+            psd:      ["psd"],
+            py:       ["py"],
+            rar:      ["rar"],
+            rb:       ["rb"],
+            readme:   ["readme"],
+            rpm:      ["rpm"],
+            rss:      ["rss"],
+            rtf:      ["rtf"],
+            script:   ["csh", "ini", "ksh", "sh", "shar", "tcl"],
+            sql:      ["sql", "dump"],
+            tar:      ["tar"],
+            tex:      ["tex"],
+            text:     ["text", "txt", "conf", "cfg"],
+            tiff:     ["tiff"],
+            vcal:     ["vcal"],
+            video:    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
+            xml:      ["xml"],
+            zip:      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
         };
 
         droppy.audioTypes = {
-            "aac" : "audio/aac",
-            "m4a" : "audio/mp4",
-            "mp1" : "audio/mpeg",
-            "mp2" : "audio/mpeg",
-            "mp3" : "audio/mpeg",
-            "mpa" : "audio/mpeg",
-            "mpg" : "audio/mpeg",
-            "mpeg": "audio/mpeg",
-            "ogg" : "audio/ogg",
-            "oga" : "audio/ogg",
-            "opus": "audio/ogg",
-            "wav" : "audio/wav"
+            aac : "audio/aac",
+            m4a : "audio/mp4",
+            mp1 : "audio/mpeg",
+            mp2 : "audio/mpeg",
+            mp3 : "audio/mpeg",
+            mpa : "audio/mpeg",
+            mpg : "audio/mpeg",
+            mpeg: "audio/mpeg",
+            ogg : "audio/ogg",
+            oga : "audio/ogg",
+            opus: "audio/ogg",
+            wav : "audio/wav"
         };
 
         droppy.videoTypes = {
-            "mp4" : "video/mp4", // can be audio/mp4 too
-            "m4v" : "video/mp4",
-            "ogv" : "video/ogg",
-            "webm": "video/webm" // can be audio/webm too
+            mp4 : "video/mp4", // can be audio/mp4 too
+            m4v : "video/mp4",
+            ogv : "video/ogg",
+            webm: "video/webm" // can be audio/webm too
         };
 
         droppy.imageTypes = {
-            "jpg" : "image/jpeg",
-            "jpeg": "image/jpeg",
-            "gif" : "image/gif",
-            "png" : "image/png",
-            "apng": "image/png",
-            "svg" : "image/svg+xml",
-            "bmp" : "image/bmp",
-            "ico" : "image/x-icon"
+            jpg : "image/jpeg",
+            jpeg: "image/jpeg",
+            gif : "image/gif",
+            png : "image/png",
+            apng: "image/png",
+            svg : "image/svg+xml",
+            bmp : "image/bmp",
+            ico : "image/x-icon"
         };
     }
 
@@ -2826,8 +2825,7 @@
         };
     }
 
-    /* jshint ignore:start */
-
+    /* eslint-disable no-unused-vars */
     function getSpriteClass(extension) {
         for (var type in droppy.iconMap) {
             if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
@@ -2838,31 +2836,30 @@
     }
 
     function formatBytes(num) {
-        if (typeof num !== 'number' || isNaN(num))
-            throw new TypeError('Expected a number');
+        if (typeof num !== "number" || isNaN(num))
+            throw new TypeError("Expected a number");
 
         var exponent, unit, neg = num < 0;
-        var units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        var units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
         if (neg) num = -num;
-        if (num < 1) return (neg ? '-' : '') + num + ' B';
+        if (num < 1) return (neg ? "-" : "") + num + " B";
 
         exponent = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
         num = (num / Math.pow(1000, exponent)).toFixed(2) * 1;
         unit = units[exponent];
 
-        return (neg ? '-' : '') + num + ' ' + unit;
+        return (neg ? "-" : "") + num + " " + unit;
     }
 
     function convertEntries(entries) {
         Object.keys(entries).forEach(function (entry) {
             var data = entries[entry].split("|");
-            entries[entry] = { type: data[0], mtime: data[1], size: data[2]};
+            entries[entry] = {type: data[0], mtime: data[1], size: data[2]};
         });
         return entries;
     }
-
-    /* jshint ignore:end */
+    /* eslint-enable no-unused-vars */
 
     function sortCompare(a, b) {
         if (typeof a === "number" && typeof b === "number")
@@ -2918,9 +2915,8 @@
 
     // Join and clean up paths (can also take a single argument to just clean it up)
     function join() {
-        var parts = [],
-            newParts = [];
-        for (var i = 0, l = arguments.length; i < l; i++) {
+        var i, l, parts = [], newParts = [];
+        for (i = 0, l = arguments.length; i < l; i++) {
             if (typeof arguments[i] === "string") {
                 parts = parts.concat(arguments[i].split("/"));
             }

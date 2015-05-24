@@ -32,33 +32,25 @@ module.exports = function (grunt) {
             modules: {
                 command: "rm -rf node_modules && npm install"
             },
-            deploy : {
+            deploy: {
                 command: [
-                    'if git ls-remote demo -ne 0 &>/dev/null; then git push -f demo master; fi',
-                    'if git ls-remote droppy -ne 0 &>/dev/null; then git push -f droppy master; fi',
+                    "if git ls-remote demo -ne 0 &>/dev/null; then git push -f demo master; fi",
+                    "if git ls-remote droppy -ne 0 &>/dev/null; then git push -f droppy master; fi"
                 ].join(";")
-            }
-        },
-        jshint: {
-            options: {
-                jshintrc: true
             },
-            all: [
-                "*.js",
-                "server/**/*.js",
-                "client/client.js"
-            ]
+            lint: {
+                command: "eslint --reset --color --quiet server client *.js"
+            }
         }
     });
 
     grunt.registerTask("update", ["shell:update", "shell:modules"]);
-    grunt.registerTask("patch",  ["jshint", "bump", "shell:push", "shell:publish", "shell:deploy"]);
-    grunt.registerTask("minor",  ["jshint", "bump:minor", "shell:push", "shell:publish", "shell:deploy"]);
-    grunt.registerTask("major",  ["jshint", "bump:major", "shell:push", "shell:publish", "shell:deploy"]);
+    grunt.registerTask("patch",  ["shell:lint", "bump", "shell:push", "shell:publish", "shell:deploy"]);
+    grunt.registerTask("minor",  ["shell:lint", "bump:minor", "shell:push", "shell:publish", "shell:deploy"]);
+    grunt.registerTask("major",  ["shell:lint", "bump:major", "shell:push", "shell:publish", "shell:deploy"]);
     grunt.registerTask("deploy", ["shell:deploy"]);
-    grunt.registerTask("jshint", ["jshint"]);
+    grunt.registerTask("lint",   ["shell:lint"]);
 
     grunt.loadNpmTasks("grunt-bump");
     grunt.loadNpmTasks("grunt-shell");
-    grunt.loadNpmTasks("grunt-contrib-jshint");
 };

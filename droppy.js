@@ -59,6 +59,7 @@ if (cmd === "-v" || cmd === "--version") {
 }
 
 if (cmds[cmd]) {
+    var db;
     switch (cmd) {
     case "start":
         require("./server/server.js")(null, true, function (err) {
@@ -95,14 +96,14 @@ if (cmds[cmd]) {
         });
         break;
     case "list":
-        var db = require("./server/lib/db.js");
+        db = require("./server/lib/db.js");
         db.init(function () {
             printUsers(db.get("users"));
         });
         break;
     case "add":
         if (args.length !== 2) return printHelp();
-        var db = require("./server/lib/db.js");
+        db = require("./server/lib/db.js");
         db.init(function () {
             db.addOrUpdateUser(args[0], args[1], true, function () {
                 printUsers(db.get("users"));
@@ -111,7 +112,7 @@ if (cmds[cmd]) {
         break;
     case "del":
         if (args.length !== 1) return printHelp();
-        var db = require("./server/lib/db.js");
+        db = require("./server/lib/db.js");
         db.init(function () {
             db.delUser(args[0], function () {
                 printUsers(db.get("users"));

@@ -136,6 +136,7 @@ resources.init = function init(doMinify, cb) {
     canUseCache(function (can) {
         if (!can) return compile(cb);
         fs.readFile(paths.cache, function (err, data) {
+            if (err) return cb(err);
             try {
                 var cache = jb.parse(data);
                 cb(null, cache);
@@ -149,7 +150,7 @@ resources.init = function init(doMinify, cb) {
 function compile(cb) {
     async.series([compileAll, readThemes, readModes, readLibs], function (err, results) {
         if (err) return cb(err);
-        var cache = { res: results[0], themes: {}, modes: {}, lib: {} };
+        var cache = {res: results[0], themes: {}, modes: {}, lib: {}};
 
         Object.keys(results[1]).forEach(function (theme) {
             cache.themes[theme] = {data: results[1][theme], etag: etag(), mime: mime("css")};
@@ -215,7 +216,7 @@ function canUseCache(cb) {
     var lastChange, files = [];
     Object.keys(resources.files).forEach(function (type) {
         resources.files[type].forEach(function (file) {
-           files.push(path.join(paths.mod, file));
+            files.push(path.join(paths.mod, file));
         });
     });
     Object.keys(libs).forEach(function (file) {
@@ -231,11 +232,11 @@ function canUseCache(cb) {
         fs.stat(file, function (err, stats) {
             cb(null, err ? 0 : stats.mtime.getTime());
         });
-    }, function(err, times) {
+    }, function (err, times) {
         if (err) return cb(err);
         lastChange = Math.max.apply(Math, times);
         fs.stat(paths.cache, function (err, stats) {
-            if (err) return cb (false);
+            if (err) return cb(false);
             cb(stats.mtime.getTime() > lastChange);
         });
     });
@@ -274,7 +275,7 @@ function readModes(callback) {
     // parse meta.js from CM for supported modes
     fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function (err, js) {
         if (err) return callback(err);
-        var sandbox = { CodeMirror : {} };
+        var sandbox = {CodeMirror : {}};
 
         // Execute meta.js in a sandbox
         vm.runInNewContext(js, sandbox);
@@ -313,13 +314,13 @@ function readLibs(callback) {
         }
     }, function (err) {
         if (minify) {
-           Object.keys(out).forEach(function (file) {
-               if (/\.js$/.test(file)) {
-                   out[file] = new Buffer(uglify.minify(out[file].toString(), opts.uglify).code);
-               } else if (/\.css$/.test(file)) {
-                   out[file] = new Buffer(cleanCSS.minify(out[file].toString()).styles);
-               }
-           });
+            Object.keys(out).forEach(function (file) {
+                if (/\.js$/.test(file)) {
+                    out[file] = new Buffer(uglify.minify(out[file].toString(), opts.uglify).code);
+                } else if (/\.css$/.test(file)) {
+                    out[file] = new Buffer(cleanCSS.minify(out[file].toString()).styles);
+                }
+            });
         }
         callback(err, out);
     });
@@ -361,8 +362,6 @@ resources.compileJS = function compileJS() {
             .split("/").slice(2).join("."), data) + ";";
     });
     js = js.replace("/* {{ oldtemplates }} */", templateCode);
-
-
 
     // Minify
     if (minify) js = uglify.minify(js, opts.uglify).code;
@@ -460,7 +459,7 @@ function compileAll(callback) {
     callback(null, res);
 }
 
-function etag () {
+function etag() {
     return crypto.createHash("md5").update(String(Date.now())).digest("hex");
 }
 

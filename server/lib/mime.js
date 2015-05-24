@@ -3,8 +3,8 @@
 var mimeTypes = require("mime-types");
 
 var overridesExt = {
-        "m4v" : "video/mp4", // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
-        "mp4v": "video/mp4"  // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
+        m4v : "video/mp4", // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
+        mp4v: "video/mp4"  // https://bugzilla.mozilla.org/show_bug.cgi?id=875573
     };
 
 module.exports = function lookup(path) {

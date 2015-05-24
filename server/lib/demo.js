@@ -15,10 +15,10 @@ var filetree = require("./filetree.js"),
     paths    = require("./paths.js").get(),
     utils    = require("./utils.js");
 
-demo.init = function init (cb) {
+demo.init = function init(cb) {
     process.title = "droppy-demo";
     demo.refresh(function () {
-        schedule.scheduleJob('*/10 * * * *', demo.refresh);
+        schedule.scheduleJob("*/10 * * * *", demo.refresh);
         if (cb) cb();
     });
 };
@@ -103,21 +103,21 @@ function getZip(url, dest, zipDest) {
 }
 
 function unzip(data, dest, callback) {
-    yauzl.fromBuffer(data, function(err, zipfile) {
+    yauzl.fromBuffer(data, function (err, zipfile) {
         var done, count = 0, written = 0;
         if (err) callback(err);
-        zipfile.on("entry", function(entry) {
+        zipfile.on("entry", function (entry) {
             count++;
             if (/\/$/.test(entry.fileName)) {
                 utils.mkdir(path.join(dest, entry.fileName));
                 if (done) callback(null);
             } else {
-                zipfile.openReadStream(entry, function(err, rs) {
+                zipfile.openReadStream(entry, function (err, rs) {
                     if (err) return callback(err);
                     var ws = fs.createWriteStream(path.join(dest, entry.fileName));
-                    ws.on("finish", function() {
+                    ws.on("finish", function () {
                         written++;
-                        if (done && (written === count)) {
+                        if (done && written === count) {
                             callback(null);
                         }
                     });
@@ -125,7 +125,7 @@ function unzip(data, dest, callback) {
                 });
             }
         });
-        zipfile.on("end", function() {
+        zipfile.on("end", function () {
             done = true;
         });
     });

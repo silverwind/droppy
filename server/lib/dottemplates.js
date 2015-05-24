@@ -16,6 +16,7 @@ var fs  = require("graceful-fs"),
         } else {
             var out = ";(function(){",
                 handleFiles = function (err, files) {
+                    if (err) callback(err);
                     files.forEach(function (fileName) {
                         var data = fs.readFileSync(folderName + "/" + fileName).toString();
                         out += produceFunction(fileName.replace(/(^[^\.\/\\]+)[\S\s]+$/, "$1"), data);

@@ -6,16 +6,17 @@ var handlebars = require("handlebars");
 var read       = require("fs").readFile;
 var path       = require("path");
 
-var prefix = '(function() {var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};\n';
-var suffix = '})();';
+var prefix = "(function() {var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};\n";
+var suffix = "})();";
 
 templates.compile = function compile(paths, cb) {
     async.map(paths, function (file, cb) {
         read(file, function (err, data) {
-           if (err) return cb(err);
-           cb(null, getEntry(file, data));
+            if (err) return cb(err);
+            cb(null, getEntry(file, data));
         });
     }, function (err, entries) {
+        if (err) return cb(err);
         cb(prefix + entries.join("") + suffix);
     });
 };

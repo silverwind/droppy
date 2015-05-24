@@ -7,22 +7,22 @@ var cfg        = {},
     path       = require("path"),
     configFile = require("./paths.js").get().cfgFile,
     defaults   = {
-        "listeners" : [
+        listeners : [
             {
-                "host"     : "0.0.0.0",
-                "port"     : 8989,
-                "protocol" : "http"
+                host     : "0.0.0.0",
+                port     : 8989,
+                protocol : "http"
             }
         ],
-        "debug"          : false,
-        "keepAlive"      : 20000,
-        "linkLength"     : 5,
-        "logLevel"       : 2,
-        "maxFileSize"    : 0,
-        "maxOpen"        : 256,
-        "public"         : false,
-        "updateInterval" : 1000,
-        "timestamps"     : true
+        debug          : false,
+        keepAlive      : 20000,
+        linkLength     : 5,
+        logLevel       : 2,
+        maxFileSize    : 0,
+        maxOpen        : 256,
+        public         : false,
+        updateInterval : 1000,
+        timestamps     : true
     };
 
 cfg.init = function (config, callback) {
@@ -87,10 +87,10 @@ function migrate(config) {
 
     if (needToMigrate && !config.listeners) {
         config.listeners = [{
-            "host"     : config.host,
-            "port"     : config.port,
-            "protocol" : (config.useSPDY || config.useTLS) ? "https" : "http",
-            "hsts"     : config.useHSTS ? 31536000 : 0
+            host     : config.host,
+            port     : config.port,
+            protocol : config.useSPDY || config.useTLS ? "https" : "http",
+            hsts     : config.useHSTS ? 31536000 : 0
         }];
     }
     oldProps.forEach(function (prop) {

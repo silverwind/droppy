@@ -12,6 +12,7 @@ function updateSelf(pkg, callback) {
     function loadNPM(cb) {
         // obtain a reference to the global npm to avoid having to install npm locally
         require("child_process").exec("npm", function (err, stdout) {
+            if (err) return cb(err);
             var match = /npm@[^ ]+ (.+)\n/i.exec(stdout);
             if (!match) return cb(new Error("Unable to find path in npm help message."));
             cb(null, require(match[1]));
@@ -34,7 +35,7 @@ function updateSelf(pkg, callback) {
 
     function cleanupModules(cb) {
         var dir = path.join(paths.mod, "/node_modules");
-        fs.stat(dir, function(err, stats) {
+        fs.stat(dir, function (err, stats) {
             if (err || !stats || !stats.isDirectory()) {
                 return cb();
             } else {
@@ -45,7 +46,7 @@ function updateSelf(pkg, callback) {
     }
 
     function install(versions, cb) {
-        cleanupModules(function() {
+        cleanupModules(function () {
             console.info("Updating " + pkg.name + " from " + chalk.green(versions[0]) + " to " + chalk.green(versions[1]) + " ...");
             npm.commands.install([pkg.name + "@" + versions[1]], function (err)  {
                 if (err) return cb(err);
@@ -59,7 +60,7 @@ function updateSelf(pkg, callback) {
         async.parallel([getInstalledVersion, getNPMVersion], function (err, versions) {
             if (err) return callback(err);
             if (versions[0] !== versions[1]) {
-                fs.readFile(paths.pid, function(err, data) {
+                fs.readFile(paths.pid, function (err, data) {
                     if (!err) {
                         var pid = parseInt(String(data), 10);
                         if (typeof pid === "number") {

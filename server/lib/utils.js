@@ -115,7 +115,7 @@ utils.getNewPath = function getNewPath(origPath, callback) {
                 filename  = filename.substring(0, filename.lastIndexOf("."));
             }
 
-            if (!/\-\d+$/.test(filename)) filename = filename + "-1";
+            if (!/\-\d+$/.test(filename)) filename += "-1";
 
             var canCreate = false;
             async.until(
@@ -188,7 +188,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             opts.dhparam ? path.resolve(paths.home, opts.dhparam) : undefined
         ];
 
-        async.map(certPaths, readFile, function (err, data) {
+        async.map(certPaths, readFile, function (_, data) {
             var certStart = "-----BEGIN CERTIFICATE-----";
             var certEnd   = "-----END CERTIFICATE-----";
 
@@ -225,14 +225,14 @@ utils.tlsInit = function tlsInit(opts, callback) {
                 if (saved) return finish(saved);
                 log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a while.");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
-                   if (err) return callback(err);
-                   db.set("dhparam", result.dhparam);
-                   finish(result.dhparam);
+                    if (err) return callback(err);
+                    db.set("dhparam", result.dhparam);
+                    finish(result.dhparam);
                 });
             }
         });
     } else { // Use self-signed certs
-        require("pem").createCertificate({ days: CERT_DAYS, selfSigned: true }, function (err, keys) {
+        require("pem").createCertificate({days: CERT_DAYS, selfSigned: true}, function (err, keys) {
             if (err) return callback(err);
             var data = {
                 selfsigned : true,
@@ -245,10 +245,10 @@ utils.tlsInit = function tlsInit(opts, callback) {
             } else {
                 log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a while.");
                 require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
-                   if (err) return callback(err);
-                   data.dhparam = result.dhparam;
-                   db.set("dhparam", result.dhparam);
-                   callback(null, data);
+                    if (err) return callback(err);
+                    data.dhparam = result.dhparam;
+                    db.set("dhparam", result.dhparam);
+                    callback(null, data);
                 });
             }
         });
@@ -258,7 +258,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
 function readFile(p, cb) {
     if (typeof p !== "string") return cb(null);
 
-    fs.stat(p, function (err, stats) {
+    fs.stat(p, function (_, stats) {
         if (stats && stats.isFile()) {
             fs.readFile(p, function (err, data) {
                 if (err) return cb(err);

@@ -12,7 +12,7 @@ cookies.get = function get(cookie) {
         });
         return cookies.validate(entries);
     } else if (typeof cookie === "string" && cookie.length) {
-        cookie.split("; ").forEach(function(entry) {
+        cookie.split("; ").forEach(function (entry) {
             var parts = entry.trim().split("=");
             entries[parts[0]] = parts[1];
         });

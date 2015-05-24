@@ -144,14 +144,12 @@ function startListeners(callback) {
 
     async.each(sockets, function (socket, cb) {
         createListener(onRequest, socket.opts, function (err, server, tlsData) {
-            if (err) {
-                return cb(err);
-            }
-
+            if (err) return cb(err);
             server.on("listening", function () {
                 setupSocket(server);
                 if (tlsData) {
                     require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
+                        if (err) return cb(err);
                         if (tlsData.selfsigned || !info.commonName) {
                             log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
                                        chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
@@ -238,6 +236,7 @@ function createListener(handler, opts, callback) {
             });
 
             server.on("clientError", function (err, conn) {
+                if (err) log.error(err);
                 conn.destroy();
             });
 
@@ -247,7 +246,7 @@ function createListener(handler, opts, callback) {
                 sessions[id] = data;
             });
             server.on("resumeSession", function (id, cb) {
-                cb(null, (id in sessions) ? sessions[id] : null);
+                cb(null, id in sessions ? sessions[id] : null);
             });
 
             callback(null, server, tlsData);
@@ -278,7 +277,7 @@ function setupSocket(server) {
             ws = request.accept();
             log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
             sid = utils.newSid();
-            clients[sid] = { views: [], cookie: cookie, ws: ws };
+            clients[sid] = {views: [], cookie: cookie, ws: ws};
         }
 
         ws.on("message", function (message) {
@@ -290,18 +289,18 @@ function setupSocket(server) {
             switch (msg.type) {
             case "REQUEST_SETTINGS":
                 sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
-                    "debug"         : config.debug,
-                    "demo"          : config.demo,
-                    "public"        : config.public,
-                    "maxFileSize"   : config.maxFileSize,
-                    "themes"        : Object.keys(cache.themes).join("|"),
-                    "modes"         : Object.keys(cache.modes).join("|"),
-                    "caseSensitive" : process.platform !== "win32"
+                    debug         : config.debug,
+                    demo          : config.demo,
+                    public        : config.public,
+                    maxFileSize   : config.maxFileSize,
+                    themes        : Object.keys(cache.themes).join("|"),
+                    modes         : Object.keys(cache.modes).join("|"),
+                    caseSensitive : process.platform !== "win32"
                 }});
                 break;
             case "REQUEST_UPDATE":
                 if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
-                if (!clients[sid]) clients[sid] = { views: [], ws: ws }; // This can happen when the server restarts
+                if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
                 fs.stat(utils.addFilesPath(msg.data), function (err, stats) {
                     var clientDir, clientFile;
                     if (err) { // Send client back to root when the requested path doesn't exist
@@ -318,7 +317,7 @@ function setupSocket(server) {
                         clientFile = null;
 
                     }
-                    clients[sid].views[vId] = { file: clientFile, directory: clientDir };
+                    clients[sid].views[vId] = {file: clientFile, directory: clientDir};
                     if (!clientFile) {
                         updateClientLocation(clientDir, sid, vId);
                         sendFiles(sid, vId);
@@ -370,7 +369,7 @@ function setupSocket(server) {
                     return sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
 
                 fs.lstat(utils.addFilesPath(msg.data.dst), function (err, stats) {
-                    if ((!err && stats) || msg.data.src === msg.data.dst) {
+                    if (!err && stats || msg.data.src === msg.data.dst) {
                         utils.getNewPath(utils.addFilesPath(msg.data.dst), function (newDst) {
                             filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
                         });
@@ -432,7 +431,7 @@ function setupSocket(server) {
                     });
                 }, function (err) {
                     if (err) log.error(ws, null, err);
-                    if (msg.data.isUpload) sendObj(sid,{type: "UPLOAD_DONE", vId: vId});
+                    if (msg.data.isUpload) sendObj(sid, {type: "UPLOAD_DONE", vId: vId});
                 });
                 break;
             case "CREATE_FOLDERS":
@@ -549,7 +548,7 @@ function handleGET(req, res) {
         cookies.free(req, res);
 
     if (/^\/\?!\//.test(URI)) {
-        handleResourceRequest(req, res, (/\?!\/([\s\S]+)$/.exec(URI)[1]));
+        handleResourceRequest(req, res, /\?!\/([\s\S]+)$/.exec(URI)[1]);
     } else if (/^\/\?[~\$]\//.test(URI)) {
         handleFileRequest(req, res, true);
     } else if (/^\/\?\?\//.test(URI)) {
@@ -733,14 +732,14 @@ function handleFileRequest(req, res, download) {
 
     // Validate the cookie for the remaining requests
     if (!cookies.get(req.headers.cookie) && !shareLink) {
-        res.writeHead(301, {"Location": "/"});
+        res.writeHead(301, {Location: "/"});
         res.end();
         log.info(req, res);
         return;
     }
 
     // 304 response when Etag matches
-    if (!download && ((req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"')) {
+    if (!download && (req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"') {
         res.writeHead(304, {
             "Content-Type": mime(filepath)
         });
@@ -773,7 +772,7 @@ function handleFileRequest(req, res, download) {
                             end          = partialend ? parseInt(partialend, 10) : total - 1;
 
                         status = 206;
-                        headers["Content-Length"] = (end - start) + 1;
+                        headers["Content-Length"] = end - start + 1;
                         headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + total;
                         res.writeHead(status, headers);
                         fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
@@ -841,7 +840,7 @@ function handleUploadRequest(req, res) {
 
     log.info(req, res, "Upload started");
 
-    opts = { headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
+    opts = {headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
 
     if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
     busboy = new Busboy(opts);
@@ -850,7 +849,7 @@ function handleUploadRequest(req, res) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
             dst         = path.join(paths.files, dstDir, dstRelative),
             tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
-            writeStream = fs.createWriteStream(tmp, { mode: "644"});
+            writeStream = fs.createWriteStream(tmp, {mode: "644"});
 
         files[dstRelative] = {
             src : tmp,
@@ -987,21 +986,21 @@ function updateClientLocation(dir, sid, vId) {
     clientsPerDir[dir].push({
         sid    : sid,
         vId    : vId,
-        update : _.throttle(function() {
+        update : _.throttle(function () {
             sendFiles(this.sid, this.vId);
         }, config.updateInterval, {leading: true, trailing: true})
     });
 }
 
 function removeClientPerDir(sid, vId) {
-    Object.keys(clientsPerDir).forEach(function(dir) {
+    Object.keys(clientsPerDir).forEach(function (dir) {
         var removeAt = [];
-        clientsPerDir[dir].forEach(function(client, i) {
+        clientsPerDir[dir].forEach(function (client, i) {
             if (client.sid === sid && (typeof vId === "number" ? client.vId === vId : true)) {
                 removeAt.push(i);
             }
         });
-        removeAt.reverse().forEach(function(pos) {
+        removeAt.reverse().forEach(function (pos) {
             clientsPerDir[dir].splice(pos, 1);
         });
 
@@ -1106,7 +1105,7 @@ function streamArchive(req, res, zipPath) {
 
 //-----------------------------------------------------------------------------
 // Hourly tasks
-schedule.scheduleJob('* 0 * * *', function hourly() {
+schedule.scheduleJob("* 0 * * *", function hourly() {
     // Clean inactive sessions after 1 month of inactivity
     var sessions = db.get("sessions");
     Object.keys(sessions).forEach(function (session) {
