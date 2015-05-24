@@ -22,7 +22,7 @@ it = {
     <div class="data-row {{= entry.classes }}" data-type="folder" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite sprite-folder">{{= entry.svgIcon }}</span>
         <a class="folder-link entry-link">{{= entry.name }}</a>
-        <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
+        <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= timeDifference(entry.mtime) }}</span>
         <span class="size" data-size="{{= entry.size }}">{{= entry.prettysize }}</span>
         <span class="line-buttons">
             <span class="sharelink" title="Share download link">{{= droppy.svg.link }}</span>
@@ -35,7 +35,7 @@ it = {
     <div class="data-row {{= entry.classes }}" data-type="file" data-id="{{= entry.id }}" data-name="{{= entry.sortname }}">
         <span class="sprite {{= entry.sprite}}">{{= entry.svgIcon }}</span>
         <a class="file-link entry-link" href="?~{{= entry.id }}" target="nope" download="{{= entry.name }}">{{= entry.name }}</a>
-        <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= droppy.templates.fn.timeDifference(entry.mtime) }}</span>
+        <span class="mtime" data-timestamp="{{= entry.mtime }}">{{= timeDifference(entry.mtime) }}</span>
         <span class="size" data-size="{{= entry.size }}">{{= entry.prettysize }}</span>
         <span class="line-buttons">
             <span class="sharelink" title="Share download link">{{= droppy.svg.link }}</span>
@@ -54,9 +54,9 @@ it = {
     <div id="empty" class="empty">{{= droppy.svg["upload-cloud"] }}<div class="text">Add files</div></div>
 {{??}}
     {{  if (it.sortBy === "name") it.sortBy = "type";
-        var entries = droppy.templates.fn.convert(it.entries), entry = {};
+        var entries = convertEntries(it.entries), entry = {};
         var folder = (it.folder === "/") ? "/" : it.folder + "/";
-        var sortedEntries = droppy.templates.fn.sortKeysByProperty(entries, it.sortBy);
+        var sortedEntries = sortByProp(entries, it.sortBy);
 
         if(it.sortAsc) sortedEntries.reverse();
         entry.sort = { type: "", mtime: "", size: "" };
@@ -67,9 +67,9 @@ it = {
         {{  entry.type = it.entries[name].type;
             entry.mtime = Number(it.entries[name].mtime) * 1e3;
             entry.size = Number(it.entries[name].size);
-            entry.prettysize = droppy.formatBytes(Number(entry.size));
+            entry.prettysize = formatBytes(Number(entry.size));
             entry.id = folder + name;
-            entry.sprite = droppy.templates.fn.getSpriteClass(/[^.]*$/.exec(name)[0]);
+            entry.sprite = getSpriteClass(/[^.]*$/.exec(name)[0]);
             entry.name = it.isUpload ? decodeURIComponent(name) : name;
             entry.sortname = entry.name.replace(/['"]/g, "_");
 

@@ -1664,7 +1664,7 @@
         view[0].sortAsc = header.hasClass("down");
         header.attr("class", "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        var sortedEntries = droppy.templates.fn.sortKeysByProperty(view[0].currentData, header.attr("data-sort"));
+        var sortedEntries = sortByProp(view[0].currentData, header.attr("data-sort"));
         if (view[0].sortAsc) sortedEntries = sortedEntries.reverse();
         for (var index = sortedEntries.length - 1; index >= 0; index--) {
             view.find("[data-name='" + sortedEntries[index].replace(/['"]/g,"_") + "']:first").css({
@@ -1673,33 +1673,6 @@
             }).attr("order", index);
         }
     }
-
-    droppy.templates.fn.compare = function (a, b) {
-        if (typeof a === "number" && typeof b === "number")
-            return b - a;
-        else
-            return naturalSort(a.toLowerCase(), b.toLowerCase());
-    };
-    // Compare by property, then by key
-    droppy.templates.fn.compare2 = function (entries, prop) {
-        var result;
-        return function (a, b) {
-            result = droppy.templates.fn.compare(entries[a][prop], entries[b][prop]);
-            if (result === 0) result = droppy.templates.fn.compare(a, b);
-            return result;
-        };
-    };
-    droppy.templates.fn.sortKeysByProperty = function (entries, by) {
-        return Object.keys(entries).sort(droppy.templates.fn.compare2(entries, by));
-    };
-
-    droppy.templates.fn.convert = function (entries) {
-        Object.keys(entries).forEach(function (entry) {
-            var data = entries[entry].split("|");
-            entries[entry] = { type: data[0], mtime: data[1], size: data[2]};
-        });
-        return entries;
-    };
 
     function closeDoc(view) {
         view[0].switchRequest = true;
@@ -2591,7 +2564,6 @@
         };
     }
 
-    // Find the corrects class for an icon sprite
     function getSpriteClass(extension) {
         for (var type in droppy.iconMap) {
             if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
@@ -2600,9 +2572,8 @@
         }
         return "sprite sprite-bin";
     }
-    droppy.templates.fn.getSpriteClass = getSpriteClass;
 
-    droppy.formatBytes = function(num) {
+    function formatBytes(num) {
         if (typeof num !== 'number' || isNaN(num))
             throw new TypeError('Expected a number');
 
@@ -2618,7 +2589,6 @@
 
         return (neg ? '-' : '') + num + ' ' + unit;
     };
-
 
     function getHeaderHTML() {
         return '<div class="file-header">' +
@@ -2699,7 +2669,6 @@
         if (isNaN(elapsed)) result = "unknown";
         return result;
     }
-    droppy.templates.fn.timeDifference = timeDifference;
 
     function secsToTime(secs) {
         var mins, hrs, time = "";
@@ -2881,6 +2850,29 @@
             }
         };
     }
+
+    function sortCompare(a, b) {
+        if (typeof a === "number" && typeof b === "number")
+            return b - a;
+        else
+            return naturalSort(a.toLowerCase(), b.toLowerCase());
+    };
+
+    function sortByProp(entries, prop) {
+        return Object.keys(entries).sort(function (a, b) {
+            var result = sortCompare(entries[a][prop], entries[b][prop]);
+            if (result === 0) result = sortCompare(a, b);
+            return result;
+        });
+    };
+
+    function convertEntries(entries) {
+        Object.keys(entries).forEach(function (entry) {
+            var data = entries[entry].split("|");
+            entries[entry] = { type: data[0], mtime: data[1], size: data[2]};
+        });
+        return entries;
+    };
 
     function naturalSort(a, b) {
         var x = [],
