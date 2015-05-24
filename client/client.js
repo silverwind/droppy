@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, prettyBytes, videojs, Draggabilly, ext */
+/* global jQuery, CodeMirror, videojs, Draggabilly, ext */
 
 (function ($, window, document) {
     "use strict";
@@ -788,7 +788,8 @@
 
         function isOverLimit(view, size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
-                showError(view, "Maximum file size for uploads is " + prettyBytes(droppy.maxFileSize));
+                showError(view, "Maximum file size for uploads is " +
+                          droppy.formatBytes(droppy.maxFileSize));
                 uploadCancel(view);
                 return true;
             }
@@ -870,7 +871,7 @@
                 speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3),
                 elapsed, secs;
 
-            speed = prettyBytes(Math.round(speed / 1e3) * 1e3);
+            speed = droppy.formatBytes(Math.round(speed / 1e3) * 1e3);
 
             updateTitle(progress + " - "+ (view[0].currentFolder !== "/" ?
                         view[0].currentFolder.substring(1) : "droppy"));
@@ -2600,6 +2601,24 @@
         return "sprite sprite-bin";
     }
     droppy.templates.fn.getSpriteClass = getSpriteClass;
+
+    droppy.formatBytes = function(num) {
+        if (typeof num !== 'number' || isNaN(num))
+            throw new TypeError('Expected a number');
+
+        var exponent, unit, neg = num < 0;
+        var units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        if (neg) num = -num;
+        if (num < 1) return (neg ? '-' : '') + num + ' B';
+
+        exponent = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
+        num = (num / Math.pow(1000, exponent)).toFixed(2) * 1;
+        unit = units[exponent];
+
+        return (neg ? '-' : '') + num + ' ' + unit;
+    };
+
 
     function getHeaderHTML() {
         return '<div class="file-header">' +

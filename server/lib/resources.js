@@ -71,7 +71,6 @@ resources.files = {
         js: [
             "node_modules/jquery/dist/jquery.js",
             "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
-            "node_modules/pretty-bytes/pretty-bytes.js",
             "node_modules/file-extension/file-extension.js",
             "client/client.js"
         ],
