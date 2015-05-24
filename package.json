@@ -31,6 +31,7 @@
     "draggabilly": "^1.2.3",
     "file-extension": "^1.1.2",
     "graceful-fs": "^3.0.7",
+    "handlebars": "^3.0.3",
     "html-minifier": "^0.7.2",
     "isbinaryfile": "^2.0.4",
     "jquery": "^2.1.4",

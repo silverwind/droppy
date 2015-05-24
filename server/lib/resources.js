@@ -69,6 +69,7 @@ resources.files = {
             "client/sprites.css"
         ],
         js: [
+            "node_modules/handlebars/dist/handlebars.runtime.min.js",
             "node_modules/jquery/dist/jquery.js",
             "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
             "node_modules/file-extension/file-extension.js",
