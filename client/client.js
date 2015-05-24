@@ -2564,32 +2564,6 @@
         };
     }
 
-    function getSpriteClass(extension) {
-        for (var type in droppy.iconMap) {
-            if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
-                return "sprite sprite-" + type;
-            }
-        }
-        return "sprite sprite-bin";
-    }
-
-    function formatBytes(num) {
-        if (typeof num !== 'number' || isNaN(num))
-            throw new TypeError('Expected a number');
-
-        var exponent, unit, neg = num < 0;
-        var units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-        if (neg) num = -num;
-        if (num < 1) return (neg ? '-' : '') + num + ' B';
-
-        exponent = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
-        num = (num / Math.pow(1000, exponent)).toFixed(2) * 1;
-        unit = units[exponent];
-
-        return (neg ? '-' : '') + num + ' ' + unit;
-    };
-
     function getHeaderHTML() {
         return '<div class="file-header">' +
                     '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
@@ -2851,20 +2825,33 @@
         };
     }
 
-    function sortCompare(a, b) {
-        if (typeof a === "number" && typeof b === "number")
-            return b - a;
-        else
-            return naturalSort(a.toLowerCase(), b.toLowerCase());
-    };
+    /* jshint ignore:start */
 
-    function sortByProp(entries, prop) {
-        return Object.keys(entries).sort(function (a, b) {
-            var result = sortCompare(entries[a][prop], entries[b][prop]);
-            if (result === 0) result = sortCompare(a, b);
-            return result;
-        });
-    };
+    function getSpriteClass(extension) {
+        for (var type in droppy.iconMap) {
+            if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
+                return "sprite sprite-" + type;
+            }
+        }
+        return "sprite sprite-bin";
+    }
+
+    function formatBytes(num) {
+        if (typeof num !== 'number' || isNaN(num))
+            throw new TypeError('Expected a number');
+
+        var exponent, unit, neg = num < 0;
+        var units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        if (neg) num = -num;
+        if (num < 1) return (neg ? '-' : '') + num + ' B';
+
+        exponent = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
+        num = (num / Math.pow(1000, exponent)).toFixed(2) * 1;
+        unit = units[exponent];
+
+        return (neg ? '-' : '') + num + ' ' + unit;
+    }
 
     function convertEntries(entries) {
         Object.keys(entries).forEach(function (entry) {
@@ -2872,7 +2859,24 @@
             entries[entry] = { type: data[0], mtime: data[1], size: data[2]};
         });
         return entries;
-    };
+    }
+
+    /* jshint ignore:end */
+
+    function sortCompare(a, b) {
+        if (typeof a === "number" && typeof b === "number")
+            return b - a;
+        else
+            return naturalSort(a.toLowerCase(), b.toLowerCase());
+    }
+
+    function sortByProp(entries, prop) {
+        return Object.keys(entries).sort(function (a, b) {
+            var result = sortCompare(entries[a][prop], entries[b][prop]);
+            if (result === 0) result = sortCompare(a, b);
+            return result;
+        });
+    }
 
     function naturalSort(a, b) {
         var x = [],
