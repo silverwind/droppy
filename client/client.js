@@ -6,6 +6,7 @@
 
     /* The lines below will get replaced during compilation by the server */
     /* {{ svg }} */
+    /* {{ oldtemplates }} */
     /* {{ templates }} */
 
     initVariables();

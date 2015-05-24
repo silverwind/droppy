@@ -4,6 +4,7 @@
 var resources = {};
 
 var dottemplates = require("./dottemplates.js"),
+    templates    = require("./templates"),
     mime         = require("./mime.js"),
     pkg          = require("./../../package.json"),
     paths        = require("./paths.js").get();
@@ -80,11 +81,17 @@ resources.files = {
             "client/html/auth.html",
             "client/html/main.html"
         ],
-        templates: [
+        oldtemplates: [
             "client/templates/views/directory.dotjs",
             "client/templates/views/document.dotjs",
             "client/templates/views/media.dotjs",
             "client/templates/options.dotjs"
+        ],
+        templates: [
+            "client/templates/directory.handlebars",
+            "client/templates/document.handlebars",
+            "client/templates/media.handlebars",
+            "client/templates/options.handlebars"
         ],
         other: [
             "client/images/logo.svg",
@@ -346,14 +353,16 @@ resources.compileJS = function compileJS() {
 
     // Insert Templates Code
     var templateCode = "droppy.templates = {fn:{},views:{}};";
-    resources.files.templates.forEach(function (file, index) {
+    resources.files.oldtemplates.forEach(function (file, index) {
         var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
         // Produce the doT functions
         templateCode += dottemplates
-            .produceFunction("droppy.templates." + resources.files.templates[index].replace(/\.dotjs$/, "")
+            .produceFunction("droppy.templates." + resources.files.oldtemplates[index].replace(/\.dotjs$/, "")
             .split("/").slice(2).join("."), data) + ";";
     });
-    js = js.replace("/* {{ templates }} */", templateCode);
+    js = js.replace("/* {{ oldtemplates }} */", templateCode);
+
+
 
     // Minify
     if (minify) js = uglify.minify(js, opts.uglify).code;
