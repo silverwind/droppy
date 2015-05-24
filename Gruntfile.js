@@ -6,7 +6,7 @@ module.exports = function (grunt) {
             options: {
                 files: ["package.json"],
                 commit: true,
-                commitMessage: "Release %VERSION%",
+                commitMessage: "%VERSION%",
                 commitFiles: ["package.json"],
                 createTag: true,
                 tagName: "%VERSION%",
