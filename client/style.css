@@ -78,7 +78,6 @@ input::-webkit-input-placeholder { color: #999 }
     text-align: center;
     order: 1;
     flex: 0 0 1.5rem;
-    z-index: 2;
     transition: transform .3s ease;
     transform: translateY(-100%);
     display: flex;
@@ -549,7 +548,7 @@ input::-webkit-input-placeholder { color: #999 }
 .spinner {
     position: absolute;
     right: 0;
-    z-index: 32;
+    z-index: 16;
     height: 1.5rem;
     width: 1.5rem;
     visibility: hidden;
