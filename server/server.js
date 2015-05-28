@@ -1019,7 +1019,7 @@ function debug() {
             if (/css$/.test(file)) {
                 cache.res["style.css"] = resources.compileCSS();
                 sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
-            } else if (/js$/.test(file)) {
+            } else if (/js$/.test(file) || /handlebars$/.test(file)) {
                 cache.res["client.js"] = resources.compileJS();
                 sendObjAll({type: "RELOAD"});
             } else if (/html$/.test(file)) {

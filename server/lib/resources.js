@@ -363,6 +363,9 @@ resources.compileJS = function compileJS() {
     });
     js = js.replace("/* {{ oldtemplates }} */", templateCode);
 
+    // Add Handlebars precompiles
+    js = js.replace("/* {{ templates }} */", templates.compile(resources.files.templates));
+
     // Minify
     if (minify) js = uglify.minify(js, opts.uglify).code;
 

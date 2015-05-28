@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, videojs, Draggabilly, ext */
+/* global jQuery, CodeMirror, videojs, Draggabilly, ext, Handlebars */
 /* eslint-disable quotes */
 "use strict";
 
@@ -140,6 +140,10 @@
                 else target.addClass(newClass);
             }
         });
+    });
+
+    Handlebars.registerHelper("select", function (sel, opts) {
+        return opts.fn(this).replace(new RegExp(" value=\"" + sel + "\""), "$& selected=");
     });
 
     var raf = window.requestAnimationFrame ||
@@ -2057,19 +2061,25 @@
         var box = $("#prefs-box");
         box[0].style.willChange = "transform, opacity, visibility";
         box.empty().append(function () {
-            var fontSizes    = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30];
-            var indentWidths = [1, 2, 4, 8];
-            return $("<div class='list-prefs'>").append(droppy.templates.options({
-                droppy: droppy,
-                prefs: [
-                    ["theme", "Editor Theme", droppy.themes, droppy.themes],
-                    ["editorFontSize", "Editor Font Size", fontSizes, fontSizes],
-                    ["indentWithTabs", "Indentation", [true, false], ["Tabs", "Spaces"]],
-                    ["indentUnit", "Indentation Width", indentWidths, indentWidths],
-                    ["lineWrapping", "Wordwrap Mode", [true, false], ["Wrap", "No Wrap"]],
-                    ["renameExistingOnUpload", "Upload Mode", [true, false], ["Rename", "Replace"]]
-                ]
-            }));
+            var i, opts = [
+                {name: "theme", label: "Editor Theme"},
+                {name: "editorFontSize", label: "Editor Font Size"},
+                {name: "indentWithTabs", label: "Indentation"},
+                {name: "indentUnit", label: "Indentation Width"},
+                {name: "lineWrapping", label: "Wordwrap Mode"},
+                {name: "renameExistingOnUpload", label: "Upload Mode"}
+            ];
+            opts.forEach(function (_, i) {
+                opts[i].values = {};
+                opts[i].selected = droppy.get(opts[i].name);
+            });
+            droppy.themes.forEach(function (t) { opts[0].values[t] = t; });
+            for (i = 10; i <= 30; i += 2) opts[1].values[String(i)] = String(i);
+            opts[2].values = {Tabs: true, Spaces: false};
+            for (i = 1; i <= 8; i *= 2) opts[3].values[String(i)] = String(i);
+            opts[4].values = {Wrap: true, "No Wrap": false};
+            opts[5].values = {Rename: true, Replace: false};
+            return Handlebars.templates.options({opts: opts});
         });
 
         $("select.theme").register("change", function () {
