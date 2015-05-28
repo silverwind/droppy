@@ -145,9 +145,11 @@
     Handlebars.registerHelper("select", function (sel, opts) {
         return opts.fn(this).replace(new RegExp(' value="' + sel + '"'), "$& selected=");
     });
-
     Handlebars.registerHelper("svg", function (type) {
         return new Handlebars.SafeString(droppy.svg[type]);
+    });
+    Handlebars.registerHelper("is", function (a, b, opts) {
+        return a === b ? opts.fn(this) : opts.inverse(this);
     });
 
     var raf = window.requestAnimationFrame ||
@@ -1868,7 +1870,7 @@
         var content,
             filename  = view[0].currentFile;
         view.data("type", type);
-        content = $(droppy.templates.views.media({
+        content = $(Handlebars.templates.media({
             type: type,
             src: getMediaSrc(view, filename),
             vid: view[0].vId
