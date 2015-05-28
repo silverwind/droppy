@@ -143,7 +143,11 @@
     });
 
     Handlebars.registerHelper("select", function (sel, opts) {
-        return opts.fn(this).replace(new RegExp(" value=\"" + sel + "\""), "$& selected=");
+        return opts.fn(this).replace(new RegExp(' value="' + sel + '"'), "$& selected=");
+    });
+
+    Handlebars.registerHelper("svg", function (type) {
+        return new Handlebars.SafeString(droppy.svg[type]);
     });
 
     var raf = window.requestAnimationFrame ||
@@ -1927,7 +1931,7 @@
         });
 
         function configCM(data, filename) {
-            var doc = $(droppy.templates.views.document({modes: droppy.modes}));
+            var doc = $(Handlebars.templates.document({modes: droppy.modes}));
             loadContent(view, contentWrap(view).append(doc), function () {
                 view[0].editorEntryId = entryId;
                 view[0].editor = editor = CodeMirror(view.find(".document")[0], {

@@ -83,9 +83,7 @@ resources.files = {
         ],
         oldtemplates: [
             "client/templates/views/directory.dotjs",
-            "client/templates/views/document.dotjs",
             "client/templates/views/media.dotjs",
-            "client/templates/options.dotjs"
         ],
         templates: [
             "client/templates/directory.handlebars",

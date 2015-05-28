@@ -1,0 +1,13 @@
+<ul class="sidebar">
+  <li class="exit">{{{svg "remove"}}}<span>Close</span></li>
+  <li class="save">{{{svg "disk"}}}<span>Save</span></li>
+  <li class="ww">{{{svg "wordwrap"}}}<span>Wrap</span></li>
+  <li class="syntax">{{{svg "code"}}}<span>Syntax</span></li>
+  <select class="mode-select">
+    {{#each modes}}
+      <option value="{{this}}">{{this}}</option>
+    {{/each}}
+  </select>
+  <li class="find">{{{svg "find"}}}<span>Find</span></li>
+  <li class="full">{{{svg "fullscreen"}}}<span>Full</span></li>
+</ul>
