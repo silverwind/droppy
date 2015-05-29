@@ -900,9 +900,7 @@ html:not(.mobile) .vjs-big-play-button {
     right: 0;
     visibility: hidden;
     z-index: 4;
-    -webkit-appearance: none;
-       -moz-appearance: none;
-            appearance: none;
+    appearance: none;
 }
 .mode-select.in { visibility: visible }
 
@@ -1263,9 +1261,7 @@ html:not(.mobile) .vjs-big-play-button {
     background-repeat: no-repeat;
     background-position: right;
     flex: 1;
-    -webkit-appearance: none;
-       -moz-appearance: none;
-            appearance: none;
+    appearance: none;
 }
 
 .list-user:before {
