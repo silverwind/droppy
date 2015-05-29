@@ -17,6 +17,7 @@ var async        = require("async"),
     htmlMinifier = require("html-minifier"),
     jb           = require("json-buffer"),
     path         = require("path"),
+    postcss      = require("postcss"),
     uglify       = require("uglify-js"),
     vm           = require("vm"),
     zlib         = require("zlib");
@@ -361,7 +362,7 @@ resources.compileCSS = function compileCSS() {
     });
 
     // Vendor prefixes
-    css = autoprefixer(opts.autoprefixer).process(css).css;
+    css = postcss([autoprefixer]).process(css).css;
 
     // Minify
     if (minify) css = cleanCSS.minify(css).styles;
