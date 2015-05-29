@@ -7,7 +7,6 @@
 
     /* The lines below will get replaced during compilation by the server */
     /* {{ svg }} */
-    /* {{ oldtemplates }} */
     /* {{ templates }} */
 
     initVariables();
@@ -800,8 +799,7 @@
 
         function isOverLimit(view, size) {
             if (droppy.maxFileSize > 0 && size > droppy.maxFileSize) {
-                showError(view, "Maximum file size for uploads is " +
-                          droppy.formatBytes(droppy.maxFileSize));
+                showError(view, "Maximum file size for uploads is " + formatBytes(droppy.maxFileSize));
                 uploadCancel(view);
                 return true;
             }
@@ -883,7 +881,7 @@
                 speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3),
                 elapsed, secs;
 
-            speed = droppy.formatBytes(Math.round(speed / 1e3) * 1e3);
+            speed = formatBytes(Math.round(speed / 1e3) * 1e3);
 
             updateTitle(progress + " - " + (view[0].currentFolder !== "/" ?
                         view[0].currentFolder.substring(1) : "droppy"));
@@ -1165,21 +1163,55 @@
             }, {duration: 200});
         });
     }
-    // Convert the received data into HTML
-    function openDirectory(view, isUpload) {
 
+    function getTemplateEntries(view, data) {
+        var entries = [];
+        Object.keys(data).forEach(function (name) {
+            var split = data[name].split("|"),
+                type  = split[0],
+                mtime = Number(split[1]) * 1e3,
+                size  = Number(split[2]);
+
+            var entry = {
+                name      : name,
+                sortname  : name.replace(/['"]/g, "_"),
+                type      : type,
+                mtime     : mtime,
+                age       : timeDifference(mtime),
+                size      : size,
+                prettySize: formatBytes(size),
+                id        : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
+                sprite    : getSpriteClass(/[^.]*$/.exec(name)[0])
+            };
+
+            if (Object.keys(droppy.audioTypes).indexOf(ext(name)) !== -1) {
+                entry.classes = name === view.find(".playing").data("name") ? "playable playing" : "playable";
+                entry.playable = true;
+            }
+
+            entries.push(entry);
+        });
+        return entries;
+    }
+
+    // Convert the received data into HTML
+    function openDirectory(view) {
+        var entries = getTemplateEntries(view, view[0].currentData), sortBy;
+
+        // sorting
         if (!view[0].sortBy) view[0].sortBy = "name";
         if (!view[0].sortAsc) view[0].sortAsc = false;
+        sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
+
+        entries = sortByProp(entries, sortBy);
+        if(view[0].sortAsc) entries.reverse();
+
+        var sort = { type: "", mtime: "", size: "" };
+        sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
         // Create HTML from template
-        var content = contentWrap(view).html(droppy.templates.views.directory({
-            entries  : view[0].currentData,
-            folder   : view[0].currentFolder,
-            isUpload : isUpload,
-            sortBy   : view[0].sortBy,
-            sortAsc  : view[0].sortAsc,
-            playing  : view.find(".playing").data("name")
-        }));
+        var content = contentWrap(view).html(Handlebars.templates.directory({entries: entries, sort: sort}));
+
         // Load it
         loadContent(view, content);
 
@@ -1674,14 +1706,14 @@
         view[0].sortAsc = header.hasClass("down");
         header.attr("class", "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active");
         header.siblings().removeClass("active up down");
-        var sortedEntries = sortByProp(view[0].currentData, header.attr("data-sort"));
-        if (view[0].sortAsc) sortedEntries = sortedEntries.reverse();
-        for (var index = sortedEntries.length - 1; index >= 0; index--) {
-            view.find("[data-name='" + sortedEntries[index].replace(/['"]/g, "_") + "']:first").css({
-                order: index,
-                "-ms-flex-order": String(index)
-            }).attr("order", index);
-        }
+        var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header.attr("data-sort"));
+        if (view[0].sortAsc) entries = entries.reverse();
+        entries.forEach(function (entry, i) {
+            view.find("[data-name='" + entries[i].sortname + "']:first").css({
+                order: String(i),
+                "-ms-flex-order": String(i)
+            }).attr("order", String(i));
+        });
     }
 
     function closeDoc(view) {
@@ -2841,7 +2873,6 @@
         };
     }
 
-    /* eslint-disable no-unused-vars */
     function getSpriteClass(extension) {
         for (var type in droppy.iconMap) {
             if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
@@ -2852,11 +2883,8 @@
     }
 
     function formatBytes(num) {
-        if (typeof num !== "number" || isNaN(num))
-            throw new TypeError("Expected a number");
-
-        var exponent, unit, neg = num < 0;
-        var units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+        if (typeof num !== "number" || isNaN(num)) throw new TypeError("Expected a number");
+        var exponent, unit, neg = num < 0, units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
         if (neg) num = -num;
         if (num < 1) return (neg ? "-" : "") + num + " B";
@@ -2868,25 +2896,18 @@
         return (neg ? "-" : "") + num + " " + unit;
     }
 
-    function convertEntries(entries) {
-        Object.keys(entries).forEach(function (entry) {
-            var data = entries[entry].split("|");
-            entries[entry] = {type: data[0], mtime: data[1], size: data[2]};
-        });
-        return entries;
-    }
-    /* eslint-enable no-unused-vars */
-
     function sortCompare(a, b) {
         if (typeof a === "number" && typeof b === "number")
             return b - a;
+        else if (typeof a === "string" && typeof b === "string")
+            return naturalSort(a.replace(/['"]/g, "_").toLowerCase(), b.replace(/['"]/g, "_").toLowerCase());
         else
-            return naturalSort(a.toLowerCase(), b.toLowerCase());
+            return 0;
     }
 
     function sortByProp(entries, prop) {
-        return Object.keys(entries).sort(function (a, b) {
-            var result = sortCompare(entries[a][prop], entries[b][prop]);
+        return entries.sort(function (a, b) {
+            var result = sortCompare(a[prop], b[prop]);
             if (result === 0) result = sortCompare(a, b);
             return result;
         });

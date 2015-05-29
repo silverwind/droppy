@@ -3,8 +3,7 @@
 
 var resources = {};
 
-var dottemplates = require("./dottemplates.js"),
-    templates    = require("./templates"),
+var templates    = require("./templates"),
     mime         = require("./mime.js"),
     pkg          = require("./../../package.json"),
     paths        = require("./paths.js").get();
@@ -80,9 +79,6 @@ resources.files = {
             "client/html/base.html",
             "client/html/auth.html",
             "client/html/main.html"
-        ],
-        oldtemplates: [
-            "client/templates/views/directory.dotjs"
         ],
         templates: [
             "client/templates/directory.handlebars",
@@ -349,18 +345,7 @@ resources.compileJS = function compileJS() {
     // Add SVG object
     js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
-    // Insert Templates Code
-    var templateCode = "droppy.templates = {fn:{},views:{}};";
-    resources.files.oldtemplates.forEach(function (file, index) {
-        var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8");
-        // Produce the doT functions
-        templateCode += dottemplates
-            .produceFunction("droppy.templates." + resources.files.oldtemplates[index].replace(/\.dotjs$/, "")
-            .split("/").slice(2).join("."), data) + ";";
-    });
-    js = js.replace("/* {{ oldtemplates }} */", templateCode);
-
-    // Add Handlebars precompiles
+    // Add Handlebars precompiled templates
     js = js.replace("/* {{ templates }} */", templates.compile(resources.files.templates));
 
     // Minify

@@ -1,0 +1,46 @@
+<div class="file-header">
+  <span data-sort="type" class="header-name {{sort.type}}">Name {{{svg "triangle"}}}</span>
+  <span data-sort="mtime" class="header-mtime {{sort.mtime}}">Modified {{{svg "triangle"}}}</span>
+  <span data-sort="size" class="header-size {{sort.size}}">Size {{{svg "triangle"}}}</span>
+  <span class="header-line-buttons"></span>
+</div>
+{{#each entries}}
+  {{#is type "f"}}
+    <div class="data-row {{classes}}" data-type="file" data-id="{{id}}" data-name="{{sortname}}">
+      <span class="{{sprite}}">
+        {{#if playable}}
+          <span class="icon-play">{{{svg "play"}}}</span>
+        {{/if}}
+      </span>
+      <a class="file-link entry-link" href="?~{{id}}" target="nope" download="{{name}}">{{name}}</a>
+      <span class="mtime" data-timestamp="{{mtime}}">{{age}}</span>
+      <span class="size" data-size="{{size}}">{{prettySize}}</span>
+      <span class="line-buttons">
+        <span class="sharelink" title="Share download link">{{{svg "link"}}}</span>
+        <a class="download" href="?~{{id}}" target="nope" download="{{name}}" title="Download File">{{{svg "download"}}}</a>
+        <span class="entry-menu" title="Actions">{{{svg "menu"}}}</span>
+      </span>
+    </div>
+  {{/is}}
+  {{#is type "d"}}
+    <div class="data-row {{classes}}" data-type="folder" data-id="{{id}}" data-name="{{sortname}}">
+      <span class="sprite sprite-folder"></span>
+      <a class="folder-link entry-link">{{name}}</a>
+      <span class="mtime" data-timestamp="{{mtime}}">{{age}}</span>
+      <span class="size" data-size="{{size}}">{{prettySize}}</span>
+      <span class="line-buttons">
+        <span class="sharelink" title="Share download link">{{{svg "link"}}}</span>
+        <a class="zip" title="Download as Zip" href="?~~{{id}}" target="nope" download="{{name}}.zip">{{{svg "download"}}}</a>
+        <span class="entry-menu" title="Actions">{{{svg "menu"}}}</span>
+      </span>
+    </div>
+  {{/is}}
+  {{#is type "e"}}
+    <div class="data-row {{classes}}" data-type="error" data-id="{{id}}" data-name="{{sortname}}">
+      <span class="{{sprite}}"></span>
+      <a class="error-link entry-link">{{name}}</a>
+    </div>
+  {{/is}}
+{{else}}
+  <div id="empty" class="empty">{{{svg "upload-cloud"}}}<div class="text">Add files</div></div>
+{{/each}}
