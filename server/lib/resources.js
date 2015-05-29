@@ -347,7 +347,10 @@ resources.compileJS = function compileJS() {
     js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
     // Add Handlebars precompiled templates
-    js = js.replace("/* {{ templates }} */", templates.compile(resources.files.templates));
+    var temps = resources.files.templates.map(function (p) {
+        return path.join(paths.mod, p);
+    });
+    js = js.replace("/* {{ templates }} */", templates.compile(temps));
 
     // Minify
     if (minify) js = uglify.minify(js, opts.uglify).code;
