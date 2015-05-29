@@ -1204,9 +1204,9 @@
         sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
 
         entries = sortByProp(entries, sortBy);
-        if(view[0].sortAsc) entries.reverse();
+        if (view[0].sortAsc) entries.reverse();
 
-        var sort = { type: "", mtime: "", size: "" };
+        var sort = {type: "", mtime: "", size: ""};
         sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
         // Create HTML from template
