@@ -1174,7 +1174,7 @@
 
             var entry = {
                 name      : name,
-                sortname  : name.replace(/['"]/g, "_"),
+                sortname  : name.replace(/['"]/g, "_").toLowerCase(),
                 type      : type,
                 mtime     : mtime,
                 age       : timeDifference(mtime),
@@ -2908,7 +2908,7 @@
     function sortByProp(entries, prop) {
         return entries.sort(function (a, b) {
             var result = sortCompare(a[prop], b[prop]);
-            if (result === 0) result = sortCompare(a, b);
+            if (result === 0) result = sortCompare(a.sortname, b.sortname);
             return result;
         });
     }
