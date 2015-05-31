@@ -201,7 +201,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
             if (!key)  return callback(new Error("Unable to read TLS key: " + certPaths[0]));
             if (!cert) return callback(new Error("Unable to read TLS certificate: " + certPaths[1]));
             if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
-            if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS Diffie-Hellman parameter file: " + certPaths[3]));
+            if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
             var finish = function (dhparam) {
                 // Split combined certificate and intermediate
@@ -223,7 +223,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
                 pem.getDhparamInfo(dhparam, function (err, info) {
                     if (err) return callback(err);
                     if (info.size < 1024) {
-                        log.simple("Diffie-Hellman parameters key too short, regenerating");
+                        log.simple("DH parameters key too short, regenerating");
                         createDH(function (err, dh) {
                             if (err) return callback(err);
                             finish(dh);
@@ -255,7 +255,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
                 pem.getDhparamInfo(data.dhparam, function (err, info) {
                     if (err) return callback(err);
                     if (info.size < 1024) {
-                        log.simple("Diffie-Hellman parameters key too short, regenerating");
+                        log.simple("DH parameters key too short, regenerating");
                         createDH(function (err, dhparam) {
                             if (err) return callback(err);
                             data.dhparam = dhparam;
@@ -277,7 +277,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
 };
 
 function createDH(cb) {
-    log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a long time.");
+    log.simple("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
     pem.createDhparam(DHPARAM_BITS, function (err, result) {
         if (err) return cb(err);
         db.set("dhparam", result.dhparam);
