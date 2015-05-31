@@ -12,6 +12,7 @@ var async  = require("async"),
     mkdirp = require("mkdirp"),
     mv     = require("mv"),
     path   = require("path"),
+    pem    = require("pem"),
     rimraf = require("rimraf");
 
 var db     = require("./db.js"),
@@ -219,20 +220,30 @@ utils.tlsInit = function tlsInit(opts, callback) {
             };
 
             if (dhparam) {
-                finish(dhparam);
+                pem.getDhparamInfo(dhparam, function (err, info) {
+                    if (err) return callback(err);
+                    if (info.size < 1024) {
+                        log.simple("Diffie-Hellman parameters key too short, regenerating");
+                        createDH(function (err, dh) {
+                            if (err) return callback(err);
+                            finish(dh);
+                        });
+                    } else {
+                        finish(dhparam);
+                    }
+                });
             } else {
                 var saved = db.get("dhparam");
                 if (saved) return finish(saved);
-                log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a while.");
-                require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
+
+                createDH(function (err, dhparam) {
                     if (err) return callback(err);
-                    db.set("dhparam", result.dhparam);
-                    finish(result.dhparam);
+                    finish(dhparam);
                 });
             }
         });
     } else { // Use self-signed certs
-        require("pem").createCertificate({days: CERT_DAYS, selfSigned: true}, function (err, keys) {
+        pem.createCertificate({days: CERT_DAYS, selfSigned: true}, function (err, keys) {
             if (err) return callback(err);
             var data = {
                 selfsigned : true,
@@ -241,19 +252,38 @@ utils.tlsInit = function tlsInit(opts, callback) {
                 dhparam    : db.get("dhparam")
             };
             if (data.dhparam) {
-                callback(null, data);
-            } else {
-                log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a while.");
-                require("pem").createDhparam(DHPARAM_BITS, function (err, result) {
+                pem.getDhparamInfo(data.dhparam, function (err, info) {
                     if (err) return callback(err);
-                    data.dhparam = result.dhparam;
-                    db.set("dhparam", result.dhparam);
+                    if (info.size < 1024) {
+                        log.simple("Diffie-Hellman parameters key too short, regenerating");
+                        createDH(function (err, dhparam) {
+                            if (err) return callback(err);
+                            data.dhparam = dhparam;
+                            callback(null, data);
+                        });
+                    } else {
+                        callback(null, data);
+                    }
+                });
+            } else {
+                createDH(function (err, dhparam) {
+                    if (err) return callback(err);
+                    data.dhparam = dhparam;
                     callback(null, data);
                 });
             }
         });
     }
 };
+
+function createDH(cb) {
+    log.simple("Generating " + DHPARAM_BITS + " bit Diffie-Hellman parameters. This will take a long time.");
+    pem.createDhparam(DHPARAM_BITS, function (err, result) {
+        if (err) return cb(err);
+        db.set("dhparam", result.dhparam);
+        cb(null, result.dhparam);
+    });
+}
 
 function readFile(p, cb) {
     if (typeof p !== "string") return cb(null);
