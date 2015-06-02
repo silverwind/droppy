@@ -243,35 +243,7 @@
     }
 
     function newView(dest, vId) {
-        var view = $(
-            "<div class='view'>" +
-                "<ul class='path'></ul>" +
-                "<div class='content-container'><div class='content'></div></div>" +
-                "<div class='dropzone'></div>" +
-                "<div class='info-box'><svg></svg><span></span><div contenteditable class='linkout'></div></div>" +
-                "<div class='audio-bar out'>" +
-                  "<div class='audio-icon volume'>" + droppy.svg["volume-medium"] + "</div>" +
-                  "<div class='volume-slider'>" +
-                    "<div class='volume-slider-inner'></div>" +
-                  "</div>" +
-                  "<div class='audio-icon previous'>" + droppy.svg.previous + "</div>" +
-                  "<div class='audio-icon pause-play'>" + droppy.svg.pause + "</div>" +
-                  "<div class='audio-icon stop'>" + droppy.svg.stop + "</div>" +
-                  "<div class='audio-icon shuffle'>" + droppy.svg.shuffle + "</div>" +
-                  "<div class='audio-icon next'>" + droppy.svg.next + "</div>" +
-                  "<div class='audio-title'></div>" +
-                  "<div class='time'>" +
-                    "<span class='time-cur'></span>" +
-                    "<span class='time-sep'> / </span>" +
-                    "<span class='time-max'></span>" +
-                  "</div>" +
-                  "<div class='seekbar'>" +
-                    "<div class='seekbar-played'></div>" +
-                    "<div class='seekbar-loaded'></div>" +
-                  "</div>" +
-                  "<audio class='audio-player' preload='none'></audio>" +
-                "</div>" +
-            "</div>");
+        var view = $(Handlebars.templates.view());
         getView(vId).remove();
         view.appendTo("#view-container");
         view[0].vId = vId;

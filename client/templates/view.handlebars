@@ -1,0 +1,32 @@
+<div class="view">
+  <ul class="path"></ul>
+  <div class="content-container"><div class="content"></div></div>
+  <div class="dropzone"></div>
+  <div class="info-box">
+    <svg></svg>
+    <span></span>
+    <div contenteditable class="linkout"></div>
+  </div>
+  <div class="audio-bar out">
+    <div class="audio-icon volume">{{{svg "volume-medium"}}}</div>
+    <div class="volume-slider">
+      <div class="volume-slider-inner"></div>
+    </div>
+    <div class="audio-icon previous">{{{svg "previous"}}}</div>
+    <div class="audio-icon pause-play">{{{svg "pause"}}}</div>
+    <div class="audio-icon stop">{{{svg "stop"}}}</div>
+    <div class="audio-icon shuffle">{{{svg "shuffle"}}}</div>
+    <div class="audio-icon next">{{{svg "next"}}}</div>
+    <div class="audio-title"></div>
+    <div class="time">
+      <span class="time-cur"></span>
+      <span class="time-sep"> / </span>
+      <span class="time-max"></span>
+    </div>
+    <div class="seekbar">
+      <div class="seekbar-played"></div>
+      <div class="seekbar-loaded"></div>
+    </div>
+    <audio class="audio-player" preload="none"></audio>
+  </div>
+</div>

@@ -9,8 +9,8 @@ var prefix = "(function() {var template = Handlebars.template, templates = Handl
 var suffix = "})();";
 
 templates.compile = function compile(paths) {
-    var strings = paths.map(function (p) {
-        return getEntry(p, String(read(p)));
+    var strings = paths.map(function (file) {
+        return getEntry(file, String(read(file)));
     });
     return prefix + strings.join("") + suffix;
 };

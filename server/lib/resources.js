@@ -81,12 +81,6 @@ resources.files = {
             "client/html/auth.html",
             "client/html/main.html"
         ],
-        templates: [
-            "client/templates/directory.handlebars",
-            "client/templates/document.handlebars",
-            "client/templates/media.handlebars",
-            "client/templates/options.handlebars"
-        ],
         other: [
             "client/images/logo.svg",
             "client/images/logo16.png",
@@ -347,8 +341,8 @@ resources.compileJS = function compileJS() {
     js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
     // Add Handlebars precompiled templates
-    var temps = resources.files.templates.map(function (p) {
-        return path.join(paths.mod, p);
+    var temps = fs.readdirSync(paths.templates).map(function (p) {
+        return path.join(paths.templates, p);
     });
     js = js.replace("/* {{ templates }} */", templates.compile(temps));
 
