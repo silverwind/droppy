@@ -599,7 +599,7 @@
                             '</div>';
 
             if (view.find(".empty").length > 0) {
-                view.find(".content").html(getHeaderHTML() + dummyHtml);
+                view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
                 wasEmpty = true;
             } else {
                 view.find(".content").prepend(dummyHtml);
@@ -624,7 +624,7 @@
                             '</div>';
 
             if (view.find(".empty").length > 0) {
-                view.find(".content").html(getHeaderHTML() + dummyHtml);
+                view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
                 wasEmpty = true;
             } else {
                 view.find(".content").prepend(dummyHtml);
@@ -2567,15 +2567,6 @@
             bmp : "image/bmp",
             ico : "image/x-icon"
         };
-    }
-
-    function getHeaderHTML() {
-        return '<div class="file-header">' +
-                    '<span class="header-name" class="down">Name' + droppy.svg.triangle + '</span>' +
-                    '<span class="header-mtime" class="up">Modified' + droppy.svg.triangle + '</span>' +
-                    '<span class="header-size" class="up">Size' + droppy.svg.triangle + '</span>' +
-                    '<span class="header-spacer"></span>' +
-                '</div>';
     }
 
     function fullScreenElement() {
