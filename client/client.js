@@ -790,22 +790,7 @@
     }
 
     function uploadInit(view) {
-        var uploadInfo = '<div class="upload-info">' +
-                '<div class="upload-bar"></div>' +
-                '<span class="upload-title"></span>' +
-                '<span class="upload-speed">' +
-                    droppy.svg.speed +
-                    '<span></span>' +
-                '</span>' +
-                '<span class="upload-time">' +
-                    droppy.svg.time +
-                    '<span class="upload-time-left"></span>' +
-                '</span>' +
-                '<span class="upload-cancel">' +
-                    droppy.svg.remove +
-                    '<span>Cancel</span>' +
-                '</span>' +
-            '</div>';
+        var uploadInfo = Handlebars.templates["upload-info"]();
 
         if (!view.find(".upload-info").length) view.append(uploadInfo);
         view.find(".upload-info").setTransitionClass("in");
