@@ -1267,7 +1267,8 @@ html:not(.mobile) .vjs-big-play-button {
 .list-user:before {
     content: "Users";
     border-bottom: 1px solid #aaa;
-    padding: .25em;
+    color: #333;
+    padding: .25em .5em;
     display: block;
 }
 

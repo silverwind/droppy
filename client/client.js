@@ -2014,23 +2014,12 @@
         }
     }
 
-    function createUserList(users) {
-        var output = "<div class='list-user'>";
-        Object.keys(users).forEach(function (user) {
-            output += '<li><span class="username">' + user + "</span>" + droppy.svg.trash + '</li>';
-        });
-        output += "</ul>";
-        output += "<div class='add-user'>" + droppy.svg.plus + "Add User</div>";
-        output += "</div>";
-        return output;
-    }
-
     function updateUsers(userlist) {
         var list, box = $("#prefs-box");
 
         if (Object.keys(userlist).length > 0) {
             box.find(".list-user").remove();
-            box.append(createUserList(userlist));
+            box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
             list = box.find(".list-user");
             list.find(".add-user").register("click", function () {
                 var user = window.prompt("Username?"),
