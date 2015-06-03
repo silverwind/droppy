@@ -1,5 +1,5 @@
 /* global jQuery, CodeMirror, videojs, Draggabilly, ext, Handlebars */
-/* eslint-disable quotes */
+/* eslint-disable quote */
 "use strict";
 
 (function ($, window, document) {
@@ -593,10 +593,7 @@
         $("#create-folder-button").register("click", function () {
             var dummyFolder, wasEmpty,
                 view      = getView(), // TODO: Create folder in last active view
-                dummyHtml = '<div class="data-row new-folder" data-type="folder">' +
-                                '<span class="sprite sprite-folder"></span>' +
-                                '<a class="folder-link entry-link"></a>' +
-                            '</div>';
+                dummyHtml = Handlebars.templates["new-folder"]();
 
             if (view.find(".empty").length > 0) {
                 view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
@@ -618,10 +615,7 @@
         $("#create-file-button").register("click", function () {
             var dummyFile, wasEmpty,
                 view      = getView(), // TODO: Create folder in last active view
-                dummyHtml = '<div class="data-row new-file" data-type="file">' +
-                                '<span class="sprite sprite-text"></span>' +
-                                '<a class="file-link entry-link">.txt</a>' +
-                            '</div>';
+                dummyHtml = Handlebars.templates["new-file"]();
 
             if (view.find(".empty").length > 0) {
                 view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
