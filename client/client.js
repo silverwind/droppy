@@ -1585,18 +1585,8 @@
             droppy.clipboard = {type: $(this).attr("class"), src: entry.data("id")};
             $(".view").each(function () {
                 var view = $(this);
-                if (!view.children(".paste-button").length) {
-                    view.append(
-                        '<div class="paste-button ' + (droppy.clipboard && "in") + '">' + droppy.svg.paste +
-                            '<span>Paste <span class="filename">' +
-                                (droppy.clipboard ? basename(droppy.clipboard.src) : "") +
-                            "</span></span>" +
-                            droppy.svg.triangle +
-                        "</div>");
-                } else {
-                    $(".paste-button .filename").text(basename(droppy.clipboard.src));
-                }
-                view.find(".paste-button").one("click", function (event) {
+                view.find(".paste-button .filename").text(basename(droppy.clipboard.src));
+                view.find(".paste-button").addClass("in").one("click", function (event) {
                     event.stopPropagation();
                     if (droppy.socketWait) return;
                     droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
