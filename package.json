@@ -16,13 +16,13 @@
     "start": "node droppy.js start"
   },
   "dependencies": {
-    "async": "^1.1.0",
+    "async": "^1.2.0",
     "autoprefixer-core": "^5.2.0",
     "busboy": "^0.2.9",
     "chalk": "^1.0.0",
     "cheerio": "^0.19.0",
     "chokidar": "^1.0.2",
-    "clean-css": "^3.3.0",
+    "clean-css": "^3.3.1",
     "codemirror": "^5.3.0",
     "content-disposition": "^0.5.0",
     "cpr": "^0.4.1",
