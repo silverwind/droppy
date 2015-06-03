@@ -1,5 +1,4 @@
 /* global jQuery, CodeMirror, videojs, Draggabilly, ext, Handlebars */
-/* eslint-disable quote */
 "use strict";
 
 (function ($, window, document) {
@@ -1591,9 +1590,9 @@
                         '<div class="paste-button ' + (droppy.clipboard && "in") + '">' + droppy.svg.paste +
                             '<span>Paste <span class="filename">' +
                                 (droppy.clipboard ? basename(droppy.clipboard.src) : "") +
-                            '</span></span>' +
+                            "</span></span>" +
                             droppy.svg.triangle +
-                        '</div>');
+                        "</div>");
                 } else {
                     $(".paste-button .filename").text(basename(droppy.clipboard.src));
                 }
@@ -2666,7 +2665,7 @@
         var className = theme.replace(/[^a-z0-9\-]/gim, "");
         if (!$(".theme-" + className).length) {
             $.get("?!/theme/" + theme).then(function (data) {
-                $('<style class="theme-' + className + '">' + data + '</style>').appendTo("head");
+                $('<style class="theme-' + className + '">' + data + "</style>").appendTo("head");
                 if (cb) cb();
             });
         } else {
