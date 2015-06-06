@@ -78,7 +78,15 @@ function write(config, callback) {
 }
 
 function migrate(config) {
-    var oldProps = ["host", "port", "useTLS", "useSPDY", "useHSTS", "readInterval"];
+    var oldProps = [
+        "host",
+        "port",
+        "useTLS",
+        "useSPDY",
+        "useHSTS",
+        "readInterval",
+        "maxOpen"
+    ];
 
     var needToMigrate = oldProps.every(function (prop) {
         return config.hasOwnProperty(prop);
