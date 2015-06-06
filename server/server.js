@@ -50,7 +50,6 @@ var droppy = function droppy(options, isStandalone, callback) {
         function (cb) { db.init(cb); },
         function (cb) {
             log.init({logLevel: config.logLevel, timestamps: config.timestamps});
-            fs.MAX_OPEN = config.maxOpen;
             firstRun = Object.keys(db.get("users")).length === 0;
             cb();
         },
@@ -908,7 +907,7 @@ function handleUploadRequest(req, res) {
         closeConnection();
 
         function run() {
-            async.eachLimit(toMove, Math.floor(config.maxOpen / 3), function (pair, cb) {
+            async.eachLimit(toMove, 64, function (pair, cb) {
                 filetree.moveTemps(pair[0], pair[1], function (err) {
                     if (err) log.error(err);
                     cb(null);

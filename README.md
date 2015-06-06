@@ -38,7 +38,6 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
   "linkLength"     : 5,
   "logLevel"       : 2,
   "maxFileSize"    : 0,
-  "maxOpen"        : 256,
   "public"         : false,
   "timestamps"     : true,
   "updateInterval" : 1000
@@ -51,7 +50,6 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `linkLength` {Number} - The amount of characters in a share link.
 - `logLevel` {Number} - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
 - `maxFileSize` {Number} - The maximum file size in bytes a user can upload in a single file.
-- `maxOpen` {Number} - The maximum number of concurrently opened files. This number should only be of concern on Windows.
 - `public` {Boolean} - When enabled, no authentication is performed.
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
 - `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file tree, in milliseconds.

@@ -19,7 +19,6 @@ var cfg        = {},
         linkLength     : 5,
         logLevel       : 2,
         maxFileSize    : 0,
-        maxOpen        : 256,
         public         : false,
         updateInterval : 1000,
         timestamps     : true
