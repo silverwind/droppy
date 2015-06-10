@@ -753,7 +753,6 @@
         if (formLength) {
             xhr.open("POST", getRootPath() + "upload?" + $.param({
                 vId : view[0].vId,
-                to  : encodeURIComponent(view[0].currentFolder),
                 r   : droppy.get("renameExistingOnUpload")
             }));
             xhr.send(formData);
@@ -806,15 +805,13 @@
 
     function uploadFinish(view) {
         view[0].isUploading = false;
-        hideSpinner(view);
         updateTitle(basename(view[0].currentFolder));
-        view.find(".upload-info").removeClass("in");
-        view.find(".icon-uploading").remove();
         if (view[0].uploadSuccess) {
             showNotification("Upload finished", "Uploaded " + view[0].uploadText + " to " + view[0].currentFolder);
             view[0].uploadSuccess = false;
         }
         setTimeout(function () {
+            view.find(".upload-info").removeClass("in");
             view.find(".upload-bar").removeAttr("style");
         }, 200);
     }

@@ -1,6 +1,6 @@
 # droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 
-droppy is a self-hosted file server with an interface similar to many desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage, and can be run directly as a web server, optionally with strong SSL/TLS encryption and SPDY support. To minimize latency, most communication is done exclusively through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
+droppy is a self-hosted file server with an interface similar to many desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage. To minimize latency, most communication is done exclusively through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
 
 ### Features
 * Multi-file and folder upload
@@ -80,12 +80,12 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 ```
 The above configuration will result in:
 - HTTP listening on all IPv4 and IPv6 interfaces, port 80.
-- HTTPS (SPDY) listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
+- HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
 
 A listener object accepts these options:
 - `host` {String/Array} - Network interface(s) to listen on. Use an array for multiple interfaces.
 - `port` {Number/Array} - Port(s) to listen on. Use an array for multiple ports.
-- `protocol` {String} - Protocol to use, `http` or `https`. `https` includes SPDY.
+- `protocol` {String} - Protocol to use, `http` or `https`.
 - `hsts` {Number} - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 - `key` {String} - Path to the SSL/TLS private key file. If ommitted, uses self-generated key.
 - `cert` {String} - Path to the SSL/TLS certificate file. If ommitted, uses self-signed certificate.

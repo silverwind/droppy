@@ -186,25 +186,20 @@ function startListeners(callback) {
 //-----------------------------------------------------------------------------
 // Create socket listener
 function createListener(handler, opts, callback) {
-    var server, tlsModule, http = require("http");
+    var server, http = require("http");
     if (opts.proto === "http") {
         callback(null, http.createServer(handler));
     } else {
-        if (opts.proto === "https" || opts.proto === "spdy")
-            tlsModule = require("spdy").server;
-        else
-            return callback(new Error("Config error: Unknown protocol: " + opts.proto));
-
         utils.tlsInit(opts, function (err, tlsData) {
             if (err) return callback(err);
 
+            var https = require("https");
             var tlsOptions = {
                 key              : tlsData.key,
                 cert             : tlsData.cert,
                 ca               : tlsData.ca ? tlsData.ca : undefined,
                 dhparam          : tlsData.dhparam ? tlsData.dhparam : undefined,
                 honorCipherOrder : true,
-                windowSize       : 4 * 1024 * 1024
             };
 
             // Slightly more secure options for 0.10.x
@@ -218,13 +213,9 @@ function createListener(handler, opts, callback) {
             }
 
             // Disable insecure client renegotiation
-            tlsModule.CLIENT_RENEG_LIMIT = 0;
+            https.CLIENT_RENEG_LIMIT = 0;
 
-            try {
-                server = new tlsModule.Server(tlsOptions, http._connectionListener);
-            } catch (err) {
-                return callback(err);
-            }
+            server = https.createServer(tlsOptions);
             server.httpAllowHalfOpen = false;
             server.timeout = 120000;
 
@@ -699,7 +690,7 @@ function handleResourceRequest(req, res, resourceName) {
 
             // Encoding, Length
             var acceptEncoding = req.headers["accept-encoding"] || "";
-            if ((/\bgzip\b/.test(acceptEncoding) || req.isSpdy) && resource.gzip && !config.debug) {
+            if (/\bgzip\b/.test(acceptEncoding) && resource.gzip && !config.debug) {
                 headers["Content-Encoding"] = "gzip";
                 headers["Content-Length"] = resource.gzip.length;
                 headers["Vary"] = "Accept-Encoding";
@@ -819,14 +810,13 @@ function handleUploadRequest(req, res) {
 
     req.query = qs.parse(req.url.substring("/upload?".length));
 
-    if (!req.query || !req.query.to) {
+    if (!req.query) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();
-        log.info(req, res, "Invalid upload dst" + req.query.to);
+        log.info(req, res, "Invalid upload request");
         return;
     }
-    dstDir = decodeURIComponent(req.query.to);
 
     if (!cookie && !config.public) {
         res.statusCode = 401;
@@ -837,13 +827,20 @@ function handleUploadRequest(req, res) {
         return;
     }
 
-    log.info(req, res, "Upload started");
+    Object.keys(clients).some(function (sid) {
+        if (clients[sid].cookie === cookie) {
+            req.sid = sid;
+            return true;
+        }
+    });
 
+    dstDir = clients[req.sid].views[req.query.vId].directory;
+    log.info(req, res, "Upload started");
     opts = {headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
 
     if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
     busboy = new Busboy(opts);
-
+    busboy.on("error", log.error);
     busboy.on("file", function (fieldname, file, filename) {
         var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
             dst         = path.join(paths.files, dstDir, dstRelative),
@@ -861,7 +858,7 @@ function handleUploadRequest(req, res) {
 
     busboy.on("filesLimit", function () {
         log.info(req, res, "Maximum files limit reached, cancelling upload");
-        closeConnection(req, res);
+        closeConnection();
     });
 
     busboy.on("finish", function () {
@@ -904,7 +901,7 @@ function handleUploadRequest(req, res) {
             })(names.pop());
         }
 
-        closeConnection(req, res);
+        closeConnection();
 
         function run() {
             async.eachLimit(toMove, 64, function (pair, cb) {
@@ -918,7 +915,7 @@ function handleUploadRequest(req, res) {
 
     req.on("close", function () {
         if (!done) log.info(req, res, "Upload cancelled");
-        closeConnection(req, res);
+        closeConnection();
 
         // Clean up the temp files
         Object.keys(files).forEach(function (relPath) {
@@ -933,18 +930,12 @@ function handleUploadRequest(req, res) {
 
     req.pipe(busboy);
 
-    function closeConnection(req, res) {
+    function closeConnection() {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/plain");
         res.setHeader("Connection", "close");
         res.end();
-
-        // find websocket sid of the client and send the final event
-        Object.keys(clients).forEach(function (sid) {
-            if (clients[sid].cookie === cookie) {
-                sendObj(sid, {type: "UPLOAD_DONE", vId: Number(req.query.vId)});
-            }
-        });
+        sendObj(req.sid, {type: "UPLOAD_DONE", vId: Number(req.query.vId)});
     }
 }
 
