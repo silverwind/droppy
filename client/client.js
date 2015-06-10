@@ -753,7 +753,8 @@
         if (formLength) {
             xhr.open("POST", getRootPath() + "upload?" + $.param({
                 vId : view[0].vId,
-                r   : droppy.get("renameExistingOnUpload")
+                to  : encodeURIComponent(view[0].currentFolder),
+                r   : droppy.get("renameExistingOnUpload") && "1" || "0"
             }));
             xhr.send(formData);
         } else {

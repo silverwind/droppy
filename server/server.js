@@ -810,7 +810,7 @@ function handleUploadRequest(req, res) {
 
     req.query = qs.parse(req.url.substring("/upload?".length));
 
-    if (!req.query) {
+    if (!req.query || !req.query.to) {
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/plain");
         res.end();
@@ -834,7 +834,7 @@ function handleUploadRequest(req, res) {
         }
     });
 
-    dstDir = clients[req.sid].views[req.query.vId].directory;
+    dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[req.query.vId].directory;
     log.info(req, res, "Upload started");
     opts = {headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
 
@@ -884,7 +884,7 @@ function handleUploadRequest(req, res) {
                             }
                         });
                     } else {
-                        if (req.query.r === "true") { // Rename option from the client
+                        if (req.query.r === "1") { // Rename option from the client
                             (function (src, dst) {
                                 utils.getNewPath(dst, function (newDst) {
                                     toMove.push([src, newDst]);
