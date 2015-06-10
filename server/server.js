@@ -861,7 +861,7 @@ function handleUploadRequest(req, res) {
 
     busboy.on("filesLimit", function () {
         log.info(req, res, "Maximum files limit reached, cancelling upload");
-        closeConnection();
+        closeConnection(req, res);
     });
 
     busboy.on("finish", function () {
@@ -904,7 +904,7 @@ function handleUploadRequest(req, res) {
             })(names.pop());
         }
 
-        closeConnection();
+        closeConnection(req, res);
 
         function run() {
             async.eachLimit(toMove, 64, function (pair, cb) {
@@ -918,7 +918,7 @@ function handleUploadRequest(req, res) {
 
     req.on("close", function () {
         if (!done) log.info(req, res, "Upload cancelled");
-        closeConnection();
+        closeConnection(req, res);
 
         // Clean up the temp files
         Object.keys(files).forEach(function (relPath) {
@@ -933,7 +933,7 @@ function handleUploadRequest(req, res) {
 
     req.pipe(busboy);
 
-    function closeConnection() {
+    function closeConnection(req, res) {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/plain");
         res.setHeader("Connection", "close");
@@ -1009,19 +1009,18 @@ function removeClientPerDir(sid, vId) {
 }
 
 function debug() {
-    require("chokidar").watch(".", {
-        cwd           : paths.client,
+    require("chokidar").watch(paths.client, {
         alwaysStat    : true,
         ignoreInitial : true
     }).on("change", function (file) {
         setTimeout(function () { // prevent EBUSY on win32
-            if (/css$/.test(file)) {
+            if (/\.css$/.test(file)) {
                 cache.res["style.css"] = resources.compileCSS();
                 sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
-            } else if (/js$/.test(file) || /handlebars$/.test(file)) {
+            } else if (/\.js$/.test(file) || /\.handlebars$/.test(file)) {
                 cache.res["client.js"] = resources.compileJS();
                 sendObjAll({type: "RELOAD"});
-            } else if (/html$/.test(file)) {
+            } else if (/\.html$/.test(file)) {
                 resources.compileHTML(cache.res);
                 sendObjAll({type: "RELOAD"});
             }
