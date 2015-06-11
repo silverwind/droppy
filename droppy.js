@@ -122,13 +122,13 @@ if (cmds[cmd]) {
 }
 
 function printHelp() {
-    var help = pkg.name + " " + pkg.version + " ( " + pkg.homepage + " )\n\nUsage: " + pkg.name + " [command] [options]\n\n Commands:";
+    var help = "Usage: " + pkg.name + " [command] [options]\n\n Commands:";
 
     Object.keys(cmds).forEach(function (command) {
         help += "\n   " + cmds[command];
     });
 
-    help += "\n\n Options";
+    help += "\n\n Options:";
 
     Object.keys(opts).forEach(function (option) {
         help += "\n   " + opts[option];
