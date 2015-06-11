@@ -2,9 +2,9 @@
 
 "use strict";
 
-var cmd   = process.argv[2],
-    args  = process.argv.slice(3),
-    pkg   = require("./package.json");
+var cmd, args,
+    pkg   = require("./package.json"),
+    argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
 
 process.title = pkg.name;
 
@@ -19,44 +19,26 @@ var cmds = {
 };
 
 var opts = {
-    color   : "--color              Force colored logging",
+    color   : "--color              Force color logging",
     home    : "--home <home>        Home directory, defaults to ~/.droppy"
 };
 
-function seedPath(home) {
-    require("./server/lib/paths.js").seed(home);
-}
-
-// Postfix options
-if (args) {
-    var indexOfHome  = args.indexOf("--home"),
-        indexOfColor = args.indexOf("--color");
-    if (indexOfHome !== -1) {
-        if (args[indexOfHome + 1]) {
-            seedPath(args.splice(indexOfHome, 2)[1]);
-        } else { printHelp(); }
-    }
-    if (indexOfColor !== -1) {
-        args.splice(indexOfColor, 1);
-    }
-}
-
-// Prefix options
-if (cmd === "--home") {
-    if (args.length > 1) {
-        seedPath(args.splice(0, 1)[0]);
-        cmd = args.splice(0, 1)[0];
-    } else { return printHelp(); }
-}
-if (cmd === "--color") {
-    if (args.length > 0) {
-        cmd = args.splice(0, 1)[0];
-    } else { return printHelp(); }
-}
-if (cmd === "-v" || cmd === "--version") {
+if (argv.v || argv.version) {
     console.info(pkg.version);
     process.exit(0);
 }
+
+if (argv.home) {
+    require("./server/lib/paths.js").seed(argv.home);
+}
+
+if (!argv._.length) {
+    printHelp();
+    process.exit(0);
+}
+
+cmd  = argv._[0];
+args = argv._.slice(1);
 
 if (cmds[cmd]) {
     var db;

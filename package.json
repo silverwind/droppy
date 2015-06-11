@@ -37,6 +37,7 @@
     "json-buffer": "^2.0.11",
     "lodash": "^3.9.3",
     "mime-types": "^2.1.1",
+    "minimist": "^1.1.1",
     "mkdirp": "^0.5.1",
     "mv": "^2.0.3",
     "node-schedule": "^0.2.8",
