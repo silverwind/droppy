@@ -461,7 +461,7 @@
     function initAuthPage(firstrun) {
         var form = $("#form");
 
-        $("#pass, .submit").register("keydown", function (event) {
+        $("#user, #pass, .submit").register("keydown", function (event) {
             if (event.keyCode === 13) form.submit();
         });
 
