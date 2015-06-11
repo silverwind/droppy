@@ -3,8 +3,11 @@
 "use strict";
 
 var cmd, args,
+    argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]}),
+    fs    = require("fs"),
+    path  = require("path"),
     pkg   = require("./package.json"),
-    argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
+    ut    = require("untildify");
 
 process.title = pkg.name;
 
@@ -20,7 +23,8 @@ var cmds = {
 
 var opts = {
     color   : "--color              Force color logging",
-    home    : "--home <home>        Home directory, defaults to ~/.droppy"
+    home    : "--home <home>        Home directory, defaults to ~/.droppy",
+    log     : "--log <logfile>      In addition to stdout, log to file"
 };
 
 if (argv.v || argv.version) {
@@ -30,6 +34,17 @@ if (argv.v || argv.version) {
 
 if (argv.home) {
     require("./server/lib/paths.js").seed(argv.home);
+}
+
+if (argv.log) {
+    var logfile = ut(path.resolve(argv.log));
+    try {
+        var fd = fs.openSync(logfile, "a", "644");
+    } catch (err) {
+        console.error("Unable to open logfile for writing: " + err.message);
+        process.exit(1);
+    }
+    require("./server/lib/log.js").setLogFile(fd);
 }
 
 if (!argv._.length) {
@@ -64,7 +79,7 @@ if (cmds[cmd]) {
                 require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfgFile], {stdio: "inherit"});
             };
 
-        require("graceful-fs").stat(paths.cfgFile, function (err) {
+        fs.stat(paths.cfgFile, function (err) {
             if (err && err.code === "ENOENT") {
                 require("mkdirp")(paths.cfg, function () {
                     cfg.init(null, function (err) {

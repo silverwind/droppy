@@ -3,7 +3,7 @@
 var npm,
     async   = require("async"),
     chalk   = require("chalk"),
-    fs      = require("fs"),
+    fs      = require("graceful-fs"),
     rm      = require("./utils").rm,
     path    = require("path"),
     paths   = require("./paths.js").get();

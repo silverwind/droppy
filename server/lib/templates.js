@@ -2,7 +2,7 @@
 
 var templates  = {};
 var handlebars = require("handlebars");
-var read       = require("fs").readFileSync;
+var read       = require("graceful-fs").readFileSync;
 var path       = require("path");
 
 var prefix = "(function() {var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};\n";

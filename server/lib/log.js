@@ -1,6 +1,7 @@
 "use strict";
 
-var opts,
+var opts, logfd,
+    fs    = require("graceful-fs"),
     chalk = require("chalk"),
     logColors = [
         "reset",
@@ -67,11 +68,20 @@ var log = function log(req, res, logLevel) {
         if (part === "")
             elems.splice(index, 1);
     });
+
+    if (logfd) {
+        fs.write(logfd, chalk.stripColor(elems.join(" ")) + "\n");
+    }
+
     console.log.apply(console, elems);
 };
 
 log.init = function init(o) {
     opts = o;
+};
+
+log.setLogFile = function setLogFile(fd) {
+    logfd = fd;
 };
 
 log.debug = function debug(req, res) {
