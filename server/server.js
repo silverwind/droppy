@@ -36,11 +36,12 @@ var cache           = {},
     ready           = false;
 
 var droppy = function droppy(options, isStandalone, callback) {
-    log.logo();
-    log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
+    if (isStandalone) {
+        log.logo();
+        log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
             chalk.blue(engine), " ", chalk.green(process.version.substring(1)), "\n ",
             chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
-
+    }
     setupProcess(isStandalone);
 
     async.series([
