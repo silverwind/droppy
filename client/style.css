@@ -172,7 +172,7 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  639px) { .content { font-size: .8em } }
 
 .content.directory {
-    background: #e8e8e8;
+    background: #eee;
     display: flex;
     flex-direction: column;
     transform: translate3d(0,0,0);
@@ -249,10 +249,10 @@ input::-webkit-input-placeholder { color: #999 }
 .path li:hover .home { fill: #fff }
 .path li:first-of-type { padding-left: .5em }
 
-.path li:nth-child(odd)        { background: #383838 }
-.path li:nth-child(odd) > .triangle  { fill: #383838 }
-.path li:nth-child(even)       { background: #282828 }
-.path li:nth-child(even) > .triangle { fill: #282828 }
+.path li:nth-child(odd)        { background: #404040 }
+.path li:nth-child(odd) > .triangle  { fill: #404040 }
+.path li:nth-child(even)       { background: #2d2d2d }
+.path li:nth-child(even) > .triangle { fill: #2d2d2d }
 
 .path li:nth-child(odd):hover        { background: #812; color: #fff }
 .path li:nth-child(odd):hover > .triangle  { fill: #812 }
@@ -342,7 +342,7 @@ input::-webkit-input-placeholder { color: #999 }
     font-size: .8rem;
     line-height: 1rem;
     border-bottom: 1px solid #bbb;
-    background: #d8d8d8;
+    background: #ddd;
     user-select: none;
     align-items: center;
 }
@@ -434,8 +434,8 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-    background: #dedede;
-    border-color: #cecece;
+    background: #e2e2e2;
+    border-color: #d2d2d2;
 }
 
 .data-row.playing {
