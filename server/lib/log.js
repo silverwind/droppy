@@ -47,11 +47,18 @@ var log = function log(req, res, logLevel) {
         if (req.url) elems.unshift(decodeURIComponent(decodeURIComponent(req.url))); // For some reason, this need double decoding for upload URLs
         if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
-        port = req.realPort || req.headers && req.headers["x-real-port"] ||
-               req.socket && req.socket.remotePort || req._socket && req._socket.remotePort;
+        port = req.realPort ||
+               req.headers && req.headers["x-real-port"] ||
+               req.connection && req.connection.remotePort ||
+               req.socket && req.socket.remotePort ||
+               req.connection && req.connection.socket && req.connection.socket.remotePort;
 
-        ip   = req.realIP || req.headers && req.headers["x-real-ip"] ||
-               req.socket && req.socket.remoteAddress || req._socket && req._socket.remoteAddress;
+        ip   = req.realIP ||
+               req.headers && req.headers["x-real-ip"] ||
+               req.headers && req.headers["x-forwarded-for"] ||
+               req.connection && req.connection.remoteAddress ||
+               req.socket && req.socket.remoteAddress ||
+               req.connection && req.connection.socket && req.connection.socket.remoteAddress;
 
         if (ip && port) elems.unshift(chalk.cyan(ip) + ":" + chalk.blue(port));
 
