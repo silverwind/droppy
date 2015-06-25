@@ -196,7 +196,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .path {
    background: #181818;
-   box-shadow: 0 0 .5em rgba(0,0,0,.2);
+   box-shadow: 0 0 .5em rgba(0,0,0,.15);
    overflow: hidden;
    white-space: nowrap;
    width: 100%;
@@ -421,20 +421,19 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row {
     display: flex;
     align-items: center;
-    line-height: 1.5em;
+    line-height: 1.4em;
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
 }
-.data-row[order='0'] { border-top: none }
+.data-row[order="0"] { border-top: none }
 
-.data-row.editing { background: #dedede }
 .data-row.editing.invalid input { color: #d22 }
 .data-row.editing .entry-link { display: none }
 .data-row, .data-row a { color: #333 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-    background: #e2e2e2;
+    background: #e6e6e6;
     border-color: #d2d2d2;
 }
 
@@ -799,10 +798,10 @@ html:not(.mobile) #entry-menu a.active svg {
 }
 
 /* Non-mobile supports autoplay */
-/*html:not(.mobile) .vjs-big-play-button {
+html:not(.mobile) .vjs-big-play-button {
     display: none !important;
 }
-*/
+
 /* ============================ Document  ============================ */
 
 .CodeMirror {
