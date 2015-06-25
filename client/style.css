@@ -1541,11 +1541,19 @@ html:not(.mobile) #drop-select span.active {
     visibility: hidden;
     pointer-events: none;
     background: #05a;
-    transition: opacity .2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
+.dropzone.in { opacity: .5; visibility: visible }
 
-.dropzone.in { opacity: .4; visibility: visible }
+.dropzone svg {
+    height: 50%;
+    width: 50%;
+    fill: #fff;
+}
+
 .shake { animation: shake .3s ease }
 
 iframe { display: none }

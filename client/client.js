@@ -1398,6 +1398,17 @@
         var dropZone = view.find(".dropzone");
         view.register("dragenter", function (event) {
             event.stopPropagation();
+
+            var svg, isInternal = !!event.dataTransfer.getData("text").length;
+            if (view.data("type") === "directory" && isInternal)
+                svg = "menu";
+            else if (!isInternal)
+                svg = "upload-cloud";
+            else
+                svg = "open";
+
+            view.find(".dropzone svg").replaceWith(droppy.svg[svg]);
+
             if (!dropZone.hasClass("in")) dropZone.addClass("in");
             getOtherViews($(event.target).parents(".view")[0].vId).find(".dropzone").removeClass("in");
         });
