@@ -78,9 +78,9 @@ var log = function log(req, res, logLevel) {
 
     if (logfd) {
         fs.write(logfd, chalk.stripColor(elems.join(" ")) + "\n");
+    } else {
+        console.log.apply(console, elems);
     }
-
-    console.log.apply(console, elems);
 };
 
 log.init = function init(o) {

@@ -24,7 +24,7 @@ var cmds = {
 var opts = {
     color   : "--color              Force color logging",
     home    : "--home <home>        Home directory, defaults to ~/.droppy",
-    log     : "--log <logfile>      In addition to stdout, log to file"
+    log     : "--log <logfile>      Log to logfile instead of stdout"
 };
 
 if (argv.v || argv.version) {
