@@ -2388,7 +2388,7 @@
                 videojs.options.flash.swf = "?!/lib/vjs.swf";
                 videojs(el, {
                     controls : true,
-                    autoplay : droppy.detects.mobile,
+                    autoplay : !droppy.detects.mobile,
                     preload  : "auto",
                     loop     : "loop",
                     width    : $(el).parents(".media-container")[0].clientWidth,

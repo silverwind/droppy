@@ -626,6 +626,7 @@ html:not(.mobile) #entry-menu a.active svg {
 .arrow-back, .arrow-forward {
     position: absolute;
     top:0;
+    bottom: 1.5rem;
     width: 3em;
     cursor: pointer;
     z-index: 33;
@@ -638,8 +639,8 @@ html:not(.mobile) #entry-menu a.active svg {
 }
 .mobile .arrow-back, .mobile .arrow-forward { display: none }
 
-.arrow-back       { left:  0; bottom: 0    }
-.arrow-forward    { right: 0; bottom: 2rem }
+.arrow-back       { left:  0 }
+.arrow-forward    { right: 0 }
 .arrow-back.in    { opacity: 1 }
 .arrow-forward.in { opacity: 1 }
 
@@ -648,10 +649,11 @@ html:not(.mobile) #entry-menu a.active svg {
     width: 2em;
     position: absolute;
     transition: all .25s ease;
+    top: calc(50% + 1rem);
 }
 
-.arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0; top: 50%              }
-.arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0; top: calc(50% + 1rem) }
+.arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
+.arrow-forward svg { transform: rotate( 90deg) translateX(-50%); right: 0 }
 .arrow-back:hover svg    { height: 3em; width: 3em; left:  -.25em }
 .arrow-forward:hover svg { height: 3em; width: 3em; right: -.25em }
 
@@ -749,25 +751,18 @@ html:not(.mobile) #entry-menu a.active svg {
 .vjs-big-play-button {
     left: 50% !important;
     top: 50% !important;
-    height: 10rem !important;
     transform: translate(-50%, -50%) !important;
-    box-shadow: none !important;
-    background: none !important;
-    color: #ccc !important;
+    color: #fff !important;
     border: none !important;
-    transition: all .3s !important;
+    transition: all .3s  !important;
 }
 
 .vjs-big-play-button:before {
-    font-size: 3.8rem !important;
     text-shadow: none !important;
 }
 
 .vjs-default-skin:hover .vjs-big-play-button, .vjs-default-skin .vjs-big-play-button:focus {
-    background: none !important;
-    box-shadow: none !important;
     transform: translate(-50%, -50%) scale(1.25) !important;
-    color: #fff !important;
 }
 
 .vjs-default-skin .vjs-play-progress, .vjs-default-skin .vjs-volume-level {
@@ -804,10 +799,10 @@ html:not(.mobile) #entry-menu a.active svg {
 }
 
 /* Non-mobile supports autoplay */
-html:not(.mobile) .vjs-big-play-button {
+/*html:not(.mobile) .vjs-big-play-button {
     display: none !important;
 }
-
+*/
 /* ============================ Document  ============================ */
 
 .CodeMirror {
