@@ -16,7 +16,7 @@
     "start": "node droppy.js start"
   },
   "dependencies": {
-    "async": "^1.2.1",
+    "async": "^1.3.0",
     "autoprefixer-core": "^5.2.1",
     "busboy": "^0.2.9",
     "chalk": "^1.0.0",
@@ -29,7 +29,7 @@
     "detect-engine": "^1.0.2",
     "draggabilly": "^1.2.4",
     "file-extension": "^1.1.3",
-    "graceful-fs": "^3.0.8",
+    "graceful-fs": "^4.1.2",
     "handlebars": "^3.0.3",
     "html-minifier": "^0.7.2",
     "isbinaryfile": "^2.0.4",

@@ -4,7 +4,7 @@
 
 var cmd, args,
     argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]}),
-    fs    = require("fs"),
+    fs    = require("graceful-fs"),
     path  = require("path"),
     pkg   = require("./package.json"),
     ut    = require("untildify");
