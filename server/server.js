@@ -1,39 +1,39 @@
 "use strict";
 
-var pkg        = require("./../package.json"),
-    resources  = require("./lib/resources.js"),
-    cfg        = require("./lib/cfg.js"),
-    cookies    = require("./lib/cookies.js"),
-    db         = require("./lib/db.js"),
-    filetree   = require("./lib/filetree.js"),
-    log        = require("./lib/log.js"),
-    manifest   = require("./lib/manifest.js"),
-    mime       = require("./lib/mime.js"),
-    paths      = require("./lib/paths.js").get(),
-    utils      = require("./lib/utils.js");
+var pkg        = require("./../package.json");
+var resources  = require("./lib/resources.js");
+var cfg        = require("./lib/cfg.js");
+var cookies    = require("./lib/cookies.js");
+var db         = require("./lib/db.js");
+var filetree   = require("./lib/filetree.js");
+var log        = require("./lib/log.js");
+var manifest   = require("./lib/manifest.js");
+var mime       = require("./lib/mime.js");
+var paths      = require("./lib/paths.js").get();
+var utils      = require("./lib/utils.js");
 
-var _          = require("lodash"),
-    async      = require("async"),
-    Busboy     = require("busboy"),
-    chalk      = require("chalk"),
-    engine     = require("detect-engine"),
-    fs         = require("graceful-fs"),
-    readdirp   = require("readdirp"),
-    schedule   = require("node-schedule"),
-    Wss        = require("websocket").server,
-    yazl       = require("yazl");
+var _          = require("lodash");
+var async      = require("async");
+var Busboy     = require("busboy");
+var chalk      = require("chalk");
+var engine     = require("detect-engine");
+var fs         = require("graceful-fs");
+var readdirp   = require("readdirp");
+var schedule   = require("node-schedule");
+var Wss        = require("websocket").server;
+var yazl       = require("yazl");
 
-var crypto     = require("crypto"),
-    path       = require("path"),
-    qs         = require("querystring");
+var crypto     = require("crypto");
+var path       = require("path");
+var qs         = require("querystring");
 
-var cache           = {},
-    clients         = {},
-    clientsPerDir   = {},
-    config          = null,
-    firstRun        = null,
-    hasServer       = null,
-    ready           = false;
+var cache           = {};
+var clients         = {};
+var clientsPerDir   = {};
+var config          = null;
+var firstRun        = null;
+var hasServer       = null;
+var ready           = false;
 
 var droppy = function droppy(options, isStandalone, callback) {
     if (isStandalone) {

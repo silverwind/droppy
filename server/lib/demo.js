@@ -1,19 +1,19 @@
 "use strict";
 
-var demo     = {},
-    async    = require("async"),
-    cpr      = require("cpr"),
-    chalk    = require("chalk"),
-    fs       = require("graceful-fs"),
-    path     = require("path"),
-    request  = require("request"),
-    schedule = require("node-schedule"),
-    yauzl    = require("yauzl");
+var demo     = {};
+var async    = require("async");
+var cpr      = require("cpr");
+var chalk    = require("chalk");
+var fs       = require("graceful-fs");
+var path     = require("path");
+var request  = require("request");
+var schedule = require("node-schedule");
+var yauzl    = require("yauzl");
 
-var filetree = require("./filetree.js"),
-    log      = require("./log.js"),
-    paths    = require("./paths.js").get(),
-    utils    = require("./utils.js");
+var filetree = require("./filetree.js");
+var log      = require("./log.js");
+var paths    = require("./paths.js").get();
+var utils    = require("./utils.js");
 
 demo.init = function init(cb) {
     process.title = "droppy-demo";

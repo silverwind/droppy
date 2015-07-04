@@ -1,6 +1,6 @@
 "use strict";
 
-exports = module.exports = function droppy(home, options) {
+module.exports = function droppy(home, options) {
     if (arguments.length === 1) {
         options = home;
         home    = undefined;

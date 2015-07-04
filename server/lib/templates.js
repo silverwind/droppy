@@ -2,7 +2,7 @@
 
 var templates  = {};
 var handlebars = require("handlebars");
-var read       = require("graceful-fs").readFileSync;
+var fs         = require("graceful-fs");
 var path       = require("path");
 
 var prefix = "(function() {var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};\n";
@@ -10,7 +10,7 @@ var suffix = "})();";
 
 templates.compile = function compile(paths) {
     var strings = paths.map(function (file) {
-        return getEntry(file, String(read(file)));
+        return getEntry(file, String(fs.readFileSync(file)));
     });
     return prefix + strings.join("") + suffix;
 };

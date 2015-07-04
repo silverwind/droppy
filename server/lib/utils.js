@@ -2,22 +2,22 @@
 
 var utils  = {};
 
-var async  = require("async"),
-    cd     = require("content-disposition"),
-    cpr    = require("cpr"),
-    crypto = require("crypto"),
-    ext    = require("file-extension"),
-    fs     = require("graceful-fs"),
-    isBin  = require("isbinaryfile"),
-    mkdirp = require("mkdirp"),
-    mv     = require("mv"),
-    path   = require("path"),
-    pem    = require("pem"),
-    rimraf = require("rimraf");
+var async  = require("async");
+var cd     = require("content-disposition");
+var cpr    = require("cpr");
+var crypto = require("crypto");
+var ext    = require("file-extension");
+var fs     = require("graceful-fs");
+var isBin  = require("isbinaryfile");
+var mkdirp = require("mkdirp");
+var mv     = require("mv");
+var path   = require("path");
+var pem    = require("pem");
+var rimraf = require("rimraf");
 
-var db     = require("./db.js"),
-    log    = require("./log.js"),
-    paths  = require("./paths.js").get();
+var db     = require("./db.js");
+var log    = require("./log.js");
+var paths  = require("./paths.js").get();
 
 var forceBinaryTypes = [
     "pdf",

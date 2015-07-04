@@ -3,24 +3,24 @@
 
 var resources = {};
 
-var templates    = require("./templates"),
-    mime         = require("./mime.js"),
-    pkg          = require("./../../package.json"),
-    paths        = require("./paths.js").get();
+var templates    = require("./templates");
+var mime         = require("./mime.js");
+var pkg          = require("./../../package.json");
+var paths        = require("./paths.js").get();
 
-var async        = require("async"),
-    autoprefixer = require("autoprefixer-core"),
-    cheerio      = require("cheerio"),
-    cleanCSS     = require("clean-css"),
-    crypto       = require("crypto"),
-    fs           = require("graceful-fs"),
-    htmlMinifier = require("html-minifier"),
-    jb           = require("json-buffer"),
-    path         = require("path"),
-    postcss      = require("postcss"),
-    uglify       = require("uglify-js"),
-    vm           = require("vm"),
-    zlib         = require("zlib");
+var async        = require("async");
+var autoprefixer = require("autoprefixer-core");
+var cheerio      = require("cheerio");
+var cleanCSS     = require("clean-css");
+var crypto       = require("crypto");
+var fs           = require("graceful-fs");
+var htmlMinifier = require("html-minifier");
+var jb           = require("json-buffer");
+var path         = require("path");
+var postcss      = require("postcss");
+var uglify       = require("uglify-js");
+var vm           = require("vm");
+var zlib         = require("zlib");
 
 var minify, svgData = {}, $,
     themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),

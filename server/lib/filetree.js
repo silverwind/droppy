@@ -1,20 +1,20 @@
 "use strict";
 
-var filetree = new (require("events").EventEmitter)(),
-    dirs     = {},
-    todoDirs = [],
-    noLog    = true;
+var filetree = new (require("events").EventEmitter)();
+var dirs     = {};
+var todoDirs = [];
+var noLog    = true;
 
-var _        = require("lodash"),
-    chalk    = require("chalk"),
-    chokidar = require("chokidar"),
-    fs       = require("graceful-fs"),
-    path     = require("path"),
-    readdirp = require("readdirp");
+var _        = require("lodash");
+var chalk    = require("chalk");
+var chokidar = require("chokidar");
+var fs       = require("graceful-fs");
+var path     = require("path");
+var readdirp = require("readdirp");
 
-var log      = require("./log.js"),
-    paths    = require("./paths.js").get(),
-    utils    = require("./utils.js");
+var log      = require("./log.js");
+var paths    = require("./paths.js").get();
+var utils    = require("./utils.js");
 
 var WATCHER_DELAY = 3000;
 var POLL_INTERVAL = 2000;

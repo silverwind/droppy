@@ -1,9 +1,10 @@
 "use strict";
 
-var paths     = {},
-    path      = require("path"),
-    untildify = require("untildify"),
-    root      = "~/.droppy";
+var paths     = {};
+var root      = "~/.droppy";
+
+var path      = require("path");
+var untildify = require("untildify");
 
 paths.get = function get() {
     return {

@@ -1,20 +1,12 @@
 "use strict";
 
-var opts, logfd,
-    fs    = require("graceful-fs"),
-    chalk = require("chalk"),
-    logColors = [
-        "reset",
-        "red",
-        "yellow",
-        "cyan"
-    ],
-    logLabels = [
-        "",
-        "ERROR",
-        "INFO",
-        "DEBG"
-    ];
+var opts, fd;
+
+var fs    = require("graceful-fs");
+var chalk = require("chalk");
+
+var logColors = ["reset", "red", "yellow", "cyan"];
+var logLabels = ["", "ERROR", "INFO", "DEBG"];
 
 var log = function log(req, res, logLevel) {
     if (opts && opts.logLevel < logLevel) return;
@@ -76,8 +68,8 @@ var log = function log(req, res, logLevel) {
             elems.splice(index, 1);
     });
 
-    if (logfd) {
-        fs.write(logfd, chalk.stripColor(elems.join(" ")) + "\n");
+    if (fd) {
+        fs.write(fd, chalk.stripColor(elems.join(" ")) + "\n");
     } else {
         console.log.apply(console, elems);
     }
@@ -88,7 +80,7 @@ log.init = function init(o) {
 };
 
 log.setLogFile = function setLogFile(fd) {
-    logfd = fd;
+    fd = fd;
 };
 
 log.debug = function debug(req, res) {

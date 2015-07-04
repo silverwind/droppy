@@ -1,12 +1,12 @@
 "use strict";
 
-var npm,
-    async   = require("async"),
-    chalk   = require("chalk"),
-    fs      = require("graceful-fs"),
-    rm      = require("./utils").rm,
-    path    = require("path"),
-    paths   = require("./paths.js").get();
+var npm;
+var async   = require("async");
+var chalk   = require("chalk");
+var fs      = require("graceful-fs");
+var rm      = require("./utils").rm;
+var path    = require("path");
+var paths   = require("./paths.js").get();
 
 function updateSelf(pkg, callback) {
     function loadNPM(cb) {

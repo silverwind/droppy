@@ -1,14 +1,14 @@
 "use strict";
 
-var database,
-    db       = {},
-    _        = require("lodash"),
-    fs       = require("graceful-fs"),
-    crypto   = require("crypto"),
-    mkdirp   = require("mkdirp"),
-    path     = require("path"),
-    dbFile   = require("./paths.js").get().db,
-    defaults = {users: {}, sessions: {}, sharelinks: {}};
+var database;
+var db       = {};
+var _        = require("lodash");
+var fs       = require("graceful-fs");
+var crypto   = require("crypto");
+var mkdirp   = require("mkdirp");
+var path     = require("path");
+var dbFile   = require("./paths.js").get().db;
+var defaults = {users: {}, sessions: {}, sharelinks: {}};
 
 db.init = function (callback) {
     fs.stat(dbFile, function (err) {

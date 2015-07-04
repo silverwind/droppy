@@ -1,8 +1,8 @@
 "use strict";
 
-var cookies = {},
-    db      = require("./db.js"),
-    utils   = require("./utils.js");
+var cookies = {};
+var db      = require("./db.js");
+var utils   = require("./utils.js");
 
 cookies.get = function get(cookie) {
     var entries = {};

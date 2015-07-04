@@ -1,28 +1,29 @@
 "use strict";
 
-var cfg        = {},
-    _          = require("lodash"),
-    fs         = require("graceful-fs"),
-    mkdirp     = require("mkdirp"),
-    path       = require("path"),
-    configFile = require("./paths.js").get().cfgFile,
-    defaults   = {
-        listeners : [
-            {
-                host     : "0.0.0.0",
-                port     : 8989,
-                protocol : "http"
-            }
-        ],
-        debug          : false,
-        keepAlive      : 20000,
-        linkLength     : 5,
-        logLevel       : 2,
-        maxFileSize    : 0,
-        public         : false,
-        updateInterval : 1000,
-        timestamps     : true
-    };
+var cfg        = {};
+var configFile = require("./paths.js").get().cfgFile;
+var _          = require("lodash");
+var fs         = require("graceful-fs");
+var mkdirp     = require("mkdirp");
+var path       = require("path");
+
+var defaults   = {
+    listeners : [
+        {
+            host     : "0.0.0.0",
+            port     : 8989,
+            protocol : "http"
+        }
+    ],
+    debug          : false,
+    keepAlive      : 20000,
+    linkLength     : 5,
+    logLevel       : 2,
+    maxFileSize    : 0,
+    public         : false,
+    updateInterval : 1000,
+    timestamps     : true
+};
 
 cfg.init = function (config, callback) {
     if (typeof config === "object" && config !== null) {

@@ -1,13 +1,11 @@
 #!/usr/bin/env node
-
 "use strict";
 
-var cmd, args,
-    argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]}),
-    fs    = require("graceful-fs"),
-    path  = require("path"),
-    pkg   = require("./package.json"),
-    ut    = require("untildify");
+var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
+var fs    = require("graceful-fs");
+var path  = require("path");
+var pkg   = require("./package.json");
+var ut    = require("untildify");
 
 process.title = pkg.name;
 
@@ -52,8 +50,8 @@ if (!argv._.length) {
     process.exit(0);
 }
 
-cmd  = argv._[0];
-args = argv._.slice(1);
+var cmd  = argv._[0];
+var args = argv._.slice(1);
 
 if (cmds[cmd]) {
     var db;
