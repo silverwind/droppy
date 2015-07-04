@@ -150,20 +150,19 @@ function startListeners(callback) {
                 if (tlsData) {
                     require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
                         if (err) return cb(err);
-                        if (tlsData.selfsigned || !info.commonName) {
-                            log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
-                                       chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
-                                       " (" + chalk.yellow("self-signed") + ")");
-                        } else {
-                            log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
-                                       chalk.cyan(server.address().address), ":", chalk.blue(server.address().port) +
-                                       " (" + chalk.yellow(info.commonName) + ")");
-                        }
+                        var cn = (tlsData.selfsigned || !info.commonName) ? info.commonName : "self-signed";
+                        log.simple("Listening on ",
+                                   socket.opts.proto.toLowerCase() + "://" +
+                                   chalk.cyan(server.address().address),
+                                   ":", chalk.blue(server.address().port) +
+                                   " (CN: " + chalk.yellow(cn) + ")");
                         cb();
                     });
                 } else {
-                    log.simple(chalk.green(socket.opts.proto.toUpperCase() + " listening on "),
-                               chalk.cyan(server.address().address), ":", chalk.blue(server.address().port));
+                    log.simple("Listening on ",
+                               socket.opts.proto.toLowerCase() + "://" +
+                               chalk.cyan(server.address().address),
+                               ":", chalk.blue(server.address().port));
                     cb();
                 }
             });
