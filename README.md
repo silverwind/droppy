@@ -100,7 +100,7 @@ droppy can be used with [express](https://github.com/strongloop/express) like th
 var app    = require("express")();
 var droppy = require("droppy")("./droppy-home", {logLevel: 0});
 
-app.use("/", droppy).listen(8989);
+app.use("/", droppy).listen(process.env.PORT || 8989);
 ```
 See the [commented express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for more details.
 
