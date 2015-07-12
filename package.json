@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "description": "Self-hosted file server with a convenient web interface",
+  "description": "Self-hosted cloud server with a convenient web interface",
   "version": "2.3.7",
   "author": "silverwind <me@silverwind.io>",
   "contributors": [

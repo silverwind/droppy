@@ -1,17 +1,18 @@
 # droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 
-droppy is a self-hosted file server with an interface similar to many desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage. To minimize latency, most communication is done exclusively through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
+droppy is a self-hosted cloud server with an interface similar to desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
 
 ### Features
+* Fully responsive HTML5 interface
 * Multi-file and folder upload
-* Realtime updates through WebSockets
+* Realtime updates of changes
 * Share public download links
 * Zip download of folders
 * Image and video gallery, audio player
-* Fullscreen support for the media gallery
-* Drag and drop and swipe gesture support
+* Drag & drop and swipe gesture support
+* Fullscreen support
 * Edit text files in a heavily customized CodeMirror
-* Node.js/io.js backend, responsive HTML5 frontend
+* Supports latest node.js/io.js (min: 0.10) and all modern browsers
 
 ### Installation
 ```
