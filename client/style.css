@@ -9,15 +9,15 @@
 /* ============================= Global styles ============================= */
 
 body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figcaption, img {
-    box-sizing: border-box;
-    font-size: 100%;
-    font-weight: inherit;
-    text-size-adjust: 100%;
-    vertical-align: baseline;
-    -webkit-touch-callout: none;
-    margin: 0;
-    padding: 0;
-    border: 0;
+  box-sizing: border-box;
+  font-size: 100%;
+  font-weight: inherit;
+  text-size-adjust: 100%;
+  vertical-align: baseline;
+  -webkit-touch-callout: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 li { list-style: none }
@@ -45,44 +45,44 @@ input::-webkit-input-placeholder { color: #999 }
 /* =============================== Animations ============================== */
 
 @keyframes nodeInserted {
-    50% { opacity: 0.99 }
+  50% { opacity: 0.99 }
 }
 @keyframes jump {
-   0%,100% { transform: translateY(-3px) }
-   50%     { transform: translateY(3px)  }
+  0%,100% { transform: translateY(-3px) }
+  50%     { transform: translateY(3px)  }
 }
 @keyframes shake {
-   0%,50%,100% { transform: translateX(-5px) }
-   25%, 75%    { transform: translateX(5px)  }
+  0%,50%,100% { transform: translateX(-5px) }
+  25%, 75%    { transform: translateX(5px)  }
 }
 @keyframes spin {
-   from { transform: rotate(0deg)   }
-   to   { transform: rotate(359deg) }
+  from { transform: rotate(0deg)   }
+  to   { transform: rotate(359deg) }
 }
 @keyframes zoom {
-   0%,100%  { transform: scale(1.3) }
-   50%      { transform: scale(0.9) }
+  0%,100%  { transform: scale(1.3) }
+  50%      { transform: scale(0.9) }
 }
 
 /* ============================ Main Page Layout =========================== */
 
 #flex-container {
-    position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-    display: flex;
-    flex-direction: column;
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 #navigation {
-    background: #181818;
-    text-align: center;
-    order: 1;
-    flex: 0 0 1.5rem;
-    transition: transform .3s ease;
-    transform: translateY(-100%);
-    display: flex;
-    white-space: nowrap;
-    user-select: none;
+  background: #181818;
+  text-align: center;
+  order: 1;
+  flex: 0 0 1.5rem;
+  transition: transform .3s ease;
+  transform: translateY(-100%);
+  display: flex;
+  white-space: nowrap;
+  user-select: none;
 }
 #navigation.in { transform: none; visibility: visible !important }
 @media (min-width: 1024px) { #navigation { font-size: 1.1em } }
@@ -90,10 +90,10 @@ input::-webkit-input-placeholder { color: #999 }
 /* ============================= Header Buttons ============================ */
 
 .button {
-    color: #888;
-    line-height: 1.5rem;
-    cursor: pointer;
-    flex: 1;
+  color: #888;
+  line-height: 1.5rem;
+  cursor: pointer;
+  flex: 1;
 }
 .button:not(.disabled):hover { color: #fff }
 
@@ -102,12 +102,12 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  750px) { .button span { display: none } }
 
 .button svg {
-    fill: #888;
-    height: .8rem;
-    width: .8rem;
-    margin-right: .15rem;
-    position: relative;
-    top: .15rem;
+  fill: #888;
+  height: .8rem;
+  width: .8rem;
+  margin-right: .15rem;
+  position: relative;
+  top: .15rem;
 }
 @media (max-width:  750px) { .button svg { margin-right: 0 } }
 
@@ -135,26 +135,26 @@ input::-webkit-input-placeholder { color: #999 }
 .button.disabled svg   { fill:  #444 !important }
 
 #view-container {
-    flex: 1 1;
-    order: 2;
-    overflow-y: auto;
+  flex: 1 1;
+  order: 2;
+  overflow-y: auto;
 }
 
 /* ================================== View ================================= */
 .view {
-    position: absolute;
-    bottom: 0; left:0; right:0; top:1.5rem;
-    display: flex;
-    flex-direction: column;
-    transition: left .2s ease, right .2s ease;
+  position: absolute;
+  bottom: 0; left:0; right:0; top:1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: left .2s ease, right .2s ease;
 }
 
 .content-container {
-    position: relative;
-    background: #111;
-    overflow-x: hidden;
-    flex: 1;
-    order: 2;
+  position: relative;
+  background: #111;
+  overflow-x: hidden;
+  flex: 1;
+  order: 2;
 }
 
 .view.left  { left:0; right:50% }
@@ -162,9 +162,9 @@ input::-webkit-input-placeholder { color: #999 }
 .view.right .content.directory { border-left: 1px solid #ccc }
 
 .content {
-    left: 0;
-    width: 100%;
-    transition: transform .175s ease;
+  left: 0;
+  width: 100%;
+  transition: transform .175s ease;
 }
 
 @media (min-width: 1024px) { .content { font-size:  1em } }
@@ -172,16 +172,16 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  639px) { .content { font-size: .8em } }
 
 .content.directory {
-    background: #eee;
-    display: flex;
-    flex-direction: column;
-    transform: translate3d(0,0,0);
+  background: #eee;
+  display: flex;
+  flex-direction: column;
+  transform: translate3d(0,0,0);
 }
 
 .content.image, .content.video, .content.document {
-    height: 100%;
-    background: #111;
-    position: absolute;
+  height: 100%;
+  background: #111;
+  position: absolute;
 }
 
 .content.back    { z-index: 0; position:absolute; transform: translate3d(-100%,0,0) }
@@ -195,14 +195,14 @@ input::-webkit-input-placeholder { color: #999 }
 /* ================================== Path ================================= */
 
 .path {
-   background: #181818;
-   box-shadow: 0 0 .5em rgba(0,0,0,.15);
-   overflow: hidden;
-   white-space: nowrap;
-   width: 100%;
-   z-index: 1;
-   flex: 0 0 1.5rem;
-   order: 1;
+  background: #181818;
+  box-shadow: 0 0 .5em rgba(0,0,0,.15);
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  z-index: 1;
+  flex: 0 0 1.5rem;
+  order: 1;
 }
 
 @media (min-width: 1024px) { .path {font-size: .9em } }
@@ -210,14 +210,14 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  639px) { .path {font-size: .7em; flex-basis: 1.25rem } }
 
 .path li {
-    color: #ccc;
-    cursor: pointer;
-    display: inline-block;
-    line-height: 1.5rem;
-    opacity: 0;
-    position: relative;
-    transform: translateX(-2em);
-    transition: transform .3s ease, opacity .3s ease;
+  color: #ccc;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1.5rem;
+  opacity: 0;
+  position: relative;
+  transform: translateX(-2em);
+  transition: transform .3s ease, opacity .3s ease;
 }
 .path li.in { opacity: 1; transform: translateX(0) }
 
@@ -235,16 +235,16 @@ input::-webkit-input-placeholder { color: #999 }
 
 .path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.875rem }
 @media (max-width:  639px) {
-    .path .triangle { height: 1.25rem; width: 1.25rem; right: -.74rem }
+  .path .triangle { height: 1.25rem; width: 1.25rem; right: -.74rem }
 }
 
 .path .home {
-    fill: #ccc;
-    height: .8rem;
-    width: .8rem;
-    position: relative;
-    top: -2px;
-    vertical-align: middle;
+  fill: #ccc;
+  height: .8rem;
+  width: .8rem;
+  position: relative;
+  top: -2px;
+  vertical-align: middle;
 }
 .path li:hover .home { fill: #fff }
 .path li:first-of-type { padding-left: .5em }
@@ -278,20 +278,20 @@ input::-webkit-input-placeholder { color: #999 }
 /* ========================= File/Folder Display =========================== */
 
 .paste-button {
-    background: #333;
-    text-align: center;
-    position: absolute;
-    white-space: nowrap;
-    z-index: 445;
-    color: #bbb;
-    padding: 0 .25em;
-    right: 0;
-    top: 0;
-    cursor: pointer;
-    transition: opacity .3s ease, visibility 0s .3s;
-    user-select: none;
-    opacity: 0; visibility: hidden;
-    line-height: 1.5rem;
+  background: #333;
+  text-align: center;
+  position: absolute;
+  white-space: nowrap;
+  z-index: 445;
+  color: #bbb;
+  padding: 0 .25em;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+  transition: opacity .3s ease, visibility 0s .3s;
+  user-select: none;
+  opacity: 0; visibility: hidden;
+  line-height: 1.5rem;
 }
 .paste-button.in  { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
@@ -300,68 +300,68 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  639px) { .paste-button { font-size: .7em; line-height: 1.25rem } }
 
 .paste-button .triangle {
-    position: absolute;
-    transform: rotate(180deg);
-    fill: #333;
+  position: absolute;
+  transform: rotate(180deg);
+  fill: #333;
 }
 
 .paste-button .triangle { position: absolute; height: 1.5rem; width: 1.5rem; left: -.875rem }
 @media (max-width:  639px) {
-    .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: -.74rem  }
+  .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: -.74rem  }
 }
 
 .paste-button svg.paste {
-    fill: #ccc;
-    display: inline-block;
-    vertical-align: middle;
-    position: relative;
-    top: -.05em;
-    height: 1em;
-    width: 1em;
-    margin-right: .25em;
+  fill: #ccc;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  top: -.05em;
+  height: 1em;
+  width: 1em;
+  margin-right: .25em;
 }
 .paste-button:hover svg.triangle {fill: #25a }
 .paste-button:hover { background: #25a; color: #fff }
 .paste-button .filename { color: #fff }
 
 #click-catcher {
-    background: #000;
-    position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-    z-index: 31;
-    opacity: 0;
-    visibility: hidden;
-    user-select: none;
+  background: #000;
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 31;
+  opacity: 0;
+  visibility: hidden;
+  user-select: none;
 }
 #click-catcher.in { opacity: .4; visibility: visible }
 
 .file-header {
-    display: flex;
-    order: -1;
-    color: #666;
-    font-size: .8rem;
-    line-height: 1rem;
-    border-bottom: 1px solid #bbb;
-    background: #ddd;
-    user-select: none;
-    align-items: center;
+  display: flex;
+  order: -1;
+  color: #666;
+  font-size: .8rem;
+  line-height: 1rem;
+  border-bottom: 1px solid #bbb;
+  background: #ddd;
+  user-select: none;
+  align-items: center;
 }
 
 .file-header span {
-    white-space: nowrap;
-    cursor: pointer;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .file-header .triangle {
-    position: relative;
-    height: .5em;
-    width: .5em;
-    margin-left: .25em;
-    transition: all .3s ease;
-    fill: #666;
-    z-index: 2;
-    top: -.1em;
-    left: -.3em;
+  position: relative;
+  height: .5em;
+  width: .5em;
+  margin-left: .25em;
+  transition: all .3s ease;
+  fill: #666;
+  z-index: 2;
+  top: -.1em;
+  left: -.3em;
 }
 
 .file-header .down .triangle { transform: rotate(90deg);  top: -.15em }
@@ -373,37 +373,37 @@ input::-webkit-input-placeholder { color: #999 }
 .file-header, .data-row { padding: 0 .5em }
 
 .header-name, .entry-link, .inline-namer {
-    flex: 1 1;
-    display: inline-block;
-    overflow: hidden;
+  flex: 1 1;
+  display: inline-block;
+  overflow: hidden;
 }
 
 .header-mtime, .mtime {
-    flex: 0 0 6rem;
-    display: inline-block;
-    text-align: right;
-    white-space: nowrap;
+  flex: 0 0 6rem;
+  display: inline-block;
+  text-align: right;
+  white-space: nowrap;
 }
 .header-size, .size {
-    flex: 0 0 5.5rem;
-    display: inline-block;
-    text-align: right;
-    white-space: nowrap;
+  flex: 0 0 5.5rem;
+  display: inline-block;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .header-line-buttons, .line-buttons {
-    flex: 0 0 5rem;
-    text-align: right;
-    display: inline-block;
+  flex: 0 0 5rem;
+  text-align: right;
+  display: inline-block;
 }
 
 .line-buttons svg {
-    cursor: pointer;
-    fill: #555;
-    width: 1em; height: 1em;
-    padding: 0 .1em;
-    position: relative;
-    top: .2em;
+  cursor: pointer;
+  fill: #555;
+  width: 1em; height: 1em;
+  padding: 0 .1em;
+  position: relative;
+  top: .2em;
 }
 .line-buttons svg:hover { fill: #000 }
 
@@ -411,19 +411,19 @@ input::-webkit-input-placeholder { color: #999 }
 .playable:not(.playing):hover .icon-play svg { visibility: visible }
 
 .icon-play svg {
-    width: 100%; height: 100%;
-    visibility: hidden;
-    cursor: pointer;
-    position: absolute;
-    fill: #222;
+  width: 100%; height: 100%;
+  visibility: hidden;
+  cursor: pointer;
+  position: absolute;
+  fill: #222;
 }
 
 .data-row {
-    display: flex;
-    align-items: center;
-    line-height: 1.4em;
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  line-height: 1.4em;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
 }
 .data-row[order="0"] { border-top: none }
 
@@ -433,13 +433,13 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-    background: #e6e6e6;
-    border-color: #d2d2d2;
+  background: #e6e6e6;
+  border-color: #d2d2d2;
 }
 
 .data-row.playing {
-    background: #05a;
-    border-color: #04b;
+  background: #05a;
+  border-color: #04b;
 }
 
 .data-row.playing a.entry-link, .playing span { color: #fff }
@@ -447,82 +447,82 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row.playing svg:hover { fill: #fff !important }
 
 .entry-link {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: top;
-    white-space: nowrap;
-    cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .error-link {
-    cursor: default !important;
-    color: #f44 !important;
+  cursor: default !important;
+  color: #f44 !important;
 }
 
 .inline-namer { background: transparent }
 
 /* Hide certain list elements when width gets too small */
 @media (max-width: 639px) {
-    .data-row, .file-header             { padding: 0 .25em }
-    .header-line-buttons, .line-buttons { flex: 0 0 3.75em }
-    .line-buttons svg                   { padding: 0       }
-    .header-size, .size                 { flex: 0 0 5rem   }
-    .size                               { font-size: .7rem }
-    .header-mtime, .mtime               { display: none    }
+  .data-row, .file-header             { padding: 0 .25em }
+  .header-line-buttons, .line-buttons { flex: 0 0 3.75em }
+  .line-buttons svg                   { padding: 0       }
+  .header-size, .size                 { flex: 0 0 5rem   }
+  .size                               { font-size: .7rem }
+  .header-mtime, .mtime               { display: none    }
 }
 @media (max-width: 319px) {
-    .header-size, .size { display: none   }
-    .download           { display: none   }
-    .line-buttons       { flex: 0 0 2.5em }
+  .header-size, .size { display: none   }
+  .download           { display: none   }
+  .line-buttons       { flex: 0 0 2.5em }
 }
 
 /* Hide them sooner when the view is split */
 @media (max-width: 1365px) {
-    .left .data-row, .right .data-row,
-    .left .file-header, .right .file-header                 { padding: 0 .25em  }
-    .left .header-line-buttons, .right .header-line-buttons,
-    .left .line-buttons, .right .line-buttons               { flex: 0 0 3.75rem }
-    .left .line-buttons svg, .right .line-buttons svg       { padding: 0        }
-    .left .header-size, .right .header-size,
-    .left .size, .right .size                               { flex: 0 0 5em     }
-    .left .size, .right .size                               { font-size: .7rem  }
-    .left .header-mtime, .right .header-mtime,
-    .left .mtime, .right .mtime                             { display: none     }
+  .left .data-row, .right .data-row,
+  .left .file-header, .right .file-header                 { padding: 0 .25em  }
+  .left .header-line-buttons, .right .header-line-buttons,
+  .left .line-buttons, .right .line-buttons               { flex: 0 0 3.75rem }
+  .left .line-buttons svg, .right .line-buttons svg       { padding: 0        }
+  .left .header-size, .right .header-size,
+  .left .size, .right .size                               { flex: 0 0 5em     }
+  .left .size, .right .size                               { font-size: .7rem  }
+  .left .header-mtime, .right .header-mtime,
+  .left .mtime, .right .mtime                             { display: none     }
 }
 @media (max-width: 799px)  {
-    .left .header-size, .right .header-size,
-    .left .size, .right  .size                              { display: none   }
-    .left .download, .right .download                       { display: none   }
-    .left .line-buttons, .right .line-buttons               { flex: 0 0 2.5em }
+  .left .header-size, .right .header-size,
+  .left .size, .right  .size                              { display: none   }
+  .left .download, .right .download                       { display: none   }
+  .left .line-buttons, .right .line-buttons               { flex: 0 0 2.5em }
 }
 
 /* ============================= Empty Folder ============================== */
 
 .empty {
-    text-align: center;
-    cursor: pointer;
-    overflow: hidden;
-    padding: 1em 0;
-    order: 2;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 1em 0;
+  order: 2;
 }
 
 .empty svg {
-    fill: #666;
-    height: 70px;
-    width: 70px;
-    transition: all .3s ease;
-    position: relative;
-    bottom: -12px;
+  fill: #666;
+  height: 70px;
+  width: 70px;
+  transition: all .3s ease;
+  position: relative;
+  bottom: -12px;
 }
 
 .empty .text {
-    font-size: 20px;
-    line-height: 20px;
-    position: relative;
-    color: #666;
-    top: -25px;
-    opacity: 0;
-    transition: all .3s ease;
+  font-size: 20px;
+  line-height: 20px;
+  position: relative;
+  color: #666;
+  top: -25px;
+  opacity: 0;
+  transition: all .3s ease;
 }
 
 .empty:hover svg   { opacity: 1; bottom: 0; fill:  #000 }
@@ -531,13 +531,13 @@ input::-webkit-input-placeholder { color: #999 }
 /* ================================= Icons ================================= */
 
 .sprite {
-    flex: 0 0 24px;
-    background-clip: content-box;
-    height: 24px;
-    background-size: 240px 216px;
-    overflow: hidden;
-    transform-origin: 0 50%;
-    position: relative;
+  flex: 0 0 24px;
+  background-clip: content-box;
+  height: 24px;
+  background-size: 240px 216px;
+  overflow: hidden;
+  transform-origin: 0 50%;
+  position: relative;
 }
 
 @media (min-width: 1024px) { .sprite { transform: scale(1.25); margin-right: .4em } }
@@ -545,14 +545,14 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width:  639px) { .sprite { transform: scale(1.0);  margin-right: .1em } }
 
 .spinner {
-    position: absolute;
-    right: 0;
-    z-index: 16;
-    height: 1.5rem;
-    width: 1.5rem;
-    visibility: hidden;
-    pointer-events: none;
-    fill: #ccc;
+  position: absolute;
+  right: 0;
+  z-index: 16;
+  height: 1.5rem;
+  width: 1.5rem;
+  visibility: hidden;
+  pointer-events: none;
+  fill: #ccc;
 }
 .spinner.in { visibility: visible; animation: spin .75s infinite linear }
 
@@ -561,17 +561,17 @@ input::-webkit-input-placeholder { color: #999 }
 /* ============================ Entry Menu ============================ */
 
 #entry-menu {
-    background: #eee;
-    border-radius: 4px;
-    box-shadow: 0 0 30px rgba(0,0,0,.3);
-    color: #333;
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    user-select: none;
-    visibility: hidden;
-    cursor: pointer;
-    z-index: 32;
+  background: #eee;
+  border-radius: 4px;
+  box-shadow: 0 0 30px rgba(0,0,0,.3);
+  color: #333;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  user-select: none;
+  visibility: hidden;
+  cursor: pointer;
+  z-index: 32;
 }
 #entry-menu.in { opacity: 1; visibility: visible }
 
@@ -581,60 +581,60 @@ input::-webkit-input-placeholder { color: #999 }
 
 html:not(.mobile) #entry-menu a:hover,
 html:not(.mobile) #entry-menu a.active {
-    background: #05a;
-    color: #fff;
+  background: #05a;
+  color: #fff;
 }
 
 html:not(.mobile) #entry-menu a:hover svg,
 html:not(.mobile) #entry-menu a.active svg {
-   fill: #fff;
+  fill: #fff;
 }
 
 #entry-menu a {
-    padding: .25em .35em;
-    color: #333;
-    display: block;
+  padding: .25em .35em;
+  color: #333;
+  display: block;
 }
 
 #entry-menu svg {
-    height: 1em;
-    width: 1em;
-    margin-right: .25em;
-    fill: #333;
-    float: left;
+  height: 1em;
+  width: 1em;
+  margin-right: .25em;
+  fill: #333;
+  float: left;
 }
 
 #entry-menu div {
-    width: 100%;
+  width: 100%;
 }
 
 #entry-menu div > span {
-    display: inline-block;
-    vertical-align: top;
+  display: inline-block;
+  vertical-align: top;
 }
 
 #entry-menu a.play, #entry-menu.type-folder a.edit {
-    display: none;
+  display: none;
 }
 
 #entry-menu.type-audio .play {
-    display: block;
+  display: block;
 }
 
 /* ============================ Media View ============================ */
 .arrow-back, .arrow-forward {
-    position: absolute;
-    top:0;
-    bottom: 1.5rem;
-    width: 3em;
-    cursor: pointer;
-    z-index: 33;
-    user-select: none;
-    fill: #222;
-    stroke: #eee;
-    stroke-width: 15;
-    opacity: 0;
-    transition: opacity .3s ease;
+  position: absolute;
+  top:0;
+  bottom: 1.5rem;
+  width: 3em;
+  cursor: pointer;
+  z-index: 33;
+  user-select: none;
+  fill: #222;
+  stroke: #eee;
+  stroke-width: 15;
+  opacity: 0;
+  transition: opacity .3s ease;
 }
 .mobile .arrow-back, .mobile .arrow-forward { display: none }
 
@@ -644,11 +644,11 @@ html:not(.mobile) #entry-menu a.active svg {
 .arrow-forward.in { opacity: 1 }
 
 .arrow-back svg, .arrow-forward svg {
-    height: 2em;
-    width: 2em;
-    position: absolute;
-    transition: all .25s ease;
-    top: calc(50% + 1rem);
+  height: 2em;
+  width: 2em;
+  position: absolute;
+  transition: all .25s ease;
+  top: calc(50% + 1rem);
 }
 
 .arrow-back svg    { transform: rotate(270deg) translateX(50%);  left:  0 }
@@ -657,72 +657,72 @@ html:not(.mobile) #entry-menu a.active svg {
 .arrow-forward:hover svg { height: 3em; width: 3em; right: -.25em }
 
 .media-container {
-    position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-    overflow: visible;
-    transform: translate3d(0,0,0);
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  overflow: visible;
+  transform: translate3d(0,0,0);
 }
 .media-container:not(.draggable) {transition: all .25s ease }
 .media-container.left  { opacity: 0; transform: translate3d(-33%,0,0) }
 .media-container.right { opacity: 0; transform: translate3d(33%,0,0)  }
 
 .media-container img, .nofullscreen .media-container video {
-    position: absolute; height: auto; width: auto;
-    max-height: 100%; max-width: 100%;
-    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  position: absolute; height: auto; width: auto;
+  max-height: 100%; max-width: 100%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:fullscreen) {
-    position: absolute; height: auto; width: auto;
-    max-height: 100%; max-width: 100%;
-    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  position: absolute; height: auto; width: auto;
+  max-height: 100%; max-width: 100%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-webkit-full-screen) {
-    position: absolute; height: auto; width: auto;
-    max-height: 100%; max-width: 100%;
-    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  position: absolute; height: auto; width: auto;
+  max-height: 100%; max-width: 100%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-moz-full-screen) {
-    position: absolute; height: auto; width: auto;
-    max-height: 100%; max-width: 100%;
-    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  position: absolute; height: auto; width: auto;
+  max-height: 100%; max-width: 100%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-ms-fullscreen) {
-    position: absolute; height: auto; width: auto;
-    max-height: 100%; max-width: 100%;
-    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  position: absolute; height: auto; width: auto;
+  max-height: 100%; max-width: 100%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 
 .fs {
-    position: absolute;
-    cursor: pointer;
-    right: .25em; bottom: .25em;
-    z-index: 1;
-    background: rgba(0,0,0,.6);
-    border-radius: .25em;
-    padding: .25em .25em 0 .25em;
+  position: absolute;
+  cursor: pointer;
+  right: .25em; bottom: .25em;
+  z-index: 1;
+  background: rgba(0,0,0,.6);
+  border-radius: .25em;
+  padding: .25em .25em 0 .25em;
 }
 .fs svg {
-    fill: #888;
-    height: 1.25em;
-    width: 1.25em;
+  fill: #888;
+  height: 1.25em;
+  width: 1.25em;
 }
 .fs:hover, .meta:hover {
-    background: rgba(48,48,48,.6);
+  background: rgba(48,48,48,.6);
 }
 .fs:hover svg { fill: #fff }
 .meta:hover span > span { color: #fff}
 
 .meta {
-    position: absolute;
-    right: 2.25em; bottom: .25em;
-    z-index: 1;
-    background: transparent;
-    color: #666;
-    background: rgba(0,0,0,.6);
-    border-radius: .25em;
-    padding: .4em;
-    cursor: pointer;
-    user-select: none;
+  position: absolute;
+  right: 2.25em; bottom: .25em;
+  z-index: 1;
+  background: transparent;
+  color: #666;
+  background: rgba(0,0,0,.6);
+  border-radius: .25em;
+  padding: .4em;
+  cursor: pointer;
+  user-select: none;
 }
 
 .meta .dims    { display: none }
@@ -734,81 +734,81 @@ html:not(.mobile) #entry-menu a.active svg {
 /* ================================= Video.js ================================= */
 
 .media-container video:not(.vjs-tech) {
-    display: none;
+  display: none;
 }
 
 .video-js {
-    height: 100% !important;
-    width: 100% !important;
-    background: transparent !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: transparent !important;
 }
 
 .video-js.vjs-fullscreen {
-    background: #000 !important;
+  background: #000 !important;
 }
 
 .vjs-big-play-button {
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    color: #fff !important;
-    border: none !important;
-    transition: all .3s  !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: #fff !important;
+  border: none !important;
+  transition: all .3s  !important;
 }
 
 .vjs-big-play-button:before {
-    text-shadow: none !important;
+  text-shadow: none !important;
 }
 
 .vjs-default-skin:hover .vjs-big-play-button, .vjs-default-skin .vjs-big-play-button:focus {
-    transform: translate(-50%, -50%) scale(1.25) !important;
+  transform: translate(-50%, -50%) scale(1.25) !important;
 }
 
 .vjs-default-skin .vjs-play-progress, .vjs-default-skin .vjs-volume-level {
-    background: #18f !important;
+  background: #18f !important;
 }
 
 .vjs-progress-control, .vjs-default-skin:hover .vjs-progress-control {
-    font-size: .7em !important;
+  font-size: .7em !important;
 }
 
 .vjs-default-skin .vjs-slider-handle::before {
-    display: none !important;
+  display: none !important;
 }
 
 .vjs-default-skin .vjs-slider {
-    background: #333 !important;
+  background: #333 !important;
 }
 
 .vjs-default-skin .vjs-slider:focus {
-    box-shadow: 0px 0px 0 .5em rgba(255,255,255,.08) !important;
+  box-shadow: 0px 0px 0 .5em rgba(255,255,255,.08) !important;
 }
 
 .vjs-default-skin .vjs-control-bar {
-    background: rgba(16,16,16,.9) !important;
+  background: rgba(16,16,16,.9) !important;
 }
 
 .vjs-default-skin {
-    color: #888 !important;
+  color: #888 !important;
 }
 
 .vjs-default-skin .vjs-control:focus::before, .vjs-default-skin .vjs-control:hover::before {
-    text-shadow: none !important;
-    color: #fff !important;
+  text-shadow: none !important;
+  color: #fff !important;
 }
 
 /* Non-mobile supports autoplay */
 html:not(.mobile) .vjs-big-play-button {
-    display: none !important;
+  display: none !important;
 }
 
 /* ============================ Document  ============================ */
 
 .CodeMirror {
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace !important;
-    line-height: 1.2em !important;
-    height: 100% !important;
-    width: 100% !important;
+  font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace !important;
+  line-height: 1.2em !important;
+  height: 100% !important;
+  width: 100% !important;
 }
 /* Need some weight to override some themes */
 .content div.CodeMirror { font-size: 16px }
@@ -820,50 +820,50 @@ html:not(.mobile) .vjs-big-play-button {
 .CodeMirror-dialog-bottom { border-top: 1px solid #383838; bottom: 0 }
 
 .CodeMirror-dialog {
-    position: absolute;
-    left: 0; right: 0;
-    background: #282828;
-    z-index: 15;
-    padding: .1em .8em;
-    overflow: hidden;
-    color: #aaa;
-    white-space: nowrap;
+  position: absolute;
+  left: 0; right: 0;
+  background: #282828;
+  z-index: 15;
+  padding: .1em .8em;
+  overflow: hidden;
+  color: #aaa;
+  white-space: nowrap;
 }
 
 .CodeMirror-dialog input {
-    border: none;
-    outline: none;
-    background: transparent;
-    width: 20em !important;
-    color: #eee;
-    font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 20em !important;
+  color: #eee;
+  font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
 }
 
 .sidebar {
-    position: absolute;
-    top: .5em;
-    right: .5em;
-    width: 2.5em;
-    user-select: none;
+  position: absolute;
+  top: .5em;
+  right: .5em;
+  width: 2.5em;
+  user-select: none;
 }
 .sidebar > li {
-    position: relative;
-    z-index: 5;
-    margin-bottom: .25em;
+  position: relative;
+  z-index: 5;
+  margin-bottom: .25em;
 }
 
 .sidebar svg {
-    fill: rgba(128,128,128,.6);
-    height: 1em;
-    width: 1em;
-    margin-left: .75em;
+  fill: rgba(128,128,128,.6);
+  height: 1em;
+  width: 1em;
+  margin-left: .75em;
 }
 
 .sidebar span {
-    display: block;
-    text-align: center;
-    opacity: 0;
-    font-size: .7em;
+  display: block;
+  text-align: center;
+  opacity: 0;
+  font-size: .7em;
 }
 
 .sidebar > li:hover         { cursor: pointer }
@@ -882,37 +882,37 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar > .full:hover span { color: #bb4 }
 
 .mode-select {
-    background: #282828;
-    border: none;
-    box-shadow: 0 0 15px rgba(0,0,0,.6);
-    border-radius: 2px;
-    color: #ccc;
-    font-size: .8em;
-    margin-top: -2.55em;
-    padding: .5em 3.25em .5em .5em;
-    position: absolute;
-    right: 0;
-    visibility: hidden;
-    z-index: 4;
-    appearance: none;
+  background: #282828;
+  border: none;
+  box-shadow: 0 0 15px rgba(0,0,0,.6);
+  border-radius: 2px;
+  color: #ccc;
+  font-size: .8em;
+  margin-top: -2.55em;
+  padding: .5em 3.25em .5em .5em;
+  position: absolute;
+  right: 0;
+  visibility: hidden;
+  z-index: 4;
+  appearance: none;
 }
 .mode-select.in { visibility: visible }
 
 /* ============================ Upload Progress ============================ */
 
 .upload-info {
-    background: #181818;
-    color: #999;
-    transition: flex-basis .2s ease;
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex: 0 0 0px;
-    order: 4;
-    align-items: stretch;
-    justify-content: space-between;
-    overflow: hidden;
-    z-index: 1;
+  background: #181818;
+  color: #999;
+  transition: flex-basis .2s ease;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex: 0 0 0px;
+  order: 4;
+  align-items: stretch;
+  justify-content: space-between;
+  overflow: hidden;
+  z-index: 1;
 }
 .upload-info.in  { flex-basis: 1.5em }
 
@@ -921,80 +921,80 @@ html:not(.mobile) .vjs-big-play-button {
 @media (max-width:  639px) { .upload-info { font-size: .7em } }
 
 .upload-info span {
-    vertical-align: middle;
-    display: inline-block;
-    line-height: 1.5em;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1.5em;
 }
 
 .upload-title {
-    flex: 1 1;
-    order: 1;
-    color: #eee;
-    z-index: 3;
-    padding-left: .25em;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  flex: 1 1;
+  order: 1;
+  color: #eee;
+  z-index: 3;
+  padding-left: .25em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .upload-speed {
-    color: #eee;
-    flex: 0 0 6.5em;
-    order: 2;
-    z-index: 3;
-    text-align: center;
-    white-space: nowrap;
+  color: #eee;
+  flex: 0 0 6.5em;
+  order: 2;
+  z-index: 3;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .upload-time {
-    color: #eee;
-    flex: 0 0 6.5em;
-    order: 3;
-    z-index: 3;
-    text-align: center;
-    white-space: nowrap;
+  color: #eee;
+  flex: 0 0 6.5em;
+  order: 3;
+  z-index: 3;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .upload-cancel {
-    transition: color .2s ease;
-    cursor: pointer;
-    color: #eee;
-    flex: 0 0 5em;
-    text-align: right;
-    padding-right: .25em;
-    order: 4;
-    z-index: 3;
-    white-space: nowrap;
+  transition: color .2s ease;
+  cursor: pointer;
+  color: #eee;
+  flex: 0 0 5em;
+  text-align: right;
+  padding-right: .25em;
+  order: 4;
+  z-index: 3;
+  white-space: nowrap;
 }
 
 @media (max-width: 959px) {
-    .view.left .upload-title       , .view.right .upload-title       { display: none !important }
-    .view.left .upload-cancel      , .view.right .upload-cancel      { flex: 0 0 2em !important }
-    .view.left .upload-cancel span , .view.right .upload-cancel span { display: none !important }
+  .view.left .upload-title       , .view.right .upload-title       { display: none !important }
+  .view.left .upload-cancel      , .view.right .upload-cancel      { flex: 0 0 2em !important }
+  .view.left .upload-cancel span , .view.right .upload-cancel span { display: none !important }
 }
 
 @media (max-width: 479px) {
-    .upload-title       { display: none !important }
-    .upload-speed       { flex: 1 1 !important     }
-    .upload-time        { flex: 1 1 !important     }
-    .upload-cancel      { flex: 0 0 2em !important }
-    .upload-cancel span { display: none !important }
+  .upload-title       { display: none !important }
+  .upload-speed       { flex: 1 1 !important     }
+  .upload-time        { flex: 1 1 !important     }
+  .upload-cancel      { flex: 0 0 2em !important }
+  .upload-cancel span { display: none !important }
 }
 
 .upload-bar {
-    position: absolute;
-    background: #05a;
-    top: 0; bottom: 0; left: 0;
-    transition: width .2s ease;
-    width: 0;
-    z-index: 2;
-    pointer-event: none;
+  position: absolute;
+  background: #05a;
+  top: 0; bottom: 0; left: 0;
+  transition: width .2s ease;
+  width: 0;
+  z-index: 2;
+  pointer-event: none;
 }
 
 .upload-info svg {
-    fill: #eee;
-    height: 1em;
-    vertical-align: middle;
-    transition: fill .15s ease;
+  fill: #eee;
+  height: 1em;
+  vertical-align: middle;
+  transition: fill .15s ease;
 }
 
 .upload-cancel:hover { color: #f44 }
@@ -1004,16 +1004,16 @@ html:not(.mobile) .vjs-big-play-button {
 /* =============================== Audio Panel =============================== */
 
 .audio-bar {
-    background: #181818;
-    box-shadow: 0 0 .5em rgba(0,0,0,.2);
-    flex: 0 0 0;
-    order: 3;
-    display: flex;
-    position: relative;
-    transition: flex-basis .2s ease;
-    width: 100%;
-    user-select: none;
-    overflow: hidden;
+  background: #181818;
+  box-shadow: 0 0 .5em rgba(0,0,0,.2);
+  flex: 0 0 0;
+  order: 3;
+  display: flex;
+  position: relative;
+  transition: flex-basis .2s ease;
+  width: 100%;
+  user-select: none;
+  overflow: hidden;
 }
 .audio-bar.in { flex-basis: 1.5em }
 
@@ -1022,88 +1022,88 @@ html:not(.mobile) .vjs-big-play-button {
 @media (max-width:  639px) { .audio-bar { font-size: .7em} }
 
 .audio-icon {
-    z-index: 4;
-    flex: 0 0 1.5em;
+  z-index: 4;
+  flex: 0 0 1.5em;
 }
 .audio-icon:first-of-type { margin-left: .25em }
 @media (max-width: 639px) { .audio-icon { flex-basis: 1.25em } }
 
 
 .audio-icon svg {
-    fill: rgba(255,255,255,.55);
-    height: 1.125em;
-    width: 1.125em;
-    margin: .0625em .25em;
-    padding: .125em;
-    pointer-events: none;
+  fill: rgba(255,255,255,.55);
+  height: 1.125em;
+  width: 1.125em;
+  margin: .0625em .25em;
+  padding: .125em;
+  pointer-events: none;
 }
 @media (max-width: 639px) { .audio-icon svg { height: 1em; width: 1em; margin: .125em } }
 
 .audio-icon:hover svg { fill: #fff }
 .audio-icon.active svg {
-    fill: #fff;
-    background: rgba(255,255,255,.3);
-    border-radius: 4px;
+  fill: #fff;
+  background: rgba(255,255,255,.3);
+  border-radius: 4px;
 }
 
 .volume-slider {
-    z-index: 4;
-    height: .75em;
-    transition: flex-basis .2s ease;
-    flex: 0 0 0px;
-    margin: .375em 0;
+  z-index: 4;
+  height: .75em;
+  transition: flex-basis .2s ease;
+  flex: 0 0 0px;
+  margin: .375em 0;
 }
 .volume-slider.in { flex-basis: 4em; box-shadow: 0 0 0 1px #eee }
 
 .volume-slider-inner {
-    background: #eee;
-    height: .75em;
+  background: #eee;
+  height: .75em;
 }
 
 .audio-title {
-    overflow: hidden;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    line-height: 1.5em;
-    color: #fff;
-    flex: 1;
-    z-index: 4;
-    cursor: default;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5em;
+  color: #fff;
+  flex: 1;
+  z-index: 4;
+  cursor: default;
 }
 
 .seekbar {
-    position: absolute;
-    left: 0; right: 0; bottom: 0; top: 0;
-    transition: all .2s ease;
-    overflow: visible;
+  position: absolute;
+  left: 0; right: 0; bottom: 0; top: 0;
+  transition: all .2s ease;
+  overflow: visible;
 }
 
 .seekbar-played {
-    position: absolute;
-    width: 0;
-    background: #05a;
-    height: 100%;
-    z-index: 2;
+  position: absolute;
+  width: 0;
+  background: #05a;
+  height: 100%;
+  z-index: 2;
 }
 
 .seekbar-loaded {
-    position: absolute;
-    width: 0;
-    height: 100%;
-    background: #282d38;
-    z-index: 1;
+  position: absolute;
+  width: 0;
+  height: 100%;
+  background: #282d38;
+  z-index: 1;
 }
 
 .audio-bar .time {
-    z-index: 4;
-    flex: 0 0 7em;
-    text-align: right;
-    margin-right: .25em;
-    display: block;
-    color: #999;
-    line-height: 1.5em;
-    cursor: default;
+  z-index: 4;
+  flex: 0 0 7em;
+  text-align: right;
+  margin-right: .25em;
+  display: block;
+  color: #999;
+  line-height: 1.5em;
+  cursor: default;
 }
 @media (max-width: 639px) { .audio-bar .time { flex-basis: 2em } }
 
@@ -1114,97 +1114,97 @@ html:not(.mobile) .vjs-big-play-button {
 /* =============================== About box =============================== */
 
 #about-box {
-    background: #eee;
-    border-radius: 6px;
-    box-shadow: 0 0 30px rgba(0,0,0,.3);
-    color: #666;
-    height: 150px;
-    left: 50%;
-    top: 50%;
-    opacity: 0;
-    visibility: hidden;
-    position: fixed;
-    transition: opacity .3s ease, visibility 0s .3s;
-    transform: translate(-50%, -50%);
-    width: 300px;
-    text-align: center;
-    z-index: 64;
+  background: #eee;
+  border-radius: 6px;
+  box-shadow: 0 0 30px rgba(0,0,0,.3);
+  color: #666;
+  height: 150px;
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  visibility: hidden;
+  position: fixed;
+  transition: opacity .3s ease, visibility 0s .3s;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  text-align: center;
+  z-index: 64;
 }
 #about-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
 #about-content {
-    color: #333;
-    margin-left: 5%;
-    width: 90%;
-    text-align: center;
+  color: #333;
+  margin-left: 5%;
+  width: 90%;
+  text-align: center;
 }
 
 #about-title {
-    font-size: 1.3em;
-    padding: .5em 0 .25em 0;
+  font-size: 1.3em;
+  padding: .5em 0 .25em 0;
 }
 
 #about-engine {
-    font-size: .8em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-bottom: .25em;
+  font-size: .8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-bottom: .25em;
 }
 
 #about-copy {
-    bottom: 0;
-    font-size: .7em;
-    margin-bottom: .3em;
-    position: absolute;
+  bottom: 0;
+  font-size: .7em;
+  margin-bottom: .3em;
+  position: absolute;
 }
 
 #about-copy a {
-    padding: 0 .3em;
-    color: #000;
-    border: 1px solid transparent;
+  padding: 0 .3em;
+  color: #000;
+  border: 1px solid transparent;
 }
 
 #about-fork {
-    font-size: .66em;
-    color: #333;
-    padding-right: .3em;
-    border-radius: .4em;
+  font-size: .66em;
+  color: #333;
+  padding-right: .3em;
+  border-radius: .4em;
 }
 
 #about-fork .github {
-    fill: #333;
-    display: inline-block;
-    vertical-align: middle;
-    height: 1em;
-    margin-bottom: 0.25em;
+  fill: #333;
+  display: inline-block;
+  vertical-align: middle;
+  height: 1em;
+  margin-bottom: 0.25em;
 }
 
 #about-fork:hover, #about-fork:hover svg, #about-copy a:hover {
-    color: #05a;
-    fill: #05a;
-    border-radius: 4px;
-    text-decoration: underline;
+  color: #05a;
+  fill: #05a;
+  border-radius: 4px;
+  text-decoration: underline;
 }
 
 /* ================================= Prefs ================================ */
 
 #prefs-box {
-    background: #eee;
-    border-radius: 6px;
-    box-shadow: 0 0 30px rgba(0,0,0,.3);
-    color: #666;
-    max-height: 95%;
-    left: 50%;
-    top: 50%;
-    position: fixed;
-    transition: opacity .3s ease, visibility 0s .3s;
-    transform: translate(-50%, -50%);
-    z-index: 64;
-    padding: .66em;
-    overflow-y: auto;
-    opacity: 0;
-    visibility: hidden;
+  background: #eee;
+  border-radius: 6px;
+  box-shadow: 0 0 30px rgba(0,0,0,.3);
+  color: #666;
+  max-height: 95%;
+  left: 50%;
+  top: 50%;
+  position: fixed;
+  transition: opacity .3s ease, visibility 0s .3s;
+  transform: translate(-50%, -50%);
+  z-index: 64;
+  padding: .66em;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
 }
 #prefs-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
@@ -1221,202 +1221,202 @@ html:not(.mobile) .vjs-big-play-button {
 .list-prefs ul li:first-of-type { margin-top: 0 }
 
 .list-prefs label {
-    display: inline-block;
-    white-space: nowrap;
-    line-height: 1.5em;
-    flex: 1;
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1.5em;
+  flex: 1;
 }
 
 @media (max-width: 319px) {
-    .list-prefs ul li {
-        flex-direction: column;
-        height: auto;
-    }
-    .list-prefs label {
-        width: 100%;
-        font-size: .9em;
-        margin-bottom: .5em;
-        text-align: center;
-        line-height: 1em;
-    }
-    .list-prefs select {
-        width: 100%;
-        padding: .25em 0;
-    }
+  .list-prefs ul li {
+   flex-direction: column;
+   height: auto;
+  }
+  .list-prefs label {
+   width: 100%;
+   font-size: .9em;
+   margin-bottom: .5em;
+   text-align: center;
+   line-height: 1em;
+  }
+  .list-prefs select {
+   width: 100%;
+   padding: .25em 0;
+  }
 }
 
 #prefs-box select {
-    padding: 0 .25em;
-    border-radius: 3px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgNjQwIDY0MCI+PHBhdGggc3R5bGU9ImZpbGw6ICM5OTkiIGQ9Ik0zMjAgMGwtMTQ3LjIgMjMzLjZoMjk0LjM2OGwtMTQ3LjE2OC0yMzMuNnpNMzIwLjAzMiA2NDBsMTQ3LjE2OC0yMzMuNi0yOTQuNC0wLjAzMiAxNDcuMjMyIDIzMy42MzJ6Ij48L3BhdGg+PC9zdmc+);
-    background-size: 1em;
-    background-repeat: no-repeat;
-    background-position: right;
-    flex: 1;
-    appearance: none;
+  padding: 0 .25em;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgNjQwIDY0MCI+PHBhdGggc3R5bGU9ImZpbGw6ICM5OTkiIGQ9Ik0zMjAgMGwtMTQ3LjIgMjMzLjZoMjk0LjM2OGwtMTQ3LjE2OC0yMzMuNnpNMzIwLjAzMiA2NDBsMTQ3LjE2OC0yMzMuNi0yOTQuNC0wLjAzMiAxNDcuMjMyIDIzMy42MzJ6Ij48L3BhdGg+PC9zdmc+);
+  background-size: 1em;
+  background-repeat: no-repeat;
+  background-position: right;
+  flex: 1;
+  appearance: none;
 }
 
 .list-user:before {
-    content: "Users";
-    border-bottom: 1px solid #aaa;
-    color: #333;
-    padding: .25em .5em;
-    display: block;
+  content: "Users";
+  border-bottom: 1px solid #aaa;
+  color: #333;
+  padding: .25em .5em;
+  display: block;
 }
 
 .list-user li {
-    padding: 0 .5em;
-    line-height: 1.25em;
+  padding: 0 .5em;
+  line-height: 1.25em;
 }
 .list-user li:hover { background: #e6e6e6; color: #000 }
 
 .list-user .trash {
-    padding-top: .1em;
-    height:1.15em;
-    width: 1.15em;
-    float: right;
-    fill: #bbb;
-    cursor: pointer;
+  padding-top: .1em;
+  height:1.15em;
+  width: 1.15em;
+  float: right;
+  fill: #bbb;
+  cursor: pointer;
 }
 
 .list-user .trash:hover { fill: #f44 }
 
 .add-user {
-    text-align: center;
-    cursor: pointer;
-    width: 10em;
-    margin: .5em auto;
+  text-align: center;
+  cursor: pointer;
+  width: 10em;
+  margin: .5em auto;
 }
 .add-user:hover { color: #333 }
 .add-user:hover svg { fill: #333 }
 
 .add-user svg {
-    height: 1em;
-    width: 1em;
-    position: relative;
-    top: .125em;
-    margin-right: .25em;
-    fill: #666;
+  height: 1em;
+  width: 1em;
+  position: relative;
+  top: .125em;
+  margin-right: .25em;
+  fill: #666;
 }
 
 /* ============================== Login Form =============================== */
 
 #login-box {
-    color: #222;
-    background: #ccc;
-    border-radius: 6px;
-    box-shadow: 0 0 30px #000;
-    height: 10rem;
-    width: 24rem;
-    opacity: 0;
-    position: absolute;
-    text-align: center;
-    top: 50%;
-    left: 50%;
-    transition: opacity .4s ease;
-    transform: translate(-50%, -50%);
-    z-index: 0;
+  color: #222;
+  background: #ccc;
+  border-radius: 6px;
+  box-shadow: 0 0 30px #000;
+  height: 10rem;
+  width: 24rem;
+  opacity: 0;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transition: opacity .4s ease;
+  transform: translate(-50%, -50%);
+  z-index: 0;
 }
 #login-box.in { transform: translate(-50%, -50%); opacity: 1 }
 
 @media (max-width: 639px), (max-height: 399px) {
-    #login-box {
-        border-radius: 0;
-        box-shadow: none;
-        font-size: .7em;
-        top: 50%;
-        left: 50%;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-    }
+  #login-box {
+   border-radius: 0;
+   box-shadow: none;
+   font-size: .7em;
+   top: 50%;
+   left: 50%;
+   height: 100%;
+   width: 100%;
+   margin: 0;
+  }
 }
 
 #form {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 #firstrun-title {
-    font-size: 1.33em;
-    margin-top: 1.5em;
-    width: 100%;
+  font-size: 1.33em;
+  margin-top: 1.5em;
+  width: 100%;
 }
 
 #login-info-box {
-    line-height: 2rem;
-    background: linear-gradient(#ccc,#fff);
-    box-shadow: 0 0 10px rgba(0,0,0,.3);
-    border-radius: 5px 5px 0 0;
-    transition: background 0.2s ease;
-    position: absolute;
-    top: 0;
-    width: 100%;
+  line-height: 2rem;
+  background: linear-gradient(#ccc,#fff);
+  box-shadow: 0 0 10px rgba(0,0,0,.3);
+  border-radius: 5px 5px 0 0;
+  transition: background 0.2s ease;
+  position: absolute;
+  top: 0;
+  width: 100%;
 }
 
 #login-info-box.error { background: #a33; color: #fff }
 @media (max-width: 639px), (max-height: 399px) { #login-info-box { border-radius: 0 } }
 
 #login-info {
-    line-height: 1.75rem;
+  line-height: 1.75rem;
 }
 
 #login-fields {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 80%;
-    transform: translate(-50%, -50%);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80%;
+  transform: translate(-50%, -50%);
 }
 
 .login-input {
-    background: rgba(255,255,255,.5);
-    padding: 0 10px;
-    height: 2rem;
-    width: 100%;
-    border-radius: 6px;
+  background: rgba(255,255,255,.5);
+  padding: 0 10px;
+  height: 2rem;
+  width: 100%;
+  border-radius: 6px;
 }
 
 .login-input:focus {
-    background: rgba(255,255,255,1);
+  background: rgba(255,255,255,1);
 }
 
 .login-input + .login-input {
-    margin-top: .3rem;
+  margin-top: .3rem;
 }
 
 #login-box .bottom {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 2rem;
-    display: flex;
-    background: linear-gradient(#fff,#ccc);
-    border-radius: 0 0 5px 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,.3);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 2rem;
+  display: flex;
+  background: linear-gradient(#fff,#ccc);
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
 .remember, .submit {
-    line-height: 2rem;
-    height: 2rem;
-    bottom: 0;
-    color: #666;
-    transition: color .2s ease;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    flex: 1;
+  line-height: 2rem;
+  height: 2rem;
+  bottom: 0;
+  color: #666;
+  transition: color .2s ease;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .remember svg, .submit svg {
-    height: 1em;
-    transition: fill .2s ease;
-    position: relative;
-    top: .15rem;
-    width: 1.2em;
+  height: 1em;
+  transition: fill .2s ease;
+  position: relative;
+  top: .15rem;
+  width: 1.2em;
 }
 
 .remember:hover, .remember:focus { color: #222 }
@@ -1428,29 +1428,29 @@ html:not(.mobile) .vjs-big-play-button {
 .remember.checked:hover svg      { fill: #222 }
 
 @media (max-width: 639px), (max-height: 399px) {
-    .remember, .submit {
-        border-radius: 0;
-     }
+  .remember, .submit {
+   border-radius: 0;
+  }
 }
 
 /* =============================== Info Box ================================ */
 
 .info-box {
-    border-radius: 6px;
-    left: 50%;
-    top: 50%;
-    transform:  translate(-50%, -50%);
-    position: absolute;
-    transition: opacity .3s ease, visibility 0s .3s;
-    text-align: center;
-    z-index: 40;
-    overflow: hidden;
-    opacity: 0;
-    color: #333;
-    background: #eee;
-    visibility: hidden;
-    box-shadow: 0 0 30px rgba(0,0,0,.3);
-    max-width: 512px;
+  border-radius: 6px;
+  left: 50%;
+  top: 50%;
+  transform:  translate(-50%, -50%);
+  position: absolute;
+  transition: opacity .3s ease, visibility 0s .3s;
+  text-align: center;
+  z-index: 40;
+  overflow: hidden;
+  opacity: 0;
+  color: #333;
+  background: #eee;
+  visibility: hidden;
+  box-shadow: 0 0 30px rgba(0,0,0,.3);
+  max-width: 512px;
 }
 .info-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
@@ -1460,11 +1460,11 @@ html:not(.mobile) .vjs-big-play-button {
 @media (max-width:  639px) { .info-box { width: 90%      } }
 
 .info-box svg {
-    position: absolute;
-    left: 0;
-    width: 2.5em;
-    padding: .25em;
-    fill: #fff;
+  position: absolute;
+  left: 0;
+  width: 2.5em;
+  padding: .25em;
+  fill: #fff;
 }
 
 .info-box.link span      { display: none }
@@ -1475,10 +1475,10 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box.error { background: linear-gradient(to right, #f44 3em, #fff 3em) }
 
 .info-box span, .info-box .linkout {
-    display: block;
-    padding: .25em .5em;
-    padding-left: 3.5em;
-    color: #444;
+  display: block;
+  padding: .25em .5em;
+  padding-left: 3.5em;
+  color: #444;
 }
 
 .info-box span     { line-height: 1.5em }
@@ -1487,70 +1487,70 @@ html:not(.mobile) .vjs-big-play-button {
 /* =========================== Drop Select Menu ============================ */
 
 #drop-select {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    width: 10em;
-    line-height: 2em;
-    z-index: 34;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    box-shadow: 0 0 30px rgba(0,0,0,.3);
-    border-radius: 6px;
-    visibility: hidden;
-    opacity: 0;
-    display: flex;
-    flex-direction: row;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 10em;
+  line-height: 2em;
+  z-index: 34;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  box-shadow: 0 0 30px rgba(0,0,0,.3);
+  border-radius: 6px;
+  visibility: hidden;
+  opacity: 0;
+  display: flex;
+  flex-direction: row;
 }
 #drop-select.in { opacity: 1; visibility: visible }
 
 #drop-select span {
-    cursor: pointer;
-    display: inline-block;
-    text-align: center;
-    flex: 1;
-    font-size: .75em;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  flex: 1;
+  font-size: .75em;
 }
 
 html:not(.mobile) #drop-select span:hover,
 html:not(.mobile) #drop-select span.active {
-    background: #05a; color: #fff;
+  background: #05a; color: #fff;
 }
 
 #drop-select .movefile:hover { border-radius: 6px 0 0 6px }
 #drop-select .viewfile:hover { border-radius: 0 6px 6px 0 }
 
 @media (max-width: 639px) {
-    #drop-select {
-        flex-direction: column;
-        width: 3.5em;
-        font-size: .8em;
-        line-height: 1.75em;
-    }
-    #drop-select .movefile:hover { border-radius: 6px 6px 0 0 }
-    #drop-select .viewfile:hover { border-radius: 0 0 6px 6px }
+  #drop-select {
+   flex-direction: column;
+   width: 3.5em;
+   font-size: .8em;
+   line-height: 1.75em;
+  }
+  #drop-select .movefile:hover { border-radius: 6px 6px 0 0 }
+  #drop-select .viewfile:hover { border-radius: 0 0 6px 6px }
 }
 /* ============================= Misc Elements ============================= */
 
 .dropzone {
-    position: absolute;
-    left: 0; right: 0; bottom: 0; top: 1.5rem;
-    z-index: 1;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    background: #05a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  left: 0; right: 0; bottom: 0; top: 1.5rem;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  background: #05a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
 .dropzone.in { opacity: .5; visibility: visible }
 
 .dropzone svg {
-    height: 50%;
-    width: 50%;
-    fill: #fff;
+  height: 50%;
+  width: 50%;
+  fill: #fff;
 }
 
 .shake { animation: shake .3s ease }
