@@ -1399,7 +1399,7 @@
     view.register("dragenter", function (event) {
       event.stopPropagation();
 
-      var svg, isInternal = !!event.dataTransfer.getData("text").length;
+      var svg, isInternal = event.dataTransfer.effectAllowed !== "all";
       if (view.data("type") === "directory" && isInternal)
         svg = "menu";
       else if (!isInternal)
