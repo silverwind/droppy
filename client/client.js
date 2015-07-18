@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, videojs, Draggabilly, ext, Handlebars */
+/* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, ext, Handlebars */
 "use strict";
 
 (function ($, window, document) {
@@ -494,27 +494,25 @@
     // Open the WebSocket
     openSocket();
 
-    // Global events
-    $(window)
-      // Re-fit path line after 50ms of no resizing
-      .register("resize", function () {
-        clearTimeout(droppy.resizeTimer);
-        droppy.resizeTimer = setTimeout(function () {
-          $(".view").each(function () {
-            checkPathOverflow($(this));
-            aspectScale();
-          });
-        }, 50);
-      })
-      // Bind escape for hiding modals
-      .register("keydown", function (event) {
-        if (event.keyCode === 27)
-          toggleCatcher(false);
-      })
-      // Stop CTRL-S from showing a save dialog
-      .register("keydown", function (event) {
-        if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) event.preventDefault();
-      });
+    // Re-fit path line after 50ms of no resizing
+    $(window).register("resize", function () {
+      clearTimeout(droppy.resizeTimer);
+      droppy.resizeTimer = setTimeout(function () {
+        $(".view").each(function () {
+          checkPathOverflow($(this));
+          aspectScale();
+        });
+      }, 50);
+    });
+
+    // escape hides modals
+    Mousetrap.bind("escape", function () {
+      toggleCatcher(false);
+    });
+
+    Mousetrap.bind("mod+s", function (e) {
+      e.preventDefault();
+    });
 
     // fullscreen event
     droppy.prefixes.fullscreenchange.forEach(function (eventName) {
@@ -1948,6 +1946,7 @@
           if (change.origin !== "setValue")
             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
         });
+
         editor.on("keydown", function (cm, event) { // Keyboard shortcuts
           if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
             var view = getCMView(cm);
