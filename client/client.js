@@ -866,7 +866,9 @@
     link.after(namer);
     entry.addClass("editing");
 
-    link.next().register("input", function () {
+    var renamer = link.next();
+
+    renamer.register("input", function () {
       inputText = namer.val();
       valid = !/[\\\*\{\}\/\?\|<>"]/.test(inputText);
       if (inputText === "") valid = false;
@@ -875,14 +877,15 @@
       });
       canSubmit = valid && (!exists || inputText === namer.attr("placeholder"));
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
-    }).register("keydown", function (event) {
-      if (event.keyCode === 27) stopEdit(view); // Escape Key
-      if (event.keyCode === 13) submitEdit(view, false, callback); // Return Key
     }).register("focusout", submitEdit.bind(null, view, true, callback));
 
     nameLength = link.text().lastIndexOf(".");
-    namer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
-    namer[0].focus();
+    renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
+    renamer[0].focus();
+
+    var trap = new Mousetrap(renamer[0]);
+    trap.bind("escape", stopEdit.bind(null, view));
+    trap.bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
       var success,
