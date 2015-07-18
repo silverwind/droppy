@@ -1947,6 +1947,13 @@
             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
         });
 
+        editor.setOption("extraKeys", {
+          Tab: function(cm) {
+            editor.replaceSelection(droppy.get("indentWithTabs") ?
+              "\t" : Array(droppy.get("indentUnit") + 1).join(" "));
+          }
+        });
+
         editor.on("keydown", function (cm, event) { // Keyboard shortcuts
           if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
             var view = getCMView(cm);
