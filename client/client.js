@@ -43,7 +43,6 @@
     webp: document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0,
     notification: "Notification" in window,
     mobile: (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent),
-    mac: /Mac/.test(navigator.platform)
   };
 // ============================================================================
 //  Set up a few more things
@@ -1931,9 +1930,6 @@
           mode: "text/plain"
         });
 
-        // Disable New-Tab browser shortcut in keymap
-        CodeMirror.keyMap.sublime[droppy.detects.mac ? "Cmd-T" : "Ctrl-T"] = false;
-
         if (!CodeMirror.autoLoadMode) initModeLoad();
         var modeInfo = CodeMirror.findModeByFileName(filename);
         var mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
@@ -1947,31 +1943,33 @@
             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
         });
 
+        function getCMView(cm) {
+          return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
+        }
+
+        function save(cm) {
+          var view = getCMView(cm);
+          showSpinner(view);
+          sendMessage(view[0].vId, "SAVE_FILE", {
+            to: view[0].editorEntryId,
+            value: cm.getValue()
+          });
+        }
+        function noop () {}
+
         editor.setOption("extraKeys", {
           Tab: function(cm) {
-            editor.replaceSelection(droppy.get("indentWithTabs") ?
+            cm.replaceSelection(droppy.get("indentWithTabs") ?
               "\t" : Array(droppy.get("indentUnit") + 1).join(" "));
-          }
-        });
-
-        editor.on("keydown", function (cm, event) { // Keyboard shortcuts
-          if (event.keyCode === 83 && (event[droppy.detects.mac ? "metaKey" : "ctrlKey"])) { // CTRL-S / CMD-S
-            var view = getCMView(cm);
-            event.preventDefault();
-            showSpinner(view);
-            sendMessage(view[0].vId, "SAVE_FILE", {
-              to: view[0].editorEntryId,
-              value: cm.getValue()
-            });
-          }
+          },
+          "Cmd-S": save,
+          "Ctrl-S": save,
+          "Cmd-T": noop,
+          "Ctrl-T": noop,
         });
 
         editor.setValue(data);
         editor.clearHistory();
-
-        function getCMView(cm) {
-          return getView($(cm.getWrapperElement()).parents(".view")[0].vId);
-        }
 
         doc.find(".exit").register("click", function () {
           closeDoc($(this).parents(".view"));
