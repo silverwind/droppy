@@ -513,8 +513,8 @@
       e.preventDefault();
     });
 
-    function next(view) { swapMedia(view, "right") }
-    function prev(view) { swapMedia(view, "left") }
+    function next(view) { swapMedia(view, "right"); }
+    function prev(view) { swapMedia(view, "left"); }
     var nextKeys = ["space", "right", "down"];
     var prevKeys = ["shift-space", "left", "up"];
 
@@ -1962,10 +1962,10 @@
             value: cm.getValue()
           });
         }
-        function noop () {}
+        function noop() {}
 
         editor.setOption("extraKeys", {
-          Tab: function(cm) {
+          Tab: function (cm) {
             cm.replaceSelection(droppy.get("indentWithTabs") ?
               "\t" : Array(droppy.get("indentUnit") + 1).join(" "));
           },
