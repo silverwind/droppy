@@ -1971,9 +1971,11 @@
           },
           "Cmd-S": save,
           "Ctrl-S": save,
-          "Cmd-T": noop,
-          "Ctrl-T": noop,
         });
+
+        // Let Mod-T through to the browser
+        CodeMirror.keyMap.sublime["Cmd-T"] = false;
+        CodeMirror.keyMap.sublime["Ctrl-T"] = false;
 
         editor.setValue(data);
         editor.clearHistory();
