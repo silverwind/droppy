@@ -713,7 +713,7 @@ function handleFileRequest(req, res, download) {
 
   // Check for a shareLink
   filepath = /\?([\$~_])\/([\s\S]+)$/.exec(URI);
-  if (filepath[1] === "$") {
+  if (filepath.length && filepath[1] === "$") {
     shareLink = true;
     filepath = utils.addFilesPath(db.get("sharelinks")[filepath[2]]);
   } else if (filepath[1] === "~" || filepath[1] === "_") {

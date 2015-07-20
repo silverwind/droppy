@@ -1743,12 +1743,11 @@
     view[0].mediaFiles = [];
     Object.keys(data).forEach(function (filename) {
       var e = ext(filename);
-      if (typeof data === "string") {
+      if (typeof data[filename] === "string") {
         if (data[filename][0] !== "f") return;
-      } else if (typeof data === "object") {
+      } else if (typeof data[filename] === "object") {
         if (data[filename].type !== "f") return;
       }
-
       if (extensions.indexOf(e) !== -1) {
         if (droppy.videoTypes[e] && !droppy.detects.videoTypes[droppy.videoTypes[e]]) return;
         view[0].mediaFiles.push(filename);
