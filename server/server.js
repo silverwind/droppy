@@ -803,10 +803,10 @@ function handleTypeRequest(req, res) {
 
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
-  var busboy, opts, dstDir,
-    done     = false,
-    files    = {},
-    cookie   = cookies.get(req.headers.cookie);
+  var busboy, opts, dstDir;
+  var done = false;
+  var files = {};
+  var cookie = cookies.get(req.headers.cookie);
 
   req.query = qs.parse(req.url.substring("/upload?".length));
 

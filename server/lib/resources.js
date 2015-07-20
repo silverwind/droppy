@@ -22,9 +22,9 @@ var uglify       = require("uglify-js");
 var vm           = require("vm");
 var zlib         = require("zlib");
 
-var minify, svgData = {}, $,
-  themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme"),
-  modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
+var minify, svgData = {}, $;
+var themesPath = path.join(paths.mod, "/node_modules/codemirror/theme");
+var modesPath = path.join(paths.mod, "/node_modules/codemirror/mode");
 
 var opts = {
   get uglify() {
@@ -423,9 +423,9 @@ function compileAll(callback) {
 
   // Read misc files
   resources.files.other.forEach(function (file) {
-    var data, date,
-      name     = path.basename(file),
-      fullPath = path.join(paths.mod, file);
+    var data, date;
+    var name     = path.basename(file);
+    var fullPath = path.join(paths.mod, file);
 
     try {
       data = fs.readFileSync(fullPath);

@@ -1,4 +1,5 @@
 rules:
+  array-bracket-spacing:       [2, "never"]
   block-scoped-var:            [2]
   brace-style:                 [2, "1tbs", {"allowSingleLine": true}]
   camelcase:                   [2, {properties: "never"}]
@@ -64,6 +65,7 @@ rules:
   no-unused-vars:              [2]
   no-use-before-define:        [2, "nofunc"]
   no-with:                     [2]
+  object-curly-spacing:        [2, "never"]
   operator-assignment:         [2, "always"]
   operator-linebreak:          [2, "after"]
   quote-props:                 [2, "as-needed"]
@@ -73,7 +75,6 @@ rules:
   space-after-keywords:        [2]
   space-before-blocks:         [2, "always"]
   space-before-function-paren: [2, {"anonymous": "always", "named": "never"}]
-  space-in-brackets:           [2, "never"]
   space-in-parens:             [2, "never"]
   space-infix-ops:             [2]
   space-return-throw-case:     [2]

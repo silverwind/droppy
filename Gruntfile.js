@@ -39,7 +39,7 @@ module.exports = function (grunt) {
         ].join(";")
       },
       lint: {
-        command: "eslint --reset --color --quiet server client *.js"
+        command: "eslint --color --quiet server client *.js"
       }
     }
   });

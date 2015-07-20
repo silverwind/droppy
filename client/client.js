@@ -82,9 +82,9 @@
 
   // Class swapping helper
   $.fn.replaceClass = function (search, replacement) {
-    var elem, classes, matches,
-      i = this.length,
-      hasClass = false;
+    var elem, classes, matches;
+    var i = this.length;
+    var hasClass = false;
     while (--i >= 0) {
       elem = this[i];
       if (typeof elem === "undefined") return false;
@@ -612,9 +612,9 @@
     }
 
     $("#create-folder-button").register("click", function () {
-      var dummyFolder, wasEmpty,
-        view      = getView(), // TODO: Create folder in last active view
-        dummyHtml = Handlebars.templates["new-folder"]();
+      var dummyFolder, wasEmpty;
+      var view      = getView(); // TODO: Create folder in last active view
+      var dummyHtml = Handlebars.templates["new-folder"]();
 
       if (view.find(".empty").length > 0) {
         view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
@@ -634,9 +634,9 @@
     });
 
     $("#create-file-button").register("click", function () {
-      var dummyFile, wasEmpty,
-        view      = getView(), // TODO: Create folder in last active view
-        dummyHtml = Handlebars.templates["new-file"]();
+      var dummyFile, wasEmpty;
+      var view      = getView(); // TODO: Create file in last active view
+      var dummyHtml = Handlebars.templates["new-file"]();
 
       if (view.find(".empty").length > 0) {
         view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
@@ -1054,9 +1054,8 @@
 
   // Update the path indicator
   function updatePath(view) {
-    var parts, oldParts,
-      pathStr = "",
-      i = 1; // Skip the first element as it's always the same
+    var parts, oldParts, pathStr = "";
+    var i = 1; // Skip the first element as it's always the same
     parts = join(view[0].currentFolder).split("/");
     if (parts[parts.length - 1] === "") parts.pop();
     if (view[0].currentFile !== null) parts.push(view[0].currentFile);
@@ -1648,17 +1647,14 @@
   }
 
   function showEntryMenu(entry, x, y) {
-    var left, top, maxTop,
-      type    = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1],
-      button  = entry.find(".entry-menu"),
-      menu    = $("#entry-menu");
-
+    var left, top, maxTop;
+    var type   = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1];
+    var button = entry.find(".entry-menu");
+    var menu   = $("#entry-menu");
     menu.attr("class", "type-" + type);
-
     left   = x ? (x - menu.width() / 2) : (button.offset().left + button.width() - menu.width());
     top    = entry.offset().top;
     maxTop = $(document).height() - menu.height();
-
     entry.addClass("active");
     toggleCatcher(true);
     menu.css({
@@ -1748,10 +1744,11 @@
     view[0].mediaFiles = [];
     Object.keys(data).forEach(function (filename) {
       var e = ext(filename);
-      if (typeof data === "string")
+      if (typeof data === "string") {
         if (data[filename][0] !== "f") return;
-      else if (typeof data === "object")
+      } else if (typeof data === "object") {
         if (data[filename].type !== "f") return;
+      }
 
       if (extensions.indexOf(e) !== -1) {
         if (droppy.videoTypes[e] && !droppy.detects.videoTypes[droppy.videoTypes[e]]) return;
@@ -1983,7 +1980,6 @@
             value: cm.getValue()
           });
         }
-        function noop() {}
 
         editor.setOption("extraKeys", {
           Tab: function (cm) {
@@ -2221,11 +2217,11 @@
   }
 
   function initAudio(view) {
-    var updateVolume, heldVolume = false,
-      bar        = view.find(".audio-bar"),
-      slider     = view.find(".volume-slider"),
-      volumeIcon = view.find(".audio-bar .volume"),
-      player     = view.find(".audio-player")[0];
+    var updateVolume, heldVolume = false;
+    var bar        = view.find(".audio-bar");
+    var slider     = view.find(".volume-slider");
+    var volumeIcon = view.find(".audio-bar .volume");
+    var player     = view.find(".audio-player")[0];
 
     setVolume(droppy.get("volume"));
 
