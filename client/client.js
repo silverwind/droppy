@@ -1422,8 +1422,7 @@
     var dropZone = view.find(".dropzone");
     view.register("dragenter", function (event) {
       event.stopPropagation();
-
-      var svg, isInternal = event.dataTransfer.effectAllowed !== "all";
+      var svg, isInternal = event.dataTransfer.effectAllowed === "copyMove";
       if (view.data("type") === "directory" && isInternal)
         svg = "menu";
       else if (!isInternal)
