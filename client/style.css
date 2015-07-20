@@ -178,7 +178,7 @@ input::-webkit-input-placeholder { color: #999 }
   transform: translate3d(0,0,0);
 }
 
-.content.image, .content.video, .content.document {
+.content.media, .content.document {
   height: 100%;
   background: #111;
   position: absolute;
@@ -730,7 +730,7 @@ html:not(.mobile) #entry-menu a.active svg {
 
 .meta > div { display: inline }
 .meta span > span { color: #ccc }
-.video .fs, .nofullscreen .fs, .video .meta { display: none }
+.type-video .fs, .type-video .meta, .nofullscreen .fs { display: none }
 /* ================================= Video.js ================================= */
 
 .media-container video:not(.vjs-tech) {

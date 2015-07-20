@@ -240,6 +240,10 @@
     return $(droppy.views.filter(function (el, index) { return index !== id; }));
   }
 
+  function getActiveView() {
+    return $(droppy.views[droppy.activeView]);
+  }
+
   function newView(dest, vId) {
     var view = $(Handlebars.templates.view());
     getView(vId).remove();
@@ -257,8 +261,10 @@
     sendMessage(vId, "DESTROY_VIEW");
   }
 
-  function contentWrap(view) {
-    return $('<div class="new content ' + view[0].animDirection + '"></div>');
+  function contentWrap(view, type) {
+    var classes = ["new", "content", view[0].animDirection];
+    if (type) classes.push("type-" + type);
+    return $('<div class="' + classes.join(" ") + '"></div>');
   }
 // ============================================================================
 //  WebSocket handling
@@ -325,7 +331,7 @@
           view[0].switchRequest = false;
           view[0].currentData = msg.data;
           openDirectory(view);
-        } else if (view.data("type") === "image" || view.data("type") === "video") {
+        } else if (view.data("type") === "media") {
           view[0].currentData = msg.data;
           populateMediaCache(view, msg.data);
           updateMediaMeta(view);
@@ -509,14 +515,34 @@
       toggleCatcher(false);
     });
 
+    // stop default browser behaviour
     Mousetrap.bind("mod+s", function (e) {
       e.preventDefault();
     });
 
-    function next(view) { swapMedia(view, "right"); }
-    function prev(view) { swapMedia(view, "left"); }
-    var nextKeys = ["space", "right", "down"];
-    var prevKeys = ["shift-space", "left", "up"];
+    // track active view
+    $(window).on("click dblclick contextmenu", function (e) {
+      var view = $(e.target).parents(".view");
+      if (view.length) droppy.activeView = view[0].vId;
+    });
+
+    Mousetrap.bind(["space", "right", "down", "return"], function () {
+      var view = getActiveView();
+      if (!view || view.data("type") !== "media") return;
+      swapMedia(getActiveView(), "right");
+    });
+
+    Mousetrap.bind(["shift+space", "left", "up", "backspace"], function () {
+      var view = getActiveView();
+      if (!view || view.data("type") !== "media") return;
+      swapMedia(getActiveView(), "left");
+    });
+
+    Mousetrap.bind(["alt+enter", "f"], function () {
+      var view = getActiveView();
+      if (!view || view.data("type") !== "media") return;
+      toggleFullscreen(getActiveView().find(".content")[0]);
+    });
 
     // fullscreen event
     droppy.prefixes.fullscreenchange.forEach(function (eventName) {
@@ -525,12 +551,9 @@
         document.activeElement.blur(); // unfocus the fullscreen button so the space key won't un-toggle fullscreen
         if (fse) {
           view = $(fse).parents(".view");
-          Mousetrap.bind(nextKeys, next.bind(null, view));
-          Mousetrap.bind(prevKeys, prev.bind(null, view));
           view.find(".fs").html(droppy.svg.unfullscreen);
           view.find(".full svg").replaceWith(droppy.svg.unfullscreen);
         } else {
-          Mousetrap.unbind(nextKeys.concat(prevKeys));
           $(".fs").html(droppy.svg.fullscreen);
           $(".full svg").replaceWith(droppy.svg.fullscreen);
         }
@@ -539,9 +562,7 @@
 
     var fileInput = $("#file");
     fileInput.register("change", function (event) {
-      var files, path, name,
-        view = getView(fileInput[0].targetView),
-        obj  = {};
+      var files, path, name, view = getView(fileInput[0].targetView), obj  = {};
 
       uploadInit(view);
       if (droppy.detects.inputDirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -1279,7 +1300,7 @@
       view.find(".data-row").removeClass("animating");
       if (view.data("type") === "directory") {
         bindDragEvents(view);
-      } else if (view.data("type") === "image" || view.data("type") === "video") {
+      } else if (view.data("type") === "media") {
         bindMediaArrows(view);
       }
       bindHoverEvents(view);
@@ -1684,7 +1705,7 @@
       view[0].currentFolder = newFolder;
       pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
       updatePath(view);
-      openMedia(view, "image", oldFolder === newFolder);
+      openMedia(view, oldFolder === newFolder);
     } else if (Object.keys(droppy.videoTypes).indexOf(e) !== -1) { // Video
       if (!droppy.detects.videoTypes[droppy.videoTypes[e]]) {
         showError(view, "Your browser can't play this file");
@@ -1694,7 +1715,7 @@
         view[0].currentFolder = newFolder;
         pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
         updatePath(view);
-        openMedia(view, "video", oldFolder === newFolder);
+        openMedia(view, oldFolder === newFolder);
       }
     } else { // Generic file, ask the server if the file has binary contents
       var entryId = join(newFolder, file);
@@ -1782,16 +1803,16 @@
 
   function swapMedia(view, dir) {
     if (view[0].tranistioning) return;
-    var a = view.find(".media-container"), b,
-      nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view),
-      isImage  = Object.keys(droppy.imageTypes).indexOf(ext(nextFile)) !== -1,
-      src      = getMediaSrc(view, nextFile);
+    var a        = view.find(".media-container"), b;
+    var nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view);
+    var isImage  = Object.keys(droppy.imageTypes).indexOf(ext(nextFile)) !== -1;
+    var src      = getMediaSrc(view, nextFile);
 
     if (isImage) {
-      b = $("<div class='media-container new-media " + dir + "'><img class='media' src='" + src + "'></div>");
+      b = $("<div class='media-container new-media " + dir + "'><img src='" + src + "'></div>");
       b.find("img").one("load", aspectScale);
     } else {
-      b = $("<div class='media-container new-media " + dir + "'><video class='media' src='" + src + "' id='video-" + view[0].vId + "'></div>");
+      b = $("<div class='media-container new-media " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
       b = $(bindVideoEvents(b[0]));
     }
 
@@ -1799,7 +1820,7 @@
     view[0].tranistioning = true;
     b.appendTo(view.find(".content")).setTransitionClass(/(left|right)/, "").end(function () {
       view[0].tranistioning = false;
-      $(".new-media").removeClass("new-media").parents(".content").replaceClass(/(image|video)/, isImage ? "image" : "video");
+      $(".new-media").removeClass("new-media").parents(".content").replaceClass(/type-(image|video)/, isImage ? "type-image" : "type-video");
       $(".old-media").remove();
       aspectScale();
       makeMediaDraggable(this, !isImage);
@@ -1851,10 +1872,10 @@
     return "?_" + encodedId.join("/");
   }
 
-  function openMedia(view, type, sameFolder) {
-    var content,
-      filename  = view[0].currentFile;
-    view.data("type", type);
+  function openMedia(view, sameFolder) {
+    var content, filename = view[0].currentFile;
+    var type = Object.keys(droppy.videoTypes).indexOf(ext(filename)) !== -1 ? "video" : "image";
+    view.data("type", "media");
     content = $(Handlebars.templates.media({
       type: type,
       src: getMediaSrc(view, filename),
@@ -1866,7 +1887,7 @@
       sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
     view[0].animDirection = "forward";
-    loadContent(view, contentWrap(view).append(content), function (view) {
+    loadContent(view, contentWrap(view, type).append(content), function (view) {
       view.find(".fs").register("click", function () {
         toggleFullscreen($(this).parents(".content")[0]);
         aspectScale();
@@ -2444,6 +2465,7 @@
 
   function initVariables() {
     droppy.activeFiles = [];
+    droppy.activeView = 0;
     droppy.debug = null;
     droppy.demo = null;
     droppy.public = null;
