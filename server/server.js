@@ -230,14 +230,13 @@ function createListener(handler, opts, callback) {
         conn.destroy();
       });
 
-      // TLS session resumption
-      var sessions = {};
-      server.on("newSession", function (id, data) {
-        sessions[id] = data;
-      });
-      server.on("resumeSession", function (id, cb) {
-        cb(null, id in sessions ? sessions[id] : null);
-      });
+      // TLS tickets - regenerate keys every hour
+      if (server.setTicketKeys) {
+        (function rotate() {
+          server.setTicketKeys(crypto.randomBytes(48));
+          setTimeout(rotate, 60 * 60 * 1000);
+        })();
+      }
 
       callback(null, server, tlsData);
     });
