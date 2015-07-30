@@ -152,7 +152,7 @@ input::-webkit-input-placeholder { color: #999 }
 .content-container {
   position: relative;
   background: #111;
-  overflow-x: hidden;
+  overflow: hidden;
   flex: 1;
   order: 2;
 }
