@@ -30,10 +30,18 @@ var opts = {
   get uglify() {
     return {
       fromString: true,
+      mangle: true,
       compress: {
         unsafe: true,
-        screw_ie8: true
-      }
+        screw_ie8: true,
+        sequences: true,
+        dead_code: true,
+        conditionals: true,
+        booleans: true,
+        unused: true,
+        if_return: true,
+        join_vars: true,
+      },
     };
   },
   get cleanCSS() {
