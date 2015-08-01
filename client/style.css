@@ -95,7 +95,7 @@ input::-webkit-input-placeholder { color: #999 }
   cursor: pointer;
   flex: 1;
 }
-.button:not(.disabled):hover { color: #fff }
+.button:not(.disabled):hover { color: #fff; background: #1f1f1f }
 
 @media (min-width: 1024px) { .button { font-size: .7em } }
 @media (max-width: 1023px) { .button { font-size: .7em } }
@@ -111,14 +111,6 @@ input::-webkit-input-placeholder { color: #999 }
 }
 @media (max-width:  750px) { .button svg { margin-right: 0 } }
 
-#upload-file-button:hover   { background: rgba(102, 166, 255, .15) }
-#upload-folder-button:hover { background: rgba(255, 102, 252, .15) }
-#create-file-button:hover   { background: rgba(102, 255, 235, .15) }
-#create-folder-button:hover { background: rgba(102, 255, 125, .15) }
-#about-button:hover         { background: rgba(148, 102, 255, .15) }
-#prefs-button:hover         { background: rgba(255, 212, 102, .15) }
-#logout-button:hover        { background: rgba(255, 102, 102, .15) }
-#split-button:hover         { background: rgba(255,  82, 255, .15) }
 
 #upload-file-button:hover svg        { fill: rgba(102, 166, 255, 1) }
 #upload-folder-button:hover svg      { fill: rgba(255, 102, 252, 1) }
