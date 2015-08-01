@@ -35,9 +35,9 @@ if (argv.home) {
 }
 
 if (argv.log) {
-  var logfile = ut(path.resolve(argv.log));
+  var logfile = ut(path.resolve(argv.log)), fd;
   try {
-    var fd = fs.openSync(logfile, "a", "644");
+    fd = fs.openSync(logfile, "a", "644");
   } catch (err) {
     console.error("Unable to open logfile for writing: " + err.message);
     process.exit(1);
