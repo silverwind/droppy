@@ -1883,9 +1883,12 @@
     }
     view[0].animDirection = "forward";
     loadContent(view, contentWrap(view, type).append(content), function (view) {
-      view.find(".fs").register("click", function () {
+      view.find(".fs").register("click", function (event) {
+        var view = $(event.target).parents(".view");
+        droppy.activeView = view[0].vId;
         toggleFullscreen($(this).parents(".content")[0]);
         aspectScale();
+        event.stopPropagation();
       });
       view.find("img").each(function () {
         aspectScale();
