@@ -20,7 +20,7 @@ var path         = require("path");
 var postcss      = require("postcss");
 var uglify       = require("uglify-js");
 var vm           = require("vm");
-var zopfli       = require("node-zopfli");
+var zlib         = require("zlib");
 
 var minify, svgData = {}, $;
 var themesPath = path.join(paths.mod, "/node_modules/codemirror/theme");
@@ -203,7 +203,7 @@ function gzipMap(map, callback) {
 }
 
 function gzip(data, callback) {
-  zopfli.gzip(data, function (err, gzipped) {
+  zlib.gzip(data, function (err, gzipped) {
     if (err) return callback(err);
     callback(null, gzipped);
   });

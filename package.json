@@ -42,7 +42,6 @@
     "mousetrap": "^1.5.3",
     "mv": "^2.1.1",
     "node-schedule": "^0.2.9",
-    "node-zopfli": "^1.3.4",
     "pem": "https://github.com/silverwind/pem/archive/dhparaminfo.tar.gz",
     "postcss": "^4.1.16",
     "readdirp": "^1.4.0",
