@@ -1354,7 +1354,7 @@ html:not(.mobile) .vjs-big-play-button {
   line-height: 1.75rem;
 }
 
-#login-fields {
+#fields {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1362,7 +1362,7 @@ html:not(.mobile) .vjs-big-play-button {
   transform: translate(-50%, -50%);
 }
 
-.login-input {
+#fields input {
   background: rgba(255,255,255,.5);
   padding: 0 10px;
   height: 2rem;
@@ -1370,11 +1370,11 @@ html:not(.mobile) .vjs-big-play-button {
   border-radius: 6px;
 }
 
-.login-input:focus {
+#fields input:focus {
   background: rgba(255,255,255,1);
 }
 
-.login-input + .login-input {
+#fields input + input {
   margin-top: .3rem;
 }
 

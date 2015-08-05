@@ -479,13 +479,19 @@
       form.submit();
     });
 
-    $("#form").register("submit", function () {
+    form.register("submit", function () {
       $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
         if (xhr.status  === 202) {
           window.location.reload(true);
         } else if (xhr.status === 401) {
-          $("#login-info").text(firstrun ? "Please fill both fields." : "Wrong login!");
-          $("#login-info-box").attr("class", "error");
+          var info = $("#login-info-box");
+          info.text(firstrun ? "Please fill both fields." : "Wrong login!");
+          if (info.hasClass("error")) {
+            info.addClass("shake");
+            setTimeout(function () {
+              info.removeClass("shake");
+            }, 500);
+          } else info.attr("class", "error");
           if (!firstrun) $("#pass").val("").focus();
         }
       });
