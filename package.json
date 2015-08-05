@@ -32,7 +32,7 @@
     "graceful-fs": "^4.1.2",
     "handlebars": "^3.0.3",
     "html-minifier": "^0.7.2",
-    "isbinaryfile": "^2.0.4",
+    "isbinaryfile": "^3.0.0",
     "jquery": "^2.1.4",
     "json-buffer": "^2.0.11",
     "lodash": "^3.10.0",

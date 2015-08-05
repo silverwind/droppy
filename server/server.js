@@ -787,11 +787,11 @@ function handleFileRequest(req, res, download) {
 
 //-----------------------------------------------------------------------------
 function handleTypeRequest(req, res) {
-  utils.isBinary(utils.addFilesPath(decodeURIComponent(req.url).substring(4)), function (error, result) {
-    if (error) {
+  utils.isBinary(utils.addFilesPath(decodeURIComponent(req.url).substring(4)), function (err, result) {
+    if (err) {
       res.statusCode = 500;
       res.end();
-      log.error(error);
+      log.error(err);
     } else {
       res.statusCode = 200;
       res.setHeader("Content-Type", "text/plain");
