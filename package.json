@@ -71,16 +71,19 @@
     "npm": ">=2.0.0"
   },
   "keywords": [
+    "self-hosted",
     "personal",
     "file",
     "server",
     "http",
     "https",
     "web",
-    "interface",
+    "html5",
     "media",
     "cloud",
     "storage",
+    "self",
+    "hosted",
     "codemirror"
   ]
 }
