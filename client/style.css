@@ -378,14 +378,14 @@ input::-webkit-input-placeholder { color: #999 }
   white-space: nowrap;
 }
 .header-size, .size {
-  flex: 0 0 5.5rem;
+  flex: 0 0 5rem;
   display: inline-block;
   text-align: right;
   white-space: nowrap;
 }
 
 .header-line-buttons, .line-buttons {
-  flex: 0 0 5rem;
+  flex: 0 0 4.5rem;
   text-align: right;
   display: inline-block;
 }
@@ -456,12 +456,12 @@ input::-webkit-input-placeholder { color: #999 }
 
 /* Hide certain list elements when width gets too small */
 @media (max-width: 639px) {
-  .data-row, .file-header             { padding: 0 .25em }
-  .header-line-buttons, .line-buttons { flex: 0 0 3.75em }
-  .line-buttons svg                   { padding: 0       }
-  .header-size, .size                 { flex: 0 0 5rem   }
-  .size                               { font-size: .7rem }
-  .header-mtime, .mtime               { display: none    }
+  .data-row, .file-header             { padding: 0 .25em  }
+  .header-line-buttons, .line-buttons { flex: 0 0 3.25rem }
+  .line-buttons svg                   { padding: 0        }
+  .header-size, .size                 { flex: 0 0 3.25rem }
+  .size                               { font-size: .7rem  }
+  .header-mtime, .mtime               { display: none     }
 }
 @media (max-width: 319px) {
   .header-size, .size { display: none   }
@@ -474,10 +474,10 @@ input::-webkit-input-placeholder { color: #999 }
   .left .data-row, .right .data-row,
   .left .file-header, .right .file-header                 { padding: 0 .25em  }
   .left .header-line-buttons, .right .header-line-buttons,
-  .left .line-buttons, .right .line-buttons               { flex: 0 0 3.75rem }
+  .left .line-buttons, .right .line-buttons               { flex: 0 0 4rem    }
   .left .line-buttons svg, .right .line-buttons svg       { padding: 0        }
   .left .header-size, .right .header-size,
-  .left .size, .right .size                               { flex: 0 0 5em     }
+  .left .size, .right .size                               { flex: 0 0 3.25rem }
   .left .size, .right .size                               { font-size: .7rem  }
   .left .header-mtime, .right .header-mtime,
   .left .mtime, .right .mtime                             { display: none     }
