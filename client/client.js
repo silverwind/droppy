@@ -1735,9 +1735,8 @@
           updatePath(view);
           openDoc(view, entryId);
         } else { // Binary content - download it
-          // Downloading into an iframe to avoid navigation
-          $("<iframe class='dl'>").css("display", "none").appendTo("body").attr("src", "?~" + entryId);
-          setTimeout(function () { $("iframe.dl").remove(); }, 1000);
+          // Download into an iframe to avoid navigation
+          $("[name=nonav]").attr("src", "?~" + entryId);
           hideSpinner(view);
         }
       });
