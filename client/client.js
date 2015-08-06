@@ -168,7 +168,7 @@
       volume : 0.5,
       videoVolume : 0.5,
       theme: "droppy",
-      editorFontSize: 16,
+      editorFontSize: droppy.detects.mobile ? 12 : 16,
       indentWithTabs : false,
       indentUnit : 4,
       lineWrapping: false,
