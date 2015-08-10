@@ -27,7 +27,7 @@ module.exports = function (grunt) {
         command: "npm publish"
       },
       update: {
-        command: "ncu -ua"
+        command: "cat package.json | ncu -ua"
       },
       modules: {
         command: "rm -rf node_modules && npm install"
