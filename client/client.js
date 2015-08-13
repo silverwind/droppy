@@ -164,15 +164,16 @@
 //  localStorage wrapper functions
 // ============================================================================
   $(function () {
-    var prefs, doSave, defaults = {
-      volume : 0.5,
-      videoVolume : 0.5,
+    var prefs, doSave;
+    var defaults = {
+      volume: 0.5,
+      videoVolume: 0.5,
       theme: "droppy",
       editorFontSize: droppy.detects.mobile ? 12 : 16,
-      indentWithTabs : false,
-      indentUnit : 4,
+      indentWithTabs: false,
+      indentUnit: 4,
       lineWrapping: false,
-      hasLoggedOut : false,
+      hasLoggedOut: false,
       renameExistingOnUpload: false
     };
     // Load prefs and set missing ones to their default
@@ -2072,7 +2073,8 @@
     var box = $("#prefs-box");
     box[0].style.willChange = "transform, opacity, visibility";
     box.empty().append(function () {
-      var i, opts = [
+      var i;
+      var opts = [
         {name: "theme", label: "Editor Theme"},
         {name: "editorFontSize", label: "Editor Font Size"},
         {name: "indentWithTabs", label: "Indentation"},

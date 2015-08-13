@@ -73,34 +73,34 @@ var opts = {
 cleanCSS = new cleanCSS(opts.cleanCSS);
 
 resources.files = {
-    css: [
-      "client/style.css",
-      "client/sprites.css"
-    ],
-    js: [
-      "node_modules/handlebars/dist/handlebars.runtime.min.js",
-      "node_modules/jquery/dist/jquery.js",
-      "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
-      "node_modules/mousetrap/mousetrap.min.js",
-      "node_modules/file-extension/file-extension.js",
-      "client/client.js"
-    ],
-    html: [
-      "client/html/base.html",
-      "client/html/auth.html",
-      "client/html/main.html"
-    ],
-    other: [
-      "client/images/logo.svg",
-      "client/images/logo16.png",
-      "client/images/logo32.png",
-      "client/images/logo128.png",
-      "client/images/logo152.png",
-      "client/images/logo180.png",
-      "client/images/logo192.png",
-      "client/images/favicon.ico"
-    ]
-  };
+  css: [
+    "client/style.css",
+    "client/sprites.css"
+  ],
+  js: [
+    "node_modules/handlebars/dist/handlebars.runtime.min.js",
+    "node_modules/jquery/dist/jquery.js",
+    "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
+    "node_modules/mousetrap/mousetrap.min.js",
+    "node_modules/file-extension/file-extension.js",
+    "client/client.js"
+  ],
+  html: [
+    "client/html/base.html",
+    "client/html/auth.html",
+    "client/html/main.html"
+  ],
+  other: [
+    "client/images/logo.svg",
+    "client/images/logo16.png",
+    "client/images/logo32.png",
+    "client/images/logo128.png",
+    "client/images/logo152.png",
+    "client/images/logo180.png",
+    "client/images/logo192.png",
+    "client/images/favicon.ico"
+  ]
+};
 
 // On-demand loadable libs. Will be available as ?!/lib/[prop]
 var libs = {
