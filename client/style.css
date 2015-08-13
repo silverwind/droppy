@@ -1183,7 +1183,7 @@ html:not(.mobile) .vjs-big-play-button {
   background: #eee;
   border-radius: 6px;
   box-shadow: 0 0 30px rgba(0,0,0,.3);
-  color: #666;
+  color: #555;
   max-height: 95%;
   left: 50%;
   top: 50%;
@@ -1260,7 +1260,7 @@ html:not(.mobile) .vjs-big-play-button {
   padding: 0 .5em;
   line-height: 1.25em;
 }
-.list-user li:hover { background: #e6e6e6; color: #000 }
+.list-user li:hover { background: #e4e4e4; color: #000 }
 
 .list-user .trash {
   padding-top: .1em;
@@ -1274,19 +1274,17 @@ html:not(.mobile) .vjs-big-play-button {
 .list-user .trash:hover { fill: #f44 }
 
 .add-user {
-  text-align: center;
   cursor: pointer;
-  width: 10em;
-  margin: .5em auto;
+  text-align: center;
+  user-select: none;
 }
-.add-user:hover { color: #333 }
-.add-user:hover svg { fill: #333 }
+.add-user:hover svg { fill: #000 }
 
 .add-user svg {
-  height: 1em;
-  width: 1em;
+  height: .8em;
+  width: .8em;
   position: relative;
-  top: .125em;
+  top: .05em;
   margin-right: .25em;
   fill: #666;
 }

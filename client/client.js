@@ -2043,15 +2043,14 @@
   }
 
   function updateUsers(userlist) {
-    var list, box = $("#prefs-box");
+    var box = $("#prefs-box");
 
     if (Object.keys(userlist).length > 0) {
-      box.find(".list-user").remove();
+      box.find(".list-user, .add-user").remove();
       box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
-      list = box.find(".list-user");
-      list.find(".add-user").register("click", function () {
-        var user = window.prompt("Username?"),
-          pass = window.prompt("Password?");
+      box.find(".add-user").register("click", function () {
+        var user = window.prompt("Username?");
+        var pass = window.prompt("Password?");
         if (!user || !pass) return;
         sendMessage(null, "UPDATE_USER", {
           name: user,
@@ -2059,7 +2058,7 @@
           priv: true
         });
       });
-      list.find(".trash").register("click", function (event) {
+      box.find(".trash").register("click", function (event) {
         event.stopPropagation();
         sendMessage(null, "UPDATE_USER", {
           name: $(this).parents("li").children(".username").text(),
