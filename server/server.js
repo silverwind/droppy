@@ -270,8 +270,8 @@ function setupSocket(server) {
     }
 
     ws.on("message", function (message) {
-      var msg = JSON.parse(message.utf8Data),
-        vId = msg.vId;
+      var msg = JSON.parse(message.utf8Data);
+      var vId = msg.vId;
 
       if (msg.type !== "SAVE_FILE") log.debug(ws, null, chalk.magenta("RECV "), message.utf8Data);
 
@@ -484,8 +484,8 @@ function sendFiles(sid, vId) {
 //-----------------------------------------------------------------------------
 // Send a list of users on the server
 function sendUsers(sid) {
-  var userDB   = db.get("users"),
-    userlist = {};
+  var userDB   = db.get("users");
+  var userlist = {};
 
   Object.keys(userDB).forEach(function (user) {
     userlist[user] = userDB[user].privileged || false;
@@ -567,8 +567,7 @@ function handleGET(req, res) {
 //-----------------------------------------------------------------------------
 var blocked = [];
 function handlePOST(req, res) {
-  var URI = decodeURIComponent(req.url),
-    body = "";
+  var body = "", URI = decodeURIComponent(req.url);
 
   if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid POST: " + req.url);
 
@@ -752,13 +751,13 @@ function handleFileRequest(req, res, download) {
           headers["Accept-Ranges"] = "bytes"; // advertise ranges support
           headers["Etag"] = '"' + cache.etags[filepath] + '"';
           if (req.headers.range) {
-            var total        = stats.size,
-              range        = req.headers.range,
-              parts        = range.replace(/bytes=/, "").split("-"),
-              partialstart = parts[0],
-              partialend   = parts[1],
-              start        = parseInt(partialstart, 10),
-              end          = partialend ? parseInt(partialend, 10) : total - 1;
+            var total        = stats.size;
+            var range        = req.headers.range;
+            var parts        = range.replace(/bytes=/, "").split("-");
+            var partialstart = parts[0];
+            var partialend   = parts[1];
+            var start        = parseInt(partialstart, 10);
+            var end          = partialend ? parseInt(partialend, 10) : total - 1;
 
             status = 206;
             headers["Content-Length"] = end - start + 1;
@@ -802,9 +801,7 @@ function handleTypeRequest(req, res) {
 
 //-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
-  var busboy, opts, dstDir;
-  var done = false;
-  var files = {};
+  var busboy, opts, dstDir, done = false, files = {};
   var cookie = cookies.get(req.headers.cookie);
 
   req.query = qs.parse(req.url.substring("/upload?".length));
@@ -841,10 +838,10 @@ function handleUploadRequest(req, res) {
   busboy = new Busboy(opts);
   busboy.on("error", log.error);
   busboy.on("file", function (fieldname, file, filename) {
-    var dstRelative = filename ? decodeURIComponent(filename) : fieldname,
-      dst         = path.join(paths.files, dstDir, dstRelative),
-      tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex")),
-      writeStream = fs.createWriteStream(tmp, {mode: "644"});
+    var dstRelative = filename ? decodeURIComponent(filename) : fieldname;
+    var dst         = path.join(paths.files, dstDir, dstRelative);
+    var tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
+    var writeStream = fs.createWriteStream(tmp, {mode: "644"});
 
     files[dstRelative] = {
       src : tmp,
@@ -861,12 +858,9 @@ function handleUploadRequest(req, res) {
   });
 
   busboy.on("finish", function () {
-    var names = Object.keys(files), total = names.length, added = 0;
+    var names = Object.keys(files), total = names.length, added = 0, toMove = [];
     log.info(req, res, "Received " + names.length + " files");
     done = true;
-
-    var toMove = [];
-
     while (names.length > 0) {
       (function (name) {
         fs.stat(files[name].dst, function (error) {
@@ -1030,8 +1024,7 @@ function cleanupTemp() {
 //-----------------------------------------------------------------------------
 // Clean up our shortened links by removing links to nonexistant files
 function cleanupLinks(callback) {
-  var linkcount = 0, cbcount = 0;
-  var links = db.get("sharelinks");
+  var linkcount = 0, cbcount = 0, links = db.get("sharelinks");
   if (Object.keys(links).length === 0)
     callback();
   else {

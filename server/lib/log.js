@@ -10,9 +10,7 @@ var logLabels = ["", "ERROR", "INFO", "DEBG"];
 
 var log = function log(req, res, logLevel) {
   if (opts && opts.logLevel < logLevel) return;
-
-  var elems = Array.prototype.slice.call(arguments, 3),
-    ip, port, statusCode;
+  var elems = Array.prototype.slice.call(arguments, 3), ip, port, statusCode;
 
   if (req && req.time) elems.unshift("[" +  chalk.magenta((Date.now() - req.time) + "ms") + "]");
 
@@ -123,13 +121,13 @@ log.plain = function plain() {
 };
 
 log.timestamp = function timestamp() {
-  var now   = new Date(),
-    day   = now.getDate(),
-    month = now.getMonth() + 1,
-    year  = now.getFullYear(),
-    hrs   = now.getHours(),
-    mins  = now.getMinutes(),
-    secs  = now.getSeconds();
+  var now   = new Date();
+  var day   = now.getDate();
+  var month = now.getMonth() + 1;
+  var year  = now.getFullYear();
+  var hrs   = now.getHours();
+  var mins  = now.getMinutes();
+  var secs  = now.getSeconds();
 
   if (month < 10) month = "0" + month;
   if (day   < 10) day   = "0" + day;

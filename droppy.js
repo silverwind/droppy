@@ -71,11 +71,11 @@ if (cmds[cmd]) {
     });
     break;
   case "config":
-    var paths = require("./server/lib/paths.js").get(),
-      cfg   = require("./server/lib/cfg.js"),
-      edit  = function () {
-        require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfgFile], {stdio: "inherit"});
-      };
+    var paths = require("./server/lib/paths.js").get();
+    var cfg   = require("./server/lib/cfg.js");
+    var edit  = function () {
+      require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfgFile], {stdio: "inherit"});
+    };
 
     fs.stat(paths.cfgFile, function (err) {
       if (err && err.code === "ENOENT") {

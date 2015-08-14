@@ -68,7 +68,7 @@ db.set = function (key, value, callback) {
 };
 
 db.addOrUpdateUser = function (user, password, privileged, callback) {
-  var salt  = crypto.randomBytes(4).toString("hex");
+  var salt = crypto.randomBytes(4).toString("hex");
 
   database.users[user] = {
     hash: getHash(password + salt + user) + "$" + salt,

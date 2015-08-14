@@ -25,16 +25,14 @@
       });
     })(),
     audioTypes: (function () {
-      var types = {},
-        el    = document.createElement("audio");
+      var types = {}, el = document.createElement("audio");
       Object.keys(droppy.audioTypes).forEach(function (type) {
         types[droppy.audioTypes[type]] = Boolean(el.canPlayType(droppy.audioTypes[type]).replace(/no/, ""));
       });
       return types;
     })(),
     videoTypes: (function () {
-      var types = {},
-        el    = document.createElement("video");
+      var types = {}, el = document.createElement("video");
       Object.keys(droppy.videoTypes).forEach(function (type) {
         types[droppy.videoTypes[type]] = Boolean(el.canPlayType(droppy.videoTypes[type]).replace(/no/, ""));
       });
@@ -60,9 +58,7 @@
 
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
   $.fn.end = function (callback) {
-    var duration,
-      called = false,
-      el = this[0];
+    var duration, called = false, el = this[0];
 
     function doCallback(event) {
       if (called) return;
@@ -82,9 +78,7 @@
 
   // Class swapping helper
   $.fn.replaceClass = function (search, replacement) {
-    var elem, classes, matches;
-    var i = this.length;
-    var hasClass = false;
+    var elem, classes, matches, i = this.length, hasClass = false;
     while (--i >= 0) {
       elem = this[i];
       if (typeof elem === "undefined") return false;
@@ -126,9 +120,9 @@
   droppy.prefixes.animationstart.forEach(function (eventName) {
     document.addEventListener(eventName, function (event) {
       if (event.animationName === "nodeInserted") {
-        var target = $(event.target),
-          newClass = target.data("newclass"),
-          oldClass = target.data("oldclass");
+        var target = $(event.target);
+        var newClass = target.data("newclass");
+        var oldClass = target.data("oldclass");
         // Clean up our data attribute and remove the animation
         target.removeData("newclass").css("animation", "");
 
@@ -150,9 +144,9 @@
   });
 
   var raf = window.requestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        function (callback) { setTimeout(callback, 1000 / 60); };
+            window.mozRequestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            function (callback) { setTimeout(callback, 1000 / 60); };
 
   if (droppy.detects.mobile)
     $("html").addClass("mobile");
@@ -642,7 +636,7 @@
 
     $("#create-file-button").register("click", function () {
       var dummyFile, wasEmpty;
-      var view      = getView(); // TODO: Create file in last active view
+      var view      = getActiveView();
       var dummyHtml = Handlebars.templates["new-file"]();
 
       if (view.find(".empty").length > 0) {
@@ -705,10 +699,8 @@
   //  Upload functions
   // ============================================================================
   function upload(view, data) {
-    var formData = new FormData(),
-      numFiles = 0,
-      formLength = 0;
     if (!data) return;
+    var formData = new FormData(), numFiles = 0, formLength = 0;
     droppy.emptyFiles   = [];
     droppy.emptyFolders = [];
     if (Object.prototype.toString.call(data) !== "[object Object]") { // We got a FileList
@@ -852,11 +844,11 @@
 
     // Update progress every 250ms at most
     if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
-      var sent     = event.loaded,
-        total    = event.total,
-        progress = Math.round((sent / total) * 100) + "%",
-        speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3),
-        elapsed, secs;
+      var sent     = event.loaded;
+      var total    = event.total;
+      var progress = Math.round((sent / total) * 100) + "%";
+      var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
+      var elapsed, secs;
 
       speed = formatBytes(Math.round(speed / 1e3) * 1e3);
 
@@ -920,9 +912,7 @@
     trap.bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
-      var success,
-        oldVal = namer.attr("placeholder"),
-        newVal = namer.val();
+      var success, oldVal = namer.attr("placeholder"), newVal = namer.val();
       if (canSubmit) {
         if (oldVal !== newVal) {
           success = true;
@@ -952,8 +942,8 @@
   }
 
   function toggleCatcher(show) {
-    var cc     = $("#click-catcher"),
-      modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
+    var cc     = $("#click-catcher");
+    var modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
     if (show === undefined)
       show = modals.some(function (selector) { return $(selector).hasClass("in"); });
@@ -1146,10 +1136,10 @@
   function getTemplateEntries(view, data) {
     var entries = [];
     Object.keys(data).forEach(function (name) {
-      var split = data[name].split("|"),
-        type  = split[0],
-        mtime = Number(split[1]) * 1e3,
-        size  = Number(split[2]);
+      var split = data[name].split("|");
+      var type  = split[0];
+      var mtime = Number(split[1]) * 1e3;
+      var size  = Number(split[2]);
 
       var entry = {
         name      : name,
@@ -1278,8 +1268,7 @@
   // Load new view content
   function loadContent(view, content, callback) {
     if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
-    var type = view.data("type"),
-      navRegex = /(forward|back|center)/;
+    var type = view.data("type"), navRegex = /(forward|back|center)/;
     if (view[0].animDirection === "center") {
       view.find(".content").replaceClass(navRegex, "center").before(content);
       view.find(".new").addClass(type).data("root", view[0].currentFolder);
@@ -1446,10 +1435,7 @@
 
   function bindDropEvents(view) {
     view.register("drop", function (event) {
-      var dragData,
-        view = $(event.target).parents(".view"),
-        items = event.dataTransfer.items;
-
+      var dragData, view = $(event.target).parents(".view"), items = event.dataTransfer.items;
       event.preventDefault();
       event.stopPropagation();
       $(".dropzone").removeClass("in");
@@ -1543,8 +1529,8 @@
 
       var rootPromises = [];
       for (var i = 0; i < event.dataTransfer.items.length; i++) {
-        var entry = event.dataTransfer.items[i][entryFunc](),
-          promise = $.Deferred();
+        var entry = event.dataTransfer.items[i][entryFunc]();
+        var promise = $.Deferred();
         if (!entry) continue;
         rootPromises.push(promise);
         if (entry.isFile) {
@@ -1565,18 +1551,17 @@
   function initEntryMenu() {
     // Play an audio file
     $("#entry-menu .play").register("click", function (event) {
-      var entry = $("#entry-menu").data("target"),
-        view  = entry.parents(".view");
-
+      var entry = $("#entry-menu").data("target");
+      var view  = entry.parents(".view");
       event.stopPropagation();
       play(view, entry);
       toggleCatcher(false);
     });
 
     $("#entry-menu .edit").register("click", function (event) {
-      var location,
-        entry = $("#entry-menu").data("target"),
-        view  = entry.parents(".view");
+      var location;
+      var entry = $("#entry-menu").data("target");
+      var view  = entry.parents(".view");
 
       toggleCatcher(false);
       view[0].currentFile = entry.find(".file-link").text();
@@ -1589,8 +1574,8 @@
 
     // Click on a "open" link
     $("#entry-menu .openfile").register("click", function (event) {
-      var entry  = $("#entry-menu").data("target"),
-        view   = entry.parents(".view");
+      var entry  = $("#entry-menu").data("target");
+      var view   = entry.parents(".view");
 
       toggleCatcher(false);
       if (entry.data("type") === "folder")
@@ -1602,8 +1587,8 @@
 
     // Rename a file/folder
     $("#entry-menu .rename").register("click", function (event) {
-      var entry = $("#entry-menu").data("target"),
-        view  = entry.parents(".view");
+      var entry = $("#entry-menu").data("target");
+      var view  = entry.parents(".view");
       if (droppy.socketWait) return;
 
       toggleCatcher(false);
@@ -1787,9 +1772,9 @@
 
   function bindMediaArrows(view) {
     if (droppy.detects.mobile) return; // Using swipe on mobile
-    var forward = view.find(".arrow-forward"),
-      back    = view.find(".arrow-back"),
-      arrows  = view.find(".arrow-back, .arrow-forward");
+    var forward = view.find(".arrow-forward");
+    var back    = view.find(".arrow-back");
+    var arrows  = view.find(".arrow-back, .arrow-forward");
 
     back.register("click", swapMedia.bind(null, view, "left"));
     forward.register("click", swapMedia.bind(null, view, "right"));
@@ -1866,8 +1851,8 @@
   }
 
   function getMediaSrc(view, filename) {
-    var encodedId = join(view[0].currentFolder, filename).split("/"),
-      i = encodedId.length - 1;
+    var encodedId = join(view[0].currentFolder, filename).split("/");
+    var i = encodedId.length - 1;
     for (;i >= 0; i--)
       encodedId[i] = encodeURIComponent(encodedId[i]);
     return "?_" + encodedId.join("/");
@@ -1915,10 +1900,10 @@
   }
 
   function openDoc(view, entryId) {
-    var editor,
-      script = $.Deferred(),
-      theme  = $.Deferred(),
-      file   = $.Deferred();
+    var editor;
+    var script = $.Deferred();
+    var theme  = $.Deferred();
+    var file   = $.Deferred();
 
     showSpinner(view);
 
@@ -2116,8 +2101,8 @@
       toggleCatcher(true);
       $("#click-catcher").one("click", function () {
         box.find("select").each(function () {
-          var option = $(this).attr("class"),
-            value  = $(this).val();
+          var option = $(this).attr("class");
+          var value  = $(this).val();
 
           if (value === "true") value = true;
           else if (value === "false") value = false;
@@ -2189,8 +2174,8 @@
   }
 
   function onNewAudio(view) {
-    var player = view[0].querySelector(".audio-player"),
-      title  = decodeURIComponent(removeExt(basename(player.src).replace(/_/g, " ").replace(/\s+/, " ")));
+    var player = view[0].querySelector(".audio-player");
+    var title  = decodeURIComponent(removeExt(basename(player.src).replace(/_/g, " ").replace(/\s+/, " ")));
 
     view.find(".audio-bar").addClass("in");
     view.find(".audio-title").text(title);
@@ -2240,10 +2225,10 @@
       onNewAudio($(event.target).parents(".view"));
     });
     updateVolume = throttle(function (event) {
-      var slider = $(event.target).parents(".view").find(".volume-slider")[0],
-        left   = slider.getBoundingClientRect().left,
-        right  = slider.getBoundingClientRect().right,
-        x      = event.pageX;
+      var slider = $(event.target).parents(".view").find(".volume-slider")[0];
+      var left   = slider.getBoundingClientRect().left;
+      var right  = slider.getBoundingClientRect().right;
+      var x      = event.pageX;
 
       setVolume((x - left) / (right - left));
     }, 1000 / 60);
@@ -2278,8 +2263,8 @@
       event.stopPropagation();
     });
     bar.find(".pause-play").register("click", function (event) {
-      var icon   = $(this).children("svg"),
-        player = $(this).parents(".audio-bar").find(".audio-player")[0];
+      var icon   = $(this).children("svg");
+      var player = $(this).parents(".audio-bar").find(".audio-player")[0];
       if (icon.attr("class") === "play") {
         icon.replaceWith($(droppy.svg.pause));
         player.play();
@@ -2409,8 +2394,8 @@
     $(el).attr("class", "media-container draggable");
     var instance = new Draggabilly(el, opts);
     $(el).on("dragEnd", function () {
-      var view      = $(instance.element).parents(".view"),
-        threshold = droppy.detects.mobile ? 0.15 : 0.075;
+      var view      = $(instance.element).parents(".view");
+      var threshold = droppy.detects.mobile ? 0.15 : 0.075;
 
       if ((Math.abs(instance.position.x) / instance.element.clientWidth) > threshold) {
         swapMedia(view, instance.position.x > 0 ? "left" : "right");
@@ -2610,13 +2595,13 @@
   }
 
   function timeDifference(previous) {
-    var msPerMinute = 60 * 1000,
-      msPerHour   = msPerMinute * 60,
-      msPerDay    = msPerHour * 24,
-      msPerMonth  = msPerDay * 30,
-      msPerYear   = msPerDay * 365,
-      elapsed     = Date.now() - parseInt(previous),
-      result      = "";
+    var msPerMinute = 60 * 1000;
+    var msPerHour   = msPerMinute * 60;
+    var msPerDay    = msPerHour * 24;
+    var msPerMonth  = msPerDay * 30;
+    var msPerYear   = msPerDay * 365;
+    var elapsed     = Date.now() - parseInt(previous);
+    var result      = "";
 
     if (elapsed < 0) elapsed = 0;
     if (elapsed < msPerMinute) {
@@ -2783,13 +2768,13 @@
       var container = $(this);
       container.find("img, video").each(function () {
         var dims  = {
-            w: this.naturalWidth || this.videoWidth || this.clientWidth,
-            h: this.naturalHeight || this.videoHeight || this.clientHeight
-          },
-          space = {
-            w: container.width(),
-            h: container.height()
-          };
+          w: this.naturalWidth || this.videoWidth || this.clientWidth,
+          h: this.naturalHeight || this.videoHeight || this.clientHeight
+        };
+        var space = {
+          w: container.width(),
+          h: container.height()
+        };
         if (dims.w > space.w || dims.h > space.h) {
           $(this).removeAttr("style"); // Let CSS handle the downscale
         } else {
@@ -2863,8 +2848,7 @@
   }
 
   function naturalSort(a, b) {
-    var x = [],
-      y = [];
+    var x = [], y = [];
     function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
     a.replace(/(\d+)|(\D+)/g, function ($0, $1, $2) { x.push([$1 || 0, $2]); });
     b.replace(/(\d+)|(\D+)/g, function ($0, $1, $2) { y.push([$1 || 0, $2]); });

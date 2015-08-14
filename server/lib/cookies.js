@@ -29,8 +29,7 @@ cookies.validate = function validate(entries) {
 };
 
 cookies.free = function free(req, res) {
-  var sessions  = db.get("sessions"),
-    sessionID = utils.getSid();
+  var sessions  = db.get("sessions"), sessionID = utils.getSid();
 
   res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + new Date(Date.now() + 31536000000).toUTCString() + ";path=/");
   sessions[sessionID] = {privileged : true, lastSeen : Date.now()};
@@ -38,8 +37,7 @@ cookies.free = function free(req, res) {
 };
 
 cookies.create = function create(req, res, postData) {
-  var sessions  = db.get("sessions"),
-    sessionID = utils.getSid();
+  var sessions  = db.get("sessions"), sessionID = utils.getSid();
 
   if (postData.remember) // semi-permanent cookie
     res.setHeader("Set-Cookie", "s=" + sessionID + ";expires=" + new Date(Date.now() + 31536000000).toUTCString() + ";path=/");

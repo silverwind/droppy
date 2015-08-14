@@ -61,9 +61,9 @@ utils.move = function move(src, dst, cb) {
 };
 
 utils.copyFile = function copyFile(src, dst, cb) {
-  var cbCalled = false,
-    read     = fs.createReadStream(src),
-    write    = fs.createWriteStream(dst);
+  var cbCalled = false;
+  var read     = fs.createReadStream(src);
+  var write    = fs.createWriteStream(dst);
 
   function done(err) {
     if (cbCalled) return;
@@ -107,9 +107,9 @@ utils.getNewPath = function getNewPath(origPath, callback) {
   fs.stat(origPath, function (err, stats) {
     if (err) callback(origPath);
     else {
-      var filename  = path.basename(origPath),
-        dirname   = path.dirname(origPath),
-        extension = "";
+      var filename  = path.basename(origPath);
+      var dirname   = path.dirname(origPath);
+      var extension = "";
 
       if (filename.indexOf(".") !== -1 && stats.isFile()) {
         extension = filename.substring(filename.lastIndexOf("."));
@@ -193,10 +193,10 @@ utils.tlsInit = function tlsInit(opts, callback) {
       var certStart = "-----BEGIN CERTIFICATE-----";
       var certEnd   = "-----END CERTIFICATE-----";
 
-      var key     = data[0],
-        cert    = data[1],
-        ca      = data[2],
-        dhparam = data[3];
+      var key     = data[0];
+      var cert    = data[1];
+      var ca      = data[2];
+      var dhparam = data[3];
 
       if (!key)  return callback(new Error("Unable to read TLS key: " + certPaths[0]));
       if (!cert) return callback(new Error("Unable to read TLS certificate: " + certPaths[1]));

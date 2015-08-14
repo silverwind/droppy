@@ -430,7 +430,7 @@ function compileAll(callback) {
   // Read misc files
   resources.files.other.forEach(function (file) {
     var data, date;
-    var name     = path.basename(file);
+    var name = path.basename(file);
     var fullPath = path.join(paths.mod, file);
 
     try {
