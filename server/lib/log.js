@@ -1,6 +1,6 @@
 "use strict";
 
-var opts, fd;
+var opts, logfile;
 
 var fs    = require("graceful-fs");
 var chalk = require("chalk");
@@ -68,8 +68,8 @@ var log = function log(req, res, logLevel) {
       elems.splice(index, 1);
   });
 
-  if (fd) {
-    fs.write(fd, chalk.stripColor(elems.join(" ")) + "\n");
+  if (logfile) {
+    fs.write(logfile, chalk.stripColor(elems.join(" ")) + "\n");
   } else {
     console.log.apply(console, elems);
   }
@@ -80,7 +80,7 @@ log.init = function init(o) {
 };
 
 log.setLogFile = function setLogFile(fd) {
-  fd = fd;
+  logfile = fd;
 };
 
 log.debug = function debug(req, res) {
