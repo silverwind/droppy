@@ -127,9 +127,7 @@ var libs = {
 
 resources.init = function init(doMinify, cb) {
   minify = doMinify;
-
   if (!minify) return compile(cb);
-
   canUseCache(function (can) {
     if (!can) return compile(cb);
     fs.readFile(paths.cache, function (err, data) {
@@ -272,9 +270,9 @@ function readModes(callback) {
   // parse meta.js from CM for supported modes
   fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function (err, js) {
     if (err) return callback(err);
-    var sandbox = {CodeMirror : {}};
 
-    // Execute meta.js in a sandbox
+    // Extract modes from CodeMirror
+    var sandbox = {CodeMirror : {}};
     vm.runInNewContext(js, sandbox);
     sandbox.CodeMirror.modeInfo.forEach(function (entry) {
       if (entry.mode !== "null") modes[entry.mode] = null;

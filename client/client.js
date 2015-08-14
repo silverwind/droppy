@@ -362,7 +362,7 @@
         toggleCatcher();
         break;
       case "USER_LIST":
-        if ($("#prefs-box").hasClass("in")) updateUsers(msg.users);
+        updateUsers(msg.users);
         break;
       case "SAVE_STATUS":
         view = getView(vId);
@@ -2045,14 +2045,14 @@
 
   function updateUsers(userlist) {
     var box = $("#prefs-box");
-
     if (Object.keys(userlist).length > 0) {
-      box.find(".list-user, .add-user").remove();
+      box.find(".list-user").remove();
       box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
       box.find(".add-user").register("click", function () {
         var user = window.prompt("Username?");
+        if (!user) return;
         var pass = window.prompt("Password?");
-        if (!user || !pass) return;
+        if (!pass) return;
         sendMessage(null, "UPDATE_USER", {
           name: user,
           pass: pass,

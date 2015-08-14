@@ -1,16 +1,14 @@
-<div class="list-prefs">
-  <ul>
-    {{#each opts}}
-          <li>
-            <label>{{this.label}}</label>
-            <select class="{{this.name}}">
-              {{#select this.selected}}
-                {{#each this.values}}
-                  <option value="{{this}}">{{@key}}</option>
-                {{/each}}
-              {{/select}}
-            </select>
-          </li>
-    {{/each}}
-  </ul>
-<div>
+<ul class="list-prefs">
+  {{#each opts}}
+    <li>
+      <label>{{this.label}}</label>
+      <select class="{{this.name}}">
+        {{#select this.selected}}
+          {{#each this.values}}
+            <option value="{{this}}">{{@key}}</option>
+          {{/each}}
+        {{/select}}
+      </select>
+    </li>
+  {{/each}}
+</ul>

@@ -1191,7 +1191,7 @@ html:not(.mobile) .vjs-big-play-button {
   transition: opacity .3s ease, visibility 0s .3s;
   transform: translate(-50%, -50%);
   z-index: 64;
-  padding: .66em;
+  padding: .33em;
   overflow-y: auto;
   opacity: 0;
   visibility: hidden;
@@ -1200,45 +1200,41 @@ html:not(.mobile) .vjs-big-play-button {
 
 @media (min-width: 800px) { #prefs-box { width: 24em } }
 @media (max-width: 799px) { #prefs-box { width: 80%  } }
+#prefs-box li:hover { background: #ddd; color: #000; border-radius: 3px }
 
-@media (min-width: 1024px) { #prefs-box { font-size: .8em } }
-@media (max-width: 1023px) { #prefs-box { font-size: .7em } }
-@media (max-width:  799px) { #prefs-box { font-size: .6em } }
-
-#prefs-box > div { width: 100% }
-
-.list-prefs ul li { display: flex; margin: 0.25em 0 }
-.list-prefs ul li:first-of-type { margin-top: 0 }
+.list-prefs li { display: flex; padding: .125em .25em }
+.list-prefs li:first-of-type { margin-top: 0 }
 
 .list-prefs label {
   display: inline-block;
   white-space: nowrap;
-  line-height: 1.5em;
+  line-height: 1.33em;
   flex: 1;
 }
 
-@media (max-width: 319px) {
-  .list-prefs ul li {
+@media (max-width: 639px) {
+  #prefs-box { font-size: .8em }
+  .list-prefs li {
    flex-direction: column;
    height: auto;
   }
   .list-prefs label {
    width: 100%;
-   font-size: .9em;
-   margin-bottom: .5em;
    text-align: center;
+   margin-bottom: .25em;
    line-height: 1em;
   }
   .list-prefs select {
    width: 100%;
-   padding: .25em 0;
+   margin-bottom: .25em;
   }
 }
 
 #prefs-box select {
   padding: 0 .25em;
   border-radius: 3px;
-  border: 1px solid #ccc;
+  border:none;
+  color: #555;
   background-color: #fff;
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgNjQwIDY0MCI+PHBhdGggc3R5bGU9ImZpbGw6ICM5OTkiIGQ9Ik0zMjAgMGwtMTQ3LjIgMjMzLjZoMjk0LjM2OGwtMTQ3LjE2OC0yMzMuNnpNMzIwLjAzMiA2NDBsMTQ3LjE2OC0yMzMuNi0yOTQuNC0wLjAzMiAxNDcuMjMyIDIzMy42MzJ6Ij48L3BhdGg+PC9zdmc+);
   background-size: 1em;
@@ -1247,12 +1243,14 @@ html:not(.mobile) .vjs-big-play-button {
   flex: 1;
   appearance: none;
 }
+#prefs-box li:hover select { color: #000 }
 
+.list-user { padding-top: .4em }
 .list-user:before {
   content: "Users";
   border-bottom: 1px solid #aaa;
   color: #333;
-  padding: .25em .5em;
+  padding: .125em;
   display: block;
 }
 
@@ -1260,17 +1258,17 @@ html:not(.mobile) .vjs-big-play-button {
   padding: 0 .5em;
   line-height: 1.25em;
 }
-.list-user li:hover { background: #e4e4e4; color: #000 }
 
 .list-user .trash {
-  height:1.15em;
-  width: 1.15em;
+  height: 1em;
+  width: 1em;
+  padding-top: .1em;
   float: right;
   fill: #bbb;
   cursor: pointer;
 }
 
-.list-user .trash:hover { fill: #f44 }
+.list-user li:hover .trash { fill: #f44 }
 
 .add-user {
   cursor: pointer;
