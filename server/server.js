@@ -393,7 +393,7 @@ function setupSocket(server) {
         break;
       case "UPDATE_USER":
         var name = msg.data.name, pass = msg.data.pass;
-        if (!db.get("sessions")[cookie].privileged) return;
+        if (!db.get("sessions")[cookie] || !db.get("sessions")[cookie].privileged) return;
         if (pass === "") {
           if (!db.get("users")[name]) return;
           db.delUser(msg.data.name, function () {

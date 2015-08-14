@@ -1263,7 +1263,6 @@ html:not(.mobile) .vjs-big-play-button {
 .list-user li:hover { background: #e4e4e4; color: #000 }
 
 .list-user .trash {
-  padding-top: .1em;
   height:1.15em;
   width: 1.15em;
   float: right;
