@@ -1,12 +1,7 @@
 /* jshint jquery: false */
 "use strict";
 
-var resources = {};
-
-var templates    = require("./templates");
-var mime         = require("./mime.js");
-var pkg          = require("./../../package.json");
-var paths        = require("./paths.js").get();
+var resources = {}, svgData = {}, minify, $;
 
 var async        = require("async");
 var autoprefixer = require("autoprefixer-core");
@@ -22,9 +17,13 @@ var uglify       = require("uglify-js");
 var vm           = require("vm");
 var zlib         = require("zlib");
 
-var minify, svgData = {}, $;
-var themesPath = path.join(paths.mod, "/node_modules/codemirror/theme");
-var modesPath = path.join(paths.mod, "/node_modules/codemirror/mode");
+var templates    = require("./templates");
+var mime         = require("./mime.js");
+var pkg          = require("./../package.json");
+var paths        = require("./paths.js").get();
+
+var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
+var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 
 var opts = {
   get uglify() {

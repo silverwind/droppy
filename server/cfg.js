@@ -1,11 +1,13 @@
 "use strict";
 
 var cfg        = {};
-var configFile = require("./paths.js").get().cfgFile;
+
 var _          = require("lodash");
 var fs         = require("graceful-fs");
 var mkdirp     = require("mkdirp");
 var path       = require("path");
+
+var configFile = require("./paths.js").get().cfgFile;
 
 var defaults = {
   listeners : [

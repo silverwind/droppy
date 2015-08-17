@@ -19,11 +19,11 @@ paths.get = function get() {
     tlsKey    : resolve(root, "config", "tls.key"),
     tlsCert   : resolve(root, "config", "tls.cert"),
     tlsCA     : resolve(root, "config", "tls.ca"),
-    mod       : resolve(__dirname, "..", ".."),
-    server    : resolve(__dirname, "..", "..", "server"),
-    client    : resolve(__dirname, "..", "..", "client"),
-    templates : resolve(__dirname, "..", "..", "client", "templates"),
-    svg       : resolve(__dirname, "..", "..", "client", "svg")
+    mod       : resolve(__dirname, ".."),
+    server    : resolve(__dirname, "..", "server"),
+    client    : resolve(__dirname, "..", "client"),
+    templates : resolve(__dirname, "..", "client", "templates"),
+    svg       : resolve(__dirname, "..", "client", "svg")
   };
 };
 

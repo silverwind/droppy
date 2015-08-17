@@ -2,7 +2,7 @@
 
 // Manifest for web application - https://w3c.github.io/manifest/
 
-var pkg = require("./../../package.json");
+var pkg = require("./../package.json");
 
 module.exports = function manifest(req) {
   var data = {

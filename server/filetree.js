@@ -1,9 +1,7 @@
 "use strict";
 
 var filetree = new (require("events").EventEmitter)();
-var dirs     = {};
-var todoDirs = [];
-var noLog    = true;
+var dirs     = {}, todoDirs = [], noLog = true;
 
 var _        = require("lodash");
 var chalk    = require("chalk");

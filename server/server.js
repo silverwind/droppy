@@ -1,16 +1,8 @@
 "use strict";
 
-var pkg       = require("./../package.json");
-var resources = require("./lib/resources.js");
-var cfg       = require("./lib/cfg.js");
-var cookies   = require("./lib/cookies.js");
-var db        = require("./lib/db.js");
-var filetree  = require("./lib/filetree.js");
-var log       = require("./lib/log.js");
-var manifest  = require("./lib/manifest.js");
-var mime      = require("./lib/mime.js");
-var paths     = require("./lib/paths.js").get();
-var utils     = require("./lib/utils.js");
+var crypto = require("crypto");
+var path   = require("path");
+var qs     = require("querystring");
 
 var _        = require("lodash");
 var async    = require("async");
@@ -23,9 +15,17 @@ var schedule = require("node-schedule");
 var Wss      = require("websocket").server;
 var yazl     = require("yazl");
 
-var crypto = require("crypto");
-var path   = require("path");
-var qs     = require("querystring");
+var pkg       = require("./../package.json");
+var resources = require("./resources.js");
+var cfg       = require("./cfg.js");
+var cookies   = require("./cookies.js");
+var db        = require("./db.js");
+var filetree  = require("./filetree.js");
+var log       = require("./log.js");
+var manifest  = require("./manifest.js");
+var mime      = require("./mime.js");
+var paths     = require("./paths.js").get();
+var utils     = require("./utils.js");
 
 var cache         = {};
 var clients       = {};
@@ -71,7 +71,7 @@ var droppy = function droppy(options, isStandalone, callback) {
           port: process.env.PORT || 5000,
           protocol: "http"
         }];
-        require("./lib/demo.js").init(cb);
+        require("./demo.js").init(cb);
       } else cb();
     },
     function (cb) { if (isStandalone) { startListeners(cb); } else cb(); },
