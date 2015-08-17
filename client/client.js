@@ -563,7 +563,7 @@
 
     var fileInput = $("#file");
     fileInput.register("change", function (event) {
-      var files, path, name, view = getView(fileInput[0].targetView), obj = {};
+      var files, path, name, view = getActiveView(), obj = {};
 
       uploadInit(view);
       if (droppy.detects.inputDirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -577,7 +577,7 @@
             obj[name] = files[i];
           }
         }
-        upload(view, obj); // TODO: view relative
+        upload(view, obj);
       } else if (fileInput.val()) {
         upload(view, fileInput.get(0).files);
       }
@@ -1183,12 +1183,11 @@
     loadContent(view, content);
 
     // Upload button on empty page
-    content.find(".empty").register("click", function (event) {
-      var view = $(event.target).parents(".view"), fileInput = $("#file");
-      fileInput[0].targetView = view[0].vId;
+    content.find(".empty").register("click", function () {
+      var inp = $("#file");
       if (droppy.detects.inputDirectory)
-        fileInput.removeAttr("directory mozdirectory webkitdirectory msdirectory");
-      fileInput.click();
+        inp.removeAttr("directory mozdirectory webkitdirectory msdirectory");
+      inp.click();
     });
 
     // Switch into a folder
