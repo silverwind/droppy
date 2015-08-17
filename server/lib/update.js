@@ -1,12 +1,12 @@
 "use strict";
 
 var npm;
-var async   = require("async");
-var chalk   = require("chalk");
-var fs      = require("graceful-fs");
-var rm      = require("./utils").rm;
-var path    = require("path");
-var paths   = require("./paths.js").get();
+var async = require("async");
+var chalk = require("chalk");
+var fs    = require("graceful-fs");
+var rm    = require("./utils").rm;
+var path  = require("path");
+var paths = require("./paths.js").get();
 
 function updateSelf(pkg, callback) {
   function loadNPM(cb) {
@@ -48,7 +48,7 @@ function updateSelf(pkg, callback) {
   function install(versions, cb) {
     cleanupModules(function () {
       console.info("Updating " + pkg.name + " from " + chalk.green(versions[0]) + " to " + chalk.green(versions[1]) + " ...");
-      npm.commands.install([pkg.name + "@" + versions[1]], function (err)  {
+      npm.commands.install([pkg.name + "@" + versions[1]], function (err) {
         if (err) return cb(err);
         cb(null, "Successfully updated to " + chalk.green(versions[1]) + "!");
       });

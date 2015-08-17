@@ -7,7 +7,7 @@ var fs         = require("graceful-fs");
 var mkdirp     = require("mkdirp");
 var path       = require("path");
 
-var defaults   = {
+var defaults = {
   listeners : [
     {
       host     : "0.0.0.0",

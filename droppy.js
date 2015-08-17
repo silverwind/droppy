@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
-var fs    = require("graceful-fs");
-var path  = require("path");
-var pkg   = require("./package.json");
-var ut    = require("untildify");
+var argv = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
+var fs   = require("graceful-fs");
+var path = require("path");
+var pkg  = require("./package.json");
+var ut   = require("untildify");
 
 process.title = pkg.name;
 

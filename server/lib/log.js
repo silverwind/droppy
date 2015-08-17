@@ -12,7 +12,7 @@ var log = function log(req, res, logLevel) {
   if (opts && opts.logLevel < logLevel) return;
   var elems = Array.prototype.slice.call(arguments, 3), ip, port, statusCode;
 
-  if (req && req.time) elems.unshift("[" +  chalk.magenta((Date.now() - req.time) + "ms") + "]");
+  if (req && req.time) elems.unshift("[" + chalk.magenta((Date.now() - req.time) + "ms") + "]");
 
   if (res) {
     if (res.statusCode) {
@@ -38,12 +38,12 @@ var log = function log(req, res, logLevel) {
     if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
     port = req.realPort ||
-         req.headers && req.headers["x-real-port"] ||
-         req.connection && req.connection.remotePort ||
-         req.socket && req.socket.remotePort ||
-         req.connection && req.connection.socket && req.connection.socket.remotePort;
+           req.headers && req.headers["x-real-port"] ||
+           req.connection && req.connection.remotePort ||
+           req.socket && req.socket.remotePort ||
+           req.connection && req.connection.socket && req.connection.socket.remotePort;
 
-    ip   = req.realIP ||
+    ip = req.realIP ||
          req.headers && req.headers["x-real-ip"] ||
          req.headers && req.headers["x-forwarded-for"] ||
          req.connection && req.connection.remoteAddress ||
@@ -134,7 +134,7 @@ log.timestamp = function timestamp() {
   if (hrs   < 10) hrs   = "0" + hrs;
   if (mins  < 10) mins  = "0" + mins;
   if (secs  < 10) secs  = "0" + secs;
-  return chalk.yellow(year + "-"  + month + "-" + day + " " + hrs + ":" + mins + ":" + secs);
+  return chalk.yellow(year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs);
 };
 
 log.logo = function logo() {

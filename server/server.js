@@ -1,39 +1,39 @@
 "use strict";
 
-var pkg        = require("./../package.json");
-var resources  = require("./lib/resources.js");
-var cfg        = require("./lib/cfg.js");
-var cookies    = require("./lib/cookies.js");
-var db         = require("./lib/db.js");
-var filetree   = require("./lib/filetree.js");
-var log        = require("./lib/log.js");
-var manifest   = require("./lib/manifest.js");
-var mime       = require("./lib/mime.js");
-var paths      = require("./lib/paths.js").get();
-var utils      = require("./lib/utils.js");
+var pkg       = require("./../package.json");
+var resources = require("./lib/resources.js");
+var cfg       = require("./lib/cfg.js");
+var cookies   = require("./lib/cookies.js");
+var db        = require("./lib/db.js");
+var filetree  = require("./lib/filetree.js");
+var log       = require("./lib/log.js");
+var manifest  = require("./lib/manifest.js");
+var mime      = require("./lib/mime.js");
+var paths     = require("./lib/paths.js").get();
+var utils     = require("./lib/utils.js");
 
-var _          = require("lodash");
-var async      = require("async");
-var Busboy     = require("busboy");
-var chalk      = require("chalk");
-var engine     = require("detect-engine");
-var fs         = require("graceful-fs");
-var readdirp   = require("readdirp");
-var schedule   = require("node-schedule");
-var Wss        = require("websocket").server;
-var yazl       = require("yazl");
+var _        = require("lodash");
+var async    = require("async");
+var Busboy   = require("busboy");
+var chalk    = require("chalk");
+var engine   = require("detect-engine");
+var fs       = require("graceful-fs");
+var readdirp = require("readdirp");
+var schedule = require("node-schedule");
+var Wss      = require("websocket").server;
+var yazl     = require("yazl");
 
-var crypto     = require("crypto");
-var path       = require("path");
-var qs         = require("querystring");
+var crypto = require("crypto");
+var path   = require("path");
+var qs     = require("querystring");
 
-var cache           = {};
-var clients         = {};
-var clientsPerDir   = {};
-var config          = null;
-var firstRun        = null;
-var hasServer       = null;
-var ready           = false;
+var cache         = {};
+var clients       = {};
+var clientsPerDir = {};
+var config        = null;
+var firstRun      = null;
+var hasServer     = null;
+var ready         = false;
 
 var droppy = function droppy(options, isStandalone, callback) {
   if (isStandalone) {
@@ -461,7 +461,7 @@ function setupSocket(server) {
       }
       removeClientPerDir(sid);
       delete clients[sid];
-      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none")  + ")");
+      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
     });
 
     ws.on("error", log.error);
@@ -471,7 +471,7 @@ function setupSocket(server) {
 //-----------------------------------------------------------------------------
 // Send a file list update
 function sendFiles(sid, vId) {
-  if (!clients[sid]  || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws.socket) return;
+  if (!clients[sid] || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws.socket) return;
   var dir = clients[sid].views[vId].directory;
   sendObj(sid, {
     type   : "UPDATE_DIRECTORY",

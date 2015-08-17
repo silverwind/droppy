@@ -476,7 +476,7 @@
 
     form.register("submit", function () {
       $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
-        if (xhr.status  === 202) {
+        if (xhr.status === 202) {
           window.location.reload(true);
         } else if (xhr.status === 401) {
           var info = $("#login-info-box");
@@ -563,7 +563,7 @@
 
     var fileInput = $("#file");
     fileInput.register("change", function (event) {
-      var files, path, name, view = getView(fileInput[0].targetView), obj  = {};
+      var files, path, name, view = getView(fileInput[0].targetView), obj = {};
 
       uploadInit(view);
       if (droppy.detects.inputDirectory && event.target.files.length > 0 && "webkitRelativePath" in event.target.files[0]) {
@@ -613,8 +613,7 @@
     }
 
     $("#create-folder-button").register("click", function () {
-      var dummyFolder, wasEmpty;
-      var view      = getView(); // TODO: Create folder in last active view
+      var dummyFolder, wasEmpty, view = getActiveView();
       var dummyHtml = Handlebars.templates["new-folder"]();
 
       if (view.find(".empty").length > 0) {
@@ -635,8 +634,7 @@
     });
 
     $("#create-file-button").register("click", function () {
-      var dummyFile, wasEmpty;
-      var view      = getActiveView();
+      var dummyFile, wasEmpty, view = getActiveView();
       var dummyHtml = Handlebars.templates["new-file"]();
 
       if (view.find(".empty").length > 0) {
@@ -779,7 +777,7 @@
       }));
       xhr.send(formData);
     } else {
-      if (droppy.emptyFiles.length)   sendEmptyFiles(view);
+      if (droppy.emptyFiles.length) sendEmptyFiles(view);
       if (droppy.emptyFolders.length) sendEmptyFolders(view);
     }
 
@@ -1574,8 +1572,8 @@
 
     // Click on a "open" link
     $("#entry-menu .openfile").register("click", function (event) {
-      var entry  = $("#entry-menu").data("target");
-      var view   = entry.parents(".view");
+      var entry = $("#entry-menu").data("target");
+      var view  = entry.parents(".view");
 
       toggleCatcher(false);
       if (entry.data("type") === "folder")
@@ -2767,7 +2765,7 @@
     $(".media-container").each(function () {
       var container = $(this);
       container.find("img, video").each(function () {
-        var dims  = {
+        var dims = {
           w: this.naturalWidth || this.videoWidth || this.clientWidth,
           h: this.naturalHeight || this.videoHeight || this.clientHeight
         };
