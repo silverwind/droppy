@@ -31,7 +31,7 @@ if (argv.v || argv.version) {
 }
 
 if (argv.home) {
-  require("./server/lib/paths.js").seed(argv.home);
+  require("./server/paths.js").seed(argv.home);
 }
 
 if (argv.log) {
@@ -42,7 +42,7 @@ if (argv.log) {
     console.error("Unable to open logfile for writing: " + err.message);
     process.exit(1);
   }
-  require("./server/lib/log.js").setLogFile(fd);
+  require("./server/log.js").setLogFile(fd);
 }
 
 if (!argv._.length) {
@@ -65,14 +65,14 @@ if (cmds[cmd]) {
     console.info(pkg.version);
     break;
   case "update":
-    require("./server/lib/update.js")(pkg, function (err, message) {
+    require("./server/update.js")(pkg, function (err, message) {
       if (err) { console.error(new Error(err.message || err).stack); process.exit(1); }
       if (message) { console.info(message); process.exit(0); }
     });
     break;
   case "config":
-    var paths = require("./server/lib/paths.js").get();
-    var cfg   = require("./server/lib/cfg.js");
+    var paths = require("./server/paths.js").get();
+    var cfg   = require("./server/cfg.js");
     var edit  = function () {
       require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfgFile], {stdio: "inherit"});
     };
@@ -91,14 +91,14 @@ if (cmds[cmd]) {
     });
     break;
   case "list":
-    db = require("./server/lib/db.js");
+    db = require("./server/db.js");
     db.init(function () {
       printUsers(db.get("users"));
     });
     break;
   case "add":
     if (args.length !== 2) return printHelp();
-    db = require("./server/lib/db.js");
+    db = require("./server/db.js");
     db.init(function () {
       db.addOrUpdateUser(args[0], args[1], true, function () {
         printUsers(db.get("users"));
@@ -107,7 +107,7 @@ if (cmds[cmd]) {
     break;
   case "del":
     if (args.length !== 1) return printHelp();
-    db = require("./server/lib/db.js");
+    db = require("./server/db.js");
     db.init(function () {
       db.delUser(args[0], function () {
         printUsers(db.get("users"));

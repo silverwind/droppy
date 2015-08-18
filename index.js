@@ -11,7 +11,7 @@ module.exports = function droppy(home, options) {
   }
 
   if (typeof home === "string") {
-    require("./server/lib/paths.js").seed(home);
+    require("./server/paths.js").seed(home);
   }
 
   var server = require("./server/server.js");
