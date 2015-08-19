@@ -432,20 +432,6 @@ function setupSocket(server) {
           if (msg.data.isUpload) sendObj(sid, {type: "UPLOAD_DONE", vId: vId});
         });
         break;
-      case "GET_URL":
-        log.info("Attempting to download " + msg.url + " to " + msg.to);
-        request(msg.url, function (err, data) {
-          if (err) {
-            log.error("Error requesting " + msg.url);
-            log.error(err);
-          } else {
-            var dest = path.join(msg.to, path.basename(msg.url));
-            fs.writeFile(dest, data, {mode: "644"}, function () {
-              log.info("Sucessfully saved " + dest);
-            });
-          }
-        });
-        break;
       }
     });
 
