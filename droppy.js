@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
-var fs   = require("graceful-fs");
-var path = require("path");
-var pkg  = require("./package.json");
-var ut   = require("untildify");
+var argv   = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
+var fs     = require("graceful-fs");
+var path   = require("path");
+var ut     = require("untildify");
+var hasbin = require("hasbin");
+
+var pkg    = require("./package.json");
 
 process.title = pkg.name;
 
@@ -74,7 +76,9 @@ if (cmds[cmd]) {
     var paths = require("./server/paths.js").get();
     var cfg   = require("./server/cfg.js");
     var edit  = function () {
-      require("child_process").spawn(process.env.EDITOR || "vim", [paths.cfgFile], {stdio: "inherit"});
+      findEditor(function (editor) {
+        require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
+      });
     };
 
     fs.stat(paths.cfgFile, function (err) {
@@ -137,4 +141,26 @@ function printHelp() {
 
 function printUsers(users) {
   console.info("Current Users: " + Object.keys(users).join(", "));
+}
+
+function findEditor(cb) {
+  var env = process.env.VISUAL || process.env.EDITOR;
+
+  // beware the pyramid of doom
+  // https://github.com/nature/hasbin/issues/3
+  if (env) return cb(env);
+  hasbin("vim", function (has) {
+    if (has) return cb("vim");
+    hasbin("vi", function (has) {
+      if (has) return cb("vi");
+      hasbin("nano", function (has) {
+        if (has) return cb("nano");
+        hasbin("pico", function (has) {
+          if (has) return cb("pico");
+          if (/^win/.test(process.platform)) return "notepad";
+          return cb();
+        });
+      });
+    });
+  });
 }
