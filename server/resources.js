@@ -47,12 +47,13 @@ var opts = {
     return {
       keepSpecialComments : 0,
       roundingPrecision: 3,
-      rebase: false
+      rebase: false,
     };
   },
   get autoprefixer() {
     return {
-      browsers: ["last 2 versions"]
+      browsers: ["last 2 versions"],
+      cascade: false,
     };
   },
   get htmlMinifier() {
@@ -64,7 +65,7 @@ var opts = {
       removeOptionalTags: true,
       removeRedundantAttributes: true,
       caseSensitive: true,
-      minifyCSS: cleanCSS
+      minifyCSS: cleanCSS,
     };
   }
 };
