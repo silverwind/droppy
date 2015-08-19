@@ -44,9 +44,9 @@
     "mv": "^2.1.1",
     "node-schedule": "^0.2.9",
     "pem": "https://github.com/silverwind/pem/archive/dhparaminfo.tar.gz",
-    "postcss": "^4.1.16",
+    "postcss": "^5.0.0",
     "readdirp": "^1.4.0",
-    "request": "^2.60.0",
+    "request": "^2.61.0",
     "rimraf": "^2.4.2",
     "uglify-js": "^2.4.24",
     "untildify": "^2.1.0",
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-bump": "^0.3.1",
+    "grunt-bump": "^0.3.2",
     "grunt-shell": "^1.1.2"
   },
   "files": [
