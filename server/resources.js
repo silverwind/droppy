@@ -11,6 +11,7 @@ var crypto       = require("crypto");
 var fs           = require("graceful-fs");
 var htmlMinifier = require("html-minifier");
 var jb           = require("json-buffer");
+var mime         = require("mime-types").lookup;
 var path         = require("path");
 var postcss      = require("postcss");
 var uglify       = require("uglify-js");
@@ -18,7 +19,6 @@ var vm           = require("vm");
 var zlib         = require("zlib");
 
 var templates    = require("./templates");
-var mime         = require("./mime.js");
 var pkg          = require("./../package.json");
 var paths        = require("./paths.js").get();
 

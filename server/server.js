@@ -10,6 +10,7 @@ var Busboy   = require("busboy");
 var chalk    = require("chalk");
 var engine   = require("detect-engine");
 var fs       = require("graceful-fs");
+var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
 var Wss      = require("websocket").server;
@@ -23,7 +24,6 @@ var db        = require("./db.js");
 var filetree  = require("./filetree.js");
 var log       = require("./log.js");
 var manifest  = require("./manifest.js");
-var mime      = require("./mime.js");
 var paths     = require("./paths.js").get();
 var utils     = require("./utils.js");
 

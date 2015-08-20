@@ -2478,7 +2478,7 @@
     // Extension to icon mappings
     droppy.iconMap = {
       archive:  ["bz2", "gz", "tgz"],
-      audio:    ["aac", "aif", "aiff", "flac", "m4a", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
+      audio:    ["aac", "aif", "aiff", "flac", "m4a", "m4p", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
       authors:  ["authors"],
       bin:      ["class", "o", "so"],
       bmp:      ["bmp"],
@@ -2530,7 +2530,7 @@
       text:     ["text", "txt", "conf", "cfg"],
       tiff:     ["tiff"],
       vcal:     ["vcal"],
-      video:    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "rm", "swf", "vob", "wmv", "webm"],
+      video:    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "ogx", "rm", "swf", "vob", "wmv", "webm"],
       xml:      ["xml"],
       zip:      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
     };
@@ -2538,6 +2538,7 @@
     droppy.audioTypes = {
       aac : "audio/aac",
       m4a : "audio/mp4",
+      m4p : "application/mp4",
       mp1 : "audio/mpeg",
       mp2 : "audio/mpeg",
       mp3 : "audio/mpeg",
@@ -2554,6 +2555,7 @@
       mp4 : "video/mp4", // can be audio/mp4 too
       m4v : "video/mp4",
       ogv : "video/ogg",
+      ogx : "application/ogg",
       webm: "video/webm" // can be audio/webm too
     };
 
