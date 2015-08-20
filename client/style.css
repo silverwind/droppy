@@ -1520,7 +1520,7 @@ html:not(.mobile) #drop-select span.active {
 .dropzone {
   position: absolute;
   left: 0; right: 0; bottom: 0; top: 1.5rem;
-  z-index: 1;
+  z-index: 5;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
