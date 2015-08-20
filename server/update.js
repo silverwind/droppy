@@ -13,8 +13,7 @@ var rm    = require("./utils").rm;
 function updateSelf(pkg, callback) {
   function loadNPM(cb) {
     // obtain a reference to the global npm to avoid having to install npm locally
-    require("child_process").exec("npm", function (err, stdout) {
-      if (err) return cb(err);
+    require("child_process").exec("npm", function (_, stdout) {
       var match = /npm@[^ ]+ (.+)\n/i.exec(stdout);
       if (!match) return cb(new Error("Unable to find path in npm help message."));
       cb(null, require(match[1]));
