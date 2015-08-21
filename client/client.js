@@ -809,12 +809,13 @@
     view.find(".upload-bar").css("width", "0%");
     view.find(".upload-time-left, .upload-speed > span").text("");
     view.find(".upload-title").text("Reading files ...");
-    updateTitle("0%");
+    updateTitle("Reading" + " - " + basename(view[0].currentFolder));
   }
 
   function uploadDone(view) {
     view.find(".upload-bar").css("width", "100%");
     view.find(".upload-title").text("Processing ...");
+    updateTitle("Processing" + " - " + basename(view[0].currentFolder));
     view[0].uploadSuccess = true;
   }
 
@@ -850,8 +851,7 @@
 
       speed = formatBytes(Math.round(speed / 1e3) * 1e3);
 
-      updateTitle(progress + " - " + (view[0].currentFolder !== "/" ?
-            view[0].currentFolder.substring(1) : "droppy"));
+      updateTitle(progress + " - " + basename(view[0].currentFolder));
       view.find(".upload-bar").css("width", progress);
       view.find(".upload-speed > span").text(speed + "/s");
 
