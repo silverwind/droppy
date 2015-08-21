@@ -888,13 +888,16 @@ function handleUploadRequest(req, res) {
           if (err) log.error(err);
           cb(null);
         });
-      }, filetree.updateDir.bind(null, dstDir));
+      }, function () {
+        filetree.updateDir(dstDir, uploadDone);
+      });
     }
   });
 
   req.on("close", function () {
     if (!done) log.info(req, res, "Upload cancelled");
     closeConnection();
+    uploadDone();
 
     // Clean up the temp files
     Object.keys(files).forEach(function (relPath) {
@@ -914,6 +917,9 @@ function handleUploadRequest(req, res) {
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Connection", "close");
     res.end();
+  }
+
+  function uploadDone() {
     sendObj(req.sid, {type: "UPLOAD_DONE", vId: Number(req.query.vId)});
   }
 }
