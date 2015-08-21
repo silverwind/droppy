@@ -183,10 +183,10 @@ function startListeners(callback) {
   }, callback);
 }
 
-//-----------------------------------------------------------------------------
 // Create socket listener
 function createListener(handler, opts, callback) {
-  var server, http = require("http");
+  var server;
+  var http = require("http");
   if (opts.proto === "http") {
     callback(null, http.createServer(handler));
   } else {
@@ -243,7 +243,6 @@ function createListener(handler, opts, callback) {
   }
 }
 
-//-----------------------------------------------------------------------------
 // WebSocket functions
 function setupSocket(server) {
   hasServer = true;
@@ -304,7 +303,6 @@ function setupSocket(server) {
           } else {
             clientDir = msg.data;
             clientFile = null;
-
           }
           clients[sid].views[vId] = {file: clientFile, directory: clientDir};
           if (!clientFile) {
@@ -454,7 +452,6 @@ function setupSocket(server) {
   });
 }
 
-//-----------------------------------------------------------------------------
 // Send a file list update
 function sendFiles(sid, vId) {
   if (!clients[sid] || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws.socket) return;
@@ -467,7 +464,6 @@ function sendFiles(sid, vId) {
   });
 }
 
-//-----------------------------------------------------------------------------
 // Send a list of users on the server
 function sendUsers(sid) {
   var userDB   = db.get("users");
@@ -479,14 +475,12 @@ function sendUsers(sid) {
   sendObj(sid, {type: "USER_LIST", users: userlist});
 }
 
-//-----------------------------------------------------------------------------
 // Send js object to single client identified by its session cooke
 function sendObj(sid, data) {
   if (!clients[sid] || !clients[sid].ws) return;
   send(clients[sid].ws, JSON.stringify(data));
 }
 
-//-----------------------------------------------------------------------------
 // Send js object to all clients
 function sendObjAll(data) {
   Object.keys(clients).forEach(function (sid) {
@@ -494,7 +488,6 @@ function sendObjAll(data) {
   });
 }
 
-//-----------------------------------------------------------------------------
 // Do the actual sending
 function send(ws, data) {
   (function queue(ws, data, time) {
@@ -513,7 +506,6 @@ function send(ws, data) {
   })(ws, data, 0);
 }
 
-//-----------------------------------------------------------------------------
 function handleGET(req, res) {
   var URI = decodeURIComponent(req.url);
 
@@ -550,7 +542,6 @@ function handleGET(req, res) {
   }
 }
 
-//-----------------------------------------------------------------------------
 var blocked = [];
 function handlePOST(req, res) {
   var body = "", URI = decodeURIComponent(req.url);
@@ -617,7 +608,6 @@ function handlePOST(req, res) {
   }
 }
 
-//-----------------------------------------------------------------------------
 function handleResourceRequest(req, res, resourceName) {
   var resource;
 
@@ -685,13 +675,11 @@ function handleResourceRequest(req, res, resourceName) {
         res.writeHead(status, headers);
         res.end(resource.data);
       }
-
     }
   }
   log.info(req, res);
 }
 
-//-----------------------------------------------------------------------------
 function handleFileRequest(req, res, download) {
   var URI = decodeURIComponent(req.url), shareLink, filepath;
 
@@ -770,7 +758,6 @@ function handleFileRequest(req, res, download) {
   });
 }
 
-//-----------------------------------------------------------------------------
 function handleTypeRequest(req, res) {
   utils.isBinary(utils.addFilesPath(decodeURIComponent(req.url).substring(4)), function (err, result) {
     if (err) {
@@ -785,7 +772,6 @@ function handleTypeRequest(req, res) {
   });
 }
 
-//-----------------------------------------------------------------------------
 function handleUploadRequest(req, res) {
   var busboy, opts, dstDir, done = false, files = {};
   var cookie = cookies.get(req.headers.cookie);
@@ -870,7 +856,6 @@ function handleUploadRequest(req, res) {
                   if (++added === total) run();
                 });
               })(files[name].src, files[name].dst);
-
             } else {
               toMove.push([files[name].src, files[name].dst]);
               if (++added === total) run();
@@ -1004,8 +989,6 @@ function debug() {
   });
 }
 
-//-----------------------------------------------------------------------------
-// Clean up the directory for incoming files
 // Needs to be synchronous for process.on("exit")
 function cleanupTemp() {
   fs.readdirSync(paths.temp).forEach(function (file) {
@@ -1013,8 +996,7 @@ function cleanupTemp() {
   });
 }
 
-//-----------------------------------------------------------------------------
-// Clean up our shortened links by removing links to nonexistant files
+// Clean up shortlinks by removing links to nonexistant files
 function cleanupLinks(callback) {
   var linkcount = 0, cbcount = 0, links = db.get("sharelinks");
   if (Object.keys(links).length === 0)
@@ -1039,7 +1021,6 @@ function cleanupLinks(callback) {
   }
 }
 
-//-----------------------------------------------------------------------------
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, zipPath) {
   fs.stat(zipPath, function (err, stats) {
@@ -1076,7 +1057,6 @@ function streamArchive(req, res, zipPath) {
   });
 }
 
-//-----------------------------------------------------------------------------
 // Hourly tasks
 schedule.scheduleJob("* 0 * * *", function hourly() {
   // Clean inactive sessions after 1 month of inactivity
@@ -1091,7 +1071,6 @@ schedule.scheduleJob("* 0 * * *", function hourly() {
   cache.etags = {};
 });
 
-//-----------------------------------------------------------------------------
 // Process startup
 function setupProcess(standalone) {
   process.on("exit", cleanupTemp);
@@ -1107,7 +1086,6 @@ function setupProcess(standalone) {
   }
 }
 
-//-----------------------------------------------------------------------------
 // Process shutdown
 function endProcess(signal) {
   var count = 0;

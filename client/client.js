@@ -1401,7 +1401,7 @@
       this.data = "";
     };
     return dt;
-  }())();
+  })()();
 
   function allowDrop(el) {
     el.register("dragover", function (event) {
@@ -2477,97 +2477,97 @@
 
     // Extension to icon mappings
     droppy.iconMap = {
-      archive:  ["bz2", "gz", "tgz"],
-      audio:    ["aac", "aif", "aiff", "flac", "m4a", "m4p", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
-      authors:  ["authors"],
-      bin:      ["class", "o", "so"],
-      bmp:      ["bmp"],
-      c:        ["c"],
-      calc:     ["ods", "ots", "xlr", "xls", "xlsx"],
-      cd:       ["cue", "iso"],
-      copying:  ["copying", "license"],
-      cpp:      ["cpp", "cc", "cxx"],
-      css:      ["css", "less", "scss", "sass"],
-      deb:      ["deb"],
-      diff:     ["diff", "patch"],
-      doc:      ["doc", "docx", "odm", "odt", "ott"],
-      draw:     ["drw"],
-      eps:      ["eps"],
-      exe:      ["bat", "cmd", "exe"],
-      gif:      ["gif"],
-      gzip:     ["gz"],
-      h:        ["h", "hh"],
-      hpp:      ["hpp"],
-      html:     ["htm", "html", "shtml"],
-      ico:      ["ico"],
-      image:    ["svg", "xpm", "webp"],
-      install:  ["install", "msi"],
-      java:     ["java"],
-      jpg:      ["jpg", "jpeg"],
-      js:       ["js", "es", "dart"],
-      json:     ["json", "gyp"],
-      log:      ["log", "changelog"],
-      makefile: ["makefile", "pom"],
-      markdown: ["markdown", "md"],
-      pdf:      ["pdf"],
-      php:      ["php"],
-      playlist: ["m3u", "m3u8", "pls"],
-      png:      ["png", "apng"],
-      pres:     ["odp", "otp", "pps", "ppt", "pptx"],
-      ps:       ["ps", "ttf", "otf", "woff", "eot"],
-      psd:      ["psd"],
-      py:       ["py"],
-      rar:      ["rar"],
-      rb:       ["rb"],
-      readme:   ["readme"],
-      rpm:      ["rpm"],
-      rss:      ["rss"],
-      rtf:      ["rtf"],
-      script:   ["csh", "ini", "ksh", "sh", "shar", "tcl"],
-      sql:      ["sql", "dump"],
-      tar:      ["tar"],
-      tex:      ["tex"],
-      text:     ["text", "txt", "conf", "cfg"],
-      tiff:     ["tiff"],
-      vcal:     ["vcal"],
-      video:    ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "ogx", "rm", "swf", "vob", "wmv", "webm"],
-      xml:      ["xml"],
-      zip:      ["7z", "bz2", "jar", "lzma", "war", "z", "Z", "zip"]
+      archive  : ["bz2", "gz", "tgz"],
+      audio    : ["aac", "aif", "aiff", "flac", "m4a", "m4p", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
+      authors  : ["authors"],
+      bin      : ["class", "o", "so"],
+      bmp      : ["bmp"],
+      c        : ["c"],
+      calc     : ["ods", "ots", "xlr", "xls", "xlsx", "csv"],
+      cd       : ["cue", "iso"],
+      copying  : ["copying", "license"],
+      cpp      : ["cpp", "cc", "cxx"],
+      css      : ["css", "less", "scss", "sass"],
+      deb      : ["deb"],
+      diff     : ["diff", "patch"],
+      doc      : ["doc", "docx", "odm", "odt", "ott"],
+      draw     : ["drw"],
+      eps      : ["eps"],
+      exe      : ["bat", "cmd", "exe", "com"],
+      gif      : ["gif"],
+      gzip     : ["gz"],
+      h        : ["h", "hh", "hxx"],
+      hpp      : ["hpp"],
+      html     : ["htm", "html", "shtml", "hbs", "handlebars"],
+      ico      : ["ico"],
+      image    : ["svg", "xpm", "webp"],
+      install  : ["install", "msi"],
+      java     : ["java"],
+      jpg      : ["jpg", "jpeg"],
+      js       : ["js", "jsx", "es", "es6", "dart", "ls"],
+      json     : ["json", "gyp"],
+      log      : ["log", "changelog"],
+      makefile : ["makefile", "pom"],
+      markdown : ["markdown", "md"],
+      pdf      : ["pdf"],
+      php      : ["php"],
+      playlist : ["m3u", "m3u8", "pls"],
+      png      : ["png", "apng"],
+      pres     : ["odp", "otp", "pps", "ppt", "pptx"],
+      ps       : ["ps", "ttf", "otf", "woff", "eot"],
+      psd      : ["psd"],
+      py       : ["py"],
+      rar      : ["rar"],
+      rb       : ["rb"],
+      readme   : ["readme"],
+      rpm      : ["rpm"],
+      rss      : ["rss"],
+      rtf      : ["rtf"],
+      script   : ["csh", "ini", "ksh", "sh", "shar", "tcl"],
+      sql      : ["sql", "dump"],
+      tar      : ["tar"],
+      tex      : ["tex"],
+      text     : ["text", "txt", "conf", "cfg"],
+      tiff     : ["tiff"],
+      vcal     : ["vcal"],
+      video    : ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "ogx", "rm", "swf", "vob", "wmv", "webm"],
+      xml      : ["xml"],
+      zip      : ["7z", "bz2", "jar", "lzma", "war", "z", "zip", "xz"]
     };
 
     droppy.audioTypes = {
-      aac : "audio/aac",
-      m4a : "audio/mp4",
-      m4p : "application/mp4",
-      mp1 : "audio/mpeg",
-      mp2 : "audio/mpeg",
-      mp3 : "audio/mpeg",
-      mpa : "audio/mpeg",
-      mpg : "audio/mpeg",
-      mpeg: "audio/mpeg",
-      ogg : "audio/ogg",
-      oga : "audio/ogg",
-      opus: "audio/ogg",
-      wav : "audio/wav"
+      aac  : "audio/aac",
+      m4a  : "audio/mp4",
+      m4p  : "application/mp4",
+      mp1  : "audio/mpeg",
+      mp2  : "audio/mpeg",
+      mp3  : "audio/mpeg",
+      mpa  : "audio/mpeg",
+      mpg  : "audio/mpeg",
+      mpeg : "audio/mpeg",
+      ogg  : "audio/ogg",
+      oga  : "audio/ogg",
+      opus : "audio/ogg",
+      wav  : "audio/wav"
     };
 
     droppy.videoTypes = {
-      mp4 : "video/mp4", // can be audio/mp4 too
-      m4v : "video/mp4",
-      ogv : "video/ogg",
-      ogx : "application/ogg",
-      webm: "video/webm" // can be audio/webm too
+      mp4  : "video/mp4", // can be audio/mp4 too
+      m4v  : "video/mp4",
+      ogv  : "video/ogg",
+      ogx  : "application/ogg",
+      webm : "video/webm" // can be audio/webm too
     };
 
     droppy.imageTypes = {
-      jpg : "image/jpeg",
-      jpeg: "image/jpeg",
-      gif : "image/gif",
-      png : "image/png",
-      apng: "image/png",
-      svg : "image/svg+xml",
-      bmp : "image/bmp",
-      ico : "image/x-icon"
+      jpg  : "image/jpeg",
+      jpeg : "image/jpeg",
+      gif  : "image/gif",
+      png  : "image/png",
+      apng : "image/png",
+      svg  : "image/svg+xml",
+      bmp  : "image/bmp",
+      ico  : "image/x-icon"
     };
   }
 
@@ -2896,4 +2896,4 @@
     }
     return newParts.join("/") || "/";
   }
-}(jQuery, window, document));
+})(jQuery, window, document);
