@@ -957,7 +957,7 @@
 
   // Update the page title
   function updateTitle(text) {
-    document.title = text || "droppy";
+    document.title = (text || "/") + " - droppy";
   }
 
   // Listen for popstate events, which indicate the user navigated back
