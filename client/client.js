@@ -1401,7 +1401,7 @@
       this.data = "";
     };
     return dt;
-  })()();
+  }())();
 
   function allowDrop(el) {
     el.register("dragover", function (event) {

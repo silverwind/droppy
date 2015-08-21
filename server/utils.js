@@ -276,6 +276,18 @@ utils.tlsInit = function tlsInit(opts, callback) {
   }
 };
 
+utils.countOccurences = function countOccurences(string, search) {
+  var num = 0, pos = 0;
+  while (true) {
+    pos = string.indexOf(search, pos);
+    if (pos >= 0) {
+      num += 1;
+      pos += search.length;
+    } else break;
+  }
+  return num;
+};
+
 function createDH(cb) {
   log.simple("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
   pem.createDhparam(DHPARAM_BITS, function (err, result) {

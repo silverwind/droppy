@@ -19,7 +19,7 @@ var POLL_INTERVAL = 2000;
 
 function filterDirs(dirs) {
   return dirs.sort(function (a, b) {
-    return a.match(/\//g).length - b.match(/\//g).length;
+    return utils.countOccurences(a, "/") - utils.countOccurences(b, "/");
   }).filter(function (path, _, self) {
     return self.every(function (another) {
       return another === path || path.indexOf(another + "/") !== 0;
