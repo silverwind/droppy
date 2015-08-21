@@ -1380,12 +1380,12 @@
         event.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
     });
   }
-  droppy.dragTimer = new (function () {
-    var dt = function () {};
-    dt.prototype.timer = null;
-    dt.prototype.data = "";
-    dt.prototype.isInternal = false;
-    dt.prototype.refresh = function (data) {
+
+  function DragTimer() {
+    this.timer = null;
+    this.data = "";
+    this.isInternal = false;
+    this.refresh = function (data) {
       if (typeof data === "string") {
         this.data = data;
         this.isInternal = true;
@@ -1393,15 +1393,15 @@
       clearTimeout(this.timer);
       this.timer = setTimeout(this.clear, 1000);
     };
-    dt.prototype.clear = function () {
+    this.clear = function () {
       if (!this.isInternal)
         $(".dropzone").removeClass("in");
       clearTimeout(this.timer);
       this.isInternal = false;
       this.data = "";
     };
-    return dt;
-  }())();
+  }
+  droppy.dragTimer = new DragTimer();
 
   function allowDrop(el) {
     el.register("dragover", function (event) {
