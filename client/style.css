@@ -1435,7 +1435,7 @@ html:not(.mobile) .vjs-big-play-button {
   background: #eee;
   visibility: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  max-width: 512px;
+  max-width: 90%;
 }
 .info-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
 
@@ -1464,6 +1464,7 @@ html:not(.mobile) .vjs-big-play-button {
   padding: .25em .5em;
   padding-left: 3.5em;
   color: #444;
+  white-space: nowrap;
 }
 
 .info-box span     { line-height: 1.5em }
