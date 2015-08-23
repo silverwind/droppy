@@ -352,7 +352,9 @@
         } else window.location.reload(true);
         break;
       case "SHARELINK":
-        showLink(getView(vId), msg.link);
+        view = getView(vId);
+        hideSpinner(view);
+        showLink(view, msg.link);
         toggleCatcher();
         break;
       case "USER_LIST":
@@ -1243,7 +1245,9 @@
     // Request a sharelink
     content.find(".sharelink").register("click", function () {
       if (droppy.socketWait) return;
-      sendMessage($(this).parents(".view")[0].vId, "REQUEST_SHARELINK", $(this).parents(".data-row").data("id"));
+      var view = $(this).parents(".view");
+      showSpinner(view);
+      sendMessage(view[0].vId, "REQUEST_SHARELINK", $(this).parents(".data-row").data("id"));
     });
 
     content.find(".icon-play").register("click", function () {
