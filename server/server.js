@@ -316,11 +316,11 @@ function setupSocket(server) {
         break;
       case "REQUEST_SHARELINK":
         if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid share link request: " + msg.data);
-        var link, links = db.get("sharelinks");
+        var link, links = db.get("links");
 
         // Check if we already have a link for that file
         var hadLink = Object.keys(links).some(function (link) {
-          if (msg.data === links[link]) {
+          if (msg.data === links[link].location) {
             sendObj(sid, {type: "SHARELINK", vId: vId, link: link});
             return true;
           }
@@ -330,8 +330,8 @@ function setupSocket(server) {
         link = utils.getLink(links, config.linkLength);
         log.info(ws, null, "Share link created: " + link + " -> " + msg.data);
         sendObj(sid, {type: "SHARELINK", vId: vId, link: link});
-        links[link] = msg.data;
-        db.set("sharelinks", links);
+        links[link] = {location: msg.data, attachement: false};
+        db.set("links", links);
         break;
       case "DELETE_FILE":
         log.info(ws, null, "Deleting: " + msg.data);
@@ -687,7 +687,7 @@ function handleFileRequest(req, res, download) {
   filepath = /\?([\$~_])\/([\s\S]+)$/.exec(URI);
   if (filepath.length && filepath[1] === "$") {
     shareLink = true;
-    filepath = utils.addFilesPath(db.get("sharelinks")[filepath[2]]);
+    filepath = utils.addFilesPath(db.get("links")[filepath[2]].location);
   } else if (filepath[1] === "~" || filepath[1] === "_") {
     filepath = utils.addFilesPath("/" + filepath[2]);
   }
@@ -998,7 +998,7 @@ function cleanupTemp() {
 
 // Clean up shortlinks by removing links to nonexistant files
 function cleanupLinks(callback) {
-  var linkcount = 0, cbcount = 0, links = db.get("sharelinks");
+  var linkcount = 0, cbcount = 0, links = db.get("links");
   if (Object.keys(links).length === 0)
     callback();
   else {
@@ -1011,12 +1011,12 @@ function cleanupLinks(callback) {
             delete links[shareLink];
           }
           if (cbcount === linkcount) {
-            db.set("sharelinks", links, function () {
+            db.set("links", links, function () {
               callback();
             });
           }
         });
-      })(link, links[link]);
+      })(link, links[link].location);
     });
   }
 }

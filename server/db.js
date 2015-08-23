@@ -1,6 +1,6 @@
 "use strict";
 
-var database, db = {}, defaults = {users: {}, sessions: {}, sharelinks: {}};
+var database, db = {}, defaults = {users: {}, sessions: {}, links: {}};
 
 var _        = require("lodash");
 var fs       = require("graceful-fs");
@@ -42,6 +42,16 @@ db.init = function (callback) {
         if (database.shortlinks) {
           database.sharelinks = database.shortlinks;
           delete database.shortlinks;
+        }
+        if (database.sharelinks) {
+          database.links = {};
+          Object.keys(database.sharelinks).forEach(function (hash) {
+            database.links[hash] = {
+              location: database.sharelinks[hash],
+              attachment: false
+            }
+          });
+          delete database.sharelinks;
         }
 
         // remove pre-1.7 session tokens
