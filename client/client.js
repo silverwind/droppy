@@ -66,7 +66,7 @@
       callback.apply(el, event);
     }
 
-    duration = window.getComputedStyle(this[0]).transitionDuration;
+    duration = getComputedStyle(this[0]).transitionDuration;
     duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
     setTimeout(function () { // Call back if "transitionend" hasn't fired in duration + 30
@@ -143,9 +143,9 @@
     return a === b ? opts.fn(this) : opts.inverse(this);
   });
 
-  var raf = window.requestAnimationFrame ||
-            window.mozRequestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
+  var raf = requestAnimationFrame ||
+            mozRequestAnimationFrame ||
+            webkitRequestAnimationFrame ||
             function (callback) { setTimeout(callback, 1000 / 60); };
 
   if (droppy.detects.mobile)
@@ -349,7 +349,7 @@
         if (msg.css) {
           $("#css").remove();
           $("<style id='css'></style>").text(msg.css).appendTo($("head"));
-        } else window.location.reload(true);
+        } else location.reload(true);
         break;
       case "SHARELINK":
         view = getView(vId);
@@ -400,8 +400,8 @@
             droppy.set("hasLoggedOut", true);
             if (droppy.socket) droppy.socket.close(4001);
             deleteCookie("session");
-            window.history.pushState(null, null, getRootPath());
-            window.location.reload(true);
+            history.pushState(null, null, getRootPath());
+            location.reload(true);
           });
         break;
       case "ERROR":
@@ -479,7 +479,7 @@
     form.register("submit", function () {
       $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
         if (xhr.status === 202) {
-          window.location.reload(true);
+          location.reload(true);
         } else if (xhr.status === 401) {
           var info = $("#login-info-box");
           info.text(firstrun ? "Please fill both fields." : "Wrong login!");
@@ -1008,11 +1008,11 @@
   }
 
   function pushHistory(view, dest) {
-    window.history.pushState(null, null, getHashPaths(view, dest));
+    history.pushState(null, null, getHashPaths(view, dest));
   }
 
   function replaceHistory(view, dest) {
-    window.history.replaceState(null, null, getHashPaths(view, dest));
+    history.replaceState(null, null, getHashPaths(view, dest));
   }
 
   // Update our current location and change the URL to it
@@ -1326,7 +1326,7 @@
       var limit = dropSelect[0].offsetWidth / 2 - 20, left;
       if (x < limit)
         left = x + limit;
-      else if (x + limit > window.innerWidth)
+      else if (x + limit > innerWidth)
         left = x - limit;
       else
         left = x;
@@ -2035,9 +2035,9 @@
       box.find(".list-user").remove();
       box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
       box.find(".add-user").register("click", function () {
-        var user = window.prompt("Username?");
+        var user = prompt("Username?");
         if (!user) return;
-        var pass = window.prompt("Password?");
+        var pass = prompt("Password?");
         if (!pass) return;
         sendMessage(null, "UPDATE_USER", {
           name: user,
@@ -2730,12 +2730,12 @@
     var box = view.find(".info-box"), out = box.find(".linkout");
     box.find("svg").replaceWith(droppy.svg.link);
     out
-      .text(window.location.protocol + "//" + window.location.host + window.location.pathname + "?$/" + link)
+      .text(location.protocol + "//" + location.host + location.pathname + "?$/" + link)
       .register("copy", function () {
         setTimeout(toggleCatcher.bind(null, false), 0);
       });
     box.attr("class", "info-box link in").end(function () {
-      var range = document.createRange(), selection = window.getSelection();
+      var range = document.createRange(), selection = getSelection();
       range.selectNodeContents(out[0]);
       selection.removeAllRanges();
       selection.addRange(range);
@@ -2872,7 +2872,7 @@
 
   // Get the path to droppy's root, ensuring a trailing slash
   function getRootPath() {
-    var p = window.location.pathname;
+    var p = location.pathname;
     return p[p.length - 1] === "/" ? p : p + "/";
   }
 
