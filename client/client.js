@@ -143,11 +143,6 @@
     return a === b ? opts.fn(this) : opts.inverse(this);
   });
 
-  var raf = requestAnimationFrame ||
-            mozRequestAnimationFrame ||
-            webkitRequestAnimationFrame ||
-            function (callback) { setTimeout(callback, 1000 / 60); };
-
   if (droppy.detects.mobile)
     $("html").addClass("mobile");
   if (!droppy.detects.fullscreen)
@@ -199,12 +194,12 @@
     var type = $("html").data("type");
     if (type === "main") {
       initMainPage();
-      raf(function () {
+      requestAnimationFrame(function () {
         $("#navigation").setTransitionClass("in");
       });
     } else {
       initAuthPage(type === "firstrun");
-      raf(function () {
+      requestAnimationFrame(function () {
         $("#login-box").setTransitionClass("in");
         $("#login-info-box").addClass("info");
         if (type === "firstrun") {
@@ -1126,7 +1121,7 @@
       width += $(this)[0].offsetWidth;
     });
 
-    raf(function () {
+    requestAnimationFrame(function () {
       view.find(".path li").animate({
         left: (width > space) ? space - width : 0
       }, {duration: 200});
