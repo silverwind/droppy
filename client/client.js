@@ -1947,7 +1947,7 @@
         if (!CodeMirror.autoLoadMode) initModeLoad();
         var modeInfo = CodeMirror.findModeByFileName(filename);
         var mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
-        CodeMirror.autoLoadMode(editor, mode);
+        if (mode !== "plain") CodeMirror.autoLoadMode(editor, mode);
         editor.setOption("mode", mode);
         view.find(".mode-select").val(mode);
 
