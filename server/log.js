@@ -38,14 +38,15 @@ var log = function log(req, res, logLevel) {
     if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
     port = req.realPort ||
+           req.headers && req.headers["x-forwarded-port"] ||
            req.headers && req.headers["x-real-port"] ||
            req.connection && req.connection.remotePort ||
            req.socket && req.socket.remotePort ||
            req.connection && req.connection.socket && req.connection.socket.remotePort;
 
     ip = req.realIP ||
-         req.headers && req.headers["x-real-ip"] ||
          req.headers && req.headers["x-forwarded-for"] ||
+         req.headers && req.headers["x-real-ip"] ||
          req.connection && req.connection.remoteAddress ||
          req.socket && req.socket.remoteAddress ||
          req.connection && req.connection.socket && req.connection.socket.remoteAddress;
