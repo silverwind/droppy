@@ -701,7 +701,7 @@ function handleFileRequest(req, res, download) {
   }
 
   // 304 response when Etag matches
-  if (!download && (req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"') {
+  if (!download && !/\/\?_/.test(req.url) && (req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"') {
     res.writeHead(304, {
       "Content-Type": mime(filepath)
     });
