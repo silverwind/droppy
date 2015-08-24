@@ -22,7 +22,8 @@ var cmds = {
 };
 
 var opts = {
-  color   : "--color              Force color logging",
+  color   : "--color              Force enable color in terminal",
+  nocolor : "--no-color           Force disable color in terminal",
   home    : "--home <home>        Home directory, defaults to ~/.droppy",
   log     : "--log <logfile>      Log to logfile instead of stdout"
 };
