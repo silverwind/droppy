@@ -49,7 +49,7 @@ db.init = function (callback) {
             database.links[hash] = {
               location: database.sharelinks[hash],
               attachment: false
-            }
+            };
           });
           delete database.sharelinks;
         }
