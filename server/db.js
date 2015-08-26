@@ -10,7 +10,7 @@ var path     = require("path");
 
 var dbFile   = require("./paths.js").get().db;
 
-db.init = function init (callback) {
+db.init = function init(callback) {
   fs.stat(dbFile, function (err) {
     if (err) {
       if (err.code === "ENOENT") {
@@ -67,17 +67,17 @@ db.init = function init (callback) {
   });
 };
 
-db.get = function get (key) {
+db.get = function get(key) {
   return database[key];
 };
 
-db.set = function set (key, value, callback) {
+db.set = function set(key, value, callback) {
   database[key] = value;
   write();
   if (callback) callback();
 };
 
-db.addOrUpdateUser = function addOrUpdateUser (user, password, privileged, callback) {
+db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged, callback) {
   var salt = crypto.randomBytes(4).toString("hex");
 
   database.users[user] = {
@@ -88,7 +88,7 @@ db.addOrUpdateUser = function addOrUpdateUser (user, password, privileged, callb
   write(callback);
 };
 
-db.delUser = function delUser (user, callback) {
+db.delUser = function delUser(user, callback) {
   if (database.users[user]) {
     delete database.users[user];
     write(function (err) {
@@ -99,7 +99,7 @@ db.delUser = function delUser (user, callback) {
   }
 };
 
-db.authUser = function authUser (user, pass) {
+db.authUser = function authUser(user, pass) {
   var parts;
 
   if (database.users[user]) {

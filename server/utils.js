@@ -210,7 +210,7 @@ utils.tlsInit = function tlsInit(opts, callback) {
       if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
       if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
-      var finish = function finish (dhparam) {
+      var finish = function finish(dhparam) {
         // Split combined certificate and intermediate
         if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
           ca   = cert.substring(cert.lastIndexOf(certStart));
