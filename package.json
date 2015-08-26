@@ -45,7 +45,7 @@
     "node-schedule": "^0.2.9",
     "pem": "https://github.com/silverwind/pem/archive/dhparaminfo.tar.gz",
     "postcss": "^4.1.16",
-    "readdirp": "^1.4.0",
+    "readdirp": "^2.0.0",
     "request": "^2.61.0",
     "rimraf": "^2.4.2",
     "uglify-js": "^2.4.24",
