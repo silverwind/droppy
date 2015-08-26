@@ -51,7 +51,14 @@ utils.rm = function rm(p, cb) {
 
 // rimraf.sync wrapper with 10 retries
 utils.rmSync = function rmSync(p) {
-  rimraf.sync(p, {maxBusyTries: 10});
+  var tries = 10;
+  (function run() {
+    try {
+      rimraf.sync(p);
+    } catch(e) {
+      if (--tries > 0) run();
+    }
+  })();
 };
 
 utils.move = function move(src, dst, cb) {
