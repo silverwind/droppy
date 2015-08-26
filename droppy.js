@@ -76,7 +76,7 @@ if (cmds[cmd]) {
   case "config":
     var paths = require("./server/paths.js").get();
     var cfg   = require("./server/cfg.js");
-    var edit  = function () {
+    var edit  = function edit () {
       findEditor(function (editor) {
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
       });

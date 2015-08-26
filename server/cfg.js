@@ -27,7 +27,7 @@ var defaults = {
   timestamps     : true
 };
 
-cfg.init = function (config, callback) {
+cfg.init = function init (config, callback) {
   if (typeof config === "object" && config !== null) {
     config = migrate(config);
     config = _.defaults(config, defaults); // Add missing options
