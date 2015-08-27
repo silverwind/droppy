@@ -22,7 +22,7 @@
     "chalk": "^1.1.1",
     "cheerio": "^0.19.0",
     "chokidar": "^1.0.5",
-    "clean-css": "^3.3.9",
+    "clean-css": "^3.4.1",
     "codemirror": "^5.6.0",
     "content-disposition": "^0.5.0",
     "cpr": "^0.4.1",
@@ -47,7 +47,7 @@
     "postcss": "^4.1.16",
     "readdirp": "^2.0.0",
     "request": "^2.61.0",
-    "rimraf": "^2.4.2",
+    "rimraf": "^2.4.3",
     "uglify-js": "^2.4.24",
     "untildify": "^2.1.0",
     "video.js": "^4.12.14",
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-bump": "^0.3.2",
+    "grunt-bump": "^0.5.0",
     "grunt-shell": "^1.1.2"
   },
   "files": [
