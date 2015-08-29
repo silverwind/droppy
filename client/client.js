@@ -585,7 +585,7 @@
     $("#upload-file-button").register("click", function () {
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.inputDirectory)
-        fileInput.removeAttr("directory msdirectory mozdirectory webkitdirectory");
+        fileInput.removeAttr(droppy.prefixes.directory.join(" "));
       fileInput.click();
     });
 
@@ -594,11 +594,8 @@
       // Directory uploads supported - enable the button
       $("#upload-folder-button").register("click", function () {
         // Set the directory attribute so we get a directory picker dialog
-        fileInput.attr({
-          directory: "directory",
-          msdirectory: "msdirectory",
-          mozdirectory: "mozdirectory",
-          webkitdirectory: "webkitdirectory"
+        droppy.prefixes.directory.forEach(function (prefix) {
+          fileInput.attr(prefix, prefix);
         });
         fileInput.click();
       });
@@ -1183,7 +1180,7 @@
     content.find(".empty").register("click", function () {
       var inp = $("#file");
       if (droppy.detects.inputDirectory)
-        inp.removeAttr("directory mozdirectory webkitdirectory msdirectory");
+        inp.removeAttr(droppy.prefixes.directory.join(" "));
       inp.click();
     });
 
@@ -2464,7 +2461,7 @@
 
     droppy.prefixes = {
       animation         : ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
-      directory         : ["directory", "mozdirectory", "webkitdirectory", "msdirectory"],
+      directory         : ["directory", "webkitdirectory"],
       animationstart    : ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"],
       getAsEntry        : ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"],
       requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
