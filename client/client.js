@@ -2398,12 +2398,9 @@
 
   // video.js
   function initVideoJS(el, cb) {
-    if (!$("#vjs-css").length) {
-      $.get("?!/lib/vjs.css").then(function (data) {
-        $('<style id="vjs-css"></style>').appendTo("head");
-        $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/font/"));
-      });
-    }
+    loadStyle("vjs-css", "?!/lib/vjs.css", function () {
+      $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/font/"));
+    })
     loadScript("vjs-js", "?!/lib/vjs.js", function () {
       (function verify() {
         if (!("videojs" in window)) return setTimeout(verify, 200);
@@ -2424,12 +2421,7 @@
 
   // CodeMirror
   function initCM(cb) {
-    if (!$("#cm-css").length) {
-      $.get("?!/lib/cm.css").then(function (data) {
-        $('<style id="cm-css"></style>').appendTo("head");
-        $("#cm-css").text(data);
-      });
-    }
+    loadStyle("cm-css", "?!/lib/cm.css");
     loadScript("cm-js", "?!/lib/cm.js", function () {
       (function verify() {
         if (!("CodeMirror" in window)) return setTimeout(verify, 200);
@@ -2652,20 +2644,24 @@
       script.setAttribute("src", url);
       document.querySelector("head").appendChild(script);
     } else {
-      cb();
+      if (cb) cb();
+    }
+  }
+
+  function loadStyle(id, url, cb) {
+    if (!document.getElementById(id)) {
+      $.get(url).then(function (data) {
+        $('<style id="' + id + '"></style>').appendTo("head");
+        $("#" + id).text(data);
+        if (cb) cb();
+      });
+    } else {
+     if (cb) cb();
     }
   }
 
   function loadTheme(theme, cb) {
-    var className = theme.replace(/[^a-z0-9\-]/gim, "");
-    if (!$(".theme-" + className).length) {
-      $.get("?!/theme/" + theme).then(function (data) {
-        $('<style class="theme-' + className + '">' + data + "</style>").appendTo("head");
-        if (cb) cb();
-      });
-    } else {
-      if (cb) cb();
-    }
+    loadStyle("theme-" + theme.replace(/[^a-z0-9\-]/gim, ""), "?!/theme/" + theme, cb);
   }
 
   function setEditorFontSize(size) {
