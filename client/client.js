@@ -117,20 +117,18 @@
   };
 
   // Listen for the animation event for our pseudo-animation
-  droppy.prefixes.animationstart.forEach(function (eventName) {
-    document.addEventListener(eventName, function (event) {
-      if (event.animationName === "nodeInserted") {
-        var target = $(event.target);
-        var newClass = target.data("newclass");
-        var oldClass = target.data("oldclass");
-        // Clean up our data attribute and remove the animation
-        target.removeData("newclass").css("animation", "");
+  document.addEventListener("animationstart", function (event) {
+    if (event.animationName === "nodeInserted") {
+      var target = $(event.target);
+      var newClass = target.data("newclass");
+      var oldClass = target.data("oldclass");
+      // Clean up our data attribute and remove the animation
+      target.removeData("newclass").css("animation", "");
 
-        // Set transition classes
-        if (oldClass) target.removeData("oldclass").replaceClass(oldClass, newClass);
-        else target.addClass(newClass);
-      }
-    });
+      // Set transition classes
+      if (oldClass) target.removeData("oldclass").replaceClass(oldClass, newClass);
+      else target.addClass(newClass);
+    }
   });
 
   Handlebars.registerHelper("select", function (sel, opts) {
@@ -2460,9 +2458,7 @@
     droppy.emptyFolders = null;
 
     droppy.prefixes = {
-      animation         : ["animation", "-moz-animation", "-webkit-animation", "-ms-animation"],
       directory         : ["directory", "webkitdirectory"],
-      animationstart    : ["animationstart", "mozAnimationStart", "webkitAnimationStart", "MSAnimationStart"],
       getAsEntry        : ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"],
       requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
       fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange"],
