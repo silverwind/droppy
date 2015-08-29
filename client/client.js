@@ -2399,8 +2399,8 @@
   // video.js
   function initVideoJS(el, cb) {
     loadStyle("vjs-css", "?!/lib/vjs.css", function () {
-      $("#vjs-css").text(data.replace(/font\//gm, "?!/lib/font/"));
-    })
+      $("#vjs-css").text($("#vjs-css").text().replace(/font\//gm, "?!/lib/font/"));
+    });
     loadScript("vjs-js", "?!/lib/vjs.js", function () {
       (function verify() {
         if (!("videojs" in window)) return setTimeout(verify, 200);
@@ -2656,7 +2656,7 @@
         if (cb) cb();
       });
     } else {
-     if (cb) cb();
+      if (cb) cb();
     }
   }
 
