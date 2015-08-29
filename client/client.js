@@ -801,13 +801,13 @@
     view.find(".upload-bar").css("width", "0%");
     view.find(".upload-time-left, .upload-speed > span").text("");
     view.find(".upload-title").text("Reading files ...");
-    updateTitle("Reading" + " - " + basename(view[0].currentFolder));
+    updateTitle("Reading - " + basename(view[0].currentFolder));
   }
 
   function uploadDone(view) {
     view.find(".upload-bar").css("width", "100%");
     view.find(".upload-title").text("Processing ...");
-    updateTitle("Processing" + " - " + basename(view[0].currentFolder));
+    updateTitle("Processing - " + basename(view[0].currentFolder));
     view[0].uploadSuccess = true;
   }
 

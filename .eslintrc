@@ -117,6 +117,7 @@ rules:
   no-unused-vars:              [2]
   no-use-before-define:        [2, "nofunc"]
   no-useless-call:             [2]
+  no-useless-concat:           [2]
   no-warning-comments:         [0]
   no-with:                     [2]
   object-curly-spacing:        [2, "never"]
