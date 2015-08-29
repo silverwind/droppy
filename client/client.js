@@ -2459,7 +2459,7 @@
 
     droppy.prefixes = {
       directory         : ["directory", "webkitdirectory"],
-      getAsEntry        : ["getAsEntry", "webkitGetAsEntry", "mozGetAsEntry", "MSGetAsEntry"],
+      getAsEntry        : ["getAsEntry", "webkitGetAsEntry"],
       requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
       fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange"],
       fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
