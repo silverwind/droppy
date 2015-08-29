@@ -2200,7 +2200,7 @@
   }
 
   function initAudio(view) {
-    var updateVolume, heldVolume = false;
+    var heldVolume = false;
     var bar        = view.find(".audio-bar");
     var slider     = view.find(".volume-slider");
     var volumeIcon = view.find(".audio-bar .volume");
@@ -2215,13 +2215,11 @@
     player.addEventListener("playing", function playing(event) {
       onNewAudio($(event.target).parents(".view"));
     });
-    updateVolume = throttle(function (event) {
+    var updateVolume = throttle(function (event) {
       var slider = $(event.target).parents(".view").find(".volume-slider")[0];
       var left   = slider.getBoundingClientRect().left;
       var right  = slider.getBoundingClientRect().right;
-      var x      = event.pageX;
-
-      setVolume((x - left) / (right - left));
+      setVolume((event.pageX - left) / (right - left));
     }, 1000 / 60);
     slider.register("mousedown", function (event) {
       heldVolume = true;
