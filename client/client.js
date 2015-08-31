@@ -1997,10 +1997,10 @@
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
           view.find(".mode-select").on("change", function () {
             var mode = $(this).val();
-            CodeMirror.autoLoadMode(editor, mode);
-            editor.setOption("mode", mode);
             view.find(".syntax").removeClass("in");
             view.find(".mode-select").removeClass("in");
+            CodeMirror.autoLoadMode(editor, mode);
+            editor.setOption("mode", mode);
           });
         });
         doc.find(".find").register("click", function () {

@@ -874,12 +874,12 @@ html:not(.mobile) .vjs-big-play-button {
 .mode-select {
   background: #282828;
   border: none;
-  box-shadow: 0 0 15px rgba(0,0,0,.6);
+  box-shadow: 0 8px 16px rgba(0,0,0,.6);
   border-radius: 2px;
   color: #ccc;
   font-size: .8em;
-  margin-top: -2.55em;
-  padding: .5em 3.25em .5em .5em;
+  margin-top: -2.7em;
+  padding: .7em 3em .7em .5em;
   position: absolute;
   right: 0;
   visibility: hidden;
