@@ -1019,7 +1019,6 @@
           else
             view[0].animDirection = "back";
 
-          view.find(".content")[0].style.willChange = "transform";
           sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
           // Skip the push if we're already navigating through history
@@ -2044,7 +2043,6 @@
 
   function showPrefs() {
     var box = $("#prefs-box");
-    box[0].style.willChange = "transform, opacity, visibility";
     box.empty().append(function () {
       var i;
       var opts = [
