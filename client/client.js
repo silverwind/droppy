@@ -153,7 +153,6 @@
   var prefs, doSave;
   var defaults = {
     volume: 0.5,
-    videoVolume: 0.5,
     theme: "droppy",
     editorFontSize: droppy.detects.mobile ? 12 : 16,
     indentWithTabs: false,
@@ -1829,11 +1828,11 @@
   }
 
   function bindVideoEvents(el) {
-    var volume = droppy.get("videoVolume");
+    var volume = droppy.get("volume");
     if (volume) el.volume = volume;
     el.addEventListener("loadedmetadata", aspectScale);
     el.addEventListener("volumechange", function () {
-      droppy.set("videoVolume", this.volume);
+      droppy.set("volume", this.volume);
     });
     el.addEventListener("error", aspectScale);
     return el;
