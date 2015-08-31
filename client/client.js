@@ -2048,13 +2048,14 @@
     box.empty().append(function () {
       var i;
       var opts = [
-        {name: "theme", label: "Editor Theme"},
-        {name: "editorFontSize", label: "Editor Font Size"},
-        {name: "indentWithTabs", label: "Indentation"},
-        {name: "indentUnit", label: "Indentation Width"},
-        {name: "lineWrapping", label: "Wordwrap Mode"},
-        {name: "renameExistingOnUpload", label: "Upload Mode"}
+        {name: "theme", label: "Editor theme"},
+        {name: "editorFontSize", label: "Editor font size"},
+        {name: "indentWithTabs", label: "Editor indent type"},
+        {name: "indentUnit", label: "Editor indent width"},
+        {name: "lineWrapping", label: "Editor word wrap"},
+        {name: "renameExistingOnUpload", label: "When added file exists"}
       ];
+
       opts.forEach(function (_, i) {
         opts[i].values = {};
         opts[i].selected = droppy.get(opts[i].name);
