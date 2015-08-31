@@ -42,6 +42,14 @@
     notification: "Notification" in window,
     mobile: (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent),
   };
+
+  // Async detect for FormData in workers
+  createWorker(function () {
+    postMessage(typeof FormData === "function");
+    close();
+  }).onmessage = function (e) {
+    droppy.detects.canUseWorker = e.data;
+  };
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
@@ -2835,6 +2843,10 @@
     if (x.length) return -1;
     if (y.length) return 1;
     return 0;
+  }
+
+  function createWorker(fn) {
+    return new Worker(URL.createObjectURL(new Blob(["(", String(fn), ")()"])));
   }
 
   function removeExt(filename) {
