@@ -150,45 +150,43 @@
 // ============================================================================
 //  localStorage wrapper functions
 // ============================================================================
-  $(function () {
-    var prefs, doSave;
-    var defaults = {
-      volume: 0.5,
-      videoVolume: 0.5,
-      theme: "droppy",
-      editorFontSize: droppy.detects.mobile ? 12 : 16,
-      indentWithTabs: false,
-      indentUnit: 4,
-      lineWrapping: false,
-      hasLoggedOut: false,
-      renameExistingOnUpload: false
-    };
-    // Load prefs and set missing ones to their default
-    prefs = JSON.parse(localStorage.getItem("prefs")) || {};
-    Object.keys(defaults).forEach(function (pref) {
-      if (prefs[pref] === undefined) {
-        doSave = true;
-        prefs[pref] = defaults[pref];
-      }
-    });
-    if (doSave) localStorage.setItem("prefs", JSON.stringify(prefs));
-
-    // Get a variable from localStorage
-    droppy.get = function (pref) {
-      prefs = JSON.parse(localStorage.getItem("prefs"));
-      return prefs[pref];
-    };
-
-    // Save a variable to localStorage
-    droppy.set = function (pref, value) {
-      prefs[pref] = value;
-      localStorage.setItem("prefs", JSON.stringify(prefs));
-    };
+  var prefs, doSave;
+  var defaults = {
+    volume: 0.5,
+    videoVolume: 0.5,
+    theme: "droppy",
+    editorFontSize: droppy.detects.mobile ? 12 : 16,
+    indentWithTabs: false,
+    indentUnit: 4,
+    lineWrapping: false,
+    hasLoggedOut: false,
+    renameExistingOnUpload: false
+  };
+  // Load prefs and set missing ones to their default
+  prefs = JSON.parse(localStorage.getItem("prefs")) || {};
+  Object.keys(defaults).forEach(function (pref) {
+    if (prefs[pref] === undefined) {
+      doSave = true;
+      prefs[pref] = defaults[pref];
+    }
   });
+  if (doSave) localStorage.setItem("prefs", JSON.stringify(prefs));
+
+  // Get a variable from localStorage
+  droppy.get = function (pref) {
+    prefs = JSON.parse(localStorage.getItem("prefs"));
+    return prefs[pref];
+  };
+
+  // Save a variable to localStorage
+  droppy.set = function (pref, value) {
+    prefs[pref] = value;
+    localStorage.setItem("prefs", JSON.stringify(prefs));
+  };
 // ============================================================================
 //  Page load
 // ============================================================================
-  $(window).one("load", function () {
+  $(function () {
     var type = $("html").data("type");
     if (type === "main") {
       initMainPage();
