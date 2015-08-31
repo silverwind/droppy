@@ -75,7 +75,7 @@ cleanCSS = new cleanCSS(opts.cleanCSS);
 resources.files = {
   css: [
     "client/style.css",
-    "client/sprites.css"
+    "client/sprites.css",
   ],
   js: [
     "node_modules/handlebars/dist/handlebars.runtime.min.js",
@@ -83,12 +83,12 @@ resources.files = {
     "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
     "node_modules/mousetrap/mousetrap.min.js",
     "node_modules/file-extension/file-extension.js",
-    "client/client.js"
+    "client/client.js",
   ],
   html: [
     "client/html/base.html",
     "client/html/auth.html",
-    "client/html/main.html"
+    "client/html/main.html",
   ],
   other: [
     "client/images/logo.svg",
@@ -98,7 +98,8 @@ resources.files = {
     "client/images/logo152.png",
     "client/images/logo180.png",
     "client/images/logo192.png",
-    "client/images/favicon.ico"
+    "client/images/favicon.ico",
+    "client/images/sprites.png",
   ]
 };
 
