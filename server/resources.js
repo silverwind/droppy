@@ -76,6 +76,7 @@ resources.files = {
   css: [
     "client/style.css",
     "client/sprites.css",
+    "client/tooltips.css",
   ],
   js: [
     "node_modules/handlebars/dist/handlebars.runtime.min.js",
