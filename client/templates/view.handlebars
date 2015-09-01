@@ -5,9 +5,17 @@
     <svg></svg>
   </div>
   <div class="info-box">
-    <svg></svg>
+    <div class="icon">{{{svg "link"}}}</div>
     <span></span>
-    <div contenteditable class="linkout mousetrap"></div>
+    <div class="link-out mousetrap"></div>
+    <div class="link-options">
+      <div class="copy-link tip tip-nw" aria-label="Copy to clipboard">
+        {{{svg "copy"}}}<div>Copy</div>
+      </div>
+      <div class="dl-link checked tip tip-sw" aria-label="Trigger a download when opened">
+        {{{svg "check"}}}<div>Is DL</div>
+      </div>
+    </div>
   </div>
   <div class="paste-button">
     {{{svg "paste"}}}

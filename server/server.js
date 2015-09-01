@@ -315,22 +315,22 @@ function setupSocket(server) {
         clients[sid].views[vId] = null;
         break;
       case "REQUEST_SHARELINK":
-        if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid share link request: " + msg.data);
+        if (!utils.isPathSane(msg.data.location)) return log.info(ws, null, "Invalid share link request: " + msg.data);
         var link, links = db.get("links");
 
         // Check if we already have a link for that file
         var hadLink = Object.keys(links).some(function (link) {
-          if (msg.data === links[link].location) {
-            sendObj(sid, {type: "SHARELINK", vId: vId, link: link});
+          if (msg.data.location === links[link].location && msg.data.attachement === links[link].attachement) {
+            sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
             return true;
           }
         });
         if (hadLink) break;
 
         link = utils.getLink(links, config.linkLength);
-        log.info(ws, null, "Share link created: " + link + " -> " + msg.data);
-        sendObj(sid, {type: "SHARELINK", vId: vId, link: link});
-        links[link] = {location: msg.data, attachement: false};
+        log.info(ws, null, "Share link created: " + link + " -> " + msg.data.location);
+        sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
+        links[link] = {location: msg.data.location, attachement: msg.data.attachement};
         db.set("links", links);
         break;
       case "DELETE_FILE":
@@ -523,7 +523,7 @@ function handleGET(req, res) {
   } else if (/^\/\?_\//.test(URI)) {
     handleFileRequest(req, res, false);
   } else if (/^\/\?~~\//.test(URI)) {
-    streamArchive(req, res, utils.addFilesPath(decodeURIComponent(req.url.substring("/~~/".length))));
+    streamArchive(req, res, utils.addFilesPath(decodeURIComponent(req.url.substring("/~~/".length))), true);
   } else if (/^\/favicon.ico$/.test(URI)) {
     handleResourceRequest(req, res, "favicon.ico");
   } else {
@@ -686,8 +686,10 @@ function handleFileRequest(req, res, download) {
   // Check for a shareLink
   filepath = /\?([\$~_])\/([\s\S]+)$/.exec(URI);
   if (filepath.length && filepath[1] === "$") {
+    var link = db.get("links")[filepath[2]];
     shareLink = true;
-    filepath = utils.addFilesPath(db.get("links")[filepath[2]].location);
+    filepath = utils.addFilesPath(link.location);
+    download = link.attachement;
   } else if (filepath[1] === "~" || filepath[1] === "_") {
     filepath = utils.addFilesPath("/" + filepath[2]);
   }
@@ -713,7 +715,7 @@ function handleFileRequest(req, res, download) {
   fs.stat(filepath, function (error, stats) {
     if (!error && stats) {
       if (stats.isDirectory() && shareLink) {
-        streamArchive(req, res, filepath);
+        streamArchive(req, res, filepath, download);
       } else {
         var headers = {"Content-Type": mime(filepath), "Content-Length": stats.size}, status = 200;
         if (download) {
@@ -1022,7 +1024,7 @@ function cleanupLinks(callback) {
 }
 
 // Create a zip file from a directory and stream it to a client
-function streamArchive(req, res, zipPath) {
+function streamArchive(req, res, zipPath, download) {
   fs.stat(zipPath, function (err, stats) {
     if (err) {
       log.error(err);
@@ -1031,11 +1033,10 @@ function streamArchive(req, res, zipPath) {
       var basePath = path.dirname(utils.removeFilesPath(zipPath));
       log.info(req, res);
       log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
-      res.writeHead(200, {
-        "Content-Type"       : mime("zip"),
-        "Content-Disposition": utils.getDispo(zipPath + ".zip"),
-        "Transfer-Encoding"  : "chunked"
-      });
+      res.statusCode = 200;
+      res.setHeader("Content-Type", mime(zip));
+      res.setHeader("Transfer-Encoding", "chunked");
+      if (download) res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
       readdirp({root: zipPath, entryType: "both"})
         .on("warn", log.info).on("error", log.error).on("data", function (file) {
           var stats = file.stat;

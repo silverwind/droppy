@@ -352,8 +352,12 @@
       case "SHARELINK":
         view = getView(vId);
         hideSpinner(view);
-        showLink(view, msg.link);
-        toggleCatcher();
+        droppy.linkCache.push({
+          location: view[0].sharelinkId,
+          link: msg.link,
+          attachement: msg.attachement,
+        });
+        showLink(view, msg.link, msg.attachement);
         break;
       case "USER_LIST":
         updateUsers(msg.users);
@@ -1239,9 +1243,7 @@
     // Request a sharelink
     content.find(".sharelink").register("click", function () {
       if (droppy.socketWait) return;
-      var view = $(this).parents(".view");
-      showSpinner(view);
-      sendMessage(view[0].vId, "REQUEST_SHARELINK", $(this).parents(".data-row").data("id"));
+      requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
     });
 
     content.find(".icon-play").register("click", function () {
@@ -2441,6 +2443,7 @@
     droppy.activeView = 0;
     droppy.debug = null;
     droppy.demo = null;
+    droppy.linkCache = [];
     droppy.public = null;
     droppy.queuedData = null;
     droppy.reopen = null;
@@ -2555,6 +2558,26 @@
       bmp  : "image/bmp",
       ico  : "image/x-icon"
     };
+  }
+
+  function requestLink(view, location, attachement, cb) {
+    view[0].sharelinkId = location;
+    var found = droppy.linkCache.some(function (entry) {
+      if (entry.location === location && entry.attachement === attachement) {
+        if (cb)
+          cb(entry.link);
+        else
+          showLink(view, entry.link, attachement);
+        return true;
+      }
+    });
+    if (!found) {
+      showSpinner(view);
+      sendMessage(view[0].vId, "REQUEST_SHARELINK", {
+        location   : location,
+        attachement: attachement
+      });
+    }
   }
 
   function fullScreenElement() {
@@ -2704,7 +2727,7 @@
   function showError(view, text) {
     var box = view.find(".info-box");
     clearTimeout(droppy.errorTimer);
-    box.find("svg").replaceWith(droppy.svg.exclamation);
+    box.find(".icon svg").replaceWith(droppy.svg.exclamation);
     box.children("span").text(text);
     box.attr("class", "info-box error in");
     droppy.errorTimer = setTimeout(function () {
@@ -2712,20 +2735,48 @@
     }, 3000);
   }
 
-  function showLink(view, link) {
-    var box = view.find(".info-box"), out = box.find(".linkout");
-    box.find("svg").replaceWith(droppy.svg.link);
-    out
-      .text(location.protocol + "//" + location.host + location.pathname + "?$/" + link)
-      .register("copy", function () {
-        setTimeout(toggleCatcher.bind(null, false), 0);
-      });
-    box.attr("class", "info-box link in").end(function () {
+  function showLink(view, link, attachement) {
+    toggleCatcher(true);
+    var box  = view.find(".info-box");
+    var out  = box.find(".link-out");
+    var copy = box.find(".copy-link");
+    var dl   = box.find(".dl-link");
+    dl[attachement ? "addClass" : "removeClass"]("checked");
+
+    var select = function () {
       var range = document.createRange(), selection = getSelection();
       range.selectNodeContents(out[0]);
       selection.removeAllRanges();
       selection.addRange(range);
-      out[0].focus();
+    };
+
+    var getFullLink = function (hash) {
+      return location.protocol + "//" + location.host + location.pathname + "?$/" + hash;
+    };
+
+    out.text(getFullLink(link));
+    out.register("copy", function () {
+      setTimeout(toggleCatcher.bind(null, false), 500);
+    });
+    box.find(".icon svg").replaceWith(droppy.svg.link);
+    box.attr("class", "info-box link in").end(function () {
+      select();
+    });
+
+    copy.register("click", function () {
+      var done;
+      select();
+      try { done = document.execCommand("copy"); } catch (e) {}
+      copy.attr("aria-label", done === true ? "Copied!" : "Copy failed");
+    }).on("mouseleave", function () {
+      copy.attr("aria-label", "Copy to clipboard");
+    });
+
+    dl.register("click", function () {
+      $(this).toggleClass("checked");
+      requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"), function (link) {
+        out.text(getFullLink(link));
+      });
     });
   }
 

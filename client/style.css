@@ -1423,9 +1423,8 @@ html:not(.mobile) .vjs-big-play-button {
   transform:  translate(-50%, -50%);
   position: absolute;
   transition: opacity .3s ease, visibility 0s .3s;
-  text-align: center;
   z-index: 40;
-  overflow: hidden;
+  display: flex;
   opacity: 0;
   color: #333;
   background: #eee;
@@ -1438,33 +1437,74 @@ html:not(.mobile) .vjs-big-play-button {
 @media (min-width: 1024px) { .info-box { font-size: 1em  } }
 @media (max-width: 1023px) { .info-box { font-size: .9em } }
 @media (max-width:  799px) { .info-box { font-size: .8em } }
-@media (max-width:  639px) { .info-box { width: 90%      } }
 
-.info-box svg {
-  position: absolute;
-  left: 0;
-  width: 2.5em;
-  padding: .25em;
-  fill: #fff;
+.info-box .icon {
+  display: flex;
+  flex: 0 0 3em;
+  border-radius: 6px 0 0 6px;
+  justify-content: center;
+  align-items: center;
 }
 
-.info-box.link span      { display: none }
-.info-box.error .linkout { display: none }
-.info-box.link  svg { height: 2.5em             }
-.info-box.error svg { height: calc(100% - .5em) }
-.info-box.link  { background: linear-gradient(to right, #05a 3em, #fff 3em) }
-.info-box.error { background: linear-gradient(to right, #f44 3em, #fff 3em) }
+.info-box.link .icon  { background: #05a }
+.info-box.error .icon { background: #f44 }
 
-.info-box span, .info-box .linkout {
-  display: block;
-  padding: .25em .5em;
-  padding-left: 3.5em;
+.info-box .icon svg {
+  height: 2.5em;
+  width: 2.5em;
+  fill: #fff;
+}
+.info-box.link span       { display: none }
+.info-box.error .link-out { display: none }
+.info-box.link  .icon svg { height: 2.5em             }
+.info-box.error .icon svg { height: calc(100% - .5em) }
+
+.info-box span, .link-out {
+  padding: .25em .75em;
   color: #444;
   white-space: nowrap;
 }
 
-.info-box span     { line-height: 1.5em }
-.info-box .linkout { line-height: 2.5em }
+.info-box span      { flex: 1; line-height: 1.5em }
+.info-box .link-out { flex: 1; line-height: 2.5em; overflow: hidden; }
+
+.link-options {
+  font-size: .7rem;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  justify-content: middle;
+  background: #05a;
+  color: #fff;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+  margin-left: .25em;
+  user-select: none;
+}
+.info-box.error .link-options { display: none }
+
+.link-options svg {
+  height: 1em;
+  width: 1em;
+  fill: #fff;
+  margin: 0 .25em 0 .5em;
+  transition: opacity .2s ease;
+}
+
+.link-options .dl-link:not(.checked) svg { opacity: 0; }
+
+.link-options > div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-right: .5em;
+}
+
+.link-options > div:first-of-type { border-top-right-radius: 6px     }
+.link-options > div:last-of-type  { border-bottom-right-radius: 6px  }
+.link-options > div:hover {
+  background: rgba(255,255,255,.2);
+}
 
 /* =========================== Drop Select Menu ============================ */
 
