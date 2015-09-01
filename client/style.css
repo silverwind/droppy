@@ -1236,7 +1236,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 #prefs-box li:hover select { color: #000 }
 
-.list-user { padding-top: .4em }
+.list-user { padding:.3em 0}
 .list-user:before {
   content: "Users";
   border-bottom: 1px solid #aaa;
@@ -1246,17 +1246,24 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .list-user li {
-  padding: 0 .5em;
-  line-height: 1.25em;
+  padding: 0 .25em;
+  line-height: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.list-user .trash {
+.username { flex: 1 }
+.delete-user {
+  cursor: pointer;
+  flex: 0 0 1rem;
+  display: flex;
+}
+
+.list-user svg {
   height: 1em;
   width: 1em;
-  padding-top: .1em;
-  float: right;
   fill: #bbb;
-  cursor: pointer;
 }
 
 .list-user li:hover .trash { fill: #f44 }
@@ -1271,8 +1278,6 @@ html:not(.mobile) .vjs-big-play-button {
 .add-user svg {
   height: .8em;
   width: .8em;
-  position: relative;
-  top: .05em;
   margin-right: .25em;
   fill: #666;
 }

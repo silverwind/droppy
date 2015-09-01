@@ -2039,7 +2039,7 @@
           priv: true
         });
       });
-      box.find(".trash").register("click", function (event) {
+      box.find(".delete-user").register("click", function (event) {
         event.stopPropagation();
         sendMessage(null, "UPDATE_USER", {
           name: $(this).parents("li").children(".username").text(),

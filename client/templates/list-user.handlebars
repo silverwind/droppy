@@ -1,6 +1,9 @@
 <ul class="list-user">
   {{#each this}}
-    <li><span class="username">{{this}}</span>{{{svg "trash"}}}</li>
+    <li>
+      <div class="username">{{this}}</div>
+      <div class="delete-user tip tip-w" aria-label="Delete user">{{{svg "trash"}}}</div>
+    </li>
   {{/each}}
   <li class="add-user">{{{svg "plus"}}}Add User</li>
 </ul>
