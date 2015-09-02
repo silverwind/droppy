@@ -19,9 +19,13 @@ droppy is a self-hosted cloud server with an interface similar to desktop file m
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
-droppy's home folder will be created in `~/.droppy` unless the `--home` switch is provided.
 
-By default the server listens on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
+To store configuration and files, these two directories will be used:
+
+- `~/.droppy`: configuration directory. Override with `--configdir`.
+- `~/.droppy/files`: files directory. Override with `--filesdir`.
+
+By default, the server listens on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
 
 ### Configuration
 Run `droppy config` to edit `config/config.json`, which is created with these defaults:
