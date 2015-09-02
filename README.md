@@ -33,7 +33,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 {
   "listeners" : [
       {
-          "host"     : "0.0.0.0",
+          "host"     : ["0.0.0.0", "::"],
           "port"     : 8989,
           "protocol" : "http"
       }

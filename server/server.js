@@ -155,7 +155,7 @@ function startListeners(callback) {
             var cn = (tlsData.selfsigned || !info.commonName) ? info.commonName : "self-signed";
             log.simple("Listening on ",
                    socket.opts.proto.toLowerCase() + "://" +
-                   chalk.cyan(server.address().address),
+                   chalk.cyan(server.address().address === "::" ? "[::]" : server.address().address),
                    ":", chalk.blue(server.address().port) +
                    " (CN: " + chalk.yellow(cn) + ")");
             cb();
@@ -163,7 +163,7 @@ function startListeners(callback) {
         } else {
           log.simple("Listening on ",
                  socket.opts.proto.toLowerCase() + "://" +
-                 chalk.cyan(server.address().address),
+                 chalk.cyan(server.address().address === "::" ? "[::]" : server.address().address),
                  ":", chalk.blue(server.address().port));
           cb();
         }
