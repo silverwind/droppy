@@ -1,22 +1,28 @@
 "use strict";
 
-module.exports = function droppy(home, options) {
-  if (arguments.length === 1) {
-    options = home;
-    home    = undefined;
+module.exports = function droppy(opts) {
+  opts = opts || {};
+
+  if (opts.configdir || opts.filesdir) {
+    require("./server/paths.js").seed(opts.configdir, opts.filesdir);
   }
 
-  if (!options) {
-    options = {};
-  }
+  if (opts.log) {
+    var ut   = require("untildify");
+    var fs   = require("fs");
+    var path = require("path");
+    var fd;
 
-  if (typeof home === "string") {
-    require("./server/paths.js").seed(home);
+    try {
+      fd = fs.openSync(ut(path.resolve(opts.log)), "a", "644");
+    } catch (err) {
+      throw new Error("Unable to open log file for writing: " + err.message);
+    }
+    require("./server/log.js").setLogFile(fd);
   }
 
   var server = require("./server/server.js");
-
-  server(options, false, function (err) {
+  server(opts, false, function (err) {
     if (err) throw err;
   });
 

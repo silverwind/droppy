@@ -197,10 +197,10 @@ utils.getSid = function getSid() {
 utils.tlsInit = function tlsInit(opts, callback) {
   if (typeof opts.key === "string" && typeof opts.cert === "string") {
     var certPaths = [
-      path.resolve(paths.home, opts.key),
-      path.resolve(paths.home, opts.cert),
-      opts.ca ? path.resolve(paths.home, opts.ca) : undefined,
-      opts.dhparam ? path.resolve(paths.home, opts.dhparam) : undefined
+      path.resolve(paths.config, opts.key),
+      path.resolve(paths.config, opts.cert),
+      opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
+      opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
     ];
 
     async.map(certPaths, readFile, function (_, data) {

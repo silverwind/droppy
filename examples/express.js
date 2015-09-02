@@ -6,11 +6,15 @@ var fs     = require("fs");
 var droppy = require("..");
 
 // initialze droppy with a config object
-// protip: use logLevel: 0 to supress all logging
-var droppyOnRequest = droppy("./home", {logLevel: 3, debug: true});
+var droppyOnRequest = droppy({
+  configdir: "./config",
+  filesdir: "./files",
+  logLevel: 3,
+  debug: true
+});
 
 // write a test file
-fs.writeFileSync("./home/files/test.txt", "Just a test!");
+fs.writeFileSync("./files/test.txt", "Just a test!");
 
 // start the app on http://localhost:8989/ or a port of your choice
 app.use("/", droppyOnRequest).listen(process.env.PORT || 8989);

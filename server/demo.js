@@ -31,7 +31,7 @@ demo.refresh = function refresh(doneCallback) {
       });
     },
     // Get image samples
-    getZip("https://silverwind.io/droppy-samples.zip", "/images", path.join(paths.home, "/demoTemp/img.zip")),
+    getZip("https://silverwind.io/droppy-samples.zip", "/images", path.join(paths.config, "/demoTemp/img.zip")),
 
     // Get video samples - Provided by http://www.webmfiles.org
     get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/video/Big Buck Bunny.webm"),
@@ -58,7 +58,7 @@ demo.refresh = function refresh(doneCallback) {
 function get(url, dest) {
   return function (callback) {
     var stream, temp;
-    temp = path.join(paths.home, "/demoTemp", dest);
+    temp = path.join(paths.config, "/demoTemp", dest);
     dest = path.join(paths.files, dest);
 
     utils.mkdir([path.dirname(temp), path.dirname(dest)], function () {

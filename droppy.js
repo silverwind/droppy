@@ -22,27 +22,31 @@ var cmds = {
 };
 
 var opts = {
-  color   : "--color              Force enable color in terminal",
-  nocolor : "--no-color           Force disable color in terminal",
-  home    : "--home <home>        Home directory, defaults to ~/.droppy",
-  log     : "--log <logfile>      Log to logfile instead of stdout"
+  color     : "--color              Force enable color in terminal",
+  nocolor   : "--no-color           Force disable color in terminal",
+  configdir : "--configdir <dir>    Config directory. Default: ~/.droppy",
+  filesdir  : "--filesdir <dir>     Files directory. Default: <configdir>/files",
+  log       : "--log <file>         Log to file instead of stdout"
 };
 
-if (argv.v || argv.version) {
+if (argv.v || argv.V || argv.version) {
   console.info(pkg.version);
   process.exit(0);
 }
 
-if (argv.home) {
-  require("./server/paths.js").seed(argv.home);
+if (argv.configdir || argv.filesdir || argv.home) {
+  if (argv.home)
+    console.log("\n Warning: --home is deprecated, use --configdir and --filesdir\n");
+
+  require("./server/paths.js").seed(argv.configdir || argv.home, argv.filesdir);
 }
 
 if (argv.log) {
-  var logfile = ut(path.resolve(argv.log)), fd;
+  var fd;
   try {
-    fd = fs.openSync(logfile, "a", "644");
+    fd = fs.openSync(ut(path.resolve(argv.log)), "a", "644");
   } catch (err) {
-    console.error("Unable to open logfile for writing: " + err.message);
+    console.error("Unable to open log file for writing: " + err.message);
     process.exit(1);
   }
   require("./server/log.js").setLogFile(fd);
@@ -84,7 +88,7 @@ if (cmds[cmd]) {
 
     fs.stat(paths.cfgFile, function (err) {
       if (err && err.code === "ENOENT") {
-        require("mkdirp")(paths.cfg, function () {
+        require("mkdirp")(paths.config, function () {
           cfg.init(null, function (err) {
             if (err) return console.error(new Error(err.message || err).stack);
             edit();

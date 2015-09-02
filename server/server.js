@@ -40,12 +40,14 @@ var droppy = function droppy(options, isStandalone, callback) {
     log.logo();
     log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
       chalk.blue(engine), " ", chalk.green(process.version.substring(1)), "\n ",
-      chalk.blue("home"), " at ", chalk.green(paths.home), "\n");
+      chalk.blue("config"), " at ", chalk.green(paths.config), "\n ",
+      chalk.blue("files"), " at ", chalk.green(paths.files), "\n"
+    );
   }
   setupProcess(isStandalone);
 
   async.series([
-    function (cb) { utils.mkdir([paths.files, paths.temp, paths.cfg], cb); },
+    function (cb) { utils.mkdir([paths.files, paths.temp, paths.config], cb); },
     function (cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
     function (cb) { cfg.init(options, function (err, conf) { config = conf; cb(err); }); },
     function (cb) { db.init(cb); },

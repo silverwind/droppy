@@ -53,7 +53,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `maxFileSize` {Number} - The maximum file size in bytes a user can upload in a single file.
 - `public` {Boolean} - When enabled, no authentication is performed.
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
-- `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file tree, in milliseconds.
+- `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file system, in milliseconds.
 
 <a name="listener-object" />
 ### Listener Object
@@ -99,15 +99,19 @@ A listener object accepts these options:
 droppy can be used with [express](https://github.com/strongloop/express) like this:
 ```js
 var app    = require("express")();
-var droppy = require("droppy")("./droppy-home", {logLevel: 0});
+var droppy = require("droppy")({
+  configdir: "~/droppy/config"
+  filesdir: "~/droppy/files",
+  log: "~/droppy/log",
+  logLevel: 0
+});
 
 app.use("/", droppy).listen(process.env.PORT || 8989);
 ```
-See the [commented express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for more details.
+See the [commented express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
 
 #### droppy([home], [options])
-- **home** {string}: The path to droppy's home folder. Defaults to `~/.droppy`.
-- **options** {object}: Custom [options](#Options). Extends [config.json](#Configuration).
+- **options** {object}: [Options](#Options). Extends [config.json](#Configuration). In addition to the listed options, `configdir`, `filesdir` and `log` are present.
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
