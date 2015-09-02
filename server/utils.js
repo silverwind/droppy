@@ -2,18 +2,19 @@
 
 var utils  = {};
 
-var async  = require("async");
-var cd     = require("content-disposition");
-var cpr    = require("cpr");
-var crypto = require("crypto");
-var ext    = require("file-extension");
-var fs     = require("graceful-fs");
-var isBin  = require("isbinaryfile");
-var mkdirp = require("mkdirp");
-var mv     = require("mv");
-var path   = require("path");
-var pem    = require("pem");
-var rimraf = require("rimraf");
+var async    = require("async");
+var cd       = require("content-disposition");
+var cpr      = require("cpr");
+var crypto   = require("crypto");
+var ext      = require("file-extension");
+var fs       = require("graceful-fs");
+var isBin    = require("isbinaryfile");
+var mkdirp   = require("mkdirp");
+var mv       = require("mv");
+var path     = require("path");
+var pem      = require("pem");
+var rimraf   = require("rimraf");
+var sanitize = require("sanitize-filename");
 
 var db     = require("./db.js");
 var log    = require("./log.js");
@@ -162,11 +163,17 @@ utils.relativeZipPath = function removeFilesPath(p, base) {
   return utils.normalizePath(path.relative(utils.normalizePath(utils.addFilesPath(base)), utils.normalizePath(p)));
 };
 
-utils.isPathSane = function isPathSane(name) {
-  if (/[\/\\]\.\./.test(name)) return false;      // Navigating down the tree (prefix)
-  if (/\.\.[\/\\]/.test(name)) return false;      // Navigating down the tree (postfix)
-  if (/[\*\{\}\|<>"]/.test(name)) return false;   // Invalid characters
-  return true;
+utils.isPathSane = function isPathSane(p, isURL) {
+  if (isURL) {
+    if (/[\/\\]\.\./.test(p)) return false;      // Navigating down the tree (prefix)
+    if (/\.\.[\/\\]/.test(p)) return false;      // Navigating down the tree (postfix)
+    if (/[\*\{\}\|<>"]/.test(p)) return false;   // Invalid characters
+    return true;
+  } else {
+    return p.split(/[\\\/]/gm).every(function (name) {
+      return name === sanitize(name);
+    });
+  }
 };
 
 utils.isBinary = function isBinary(path, callback) {

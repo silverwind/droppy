@@ -412,22 +412,20 @@ function setupSocket(server) {
         break;
       case "CREATE_FILES":
         async.each(msg.data.files, function (file, cb) {
-          if (!utils.isPathSane(file)) return cb(new Error("Invalid empty file creation request: " + file));
+          if (!utils.isPathSane(file)) return cb(new Error("Invalid file creation request: " + file));
           filetree.mkdir(utils.addFilesPath(path.dirname(file)), function () {
             filetree.mk(utils.addFilesPath(file), cb);
           });
         }, function (err) {
           if (err) log.error(ws, null, err);
-          if (msg.data.isUpload) sendObj(sid, {type: "UPLOAD_DONE", vId: vId});
         });
         break;
       case "CREATE_FOLDERS":
         async.each(msg.data.folders, function (folder, cb) {
-          if (!utils.isPathSane(folder)) return cb(new Error("Invalid empty file creation request: " + folder));
+          if (!utils.isPathSane(folder)) return cb(new Error("Invalid folder creation request: " + folder));
           filetree.mkdir(utils.addFilesPath(folder), cb);
         }, function (err) {
           if (err) log.error(ws, null, err);
-          if (msg.data.isUpload) sendObj(sid, {type: "UPLOAD_DONE", vId: vId});
         });
         break;
       }
@@ -509,7 +507,8 @@ function send(ws, data) {
 function handleGET(req, res) {
   var URI = decodeURIComponent(req.url);
 
-  if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid GET: " + req.url);
+  if (!utils.isPathSane(URI, true))
+    return log.info(req, res, "Invalid GET: " + req.url);
 
   if (config.public && !cookies.get(req.headers.cookie))
     cookies.free(req, res);
@@ -546,7 +545,8 @@ var blocked = [];
 function handlePOST(req, res) {
   var body = "", URI = decodeURIComponent(req.url);
 
-  if (!utils.isPathSane(URI)) return log.info(req, res, "Invalid POST: " + req.url);
+  if (!utils.isPathSane(URI, true))
+    return log.info(req, res, "Invalid POST: " + req.url);
 
   if (/\/upload/.test(URI)) {
     if (!cookies.get(req.headers.cookie)) {
@@ -806,24 +806,23 @@ function handleUploadRequest(req, res) {
 
   dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[req.query.vId].directory;
   log.info(req, res, "Upload started");
-  opts = {headers: req.headers, fileHwm: 1024 * 1024, limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}};
-
+  opts = {
+    preservePath: true,
+    headers: req.headers,
+    fileHwm: 1024 * 1024,
+    limits: {fieldNameSize: 255, fieldSize: 10 * 1024 * 1024}
+  };
   if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
+
   busboy = new Busboy(opts);
   busboy.on("error", log.error);
-  busboy.on("file", function (fieldname, file, filename) {
-    var dstRelative = filename ? decodeURIComponent(filename) : fieldname;
-    var dst         = path.join(paths.files, dstDir, dstRelative);
-    var tmp         = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
-    var writeStream = fs.createWriteStream(tmp, {mode: "644"});
-
-    files[dstRelative] = {
-      src : tmp,
-      dst : dst,
-      ws  : writeStream
-    };
-
-    file.pipe(writeStream);
+  busboy.on("file", function (_, file, filePath) {
+    if (!utils.isPathSane(filePath)) return;
+    var dst = path.join(paths.files, dstDir, filePath);
+    var tmp = path.join(paths.temp, crypto.createHash("md5").update(String(dst)).digest("hex"));
+    var ws  = fs.createWriteStream(tmp, {mode: "644"});
+    files[filePath] = {src: tmp, dst : dst, ws: ws};
+    file.pipe(ws);
   });
 
   busboy.on("filesLimit", function () {
@@ -835,6 +834,7 @@ function handleUploadRequest(req, res) {
     var names = Object.keys(files), total = names.length, added = 0, toMove = [];
     log.info(req, res, "Received " + names.length + " files");
     done = true;
+
     while (names.length > 0) {
       (function (name) {
         fs.stat(files[name].dst, function (error) {
@@ -866,7 +866,6 @@ function handleUploadRequest(req, res) {
         });
       })(names.pop());
     }
-
     closeConnection();
 
     function run() {

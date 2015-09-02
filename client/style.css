@@ -942,7 +942,7 @@ html:not(.mobile) .vjs-big-play-button {
 .upload-cancel {
   transition: color .2s ease;
   cursor: pointer;
-  flex: 0 0 1em;
+  flex: 0 0 1.5em;
 }
 
 @media (max-width: 959px) {
