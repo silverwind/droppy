@@ -110,8 +110,8 @@ app.use("/", droppy).listen(process.env.PORT || 8989);
 ```
 See the [commented express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
 
-#### droppy([home], [options])
-- **options** {object}: [Options](#Options). Extends [config.json](#Configuration). In addition to the listed options, `configdir`, `filesdir` and `log` are present.
+#### droppy([options])
+- **options** {object}: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
