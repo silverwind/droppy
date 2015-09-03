@@ -2246,7 +2246,7 @@
   // video.js
   function initVideoJS(el, cb) {
     loadStyle("vjs-css", "?!/lib/vjs.css", function () {
-      $("#vjs-css").text($("#vjs-css").text().replace(/font\//gm, "?!/lib/font/"));
+      $("#vjs-css").text($("#vjs-css").text().replace(/\(font\//gm, "(?!/lib/font/"));
     });
     loadScript("vjs-js", "?!/lib/vjs.js", function () {
       (function verify() {
