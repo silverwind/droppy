@@ -1086,7 +1086,7 @@ html:not(.mobile) .vjs-big-play-button {
   line-height: 1.5em;
   cursor: default;
 }
-@media (max-width: 639px) { .audio-bar .time { flex-basis: 2em } }
+@media (max-width: 639px) { .audio-bar .time { flex-basis: 2.8em } }
 
 .time > * { pointer-events: none }
 .time-cur, .time-max { color: #fff }
