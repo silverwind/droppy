@@ -4,7 +4,7 @@
 var resources = {}, svgData = {}, minify, $;
 
 var async        = require("async");
-var autoprefixer = require("autoprefixer-core");
+var autoprefixer = require("autoprefixer");
 var cheerio      = require("cheerio");
 var cleanCSS     = require("clean-css");
 var crypto       = require("crypto");
