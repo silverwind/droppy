@@ -2573,7 +2573,7 @@
     box.attr("class", "info-box error in");
     droppy.errorTimer = setTimeout(function () {
       box.removeClass("in");
-    }, 3000);
+    }, 4000);
   }
 
   function showLink(view, link, attachement) {

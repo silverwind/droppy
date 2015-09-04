@@ -1460,12 +1460,20 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box.error .icon svg { height: calc(100% - .5em) }
 
 .info-box span, .link-out {
-  padding: .25em .75em;
   color: #444;
-  white-space: nowrap;
 }
 
-.info-box span      { flex: 1; line-height: 1.5em }
+.link-out {
+  white-space: nowrap;
+  padding: .25em .75em;
+}
+
+.info-box span {
+  flex: 1;
+  line-height: 1.25em;
+  padding: .5em;
+}
+
 .info-box .link-out { flex: 1; line-height: 2.5em; overflow: hidden; }
 
 .link-options {
