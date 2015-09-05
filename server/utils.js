@@ -15,6 +15,7 @@ var path     = require("path");
 var pem      = require("pem");
 var rimraf   = require("rimraf");
 var sanitize = require("sanitize-filename");
+var util     = require("util");
 
 var db     = require("./db.js");
 var log    = require("./log.js");
@@ -105,10 +106,8 @@ utils.getLink = function getLink(links, length) {
   return link;
 };
 
-// Get a unique string, used to identify websocket session
-utils.newSid = function getSid() {
-  var hrtime = process.hrtime();
-  return String(hrtime[0] + hrtime[1]);
+utils.pretty = function pretty(data) {
+  return util.inspect(data, {colors: true}).replace(/\s+/gm, "");
 };
 
 utils.getNewPath = function getNewPath(origPath, callback) {

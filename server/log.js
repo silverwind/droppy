@@ -10,7 +10,7 @@ var logLabels = ["", "ERROR", "INFO", "DEBG"];
 
 var log = function log(req, res, logLevel) {
   if (opts && opts.logLevel < logLevel) return;
-  var elems = Array.prototype.slice.call(arguments, 3), ip, port, statusCode;
+  var elems = Array.prototype.slice.call(arguments, 3), statusCode;
 
   if (req && req.time) elems.unshift("[" + chalk.magenta((Date.now() - req.time) + "ms") + "]");
 
@@ -37,24 +37,25 @@ var log = function log(req, res, logLevel) {
     if (req.url) elems.unshift(decodeURIComponent(decodeURIComponent(req.url))); // For some reason, this need double decoding for upload URLs
     if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
-    port = req.realPort ||
-           req.headers && req.headers["x-forwarded-port"] ||
-           req.headers && req.headers["x-real-port"] ||
-           req.connection && req.connection.remotePort ||
-           req.socket && req.socket.remotePort ||
-           req.connection && req.connection.socket && req.connection.socket.remotePort;
+    var port =
+      req.headers && req.headers["x-forwarded-port"] ||
+      req.headers && req.headers["x-real-port"] ||
+      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-forwarded-port"] ||
+      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-port"] ||
+      req._socket && req._socket.remotePort && req._socket.remotePort ||
+      req.connection && req.connection.remotePort ||
+      req.connection && req.connection.socket && req.connection.socket.remotePort;
 
-    ip = req.realIP ||
-         req.headers && req.headers["x-forwarded-for"] ||
-         req.headers && req.headers["x-real-ip"] ||
-         req.connection && req.connection.remoteAddress ||
-         req.socket && req.socket.remoteAddress ||
-         req.connection && req.connection.socket && req.connection.socket.remoteAddress;
+    var ip =
+      req.headers && req.headers["x-forwarded-for"] ||
+      req.headers && req.headers["x-real-ip"] ||
+      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-forwarded-for"] ||
+      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-ip"] ||
+      req._socket && req._socket.remoteAddress && req._socket.remoteAddress ||
+      req.connection && req.connection.remoteAddress ||
+      req.connection && req.connection.socket && req.connection.socket.remoteAddress;
 
     if (ip && port) elems.unshift(chalk.cyan(ip) + ":" + chalk.blue(port));
-
-    if (req.headers && req.headers["x-real-port"]) req.realPort = req.headers["x-real-port"];
-    if (req.headers && req.headers["x-real-ip"]) req.realIP = req.headers["x-real-ip"];
   }
 
   if (logLevel > 0)

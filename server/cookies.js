@@ -6,12 +6,7 @@ var utils   = require("./utils.js");
 
 cookies.get = function get(cookie) {
   var entries = {};
-  if (Array.isArray(cookie) && cookie.length) {
-    cookie.forEach(function (c) {
-      entries[c.name] = c.value;
-    });
-    return cookies.validate(entries);
-  } else if (typeof cookie === "string" && cookie.length) {
+  if (typeof cookie === "string" && cookie.length) {
     cookie.split("; ").forEach(function (entry) {
       var parts = entry.trim().split("=");
       entries[parts[0]] = parts[1];

@@ -13,7 +13,7 @@ var fs       = require("graceful-fs");
 var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
-var Wss      = require("websocket").server;
+var Wss      = require("ws").Server;
 var yazl     = require("yazl");
 
 var pkg       = require("./../package.json");
@@ -230,32 +230,33 @@ function createListener(handler, opts, callback) {
 function setupSocket(server) {
   hasServer = true;
   var wss = new Wss({
-    httpServer: server,
-    keepAlive: config.keepAlive > 0,
-    keepaliveInterval: config.keepAlive,
-    autoAcceptConnections: false,
-    maxReceivedFrameSize: Infinity,
-    maxReceivedMessageSize: Infinity
-  });
-  wss.on("request", function (request) {
-    var ws, sid, cookie = cookies.get(request.cookies);
-
-    if (!cookie && !config.public) {
-      request.reject();
-      log.info(ws, null, "Unauthorized WebSocket connection rejected.");
-      return;
-    } else {
-      ws = request.accept();
-      log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
-      sid = utils.newSid();
-      clients[sid] = {views: [], cookie: cookie, ws: ws};
+    server: server,
+    verifyClient: function (info, cb) {
+      var cookie = cookies.get(info.req.headers.cookie);
+      if (!cookie && !config.public) {
+        log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
+        cb(false, 401, "Unauthorized");
+      } else {
+        log.info(info.req, null, "WebSocket [", chalk.green("connected"), "] ");
+        cb(true);
+      }
     }
+  });
+  if (config.keepAlive > 0) {
+    Object.keys(wss.clients).forEach(function (client) {
+      client.ws.ping();
+    });
+  }
+  wss.on("connection", function (ws) {
+    var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
+    var cookie = cookies.get(ws.upgradeReq.headers.cookie);
+    clients[sid] = {views: [], cookie: cookie, ws: ws};
 
-    ws.on("message", function (message) {
-      var msg = JSON.parse(message.utf8Data);
+    ws.on("message", function (msg) {
+      msg = JSON.parse(msg);
       var vId = msg.vId;
 
-      if (msg.type !== "SAVE_FILE") log.debug(ws, null, chalk.magenta("RECV "), message.utf8Data);
+      if (msg.type !== "SAVE_FILE") log.debug(ws, null, chalk.magenta("RECV "), utils.pretty(msg));
 
       switch (msg.type) {
       case "REQUEST_SETTINGS":
@@ -263,7 +264,6 @@ function setupSocket(server) {
           debug         : config.debug,
           demo          : config.demo,
           public        : config.public,
-          maxFileSize   : config.maxFileSize,
           themes        : Object.keys(cache.themes).join("|"),
           modes         : Object.keys(cache.modes).join("|"),
           caseSensitive : process.platform !== "win32"
@@ -435,7 +435,7 @@ function setupSocket(server) {
 
 // Send a file list update
 function sendFiles(sid, vId) {
-  if (!clients[sid] || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws.socket) return;
+  if (!clients[sid] || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws._socket) return;
   var dir = clients[sid].views[vId].directory;
   sendObj(sid, {
     type   : "UPDATE_DIRECTORY",
@@ -473,14 +473,16 @@ function sendObjAll(data) {
 function send(ws, data) {
   (function queue(ws, data, time) {
     if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
-    if (ws && ws.state === "open") {
+    if (ws && ws.readyState === 1) {
       if (config.logLevel === 3) {
         var debugData = JSON.parse(data);
         // Remove some spammy logging
         if (debugData.type === "RELOAD" && debugData.css) debugData.css = {"...": "..."};
-        log.debug(ws, null, chalk.green("SEND "), JSON.stringify(debugData));
+        log.debug(ws, null, chalk.green("SEND "), utils.pretty(debugData));
       }
-      ws.sendUTF(data);
+      ws.send(data, function (err) {
+        if (err) log.err(err);
+      });
     } else {
       setTimeout(queue, 50, ws, data, time + 50);
     }
@@ -1075,9 +1077,9 @@ function endProcess(signal) {
   log.simple("Received " + chalk.red(signal) + " - Shutting down ...");
   Object.keys(clients).forEach(function (sid) {
     if (!clients[sid] || !clients[sid].ws) return;
-    if (clients[sid].ws.state === "open" || clients[sid].ws.state === "connecting") {
+    if (clients[sid].ws.readyState < 2) {
       count++;
-      clients[sid].ws.drop(1001);
+      clients[sid].ws.close(1001);
     }
   });
   if (count > 0) log.simple("Closed " + count + " WebSocket" + (count > 1 ? "s" : ""));
