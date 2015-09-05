@@ -120,7 +120,7 @@ function startListeners(callback) {
   if (!Array.isArray(listeners))
     return callback(new Error("Config Error: 'listeners' must be an array"));
 
-  listeners.forEach(function (listener) {
+  listeners.forEach(function (listener, i) {
     ["host", "port", "protocol"].forEach(function (prop) {
       if (typeof listener[prop] === "undefined" && !config.demo)
         return callback(new Error("Config Error: listener " + prop + " undefined"));
@@ -137,7 +137,8 @@ function startListeners(callback) {
             key     : listener.key,
             cert    : listener.cert,
             ca      : listener.ca,
-            dhparam : listener.dhparam
+            dhparam : listener.dhparam,
+            index   : i,
           }
         });
       });
@@ -188,34 +189,14 @@ function startListeners(callback) {
 // Create socket listener
 function createListener(handler, opts, callback) {
   var server;
-  var http = require("http");
   if (opts.proto === "http") {
+    var http = require("http");
     callback(null, http.createServer(handler));
   } else {
-    utils.tlsInit(opts, function (err, tlsData) {
+    var https = require("https");
+    https.CLIENT_RENEG_LIMIT = 0;
+    utils.tlsInit(opts, function (err, tlsOptions) {
       if (err) return callback(err);
-
-      var https = require("https");
-      var tlsOptions = {
-        key              : tlsData.key,
-        cert             : tlsData.cert,
-        ca               : tlsData.ca ? tlsData.ca : undefined,
-        dhparam          : tlsData.dhparam ? tlsData.dhparam : undefined,
-        honorCipherOrder : true,
-      };
-
-      // Slightly more secure options for 0.10.x
-      if (engine === "node" && /^v0\.10/.test(process.version)) {
-        tlsOptions.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
-      } else {
-        tlsOptions.ciphers = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:" +
-                   "ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:" +
-                   "DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:" +
-                   "DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA";
-      }
-
-      // Disable insecure client renegotiation
-      https.CLIENT_RENEG_LIMIT = 0;
 
       server = https.createServer(tlsOptions);
       server.httpAllowHalfOpen = false;
@@ -240,7 +221,7 @@ function createListener(handler, opts, callback) {
         })();
       }
 
-      callback(null, server, tlsData);
+      callback(null, server, tlsOptions);
     });
   }
 }

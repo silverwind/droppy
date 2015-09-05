@@ -194,7 +194,31 @@ utils.getSid = function getSid() {
   return crypto.randomBytes(64).toString("base64").substring(0, 48);
 };
 
-utils.tlsInit = function tlsInit(opts, callback) {
+var cbs = [];
+utils.tlsInit = function tlsInit(opts, cb) {
+  if (!cbs[opts.index]) {
+    cbs[opts.index] = [cb];
+    utils.tlsSetup(opts, function (err, tlsData) {
+      cbs[opts.index].forEach(function (cb) {
+        cb(err, tlsData);
+      });
+    });
+  } else cbs[opts.index].push(cb);
+};
+
+utils.tlsSetup = function tlsSetup(opts, callback) {
+  opts.honorCipherOrder = true;
+
+  // Slightly more secure options for 0.10.x
+  if (/^v0\.10/.test(process.version)) {
+    opts.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
+  } else {
+    opts.ciphers = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:" +
+      "ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:" +
+      "DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:" +
+      "DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA";
+  }
+
   if (typeof opts.key === "string" && typeof opts.cert === "string") {
     var certPaths = [
       path.resolve(paths.config, opts.key),
