@@ -20,10 +20,10 @@ module.exports = function manifest(req) {
     ]
   };
 
-  if (req.headers["host"]) {
-    data["start_url"] = (req.connection.encrypted ? "https://" : "http://") + req.headers["host"] + "/";
-  }
-
+  if (typeof req.connection.encrypted === "boolean" && req.headers.host)
+    data.start_url = (req.connection.encrypted ? "https://" : "http://") + req.headers["host"] + "/";
+  else if (req.headers.referer || req.headers.referrer)
+    data.start_url = req.headers.referer || req.headers.referrer;
   return JSON.stringify(data);
 };
 
