@@ -1371,6 +1371,7 @@
       $(".dropzone").removeClass("in");
 
       if (event.dataTransfer.getData("text").length) { // drag between views
+        event.stopPropagation();
         dragData = JSON.parse(event.dataTransfer.getData("text"));
         if (view.data("type") === "directory") { // dropping into a directory view
           handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
