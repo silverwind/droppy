@@ -80,8 +80,9 @@ filetree.updateDir = function updateDir(dir, cb) {
 
 function updateDirSizes() {
   var todo = Object.keys(dirs);
-  todo = todo.sort(function (a, b) {
-    return -(a.match(/\//g).length - b.match(/\//g).length);
+
+  todo.sort(function (a, b) {
+    return utils.countOccurences(b, "/") - utils.countOccurences(a, "/");
   });
 
   todo.forEach(function (d) {
