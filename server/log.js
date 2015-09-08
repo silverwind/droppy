@@ -2,8 +2,9 @@
 
 var opts, logfile;
 
-var fs    = require("graceful-fs");
-var chalk = require("chalk");
+var fs     = require("graceful-fs");
+var chalk  = require("chalk");
+var format = require("url-format-lax");
 
 var logColors = ["reset", "red", "yellow", "cyan"];
 var logLabels = ["", "ERROR", "INFO", "DEBG"];
@@ -55,7 +56,7 @@ var log = function log(req, res, logLevel) {
       req.connection && req.connection.remoteAddress ||
       req.connection && req.connection.socket && req.connection.socket.remoteAddress;
 
-    if (ip && port) elems.unshift(chalk.cyan(ip) + ":" + chalk.blue(port));
+    if (ip && port) elems.unshift(log.formatHostPort(ip, port));
   }
 
   if (logLevel > 0)
@@ -147,6 +148,13 @@ log.logo = function logo() {
     " |_____|__| |_____|   __|   __|___  |\n",
     "                  |__|  |__|  |_____|\n",
   ].join("")));
+};
+
+log.formatHostPort = function formatHostPort(host, port) {
+  var str = format({hostname: host, port: port});
+  host = str.substring(0, str.lastIndexOf(":"));
+  port = str.substring(str.lastIndexOf(":") + 1, str.length);
+  return chalk.cyan(host) + ":" + chalk.blue(port);
 };
 
 module.exports = log;

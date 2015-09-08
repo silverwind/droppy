@@ -52,6 +52,7 @@
     "uglify-js": "^2.4.24",
     "untildify": "^2.1.0",
     "uppie": "^0.7.5",
+    "url-format-lax": "^1.0.0",
     "video.js": "^4.12.15",
     "ws": "^0.8.0",
     "yauzl": "^2.3.1",

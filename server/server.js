@@ -155,17 +155,16 @@ function startListeners(callback) {
             if (err) return cb(err);
             var cn = (tlsData.selfsigned || !info.commonName) ? info.commonName : "self-signed";
             log.simple("Listening on ",
-                   socket.opts.proto.toLowerCase() + "://" +
-                   chalk.cyan(server.address().address === "::" ? "[::]" : server.address().address),
-                   ":", chalk.blue(server.address().port) +
-                   " (CN: " + chalk.yellow(cn) + ")");
+              socket.opts.proto.toLowerCase() + "://" +
+              log.formatHostPort(server.address().address, server.address().port) +
+              " (CN: " + chalk.yellow(cn) + ")");
             cb();
           });
         } else {
           log.simple("Listening on ",
-                 socket.opts.proto.toLowerCase() + "://" +
-                 chalk.cyan(server.address().address === "::" ? "[::]" : server.address().address),
-                 ":", chalk.blue(server.address().port));
+            socket.opts.proto.toLowerCase() + "://" +
+            log.formatHostPort(server.address().address, server.address().port)
+          );
           cb();
         }
       });
