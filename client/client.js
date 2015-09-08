@@ -562,7 +562,9 @@
 
     var fileInput = $("#file");
     var uppie = new Uppie();
-    uppie(fileInput[0], function (fd, files) {
+    uppie(fileInput[0], function (event, fd, files) {
+      event.preventDefault();
+      event.stopPropagation();
       var view = getActiveView();
       uploadInit(view);
       upload(view, fd, files);
@@ -1339,6 +1341,7 @@
     var dropZone = view.find(".dropzone");
     view.register("dragenter", function (event) {
       event.stopPropagation();
+      droppy.activeView = view[0].vId;
       var svg, isInternal = event.dataTransfer.effectAllowed === "copyMove";
       if (view.data("type") === "directory" && isInternal)
         svg = "menu";
@@ -1348,8 +1351,8 @@
         svg = "open";
 
       view.find(".dropzone svg").replaceWith(droppy.svg[svg]);
-
       if (!dropZone.hasClass("in")) dropZone.addClass("in");
+
       getOtherViews($(event.target).parents(".view")[0].vId).find(".dropzone").removeClass("in");
     });
   }
@@ -1357,8 +1360,9 @@
   function bindDropEvents(view) {
     // file drop
     var uppie = new Uppie();
-    uppie(view[0], function (fd, files) {
+    uppie(view[0], function (event, fd, files) {
       if (!files.length) return;
+      event.stopPropagation();
       var view = getActiveView();
       uploadInit(view);
       upload(view, fd, files);
