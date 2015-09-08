@@ -314,6 +314,7 @@
         view = getView(vId);
         if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.data("type", "directory"); // For initial loading
         if (!view.length || view[0].isUploading) return;
+
         if (view.data("type") === "directory") {
           if (msg.folder !== getViewLocation(view)) {
             view[0].currentFile = null;
@@ -1065,6 +1066,10 @@
       var type  = split[0];
       var mtime = Number(split[1]) * 1e3;
       var size  = Number(split[2]);
+
+      // OS X can return NFD form unicode, workaround by normalizing the
+      // displayed form to NFC.
+      if (String.prototype.normalize) name = name.normalize("NFC");
 
       var entry = {
         name      : name,
