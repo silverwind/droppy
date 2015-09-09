@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv   = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
-var fs     = require("graceful-fs");
-var path   = require("path");
-var ut     = require("untildify");
-var hasbin = require("hasbin");
+var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
+var fs    = require("graceful-fs");
+var path  = require("path");
+var ut    = require("untildify");
+var which = require("which");
 
-var pkg    = require("./package.json");
+var pkg   = require("./package.json");
 
 process.title = pkg.name;
 
@@ -82,6 +82,7 @@ if (cmds[cmd]) {
     var cfg   = require("./server/cfg.js");
     var edit  = function edit() {
       findEditor(function (editor) {
+        if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
       });
     };
@@ -149,23 +150,15 @@ function printUsers(users) {
 }
 
 function findEditor(cb) {
-  var env = process.env.VISUAL || process.env.EDITOR;
-
-  // beware the pyramid of doom
-  // https://github.com/nature/hasbin/issues/3
-  if (env) return cb(env);
-  hasbin("vim", function (has) {
-    if (has) return cb("vim");
-    hasbin("vi", function (has) {
-      if (has) return cb("vi");
-      hasbin("nano", function (has) {
-        if (has) return cb("nano");
-        hasbin("pico", function (has) {
-          if (has) return cb("pico");
-          if (/^win/.test(process.platform)) return "notepad";
-          return cb();
-        });
-      });
-    });
-  });
+  var editors = ["vim", "vi", "nano", "pico", "emacs", "npp", "notepad"];
+  (function find(editor) {
+    try {
+      cb(which.sync(editor));
+    } catch(e) {
+      if (editors.length)
+        find(editors.shift());
+      else
+        cb();
+    }
+  })(editors.shift());
 }
