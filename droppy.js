@@ -3,10 +3,6 @@
 
 var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
 var fs    = require("graceful-fs");
-var path  = require("path");
-var ut    = require("untildify");
-var which = require("which");
-
 var pkg   = require("./package.json");
 
 process.title = pkg.name;
@@ -42,14 +38,14 @@ if (argv.configdir || argv.filesdir || argv.home) {
 }
 
 if (argv.log) {
-  var fd;
+  var ut = require("untildify");
+  var path = require("path");
   try {
-    fd = fs.openSync(ut(path.resolve(argv.log)), "a", "644");
+    require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log)), "a", "644"))
   } catch (err) {
     console.error("Unable to open log file for writing: " + err.message);
     process.exit(1);
   }
-  require("./server/log.js").setLogFile(fd);
 }
 
 if (!argv._.length) {
@@ -80,7 +76,23 @@ if (cmds[cmd]) {
   case "config":
     var paths = require("./server/paths.js").get();
     var cfg   = require("./server/cfg.js");
-    var edit  = function edit() {
+    var which = require("which");
+
+    var findEditor = function findEditor(cb) {
+      var editors = ["vim", "vi", "nano", "pico", "emacs", "npp", "notepad"];
+      (function find(editor) {
+        try {
+          cb(which.sync(editor));
+        } catch(e) {
+          if (editors.length)
+            find(editors.shift());
+          else
+            cb();
+        }
+      })(editors.shift());
+    };
+
+    var edit = function edit() {
       findEditor(function (editor) {
         if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
@@ -147,18 +159,4 @@ function printHelp() {
 
 function printUsers(users) {
   console.info("Current Users: " + Object.keys(users).join(", "));
-}
-
-function findEditor(cb) {
-  var editors = ["vim", "vi", "nano", "pico", "emacs", "npp", "notepad"];
-  (function find(editor) {
-    try {
-      cb(which.sync(editor));
-    } catch(e) {
-      if (editors.length)
-        find(editors.shift());
-      else
-        cb();
-    }
-  })(editors.shift());
 }
