@@ -41,7 +41,7 @@ if (argv.log) {
   var ut = require("untildify");
   var path = require("path");
   try {
-    require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log)), "a", "644"))
+    require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log)), "a", "644"));
   } catch (err) {
     console.error("Unable to open log file for writing: " + err.message);
     process.exit(1);
