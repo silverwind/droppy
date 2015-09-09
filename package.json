@@ -50,7 +50,7 @@
     "sanitize-filename": "^1.4.2",
     "uglify-js": "^2.4.24",
     "untildify": "^2.1.0",
-    "uppie": "^0.8.2",
+    "uppie": "^0.8.3",
     "url-format-lax": "^1.0.0",
     "video.js": "^4.12.15",
     "which": "^1.1.2",
