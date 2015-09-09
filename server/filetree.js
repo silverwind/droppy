@@ -1,7 +1,7 @@
 "use strict";
 
 var filetree = new (require("events").EventEmitter)();
-var dirs     = {}, todoDirs = [], noLog = true;
+var dirs     = {}, todoDirs = [], initial = true;
 
 var _        = require("lodash");
 var chalk    = require("chalk");
@@ -44,7 +44,10 @@ function update(dir) {
 
 filetree.updateDir = function updateDir(dir, cb) {
   if (dir === null) { dir = "/"; dirs = {}; }
-  if (noLog) noLog = false; else log.debug(chalk.magenta("Updating " + dir));
+  if (initial) {
+    log.simple("Caching directories ...");
+    initial = false;
+  } else log.debug(chalk.magenta("Updating " + dir));
 
   fs.stat(utils.addFilesPath(dir), function (err, stats) {
     if (err) log.error(err);
@@ -293,7 +296,7 @@ var timer = null;
 
 filetree.updateAll = _.debounce(function updateAll() {
   log.debug(chalk.magenta("Updating file tree from watcher"));
-  noLog = true;
+  initial = true;
   filetree.updateDir(null, function () {
     filetree.emit("updateall");
   });
