@@ -218,15 +218,7 @@
 //  View handling
 // ============================================================================
   function getView(id) {
-    var view;
-    if (id) {
-      return $(droppy.views[id]);
-    } else {
-      droppy.views.every(function (el) { // get first element not undefined
-        view = el;
-      });
-      return $(view);
-    }
+    return $(droppy.views[id]);
   }
 
   function getOtherViews(id) {
@@ -247,6 +239,7 @@
     bindDropEvents(view);
     return getView(vId);
   }
+
   function destroyView(vId) {
     getView(vId).remove();
     droppy.views = droppy.views.filter(function (view, index) { // Remove view from views array
