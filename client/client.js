@@ -237,6 +237,8 @@
     droppy.views[vId] = view[0];
     if (dest) updateLocation(view, dest);
     bindDropEvents(view);
+    bindHoverEvents(view);
+    allowDrop(view);
     return getView(vId);
   }
 
@@ -1220,8 +1222,6 @@
       } else if (view.data("type") === "media") {
         bindMediaArrows(view);
       }
-      bindHoverEvents(view);
-      allowDrop(view);
       if (callback) callback(view);
     }
   }
@@ -1334,7 +1334,6 @@
     });
   }
 
-  // Hover events for upload arrows
   function bindHoverEvents(view) {
     var dropZone = view.find(".dropzone");
     view.register("dragenter", function (event) {
