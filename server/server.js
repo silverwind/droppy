@@ -1044,6 +1044,7 @@ function streamArchive(req, res, zipPath, download) {
 
 // Hourly tasks
 schedule.scheduleJob("* 0 * * *", function hourly() {
+  if (!ready) return;
   // Clean inactive sessions after 1 month of inactivity
   var sessions = db.get("sessions");
   Object.keys(sessions).forEach(function (session) {
