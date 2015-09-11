@@ -56,7 +56,7 @@ var log = function log(req, res, logLevel) {
       req.connection && req.connection.remoteAddress ||
       req.connection && req.connection.socket && req.connection.socket.remoteAddress;
 
-    if (ip && port) elems.unshift(log.formatHostPort(ip, port));
+    if (ip && port) elems.unshift(log.formatUrl(ip, port));
   }
 
   if (logLevel > 0)
@@ -145,11 +145,17 @@ log.logo = function logo() {
   ].join("")));
 };
 
-log.formatHostPort = function formatHostPort(host, port) {
+log.formatUrl = function formatUrl(host, port, proto) {
   var str = format({hostname: host, port: port});
   host = str.substring(0, str.lastIndexOf(":"));
   port = str.substring(str.lastIndexOf(":") + 1, str.length);
-  return chalk.cyan(host) + ":" + chalk.blue(port);
+
+  if (proto === "http" && port === "80" || proto === "https" && port === "443")
+    port = "";
+  else
+    port = chalk.blue(":" + port);
+
+  return chalk.cyan(host) + port;
 };
 
 module.exports = log;

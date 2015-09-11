@@ -150,20 +150,21 @@ function startListeners(callback) {
       if (err) return cb(err);
       server.on("listening", function () {
         setupSocket(server);
+        var proto = socket.opts.proto.toLowerCase();
         if (tlsData) {
           require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
             if (err) return cb(err);
             var cn = (tlsData.selfsigned || !info.commonName) ? info.commonName : "self-signed";
             log.info("Listening on ",
-              socket.opts.proto.toLowerCase() + "://" +
-              log.formatHostPort(server.address().address, server.address().port) +
+              chalk.blue(proto + "://") +
+              log.formatUrl(server.address().address, server.address().port, proto) +
               " (CN: " + chalk.yellow(cn) + ")");
             cb();
           });
         } else {
           log.info("Listening on ",
-            socket.opts.proto.toLowerCase() + "://" +
-            log.formatHostPort(server.address().address, server.address().port)
+            chalk.blue(proto + "://") +
+            log.formatUrl(server.address().address, server.address().port, proto)
           );
           cb();
         }
