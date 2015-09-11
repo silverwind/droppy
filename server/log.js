@@ -113,11 +113,6 @@ log.error = function error(err) {
   log(null, null, 1, chalk.red(output));
 };
 
-log.simple = function simple() {
-  if (opts && opts.logLevel < 2) return;
-  log(null, null, 0, chalk.magenta("• ") + Array.prototype.slice.call(arguments, 0).join(""));
-};
-
 log.plain = function plain() {
   if (opts && opts.logLevel < 2) return;
   log(null, null, 0, Array.prototype.slice.call(arguments, 0).join(""));
@@ -137,7 +132,7 @@ log.timestamp = function timestamp() {
   if (hrs   < 10) hrs   = "0" + hrs;
   if (mins  < 10) mins  = "0" + mins;
   if (secs  < 10) secs  = "0" + secs;
-  return chalk.yellow(year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs);
+  return year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
 };
 
 log.logo = function logo() {

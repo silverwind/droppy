@@ -45,7 +45,7 @@ function update(dir) {
 filetree.updateDir = function updateDir(dir, cb) {
   if (dir === null) { dir = "/"; dirs = {}; }
   if (initial) {
-    log.simple("Caching directories ...");
+    log.info("Caching directories ...");
     initial = false;
   } else log.debug(chalk.magenta("Updating " + dir));
 

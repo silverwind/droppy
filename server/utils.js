@@ -260,7 +260,7 @@ utils.tlsSetup = function tlsSetup(opts, callback) {
         pem.getDhparamInfo(dhparam, function (err, info) {
           if (err) return callback(err);
           if (info.size < 1024) {
-            log.simple("DH parameters key too short, regenerating");
+            log.info("DH parameters key too short, regenerating");
             createDH(function (err, dh) {
               if (err) return callback(err);
               finish(dh);
@@ -292,7 +292,7 @@ utils.tlsSetup = function tlsSetup(opts, callback) {
         pem.getDhparamInfo(data.dhparam, function (err, info) {
           if (err) return callback(err);
           if (info.size < 1024) {
-            log.simple("DH parameters key too short, regenerating");
+            log.info("DH parameters key too short, regenerating");
             createDH(function (err, dhparam) {
               if (err) return callback(err);
               data.dhparam = dhparam;
@@ -326,7 +326,7 @@ utils.countOccurences = function countOccurences(string, search) {
 };
 
 function createDH(cb) {
-  log.simple("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
+  log.info("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
   pem.createDhparam(DHPARAM_BITS, function (err, result) {
     if (err) return cb(err);
     db.set("dhparam", result.dhparam);

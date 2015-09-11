@@ -57,7 +57,7 @@ var droppy = function droppy(options, isStandalone, callback) {
       cb();
     },
     function (cb) {
-      log.simple("Loading " + (!config.debug ? "and minifying " : "") + "resources ...");
+      log.info("Loading " + (!config.debug ? "and minifying " : "") + "resources ...");
       resources.init(!config.debug, function (err, c) { cache = c; cb(err); });
     },
     function (cb) { cleanupTemp(); cb(); },
@@ -81,7 +81,7 @@ var droppy = function droppy(options, isStandalone, callback) {
   ], function (err) {
     if (err) return callback(err);
     ready = true;
-    log.simple(chalk.green("Ready for requests!"));
+    log.info(chalk.green("Ready for requests!"));
     callback();
   });
 };
@@ -154,14 +154,14 @@ function startListeners(callback) {
           require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
             if (err) return cb(err);
             var cn = (tlsData.selfsigned || !info.commonName) ? info.commonName : "self-signed";
-            log.simple("Listening on ",
+            log.info("Listening on ",
               socket.opts.proto.toLowerCase() + "://" +
               log.formatHostPort(server.address().address, server.address().port) +
               " (CN: " + chalk.yellow(cn) + ")");
             cb();
           });
         } else {
-          log.simple("Listening on ",
+          log.info("Listening on ",
             socket.opts.proto.toLowerCase() + "://" +
             log.formatHostPort(server.address().address, server.address().port)
           );
@@ -171,10 +171,10 @@ function startListeners(callback) {
 
       server.on("error", function (err) {
         if (err.code === "EADDRINUSE")
-          log.simple(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+          log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
                 chalk.blue(socket.port), chalk.red(". Address already in use"));
         else if (err.code === "EACCES")
-          log.simple(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+          log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
                 chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024"));
         else
           log.error(err);
@@ -1073,7 +1073,7 @@ function setupProcess(standalone) {
 // Process shutdown
 function endProcess(signal) {
   var count = 0;
-  log.simple("Received " + chalk.red(signal) + " - Shutting down ...");
+  log.info("Received " + chalk.red(signal) + " - Shutting down ...");
   Object.keys(clients).forEach(function (sid) {
     if (!clients[sid] || !clients[sid].ws) return;
     if (clients[sid].ws.readyState < 2) {
@@ -1081,7 +1081,7 @@ function endProcess(signal) {
       clients[sid].ws.close(1001);
     }
   });
-  if (count > 0) log.simple("Closed " + count + " WebSocket" + (count > 1 ? "s" : ""));
+  if (count > 0) log.info("Closed " + count + " WebSocket" + (count > 1 ? "s" : ""));
   try { fs.unlinkSync(paths.pid); } catch(err) {}
   process.exit(0);
 }

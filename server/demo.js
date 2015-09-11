@@ -49,7 +49,7 @@ demo.refresh = function refresh(doneCallback) {
       ], callback);
     }
   ], function () {
-    log.simple("Demo refreshed");
+    log.info("Demo refreshed");
     filetree.updateAll();
     if (doneCallback) doneCallback();
   });
@@ -69,7 +69,7 @@ function get(url, dest) {
           stream.on("close", function () {
             utils.copyFile(temp, dest, callback);
           });
-          log.simple(chalk.yellow("GET ") + url);
+          log.info(chalk.yellow("GET ") + url);
           request(url).pipe(stream);
         } else {
           utils.copyFile(temp, dest, callback);
@@ -85,7 +85,7 @@ function getZip(url, dest, zipDest) {
     utils.mkdir([dest, path.dirname(zipDest)], function () {
       fs.stat(zipDest, function (err, stats) {
         if (err || !stats.size) {
-          log.simple(chalk.yellow("GET ") + url);
+          log.info(chalk.yellow("GET ") + url);
           request({url: url, encoding: null}, function (err, _, data) {
             if (err) return callback(err);
             fs.writeFile(zipDest, data, function (err) {
