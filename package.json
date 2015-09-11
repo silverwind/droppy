@@ -47,7 +47,7 @@
     "readdirp": "^2.0.0",
     "request": "^2.61.0",
     "rimraf": "^2.4.3",
-    "sanitize-filename": "^1.4.2",
+    "sanitize-filename": "^1.4.3",
     "uglify-js": "^2.4.24",
     "untildify": "^2.1.0",
     "uppie": "^0.8.3",
