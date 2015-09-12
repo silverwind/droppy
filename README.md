@@ -1,6 +1,6 @@
 # droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 
-droppy is a self-hosted cloud server with an interface similar to desktop file managers and has capabilites to edit files on-the-fly as well as view and playback media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
+droppy is a self-hosted cloud server with an interface similar to desktop file managers and has capabilites to edit files as well as view and playback media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
 
 ### Features
 * Fully responsive HTML5 interface
@@ -14,7 +14,7 @@ droppy is a self-hosted cloud server with an interface similar to desktop file m
 * Edit text files in a heavily customized CodeMirror
 * Supports latest node.js/io.js (min: 0.10) and all modern browsers
 
-### Installation
+### Install
 ```
 $ [sudo] npm install -g droppy
 $ droppy start
@@ -27,7 +27,7 @@ To store configuration and files, these two directories will be used:
 
 By default, the server listens on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
 
-### Configuration
+### Configure
 Run `droppy config` to edit `config/config.json`, which is created with these defaults:
 ```javascript
 {
@@ -49,7 +49,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 }
 ```
 ### Options
-- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See the details of the [listener object](#listener-object) below. `listeners` has no effect when droppy is used as a module.
+- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
 - `debug` {Boolean} - When enabled, skips resource minification and enables CSS reloading.
 - `keepAlive` {Number} - The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
 - `linkLength` {Number} - The amount of characters in a share link.
@@ -59,10 +59,10 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `timestamps` {Boolean} - When enabled, adds timestamps to log output.
 - `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file system, in milliseconds.
 
-<a name="listener-object" />
-### Listener Object
+<a name="listener-options" />
+#### Listener Options
 
-`listeners` defines on which interfaces, ports and protcol the server will listen. For example:
+`listeners` defines on which interfaces, ports and protcol(s) the server will listen. For example:
 
 ```javascript
 "listeners": [
@@ -125,7 +125,7 @@ Returns `function onRequest(req, res)`. All arguments are optional.
 - [Installation as debian initscript](https://github.com/silverwind/droppy/wiki/Debian-Installation)
 - [Reverse proxying through nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 
-### wget
+### Note about wget
 For correct filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
 
 ```ini
