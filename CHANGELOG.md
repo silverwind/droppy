@@ -1,4 +1,10 @@
-#### Version 3.0.0 - 7/2/2015
+#### Version 3.1.0 - 9/13/2015
+
+- Fixed a bug where configuration could get lost when the server shuts down during a save operation.
+- Extended the default self-signed certificate validity to 100 years.
+- Prime generation for Perfect Forward Secrecy is now supported cross-platform.
+
+#### Version 3.0.0 - 9/2/2015
 
 - Deprecated `--home` option in favor of `--configdir` and `--filesdir`. The old option is still supported, but files in `<configdir>/config` will be migrated to `<configdir>`. If `--filesdir` is not given, it will default to `<configdir>/files`.
 - The module API has been changed to not take a `home` option anymore. Instead, `options` now takes additional `configdir` and `filesdir`.
