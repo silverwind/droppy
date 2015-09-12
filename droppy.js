@@ -61,7 +61,10 @@ if (cmds[cmd]) {
   switch (cmd) {
   case "start":
     require("./server/server.js")(null, true, function (err) {
-      if (err) { console.error("\n" + new Error(err.message || err).stack); process.exit(1); }
+      if (err) {
+        console.error("\n" + new Error(err.message || err).stack);
+        setTimeout(process.exit.bind(null, 1), 3000);
+      }
     });
     break;
   case "version":

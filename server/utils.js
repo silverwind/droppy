@@ -6,6 +6,7 @@ var async    = require("async");
 var cd       = require("content-disposition");
 var cpr      = require("cpr");
 var crypto   = require("crypto");
+var dhparam  = require("dhparam");
 var ext      = require("file-extension");
 var fs       = require("graceful-fs");
 var isBin    = require("isbinaryfile");
@@ -29,7 +30,7 @@ var forceBinaryTypes = [
 ];
 
 var DHPARAM_BITS = 2048;
-var CERT_DAYS = 365;
+var CERT_DAYS = 36500;
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
@@ -205,7 +206,7 @@ utils.tlsInit = function tlsInit(opts, cb) {
   } else cbs[opts.index].push(cb);
 };
 
-utils.tlsSetup = function tlsSetup(opts, callback) {
+utils.tlsSetup = function tlsSetup(opts, cb) {
   opts.honorCipherOrder = true;
 
   // Slightly more secure options for 0.10.x
@@ -235,80 +236,35 @@ utils.tlsSetup = function tlsSetup(opts, callback) {
       var ca      = data[2];
       var dhparam = data[3];
 
-      if (!key)  return callback(new Error("Unable to read TLS key: " + certPaths[0]));
-      if (!cert) return callback(new Error("Unable to read TLS certificate: " + certPaths[1]));
-      if (opts.ca && !ca) return callback(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
-      if (opts.dhparam && !dhparam) return callback(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
+      if (!key)  return cb(new Error("Unable to read TLS key: " + certPaths[0]));
+      if (!cert) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
+      if (opts.ca && !ca) return cb(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
+      if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
-      var finish = function finish(dhparam) {
-        // Split combined certificate and intermediate
-        if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
-          ca   = cert.substring(cert.lastIndexOf(certStart));
-          cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
-        }
-
-        callback(null, {
-          selfsigned : false,
-          key        : key,
-          cert       : cert,
-          ca         : ca,
-          dhparam    : dhparam
-        });
-      };
-
-      if (dhparam) {
-        pem.getDhparamInfo(dhparam, function (err, info) {
-          if (err) return callback(err);
-          if (info.size < 1024) {
-            log.info("DH parameters key too short, regenerating");
-            createDH(function (err, dh) {
-              if (err) return callback(err);
-              finish(dh);
-            });
-          } else {
-            finish(dhparam);
-          }
-        });
-      } else {
-        var saved = db.get("dhparam");
-        if (saved) return finish(saved);
-
-        createDH(function (err, dhparam) {
-          if (err) return callback(err);
-          finish(dhparam);
-        });
+      // Split combined certificate and intermediate
+      if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
+        ca   = cert.substring(cert.lastIndexOf(certStart));
+        cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
       }
+
+      cb(null, {
+        selfsigned : false,
+        key        : key,
+        cert       : cert,
+        ca         : ca,
+        dhparam    : dhparam || db.get("dhparam") || createDH()
+      });
     });
   } else { // Use self-signed certs
     pem.createCertificate({days: CERT_DAYS, selfSigned: true}, function (err, keys) {
-      if (err) return callback(err);
+      if (err) return cb(err);
       var data = {
         selfsigned : true,
         key        : keys.serviceKey,
         cert       : keys.certificate,
-        dhparam    : db.get("dhparam")
+        dhparam    : db.get("dhparam") || createDH()
       };
-      if (data.dhparam) {
-        pem.getDhparamInfo(data.dhparam, function (err, info) {
-          if (err) return callback(err);
-          if (info.size < 1024) {
-            log.info("DH parameters key too short, regenerating");
-            createDH(function (err, dhparam) {
-              if (err) return callback(err);
-              data.dhparam = dhparam;
-              callback(null, data);
-            });
-          } else {
-            callback(null, data);
-          }
-        });
-      } else {
-        createDH(function (err, dhparam) {
-          if (err) return callback(err);
-          data.dhparam = dhparam;
-          callback(null, data);
-        });
-      }
+      cb(null, data);
     });
   }
 };
@@ -325,13 +281,11 @@ utils.countOccurences = function countOccurences(string, search) {
   return num;
 };
 
-function createDH(cb) {
+function createDH() {
   log.info("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
-  pem.createDhparam(DHPARAM_BITS, function (err, result) {
-    if (err) return cb(err);
-    db.set("dhparam", result.dhparam);
-    cb(null, result.dhparam);
-  });
+  var dh = dhparam(DHPARAM_BITS);
+  db.set("dhparam", dh);
+  return dh;
 }
 
 function readFile(p, cb) {

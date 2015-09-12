@@ -73,8 +73,7 @@ db.get = function get(key) {
 
 db.set = function set(key, value, callback) {
   database[key] = value;
-  write();
-  if (callback) callback();
+  write(callback);
 };
 
 db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged, callback) {
