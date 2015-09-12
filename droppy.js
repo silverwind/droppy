@@ -83,7 +83,7 @@ if (cmds[cmd]) {
       (function find(editor) {
         try {
           cb(which.sync(editor));
-        } catch(e) {
+        } catch (e) {
           if (editors.length)
             find(editors.shift());
           else

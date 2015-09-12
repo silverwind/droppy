@@ -57,7 +57,7 @@ utils.rmSync = function rmSync(p) {
   (function run() {
     try {
       rimraf.sync(p);
-    } catch(e) {
+    } catch (e) {
       if (tries-- > 0) run();
     }
   })();

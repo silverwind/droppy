@@ -1084,6 +1084,6 @@ function endProcess(signal) {
     }
   });
   if (count > 0) log.info("Closed " + count + " WebSocket" + (count > 1 ? "s" : ""));
-  try { fs.unlinkSync(paths.pid); } catch(err) {}
+  try { fs.unlinkSync(paths.pid); } catch (err) {}
   process.exit(0);
 }
