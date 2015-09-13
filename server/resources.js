@@ -379,26 +379,22 @@ resources.compileCSS = function compileCSS() {
 
 resources.compileHTML = function compileHTML(res) {
   var html = {};
+  var min = function min(html) {
+    return minify ? htmlMinifier.minify(html, opts.htmlMinifier) : html;
+  }
   resources.files.html.forEach(function (file) {
     var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
       .replace(/\{\{version\}\}/gm, pkg.version)
       .replace(/\{\{name\}\}/gm, pkg.name)
       .replace(/\{\{engine\}\}/gm, require("detect-engine") + " " + process.version.substring(1));
-
-    // Add SVGs
-    data = addSVG(data);
-
-    // Minify
-    if (minify) data = htmlMinifier.minify(data, opts.htmlMinifier);
-
-    html[path.basename(file)] = data;
+    html[path.basename(file)] = addSVG(data);
   });
 
   // Combine pages
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "main");
   res["main.html"] = {
-    data: new Buffer($("#page").replaceWith(html["main.html"]).end().html()),
+    data: new Buffer(min($("#page").replaceWith(html["main.html"]).end().html())),
     etag: etag(),
     mime: mime("html")
   };
@@ -406,7 +402,7 @@ resources.compileHTML = function compileHTML(res) {
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "auth");
   res["auth.html"] = {
-    data: new Buffer($("#page").replaceWith(html["auth.html"]).end().html()),
+    data: new Buffer(min($("#page").replaceWith(html["auth.html"]).end().html())),
     etag: etag(),
     mime: mime("html")
   };
@@ -414,7 +410,7 @@ resources.compileHTML = function compileHTML(res) {
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "firstrun");
   res["firstrun.html"] = {
-    data: new Buffer($("#page").replaceWith(html["auth.html"]).end().html()),
+    data: new Buffer(min($("#page").replaceWith(html["auth.html"]).end().html())),
     etag: etag(),
     mime: mime("html")
   };
