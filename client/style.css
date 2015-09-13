@@ -1098,7 +1098,7 @@ html:not(.mobile) .vjs-big-play-button {
   background: #eee;
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  color: #666;
+  color: #333;
   height: 150px;
   left: 50%;
   top: 50%;
@@ -1112,13 +1112,6 @@ html:not(.mobile) .vjs-big-play-button {
   z-index: 64;
 }
 #about-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
-
-#about-content {
-  color: #333;
-  margin-left: 5%;
-  width: 90%;
-  text-align: center;
-}
 
 #about-title {
   font-size: 1.3em;
@@ -1136,7 +1129,8 @@ html:not(.mobile) .vjs-big-play-button {
 #about-copy {
   bottom: 0;
   font-size: .7em;
-  margin-bottom: .3em;
+  margin-bottom: .2em;
+  width: 300px;
   position: absolute;
 }
 
@@ -1149,7 +1143,6 @@ html:not(.mobile) .vjs-big-play-button {
 #about-fork {
   font-size: .66em;
   color: #333;
-  padding-right: .3em;
   border-radius: .4em;
 }
 

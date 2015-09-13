@@ -1,7 +1,6 @@
 "use strict";
 
 var paths     = {};
-
 var fs        = require("fs");
 var path      = require("path");
 var untildify = require("untildify");
