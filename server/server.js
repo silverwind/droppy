@@ -32,7 +32,6 @@ var clients       = {};
 var clientsPerDir = {};
 var config        = null;
 var firstRun      = null;
-var hasServer     = null;
 var ready         = false;
 
 var droppy = function droppy(options, isStandalone, callback) {
@@ -86,28 +85,22 @@ var droppy = function droppy(options, isStandalone, callback) {
   });
 };
 
-function onRequest(req, res, next) {
+function onRequest(req, res) {
   req.time = Date.now();
-  var method = req.method.toUpperCase();
-  if (!hasServer && req.socket.server) setupSocket(req.socket.server);
-  if (!ready) { // Show a simple self-reloading loading page during startup
-    res.statusCode = 503;
-    res.end("<!DOCTYPE html><html><head><title>droppy - starting ...</title></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},2000)</script></body></html>");
-  } else {
-    while (req.url.indexOf("\u0000") !== -1) req.url = req.url.replace(/\%00/g, ""); // Strip all null-bytes from the url
-    if (method === "GET") {
-      handleGET(req, res, next);
-    } else if (method === "POST") {
-      handlePOST(req, res, next);
-    } else if (method === "OPTIONS") {
-      res.setHeader("Allow", "GET,POST,OPTIONS");
-      res.end();
-      log.info(req, res);
+  if (ready) {
+    // Strip null-bytes from the url
+    while (req.url.indexOf("\u0000") !== -1) req.url = req.url.replace(/\%00/g, "");
+    if (req.method === "GET") {
+      handleGET(req, res);
+    } else if (req.method === "POST") {
+      handlePOST(req, res);
     } else {
       res.statusCode = 405;
       res.end();
-      log.info(req, res);
     }
+  } else {
+    res.statusCode = 503;
+    res.end("<!DOCTYPE html><html><head><title>droppy - starting up</title></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},2000)</script></body></html>");
   }
 }
 
@@ -228,7 +221,6 @@ function createListener(handler, opts, callback) {
 
 // WebSocket functions
 function setupSocket(server) {
-  hasServer = true;
   var wss = new Wss({
     server: server,
     verifyClient: function (info, cb) {
