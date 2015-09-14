@@ -142,6 +142,7 @@ function startListeners(callback) {
     createListener(onRequest, socket.opts, function (err, server, tlsData) {
       if (err) return cb(err);
       server.on("listening", function () {
+        server.removeAllListeners("error");
         setupSocket(server);
         var proto = socket.opts.proto.toLowerCase();
         if (tlsData) {
