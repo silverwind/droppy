@@ -13,10 +13,10 @@ var isBin    = require("isbinaryfile");
 var mkdirp   = require("mkdirp");
 var mv       = require("mv");
 var path     = require("path");
-var pem      = require("pem");
 var rimraf   = require("rimraf");
 var sanitize = require("sanitize-filename");
 var util     = require("util");
+var ut       = require("untildify");
 
 var db     = require("./db.js");
 var log    = require("./log.js");
@@ -214,8 +214,8 @@ utils.tlsSetup = function tlsSetup(opts, cb) {
     return cb(new Error("Missing TLS option 'cert'"));
 
   var certPaths = [
-    path.resolve(paths.config, opts.key),
-    path.resolve(paths.config, opts.cert),
+    path.resolve(paths.config, ut(opts.key)),
+    path.resolve(paths.config, ut(opts.cert)),
     opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
     opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
   ];
@@ -270,7 +270,6 @@ function createDH() {
 
 function readFile(p, cb) {
   if (typeof p !== "string") return cb(null);
-
   fs.stat(p, function (_, stats) {
     if (stats && stats.isFile()) {
       fs.readFile(p, function (err, data) {

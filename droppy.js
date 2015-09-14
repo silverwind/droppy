@@ -3,6 +3,7 @@
 
 var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
 var fs    = require("graceful-fs");
+var chalk = require("chalk");
 var pkg   = require("./package.json");
 
 process.title = pkg.name;
@@ -62,8 +63,8 @@ if (cmds[cmd]) {
   case "start":
     require("./server/server.js")(null, true, function (err) {
       if (err) {
-        console.error("\n" + new Error(err.message || err).stack);
-        setTimeout(process.exit.bind(null, 1), 3000);
+        console.error("[" + chalk.red("ERROR") + "] " + chalk.red(err));
+        process.exit(1);
       }
     });
     break;

@@ -16,7 +16,8 @@ db.init = function init(callback) {
       if (err.code === "ENOENT") {
         database = defaults;
         mkdirp(path.dirname(dbFile), function () {
-          write(callback);
+          write();
+          callback();
         });
       } else {
         callback(err);
@@ -61,7 +62,8 @@ db.init = function init(callback) {
           });
         }
 
-        write(callback);
+        write();
+        callback();
       });
     }
   });
@@ -71,12 +73,12 @@ db.get = function get(key) {
   return database[key];
 };
 
-db.set = function set(key, value, callback) {
+db.set = function set(key, value) {
   database[key] = value;
-  write(callback);
+  write();
 };
 
-db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged, callback) {
+db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged) {
   var salt = crypto.randomBytes(4).toString("hex");
 
   database.users[user] = {
@@ -84,17 +86,16 @@ db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged, callba
     privileged: privileged
   };
 
-  write(callback);
+  write();
 };
 
-db.delUser = function delUser(user, callback) {
+db.delUser = function delUser(user) {
   if (database.users[user]) {
     delete database.users[user];
-    write(function (err) {
-      callback(err, true);
-    });
+    write();
+    return true;
   } else {
-    callback(null, false);
+    return false;
   }
 };
 
@@ -110,10 +111,8 @@ db.authUser = function authUser(user, pass) {
   return false;
 };
 
-function write(callback) {
-  fs.writeFile(dbFile, JSON.stringify(database, null, 2), function () {
-    if (callback) callback();
-  });
+function write() {
+  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
 }
 
 function getHash(string) {

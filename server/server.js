@@ -366,19 +366,16 @@ function setupSocket(server) {
         if (!db.get("sessions")[cookie] || !db.get("sessions")[cookie].privileged) return;
         if (pass === "") {
           if (!db.get("users")[name]) return;
-          db.delUser(msg.data.name, function () {
-            log.info(ws, null, "Deleted user: ", chalk.magenta(name));
-            sendUsers(sid);
-          });
+          if (db.delUser(msg.data.name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
+          sendUsers(sid);
         } else {
           var isNew = !db.get("users")[name];
-          db.addOrUpdateUser(name, pass, msg.data.priv, function () {
-            if (isNew)
-              log.info(ws, null, "Added user: ", chalk.magenta(name));
-            else
-              log.info(ws, null, "Updated user: ", chalk.magenta(name));
-            sendUsers(sid);
-          });
+          db.addOrUpdateUser(name, pass, msg.data.priv);
+          if (isNew)
+            log.info(ws, null, "Added user: ", chalk.magenta(name));
+          else
+            log.info(ws, null, "Updated user: ", chalk.magenta(name));
+          sendUsers(sid);
         }
         if (db.get("sessions")[cookie].privileged) sendUsers(sid);
         break;
@@ -986,9 +983,8 @@ function cleanupLinks(callback) {
             delete links[shareLink];
           }
           if (cbcount === linkcount) {
-            db.set("links", links, function () {
-              callback();
-            });
+            db.set("links", links);
+            callback();
           }
         });
       })(link, links[link].location);
