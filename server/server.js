@@ -159,9 +159,7 @@ function startListeners(callback) {
           );
           cb();
         }
-      });
-
-      server.on("error", function (err) {
+      }).on("error", function (err) {
         if (err.code === "EADDRINUSE")
           log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
                 chalk.blue(socket.port), chalk.red(". Address already in use"));
@@ -171,8 +169,7 @@ function startListeners(callback) {
         else
           log.error(err);
         return cb(err);
-      });
-      server.listen(socket.port, socket.host);
+      }).listen(socket.port, socket.host);
     });
   }, callback);
 }
