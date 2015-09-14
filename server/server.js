@@ -145,15 +145,12 @@ function startListeners(callback) {
         setupSocket(server);
         var proto = socket.opts.proto.toLowerCase();
         if (tlsData) {
-          require("pem").readCertificateInfo(tlsData.cert, function (err, info) {
-            if (err) return cb(err);
-            var cn = (tlsData.selfsigned || !info.commonName) ? info.commonName : "self-signed";
-            log.info("Listening on ",
-              chalk.blue(proto + "://") +
-              log.formatUrl(server.address().address, server.address().port, proto) +
-              " (CN: " + chalk.yellow(cn) + ")");
-            cb();
-          });
+          var cn = require("x509").getSubject(tlsData.cert).commonName;
+          log.info("Listening on ",
+            chalk.blue(proto + "://") +
+            log.formatUrl(server.address().address, server.address().port, proto) +
+            (cn ? " (" + chalk.yellow(cn) + ")" : ""));
+          cb();
         } else {
           log.info("Listening on ",
             chalk.blue(proto + "://") +

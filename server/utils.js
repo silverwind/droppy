@@ -30,7 +30,6 @@ var forceBinaryTypes = [
 ];
 
 var DHPARAM_BITS = 2048;
-var CERT_DAYS = 36500;
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
@@ -209,64 +208,45 @@ utils.tlsInit = function tlsInit(opts, cb) {
 utils.tlsSetup = function tlsSetup(opts, cb) {
   opts.honorCipherOrder = true;
 
-  // Slightly more secure options for 0.10.x
-  if (/^v0\.10/.test(process.version)) {
-    opts.ciphers = "ECDHE-RSA-AES256-SHA:AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM";
-  } else {
-    opts.ciphers = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:" +
-      "ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:" +
-      "DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:" +
-      "DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA";
-  }
+  if (typeof opts.key !== "string")
+    return cb(new Error("Missing TLS option 'key'"));
+  if (typeof opts.cert !== "string")
+    return cb(new Error("Missing TLS option 'cert'"));
 
-  if (typeof opts.key === "string" && typeof opts.cert === "string") {
-    var certPaths = [
-      path.resolve(paths.config, opts.key),
-      path.resolve(paths.config, opts.cert),
-      opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
-      opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
-    ];
+  var certPaths = [
+    path.resolve(paths.config, opts.key),
+    path.resolve(paths.config, opts.cert),
+    opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
+    opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
+  ];
 
-    async.map(certPaths, readFile, function (_, data) {
-      var certStart = "-----BEGIN CERTIFICATE-----";
-      var certEnd   = "-----END CERTIFICATE-----";
+  async.map(certPaths, readFile, function (_, data) {
+    var certStart = "-----BEGIN CERTIFICATE-----";
+    var certEnd   = "-----END CERTIFICATE-----";
 
-      var key     = data[0];
-      var cert    = data[1];
-      var ca      = data[2];
-      var dhparam = data[3];
+    var key     = data[0];
+    var cert    = data[1];
+    var ca      = data[2];
+    var dhparam = data[3];
 
-      if (!key)  return cb(new Error("Unable to read TLS key: " + certPaths[0]));
-      if (!cert) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
-      if (opts.ca && !ca) return cb(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
-      if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
+    if (!key)  return cb(new Error("Unable to read TLS key: " + certPaths[0]));
+    if (!cert) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
+    if (opts.ca && !ca) return cb(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
+    if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
-      // Split combined certificate and intermediate
-      if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
-        ca   = cert.substring(cert.lastIndexOf(certStart));
-        cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
-      }
+    // Split combined certificate and intermediate
+    if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
+      ca   = cert.substring(cert.lastIndexOf(certStart));
+      cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
+    }
 
-      cb(null, {
-        selfsigned : false,
-        key        : key,
-        cert       : cert,
-        ca         : ca,
-        dhparam    : dhparam || db.get("dhparam") || createDH()
-      });
+    cb(null, {
+      key        : key,
+      cert       : cert,
+      ca         : ca,
+      dhparam    : dhparam || db.get("dhparam") || createDH()
     });
-  } else { // Use self-signed certs
-    pem.createCertificate({days: CERT_DAYS, selfSigned: true}, function (err, keys) {
-      if (err) return cb(err);
-      var data = {
-        selfsigned : true,
-        key        : keys.serviceKey,
-        cert       : keys.certificate,
-        dhparam    : db.get("dhparam") || createDH()
-      };
-      cb(null, data);
-    });
-  }
+  });
 };
 
 utils.countOccurences = function countOccurences(string, search) {

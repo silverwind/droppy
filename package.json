@@ -43,7 +43,6 @@
     "mousetrap": "^1.5.3",
     "mv": "^2.1.1",
     "node-schedule": "^0.2.9",
-    "pem": "https://github.com/silverwind/pem/archive/dhparaminfo.tar.gz",
     "postcss": "^5.0.5",
     "readdirp": "^2.0.0",
     "request": "^2.61.0",
@@ -56,6 +55,7 @@
     "video.js": "^4.12.15",
     "which": "^1.1.2",
     "ws": "^0.8.0",
+    "x509": "^0.2.2",
     "yauzl": "^2.3.1",
     "yazl": "^2.2.2"
   },
