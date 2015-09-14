@@ -381,7 +381,8 @@ resources.compileHTML = function compileHTML(res) {
   var html = {};
   var min = function min(html) {
     return minify ? htmlMinifier.minify(html, opts.htmlMinifier) : html;
-  }
+  };
+
   resources.files.html.forEach(function (file) {
     var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
       .replace(/\{\{version\}\}/gm, pkg.version)
