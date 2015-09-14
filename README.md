@@ -25,7 +25,7 @@ To store configuration and files, these two directories will be used:
 - `~/.droppy`: configuration directory. Override with `--configdir`.
 - `~/.droppy/files`: files directory. Override with `--filesdir`.
 
-By default, the server listens on [http://localhost:8989/](http://localhost:8989/). On first startup, a prompt for username and password for the first account will appear.
+By default, the server listens on `http://0.0.0.0:8989/` and `http://[::]:8989`. On first login, a prompt for username and password for the first account will appear.
 
 ### Configure
 Run `droppy config` to edit `config/config.json`, which is created with these defaults:
