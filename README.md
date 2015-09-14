@@ -49,15 +49,15 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 }
 ```
 ### Options
-- `listeners` {Array} - Defines on which interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
-- `debug` {Boolean} - When enabled, skips resource minification and enables CSS reloading.
-- `keepAlive` {Number} - The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
-- `linkLength` {Number} - The amount of characters in a share link.
-- `logLevel` {Number} - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
-- `maxFileSize` {Number} - The maximum file size in bytes a user can upload in a single file.
-- `public` {Boolean} - When enabled, no authentication is performed.
-- `timestamps` {Boolean} - When enabled, adds timestamps to log output.
-- `updateInterval` {Number} - Interval in which a single client can receive updates through changes in the file system, in milliseconds.
+- `listeners` *Array* - Defines on which interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
+- `debug` *Boolean* - When enabled, skips resource minification and enables CSS reloading.
+- `keepAlive` *Number* - The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
+- `linkLength` *Number* - The amount of characters in a share link.
+- `logLevel` *Number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
+- `maxFileSize` *Number* - The maximum file size in bytes a user can upload in a single file.
+- `public` *Boolean* - When enabled, no authentication is performed.
+- `timestamps` *Boolean* - When enabled, adds timestamps to log output.
+- `updateInterval` *Number* - Interval in which a single client can receive updates through changes in the file system, in milliseconds.
 
 <a name="listener-options" />
 #### Listener Options
@@ -75,11 +75,11 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
         "host"     : "0.0.0.0",
         "port"     : 443,
         "protocol" : "https",
-        "hsts"     : 31536000,
-        "key"      : "config/tls.key",
-        "cert"     : "config/tls.crt",
-        "ca"       : "config/tls.ca",
-        "dhparam"  : "config/tls.dhparam"
+        "key"      : "~/certs/tls.key",
+        "cert"     : "~/certs/tls.crt",
+        "ca"       : "~/certs/tls.ca",
+        "dhparam"  : "~/certs/tls.dhparam",
+        "hsts"     : 31536000
     }
 ]
 ```
@@ -88,16 +88,18 @@ The above configuration will result in:
 - HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
 
 A listener object accepts these options:
-- `host` {String/Array} - Network interface(s) to listen on. Use an array for multiple interfaces.
-- `port` {Number/Array} - Port(s) to listen on. Use an array for multiple ports.
-- `protocol` {String} - Protocol to use, `http` or `https`.
-- `hsts` {Number} - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
-- `key` {String} - Path to the SSL/TLS private key file. If ommitted, uses self-generated key.
-- `cert` {String} - Path to the SSL/TLS certificate file. If ommitted, uses self-signed certificate.
-- `ca` {String} - Path to the SSL/TLS intermediate certificate file. Optional.
-- `dhparam` {String} - Path to the SSL/TLS Diffie Hellman parameters file. Optional. If ommitted, new 2048 bit parameters will created and saved for later use.
+- `host` *String/Array* - Network interface(s) to listen on. Required.
+- `port` *Number/Array* - Network port(s) to listen on. Required.
+- `protocol` *String* - Protocol to use, `http` or `https`. Required.
 
-*Note: SSL/TLS paths are relative to the home folder, but can be defined as absolute too. If your certificate file includes an intermediate certificate, it will be detected and used. There's no need to specify `ca` in this case.*
+For SSL/TLS these additional options are available:
+- `key` *String* - Path to PEM-encoded SSL/TLS private key file. Required.
+- `cert` *String* - Path to PEM-encoded SSL/TLS certificate file. Required.
+- `ca` *String* - Path to PEM-encoded SSL/TLS intermediate certificate file.
+- `dhparam` *String* - Path to PEM-encoded SSL/TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use.
+- `hsts` *Number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
+
+*Note: Unless given absolute, SSL/TLS paths are relative to the config folder. If your certificate file includes an concatenated intermediate certificate, it will be detected and used, there's no need to specify `ca` in this case.*
 
 ### API
 droppy can be used with [express](https://github.com/strongloop/express) like this:
