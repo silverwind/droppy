@@ -1,4 +1,4 @@
-/* jshint jquery: false */
+/* eslint-disable space-before-keywords  */
 "use strict";
 
 var resources = {}, svgData = {}, minify, $;
