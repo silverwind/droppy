@@ -2206,7 +2206,8 @@
       var others = document.getElementsByTagName("script")[0];
       others.parentNode.insertBefore(script, others);
       var list = loading[mode] = [cont];
-      var count = 0, poll = setInterval(function () {
+      var count = 0;
+      var poll = setInterval(function () {
         if (++count > 100) return clearInterval(poll);
         if (CodeMirror.modes.hasOwnProperty(mode)) {
           clearInterval(poll);
