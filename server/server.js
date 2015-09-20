@@ -88,8 +88,6 @@ var droppy = function droppy(options, isStandalone, callback) {
 function onRequest(req, res) {
   req.time = Date.now();
   if (ready) {
-    // Strip null-bytes from the url
-    while (req.url.indexOf("\u0000") !== -1) req.url = req.url.replace(/\%00/g, "");
     if (req.method === "GET") {
       handleGET(req, res);
     } else if (req.method === "POST") {
@@ -491,7 +489,7 @@ function handleGET(req, res) {
   } else if (/^\/\?_\//.test(URI)) {
     handleFileRequest(req, res, false);
   } else if (/^\/\?~~\//.test(URI)) {
-    streamArchive(req, res, utils.addFilesPath(decodeURIComponent(req.url.substring("/~~/".length))), true);
+    streamArchive(req, res, utils.addFilesPath(URI.substring(4)), true);
   } else if (/^\/favicon.ico$/.test(URI)) {
     handleResourceRequest(req, res, "favicon.ico");
   } else {
