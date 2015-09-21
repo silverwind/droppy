@@ -217,13 +217,12 @@ function setupSocket(server) {
   var wss = new Wss({
     server: server,
     verifyClient: function (info, cb) {
-      var cookie = cookies.get(info.req.headers.cookie);
-      if (!cookie && !config.public) {
-        log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
-        cb(false, 401, "Unauthorized");
-      } else {
+      if (validateRequest(info.req)) {
         log.info(info.req, null, "WebSocket [", chalk.green("connected"), "] ");
         cb(true);
+      } else {
+        log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
+        cb(false, 401, "Unauthorized");
       }
     }
   });
@@ -493,12 +492,11 @@ function handleGET(req, res) {
   } else if (/^\/favicon.ico$/.test(URI)) {
     handleResourceRequest(req, res, "favicon.ico");
   } else {
-    var cookie = cookies.get(req.headers.cookie);
-    if (cookie || config.public) {
+    if (validateRequest(req)) {
       handleResourceRequest(req, res, "main.html");
       if (config.public) return;
       var sessions = db.get("sessions");
-      sessions[cookie].lastSeen = Date.now();
+      sessions[cookies.get(req.headers.cookie)].lastSeen = Date.now();
       db.set("sessions", sessions);
     } else if (firstRun) {
       handleResourceRequest(req, res, "firstrun.html");
@@ -516,7 +514,7 @@ function handlePOST(req, res) {
     return log.info(req, res, "Invalid POST: " + req.url);
 
   if (/\/upload/.test(URI)) {
-    if (!cookies.get(req.headers.cookie)) {
+    if (!validateRequest(req)) {
       res.statusCode = 401;
       res.end();
       log.info(req, res);
@@ -662,7 +660,7 @@ function handleFileRequest(req, res, download) {
   }
 
   // Validate the cookie for the remaining requests
-  if (!cookies.get(req.headers.cookie) && !shareLink) {
+  if (!validateRequest(req) && !shareLink) {
     res.writeHead(301, {Location: "/"});
     res.end();
     log.info(req, res);
@@ -743,7 +741,15 @@ function handleTypeRequest(req, res) {
 
 function handleUploadRequest(req, res) {
   var busboy, opts, dstDir, done = false, files = {};
-  var cookie = cookies.get(req.headers.cookie);
+
+  if (!validateRequest(req)) {
+    res.statusCode = 401;
+    res.setHeader("Content-Type", "text/plain");
+    res.end();
+    log.info(req, res, "Unauthorized upload request");
+    log.info(req, res);
+    return;
+  }
 
   req.query = qs.parse(req.url.substring("/upload?".length));
 
@@ -755,17 +761,8 @@ function handleUploadRequest(req, res) {
     return;
   }
 
-  if (!cookie && !config.public) {
-    res.statusCode = 401;
-    res.setHeader("Content-Type", "text/plain");
-    res.end();
-    log.info(req, res, "Unauthorized upload request");
-    log.info(req, res);
-    return;
-  }
-
   Object.keys(clients).some(function (sid) {
-    if (clients[sid].cookie === cookie) {
+    if (clients[sid].cookie === req.headers.cookie) {
       req.sid = sid;
       return true;
     }
@@ -990,6 +987,12 @@ function cleanupLinks(callback) {
 
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, zipPath, download) {
+  if (!validateRequest(req)) {
+    res.writeHead(301, {Location: "/"});
+    res.end();
+    log.info(req, res);
+    return;
+  }
   fs.stat(zipPath, function (err, stats) {
     if (err) {
       log.error(err);
@@ -1021,6 +1024,10 @@ function streamArchive(req, res, zipPath, download) {
       log.info(req, res);
     }
   });
+}
+
+function validateRequest(req) {
+  return Boolean(cookies.get(req.headers.cookie) || config.public);
 }
 
 // Hourly tasks
