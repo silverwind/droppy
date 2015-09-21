@@ -211,7 +211,7 @@ function gzip(data, callback) {
 }
 
 function canUseCache(cacheVersion, cb) {
-  if (cacheVersion !== pkg.version) return false;
+  if (cacheVersion !== pkg.version) return cb(false);
   var lastChange, files = [];
   Object.keys(resources.files).forEach(function (type) {
     resources.files[type].forEach(function (file) {
