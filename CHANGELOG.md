@@ -1,5 +1,9 @@
 *Note: For minor versions, see the commit log*
 
+#### Version 3.2.0 - 9/21/2015
+
+- Fix a security issue, all users are adviced to upgrade
+
 #### Version 3.1.0 - 9/13/2015
 
 - Fixed a bug where configuration could get lost when the server shuts down during a save operation.
