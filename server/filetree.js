@@ -8,11 +8,11 @@ var chalk    = require("chalk");
 var chokidar = require("chokidar");
 var fs       = require("graceful-fs");
 var path     = require("path");
-var readdirp = require("readdirp");
 
 var log      = require("./log.js");
 var paths    = require("./paths.js").get();
 var utils    = require("./utils.js");
+var walk     = require("./walk.js");
 
 var WATCHER_DELAY = 3000;
 var POLL_INTERVAL = 2000;
@@ -42,44 +42,53 @@ function update(dir) {
   debouncedUpdate();
 }
 
+function handleUpdateDirErrs(errs, cb) {
+  errs.forEach(function (err) {
+    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)])
+      delete dirs[utils.removeFilesPath(err.path)];
+    else log.error(err);
+  });
+  if (typeof cb === "function") cb();
+}
+
 filetree.updateDir = function updateDir(dir, cb) {
   if (dir === null) { dir = "/"; dirs = {}; }
-  if (initial) {
-    log.info("Caching directories ...");
-    initial = false;
-  } else log.debug(chalk.magenta("Updating " + dir));
-
-  fs.stat(utils.addFilesPath(dir), function (err, stats) {
+  fs.stat(utils.addFilesPath(dir), function (err, stat) {
     if (err) log.error(err);
-    readdirp({root: utils.addFilesPath(dir)}, function (errs, results) {
-      dirs[dir] = {files: {}, size: 0, mtime: stats ? stats.mtime.getTime() : Date.now()};
-      if (errs) {
-        errs.forEach(function (err) {
-          if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)])
-            delete dirs[utils.removeFilesPath(err.path)];
-          else
-            log.error(err);
-        });
-        if (typeof cb === "function") cb();
-      }
-
-      // Add dirs
-      results.directories.forEach(function (d) {
-        dirs[utils.removeFilesPath(d.fullPath)] = {files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0};
+    if (initial) { // use sync walk for performance
+      initial = false;
+      log.info("Caching directories ...");
+      var r = walk.sync(utils.addFilesPath(dir));
+      if (r[0]) handleUpdateDirErrs(r[0]);
+      updateDirInCache(dir, stat, r[1], r[2], cb);
+    } else {
+      log.debug(chalk.magenta("Updating " + dir));
+      walk(utils.addFilesPath(dir), function (errs, readDirs, readFiles) {
+        if (errs) handleUpdateDirErrs(errs, cb);
+        updateDirInCache(dir, stat, readDirs, readFiles, cb);
       });
-
-      // Add files
-      results.files.forEach(function (f) {
-        var parentDir = utils.removeFilesPath(f.fullParentDir);
-        dirs[parentDir].files[f.name] = {size: f.stat.size, mtime: f.stat.mtime.getTime() || 0};
-        dirs[parentDir].size += f.stat.size;
-      });
-
-      update(dir);
-      if (typeof cb === "function") cb();
-    });
+    }
   });
 };
+
+function updateDirInCache(root, stat, readDirs, readFiles, cb) {
+  dirs[root] = {files: {}, size: 0, mtime: stat ? stat.mtime.getTime() : Date.now()};
+
+  // Add dirs
+  readDirs.forEach(function (d) {
+    dirs[utils.removeFilesPath(d.path)] = {files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0};
+  });
+
+  // Add files
+  readFiles.forEach(function (f) {
+    var parentDir = utils.removeFilesPath(path.dirname(f.path));
+    dirs[parentDir].files[path.basename(f.path)] = {size: f.stat.size, mtime: f.stat.mtime.getTime() || 0};
+    dirs[parentDir].size += f.stat.size;
+  });
+
+  update(root);
+  if (typeof cb === "function") cb();
+}
 
 function updateDirSizes() {
   var todo = Object.keys(dirs);
@@ -96,7 +105,7 @@ function updateDirSizes() {
   });
 
   todo.forEach(function (d) {
-    if (path.dirname(d) !== "/")
+    if (path.dirname(d) !== "/" && dirs[path.dirname(d)])
       dirs[path.dirname(d)].size += dirs[d].size;
   });
 }

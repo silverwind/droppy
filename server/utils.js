@@ -151,11 +151,17 @@ utils.normalizePath = function normalizePath(p) {
 };
 
 utils.addFilesPath = function addFilesPath(p) {
-  return path.join(paths.files + "/" + p);
+  if (p === "/")
+    return paths.files;
+  else
+    return path.join(paths.files + "/" + p);
 };
 
 utils.removeFilesPath = function removeFilesPath(p) {
-  return utils.normalizePath("/" + path.relative(paths.files, p));
+  if (p.length > paths.files.length)
+    return p.substring(paths.files.length);
+  else if (p === paths.files)
+    return "/";
 };
 
 utils.relativeZipPath = function removeFilesPath(p, base) {
