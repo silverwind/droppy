@@ -23,8 +23,12 @@ npm-minor:
 npm-major:
 	npm version major
 
-patch: lint npm-patch publish deploy
-minor: lint npm-minor publish deploy
-major: lint npm-major publish deploy
+# Touch a client resource so the cache is recompiled each version
+touch:
+	touch client/client.js
 
-.PHONY: lint publish update deploy patch minor major npm-patch npm-minor npm-major
+patch: lint touch npm-patch publish deploy
+minor: lint touch npm-minor publish deploy
+major: lint touch npm-major publish deploy
+
+.PHONY: lint touch publish update deploy patch minor major npm-patch npm-minor npm-major
