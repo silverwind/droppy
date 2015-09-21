@@ -57,7 +57,11 @@ var droppy = function droppy(options, isStandalone, callback) {
     },
     function (cb) {
       log.info("Loading " + (!config.debug ? "and minifying " : "") + "resources ...");
-      resources.init(!config.debug, function (err, c) { cache = c; cb(err); });
+      resources.init(!config.debug, db.get("version"), function (err, c) {
+        cache = c;
+        db.set("version", pkg.version);
+        cb(err);
+      });
     },
     function (cb) { cleanupTemp(); cb(); },
     function (cb) { cleanupLinks(cb); },

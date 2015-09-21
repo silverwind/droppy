@@ -128,10 +128,10 @@ var libs = {
   "cm.css": "node_modules/codemirror/lib/codemirror.css"
 };
 
-resources.init = function init(doMinify, cb) {
+resources.init = function init(doMinify, cacheVersion, cb) {
   minify = doMinify;
   if (!minify) return compile(cb);
-  canUseCache(function (can) {
+  canUseCache(cacheVersion, function (can) {
     if (!can) return compile(cb);
     fs.readFile(paths.cache, function (err, data) {
       if (err) return cb(err);
@@ -210,7 +210,8 @@ function gzip(data, callback) {
   });
 }
 
-function canUseCache(cb) {
+function canUseCache(cacheVersion, cb) {
+  if (cacheVersion !== pkg.version) return false;
   var lastChange, files = [];
   Object.keys(resources.files).forEach(function (type) {
     resources.files[type].forEach(function (file) {
