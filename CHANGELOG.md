@@ -2,7 +2,7 @@
 
 #### Version 3.2.0 - 9/21/2015
 
-- Fix a security issue, all users are adviced to upgrade
+- Fix a security issue, all users are adviced to upgrade.
 
 #### Version 3.1.0 - 9/13/2015
 
