@@ -62,6 +62,9 @@ db.init = function init(callback) {
           });
         }
 
+        // remove unused values
+        if (database.version) delete database.version;
+
         write();
         callback();
       });

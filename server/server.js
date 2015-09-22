@@ -57,11 +57,7 @@ var droppy = function droppy(options, isStandalone, callback) {
     },
     function (cb) {
       log.info("Loading " + (!config.debug ? "and minifying " : "") + "resources ...");
-      resources.init(!config.debug, db.get("version"), function (err, c) {
-        cache = c;
-        db.set("version", pkg.version);
-        cb(err);
-      });
+      resources.init(!config.debug, function (err, c) { cache = c; cb(err); });
     },
     function (cb) { cleanupTemp(); cb(); },
     function (cb) { cleanupLinks(cb); },
@@ -249,12 +245,14 @@ function setupSocket(server) {
       switch (msg.type) {
       case "REQUEST_SETTINGS":
         sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
+          version       : pkg.version,
           debug         : config.debug,
           demo          : config.demo,
           public        : config.public,
+          engine        : [engine, process.version.substring(1)].join(" "),
+          caseSensitive : process.platform !== "win32",
           themes        : Object.keys(cache.themes).join("|"),
           modes         : Object.keys(cache.modes).join("|"),
-          caseSensitive : process.platform !== "win32"
         }});
         break;
       case "REQUEST_UPDATE":

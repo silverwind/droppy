@@ -19,7 +19,6 @@ var vm           = require("vm");
 var zlib         = require("zlib");
 
 var templates    = require("./templates");
-var pkg          = require("./../package.json");
 var paths        = require("./paths.js").get();
 
 var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
@@ -128,10 +127,10 @@ var libs = {
   "cm.css": "node_modules/codemirror/lib/codemirror.css"
 };
 
-resources.init = function init(doMinify, cacheVersion, cb) {
+resources.init = function init(doMinify, cb) {
   minify = doMinify;
   if (!minify) return compile(cb);
-  canUseCache(cacheVersion, function (can) {
+  canUseCache(function (can) {
     if (!can) return compile(cb);
     fs.readFile(paths.cache, function (err, data) {
       if (err) return cb(err);
@@ -211,7 +210,6 @@ function gzip(data, callback) {
 }
 
 function canUseCache(cacheVersion, cb) {
-  if (cacheVersion !== pkg.version) return cb(false);
   var lastChange, files = [];
   Object.keys(resources.files).forEach(function (type) {
     resources.files[type].forEach(function (file) {
@@ -385,11 +383,7 @@ resources.compileHTML = function compileHTML(res) {
   };
 
   resources.files.html.forEach(function (file) {
-    var data = fs.readFileSync(path.join(paths.mod, file)).toString("utf8")
-      .replace(/\{\{version\}\}/gm, pkg.version)
-      .replace(/\{\{name\}\}/gm, pkg.name)
-      .replace(/\{\{engine\}\}/gm, require("detect-engine") + " " + process.version.substring(1));
-    html[path.basename(file)] = addSVG(data);
+    html[path.basename(file)] = addSVG(String(fs.readFileSync(path.join(paths.mod, file))));
   });
 
   // Combine pages

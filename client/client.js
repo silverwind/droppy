@@ -375,6 +375,9 @@
           droppy[setting] = msg.settings[setting];
         });
 
+        $("#about-title").text("droppy " + droppy.version);
+        $("#about-engine").text(droppy.engine);
+
         droppy.themes = droppy.themes.split("|");
         droppy.modes = droppy.modes.split("|");
 
