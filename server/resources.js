@@ -209,7 +209,7 @@ function gzip(data, callback) {
   });
 }
 
-function canUseCache(cacheVersion, cb) {
+function canUseCache(cb) {
   var lastChange, files = [];
   Object.keys(resources.files).forEach(function (type) {
     resources.files[type].forEach(function (file) {
