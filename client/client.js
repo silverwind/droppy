@@ -222,7 +222,7 @@
   }
 
   function getOtherViews(id) {
-    return $(droppy.views.filter(function (el, index) { return index !== id; }));
+    return $(droppy.views.filter(function (_, i) { return i !== id; }));
   }
 
   function getActiveView() {
@@ -244,9 +244,7 @@
 
   function destroyView(vId) {
     getView(vId).remove();
-    droppy.views = droppy.views.filter(function (view, index) { // Remove view from views array
-      return index !== vId;
-    });
+    droppy.views = droppy.views.filter(function (_, i) { return i !== vId; });
     sendMessage(vId, "DESTROY_VIEW");
   }
 
@@ -613,7 +611,7 @@
       }
       dummyFolder = $(".data-row.new-folder");
       view.find(".content").scrollTop(0);
-      entryRename(view, dummyFolder, wasEmpty, function (success, oldVal, newVal) {
+      entryRename(view, dummyFolder, wasEmpty, function (success, _oldVal, newVal) {
         if (success) {
           if (view.data("type") === "directory") showSpinner(view);
           sendMessage(view[0].vId, "CREATE_FOLDER", newVal);
@@ -634,7 +632,7 @@
       }
       dummyFile = $(".data-row.new-file");
       view.find(".content").scrollTop(0);
-      entryRename(view, dummyFile, wasEmpty, function (success, oldVal, newVal) {
+      entryRename(view, dummyFile, wasEmpty, function (success, _oldVal, newVal) {
         if (success) {
           if (view.data("type") === "directory") showSpinner(view);
           sendMessage(view[0].vId, "CREATE_FILE", newVal);
@@ -1514,7 +1512,7 @@
     header.siblings().removeClass("active up down");
     var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header.attr("data-sort"));
     if (view[0].sortAsc) entries = entries.reverse();
-    entries.forEach(function (entry, i) {
+    entries.forEach(function (_, i) {
       view.find("[data-name='" + entries[i].sortname + "']:first").css({
         order: String(i),
         "-ms-flex-order": String(i)
@@ -1555,7 +1553,7 @@
         type: "GET",
         url: "??" + entryId,
         dataType: "text"
-      }).done(function (data, textStatus, request) {
+      }).done(function (data, _, request) {
         if (request.status !== 200) {
           showError(view, "Couldn't open or read the file");
           hideSpinner(view);
@@ -2730,8 +2728,8 @@
   function naturalSort(a, b) {
     var x = [], y = [];
     function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
-    a.replace(/(\d+)|(\D+)/g, function ($0, $1, $2) { x.push([$1 || 0, $2]); });
-    b.replace(/(\d+)|(\D+)/g, function ($0, $1, $2) { y.push([$1 || 0, $2]); });
+    a.replace(/(\d+)|(\D+)/g, function (_, a, b) { x.push([a || 0, b]); });
+    b.replace(/(\d+)|(\D+)/g, function (_, a, b) { y.push([a || 0, b]); });
     while (x.length && y.length) {
       var xx = x.shift();
       var yy = y.shift();
