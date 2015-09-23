@@ -107,7 +107,9 @@ utils.getLink = function getLink(links, length) {
 };
 
 utils.pretty = function pretty(data) {
-  return util.inspect(data, {colors: true}).replace(/\s+/gm, "");
+  return util.inspect(data, {colors: true})
+    .replace(/^\s+/gm, " ").replace(/\s+$/gm, "")
+    .replace(/[\r\n]+/gm, "");
 };
 
 utils.getNewPath = function getNewPath(origPath, callback) {
