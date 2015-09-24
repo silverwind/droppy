@@ -829,6 +829,15 @@ html:not(.mobile) .vjs-big-play-button {
   font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
 }
 
+.CodeMirror-dialog button {
+  background: #181818;
+  padding: .05rem .2rem;
+  color: #eee;
+}
+.CodeMirror-dialog button:hover {
+  background: #383838;
+}
+
 .sidebar {
   position: absolute;
   top: .5em;
