@@ -764,7 +764,7 @@ function handleUploadRequest(req, res) {
   }
 
   Object.keys(clients).some(function (sid) {
-    if (clients[sid].cookie === req.headers.cookie) {
+    if (clients[sid].cookie === cookies.get(req.headers.cookie)) {
       req.sid = sid;
       return true;
     }
