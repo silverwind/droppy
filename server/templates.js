@@ -9,7 +9,7 @@ var prefix = "(function() {var template = Handlebars.template, templates = Handl
 var suffix = "})();";
 
 templates.compile = function compile(paths) {
-  var strings = paths.map(function (file) {
+  var strings = paths.map(function(file) {
     return getEntry(file, String(fs.readFileSync(file)));
   });
   return prefix + strings.join("") + suffix;

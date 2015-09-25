@@ -17,7 +17,7 @@ var utils    = require("./utils.js");
 
 demo.init = function init(cb) {
   process.title = "droppy-demo";
-  demo.refresh(function () {
+  demo.refresh(function() {
     schedule.scheduleJob("*/10 * * * *", demo.refresh);
     if (cb) cb();
   });
@@ -25,8 +25,8 @@ demo.init = function init(cb) {
 
 demo.refresh = function refresh(doneCallback) {
   async.series([
-    function (callback) {
-      utils.rm(paths.files, function () {
+    function(callback) {
+      utils.rm(paths.files, function() {
         utils.mkdir(paths.files, callback);
       });
     },
@@ -42,13 +42,13 @@ demo.refresh = function refresh(doneCallback) {
     get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/517%5Bkb%5D160_tricky-bongos.wav.mp3", "/audio/sample-3.mp3"),
     get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/SYNTH%20AND%20ELECTRONIC%20BPM/534%5Bkb%5D078_tinkles-synth.wav.mp3", "/audio/sample-4.mp3"),
     get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/SYNTH%20AND%20ELECTRONIC%20BPM/689%5Bkb%5D120_dreamy-synth-wave.wav.mp3", "/audio/sample-5.mp3"),
-    function (callback) {
+    function(callback) {
       async.parallel([
-        function (cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
-        function (cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
+        function(cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
+        function(cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
       ], callback);
     }
-  ], function () {
+  ], function() {
     log.info("Demo refreshed");
     filetree.updateAll();
     if (doneCallback) doneCallback();
@@ -56,17 +56,17 @@ demo.refresh = function refresh(doneCallback) {
 };
 
 function get(url, dest) {
-  return function (callback) {
+  return function(callback) {
     var stream, temp;
     temp = path.join(paths.config, "/demoTemp", dest);
     dest = path.join(paths.files, dest);
 
-    utils.mkdir([path.dirname(temp), path.dirname(dest)], function () {
-      fs.stat(temp, function (err, stats) {
+    utils.mkdir([path.dirname(temp), path.dirname(dest)], function() {
+      fs.stat(temp, function(err, stats) {
         if (err || !stats.size) {
           stream = fs.createWriteStream(temp);
           stream.on("error", callback);
-          stream.on("close", function () {
+          stream.on("close", function() {
             utils.copyFile(temp, dest, callback);
           });
           log.info(chalk.yellow("GET ") + url);
@@ -80,21 +80,21 @@ function get(url, dest) {
 }
 
 function getZip(url, dest, zipDest) {
-  return function (callback) {
+  return function(callback) {
     dest = path.join(paths.files, dest);
-    utils.mkdir([dest, path.dirname(zipDest)], function () {
-      fs.stat(zipDest, function (err, stats) {
+    utils.mkdir([dest, path.dirname(zipDest)], function() {
+      fs.stat(zipDest, function(err, stats) {
         if (err || !stats.size) {
           log.info(chalk.yellow("GET ") + url);
-          request({url: url, encoding: null}, function (err, _, data) {
+          request({url: url, encoding: null}, function(err, _, data) {
             if (err) return callback(err);
-            fs.writeFile(zipDest, data, function (err) {
+            fs.writeFile(zipDest, data, function(err) {
               if (err) log.error(err);
             });
             unzip(data, dest, callback);
           });
         } else {
-          fs.readFile(zipDest, function (err, data) {
+          fs.readFile(zipDest, function(err, data) {
             if (err) return callback(err);
             unzip(data, dest, callback);
           });
@@ -105,19 +105,19 @@ function getZip(url, dest, zipDest) {
 }
 
 function unzip(data, dest, callback) {
-  yauzl.fromBuffer(data, function (err, zipfile) {
+  yauzl.fromBuffer(data, function(err, zipfile) {
     var done, count = 0, written = 0;
     if (err) callback(err);
-    zipfile.on("entry", function (entry) {
+    zipfile.on("entry", function(entry) {
       count++;
       if (/\/$/.test(entry.fileName)) {
         utils.mkdir(path.join(dest, entry.fileName));
         if (done) callback(null);
       } else {
-        zipfile.openReadStream(entry, function (err, rs) {
+        zipfile.openReadStream(entry, function(err, rs) {
           if (err) return callback(err);
           var ws = fs.createWriteStream(path.join(dest, entry.fileName));
-          ws.on("finish", function () {
+          ws.on("finish", function() {
             written++;
             if (done && written === count) {
               callback(null);
@@ -127,7 +127,7 @@ function unzip(data, dest, callback) {
         });
       }
     });
-    zipfile.on("end", function () {
+    zipfile.on("end", function() {
       done = true;
     });
   });

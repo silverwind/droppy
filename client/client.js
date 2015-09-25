@@ -1,7 +1,6 @@
 /* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, ext, Handlebars, Uppie */
-"use strict";
-
-(function ($, window, document) {
+(function($, window, document) {
+  "use strict";
   var droppy = {};
 
   /* The lines below will get replaced during compilation by the server */
@@ -13,27 +12,27 @@
 //  Feature Detects
 // ============================================================================
   droppy.detects = {
-    directoryUpload: (function () {
+    directoryUpload: (function() {
       var el = document.createElement("input");
-      return droppy.prefixes.directory.some(function (prop) {
+      return droppy.prefixes.directory.some(function(prop) {
         if (prop in el) return true;
       });
     })(),
-    fullscreen: (function () {
-      return droppy.prefixes.fullscreenEnabled.some(function (prop) {
+    fullscreen: (function() {
+      return droppy.prefixes.fullscreenEnabled.some(function(prop) {
         if (prop in document) return true;
       });
     })(),
-    audioTypes: (function () {
+    audioTypes: (function() {
       var types = {}, el = document.createElement("audio");
-      Object.keys(droppy.audioTypes).forEach(function (type) {
+      Object.keys(droppy.audioTypes).forEach(function(type) {
         types[droppy.audioTypes[type]] = Boolean(el.canPlayType(droppy.audioTypes[type]).replace(/no/, ""));
       });
       return types;
     })(),
-    videoTypes: (function () {
+    videoTypes: (function() {
       var types = {}, el = document.createElement("video");
-      Object.keys(droppy.videoTypes).forEach(function (type) {
+      Object.keys(droppy.videoTypes).forEach(function(type) {
         types[droppy.videoTypes[type]] = Boolean(el.canPlayType(droppy.videoTypes[type]).replace(/no/, ""));
       });
       return types;
@@ -44,10 +43,10 @@
   };
 
   // Async detect for FormData in workers
-  createWorker(function () {
+  createWorker(function() {
     postMessage(typeof FormData === "function");
     close();
-  }).onmessage = function (e) {
+  }).onmessage = function(e) {
     droppy.detects.canUseWorker = e.data;
   };
 // ============================================================================
@@ -60,12 +59,12 @@
   $.ajaxSetup({cache: true});
 
   // Shorthand for safe event listeners
-  $.fn.register = function (events, callback) {
+  $.fn.register = function(events, callback) {
     return this.off(events).on(events, callback);
   };
 
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
-  $.fn.end = function (callback) {
+  $.fn.end = function(callback) {
     var duration, called = false, el = this[0];
 
     function doCallback(event) {
@@ -77,7 +76,7 @@
     duration = getComputedStyle(this[0]).transitionDuration;
     duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
-    setTimeout(function () { // Call back if "transitionend" hasn't fired in duration + 30
+    setTimeout(function() { // Call back if "transitionend" hasn't fired in duration + 30
       doCallback({target: el}); // Just mimic the event.target property on our fake event
     }, duration + 30);
 
@@ -85,12 +84,12 @@
   };
 
   // Class swapping helper
-  $.fn.replaceClass = function (search, replacement) {
+  $.fn.replaceClass = function(search, replacement) {
     var elem, classes, matches, i = this.length, hasClass = false;
     while (--i >= 0) {
       elem = this[i];
       if (typeof elem === "undefined") return false;
-      classes = elem.className.split(" ").filter(function (className) {
+      classes = elem.className.split(" ").filter(function(className) {
         if (className === search) return false;
         if (className === replacement) hasClass = true;
 
@@ -109,7 +108,7 @@
   };
 
   // Set a new class on an element, and make sure it is ready to be transitioned.
-  $.fn.setTransitionClass = function (oldclass, newclass) {
+  $.fn.setTransitionClass = function(oldclass, newclass) {
     if (typeof newclass === "undefined") {
       newclass = oldclass;
       oldclass = null;
@@ -125,7 +124,7 @@
   };
 
   // Listen for the animation event for our pseudo-animation
-  document.addEventListener("animationstart", function (event) {
+  document.addEventListener("animationstart", function(event) {
     if (event.animationName === "nodeInserted") {
       var target = $(event.target);
       var newClass = target.data("newclass");
@@ -139,13 +138,13 @@
     }
   });
 
-  Handlebars.registerHelper("select", function (sel, opts) {
+  Handlebars.registerHelper("select", function(sel, opts) {
     return opts.fn(this).replace(new RegExp(' value="' + sel + '"'), "$& selected=");
   });
-  Handlebars.registerHelper("svg", function (type) {
+  Handlebars.registerHelper("svg", function(type) {
     return new Handlebars.SafeString(droppy.svg[type]);
   });
-  Handlebars.registerHelper("is", function (a, b, opts) {
+  Handlebars.registerHelper("is", function(a, b, opts) {
     return a === b ? opts.fn(this) : opts.inverse(this);
   });
 
@@ -171,7 +170,7 @@
   };
   // Load prefs and set missing ones to their default
   prefs = JSON.parse(localStorage.getItem("prefs")) || {};
-  Object.keys(defaults).forEach(function (pref) {
+  Object.keys(defaults).forEach(function(pref) {
     if (prefs[pref] === undefined) {
       doSave = true;
       prefs[pref] = defaults[pref];
@@ -180,29 +179,29 @@
   if (doSave) localStorage.setItem("prefs", JSON.stringify(prefs));
 
   // Get a variable from localStorage
-  droppy.get = function (pref) {
+  droppy.get = function(pref) {
     prefs = JSON.parse(localStorage.getItem("prefs"));
     return prefs[pref];
   };
 
   // Save a variable to localStorage
-  droppy.set = function (pref, value) {
+  droppy.set = function(pref, value) {
     prefs[pref] = value;
     localStorage.setItem("prefs", JSON.stringify(prefs));
   };
 // ============================================================================
 //  Page load
 // ============================================================================
-  $(function () {
+  $(function() {
     var type = $("html").data("type");
     if (type === "main") {
       initMainPage();
-      requestAnimationFrame(function () {
+      requestAnimationFrame(function() {
         $("#navigation").setTransitionClass("in");
       });
     } else {
       initAuthPage(type === "firstrun");
-      requestAnimationFrame(function () {
+      requestAnimationFrame(function() {
         $("#login-box").setTransitionClass("in");
         $("#login-info-box").addClass("info");
         if (type === "firstrun") {
@@ -222,7 +221,7 @@
   }
 
   function getOtherViews(id) {
-    return $(droppy.views.filter(function (_, i) { return i !== id; }));
+    return $(droppy.views.filter(function(_, i) { return i !== id; }));
   }
 
   function getActiveView() {
@@ -244,7 +243,7 @@
 
   function destroyView(vId) {
     getView(vId).remove();
-    droppy.views = droppy.views.filter(function (_, i) { return i !== vId; });
+    droppy.views = droppy.views.filter(function(_, i) { return i !== vId; });
     sendMessage(vId, "DESTROY_VIEW");
   }
 
@@ -260,7 +259,7 @@
   function openSocket() {
     var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
     droppy.socket = new WebSocket(protocol + document.location.host + "/?socket");
-    droppy.socket.onopen = function () {
+    droppy.socket.onopen = function() {
       retries = 5; // reset retries on connection loss
       // Request settings when droppy.debug is uninitialized, could use another variable too.
       if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
@@ -268,7 +267,7 @@
         sendMessage();
       else {
         // Create new view with initializing
-        getLocationsFromHash().forEach(function (string, index) {
+        getLocationsFromHash().forEach(function(string, index) {
           var dest = join(decodeURIComponent(string));
           if (index === 0)
             newView(dest, index);
@@ -280,13 +279,13 @@
     };
 
     // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
-    droppy.socket.onclose = function (event) {
+    droppy.socket.onclose = function(event) {
       if (droppy.get("hasLoggedOut") || event.code === 4000) return;
       if (event.code >= 1001 && event.code < 3999) {
         if (retries > 0) {
           // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
           // TODO: Indicate connection drop in the UI, especially on close code 1006
-          setTimeout(function () {
+          setTimeout(function() {
             openSocket();
             retries--;
           }, retryTimeout);
@@ -297,7 +296,7 @@
       }
     };
 
-    droppy.socket.onmessage = function (event) {
+    droppy.socket.onmessage = function(event) {
       var view, msg, vId;
       droppy.socketWait = false;
       msg = JSON.parse(event.data);
@@ -361,15 +360,15 @@
         file.find("svg").css("transition", "fill .2s ease");
         file.removeClass("dirty").attr("style", "transition: background .2s ease;")
           .addClass(msg.status === 0 ? "saved" : "save-failed");
-        setTimeout(function () {
-          file.removeClass("saved save-failed").end(function () {
+        setTimeout(function() {
+          file.removeClass("saved save-failed").end(function() {
             $(this).attr("style", oldStyle);
             $(this).children("svg").removeAttr("style");
           });
         }, 1000);
         break;
       case "SETTINGS":
-        Object.keys(msg.settings).forEach(function (setting) {
+        Object.keys(msg.settings).forEach(function(setting) {
           droppy[setting] = msg.settings[setting];
         });
 
@@ -390,7 +389,7 @@
           $("#logout-button").addClass("disabled")
             .register("click", showError.bind(null, getView(0), "Signing out is disabled"));
         else
-          $("#logout-button").register("click", function () {
+          $("#logout-button").register("click", function() {
             droppy.set("hasLoggedOut", true);
             if (droppy.socket) droppy.socket.close(4001);
             deleteCookie("session");
@@ -413,7 +412,7 @@
       droppy.socketWait = true;
 
       // Unlock the UI in case we get no socket resonse after waiting for 1 second
-      setTimeout(function () {
+      setTimeout(function() {
         droppy.socketWait = false;
       }, 1000);
 
@@ -437,7 +436,7 @@
   }
 
   // Close the socket gracefully before navigating away
-  $(window).register("beforeunload", function () {
+  $(window).register("beforeunload", function() {
     if (droppy.socket && droppy.socket.readyState < 2) {
       // 1001 aka CLOSE_GOING_AWAY is a valid status code, though Firefox still throws an INVALID_ACCESS_ERR
       // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
@@ -457,21 +456,21 @@
   function initAuthPage(firstrun) {
     var form = $("#form");
 
-    $("#user, #pass, .submit").register("keydown", function (event) {
+    $("#user, #pass, .submit").register("keydown", function(event) {
       if (event.keyCode === 13) form.submit();
     });
 
-    $(".remember").register("click", function () {
+    $(".remember").register("click", function() {
       $(".remember").toggleClass("checked");
       $("[name=remember]").attr("value", $(".remember").hasClass("checked") ? "1" : "");
     });
 
-    $(".submit").register("click", function () {
+    $(".submit").register("click", function() {
       form.submit();
     });
 
-    form.register("submit", function () {
-      $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function (xhr) {
+    form.register("submit", function() {
+      $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function(xhr) {
         if (xhr.status === 202) {
           location.reload(true);
         } else if (xhr.status === 401) {
@@ -479,7 +478,7 @@
           info.text(firstrun ? "Please fill both fields." : "Wrong login!");
           if (info.hasClass("error")) {
             info.addClass("shake");
-            setTimeout(function () {
+            setTimeout(function() {
               info.removeClass("shake");
             }, 500);
           } else info.attr("class", "error");
@@ -497,10 +496,10 @@
     openSocket();
 
     // Re-fit path line after 50ms of no resizing
-    $(window).register("resize", function () {
+    $(window).register("resize", function() {
       clearTimeout(droppy.resizeTimer);
-      droppy.resizeTimer = setTimeout(function () {
-        $(".view").each(function () {
+      droppy.resizeTimer = setTimeout(function() {
+        $(".view").each(function() {
           checkPathOverflow($(this));
           aspectScale();
         });
@@ -508,42 +507,42 @@
     });
 
     // escape hides modals
-    Mousetrap.bind("escape", function () {
+    Mousetrap.bind("escape", function() {
       toggleCatcher(false);
     });
 
     // stop default browser behaviour
-    Mousetrap.bind("mod+s", function (e) {
+    Mousetrap.bind("mod+s", function(e) {
       e.preventDefault();
     });
 
     // track active view
-    $(window).on("click dblclick contextmenu", function (e) {
+    $(window).on("click dblclick contextmenu", function(e) {
       var view = $(e.target).parents(".view");
       if (view.length) droppy.activeView = view[0].vId;
     });
 
-    Mousetrap.bind(["space", "right", "down", "return"], function () {
+    Mousetrap.bind(["space", "right", "down", "return"], function() {
       var view = getActiveView();
       if (!view || view.data("type") !== "media") return;
       swapMedia(getActiveView(), "right");
     });
 
-    Mousetrap.bind(["shift+space", "left", "up", "backspace"], function () {
+    Mousetrap.bind(["shift+space", "left", "up", "backspace"], function() {
       var view = getActiveView();
       if (!view || view.data("type") !== "media") return;
       swapMedia(getActiveView(), "left");
     });
 
-    Mousetrap.bind(["alt+enter", "f"], function () {
+    Mousetrap.bind(["alt+enter", "f"], function() {
       var view = getActiveView();
       if (!view || view.data("type") !== "media") return;
       toggleFullscreen(getActiveView().find(".content")[0]);
     });
 
     // fullscreen event
-    droppy.prefixes.fullscreenchange.forEach(function (eventName) {
-      $(document).register(eventName, function () {
+    droppy.prefixes.fullscreenchange.forEach(function(eventName) {
+      $(document).register(eventName, function() {
         var view, fse = fullScreenElement();
         document.activeElement.blur(); // unfocus the fullscreen button so the space key won't un-toggle fullscreen
         if (fse) {
@@ -559,7 +558,7 @@
 
     var fileInput = $("#file");
     var uppie = new Uppie();
-    uppie(fileInput[0], function (event, fd, files) {
+    uppie(fileInput[0], function(event, fd, files) {
       event.preventDefault();
       event.stopPropagation();
       var view = getActiveView();
@@ -569,7 +568,7 @@
     });
 
     // File upload button
-    $("#upload-file-button").register("click", function () {
+    $("#upload-file-button").register("click", function() {
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.directoryUpload)
         fileInput.removeAttr(droppy.prefixes.directory.join(" "));
@@ -579,9 +578,9 @@
     // Folder upload button - check if we support directory uploads
     if (droppy.detects.directoryUpload) {
       // Directory uploads supported - enable the button
-      $("#upload-folder-button").register("click", function () {
+      $("#upload-folder-button").register("click", function() {
         // Set the directory attribute so we get a directory picker dialog
-        droppy.prefixes.directory.forEach(function (prefix) {
+        droppy.prefixes.directory.forEach(function(prefix) {
           fileInput.attr(prefix, prefix);
         });
         if (fileInput[0].isFilesAndDirectoriesSupported) {
@@ -594,12 +593,12 @@
       });
     } else {
       // No directory upload support - disable the button
-      $("#upload-folder-button").addClass("disabled").on("click", function () {
+      $("#upload-folder-button").addClass("disabled").on("click", function() {
         showError(getView(0), "Your browser doesn't support directory uploading");
       });
     }
 
-    $("#create-folder-button").register("click", function () {
+    $("#create-folder-button").register("click", function() {
       var dummyFolder, wasEmpty, view = getActiveView();
       var dummyHtml = Handlebars.templates["new-folder"]();
 
@@ -611,7 +610,7 @@
       }
       dummyFolder = $(".data-row.new-folder");
       view.find(".content").scrollTop(0);
-      entryRename(view, dummyFolder, wasEmpty, function (success, _oldVal, newVal) {
+      entryRename(view, dummyFolder, wasEmpty, function(success, _oldVal, newVal) {
         if (success) {
           if (view.data("type") === "directory") showSpinner(view);
           sendMessage(view[0].vId, "CREATE_FOLDER", newVal);
@@ -620,7 +619,7 @@
       });
     });
 
-    $("#create-file-button").register("click", function () {
+    $("#create-file-button").register("click", function() {
       var dummyFile, wasEmpty, view = getActiveView();
       var dummyHtml = Handlebars.templates["new-file"]();
 
@@ -632,7 +631,7 @@
       }
       dummyFile = $(".data-row.new-file");
       view.find(".content").scrollTop(0);
-      entryRename(view, dummyFile, wasEmpty, function (success, _oldVal, newVal) {
+      entryRename(view, dummyFile, wasEmpty, function(success, _oldVal, newVal) {
         if (success) {
           if (view.data("type") === "directory") showSpinner(view);
           sendMessage(view[0].vId, "CREATE_FILE", newVal);
@@ -642,7 +641,7 @@
     });
 
     var splitButton = $("#split-button"), splitting;
-    droppy.split = function (dest) {
+    droppy.split = function(dest) {
       var first, second;
       if (splitting) return;
       splitting = true;
@@ -659,8 +658,8 @@
         splitButton.attr("aria-label", "Split view in half").children("span").text("Split");
         replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
       }
-      first.end(function () {
-        droppy.views.forEach(function (view) {
+      first.end(function() {
+        droppy.views.forEach(function(view) {
           checkPathOverflow($(view));
         });
         splitting = false;
@@ -668,12 +667,12 @@
     };
     $("#split-button").register("click", droppy.split);
 
-    $("#about-button").register("click", function () {
+    $("#about-button").register("click", function() {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    $("#prefs-button").register("click", function () {
+    $("#prefs-button").register("click", function() {
       showPrefs();
       sendMessage(null, "GET_USERS");
     });
@@ -688,13 +687,13 @@
 
     // Create the XHR2 and bind the progress events
     var xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener("progress", function (event) { uploadProgress(view, event); });
-    xhr.upload.addEventListener("error", function (event) {
+    xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); });
+    xhr.upload.addEventListener("error", function(event) {
       if (event && event.message) console.info(event.message);
       showError(view, "An error occured during upload");
       uploadCancel(view);
     });
-    xhr.addEventListener("readystatechange", function () {
+    xhr.addEventListener("readystatechange", function() {
       if (xhr.readyState !== 4) return;
       if (xhr.status === 200) {
         uploadDone(view);
@@ -705,7 +704,7 @@
       }
     });
 
-    $(".upload-cancel").register("click", function () {
+    $(".upload-cancel").register("click", function() {
       xhr.abort();
       uploadCancel(view);
     });
@@ -756,7 +755,7 @@
       showNotification("Upload finished", "Uploaded " + view[0].uploadText + " to " + view[0].currentFolder);
       view[0].uploadSuccess = false;
     }
-    setTimeout(function () {
+    setTimeout(function() {
       view.find(".upload-info").removeClass("in");
       view.find(".upload-bar").removeAttr("style");
     }, 200);
@@ -799,7 +798,7 @@
     var canSubmit, exists, valid, inputText, link, namer, nameLength;
     // Populate active files list
     droppy.activeFiles = [];
-    view.find(".entry-link").each(function () {
+    view.find(".entry-link").each(function() {
       $(this).removeClass("editing invalid");
       droppy.activeFiles.push(droppy.caseSensitive ? $(this).text() : $(this).text().toLowerCase());
     });
@@ -815,11 +814,11 @@
 
     var renamer = link.next();
 
-    renamer.register("input", function () {
+    renamer.register("input", function() {
       inputText = namer.val();
       valid = !/[\\\*\{\}\/\?\|<>"]/.test(inputText);
       if (inputText === "") valid = false;
-      exists = droppy.activeFiles.some(function (file) {
+      exists = droppy.activeFiles.some(function(file) {
         if (file === (droppy.caseSensitive ? inputText : inputText.toLowerCase())) return true;
       });
       canSubmit = valid && (!exists || inputText === namer.attr("placeholder"));
@@ -843,7 +842,7 @@
         stopEdit(view);
       } else if (exists && !skipInvalid) {
         namer.addClass("shake");
-        setTimeout(function () {
+        setTimeout(function() {
           namer.removeClass("shake");
         }, 500);
       } else {
@@ -869,10 +868,10 @@
     var modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
     if (show === undefined)
-      show = modals.some(function (selector) { return $(selector).hasClass("in"); });
+      show = modals.some(function(selector) { return $(selector).hasClass("in"); });
 
     if (!show) {
-      modals.forEach(function (selector) { $(selector)[show ? "addClass" : "removeClass"]("in"); });
+      modals.forEach(function(selector) { $(selector)[show ? "addClass" : "removeClass"]("in"); });
       $(".data-row.active").removeClass("active");
     }
 
@@ -886,13 +885,13 @@
   }
 
   // Listen for popstate events, which indicate the user navigated back
-  $(window).register("popstate", function () {
+  $(window).register("popstate", function() {
     if (!droppy.socket) return;
     var locs = getLocationsFromHash();
-    droppy.views.forEach(function (view) {
+    droppy.views.forEach(function(view) {
       var dest = locs[view.vId];
       view.switchRequest = true;
-      setTimeout(function () { view.switchRequest = false; }, 1000);
+      setTimeout(function() { view.switchRequest = false; }, 1000);
       if (dest) updateLocation($(view), dest, true);
     });
   });
@@ -911,7 +910,7 @@
     if (locations.length === 0)
       locations.push("");
 
-    locations.forEach(function (part, i) {
+    locations.forEach(function(part, i) {
       locations[i] = part.replace(/\/*$/g, "");
       if (locations[i] === "") locations[i] = "/";
     });
@@ -920,7 +919,7 @@
 
   function getHashPaths(modview, dest) {
     var hash = "";
-    droppy.views.forEach(function (view) {
+    droppy.views.forEach(function(view) {
       view = $(view);
       if (modview && modview.is(view))
         hash += "/#" + dest;
@@ -1010,7 +1009,7 @@
     function addPart(name, path) {
       var li = $("<li><a>" + name + "</a></li>");
       li.data("destination", path);
-      li.register("click", function (event) {
+      li.register("click", function(event) {
         var view = $(event.target).parents(".view");
         if (droppy.socketWait) return;
         if ($(this).is(":last-child")) {
@@ -1021,7 +1020,7 @@
           view[0].switchRequest = true; // This is set so we can switch out of a editor view
           updateLocation(view, $(this).data("destination"));
         }
-        setTimeout(function () {checkPathOverflow(view); }, 400);
+        setTimeout(function() {checkPathOverflow(view); }, 400);
       });
       view.find(".path").append(li);
       li.append(droppy.svg.triangle);
@@ -1029,14 +1028,14 @@
 
     function removePart(i) {
       var toRemove = view.find(".path li").slice(i);
-      toRemove.setTransitionClass("in", "gone").end(function () {
+      toRemove.setTransitionClass("in", "gone").end(function() {
         $(this).remove();
       });
     }
 
     function finalize() {
       view.find(".path li:not(.gone)").setTransitionClass("in");
-      setTimeout(function () {checkPathOverflow(view); }, 400);
+      setTimeout(function() {checkPathOverflow(view); }, 400);
     }
   }
 
@@ -1044,11 +1043,11 @@
   function checkPathOverflow(view) {
     var width = 40, space = view.width();
 
-    view.find(".path li.in").each(function () {
+    view.find(".path li.in").each(function() {
       width += $(this)[0].offsetWidth;
     });
 
-    requestAnimationFrame(function () {
+    requestAnimationFrame(function() {
       view.find(".path li").animate({
         left: (width > space) ? space - width : 0
       }, {duration: 200});
@@ -1057,7 +1056,7 @@
 
   function getTemplateEntries(view, data) {
     var entries = [];
-    Object.keys(data).forEach(function (name) {
+    Object.keys(data).forEach(function(name) {
       var split = data[name].split("|");
       var type  = split[0];
       var mtime = Number(split[1]) * 1e3;
@@ -1111,7 +1110,7 @@
     loadContent(view, content);
 
     // Upload button on empty page
-    content.find(".empty").register("click", function () {
+    content.find(".empty").register("click", function() {
       var inp = $("#file");
       if (droppy.detects.directoryUpload)
         inp.removeAttr(droppy.prefixes.directory.join(" "));
@@ -1119,25 +1118,25 @@
     });
 
     // Switch into a folder
-    content.find(".folder-link").register("click", function (event) {
+    content.find(".folder-link").register("click", function(event) {
       if (droppy.socketWait) return;
       updateLocation(view, $(this).parents(".data-row").data("id"));
       event.preventDefault();
     });
 
     // Click on a file link
-    content.find(".file-link").register("click", function (event) {
+    content.find(".file-link").register("click", function(event) {
       if (droppy.socketWait) return;
       var view = $(event.target).parents(".view");
       openFile(view, view[0].currentFolder, $(event.target).text());
       event.preventDefault();
     });
 
-    content.find(".data-row").each(function (index) {
+    content.find(".data-row").each(function(index) {
       this.setAttribute("order", index);
     });
 
-    content.find(".data-row").register("contextmenu", function (event) {
+    content.find(".data-row").register("contextmenu", function(event) {
       var target = $(event.target), targetRow;
       if (target.attr("class") === ".data-row")
         targetRow = target;
@@ -1149,32 +1148,32 @@
       event.stopPropagation();
     });
 
-    content.find(".data-row .entry-menu").register("click", function (event) {
+    content.find(".data-row .entry-menu").register("click", function(event) {
       showEntryMenu($(event.target).parents(".data-row"));
       event.preventDefault();
       event.stopPropagation();
     });
 
     // Stop navigation when clicking on an <a>
-    content.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function (event) {
+    content.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function(event) {
       event.stopPropagation();
       if (droppy.socketWait) return;
 
       // Some browsers (like IE) think that clicking on an <a> is real navigation
       // and will close the WebSocket in turn. We'll reconnect if neccessary.
       droppy.reopen = true;
-      setTimeout(function () {
+      setTimeout(function() {
         droppy.reopen = false;
       }, 2000);
     });
 
     // Request a sharelink
-    content.find(".sharelink").register("click", function () {
+    content.find(".sharelink").register("click", function() {
       if (droppy.socketWait) return;
       requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
     });
 
-    content.find(".icon-play").register("click", function () {
+    content.find(".icon-play").register("click", function() {
       var view = $(this).parents(".view");
 
       if ($(this).parents(".data-row").hasClass("playing"))
@@ -1183,7 +1182,7 @@
       play(view, $(this).parents(".data-row"));
     });
 
-    content.find(".header-name, .header-mtime, .header-size").register("click", function () {
+    content.find(".header-name, .header-mtime, .header-size").register("click", function() {
       sortByHeader(view, $(this));
     });
 
@@ -1253,19 +1252,19 @@
         left = x;
 
       dropSelect.css({left: left, top: event.originalEvent.clientY}).addClass("in");
-      $(document.elementFromPoint(x, y)).addClass("active").one("mouseleave", function () {
+      $(document.elementFromPoint(x, y)).addClass("active").one("mouseleave", function() {
         $(this).removeClass("active");
       });
       toggleCatcher(true);
-      dropSelect.children(".movefile").off("click").one("click", function () {
+      dropSelect.children(".movefile").off("click").one("click", function() {
         sendDrop(view, "cut", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".copyfile").off("click").one("click", function () {
+      dropSelect.children(".copyfile").off("click").one("click", function() {
         sendDrop(view, "copy", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".viewfile").off("click").one("click", function () {
+      dropSelect.children(".viewfile").off("click").one("click", function() {
         updateLocation(view, src);
         toggleCatcher(false);
       });
@@ -1287,7 +1286,7 @@
   // Set drag properties for internal drag sources
   function bindDragEvents(view) {
     view.find(".data-row .entry-link").attr("draggable", "true");
-    view.register("dragstart", function (event) {
+    view.register("dragstart", function(event) {
       var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
 
       if (event.ctrlKey || event.metaKey || event.altKey)
@@ -1310,7 +1309,7 @@
     this.timer = null;
     this.data = "";
     this.isInternal = false;
-    this.refresh = function (data) {
+    this.refresh = function(data) {
       if (typeof data === "string") {
         this.data = data;
         this.isInternal = true;
@@ -1318,7 +1317,7 @@
       clearTimeout(this.timer);
       this.timer = setTimeout(this.clear, 1000);
     };
-    this.clear = function () {
+    this.clear = function() {
       if (!this.isInternal)
         $(".dropzone").removeClass("in");
       clearTimeout(this.timer);
@@ -1329,7 +1328,7 @@
   droppy.dragTimer = new DragTimer();
 
   function allowDrop(el) {
-    el.register("dragover", function (event) {
+    el.register("dragover", function(event) {
       event.preventDefault();
       droppy.dragTimer.refresh();
     });
@@ -1337,7 +1336,7 @@
 
   function bindHoverEvents(view) {
     var dropZone = view.find(".dropzone");
-    view.register("dragenter", function (event) {
+    view.register("dragenter", function(event) {
       event.stopPropagation();
       droppy.activeView = view[0].vId;
       var svg, isInternal = event.dataTransfer.effectAllowed === "copyMove";
@@ -1358,7 +1357,7 @@
   function bindDropEvents(view) {
     // file drop
     var uppie = new Uppie();
-    uppie(view[0], function (event, fd, files) {
+    uppie(view[0], function(event, fd, files) {
       if (!files.length) return;
       event.stopPropagation();
       var view = getActiveView();
@@ -1367,7 +1366,7 @@
     });
 
     // drag between views
-    view.register("drop", function (event) {
+    view.register("drop", function(event) {
       var dragData, view = $(event.target).parents(".view");
       event.preventDefault();
       $(".dropzone").removeClass("in");
@@ -1393,7 +1392,7 @@
 
   function initEntryMenu() {
     // Play an audio file
-    $("#entry-menu .play").register("click", function (event) {
+    $("#entry-menu .play").register("click", function(event) {
       var entry = $("#entry-menu").data("target");
       var view  = entry.parents(".view");
       event.stopPropagation();
@@ -1401,7 +1400,7 @@
       toggleCatcher(false);
     });
 
-    $("#entry-menu .edit").register("click", function (event) {
+    $("#entry-menu .edit").register("click", function(event) {
       var location;
       var entry = $("#entry-menu").data("target");
       var view  = entry.parents(".view");
@@ -1416,7 +1415,7 @@
     });
 
     // Click on a "open" link
-    $("#entry-menu .openfile").register("click", function (event) {
+    $("#entry-menu .openfile").register("click", function(event) {
       var entry = $("#entry-menu").data("target");
       var view  = entry.parents(".view");
 
@@ -1429,13 +1428,13 @@
     });
 
     // Rename a file/folder
-    $("#entry-menu .rename").register("click", function (event) {
+    $("#entry-menu .rename").register("click", function(event) {
       var entry = $("#entry-menu").data("target");
       var view  = entry.parents(".view");
       if (droppy.socketWait) return;
 
       toggleCatcher(false);
-      entryRename(view, entry, false, function (success, oldVal, newVal) {
+      entryRename(view, entry, false, function(success, oldVal, newVal) {
         if (success) {
           showSpinner(view);
           sendMessage(view[0].vId, "RENAME", {src: oldVal, dst: newVal});
@@ -1445,15 +1444,15 @@
     });
 
     // Copy/cut a file/folder
-    $("#entry-menu .copy, #entry-menu .cut").register("click", function (event) {
+    $("#entry-menu .copy, #entry-menu .cut").register("click", function(event) {
       var entry = $("#entry-menu").data("target");
 
       toggleCatcher(false);
       droppy.clipboard = {type: $(this).attr("class"), src: entry.data("id")};
-      $(".view").each(function () {
+      $(".view").each(function() {
         var view = $(this);
         view.find(".paste-button .filename").text(basename(droppy.clipboard.src));
-        view.find(".paste-button").addClass("in").one("click", function (event) {
+        view.find(".paste-button").addClass("in").one("click", function(event) {
           event.stopPropagation();
           if (droppy.socketWait) return;
           droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
@@ -1469,7 +1468,7 @@
     });
 
     // Delete a file/folder
-    $("#entry-menu .delete").register("click", function (event) {
+    $("#entry-menu .delete").register("click", function(event) {
       event.stopPropagation();
       if (droppy.socketWait) return;
 
@@ -1499,7 +1498,7 @@
     if (x && y) {
       var target = document.elementFromPoint(x, y);
       target = target.nodeName === "a" ? $(target) : $(target).parents("a");
-      target.addClass("active").one("mouseleave", function () {
+      target.addClass("active").one("mouseleave", function() {
         $(this).removeClass("active");
       });
     }
@@ -1512,9 +1511,9 @@
     header.siblings().removeClass("active up down");
     var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header.attr("data-sort"));
     if (view[0].sortAsc) entries = entries.reverse();
-    entries.forEach(function (_, i) {
+    entries.forEach(function(_, i) {
       view.find("[data-name='" + entries[i].sortname + "']:first").css({
-        order: String(i),
+        "order": String(i),
         "-ms-flex-order": String(i)
       }).attr("order", String(i));
     });
@@ -1553,7 +1552,7 @@
         type: "GET",
         url: "??" + entryId,
         dataType: "text"
-      }).done(function (data, _, request) {
+      }).done(function(data, _, request) {
         if (request.status !== 200) {
           showError(view, "Couldn't open or read the file");
           hideSpinner(view);
@@ -1575,7 +1574,7 @@
   function populateMediaCache(view, data) {
     var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
     view[0].mediaFiles = [];
-    Object.keys(data).forEach(function (filename) {
+    Object.keys(data).forEach(function(filename) {
       var e = ext(filename);
       if (typeof data[filename] === "string") {
         if (data[filename][0] !== "f") return;
@@ -1588,7 +1587,7 @@
       }
     });
     view[0].mediaFiles = view[0].mediaFiles.sort(naturalSort);
-    [getPrevMedia(view), getNextMedia(view)].forEach(function (filename) {
+    [getPrevMedia(view), getNextMedia(view)].forEach(function(filename) {
       var src = getMediaSrc(view, filename);
       if (!src) return;
       if (Object.keys(droppy.imageTypes).indexOf(ext(filename)) !== -1) {
@@ -1622,12 +1621,12 @@
     back.register("click", swapMedia.bind(null, view, "left"));
     forward.register("click", swapMedia.bind(null, view, "right"));
 
-    arrows.register("mouseenter mousemove", function () {
+    arrows.register("mouseenter mousemove", function() {
       $(this).addClass("in");
-    }).register("mouseleave", function () {
+    }).register("mouseleave", function() {
       $(this).removeClass("in");
     }).addClass("in");
-    setTimeout(function () {arrows.removeClass("in"); }, 2000);
+    setTimeout(function() {arrows.removeClass("in"); }, 2000);
   }
 
   function swapMedia(view, dir) {
@@ -1647,7 +1646,7 @@
 
     a.attr("class", "media-container old-media " + (dir === "left" ? "right" : "left"));
     view[0].tranistioning = true;
-    b.appendTo(view.find(".content")).setTransitionClass(/(left|right)/, "").end(function () {
+    b.appendTo(view.find(".content")).setTransitionClass(/(left|right)/, "").end(function() {
       view[0].tranistioning = false;
       $(".new-media").removeClass("new-media").parents(".content").replaceClass(/type-(image|video)/, isImage ? "type-image" : "type-video");
       $(".old-media").remove();
@@ -1668,7 +1667,7 @@
 
     meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
     meta.find(".max").text(view[0].mediaFiles.length);
-    meta.register("click", function () {
+    meta.register("click", function() {
       view.find(".dims").toggleClass("in");
     });
 
@@ -1686,7 +1685,7 @@
     var volume = droppy.get("volume");
     if (volume) el.volume = volume;
     el.addEventListener("loadedmetadata", aspectScale);
-    el.addEventListener("volumechange", function () {
+    el.addEventListener("volumechange", function() {
       droppy.set("volume", this.volume);
     });
     el.addEventListener("error", aspectScale);
@@ -1716,21 +1715,21 @@
       sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
     view[0].animDirection = "forward";
-    loadContent(view, contentWrap(view, type).append(content), function (view) {
-      view.find(".fs").register("click", function (event) {
+    loadContent(view, contentWrap(view, type).append(content), function(view) {
+      view.find(".fs").register("click", function(event) {
         var view = $(event.target).parents(".view");
         droppy.activeView = view[0].vId;
         toggleFullscreen($(this).parents(".content")[0]);
         aspectScale();
         event.stopPropagation();
       });
-      view.find("img").each(function () {
+      view.find("img").each(function() {
         aspectScale();
         makeMediaDraggable(this.parentNode, false);
         updateMediaMeta(view);
       });
-      view.find("video").each(function () {
-        initVideoJS(this, function () {
+      view.find("video").each(function() {
+        initVideoJS(this, function() {
           aspectScale();
           makeMediaDraggable(view.find(".media-container")[0], true);
           bindVideoEvents(view.find("video")[0]);
@@ -1750,7 +1749,7 @@
 
     showSpinner(view);
 
-    $.when(file, script, theme).done(function (data) {
+    $.when(file, script, theme).done(function(data) {
       view.data("type", "document");
       updateTitle(basename(entryId));
       setEditorFontSize(droppy.get("editorFontSize"));
@@ -1764,15 +1763,15 @@
       type: "GET",
       url: "?_" + entryId,
       dataType: "text"
-    }).done(function (data) {
+    }).done(function(data) {
       file.resolve(data);
-    }).fail(function () {
+    }).fail(function() {
       closeDoc(view);
     });
 
     function configCM(data, filename) {
       var doc = $(Handlebars.templates.document({modes: droppy.modes}));
-      loadContent(view, contentWrap(view).append(doc), function () {
+      loadContent(view, contentWrap(view).append(doc), function() {
         view[0].editorEntryId = entryId;
         view[0].editor = editor = CodeMirror(view.find(".document")[0], {
           autofocus: true,
@@ -1797,7 +1796,7 @@
         editor.setOption("mode", mode);
         view.find(".mode-select").val(mode);
 
-        editor.on("change", function (cm, change) {
+        editor.on("change", function(cm, change) {
           var view = getCMView(cm);
           if (change.origin !== "setValue")
             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
@@ -1817,7 +1816,7 @@
         }
 
         editor.setOption("extraKeys", {
-          Tab: function (cm) {
+          "Tab": function(cm) {
             cm.replaceSelection(droppy.get("indentWithTabs") ?
               "\t" : Array(droppy.get("indentUnit") + 1).join(" "));
           },
@@ -1832,11 +1831,11 @@
         editor.setValue(data);
         editor.clearHistory();
 
-        doc.find(".exit").register("click", function () {
+        doc.find(".exit").register("click", function() {
           closeDoc($(this).parents(".view"));
           editor = null;
         });
-        doc.find(".save").register("click", function () {
+        doc.find(".save").register("click", function() {
           var view = $(this).parents(".view");
           showSpinner(view);
           sendMessage(view[0].vId, "SAVE_FILE", {
@@ -1844,14 +1843,14 @@
             value: editor.getValue()
           });
         });
-        doc.find(".ww").register("click", function () {
+        doc.find(".ww").register("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
           droppy.set("lineWrapping", !editor.options.lineWrapping);
         });
-        doc.find(".syntax").register("click", function () {
+        doc.find(".syntax").register("click", function() {
           var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
-          view.find(".mode-select").on("change", function () {
+          view.find(".mode-select").on("change", function() {
             var mode = $(this).val();
             view.find(".syntax").removeClass("in");
             view.find(".mode-select").removeClass("in");
@@ -1859,11 +1858,11 @@
             editor.setOption("mode", mode);
           });
         });
-        doc.find(".find").register("click", function () {
+        doc.find(".find").register("click", function() {
           CodeMirror.commands.find(editor);
           view.find(".CodeMirror-search-field").eq(0).focus();
         });
-        doc.find(".full").register("click", function () {
+        doc.find(".full").register("click", function() {
           toggleFullscreen($(this).parents(".content")[0]);
         });
         hideSpinner(view);
@@ -1876,7 +1875,7 @@
     if (Object.keys(userlist).length > 0) {
       box.find(".list-user").remove();
       box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
-      box.find(".add-user").register("click", function () {
+      box.find(".add-user").register("click", function() {
         var user = prompt("Username?");
         if (!user) return;
         var pass = prompt("Password?");
@@ -1887,7 +1886,7 @@
           priv: true
         });
       });
-      box.find(".delete-user").register("click", function (event) {
+      box.find(".delete-user").register("click", function(event) {
         event.stopPropagation();
         sendMessage(null, "UPDATE_USER", {
           name: $(this).parents("li").children(".username").text(),
@@ -1899,7 +1898,7 @@
 
   function showPrefs() {
     var box = $("#prefs-box");
-    box.empty().append(function () {
+    box.empty().append(function() {
       var i;
       var opts = [
         {name: "theme", label: "Editor theme"},
@@ -1910,40 +1909,40 @@
         {name: "renameExistingOnUpload", label: "When added file exists"}
       ];
 
-      opts.forEach(function (_, i) {
+      opts.forEach(function(_, i) {
         opts[i].values = {};
         opts[i].selected = droppy.get(opts[i].name);
       });
-      droppy.themes.forEach(function (t) { opts[0].values[t] = t; });
+      droppy.themes.forEach(function(t) { opts[0].values[t] = t; });
       for (i = 10; i <= 30; i += 2) opts[1].values[String(i)] = String(i);
       opts[2].values = {Tabs: true, Spaces: false};
       for (i = 1; i <= 8; i *= 2) opts[3].values[String(i)] = String(i);
-      opts[4].values = {Wrap: true, "No Wrap": false};
+      opts[4].values = {"Wrap": true, "No Wrap": false};
       opts[5].values = {Rename: true, Replace: false};
       return Handlebars.templates.options({opts: opts});
     });
 
-    $("select.theme").register("change", function () {
+    $("select.theme").register("change", function() {
       var theme = $(this).val();
-      loadTheme(theme, function () {
+      loadTheme(theme, function() {
         droppy.set("theme", theme);
-        $(".view").each(function () {
+        $(".view").each(function() {
           if (this.editor) this.editor.setOption("theme", theme);
         });
       });
     });
 
-    $("select.editorFontSize").register("change", function () {
+    $("select.editorFontSize").register("change", function() {
       setEditorFontSize($(this).val());
     });
 
-    setTimeout(function () {
-      box.addClass("in").end(function () {
+    setTimeout(function() {
+      box.addClass("in").end(function() {
         $(this).removeAttr("style");
       });
       toggleCatcher(true);
-      $("#click-catcher").one("click", function () {
-        box.find("select").each(function () {
+      $("#click-catcher").one("click", function() {
+        box.find("select").each(function() {
           var option = $(this).attr("class");
           var value  = $(this).val();
 
@@ -1954,7 +1953,7 @@
           droppy.set(option, value);
           if (option === "indentUnit") droppy.set("tabSize", value);
 
-          $(".view").each(function () {
+          $(".view").each(function() {
             if (this.editor) {
               this.editor.setOption(option, value);
               if (option === "indentUnit") this.editor.setOption("tabSize", value);
@@ -2008,7 +2007,7 @@
       }
 
       var i = 0;
-      row.parent().children(".playable").each(function () {
+      row.parent().children(".playable").each(function() {
         $(this).attr("data-playindex", i++);
       });
       view[0].playlistLength = i;
@@ -2032,7 +2031,7 @@
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
 
-    $(player).register("timeupdate", function () {
+    $(player).register("timeupdate", function() {
       var cur = player.currentTime, max = player.duration;
       if (!cur || !max) return;
       view[0].querySelector(".seekbar-played").style.width = (cur / max) * 100 + "%";
@@ -2067,43 +2066,43 @@
     player.addEventListener("playing", function playing(event) {
       onNewAudio($(event.target).parents(".view"));
     });
-    var updateVolume = throttle(function (event) {
+    var updateVolume = throttle(function(event) {
       var slider = $(event.target).parents(".view").find(".volume-slider")[0];
       var left   = slider.getBoundingClientRect().left;
       var right  = slider.getBoundingClientRect().right;
       setVolume((event.pageX - left) / (right - left));
     }, 1000 / 60);
-    slider.register("mousedown", function (event) {
+    slider.register("mousedown", function(event) {
       heldVolume = true;
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.register("mousemove", function (event) {
+    bar.register("mousemove", function(event) {
       if (heldVolume) updateVolume(event);
     });
-    bar.register("mouseup", function () {
+    bar.register("mouseup", function() {
       heldVolume = false;
     });
-    slider.register("click", function (event) {
+    slider.register("click", function(event) {
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.register("click", function (event) {
+    bar.register("click", function(event) {
       var time = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
       if (!isNaN(parseFloat(time)) && isFinite(time))
         player.currentTime = time;
       else
         endAudio($(this).parents(".view"));
     });
-    bar.find(".previous").register("click", function (event) {
+    bar.find(".previous").register("click", function(event) {
       playPrev($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".next").register("click", function (event) {
+    bar.find(".next").register("click", function(event) {
       playNext($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".pause-play").register("click", function (event) {
+    bar.find(".pause-play").register("click", function(event) {
       var icon   = $(this).children("svg");
       var player = $(this).parents(".audio-bar").find(".audio-player")[0];
       if (icon.attr("class") === "play") {
@@ -2116,11 +2115,11 @@
       event.stopPropagation();
     });
 
-    bar.find(".stop").register("click", function (event) {
+    bar.find(".stop").register("click", function(event) {
       endAudio($(this).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".shuffle").register("click", function (event) {
+    bar.find(".shuffle").register("click", function(event) {
       $(this).toggleClass("active");
       $(this).parents(".view")[0].shuffle = $(this).hasClass("active");
       event.stopPropagation();
@@ -2135,7 +2134,7 @@
     slider[0].addEventListener("DOMMouseScroll", onWheel);
     volumeIcon[0].addEventListener("mousewheel", onWheel);
     volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
-    volumeIcon.register("click", function (event) {
+    volumeIcon.register("click", function(event) {
       slider.toggleClass("in");
       volumeIcon.toggleClass("active");
       event.stopPropagation();
@@ -2181,7 +2180,7 @@
     var loading = {};
     function splitCallback(cont, n) {
       var countDown = n;
-      return function () { if (--countDown === 0) cont(); };
+      return function() { if (--countDown === 0) cont(); };
     }
     function ensureDeps(mode, cont) {
       var deps = CodeMirror.modes[mode].dependencies;
@@ -2197,7 +2196,7 @@
         CodeMirror.requireMode(missing[j], split);
     }
 
-    CodeMirror.requireMode = function (mode, cont) {
+    CodeMirror.requireMode = function(mode, cont) {
       if (typeof mode !== "string") mode = mode.name;
       if (CodeMirror.modes.hasOwnProperty(mode)) return ensureDeps(mode, cont);
       if (loading.hasOwnProperty(mode)) return loading[mode].push(cont);
@@ -2208,21 +2207,21 @@
       others.parentNode.insertBefore(script, others);
       var list = loading[mode] = [cont];
       var count = 0;
-      var poll = setInterval(function () {
+      var poll = setInterval(function() {
         if (++count > 100) return clearInterval(poll);
         if (CodeMirror.modes.hasOwnProperty(mode)) {
           clearInterval(poll);
           loading[mode] = null;
-          ensureDeps(mode, function () {
+          ensureDeps(mode, function() {
             for (var i = 0; i < list.length; ++i) list[i]();
           });
         }
       }, 200);
     };
 
-    CodeMirror.autoLoadMode = function (instance, mode) {
+    CodeMirror.autoLoadMode = function(instance, mode) {
       if (!CodeMirror.modes.hasOwnProperty(mode)) {
-        CodeMirror.requireMode(mode, function () {
+        CodeMirror.requireMode(mode, function() {
           instance.setOption("mode", instance.getOption("mode"));
         });
       }
@@ -2235,7 +2234,7 @@
     var opts = isVideo ? {axis: "x", handle: "video"} : {axis: "x"};
     $(el).attr("class", "media-container draggable");
     var instance = new Draggabilly(el, opts);
-    $(el).on("dragEnd", function () {
+    $(el).on("dragEnd", function() {
       var view      = $(instance.element).parents(".view");
       var threshold = droppy.detects.mobile ? 0.15 : 0.075;
 
@@ -2249,10 +2248,10 @@
 
   // video.js
   function initVideoJS(el, cb) {
-    loadStyle("vjs-css", "?!/lib/vjs.css", function () {
+    loadStyle("vjs-css", "?!/lib/vjs.css", function() {
       $("#vjs-css").text($("#vjs-css").text().replace(/\(font\//gm, "(?!/lib/font/"));
     });
-    loadScript("vjs-js", "?!/lib/vjs.js", function () {
+    loadScript("vjs-js", "?!/lib/vjs.js", function() {
       (function verify() {
         if (!("videojs" in window)) return setTimeout(verify, 200);
         if (!el.classList.contains("video-js"))
@@ -2273,7 +2272,7 @@
   // CodeMirror
   function initCM(cb) {
     loadStyle("cm-css", "?!/lib/cm.css");
-    loadScript("cm-js", "?!/lib/cm.js", function () {
+    loadScript("cm-js", "?!/lib/cm.js", function() {
       (function verify() {
         if (!("CodeMirror" in window)) return setTimeout(verify, 200);
         cb();
@@ -2407,7 +2406,7 @@
 
   function requestLink(view, location, attachement, cb) {
     view[0].sharelinkId = location;
-    var found = droppy.linkCache.some(function (entry) {
+    var found = droppy.linkCache.some(function(entry) {
       if (entry.location === location && entry.attachement === attachement) {
         if (cb)
           cb(entry.link);
@@ -2427,7 +2426,7 @@
 
   function fullScreenElement() {
     var el;
-    droppy.prefixes.fullscreenElement.some(function (prop) {
+    droppy.prefixes.fullscreenElement.some(function(prop) {
       if (prop in document) {
         el = document[prop];
       }
@@ -2437,11 +2436,11 @@
 
   function toggleFullscreen(el) {
     if (!fullScreenElement()) {
-      droppy.prefixes.requestFullscreen.some(function (prop) {
+      droppy.prefixes.requestFullscreen.some(function(prop) {
         if (prop in el) el[prop]();
       });
     } else {
-      droppy.prefixes.exitFullscreen.some(function (method) {
+      droppy.prefixes.exitFullscreen.some(function(method) {
         if (method in document) return document[method]();
       });
     }
@@ -2494,7 +2493,7 @@
     return time + mins + ":" + secs;
   }
 
-  setInterval(function () {
+  setInterval(function() {
     var dates = document.getElementsByClassName("mtime");
     if (!dates) return;
     for (var i = 0; i < dates.length; i++) {
@@ -2520,7 +2519,7 @@
 
   function loadStyle(id, url, cb) {
     if (!document.getElementById(id)) {
-      $.get(url).then(function (data) {
+      $.get(url).then(function(data) {
         $('<style id="' + id + '"></style>').appendTo("head");
         $("#" + id).text(data);
         if (cb) cb();
@@ -2535,9 +2534,9 @@
   }
 
   function setEditorFontSize(size) {
-    [].slice.call(document.styleSheets).some(function (sheet) {
+    [].slice.call(document.styleSheets).some(function(sheet) {
       if (sheet.ownerNode.id === "css") {
-        [].slice.call(sheet.cssRules).some(function (rule) {
+        [].slice.call(sheet.cssRules).some(function(rule) {
           if (rule.selectorText === ".content div.CodeMirror") {
             rule.style.fontSize = size + "px";
             return true;
@@ -2557,7 +2556,7 @@
     // HACK: Safeguard so a view won't get stuck in loading state
     if (view.data("type") === "directory") {
       clearTimeout(view[0].stuckTimeout);
-      view[0].stuckTimeout = setTimeout(function () {
+      view[0].stuckTimeout = setTimeout(function() {
         sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
       }, 2000);
     }
@@ -2575,7 +2574,7 @@
     box.find(".icon svg").replaceWith(droppy.svg.exclamation);
     box.children("span").text(text);
     box.attr("class", "info-box error in");
-    droppy.errorTimer = setTimeout(function () {
+    droppy.errorTimer = setTimeout(function() {
       box.removeClass("in");
     }, 4000);
   }
@@ -2588,38 +2587,38 @@
     var dl   = box.find(".dl-link");
     dl[attachement ? "addClass" : "removeClass"]("checked");
 
-    var select = function () {
+    var select = function() {
       var range = document.createRange(), selection = getSelection();
       range.selectNodeContents(out[0]);
       selection.removeAllRanges();
       selection.addRange(range);
     };
 
-    var getFullLink = function (hash) {
+    var getFullLink = function(hash) {
       return location.protocol + "//" + location.host + location.pathname + "?$/" + hash;
     };
 
     out.text(getFullLink(link));
-    out.register("copy", function () {
+    out.register("copy", function() {
       setTimeout(toggleCatcher.bind(null, false), 500);
     });
     box.find(".icon svg").replaceWith(droppy.svg.link);
-    box.attr("class", "info-box link in").end(function () {
+    box.attr("class", "info-box link in").end(function() {
       select();
     });
 
-    copy.register("click", function () {
+    copy.register("click", function() {
       var done;
       select();
       try { done = document.execCommand("copy"); } catch (e) {}
       copy.attr("aria-label", done === true ? "Copied!" : "Copy failed");
-    }).on("mouseleave", function () {
+    }).on("mouseleave", function() {
       copy.attr("aria-label", "Copy to clipboard");
     });
 
-    dl.register("click", function () {
+    dl.register("click", function() {
       $(this).toggleClass("checked");
-      requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"), function (link) {
+      requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"), function(link) {
         out.text(getFullLink(link));
       });
     });
@@ -2627,19 +2626,19 @@
 
   function showNotification(msg, body) {
     if (droppy.detects.notification && document.hidden) {
-      var show = function (msg, body) {
+      var show = function(msg, body) {
         var opts = {icon: "?!/logo192.png"};
         if (body) opts.body = body;
         var n = new Notification(msg, opts);
-        n.onshow = function () { // Compat: Chrome
+        n.onshow = function() { // Compat: Chrome
           var self = this;
-          setTimeout(function () { self.close(); }, 4000);
+          setTimeout(function() { self.close(); }, 4000);
         };
       };
       if (Notification.permission === "granted") {
         show(msg, body);
       } else if (Notification.permission !== "denied") {
-        Notification.requestPermission(function (permission) {
+        Notification.requestPermission(function(permission) {
           if (!("permission" in Notification)) Notification.permission = permission;
           if (permission === "granted") show(msg, body);
         });
@@ -2649,9 +2648,9 @@
 
   // Media up/down-scaling while maintaining aspect ratio.
   function aspectScale() {
-    $(".media-container").each(function () {
+    $(".media-container").each(function() {
       var container = $(this);
-      container.find("img, video").each(function () {
+      container.find("img, video").each(function() {
         var dims = {
           w: this.naturalWidth || this.videoWidth || this.clientWidth,
           h: this.naturalHeight || this.videoHeight || this.clientHeight
@@ -2676,12 +2675,12 @@
   function throttle(func, threshold) {
     if (!threshold) threshold = 250;
     var last, deferTimer;
-    return function () {
+    return function() {
       var now = Date.now(),
         args = arguments;
       if (last && now < last + threshold) {
         clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
+        deferTimer = setTimeout(function() {
           last = now;
           func.apply(this, args);
         }, threshold);
@@ -2718,7 +2717,7 @@
   }
 
   function sortByProp(entries, prop) {
-    return entries.sort(function (a, b) {
+    return entries.sort(function(a, b) {
       var result = sortCompare(a[prop], b[prop]);
       if (result === 0) result = sortCompare(a.sortname, b.sortname);
       return result;
@@ -2728,8 +2727,8 @@
   function naturalSort(a, b) {
     var x = [], y = [];
     function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
-    a.replace(/(\d+)|(\D+)/g, function (_, a, b) { x.push([a || 0, b]); });
-    b.replace(/(\d+)|(\D+)/g, function (_, a, b) { y.push([a || 0, b]); });
+    a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
+    b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
     while (x.length && y.length) {
       var xx = x.shift();
       var yy = y.shift();

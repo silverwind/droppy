@@ -34,9 +34,9 @@ var DHPARAM_BITS = 2048;
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
   if (Array.isArray(dir)) {
-    async.each(dir, function (p, cb) {
+    async.each(dir, function(p, cb) {
       mkdirp(p, {fs: fs, mode: "755"}, cb);
-    }, function (err) {
+    }, function(err) {
       cb(err);
     });
   } else if (typeof dir === "string") {
@@ -64,7 +64,7 @@ utils.rmSync = function rmSync(p) {
 };
 
 utils.move = function move(src, dst, cb) {
-  mv(src, dst, function (err) {
+  mv(src, dst, function(err) {
     if (cb) cb(err);
   });
 };
@@ -87,7 +87,7 @@ utils.copyFile = function copyFile(src, dst, cb) {
 };
 
 utils.copyDir = function copyDir(src, dst, cb) {
-  cpr(src, dst, {overwrite: true}, function (errs) {
+  cpr(src, dst, {overwrite: true}, function(errs) {
     if (errs) log.error(errs);
     if (cb) cb();
   });
@@ -113,7 +113,7 @@ utils.pretty = function pretty(data) {
 };
 
 utils.getNewPath = function getNewPath(origPath, callback) {
-  fs.stat(origPath, function (err, stats) {
+  fs.stat(origPath, function(err, stats) {
     if (err) callback(origPath);
     else {
       var filename  = path.basename(origPath);
@@ -129,18 +129,18 @@ utils.getNewPath = function getNewPath(origPath, callback) {
 
       var canCreate = false;
       async.until(
-        function () {
+        function() {
           return canCreate;
         },
-        function (cb) {
+        function(cb) {
           var num = parseInt(filename.substring(filename.lastIndexOf("-") + 1), 10);
           filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
-          fs.stat(path.join(dirname, filename + extension), function (err) {
+          fs.stat(path.join(dirname, filename + extension), function(err) {
             canCreate = err;
             cb();
           });
         },
-        function () {
+        function() {
           callback(path.join(dirname, filename + extension));
         }
       );
@@ -177,7 +177,7 @@ utils.isPathSane = function isPathSane(p, isURL) {
     if (/[\*\{\}\|<>"]/.test(p)) return false;   // Invalid characters
     return true;
   } else {
-    return p.split(/[\\\/]/gm).every(function (name) {
+    return p.split(/[\\\/]/gm).every(function(name) {
       return name === sanitize(name);
     });
   }
@@ -187,7 +187,7 @@ utils.isBinary = function isBinary(path, callback) {
   if (forceBinaryTypes.indexOf(ext(path)) !== -1)
     return callback(null, true);
 
-  isBin(path, function (err, result) {
+  isBin(path, function(err, result) {
     if (err) return callback(err);
     callback(null, result);
   });
@@ -205,8 +205,8 @@ var cbs = [];
 utils.tlsInit = function tlsInit(opts, cb) {
   if (!cbs[opts.index]) {
     cbs[opts.index] = [cb];
-    utils.tlsSetup(opts, function (err, tlsData) {
-      cbs[opts.index].forEach(function (cb) {
+    utils.tlsSetup(opts, function(err, tlsData) {
+      cbs[opts.index].forEach(function(cb) {
         cb(err, tlsData);
       });
     });
@@ -228,7 +228,7 @@ utils.tlsSetup = function tlsSetup(opts, cb) {
     opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
   ];
 
-  async.map(certPaths, readFile, function (_, data) {
+  async.map(certPaths, readFile, function(_, data) {
     var certStart = "-----BEGIN CERTIFICATE-----";
     var certEnd   = "-----END CERTIFICATE-----";
 
@@ -278,9 +278,9 @@ function createDH() {
 
 function readFile(p, cb) {
   if (typeof p !== "string") return cb(null);
-  fs.stat(p, function (_, stats) {
+  fs.stat(p, function(_, stats) {
     if (stats && stats.isFile()) {
-      fs.readFile(p, function (err, data) {
+      fs.readFile(p, function(err, data) {
         if (err) return cb(err);
         cb(null, String(data));
       });

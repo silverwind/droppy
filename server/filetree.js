@@ -18,19 +18,19 @@ var WATCHER_DELAY = 3000;
 var POLL_INTERVAL = 2000;
 
 function filterDirs(dirs) {
-  return dirs.sort(function (a, b) {
+  return dirs.sort(function(a, b) {
     return utils.countOccurences(a, "/") - utils.countOccurences(b, "/");
-  }).filter(function (path, _, self) {
-    return self.every(function (another) {
+  }).filter(function(path, _, self) {
+    return self.every(function(another) {
       return another === path || path.indexOf(another + "/") !== 0;
     });
-  }).filter(function (path, index, self) {
+  }).filter(function(path, index, self) {
     return self.indexOf(path) === index;
   });
 }
 
-var debouncedUpdate = _.debounce(function () {
-  filterDirs(todoDirs).forEach(function (dir) {
+var debouncedUpdate = _.debounce(function() {
+  filterDirs(todoDirs).forEach(function(dir) {
     filetree.emit("update", dir);
   });
   todoDirs = [];
@@ -43,7 +43,7 @@ function update(dir) {
 }
 
 function handleUpdateDirErrs(errs, cb) {
-  errs.forEach(function (err) {
+  errs.forEach(function(err) {
     if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)])
       delete dirs[utils.removeFilesPath(err.path)];
     else log.error(err);
@@ -53,7 +53,7 @@ function handleUpdateDirErrs(errs, cb) {
 
 filetree.updateDir = function updateDir(dir, cb) {
   if (dir === null) { dir = "/"; dirs = {}; }
-  fs.stat(utils.addFilesPath(dir), function (err, stat) {
+  fs.stat(utils.addFilesPath(dir), function(err, stat) {
     if (err) log.error(err);
     if (initial) { // use sync walk for performance
       initial = false;
@@ -63,7 +63,7 @@ filetree.updateDir = function updateDir(dir, cb) {
       updateDirInCache(dir, stat, r[1], r[2], cb);
     } else {
       log.debug(chalk.magenta("Updating " + dir));
-      walk(utils.addFilesPath(dir), function (errs, readDirs, readFiles) {
+      walk(utils.addFilesPath(dir), function(errs, readDirs, readFiles) {
         if (errs) handleUpdateDirErrs(errs, cb);
         updateDirInCache(dir, stat, readDirs, readFiles, cb);
       });
@@ -75,12 +75,12 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
   dirs[root] = {files: {}, size: 0, mtime: stat ? stat.mtime.getTime() : Date.now()};
 
   // Add dirs
-  readDirs.forEach(function (d) {
+  readDirs.forEach(function(d) {
     dirs[utils.removeFilesPath(d.path)] = {files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0};
   });
 
   // Add files
-  readFiles.forEach(function (f) {
+  readFiles.forEach(function(f) {
     var parentDir = utils.removeFilesPath(path.dirname(f.path));
     dirs[parentDir].files[path.basename(f.path)] = {size: f.stat.size, mtime: f.stat.mtime.getTime() || 0};
     dirs[parentDir].size += f.stat.size;
@@ -93,25 +93,25 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
 function updateDirSizes() {
   var todo = Object.keys(dirs);
 
-  todo.sort(function (a, b) {
+  todo.sort(function(a, b) {
     return utils.countOccurences(b, "/") - utils.countOccurences(a, "/");
   });
 
-  todo.forEach(function (d) {
+  todo.forEach(function(d) {
     dirs[d].size = 0;
-    Object.keys(dirs[d].files).forEach(function (f) {
+    Object.keys(dirs[d].files).forEach(function(f) {
       dirs[d].size += dirs[d].files[f].size;
     });
   });
 
-  todo.forEach(function (d) {
+  todo.forEach(function(d) {
     if (path.dirname(d) !== "/" && dirs[path.dirname(d)])
       dirs[path.dirname(d)].size += dirs[d].size;
   });
 }
 
 filetree.del = function del(dir) {
-  fs.stat(utils.addFilesPath(dir), function (err, stats) {
+  fs.stat(utils.addFilesPath(dir), function(err, stats) {
     if (err) log.error(err);
     if (!stats) return;
     if (stats.isFile()) {
@@ -124,7 +124,7 @@ filetree.del = function del(dir) {
 
 filetree.unlink = function unlink(dir) {
   lookAway();
-  utils.rm(utils.addFilesPath(dir), function (err) {
+  utils.rm(utils.addFilesPath(dir), function(err) {
     if (err) log.error(err);
     delete dirs[path.dirname(dir)].files[path.basename(dir)];
     update(path.dirname(dir));
@@ -133,10 +133,10 @@ filetree.unlink = function unlink(dir) {
 
 filetree.unlinkdir = function unlinkdir(dir) {
   lookAway();
-  utils.rm(utils.addFilesPath(dir), function (err) {
+  utils.rm(utils.addFilesPath(dir), function(err) {
     if (err) log.error(err);
     delete dirs[dir];
-    Object.keys(dirs).forEach(function (d) {
+    Object.keys(dirs).forEach(function(d) {
       if (new RegExp("^" + dir + "/").test(d)) delete dirs[d];
     });
     update(path.dirname(dir));
@@ -144,7 +144,7 @@ filetree.unlinkdir = function unlinkdir(dir) {
 };
 
 filetree.clipboard = function clipboard(src, dst, type) {
-  fs.stat(utils.addFilesPath(src), function (err, stats) {
+  fs.stat(utils.addFilesPath(src), function(err, stats) {
     lookAway();
     if (err) log.error(err);
     if (stats.isFile())
@@ -156,11 +156,11 @@ filetree.clipboard = function clipboard(src, dst, type) {
 
 filetree.mk = function mk(dir, cb) {
   lookAway();
-  fs.stat(utils.addFilesPath(dir), function (err) {
+  fs.stat(utils.addFilesPath(dir), function(err) {
     if (err && err.code === "ENOENT") {
-      fs.open(utils.addFilesPath(dir), "wx", function (err, fd) {
+      fs.open(utils.addFilesPath(dir), "wx", function(err, fd) {
         if (err) log.error(err);
-        fs.close(fd, function (error) {
+        fs.close(fd, function(error) {
           if (error) log.error(error);
           dirs[path.dirname(dir)].files[path.basename(dir)] = {size: 0, mtime: Date.now()};
           update(path.dirname(dir));
@@ -175,9 +175,9 @@ filetree.mk = function mk(dir, cb) {
 
 filetree.mkdir = function mkdir(dir, cb) {
   lookAway();
-  fs.stat(utils.addFilesPath(dir), function (err) {
+  fs.stat(utils.addFilesPath(dir), function(err) {
     if (err && err.code === "ENOENT") {
-      utils.mkdir(utils.addFilesPath(dir), function (err) {
+      utils.mkdir(utils.addFilesPath(dir), function(err) {
         if (err) log.error(err);
         dirs[dir] = {files: {}, size: 0, mtime: Date.now()};
         update(path.dirname(dir));
@@ -191,7 +191,7 @@ filetree.mkdir = function mkdir(dir, cb) {
 
 filetree.move = function move(src, dst, cb) {
   lookAway();
-  fs.stat(utils.addFilesPath(src), function (err, stats) {
+  fs.stat(utils.addFilesPath(src), function(err, stats) {
     if (err) log.error(err);
     if (stats.isFile())
       filetree.mv(src, dst, cb);
@@ -207,7 +207,7 @@ filetree.moveTemps = function move(src, dst, cb) {
 
 filetree.mv = function mv(src, dst, cb) {
   lookAway();
-  utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
+  utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function(err) {
     if (err) log.error(err);
     dirs[path.dirname(dst)].files[path.basename(dst)] = dirs[path.dirname(src)].files[path.basename(src)];
     delete dirs[path.dirname(src)].files[path.basename(src)];
@@ -219,13 +219,13 @@ filetree.mv = function mv(src, dst, cb) {
 
 filetree.mvdir = function mvdir(src, dst, cb) {
   lookAway();
-  utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function (err) {
+  utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function(err) {
     if (err) log.error(err);
     // Basedir
     dirs[dst] = dirs[src];
     delete dirs[src];
     // Subdirs
-    Object.keys(dirs).forEach(function (dir) {
+    Object.keys(dirs).forEach(function(dir) {
       if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
         dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = dirs[dir];
         delete dirs[dir];
@@ -239,7 +239,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
 
 filetree.cp = function cp(src, dst, cb) {
   lookAway();
-  utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), function () {
+  utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
     dirs[path.dirname(dst)].files[path.basename(dst)] = _.clone(dirs[path.dirname(src)].files[path.basename(src)], true);
     dirs[path.dirname(dst)].files[path.basename(dst)].mtime = Date.now();
     update(path.dirname(dst));
@@ -249,12 +249,12 @@ filetree.cp = function cp(src, dst, cb) {
 
 filetree.cpdir = function cpdir(src, dst, cb) {
   lookAway();
-  utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function () {
+  utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
     // Basedir
     dirs[dst] = _.clone(dirs[src], true);
     dirs[dst].mtime = Date.now();
     // Subdirs
-    Object.keys(dirs).forEach(function (dir) {
+    Object.keys(dirs).forEach(function(dir) {
       if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
         dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
         dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")].mtime = Date.now();
@@ -267,9 +267,9 @@ filetree.cpdir = function cpdir(src, dst, cb) {
 
 filetree.save = function save(dst, data, cb) {
   lookAway();
-  fs.stat(utils.addFilesPath(dst), function (err) {
+  fs.stat(utils.addFilesPath(dst), function(err) {
     if (err && err.code !== "ENOENT") return cb(err);
-    fs.writeFile(utils.addFilesPath(dst), data, function (err) {
+    fs.writeFile(utils.addFilesPath(dst), data, function(err) {
       dirs[path.dirname(dst)].files[path.basename(dst)] = {size: Buffer.byteLength(data), mtime: Date.now()};
       update(path.dirname(dst));
       if (cb) cb(err);
@@ -280,14 +280,14 @@ filetree.save = function save(dst, data, cb) {
 filetree.getDirContents = function getDirContents(p) {
   if (!dirs[p]) return;
   var entries = {}, files = dirs[p].files;
-  Object.keys(files).forEach(function (file) {
+  Object.keys(files).forEach(function(file) {
     entries[file] = [
       "f",
       Math.round(files[file].mtime / 1e3),
       files[file].size
     ].join("|");
   });
-  Object.keys(dirs).forEach(function (dir) {
+  Object.keys(dirs).forEach(function(dir) {
     if (path.dirname(dir) === p && path.basename(dir)) {
       entries[path.basename(dir)] = [
         "d",
@@ -306,7 +306,7 @@ var timer = null;
 filetree.updateAll = _.debounce(function updateAll() {
   log.debug(chalk.magenta("Updating file tree from watcher"));
   initial = true;
-  filetree.updateDir(null, function () {
+  filetree.updateDir(null, function() {
     filetree.emit("updateall");
   });
 }, WATCHER_DELAY);
@@ -314,7 +314,7 @@ filetree.updateAll = _.debounce(function updateAll() {
 function lookAway() {
   watching = false;
   clearTimeout(timer);
-  timer = setTimeout(function () {
+  timer = setTimeout(function() {
     watching = true;
   }, WATCHER_DELAY);
 }
@@ -325,7 +325,7 @@ chokidar.watch(paths.files, {
   usePolling    : true,
   interval      : POLL_INTERVAL,
   binaryInterval: POLL_INTERVAL
-}).on("error", log.error).on("all", function () {
+}).on("error", log.error).on("all", function() {
   if (watching) filetree.updateAll();
 });
 

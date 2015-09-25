@@ -61,7 +61,7 @@ if (cmds[cmd]) {
   var db;
   switch (cmd) {
   case "start":
-    require("./server/server.js")(null, true, function (err) {
+    require("./server/server.js")(null, true, function(err) {
       if (err) {
         console.error("[" + chalk.red("ERROR") + "] " + chalk.red(err));
         process.exit(1);
@@ -72,7 +72,7 @@ if (cmds[cmd]) {
     console.info(pkg.version);
     break;
   case "update":
-    require("./server/update.js")(pkg, function (err, message) {
+    require("./server/update.js")(pkg, function(err, message) {
       if (err) { console.error(new Error(err.message || err).stack); process.exit(1); }
       if (message) { console.info(message); process.exit(0); }
     });
@@ -97,16 +97,16 @@ if (cmds[cmd]) {
     };
 
     var edit = function edit() {
-      findEditor(function (editor) {
+      findEditor(function(editor) {
         if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
       });
     };
 
-    fs.stat(paths.cfgFile, function (err) {
+    fs.stat(paths.cfgFile, function(err) {
       if (err && err.code === "ENOENT") {
-        require("mkdirp")(paths.config, function () {
-          cfg.init(null, function (err) {
+        require("mkdirp")(paths.config, function() {
+          cfg.init(null, function(err) {
             if (err) return console.error(new Error(err.message || err).stack);
             edit();
           });
@@ -118,15 +118,15 @@ if (cmds[cmd]) {
     break;
   case "list":
     db = require("./server/db.js");
-    db.init(function () {
+    db.init(function() {
       printUsers(db.get("users"));
     });
     break;
   case "add":
     if (args.length !== 2) return printHelp();
     db = require("./server/db.js");
-    db.init(function () {
-      db.addOrUpdateUser(args[0], args[1], true, function () {
+    db.init(function() {
+      db.addOrUpdateUser(args[0], args[1], true, function() {
         printUsers(db.get("users"));
       });
     });
@@ -134,8 +134,8 @@ if (cmds[cmd]) {
   case "del":
     if (args.length !== 1) return printHelp();
     db = require("./server/db.js");
-    db.init(function () {
-      db.delUser(args[0], function () {
+    db.init(function() {
+      db.delUser(args[0], function() {
         printUsers(db.get("users"));
       });
     });
@@ -148,13 +148,13 @@ if (cmds[cmd]) {
 function printHelp() {
   var help = "Usage: " + pkg.name + " command [options]\n\n Commands:";
 
-  Object.keys(cmds).forEach(function (command) {
+  Object.keys(cmds).forEach(function(command) {
     help += "\n   " + cmds[command];
   });
 
   help += "\n\n Options:";
 
-  Object.keys(opts).forEach(function (option) {
+  Object.keys(opts).forEach(function(option) {
     help += "\n   " + opts[option];
   });
 

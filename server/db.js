@@ -11,11 +11,11 @@ var path     = require("path");
 var dbFile   = require("./paths.js").get().db;
 
 db.init = function init(callback) {
-  fs.stat(dbFile, function (err) {
+  fs.stat(dbFile, function(err) {
     if (err) {
       if (err.code === "ENOENT") {
         database = defaults;
-        mkdirp(path.dirname(dbFile), function () {
+        mkdirp(path.dirname(dbFile), function() {
           write();
           callback();
         });
@@ -23,7 +23,7 @@ db.init = function init(callback) {
         callback(err);
       }
     } else {
-      fs.readFile(dbFile, function (err, data) {
+      fs.readFile(dbFile, function(err, data) {
         if (err) return callback(err);
         data = data.toString();
 
@@ -46,7 +46,7 @@ db.init = function init(callback) {
         }
         if (database.sharelinks) {
           database.links = {};
-          Object.keys(database.sharelinks).forEach(function (hash) {
+          Object.keys(database.sharelinks).forEach(function(hash) {
             database.links[hash] = {
               location: database.sharelinks[hash],
               attachment: false
@@ -57,7 +57,7 @@ db.init = function init(callback) {
 
         // remove pre-1.7 session tokens
         if (database.sessions) {
-          Object.keys(database.sessions).forEach(function (session) {
+          Object.keys(database.sessions).forEach(function(session) {
             if (session.length !== 48) delete database.sessions[session];
           });
         }

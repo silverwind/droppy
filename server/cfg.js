@@ -33,12 +33,12 @@ cfg.init = function init(config, callback) {
     config = _.defaults(config, defaults); // Add missing options
     callback(null, config);
   } else {
-    fs.stat(configFile, function (err) {
+    fs.stat(configFile, function(err) {
       if (err) {
         if (err.code === "ENOENT") {
           config = defaults;
-          mkdirp(path.dirname(configFile), function () {
-            write(config, function (err) {
+          mkdirp(path.dirname(configFile), function() {
+            write(config, function(err) {
               callback(err || null, config);
             });
           });
@@ -46,7 +46,7 @@ cfg.init = function init(config, callback) {
           callback(err);
         }
       } else {
-        fs.readFile(configFile, function (err, data) {
+        fs.readFile(configFile, function(err, data) {
           if (err) return callback(err);
 
           try {
@@ -61,13 +61,13 @@ cfg.init = function init(config, callback) {
           config = _.defaults(config, defaults);
 
           // Remove options no longer present
-          Object.keys(config).forEach(function (key) {
+          Object.keys(config).forEach(function(key) {
             if (typeof defaults[key] === "undefined" && key !== "demo") {
               delete config[key];
             }
           });
 
-          write(config, function (err) {
+          write(config, function(err) {
             callback(err || null, config);
           });
         });
@@ -91,7 +91,7 @@ function migrate(config) {
     "maxOpen"
   ];
 
-  var needToMigrate = oldProps.every(function (prop) {
+  var needToMigrate = oldProps.every(function(prop) {
     return config.hasOwnProperty(prop);
   });
 
@@ -103,7 +103,7 @@ function migrate(config) {
       hsts     : config.useHSTS ? 31536000 : 0
     }];
   }
-  oldProps.forEach(function (prop) {
+  oldProps.forEach(function(prop) {
     delete config[prop];
   });
   return config;

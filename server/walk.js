@@ -4,18 +4,18 @@ var fs = require("fs");
 
 module.exports = function walk(dir, cb) {
   var files = [], dirs = [], errs = [];
-  fs.readdir(dir, function (err, list) {
+  fs.readdir(dir, function(err, list) {
     if (err) errs.push(err);
     (function next(i) {
       if (!list || !list[i]) return cb(errs.length ? errs : null, dirs, files);
       var path = dir + "/" + list[i];
-      fs.lstat(path, function (err, stat) {
+      fs.lstat(path, function(err, stat) {
         if (err) {
           errs.push(err);
           next(++i);
         } else if (stat && stat.isDirectory()) {
           dirs.push({path: path, stat: stat});
-          walk(path, function (e, d, f) {
+          walk(path, function(e, d, f) {
             if (e) errs = errs.concat(e);
             dirs = dirs.concat(d);
             files = files.concat(f);

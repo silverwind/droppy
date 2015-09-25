@@ -130,9 +130,9 @@ var libs = {
 resources.init = function init(doMinify, cb) {
   minify = doMinify;
   if (!minify) return compile(cb);
-  canUseCache(function (can) {
+  canUseCache(function(can) {
     if (!can) return compile(cb);
-    fs.readFile(paths.cache, function (err, data) {
+    fs.readFile(paths.cache, function(err, data) {
       if (err) return cb(err);
       try {
         var cache = jb.parse(data);
@@ -145,23 +145,23 @@ resources.init = function init(doMinify, cb) {
 };
 
 function compile(cb) {
-  async.series([compileAll, readThemes, readModes, readLibs], function (err, results) {
+  async.series([compileAll, readThemes, readModes, readLibs], function(err, results) {
     if (err) return cb(err);
     var cache = {res: results[0], themes: {}, modes: {}, lib: {}};
 
-    Object.keys(results[1]).forEach(function (theme) {
+    Object.keys(results[1]).forEach(function(theme) {
       cache.themes[theme] = {data: results[1][theme], etag: etag(), mime: mime("css")};
     });
 
-    Object.keys(results[2]).forEach(function (mode) {
+    Object.keys(results[2]).forEach(function(mode) {
       cache.modes[mode] = {data: results[2][mode], etag: etag(), mime: mime("js")};
     });
 
-    Object.keys(results[3]).forEach(function (file) {
+    Object.keys(results[3]).forEach(function(file) {
       cache.lib[file] = {data: results[3][file], etag: etag(), mime: mime(path.basename(file))};
     });
 
-    addGzip(cache, function (err, cache) {
+    addGzip(cache, function(err, cache) {
       cache.etags = {};
       if (minify) fs.writeFile(paths.cache, jb.stringify(cache));
       cb(err, cache);
@@ -172,14 +172,14 @@ function compile(cb) {
 // Create gzip compressed data
 function addGzip(cache, callback) {
   var types = Object.keys(cache), funcs = [];
-  types.forEach(function (type) {
-    funcs.push(function (cb) {
+  types.forEach(function(type) {
+    funcs.push(function(cb) {
       gzipMap(cache[type], cb);
     });
   });
-  async.parallel(funcs, function (err, results) {
+  async.parallel(funcs, function(err, results) {
     if (err) return callback(err);
-    types.forEach(function (type, index) {
+    types.forEach(function(type, index) {
       cache[type] = results[index];
     });
     callback(null, cache);
@@ -188,14 +188,14 @@ function addGzip(cache, callback) {
 
 function gzipMap(map, callback) {
   var names = Object.keys(map), funcs = [];
-  names.forEach(function (name) {
-    funcs.push(function (cb) {
+  names.forEach(function(name) {
+    funcs.push(function(cb) {
       gzip(map[name].data, cb);
     });
   });
-  async.parallel(funcs, function (err, results) {
+  async.parallel(funcs, function(err, results) {
     if (err) return callback(err);
-    names.forEach(function (name, index) {
+    names.forEach(function(name, index) {
       map[name].gzip = results[index];
     });
     callback(null, map);
@@ -203,7 +203,7 @@ function gzipMap(map, callback) {
 }
 
 function gzip(data, callback) {
-  zlib.gzip(data, function (err, gzipped) {
+  zlib.gzip(data, function(err, gzipped) {
     if (err) return callback(err);
     callback(null, gzipped);
   });
@@ -211,28 +211,28 @@ function gzip(data, callback) {
 
 function canUseCache(cb) {
   var lastChange, files = [];
-  Object.keys(resources.files).forEach(function (type) {
-    resources.files[type].forEach(function (file) {
+  Object.keys(resources.files).forEach(function(type) {
+    resources.files[type].forEach(function(file) {
       files.push(path.join(paths.mod, file));
     });
   });
-  Object.keys(libs).forEach(function (file) {
+  Object.keys(libs).forEach(function(file) {
     if (typeof libs[file] === "string") {
       files.push(path.join(paths.mod, libs[file]));
     } else {
-      libs[file].forEach(function (file) {
+      libs[file].forEach(function(file) {
         files.push(path.join(paths.mod, file));
       });
     }
   });
-  async.map(files, function (file, cb) {
-    fs.stat(file, function (err, stats) {
+  async.map(files, function(file, cb) {
+    fs.stat(file, function(err, stats) {
       cb(null, err ? 0 : stats.mtime.getTime());
     });
-  }, function (err, times) {
+  }, function(err, times) {
     if (err) return cb(err);
     lastChange = Math.max.apply(Math, times);
-    fs.stat(paths.cache, function (err, stats) {
+    fs.stat(paths.cache, function(err, stats) {
       if (err) return cb(false);
       cb(stats.mtime.getTime() > lastChange);
     });
@@ -241,23 +241,23 @@ function canUseCache(cb) {
 
 function readThemes(callback) {
   var themes = {};
-  fs.readdir(themesPath, function (err, filenames) {
+  fs.readdir(themesPath, function(err, filenames) {
     if (err) return callback(err);
 
-    var files = filenames.map(function (name) {
+    var files = filenames.map(function(name) {
       return path.join(themesPath, name);
     });
 
-    async.map(files, fs.readFile, function (err, data) {
+    async.map(files, fs.readFile, function(err, data) {
       if (err) return callback(err);
 
-      filenames.forEach(function (name, index) {
+      filenames.forEach(function(name, index) {
         var css = String(data[index]);
         themes[name.replace(/\.css$/, "")] = new Buffer(minify ? cleanCSS.minify(css).styles : css);
       });
 
       // add our own theme
-      fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function (err, css) {
+      fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function(err, css) {
         if (err) return callback(err);
         themes.droppy = new Buffer(minify ? cleanCSS.minify(css).styles : css);
         callback(null, themes);
@@ -270,22 +270,22 @@ function readModes(callback) {
   var modes = {};
 
   // parse meta.js from CM for supported modes
-  fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function (err, js) {
+  fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function(err, js) {
     if (err) return callback(err);
 
     // Extract modes from CodeMirror
     var sandbox = {CodeMirror : {}};
     vm.runInNewContext(js, sandbox);
-    sandbox.CodeMirror.modeInfo.forEach(function (entry) {
+    sandbox.CodeMirror.modeInfo.forEach(function(entry) {
       if (entry.mode !== "null") modes[entry.mode] = null;
     });
 
-    async.map(Object.keys(modes), function (mode, cb) {
-      fs.readFile(path.join(modesPath, mode, mode + ".js"), function (err, data) {
+    async.map(Object.keys(modes), function(mode, cb) {
+      fs.readFile(path.join(modesPath, mode, mode + ".js"), function(err, data) {
         cb(err, minify ? new Buffer(uglify.minify(data.toString(), opts.uglify).code) : data);
       });
-    }, function (err, result) {
-      Object.keys(modes).forEach(function (mode, i) {
+    }, function(err, result) {
+      Object.keys(modes).forEach(function(mode, i) {
         modes[mode] = result[i];
       });
       callback(err, modes);
@@ -295,23 +295,23 @@ function readModes(callback) {
 
 function readLibs(callback) {
   var out = {};
-  async.each(Object.keys(libs), function (dest, cb) {
+  async.each(Object.keys(libs), function(dest, cb) {
     if (Array.isArray(libs[dest])) {
-      async.map(libs[dest], function (p, innercb) {
+      async.map(libs[dest], function(p, innercb) {
         fs.readFile(path.join(paths.mod, p), innercb);
-      }, function (err, data) {
+      }, function(err, data) {
         out[dest] = Buffer.concat(data);
         cb(err);
       });
     } else {
-      fs.readFile(path.join(paths.mod, libs[dest]), function (err, data) {
+      fs.readFile(path.join(paths.mod, libs[dest]), function(err, data) {
         out[dest] = data;
         cb(err);
       });
     }
-  }, function (err) {
+  }, function(err) {
     if (minify) {
-      Object.keys(out).forEach(function (file) {
+      Object.keys(out).forEach(function(file) {
         if (/\.js$/.test(file)) {
           out[file] = new Buffer(uglify.minify(out[file].toString(), opts.uglify).code);
         } else if (/\.css$/.test(file)) {
@@ -324,7 +324,7 @@ function readLibs(callback) {
 }
 
 function readSVG() {
-  fs.readdirSync(paths.svg).forEach(function (name) {
+  fs.readdirSync(paths.svg).forEach(function(name) {
     var className = name.slice(0, name.length - ".svg".length);
     $ = cheerio.load(fs.readFileSync(path.join(paths.svg, name)).toString(), {xmlMode: true});
     $("svg").addClass(className);
@@ -334,7 +334,7 @@ function readSVG() {
 
 function addSVG(html) {
   $ = cheerio.load(html);
-  $("svg").each(function () {
+  $("svg").each(function() {
     $(this).replaceWith(svgData[$(this).attr("class")]);
   });
   return $.html();
@@ -342,7 +342,7 @@ function addSVG(html) {
 
 resources.compileJS = function compileJS() {
   var js = "";
-  resources.files.js.forEach(function (file) {
+  resources.files.js.forEach(function(file) {
     js += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + ";";
   });
 
@@ -350,7 +350,7 @@ resources.compileJS = function compileJS() {
   js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
   // Add Handlebars precompiled templates
-  var temps = fs.readdirSync(paths.templates).map(function (p) {
+  var temps = fs.readdirSync(paths.templates).map(function(p) {
     return path.join(paths.templates, p);
   });
   js = js.replace("/* {{ templates }} */", templates.compile(temps));
@@ -363,7 +363,7 @@ resources.compileJS = function compileJS() {
 
 resources.compileCSS = function compileCSS() {
   var css = "";
-  resources.files.css.forEach(function (file) {
+  resources.files.css.forEach(function(file) {
     css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + "\n";
   });
 
@@ -382,7 +382,7 @@ resources.compileHTML = function compileHTML(res) {
     return minify ? htmlMinifier.minify(html, opts.htmlMinifier) : html;
   };
 
-  resources.files.html.forEach(function (file) {
+  resources.files.html.forEach(function(file) {
     html[path.basename(file)] = addSVG(String(fs.readFileSync(path.join(paths.mod, file))));
   });
 
@@ -423,7 +423,7 @@ function compileAll(callback) {
   res = resources.compileHTML(res);
 
   // Read misc files
-  resources.files.other.forEach(function (file) {
+  resources.files.other.forEach(function(file) {
     var data, date;
     var name = path.basename(file);
     var fullPath = path.join(paths.mod, file);

@@ -49,9 +49,9 @@ function checkMigrate() {
   checked = true;
   var rimraf = require("rimraf");
   var oldConfig = resolve(configDir, "config");
-  fs.stat(oldConfig, function (_, stats) {
+  fs.stat(oldConfig, function(_, stats) {
     if (stats && stats.isDirectory()) {
-      fs.readdirSync(oldConfig).forEach(function (file) {
+      fs.readdirSync(oldConfig).forEach(function(file) {
         fs.renameSync(path.join(oldConfig, file), path.join(resolve(configDir), file));
       });
       rimraf.sync(oldConfig);

@@ -64,7 +64,7 @@ var log = function log(req, res, logLevel) {
 
   if (opts && opts.timestamps) elems.unshift(log.timestamp());
 
-  elems.forEach(function (part, index) {
+  elems.forEach(function(part, index) {
     if (part === "")
       elems.splice(index, 1);
   });
