@@ -161,7 +161,7 @@ utils.addFilesPath = function addFilesPath(p) {
 
 utils.removeFilesPath = function removeFilesPath(p) {
   if (p.length > paths.files.length)
-    return p.substring(paths.files.length);
+    return utils.normalizePath(p.substring(paths.files.length));
   else if (p === paths.files)
     return "/";
 };
