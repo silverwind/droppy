@@ -143,20 +143,11 @@ function startListeners(callback) {
         server.removeAllListeners("error");
         setupSocket(server);
         var proto = socket.opts.proto.toLowerCase();
-        if (tlsData) {
-          var cn = require("x509").getSubject(tlsData.cert).commonName;
-          log.info("Listening on ",
-            chalk.blue(proto + "://") +
-            log.formatUrl(server.address().address, server.address().port, proto) +
-            (cn ? " (" + chalk.yellow(cn) + ")" : ""));
-          cb();
-        } else {
-          log.info("Listening on ",
-            chalk.blue(proto + "://") +
-            log.formatUrl(server.address().address, server.address().port, proto)
-          );
-          cb();
-        }
+        log.info("Listening on ",
+          chalk.blue(proto + "://") +
+          log.formatUrl(server.address().address, server.address().port, proto)
+        );
+        cb();
       }).on("error", function(err) {
         if (err.code === "EADDRINUSE")
           log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
