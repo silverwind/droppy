@@ -137,7 +137,7 @@ function startListeners(callback) {
   });
 
   async.each(sockets, function(socket, cb) {
-    createListener(onRequest, socket.opts, function(err, server, tlsData) {
+    createListener(onRequest, socket.opts, function(err, server) {
       if (err) return cb(err);
       server.on("listening", function() {
         server.removeAllListeners("error");
@@ -198,7 +198,7 @@ function createListener(handler, opts, callback) {
         })();
       }
 
-      callback(null, server, tlsOptions);
+      callback(null, server);
     });
   }
 }
