@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, ext, Handlebars, Uppie */
+/* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, fileExtension, Handlebars, Uppie */
 (function($, window, document) {
   "use strict";
   var droppy = {};
@@ -1078,7 +1078,7 @@
         sprite    : getSpriteClass(/[^.]*$/.exec(name)[0])
       };
 
-      if (Object.keys(droppy.audioTypes).indexOf(ext(name)) !== -1) {
+      if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
         entry.classes = name === view.find(".playing").data("name") ? "playable playing" : "playable";
         entry.playable = true;
       }
@@ -1526,7 +1526,7 @@
   }
 
   function openFile(view, newFolder, file) {
-    var e = ext(file), oldFolder = view[0].currentFolder;
+    var e = fileExtension(file), oldFolder = view[0].currentFolder;
 
     // Determine filetype and how to open it
     if (Object.keys(droppy.imageTypes).indexOf(e) !== -1) { // Image
@@ -1575,7 +1575,7 @@
     var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
     view[0].mediaFiles = [];
     Object.keys(data).forEach(function(filename) {
-      var e = ext(filename);
+      var e = fileExtension(filename);
       if (typeof data[filename] === "string") {
         if (data[filename][0] !== "f") return;
       } else if (typeof data[filename] === "object") {
@@ -1590,7 +1590,7 @@
     [getPrevMedia(view), getNextMedia(view)].forEach(function(filename) {
       var src = getMediaSrc(view, filename);
       if (!src) return;
-      if (Object.keys(droppy.imageTypes).indexOf(ext(filename)) !== -1) {
+      if (Object.keys(droppy.imageTypes).indexOf(fileExtension(filename)) !== -1) {
         (document.createElement("img")).src = src;
       }
     });
@@ -1633,7 +1633,7 @@
     if (view[0].tranistioning) return;
     var a        = view.find(".media-container"), b;
     var nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view);
-    var isImage  = Object.keys(droppy.imageTypes).indexOf(ext(nextFile)) !== -1;
+    var isImage  = Object.keys(droppy.imageTypes).indexOf(fileExtension(nextFile)) !== -1;
     var src      = getMediaSrc(view, nextFile);
 
     if (isImage) {
@@ -1702,7 +1702,7 @@
 
   function openMedia(view, sameFolder) {
     var content, filename = view[0].currentFile;
-    var type = Object.keys(droppy.videoTypes).indexOf(ext(filename)) !== -1 ? "video" : "image";
+    var type = Object.keys(droppy.videoTypes).indexOf(fileExtension(filename)) !== -1 ? "video" : "image";
     view.data("type", "media");
     content = $(Handlebars.templates.media({
       type: type,
@@ -1988,7 +1988,7 @@
     source = "?_" + row.data("id");
     view.find(".seekbar-played, .seekbar-loaded").css("width", "0%");
 
-    if (player.canPlayType(droppy.audioTypes[ext(source)])) {
+    if (player.canPlayType(droppy.audioTypes[fileExtension(source)])) {
       player.src = source;
       player.load();
       player.play();
