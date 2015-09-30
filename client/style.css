@@ -754,37 +754,20 @@ html:not(.mobile) #entry-menu a.active svg {
   transform: translate(-50%, -50%) scale(1.25) !important;
 }
 
-.vjs-default-skin .vjs-play-progress, .vjs-default-skin .vjs-volume-level {
-  background: #18f !important;
-}
-
 .vjs-progress-control, .vjs-default-skin:hover .vjs-progress-control {
-  font-size: .7em !important;
-}
-
-.vjs-default-skin .vjs-slider-handle::before {
-  display: none !important;
+  font-size: 1.2em !important;
 }
 
 .vjs-default-skin .vjs-slider {
   background: #333 !important;
 }
 
-.vjs-default-skin .vjs-slider:focus {
-  box-shadow: 0px 0px 0 .5em rgba(255,255,255,.08) !important;
+.vjs-default-skin .vjs-load-progress {
+  background: rgba(160, 160, 160, .5) !important;
 }
 
 .vjs-default-skin .vjs-control-bar {
   background: rgba(16,16,16,.9) !important;
-}
-
-.vjs-default-skin {
-  color: #888 !important;
-}
-
-.vjs-default-skin .vjs-control:focus::before, .vjs-default-skin .vjs-control:hover::before {
-  text-shadow: none !important;
-  color: #fff !important;
 }
 
 /* Non-mobile supports autoplay */

@@ -2248,9 +2248,7 @@
 
   // video.js
   function initVideoJS(el, cb) {
-    loadStyle("vjs-css", "?!/lib/vjs.css", function() {
-      $("#vjs-css").text($("#vjs-css").text().replace(/\(font\//gm, "(?!/lib/font/"));
-    });
+    loadStyle("vjs-css", "?!/lib/vjs.css");
     loadScript("vjs-js", "?!/lib/vjs.js", function() {
       (function verify() {
         if (!("videojs" in window)) return setTimeout(verify, 200);

@@ -106,13 +106,9 @@ resources.files = {
 
 // On-demand loadable libs. Will be available as ?!/lib/[prop]
 var libs = {
-  "vjs.js": "node_modules/video.js/dist/video-js/video.js",
-  "vjs.css": "node_modules/video.js/dist/video-js/video-js.min.css",
-  "vjs.swf": "node_modules/video.js/dist/video-js/video-js.swf",
-  "font/vjs.eot": "node_modules/video.js/dist/video-js/font/vjs.eot",
-  "font/vjs.svg": "node_modules/video.js/dist/video-js/font/vjs.svg",
-  "font/vjs.ttf": "node_modules/video.js/dist/video-js/font/vjs.ttf",
-  "font/vjs.woff": "node_modules/video.js/dist/video-js/font/vjs.woff",
+  "vjs.js": "node_modules/video.js/dist/video.min.js",
+  "vjs.css": "node_modules/video.js/dist/video-js.min.css",
+  "vjs.swf": "node_modules/video.js/dist/video-js.swf",
   "cm.js": [
     "node_modules/codemirror/lib/codemirror.js",
     "node_modules/codemirror/mode/meta.js",
