@@ -743,15 +743,6 @@ html:not(.mobile) #entry-menu a.active svg {
   transform: translate(-50%, -50%) !important;
   color: #fff !important;
   border: none !important;
-  transition: all .3s  !important;
-}
-
-.vjs-big-play-button:before {
-  text-shadow: none !important;
-}
-
-.vjs-default-skin:hover .vjs-big-play-button, .vjs-default-skin .vjs-big-play-button:focus {
-  transform: translate(-50%, -50%) scale(1.25) !important;
 }
 
 .vjs-progress-control, .vjs-default-skin:hover .vjs-progress-control {
