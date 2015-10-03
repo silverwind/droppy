@@ -3,6 +3,14 @@
   background: #161616;
   box-shadow: inset 0 0 10px #000;
 }
+
+@media screen and (max-resolution: 1.99dppx) {
+  .cm-s-droppy.CodeMirror {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
 .cm-s-droppy .CodeMirror-gutters {
   background: #242424;
   border-right: none;
