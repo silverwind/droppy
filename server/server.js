@@ -174,10 +174,7 @@ function createListener(handler, opts, callback) {
     https.CLIENT_RENEG_LIMIT = 0;
     utils.tlsInit(opts, function(err, tlsOptions) {
       if (err) return callback(err);
-
       server = https.createServer(tlsOptions);
-      server.httpAllowHalfOpen = false;
-      server.timeout = 120000;
 
       server.on("request", function(req, res) {
         if (opts.hsts && opts.hsts > 0)
