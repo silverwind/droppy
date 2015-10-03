@@ -42,6 +42,13 @@ input::-moz-placeholder          { color: #999; opacity: 1 }
 input:-ms-input-placeholder      { color: #999 }
 input::-webkit-input-placeholder { color: #999 }
 
+@media screen and (max-resolution: 1.99dppx) {
+  .navigation, .path, .tip:before {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
 /* =============================== Animations ============================== */
 
 @keyframes nodeInserted {
@@ -378,7 +385,7 @@ input::-webkit-input-placeholder { color: #999 }
   white-space: nowrap;
 }
 .header-size, .size {
-  flex: 0 0 5rem;
+  flex: 0 0 6rem;
   display: inline-block;
   text-align: right;
   white-space: nowrap;
