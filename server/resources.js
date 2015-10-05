@@ -8,6 +8,7 @@ var autoprefixer = require("autoprefixer");
 var cheerio      = require("cheerio");
 var cleanCSS     = require("clean-css");
 var crypto       = require("crypto");
+var etag         = require("etag");
 var fs           = require("graceful-fs");
 var htmlMinifier = require("html-minifier");
 var jb           = require("json-buffer");
@@ -146,19 +147,18 @@ function compile(cb) {
     var cache = {res: results[0], themes: {}, modes: {}, lib: {}};
 
     Object.keys(results[1]).forEach(function(theme) {
-      cache.themes[theme] = {data: results[1][theme], etag: etag(), mime: mime("css")};
+      cache.themes[theme] = {data: results[1][theme], etag: etag(results[1][theme]), mime: mime("css")};
     });
 
     Object.keys(results[2]).forEach(function(mode) {
-      cache.modes[mode] = {data: results[2][mode], etag: etag(), mime: mime("js")};
+      cache.modes[mode] = {data: results[2][mode], etag: etag(results[2][mode]), mime: mime("js")};
     });
 
     Object.keys(results[3]).forEach(function(file) {
-      cache.lib[file] = {data: results[3][file], etag: etag(), mime: mime(path.basename(file))};
+      cache.lib[file] = {data: results[3][file], etag: etag(results[3][file]), mime: mime(path.basename(file))};
     });
 
     addGzip(cache, function(err, cache) {
-      cache.etags = {};
       if (minify) fs.writeFile(paths.cache, jb.stringify(cache));
       cb(err, cache);
     });
@@ -354,7 +354,7 @@ resources.compileJS = function compileJS() {
   // Minify
   if (minify) js = uglify.minify(js, opts.uglify).code;
 
-  return {data: new Buffer(js), etag: etag(), mime: mime("js")};
+  return {data: new Buffer(js), etag: etag(js), mime: mime("js")};
 };
 
 resources.compileCSS = function compileCSS() {
@@ -369,7 +369,7 @@ resources.compileCSS = function compileCSS() {
   // Minify
   if (minify) css = cleanCSS.minify(css).styles;
 
-  return {data: new Buffer(css), etag: etag(), mime: mime("css")};
+  return {data: new Buffer(css), etag: etag(css), mime: mime("css")};
 };
 
 resources.compileHTML = function compileHTML(res) {
@@ -385,27 +385,18 @@ resources.compileHTML = function compileHTML(res) {
   // Combine pages
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "main");
-  res["main.html"] = {
-    data: new Buffer(min($("#page").replaceWith(html["main.html"]).end().html())),
-    etag: etag(),
-    mime: mime("html")
-  };
+  var main = min($("#page").replaceWith(html["main.html"]).end().html());
+  res["main.html"] = {data: new Buffer(main), etag: etag(main), mime: mime("html")};
 
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "auth");
-  res["auth.html"] = {
-    data: new Buffer(min($("#page").replaceWith(html["auth.html"]).end().html())),
-    etag: etag(),
-    mime: mime("html")
-  };
+  var auth = min($("#page").replaceWith(html["auth.html"]).end().html());
+  res["auth.html"] = {data: new Buffer(auth), etag: etag(auth), mime: mime("html")};
 
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "firstrun");
-  res["firstrun.html"] = {
-    data: new Buffer(min($("#page").replaceWith(html["auth.html"]).end().html())),
-    etag: etag(),
-    mime: mime("html")
-  };
+  var firstrun = min($("#page").replaceWith(html["auth.html"]).end().html());
+  res["firstrun.html"] = {data: new Buffer(firstrun), etag: etag(firstrun), mime: mime("html")};
 
   return res;
 };
@@ -433,15 +424,11 @@ function compileAll(callback) {
 
     res[name] = {
       data: data,
-      etag: crypto.createHash("md5").update(String(date)).digest("hex"),
+      etag: etag(data),
       mime: mime(name)
     };
   });
   callback(null, res);
-}
-
-function etag() {
-  return crypto.createHash("md5").update(String(Date.now())).digest("hex");
 }
 
 module.exports = resources;

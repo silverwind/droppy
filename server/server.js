@@ -587,7 +587,7 @@ function handleResourceRequest(req, res, resourceName) {
     res.statusCode = 404;
     res.end();
   } else {
-    if ((req.headers["if-none-match"] || "") === '"' + resource.etag + '"') {
+    if ((req.headers["if-none-match"] || "") === resource.etag) {
       res.statusCode = 304;
       res.end();
     } else {
@@ -600,12 +600,12 @@ function handleResourceRequest(req, res, resourceName) {
           headers["X-UA-Compatible"] = "IE=Edge, chrome=1";
       }
 
-      if (/.+\.(png|ico|svg|woff)$/.test(resourceName)) {
+      if (/.+\.(ico|svg|woff)$/.test(resourceName)) {
         headers["Cache-Control"] = "public, max-age=604800";
         headers["Expires"] = new Date(Date.now() + 604800000).toUTCString();
       } else {
         if (resource.etag && !/\.html$/.test(resourceName)) {
-          headers["ETag"] = '"' + resource.etag + '"';
+          headers["ETag"] = resource.etag;
         }
         headers["Cache-Control"] = "private, max-age=0";
         headers["Expires"] = "0";
@@ -657,16 +657,6 @@ function handleFileRequest(req, res, download) {
     return;
   }
 
-  // 304 response when Etag matches
-  if (!download && !/\/\?_/.test(req.url) && (req.headers["if-none-match"] || "") === '"' + cache.etags[filepath] + '"') {
-    res.writeHead(304, {
-      "Content-Type": mime(filepath)
-    });
-    res.end();
-    log.info(req, res);
-    return;
-  }
-
   fs.stat(filepath, function(error, stats) {
     if (!error && stats) {
       if (stats.isDirectory() && shareLink) {
@@ -678,9 +668,7 @@ function handleFileRequest(req, res, download) {
           res.writeHead(status, headers);
           fs.createReadStream(filepath).pipe(res);
         } else {
-          cache.etags[filepath] = crypto.createHash("md5").update(String(stats.mtime)).digest("hex");
           headers["Accept-Ranges"] = "bytes"; // advertise ranges support
-          headers["Etag"] = '"' + cache.etags[filepath] + '"';
           if (req.headers.range) {
             var total        = stats.size;
             var range        = req.headers.range;
@@ -1031,8 +1019,6 @@ schedule.scheduleJob("* 0 * * *", function hourly() {
     }
   });
   db.set("sessions", sessions);
-  // Clean up Etag cache
-  cache.etags = {};
 });
 
 // Process startup

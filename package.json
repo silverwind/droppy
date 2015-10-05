@@ -29,6 +29,7 @@
     "detect-engine": "^1.1.0",
     "dhparam": "^1.0.2",
     "draggabilly": "^1.2.4",
+    "etag": "^1.7.0",
     "file-extension": "^2.0.1",
     "graceful-fs": "^4.1.2",
     "handlebars": "^4.0.3",
