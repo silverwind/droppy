@@ -7,7 +7,6 @@ var async        = require("async");
 var autoprefixer = require("autoprefixer");
 var cheerio      = require("cheerio");
 var cleanCSS     = require("clean-css");
-var crypto       = require("crypto");
 var etag         = require("etag");
 var fs           = require("graceful-fs");
 var htmlMinifier = require("html-minifier");
@@ -411,22 +410,17 @@ function compileAll(callback) {
 
   // Read misc files
   resources.files.other.forEach(function(file) {
-    var data, date;
+    var data;
     var name = path.basename(file);
     var fullPath = path.join(paths.mod, file);
 
     try {
       data = fs.readFileSync(fullPath);
-      date = fs.statSync(fullPath).mtime;
     } catch (err) {
       callback(err);
     }
 
-    res[name] = {
-      data: data,
-      etag: etag(data),
-      mime: mime(name)
-    };
+    res[name] = {data: data, etag: etag(data), mime: mime(name)};
   });
   callback(null, res);
 }
