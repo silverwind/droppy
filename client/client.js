@@ -1494,7 +1494,7 @@
 
     if (x && y) {
       var target = document.elementFromPoint(x, y);
-      target = target.nodeName === "a" ? $(target) : $(target).parents("a");
+      target = target.tagName.toLowerCase() === "a" ? $(target) : $(target).parents("a");
       target.addClass("active").one("mouseleave", function() {
         $(this).removeClass("active");
       });
