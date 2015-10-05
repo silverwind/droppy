@@ -1198,7 +1198,6 @@
       finish();
     } else {
       view.children(".content-container").append(content);
-      view.find(".content")[0].style.willChange = "transform";
       view.find(".new").data("root", view[0].currentFolder);
       view[0].isAnimating = true;
       view.find(".data-row").addClass("animating");
@@ -1213,7 +1212,6 @@
       view[0].isAnimating = false;
       getOtherViews(view[0].vId).css("z-index", "auto");
       view.find(".content:not(.new)").remove();
-      view.find(".content")[0].style.willChange = "auto";
       view.find(".new").removeClass("new");
       view.find(".data-row").removeClass("animating");
       if (view.data("type") === "directory") {
