@@ -980,9 +980,8 @@
     parts[0] = droppy.svg.home; // Replace empty string with our home icon
     if (view[0].savedParts) {
       oldParts = view[0].savedParts;
-      while (true) {
+      while (parts[i] || oldParts[i]) {
         pathStr += "/" + parts[i];
-        if (!parts[i] && !oldParts[i]) break;
         if (parts[i] !== oldParts[i]) {
           if (!parts[i] && oldParts[i] !== parts[i]) { // remove this part
             removePart(i);
