@@ -80,22 +80,6 @@ if (cmds[cmd]) {
   case "config":
     var paths = require("./server/paths.js").get();
     var cfg   = require("./server/cfg.js");
-    var which = require("which");
-
-    var findEditor = function findEditor(cb) {
-      var editors = ["vim", "vi", "nano", "pico", "emacs", "npp", "notepad"];
-      (function find(editor) {
-        try {
-          cb(which.sync(editor));
-        } catch (e) {
-          if (editors.length)
-            find(editors.shift());
-          else
-            cb();
-        }
-      })(editors.shift());
-    };
-
     var edit = function edit() {
       findEditor(function(editor) {
         if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
@@ -163,4 +147,25 @@ function printHelp() {
 
 function printUsers(users) {
   console.info("Current Users: " + Object.keys(users).join(", "));
+}
+
+function findEditor(cb) {
+  var editors    = ["vim", "nano", "vi", "npp", "pico", "emacs", "notepad"];
+  var basename   = require("path").basename;
+  var which      = require("which");
+  var userEditor = basename(process.env.VISUAL || process.env.EDITOR);
+
+  if (editors.indexOf(userEditor) === -1)
+    editors.unshift(userEditor);
+
+  (function find(editor) {
+    try {
+      cb(which.sync(editor));
+    } catch (err) {
+      if (editors.length)
+        find(editors.shift());
+      else
+        cb();
+    }
+  })(editors.shift());
 }
