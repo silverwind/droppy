@@ -106,13 +106,17 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
 
   // Add dirs
   readDirs.forEach(function(d) {
-    dirs[utils.removeFilesPath(d.path)] = {files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0};
+    dirs[utils.removeFilesPath(d.path).normalize()] = {
+      files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0
+    };
   });
 
   // Add files
   readFiles.forEach(function(f) {
-    var parentDir = utils.removeFilesPath(path.dirname(f.path));
-    dirs[parentDir].files[path.basename(f.path)] = {size: f.stat.size, mtime: f.stat.mtime.getTime() || 0};
+    var parentDir = utils.removeFilesPath(path.dirname(f.path)).normalize();
+    dirs[parentDir].files[path.basename(f.path).normalize()] = {
+      size: f.stat.size, mtime: f.stat.mtime.getTime() || 0
+    };
     dirs[parentDir].size += f.stat.size;
   });
 

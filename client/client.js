@@ -404,24 +404,32 @@
   }
   function sendMessage(vId, type, data) {
     var sendObject = {vId: vId, type: type, data: data};
+    if (typeof sendObject.data === "string") {
+      sendObject.data = normalize(sendObject.data);
+    } else if (typeof sendObject.data === "object") {
+      Object.keys(sendObject.data).forEach(function(key) {
+        if (typeof sendObject.data[key] === "string") {
+          sendObject.data[key] = sendObject.data[key].normalize();
+        }
+      });
+    }
+    var json = JSON.stringify(sendObject);
+
     if (droppy.socket.readyState === 1) { // open
       // Lock the UI while we wait for a socket response
       droppy.socketWait = true;
-
       // Unlock the UI in case we get no socket resonse after waiting for 1 second
       setTimeout(function() {
         droppy.socketWait = false;
       }, 1000);
-
       if (droppy.queuedData) {
         droppy.socket.send(droppy.queuedData);
         droppy.queuedData = null;
       }
-      droppy.socket.send(JSON.stringify(sendObject));
+      droppy.socket.send(json);
     } else {
       // We can't send right now, so queue up the last added message to be sent later
-      droppy.queuedData = JSON.stringify(sendObject);
-
+      droppy.queuedData = json;
       if (droppy.socket.readyState === 2) { // closing
         // Socket is closing, queue a re-opening
         droppy.reopen = true;
@@ -1053,10 +1061,7 @@
       var type  = split[0];
       var mtime = Number(split[1]) * 1e3;
       var size  = Number(split[2]);
-
-      // OS X can return NFD form unicode, workaround by normalizing the
-      // displayed form to NFC.
-      if (String.prototype.normalize) name = name.normalize("NFC");
+      name = normalize(name);
 
       var entry = {
         name      : name,
@@ -2765,5 +2770,9 @@
         newParts.push(parts[i]);
     }
     return newParts.join("/") || "/";
+  }
+
+  function normalize(str) {
+    return String.prototype.normalize ? str.normalize() : str;
   }
 })(jQuery, window, document);
