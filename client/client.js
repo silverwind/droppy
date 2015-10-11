@@ -712,7 +712,7 @@
     view[0].isUploading   = true;
     view[0].uploadStart   = Date.now();
     view[0].uploadSuccess = false;
-    view.find(".upload-title").text("Uploading - 0%");
+    view.find(".upload-title").text("Uploading - 0.0%");
 
     if (files.length) {
       xhr.open("POST", getRootPath() + "upload?" + $.param({
@@ -768,7 +768,7 @@
     if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
       var sent     = event.loaded;
       var total    = event.total;
-      var progress = Math.round((sent / total) * 1000) / 10 + "%";
+      var progress = (Math.round((sent / total) * 1000) / 10).toFixed(1) + "%";
       var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
       var elapsed, secs;
 
