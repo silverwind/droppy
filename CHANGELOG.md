@@ -1,5 +1,9 @@
 *Note: For patch versions, see the commit log*
 
+#### Version 3.3.0 - 10/11/2015
+
+- File uploads can now take longer than 2 minutes (the server cancelled those before). When running behind a reverse proxy like nginx, proxy-specific request timeouts may still apply.
+
 #### Version 3.2.0 - 9/21/2015
 
 - Fix a security issue, all users are adviced to upgrade.
