@@ -305,7 +305,7 @@
       case "UPDATE_DIRECTORY":
         view = getView(vId);
         if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.data("type", "directory"); // For initial loading
-        if (!view.length || view[0].isUploading) return;
+        if (!view.length) return;
 
         if (view.data("type") === "directory") {
           if (msg.folder !== getViewLocation(view)) {
