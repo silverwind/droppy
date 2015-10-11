@@ -1,5 +1,10 @@
 *Note: For patch releases, see the commit log*
 
+#### Version 3.4.0 - 10/11/2015
+
+- Added `pollingInterval` option and disabled file system polling by default. This reduces CPU usage to practically zero when idle. If you notice issues with files getting out of sync, you enable this option by setting a timeout of a few seconds.
+- Increased minimum node.js version to 0.12.0, which was necessary for unicode normalization.
+
 #### Version 3.3.0 - 10/11/2015
 
 - File uploads can now take longer than 2 minutes. Proxy-specific timeouts may still apply. See the [`nginx.conf` template](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy) for a suitable nginx configuration.
