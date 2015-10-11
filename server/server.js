@@ -729,6 +729,9 @@ function handleUploadRequest(req, res) {
     return;
   }
 
+  // Set huge timeout for big file uploads and/or slow connection
+  res.setTimeout(24 * 60 * 60 * 1000);
+
   req.query = qs.parse(req.url.substring("/upload?".length));
 
   if (!req.query || !req.query.to) {
