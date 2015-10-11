@@ -711,9 +711,8 @@
 
     view[0].isUploading   = true;
     view[0].uploadStart   = Date.now();
-    view[0].uploadText    = files.length + " file" + (files.length > 1 ? "s" : "");
     view[0].uploadSuccess = false;
-    view.find(".upload-title").text("Uploading " + view[0].uploadText);
+    view.find(".upload-title").text("Uploading - 0%");
 
     if (files.length) {
       xhr.open("POST", getRootPath() + "upload?" + $.param({
@@ -752,7 +751,7 @@
     view[0].isUploading = false;
     updateTitle(basename(view[0].currentFolder));
     if (view[0].uploadSuccess) {
-      showNotification("Upload finished", "Uploaded " + view[0].uploadText + " to " + view[0].currentFolder);
+      showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
       view[0].uploadSuccess = false;
     }
     setTimeout(function() {
@@ -769,7 +768,7 @@
     if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
       var sent     = event.loaded;
       var total    = event.total;
-      var progress = Math.round((sent / total) * 100) + "%";
+      var progress = Math.round((sent / total) * 1000) / 10 + "%";
       var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
       var elapsed, secs;
 
@@ -778,6 +777,7 @@
       updateTitle(progress + " - " + basename(view[0].currentFolder));
       view.find(".upload-bar").css("width", progress);
       view.find(".upload-speed > span").text(speed + "/s");
+      view.find(".upload-title").text("Uploading - " + progress);
 
       // Calculate estimated time left
       elapsed = Date.now() - view[0].uploadStart;
