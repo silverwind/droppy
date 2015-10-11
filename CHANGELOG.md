@@ -1,4 +1,4 @@
-*Note: For minor versions, see the commit log*
+*Note: For patch versions, see the commit log*
 
 #### Version 3.2.0 - 9/21/2015
 
