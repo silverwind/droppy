@@ -693,7 +693,7 @@
     xhr.addEventListener("readystatechange", function() {
       if (xhr.readyState !== 4) return;
       if (xhr.status === 200) {
-        uploadDone(view);
+        uploadSuccess(view);
       } else {
         if (xhr.status === 0) return; // cancelled by user
         showError(view, "Server responded with HTTP " + xhr.status);
@@ -709,7 +709,6 @@
 
     view[0].isUploading   = true;
     view[0].uploadStart   = Date.now();
-    view[0].uploadSuccess = false;
     view.find(".upload-title").text("Uploading - 0.0%");
 
     if (files.length) {
@@ -733,11 +732,11 @@
     updateTitle("Reading - " + basename(view[0].currentFolder));
   }
 
-  function uploadDone(view) {
+  function uploadSuccess(view) {
     view.find(".upload-bar").css("width", "100%");
     view.find(".upload-title").text("Processing ...");
     updateTitle("Processing - " + basename(view[0].currentFolder));
-    view[0].uploadSuccess = true;
+    showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
   }
 
   function uploadCancel(view) {
@@ -748,14 +747,10 @@
   function uploadFinish(view) {
     view[0].isUploading = false;
     updateTitle(basename(view[0].currentFolder));
-    if (view[0].uploadSuccess) {
-      showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
-      view[0].uploadSuccess = false;
-    }
     setTimeout(function() {
       view.find(".upload-info").removeClass("in");
       view.find(".upload-bar").removeAttr("style");
-    }, 200);
+    }, 500);
   }
 
   var lastUpdate;

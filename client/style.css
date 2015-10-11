@@ -883,7 +883,7 @@ html:not(.mobile) .vjs-big-play-button {
 .upload-info {
   background: #181818;
   color: #999;
-  transition: flex-basis .2s ease;
+  transition: flex-basis .15s ease;
   width: 100%;
   position: relative;
   display: flex;
@@ -981,7 +981,7 @@ html:not(.mobile) .vjs-big-play-button {
   order: 3;
   display: flex;
   position: relative;
-  transition: flex-basis .2s ease;
+  transition: flex-basis .15s ease;
   width: 100%;
   user-select: none;
   overflow: hidden;
