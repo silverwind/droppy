@@ -1,8 +1,8 @@
-*Note: For patch versions, see the commit log*
+*Note: For patch releases, see the commit log*
 
 #### Version 3.3.0 - 10/11/2015
 
-- File uploads can now take longer than 2 minutes (the server cancelled those before). When running behind a reverse proxy like nginx, proxy-specific request timeouts may still apply.
+- File uploads can now take longer than 2 minutes. Proxy-specific timeouts may still apply, See https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy for a suitable `nginx.conf` template.
 
 #### Version 3.2.0 - 9/21/2015
 
