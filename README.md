@@ -38,26 +38,28 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
           "protocol" : "http"
       }
   ],
-  "debug"          : false,
-  "keepAlive"      : 20000,
-  "linkLength"     : 5,
-  "logLevel"       : 2,
-  "maxFileSize"    : 0,
-  "public"         : false,
-  "timestamps"     : true,
-  "updateInterval" : 1000
+  "public"          : false,
+  "timestamps"      : true,
+  "linkLength"      : 5,
+  "logLevel"        : 2,
+  "maxFileSize"     : 0,
+  "updateInterval"  : 1000,
+  "pollingInterval" : 0,
+  "keepAlive"       : 20000,
+  "debug"           : false
 }
 ```
 ### Options
-- `listeners` *Array* - Defines on which interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
-- `debug` *Boolean* - When enabled, skips resource minification and enables CSS reloading.
-- `keepAlive` *Number* - The interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
+- `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
+- `public` *Boolean* - When enabled, no authentication is performed.
+- `timestamps` *Boolean* - When enabled, adds timestamps to log output.
 - `linkLength` *Number* - The amount of characters in a share link.
 - `logLevel` *Number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
 - `maxFileSize` *Number* - The maximum file size in bytes a user can upload in a single file.
-- `public` *Boolean* - When enabled, no authentication is performed.
-- `timestamps` *Boolean* - When enabled, adds timestamps to log output.
-- `updateInterval` *Number* - Interval in which a single client can receive updates through changes in the file system, in milliseconds.
+- `updateInterval` *Number* - Interval in milliseconds which a single client can receive update messages through changes in the file system.
+- `pollingInterval` *Number* - Interval in milliseconds which the file system is polled for changes, which may be necessary on network drives and other non-standard situations. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. Set to `0` to disable polling.
+- `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
+- `debug` *Boolean* - When enabled, skips resource minification and enables CSS reloading.
 
 <a name="listener-options" />
 #### Listener Options

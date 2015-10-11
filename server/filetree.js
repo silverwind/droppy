@@ -1,7 +1,7 @@
 "use strict";
 
 var filetree = new (require("events").EventEmitter)();
-var dirs     = {}, todoDirs = [], initial = true;
+var dirs     = {}, todoDirs = [], initial = true, watching = true, timer = null;
 
 var _        = require("lodash");
 var chalk    = require("chalk");
@@ -15,7 +15,37 @@ var utils    = require("./utils.js");
 var walk     = require("./walk.js");
 
 var WATCHER_DELAY = 3000;
-var POLL_INTERVAL = 2000;
+
+filetree.init = function init(pollingInterval) {
+  if (pollingInterval && typeof pollingInterval !== "number") {
+    throw new TypeError("Expected a number");
+  }
+  chokidar.watch(paths.files, {
+    alwaysStat    : true,
+    ignoreInitial : true,
+    usePolling    : Boolean(pollingInterval),
+    interval      : pollingInterval,
+    binaryInterval: pollingInterval
+  }).on("error", log.error).on("all", function() {
+    if (watching) filetree.updateAll();
+  });
+};
+
+filetree.updateAll = _.debounce(function updateAll() {
+  log.debug(chalk.magenta("Updating file tree from watcher"));
+  initial = true;
+  filetree.updateDir(null, function() {
+    filetree.emit("updateall");
+  });
+}, WATCHER_DELAY);
+
+function lookAway() {
+  watching = false;
+  clearTimeout(timer);
+  timer = setTimeout(function() {
+    watching = true;
+  }, WATCHER_DELAY);
+}
 
 function filterDirs(dirs) {
   return dirs.sort(function(a, b) {
@@ -298,35 +328,5 @@ filetree.getDirContents = function getDirContents(p) {
   });
   return entries;
 };
-
-// local fs changes. debounced heavily but refresh everything.
-var watching = true;
-var timer = null;
-
-filetree.updateAll = _.debounce(function updateAll() {
-  log.debug(chalk.magenta("Updating file tree from watcher"));
-  initial = true;
-  filetree.updateDir(null, function() {
-    filetree.emit("updateall");
-  });
-}, WATCHER_DELAY);
-
-function lookAway() {
-  watching = false;
-  clearTimeout(timer);
-  timer = setTimeout(function() {
-    watching = true;
-  }, WATCHER_DELAY);
-}
-
-chokidar.watch(paths.files, {
-  alwaysStat    : true,
-  ignoreInitial : true,
-  usePolling    : true,
-  interval      : POLL_INTERVAL,
-  binaryInterval: POLL_INTERVAL
-}).on("error", log.error).on("all", function() {
-  if (watching) filetree.updateAll();
-});
 
 module.exports = filetree;

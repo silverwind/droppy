@@ -76,7 +76,12 @@ var droppy = function droppy(options, isStandalone, callback) {
       } else cb();
     },
     function(cb) { if (isStandalone) { startListeners(cb); } else cb(); },
-    function(cb) { filetree.updateDir(null, cb); },
+    function(cb) {
+      filetree.updateDir(null, function() {
+        filetree.init(config.pollingInterval);
+        cb();
+      });
+    },
   ], function(err) {
     if (err) return callback(err);
     ready = true;
@@ -214,7 +219,7 @@ function setupSocket(server) {
       }
     }
   });
-  if (config.keepAlive > 0) {
+  if (typeof config.keepAlive === "number" && config.keepAlive > 0) {
     Object.keys(wss.clients).forEach(function(client) {
       client.ws.ping();
     });

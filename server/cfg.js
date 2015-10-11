@@ -17,14 +17,15 @@ var defaults = {
       protocol : "http"
     }
   ],
-  debug          : false,
-  keepAlive      : 20000,
-  linkLength     : 5,
-  logLevel       : 2,
-  maxFileSize    : 0,
-  public         : false,
-  updateInterval : 1000,
-  timestamps     : true
+  public          : false,
+  timestamps      : true,
+  linkLength      : 5,
+  logLevel        : 2,
+  maxFileSize     : 0,
+  updateInterval  : 1000,
+  pollingInterval : 0,
+  keepAlive       : 20000,
+  debug           : false,
 };
 
 cfg.init = function init(config, callback) {
