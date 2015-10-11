@@ -2054,12 +2054,14 @@
 
     setVolume(droppy.get("volume"));
 
-    player.addEventListener("ended", function ended(event) {
-      var view = $(event.target).parents(".view");
-      playNext(view);
+    player.addEventListener("ended", function(e) {
+      playNext($(e.target).parents(".view"));
     });
-    player.addEventListener("playing", function playing(event) {
-      onNewAudio($(event.target).parents(".view"));
+    player.addEventListener("error", function(e) {
+      playNext($(e.target).parents(".view"));
+    });
+    player.addEventListener("playing", function(e) {
+      onNewAudio($(e.target).parents(".view"));
     });
     var updateVolume = throttle(function(event) {
       var slider = $(event.target).parents(".view").find(".volume-slider")[0];
