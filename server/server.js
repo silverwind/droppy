@@ -427,7 +427,7 @@ function sendUsers(sid) {
   sendObj(sid, {type: "USER_LIST", users: userlist});
 }
 
-// Send js object to single client identified by its session cooke
+// Send js object to single client identified by its session cookie
 function sendObj(sid, data) {
   if (!clients[sid] || !clients[sid].ws) return;
   send(clients[sid].ws, JSON.stringify(data));
@@ -820,7 +820,7 @@ function handleUploadRequest(req, res) {
           cb(null);
         });
       }, function() {
-        filetree.updateDir(dstDir, uploadDone);
+        filetree.updateDir(dstDir);
       });
     }
   });
@@ -828,7 +828,6 @@ function handleUploadRequest(req, res) {
   req.on("close", function() {
     if (!done) log.info(req, res, "Upload cancelled");
     closeConnection();
-    uploadDone();
 
     // Clean up the temp files
     Object.keys(files).forEach(function(relPath) {
@@ -848,10 +847,6 @@ function handleUploadRequest(req, res) {
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Connection", "close");
     res.end();
-  }
-
-  function uploadDone() {
-    sendObj(req.sid, {type: "UPLOAD_DONE", vId: Number(req.query.vId)});
   }
 }
 

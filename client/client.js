@@ -328,9 +328,6 @@
       case "UPDATE_BE_FILE":
         openFile(getView(vId), msg.folder, msg.file);
         break;
-      case "UPLOAD_DONE":
-        uploadFinish(getView(vId));
-        break;
       case "RELOAD":
         if (msg.css) {
           $("#css").remove();
@@ -702,6 +699,7 @@
         showError(view, "Server responded with HTTP " + xhr.status);
         uploadCancel(view);
       }
+      uploadFinish(view);
     });
 
     $(".upload-cancel").register("click", function() {
