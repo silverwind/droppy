@@ -3,7 +3,7 @@
 #### Version 3.5.0 - 10/12/2015
 
 - Fixed a semi-critical CSFR vulnerabilty which allowed a attacker to use an authenticated user's session.
-- Increased site security by enabling CSP and making cookies inaccesible for scripts.
+- Increased site security by enabling CSP and making cookies inaccessible for scripts.
 
 #### Version 3.4.0 - 10/11/2015
 
