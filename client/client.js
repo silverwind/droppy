@@ -1091,7 +1091,7 @@
       };
 
       if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
-        entry.classes = name === view.find(".playing").data("name") ? "playable playing" : "playable";
+        entry.classes = name.toLowerCase() === view.find(".playing").data("name") ? "playable playing" : "playable";
         entry.playable = true;
       }
 
