@@ -19,6 +19,7 @@ var yazl     = require("yazl");
 var pkg       = require("./../package.json");
 var resources = require("./resources.js");
 var cfg       = require("./cfg.js");
+var csrf      = require("./csrf.js");
 var cookies   = require("./cookies.js");
 var db        = require("./db.js");
 var filetree  = require("./filetree.js");
@@ -231,10 +232,18 @@ function setupSocket(server) {
 
     ws.on("message", function(msg) {
       msg = JSON.parse(msg);
+
+      if (msg.type !== "SAVE_FILE") {
+        log.debug(ws, null, chalk.magenta("RECV "), utils.pretty(msg));
+      }
+
+      if (!csrf.validate(msg.token)) {
+        log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
+        ws.close(1011);
+        return;
+      }
+
       var vId = msg.vId;
-
-      if (msg.type !== "SAVE_FILE") log.debug(ws, null, chalk.magenta("RECV "), utils.pretty(msg));
-
       switch (msg.type) {
       case "REQUEST_SETTINGS":
         sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
@@ -402,7 +411,8 @@ function setupSocket(server) {
       }
       removeClientPerDir(sid);
       delete clients[sid];
-      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
+      if (code !== 1011)
+        log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
     });
 
     ws.on("error", log.error);
@@ -476,6 +486,11 @@ function handleGET(req, res) {
 
   if (/^\/\?!\//.test(URI)) {
     handleResourceRequest(req, res, /\?!\/([\s\S]+)$/.exec(URI)[1]);
+  } else if (/^\/\?\@$/.test(URI)) {
+    if (validateRequest(req)) {
+      res.writeHead(200, {"Content-Type": "text/plain"});
+      res.end(csrf.get(req));
+    }
   } else if (/^\/\?[~\$]\//.test(URI)) {
     handleFileRequest(req, res, true);
   } else if (/^\/\?\?\//.test(URI)) {
@@ -599,6 +614,7 @@ function handleResourceRequest(req, res, resourceName) {
       var headers = {}, status = 200;
 
       if (/\.html$/.test(resourceName)) {
+        headers["Content-Security-Policy"] = "script-src 'self' blob:; frame-src 'self'; object-src 'self'; media-src 'self';";
         if (!config.debug)
           headers["X-Frame-Options"] = "DENY";
         if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)

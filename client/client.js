@@ -256,24 +256,37 @@
 //  WebSocket handling
 // ============================================================================
   var retries = 5, retryTimeout = 4000;
+
+  function init() {
+    retries = 5; // reset retries on connection loss
+    // Request settings when droppy.debug is uninitialized, could use another variable too.
+    if (droppy.debug === null)
+      sendMessage(null, "REQUEST_SETTINGS");
+    if (droppy.queuedData) {
+      sendMessage();
+    } else {
+      // Create new view with initializing
+      getLocationsFromHash().forEach(function(string, index) {
+        var dest = join(decodeURIComponent(string));
+        if (index === 0)
+          newView(dest, index);
+        else if (index === 1) {
+          droppy.split(dest);
+        }
+      });
+    }
+  }
+
   function openSocket() {
     var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
     droppy.socket = new WebSocket(protocol + document.location.host + "/?socket");
     droppy.socket.onopen = function() {
-      retries = 5; // reset retries on connection loss
-      // Request settings when droppy.debug is uninitialized, could use another variable too.
-      if (droppy.debug === null) droppy.socket.send(JSON.stringify({type: "REQUEST_SETTINGS"}));
-      if (droppy.queuedData)
-        sendMessage();
-      else {
-        // Create new view with initializing
-        getLocationsFromHash().forEach(function(string, index) {
-          var dest = join(decodeURIComponent(string));
-          if (index === 0)
-            newView(dest, index);
-          else if (index === 1) {
-            droppy.split(dest);
-          }
+      if (droppy.token) {
+        init();
+      } else {
+        $.get("?@").then(function(token) {
+          droppy.token = token;
+          init();
         });
       }
     };
@@ -281,7 +294,10 @@
     // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
     droppy.socket.onclose = function(event) {
       if (droppy.get("hasLoggedOut") || event.code === 4000) return;
-      if (event.code >= 1001 && event.code < 3999) {
+      if (event.code === 1011) {
+        droppy.token = null;
+        openSocket();
+      } else if (event.code >= 1001 && event.code < 3999) {
         if (retries > 0) {
           // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
           // TODO: Indicate connection drop in the UI, especially on close code 1006
@@ -389,7 +405,6 @@
           $("#logout-button").register("click", function() {
             droppy.set("hasLoggedOut", true);
             if (droppy.socket) droppy.socket.close(4001);
-            deleteCookie("session");
             history.pushState(null, null, getRootPath());
             location.reload(true);
           });
@@ -403,7 +418,7 @@
     };
   }
   function sendMessage(vId, type, data) {
-    var sendObject = {vId: vId, type: type, data: data};
+    var sendObject = {vId: vId, type: type, data: data, token: droppy.token};
     if (typeof sendObject.data === "string") {
       sendObject.data = normalize(sendObject.data);
     } else if (typeof sendObject.data === "object") {
@@ -2275,10 +2290,6 @@
     });
   }
 
-  function deleteCookie(name) {
-    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-  }
-
   function initVariables() {
     droppy.activeFiles = [];
     droppy.activeView = 0;
@@ -2291,6 +2302,7 @@
     droppy.resizeTimer = null;
     droppy.socket = null;
     droppy.socketWait = null;
+    droppy.token = null;
     droppy.views = [];
 
     droppy.prefixes = {
