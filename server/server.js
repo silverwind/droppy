@@ -238,7 +238,6 @@ function setupSocket(server) {
       }
 
       if (!csrf.validate(msg.token)) {
-        log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
         ws.close(1011);
         return;
       }
@@ -411,7 +410,9 @@ function setupSocket(server) {
       }
       removeClientPerDir(sid);
       delete clients[sid];
-      if (code !== 1011)
+      if (code === 1011)
+        log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
+      else
         log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
     });
 
