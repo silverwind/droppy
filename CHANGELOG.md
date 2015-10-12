@@ -1,5 +1,10 @@
 *Note: For patch releases, see the commit log*
 
+#### Version 3.5.0 - 10/12/2015
+
+- Fixed a semi-critical CSFR vulnerabilty which allowed a attacker to use an authenticated user's session.
+- Increased site security by enabling CSP and making cookies inaccesible for scripts.
+
 #### Version 3.4.0 - 10/11/2015
 
 - Added `pollingInterval` option and disabled file system polling by default. This reduces CPU usage to practically zero when idle. If you notice issues with files getting out of sync, you enable this option by setting a timeout of a few seconds.
