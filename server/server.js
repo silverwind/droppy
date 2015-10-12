@@ -491,6 +491,7 @@ function handleGET(req, res) {
     if (validateRequest(req)) {
       res.writeHead(200, {"Content-Type": "text/plain"});
       res.end(csrf.get(req));
+      log.info(req, res);
     }
   } else if (/^\/\?[~\$]\//.test(URI)) {
     handleFileRequest(req, res, true);
