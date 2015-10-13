@@ -1,4 +1,4 @@
-# droppy [![NPM version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![Dependency Status](http://img.shields.io/david/silverwind/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![Downloads per month](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
+# droppy [![version](https://img.shields.io/npm/v/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy) [![node >=0.12](https://img.shields.io/node/v/droppy.svg?style=flat)](https://david-dm.org/silverwind/droppy) [![downloads](http://img.shields.io/npm/dm/droppy.svg?style=flat)](https://www.npmjs.org/package/droppy)
 
 droppy is a self-hosted cloud server with an interface similar to desktop file managers and has capabilites to edit files as well as view and playback media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="http://droppy.silverwind.io">here</a>.
 
