@@ -85,13 +85,10 @@ input::-webkit-input-placeholder { color: #999 }
   text-align: center;
   order: 1;
   flex: 0 0 1.5rem;
-  transition: transform .3s ease;
-  transform: translateY(-100%);
   display: flex;
   white-space: nowrap;
   user-select: none;
 }
-#navigation.in { transform: none; visibility: visible !important }
 @media (min-width: 1024px) { #navigation { font-size: 1.1em } }
 
 /* ============================= Header Buttons ============================ */
@@ -217,7 +214,7 @@ input::-webkit-input-placeholder { color: #999 }
   opacity: 0;
   position: relative;
   transform: translateX(-2em);
-  transition: transform .3s ease, opacity .3s ease;
+  transition: transform .2s ease, opacity .2s ease;
 }
 .path li.in { opacity: 1; transform: translateX(0) }
 
@@ -1274,16 +1271,12 @@ html:not(.mobile) .vjs-big-play-button {
   box-shadow: 0 8px 24px #000;
   height: 11rem;
   width: 24rem;
-  opacity: 0;
   position: absolute;
   text-align: center;
   top: 50%;
   left: 50%;
-  transition: opacity .4s ease;
   transform: translate(-50%, -50%);
-  z-index: 0;
 }
-#login-box.in { transform: translate(-50%, -50%); opacity: 1 }
 
 @media (max-width: 639px), (max-height: 399px) {
   #login-box {
@@ -1367,7 +1360,7 @@ html:not(.mobile) .vjs-big-play-button {
   line-height: 2rem;
   height: 2rem;
   bottom: 0;
-  color: #666;
+  color: #555;
   transition: color .2s ease;
   cursor: pointer;
   user-select: none;
@@ -1385,15 +1378,15 @@ html:not(.mobile) .vjs-big-play-button {
 
 .remember:hover, .remember:focus { color: #222 }
 .submit:hover, .submit:focus     { color: #222 }
-.submit svg                      { fill: #666; margin-right: .2em }
+.submit svg                      { fill: #555; margin-right: .2em }
 .remember svg                    { fill: transparent }
-.remember.checked svg            { fill: #666 }
+.remember.checked svg            { fill: #555 }
 .submit:hover svg                { fill: #222 }
 .remember.checked:hover svg      { fill: #222 }
 
 @media (max-width: 639px), (max-height: 399px) {
   .remember, .submit {
-   border-radius: 0;
+    border-radius: 0;
   }
 }
 

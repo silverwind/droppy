@@ -196,21 +196,13 @@
     var type = $("html").data("type");
     if (type === "main") {
       initMainPage();
-      requestAnimationFrame(function() {
-        $("#navigation").setTransitionClass("in");
-      });
     } else {
+      if (type === "firstrun") {
+        $("#login-info").text("Hello! Choose your credentials.");
+      } else if (droppy.get("hasLoggedOut")) {
+        droppy.set("hasLoggedOut", false);
+      }
       initAuthPage(type === "firstrun");
-      requestAnimationFrame(function() {
-        $("#login-box").setTransitionClass("in");
-        $("#login-info-box").addClass("info");
-        if (type === "firstrun") {
-          $("#login-info").text("Hello! Choose your credentials.");
-        } else if (droppy.get("hasLoggedOut")) {
-          $("#login-info").text("Logged out!");
-          droppy.set("hasLoggedOut", false);
-        }
-      });
     }
   });
 // ============================================================================
