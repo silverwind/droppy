@@ -26,4 +26,3 @@ module.exports = function manifest(req) {
     data.start_url = req.headers.referer || req.headers.referrer;
   return JSON.stringify(data);
 };
-
