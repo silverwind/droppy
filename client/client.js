@@ -2479,7 +2479,7 @@
 
   function secsToTime(secs) {
     var mins, hrs, time = "";
-    secs = parseInt(secs, 10);
+    secs = parseInt(secs);
     hrs  = Math.floor(secs / 3600);
     mins = Math.floor((secs - (hrs * 3600)) / 60);
     secs = secs - (hrs * 3600) - (mins * 60);

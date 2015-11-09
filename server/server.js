@@ -698,8 +698,8 @@ function handleFileRequest(req, res, download) {
             var parts        = range.replace(/bytes=/, "").split("-");
             var partialstart = parts[0];
             var partialend   = parts[1];
-            var start        = parseInt(partialstart, 10);
-            var end          = partialend ? parseInt(partialend, 10) : total - 1;
+            var start        = parseInt(partialstart);
+            var end          = partialend ? parseInt(partialend) : total - 1;
 
             status = 206;
             headers["Content-Length"] = end - start + 1;

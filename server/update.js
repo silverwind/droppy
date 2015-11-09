@@ -63,7 +63,7 @@ function updateSelf(pkg, callback) {
       if (versions[0] !== versions[1]) {
         fs.readFile(paths.pid, function(err, data) {
           if (!err) {
-            var pid = parseInt(String(data), 10);
+            var pid = parseInt(String(data));
             if (typeof pid === "number") {
               try {
                 console.info("Shutting down active process ...");
