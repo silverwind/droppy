@@ -1,4 +1,5 @@
 "use strict";
+"use strict";
 
 var filetree = new (require("events").EventEmitter)();
 var dirs     = {}, todoDirs = [], initial = true, watching = true, timer = null;
@@ -106,15 +107,15 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
 
   // Add dirs
   readDirs.forEach(function(d) {
-    dirs[utils.removeFilesPath(d.path).normalize()] = {
+    dirs[normalize(utils.removeFilesPath(d.path))] = {
       files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0
     };
   });
 
   // Add files
   readFiles.forEach(function(f) {
-    var parentDir = utils.removeFilesPath(path.dirname(f.path)).normalize();
-    dirs[parentDir].files[path.basename(f.path).normalize()] = {
+    var parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
+    dirs[parentDir].files[normalize(path.basename(f.path))] = {
       size: f.stat.size, mtime: f.stat.mtime.getTime() || 0
     };
     dirs[parentDir].size += f.stat.size;
@@ -332,5 +333,9 @@ filetree.getDirContents = function getDirContents(p) {
   });
   return entries;
 };
+
+function normalize(str) {
+  return String.prototype.normalize ? str.normalize() : str;
+}
 
 module.exports = filetree;
