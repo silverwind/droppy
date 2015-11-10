@@ -142,10 +142,13 @@ function startListeners(callback) {
     });
   });
 
+  var listeningSockets = 0;
+
   async.each(sockets, function(socket, cb) {
     createListener(onRequest, socket.opts, function(err, server) {
       if (err) return cb(err);
       server.on("listening", function() {
+        listeningSockets++;
         server.removeAllListeners("error");
         setupSocket(server);
         var proto = socket.opts.proto.toLowerCase();
@@ -155,18 +158,20 @@ function startListeners(callback) {
         );
         cb();
       }).on("error", function(err) {
-        if (err.code === "EADDRINUSE")
+        if (err.code === "EADDRINUSE") {
           log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
                 chalk.blue(socket.port), chalk.red(". Address already in use"));
-        else if (err.code === "EACCES")
+        } else if (err.code === "EACCES") {
           log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
                 chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024"));
-        else
-          log.error(err);
+        } else log.error(err);
         return cb(err);
       }).listen(socket.port, socket.host);
     });
-  }, callback);
+  }, function (err) {
+    // Don't abort if we have at least one listening socket
+    callback(listeningSockets === 0 ? err : null);
+  });
 }
 
 // Create socket listener
