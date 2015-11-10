@@ -119,7 +119,10 @@ function startListeners(callback) {
 
   listeners.forEach(function(listener, i) {
     ["host", "port", "protocol"].forEach(function(prop) {
-      if (typeof listener[prop] === "undefined" && !config.demo)
+      if (prop === "protocol" && listener[prop] === undefined)
+        listener[prop] = "http";
+
+      if (listener[prop] === undefined && !config.demo)
         return callback(new Error("Config Error: listener " + prop + " undefined"));
     });
 
