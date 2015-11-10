@@ -1,5 +1,4 @@
 "use strict";
-"use strict";
 
 var filetree = new (require("events").EventEmitter)();
 var dirs     = {}, todoDirs = [], initial = true, watching = true, timer = null;
