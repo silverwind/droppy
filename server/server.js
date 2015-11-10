@@ -174,7 +174,7 @@ function startListeners(callback) {
         return cb(err);
       }).listen(socket.port, socket.host);
     });
-  }, function (err) {
+  }, function(err) {
     // Don't abort if we have at least one listening socket
     callback(listeningSockets === 0 ? err : null);
   });
