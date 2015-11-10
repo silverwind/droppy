@@ -19,6 +19,13 @@ droppy is a self-hosted cloud server with an interface similar to desktop file m
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
+Alternatively, `git` can be used to install to a non-global location:
+```
+$ git clone https://github.com/silverwind/droppy.git
+$ cd droppy
+$ npm install
+$ node droppy.js start
+```
 
 To store configuration and files, these two directories will be used:
 
