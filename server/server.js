@@ -627,6 +627,7 @@ function handleResourceRequest(req, res, resourceName) {
       var headers = {}, status = 200;
 
       if (/\.html$/.test(resourceName)) {
+        headers["Content-Security-Policy"] = "script-src 'self' 'unsafe-eval' blob: data:; child-src 'self' blob: data:; object-src 'self'; media-src 'self' blob: data:";
         if (!config.debug)
           headers["X-Frame-Options"] = "DENY";
         if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
