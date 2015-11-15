@@ -2266,7 +2266,11 @@
           loop     : "loop",
           width    : $(el).parents(".media-container")[0].clientWidth,
           heigth   : $(el).parents(".media-container")[0].clientHeight
-        }, cb);
+        }, cb).on("ready", function() {
+          this.volume(droppy.get("volume"));
+        }).on("volumechange", function() {
+          droppy.set("volume", this.muted() ? 0 : this.volume());
+        });
       })();
     });
   }
