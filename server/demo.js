@@ -26,8 +26,12 @@ demo.init = function init(cb) {
 demo.refresh = function refresh(doneCallback) {
   async.series([
     function(callback) {
-      utils.rm(paths.files, function() {
-        utils.mkdir(paths.files, callback);
+      utils.rm(path.join(paths.files, "**/*"), function(err) {
+        if (err) log.error(err);
+        utils.rm(path.join(paths.files, "**/.*"), function(err) {
+          if (err) log.error(err);
+          callback();
+        });
       });
     },
     // Get image samples

@@ -68,11 +68,6 @@ var droppy = function droppy(options, isStandalone, callback) {
         process.title = "droppy-demo";
         config.demo = true;
         config.public = true;
-        config.listeners = [{
-          host: "0.0.0.0",
-          port: process.env.PORT || 5000,
-          protocol: "http"
-        }];
         require("./demo.js").init(cb);
       } else cb();
     },
