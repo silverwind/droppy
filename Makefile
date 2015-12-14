@@ -3,6 +3,7 @@ lint:
 
 publish:
 	git push -u --tags origin master
+	if git ls-remote --exit-code gogs &>/dev/null; then git push -u -f --tags gogs master; fi
 	npm publish
 
 update:
@@ -11,8 +12,8 @@ update:
 	npm install
 
 deploy:
-	if git ls-remote demo -ne 0 &>/dev/null; then git push -f demo master; fi
-	if git ls-remote droppy -ne 0 &>/dev/null; then git push -f droppy master; fi
+	if git ls-remote --exit-code demo &>/dev/null; then git push -f demo master; fi
+	if git ls-remote --exit-code droppy &>/dev/null; then git push -f droppy master; fi
 
 npm-patch:
 	npm version patch
