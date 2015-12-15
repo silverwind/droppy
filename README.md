@@ -2,6 +2,8 @@
 
 droppy is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="https://droppy.silverwind.io">here</a>.
 
+**Note: droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are read into memory once on startup and the filesystem is only accessed when neccessary. The downside of this method is that the startup will take considerable time on slow storage with hunderts of thousands of files present.**
+
 ### Features
 * Fully responsive HTML5 interface
 * Multi-file and folder upload
