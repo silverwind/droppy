@@ -2,8 +2,6 @@
 
 droppy is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="https://droppy.silverwind.io">here</a>.
 
-**Note: droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are read into memory once on startup and the filesystem is only accessed when neccessary. The downside of this method is that the startup will take considerable time on slow storage with hunderts of thousands of files present.**
-
 ### Features
 * Fully responsive HTML5 interface
 * Multi-file and folder upload
@@ -31,10 +29,10 @@ $ node droppy.js start
 
 To store configuration and files, these two directories will be used:
 
-- `~/.droppy`: configuration directory. Override with `--configdir`.
-- `~/.droppy/files`: files directory. Override with `--filesdir`.
+- `~/.droppy`: configuration directory. Override with `--configdir <dir>`.
+- `~/.droppy/files`: files directory. Override with `--filesdir <dir>`.
 
-By default, the server listens on `http://0.0.0.0:8989/` and `http://[::]:8989`. On first login, a prompt for username and password for the first account will appear.
+By default, the server listens on port 8989 on all interfaces. On first login, a prompt for username and password for the first account will appear. Additional accounts can be created in the options interface or the command line.
 
 ### Configure
 Run `droppy config` to edit `config/config.json`, which is created with these defaults:
@@ -133,7 +131,6 @@ See the [commented express example](https://github.com/silverwind/droppy/blob/ma
 Returns `function onRequest(req, res)`. All arguments are optional.
 
 ### Installation guides
-
 - [Installation as systemd service](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 - [Installation as debian initscript](https://github.com/silverwind/droppy/wiki/Debian-Installation)
 - [Reverse proxying through nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
@@ -144,5 +141,8 @@ For correct filenames of shared links, use `--content-disposition` or add this t
 ```ini
 content-disposition = on
 ```
+
+### Note about startup performance
+droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are read into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hunderts of thousands of files present.
 
 © 2012-2015 [silverwind](https://github.com/silverwind), distributed under BSD licence
