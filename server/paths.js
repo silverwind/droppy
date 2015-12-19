@@ -16,7 +16,6 @@ paths.get = function get() {
 
     pid       : resolve(configDir, "droppy.pid"),
     temp      : resolve(configDir, "temp"),
-    cache     : resolve(configDir, "cache"),
     cfgFile   : resolve(configDir, "config.json"),
     db        : resolve(configDir, "db.json"),
     tlsKey    : resolve(configDir, "tls.key"),
@@ -39,22 +38,33 @@ paths.seed = function seed(config, files) {
     filesDir = path.join(config, "files");
   }
   checkMigrate();
+  cleanupConfigDir();
 };
 
 checkMigrate();
+cleanupConfigDir();
 
 // migrate pre 3.0 config files
 function checkMigrate() {
   if (checked) return;
   checked = true;
-  var rimraf = require("rimraf");
   var oldConfig = resolve(configDir, "config");
-  fs.stat(oldConfig, function(_, stats) {
+  fs.stat(oldConfig, function(_err, stats) {
     if (stats && stats.isDirectory()) {
       fs.readdirSync(oldConfig).forEach(function(file) {
         fs.renameSync(path.join(oldConfig, file), path.join(resolve(configDir), file));
       });
-      rimraf.sync(oldConfig);
+      require("rimraf").sync(oldConfig);
+    }
+  });
+}
+
+// cleanup unnecessary files
+function cleanupConfigDir() {
+  var cacheFile = resolve(configDir, "cache");
+  fs.stat(cacheFile, function(_err, stats) {
+    if (stats) {
+      fs.unlinkSync(cacheFile);
     }
   });
 }

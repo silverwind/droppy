@@ -57,12 +57,12 @@ var droppy = function droppy(options, isStandalone, callback) {
       cb();
     },
     function(cb) {
-      log.info("Loading " + (!config.debug ? "and minifying " : "") + "resources ...");
-      resources.init(!config.debug, function(err, c) { cache = c; cb(err); });
+      log.info("Loading resources ...");
+      resources.load(config.dev, function(err, c) { cache = c; cb(err); });
     },
     function(cb) { cleanupTemp(); cb(); },
     function(cb) { cleanupLinks(cb); },
-    function(cb) { if (config.debug) debug(); cb(); },
+    function(cb) { if (config.dev) debug(); cb(); },
     function(cb) {
       if (config.demo || process.env.DROPPY_MODE === "demo") {
         process.title = "droppy-demo";
@@ -253,7 +253,7 @@ function setupSocket(server) {
       case "REQUEST_SETTINGS":
         sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
           version       : pkg.version,
-          debug         : config.debug,
+          debug         : config.dev,
           demo          : config.demo,
           public        : config.public,
           engine        : [engine, process.version.substring(1)].join(" "),
@@ -623,8 +623,7 @@ function handleResourceRequest(req, res, resourceName) {
 
       if (/\.html$/.test(resourceName)) {
         headers["Content-Security-Policy"] = "script-src 'self' 'unsafe-eval' blob: data:; child-src 'self' blob: data:; object-src 'self'; media-src 'self' blob: data:";
-        if (!config.debug)
-          headers["X-Frame-Options"] = "DENY";
+        headers["X-Frame-Options"] = "DENY";
         if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
           headers["X-UA-Compatible"] = "IE=Edge, chrome=1";
       }
@@ -648,7 +647,7 @@ function handleResourceRequest(req, res, resourceName) {
 
       // Encoding, Length
       var acceptEncoding = req.headers["accept-encoding"] || "";
-      if (/\bgzip\b/.test(acceptEncoding) && resource.gzip && !config.debug) {
+      if (/\bgzip\b/.test(acceptEncoding) && resource.gzip) {
         headers["Content-Encoding"] = "gzip";
         headers["Content-Length"] = resource.gzip.length;
         headers["Vary"] = "Accept-Encoding";

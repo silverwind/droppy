@@ -25,8 +25,9 @@ var defaults = {
   updateInterval  : 1000,
   pollingInterval : 0,
   keepAlive       : 20000,
-  debug           : false,
 };
+
+var hiddenOpts = ["dev", "demo"];
 
 cfg.init = function init(config, callback) {
   if (typeof config === "object" && config !== null) {
@@ -63,7 +64,7 @@ cfg.init = function init(config, callback) {
 
           // Remove options no longer present
           Object.keys(config).forEach(function(key) {
-            if (typeof defaults[key] === "undefined" && key !== "demo") {
+            if (defaults[key] === undefined && hiddenOpts.indexOf(key) === -1) {
               delete config[key];
             }
           });

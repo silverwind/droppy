@@ -52,8 +52,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
   "maxFileSize"     : 0,
   "updateInterval"  : 1000,
   "pollingInterval" : 0,
-  "keepAlive"       : 20000,
-  "debug"           : false
+  "keepAlive"       : 20000
 }
 ```
 ### Options
@@ -66,7 +65,6 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `updateInterval` *Number* - Interval in milliseconds which a single client can receive update messages through changes in the file system.
 - `pollingInterval` *Number* - Interval in milliseconds which the file system is polled for changes, which may be necessary on network drives and other non-standard situations. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. Set to `0` to disable polling.
 - `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
-- `debug` *Boolean* - When enabled, skips resource minification and enables CSS reloading.
 
 <a name="listener-options" />
 #### Listener Options

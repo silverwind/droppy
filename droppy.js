@@ -3,19 +3,19 @@
 
 var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
 var fs    = require("graceful-fs");
-var chalk = require("chalk");
 var pkg   = require("./package.json");
 
 process.title = pkg.name;
 
 var cmds = {
-  start   : "start                Start the server",
-  update  : "update               Update the server",
-  config  : "config               Edit the config",
-  list    : "list                 List users",
-  add     : "add <user> <pass>    Add a user",
-  del     : "del <user>           Delete a user",
-  version : "version, -v          Print version"
+  start     : "start                Start the server",
+  update    : "update               Update the server",
+  config    : "config               Edit the config",
+  list      : "list                 List users",
+  add       : "add <user> <pass>    Add a user",
+  del       : "del <user>           Delete a user",
+  build     : "build                Build client resources",
+  version   : "version, -v          Print version"
 };
 
 var opts = {
@@ -29,6 +29,14 @@ var opts = {
 if (argv.v || argv.V || argv.version) {
   console.info(pkg.version);
   process.exit(0);
+}
+
+if (argv._[0] === "build") {
+  console.log("Building resources ...");
+  require("./server/resources.js").build(function(err) {
+    console.log(err || "Resources built successfully");
+    process.exit(err ? 1 : 0);
+  });
 }
 
 if (argv.configdir || argv.filesdir || argv.home) {
@@ -63,7 +71,7 @@ if (cmds[cmd]) {
   case "start":
     require("./server/server.js")(null, true, function(err) {
       if (err) {
-        console.error("[" + chalk.red("ERROR") + "] " + chalk.red(err));
+        require("./server/log.js").error(err);
         process.exit(1);
       }
     });

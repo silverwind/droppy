@@ -12,17 +12,20 @@ var fs           = require("graceful-fs");
 var htmlMinifier = require("html-minifier");
 var jb           = require("json-buffer");
 var mime         = require("mime-types").lookup;
+var mkdirp       = require("mkdirp");
 var path         = require("path");
 var postcss      = require("postcss");
 var uglify       = require("uglify-js");
 var vm           = require("vm");
 var zlib         = require("zlib");
 
-var templates    = require("./templates");
+var log          = require("./log");
 var paths        = require("./paths.js").get();
+var templates    = require("./templates.js");
 
 var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
 var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
+var cachePath    = path.join(paths.mod, "dist", "cache.json");
 
 var opts = {
   get uglify() {
@@ -123,24 +126,30 @@ var libs = {
   "cm.css": "node_modules/codemirror/lib/codemirror.css"
 };
 
-resources.init = function init(doMinify, cb) {
-  minify = doMinify;
-  if (!minify) return compile(cb);
-  canUseCache(function(can) {
-    if (!can) return compile(cb);
-    fs.readFile(paths.cache, function(err, data) {
-      if (err) return cb(err);
-      try {
-        var cache = jb.parse(data);
-        cb(null, cache);
-      } catch (e) {
-        compile(cb);
-      }
-    });
+resources.load = function load(dev, cb) {
+  minify = !dev;
+
+  if (dev) return compile(false, cb);
+  fs.readFile(cachePath, function(err, data) {
+    if (err) {
+      log.info(err.code, " ", cachePath, ", ", "building cache ...");
+      return compile(false, cb);
+    }
+    try {
+      cb(null, jb.parse(data));
+    } catch (err) {
+      log.error(err);
+      compile(false, cb);
+    }
   });
 };
 
-function compile(cb) {
+resources.build = function build(cb) {
+  minify = true;
+  compile(true, cb);
+};
+
+function compile(write, cb) {
   async.series([compileAll, readThemes, readModes, readLibs], function(err, results) {
     if (err) return cb(err);
     var cache = {res: results[0], themes: {}, modes: {}, lib: {}};
@@ -158,8 +167,15 @@ function compile(cb) {
     });
 
     addGzip(cache, function(err, cache) {
-      if (minify) fs.writeFile(paths.cache, jb.stringify(cache));
-      cb(err, cache);
+      if (err) return cb(err);
+      if (write) {
+        mkdirp(path.dirname(cachePath), function(err) {
+          if (err) return cb(err);
+          fs.writeFile(cachePath, jb.stringify(cache), function(err) {
+            cb(err, cache);
+          });
+        });
+      } else cb(null, cache);
     });
   });
 }
@@ -201,36 +217,6 @@ function gzip(data, callback) {
   zlib.gzip(data, function(err, gzipped) {
     if (err) return callback(err);
     callback(null, gzipped);
-  });
-}
-
-function canUseCache(cb) {
-  var lastChange, files = [];
-  Object.keys(resources.files).forEach(function(type) {
-    resources.files[type].forEach(function(file) {
-      files.push(path.join(paths.mod, file));
-    });
-  });
-  Object.keys(libs).forEach(function(file) {
-    if (typeof libs[file] === "string") {
-      files.push(path.join(paths.mod, libs[file]));
-    } else {
-      libs[file].forEach(function(file) {
-        files.push(path.join(paths.mod, file));
-      });
-    }
-  });
-  async.map(files, function(file, cb) {
-    fs.stat(file, function(err, stats) {
-      cb(null, err ? 0 : stats.mtime.getTime());
-    });
-  }, function(err, times) {
-    if (err) return cb(err);
-    lastChange = Math.max.apply(Math, times);
-    fs.stat(paths.cache, function(err, stats) {
-      if (err) return cb(false);
-      cb(stats.mtime.getTime() > lastChange);
-    });
   });
 }
 
