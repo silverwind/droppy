@@ -1171,7 +1171,7 @@
     });
 
     // Request a sharelink
-    content.find(".sharelink").register("click", function() {
+    content.find(".share-file").register("click", function() {
       if (droppy.socketWait) return;
       requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
     });
