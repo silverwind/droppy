@@ -101,15 +101,14 @@ input::-webkit-input-placeholder { color: #999 }
 }
 .button:not(.disabled):hover { color: #fff; background: #1f1f1f }
 
-@media (min-width: 1024px) { .button { font-size: .7em } }
-@media (max-width: 1023px) { .button { font-size: .7em } }
-@media (max-width:  750px) { .button span { display: none } }
+@media (min-width: 751px) { .button { font-size: .66em } }
+@media (max-width: 750px) { .button span { display: none } }
 
 .button svg {
   fill: #888;
   height: .8rem;
   width: .8rem;
-  margin-right: .15rem;
+  margin-right: .2rem;
   position: relative;
   top: .15rem;
 }
