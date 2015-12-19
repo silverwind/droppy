@@ -145,9 +145,51 @@ resources.load = function load(dev, cb) {
 };
 
 resources.build = function build(cb) {
-  minify = true;
-  compile(true, cb);
+  isCacheFresh(function(fresh) {
+    if (fresh) {
+      fs.readFile(cachePath, function(err, data) {
+        if (err) return compile(true, cb);
+        try {
+          jb.parse(data);
+          cb(null);
+        } catch (err) {
+          compile(true, cb);
+        }
+      });
+    } else {
+      minify = true;
+      compile(true, cb);
+    }
+  });
 };
+
+function isCacheFresh(cb) {
+  fs.stat(cachePath, function(err, stats) {
+    if (err) return cb(false);
+    var files = [];
+    Object.keys(resources.files).forEach(function(type) {
+      resources.files[type].forEach(function(file) {
+        files.push(path.join(paths.mod, file));
+      });
+    });
+    Object.keys(libs).forEach(function(file) {
+      if (typeof libs[file] === "string") {
+        files.push(path.join(paths.mod, libs[file]));
+      } else {
+        libs[file].forEach(function(file) {
+          files.push(path.join(paths.mod, file));
+        });
+      }
+    });
+    async.map(files, function(file, cb) {
+      fs.stat(file, function(err, stats) {
+        cb(null, err ? 0 : stats.mtime.getTime());
+      });
+    }, function(_, times) {
+      cb(stats.mtime.getTime() >= Math.max.apply(Math, times));
+    });
+  });
+}
 
 function compile(write, cb) {
   async.series([compileAll, readThemes, readModes, readLibs], function(err, results) {
