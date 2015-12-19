@@ -37,7 +37,7 @@ module.exports.sync = function walkSync(dir) {
     for (var i = 0, l = list.length; i < l; i++) {
       var path = dir + "/" + list[i];
       try {
-        var stat = fs.statSync(path);
+        var stat = fs.lstatSync(path);
         if (stat.isDirectory()) {
           dirs.push({path: path, stat: stat});
           var r = walkSync(path);
