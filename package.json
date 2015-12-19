@@ -65,9 +65,9 @@
   "files": [
     "client",
     "server",
+    "dist",
     "droppy.js",
-    "index.js",
-    "cache.json"
+    "index.js"
   ],
   "engines": {
     "node": ">=0.10.0"
