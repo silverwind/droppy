@@ -9,7 +9,7 @@ module.exports = function walk(dir, cb) {
     (function next(i) {
       if (!list || !list[i]) return cb(errs.length ? errs : null, dirs, files);
       var path = dir + "/" + list[i];
-      fs.lstat(path, function(err, stat) {
+      fs.stat(path, function(err, stat) {
         if (err) {
           errs.push(err);
           next(++i);
@@ -37,7 +37,7 @@ module.exports.sync = function walkSync(dir) {
     for (var i = 0, l = list.length; i < l; i++) {
       var path = dir + "/" + list[i];
       try {
-        var stat = fs.lstatSync(path);
+        var stat = fs.statSync(path);
         if (stat.isDirectory()) {
           dirs.push({path: path, stat: stat});
           var r = walkSync(path);

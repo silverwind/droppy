@@ -331,7 +331,7 @@ function setupSocket(server) {
         if (new RegExp("^" + msg.data.src + "/").test(msg.data.dst))
           return sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
 
-        fs.lstat(utils.addFilesPath(msg.data.dst), function(err, stats) {
+        fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {
           if (!err && stats || msg.data.src === msg.data.dst) {
             utils.getNewPath(utils.addFilesPath(msg.data.dst), function(newDst) {
               filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
