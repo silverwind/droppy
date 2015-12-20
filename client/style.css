@@ -663,27 +663,27 @@ html:not(.mobile) #entry-menu a.active svg {
 .media-container.right { opacity: 0; transform: translate3d(33%,0,0)  }
 
 .media-container img, .nofullscreen .media-container video {
-  position: absolute; height: auto; width: auto;
+  position: absolute;
   max-height: 100%; max-width: 100%;
   left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:fullscreen) {
-  position: absolute; height: auto; width: auto;
+  position: absolute;
   max-height: 100%; max-width: 100%;
   left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-webkit-full-screen) {
-  position: absolute; height: auto; width: auto;
+  position: absolute;
   max-height: 100%; max-width: 100%;
   left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-moz-full-screen) {
-  position: absolute; height: auto; width: auto;
+  position: absolute;
   max-height: 100%; max-width: 100%;
   left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 .media-container video:not(:-ms-fullscreen) {
-  position: absolute; height: auto; width: auto;
+  position: absolute;
   max-height: 100%; max-width: 100%;
   left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
