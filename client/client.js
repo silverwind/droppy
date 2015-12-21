@@ -775,7 +775,7 @@
     if (!lastUpdate || (Date.now() - lastUpdate) >= 100) {
       var sent     = event.loaded;
       var total    = event.total;
-      var progress = (Math.round((sent / total) * 1000) / 10).toFixed(1) + "%";
+      var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
       var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
       var elapsed, secs;
 
@@ -2706,7 +2706,7 @@
     if (num < 1) return num + " B";
     var units = ["B", "kB", "MB", "GB", "TB", "PB"];
     var exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
-    return (num / Math.pow(1000, exp)).toFixed(2) + " " + units[exp];
+    return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
   }
 
   function sortCompare(a, b) {
