@@ -771,8 +771,8 @@
   function uploadProgress(view, event) {
     if (!event.lengthComputable) return;
 
-    // Update progress every 250ms at most
-    if (!lastUpdate || (Date.now() - lastUpdate) >= 250) {
+    // Update progress every 100ms at most
+    if (!lastUpdate || (Date.now() - lastUpdate) >= 100) {
       var sent     = event.loaded;
       var total    = event.total;
       var progress = (Math.round((sent / total) * 1000) / 10).toFixed(1) + "%";
