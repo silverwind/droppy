@@ -4,7 +4,7 @@
 
 .tip:after {
   position: absolute;
-  z-index: 999;
+  z-index: 65535;
   display: none;
   padding: 2px 8px;
   font: 14px/1.5 Helvetica, Arial, sans-serif;

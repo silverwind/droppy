@@ -958,6 +958,7 @@ html:not(.mobile) .vjs-big-play-button {
 .upload-info svg {
   fill: #ccc;
   height: 1em;
+  width: 1em;
   vertical-align: middle;
   transition: fill .15s ease;
   position: relative;
