@@ -1334,7 +1334,7 @@ html:not(.mobile) .vjs-big-play-button {
   padding: 0 10px;
   height: 2rem;
   width: 100%;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 #fields input:focus {
@@ -1360,8 +1360,7 @@ html:not(.mobile) .vjs-big-play-button {
   line-height: 2rem;
   height: 2rem;
   bottom: 0;
-  color: #555;
-  transition: color .2s ease;
+  color: #666;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -1370,7 +1369,6 @@ html:not(.mobile) .vjs-big-play-button {
 
 .remember svg, .submit svg {
   height: 1em;
-  transition: fill .2s ease;
   position: relative;
   top: .15rem;
   width: 1.2em;
@@ -1378,9 +1376,9 @@ html:not(.mobile) .vjs-big-play-button {
 
 .remember:hover, .remember:focus { color: #222 }
 .submit:hover, .submit:focus     { color: #222 }
-.submit svg                      { fill: #555; margin-right: .2em }
+.submit svg                      { fill: #666; margin-right: .2em }
 .remember svg                    { fill: transparent }
-.remember.checked svg            { fill: #555 }
+.remember.checked svg            { fill: #666 }
 .submit:hover svg                { fill: #222 }
 .remember.checked:hover svg      { fill: #222 }
 
