@@ -143,4 +143,4 @@ content-disposition = on
 ### Note about startup performance
 droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are read into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hunderts of thousands of files present.
 
-© 2012-2015 [silverwind](https://github.com/silverwind), distributed under BSD licence
+© [silverwind](https://github.com/silverwind), distributed under BSD licence.
