@@ -4,7 +4,6 @@ var filetree = new (require("events").EventEmitter)();
 var dirs     = {}, todoDirs = [], initial = true, watching = true, timer = null;
 
 var _        = require("lodash");
-var chalk    = require("chalk");
 var chokidar = require("chokidar");
 var fs       = require("graceful-fs");
 var path     = require("path");
@@ -32,8 +31,7 @@ filetree.init = function init(pollingInterval) {
 };
 
 filetree.updateAll = _.debounce(function updateAll() {
-  log.debug(chalk.magenta("Updating file tree from watcher"));
-  initial = true;
+  log.debug("Updating file tree because of local filesystem changes");
   filetree.updateDir(null, function() {
     filetree.emit("updateall");
   });
@@ -87,12 +85,13 @@ filetree.updateDir = function updateDir(dir, cb) {
     if (err) log.error(err);
     if (initial) { // use sync walk for performance
       initial = false;
-      log.info("Caching directories ...");
+      log.info("Caching files ...");
       var r = walk.sync(utils.addFilesPath(dir));
       if (r[0]) handleUpdateDirErrs(r[0]);
       updateDirInCache(dir, stat, r[1], r[2], cb);
+      log.info("Caching files done");
     } else {
-      log.debug(chalk.magenta("Updating " + dir));
+      log.debug("Updating cache of " + dir);
       walk(utils.addFilesPath(dir), function(errs, readDirs, readFiles) {
         if (errs) handleUpdateDirErrs(errs, cb);
         updateDirInCache(dir, stat, readDirs, readFiles, cb);

@@ -48,7 +48,7 @@ utils.mkdir = function mkdir(dir, cb) {
 
 // rimraf wrapper with 10 retries
 utils.rm = function rm(p, cb) {
-  rimraf(p, {maxBusyTries: 10}, cb);
+  rimraf(p, {maxBusyTries: 10, glob: {dot: true}}, cb);
 };
 
 // rimraf.sync wrapper with 10 retries
@@ -56,7 +56,7 @@ utils.rmSync = function rmSync(p) {
   var tries = 10;
   (function run() {
     try {
-      rimraf.sync(p);
+      rimraf.sync(p, {glob: {dot: true}});
     } catch (e) {
       if (tries-- > 0) run();
     }

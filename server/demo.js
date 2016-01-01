@@ -10,13 +10,13 @@ var request  = require("request");
 var schedule = require("node-schedule");
 var yauzl    = require("yauzl");
 
-var filetree = require("./filetree.js");
 var log      = require("./log.js");
 var paths    = require("./paths.js").get();
 var utils    = require("./utils.js");
 
 demo.init = function init(cb) {
   process.title = "droppy-demo";
+  log.info("Initializing demo mode ...");
   demo.refresh(function() {
     schedule.scheduleJob("*/10 * * * *", demo.refresh);
     if (cb) cb();
@@ -28,19 +28,16 @@ demo.refresh = function refresh(doneCallback) {
     function(callback) {
       utils.rm(path.join(paths.files, "**/*"), function(err) {
         if (err) log.error(err);
-        utils.rm(path.join(paths.files, "**/.*"), function(err) {
-          if (err) log.error(err);
-          callback();
-        });
+        callback();
       });
     },
     // Get image samples
     getZip("https://silverwind.io/droppy-samples.zip", "/images", path.join(paths.config, "/demoTemp/img.zip")),
 
-    // Get video samples - Provided by http://www.webmfiles.org
+    // Get video samples - Provided by webmfiles.org
     get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/video/Big Buck Bunny.webm"),
 
-    // Get audio samples - Provided by http://sampleswap.org
+    // Get audio samples - Provided by sampleswap.org
     get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/258%5Bkb%5D160_roll-to-the-moon-and-back.wav.mp3", "/audio/sample-1.mp3"),
     get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/GUITARS%20BPM/1380%5Bkb%5D120_a-bleep-odyssey.aif.mp3", "/audio/sample-2.mp3"),
     get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/517%5Bkb%5D160_tricky-bongos.wav.mp3", "/audio/sample-3.mp3"),
@@ -53,8 +50,7 @@ demo.refresh = function refresh(doneCallback) {
       ], callback);
     }
   ], function() {
-    log.info("Demo refreshed");
-    filetree.updateAll();
+    log.info("Demo files refreshed");
     if (doneCallback) doneCallback();
   });
 };
