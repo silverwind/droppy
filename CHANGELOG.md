@@ -1,4 +1,12 @@
-*Note: For patch releases, see the commit log*
+*For patch-level releases, see the commit log*
+
+#### Version 3.7.0 - 12/19/2015
+
+- Client data is now precompiled and published to npm, resulting in drastically reduced startup time after installing a new version.
+
+#### Version 3.6.0 - 11/10/2015
+
+- Node.js 0.10 is again supported
 
 #### Version 3.5.0 - 10/12/2015
 
