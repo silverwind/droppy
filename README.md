@@ -12,14 +12,23 @@ droppy is a self-hosted file storage server with an interface similar to desktop
 * Drag & drop and swipe gesture support
 * Fullscreen support
 * Edit text files in a heavily customized CodeMirror
-* Supports latest node.js/io.js (min: 0.10) and all modern browsers
+* Supports all modern browsers and Node.js 0.10 or greater
 
 ### Install
+With `Node.js` and `npm` installed, run:
+
 ```
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
-Alternatively, `git` can be used to install to a non-global location:
+
+If you're running Docker, use the official image:
+```
+$ docker pull silverwind/droppy
+$ docker run -p 8989:8989 -d silverwind/droppy
+```
+
+To install to a local directory, use `git`:
 ```
 $ git clone https://github.com/silverwind/droppy.git
 $ cd droppy
@@ -32,7 +41,7 @@ To store configuration and files, these two directories will be used:
 - `~/.droppy`: configuration directory. Override with `--configdir <dir>`.
 - `~/.droppy/files`: files directory. Override with `--filesdir <dir>`.
 
-By default, the server listens on port 8989 on all interfaces. On first login, a prompt for username and password for the first account will appear. Additional accounts can be created in the options interface or the command line.
+By default, the server listens on all interfaces, port 8989. On first login, a prompt for username and password for the first account will appear. Additional accounts can be created in the options interface or the command line.
 
 ### Configure
 Run `droppy config` to edit `config/config.json`, which is created with these defaults:

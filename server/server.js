@@ -58,7 +58,10 @@ var droppy = function droppy(options, isStandalone, callback) {
     },
     function(cb) {
       log.info("Loading resources ...");
-      resources.load(config.dev, function(err, c) { cache = c; cb(err); });
+      resources.load(config.dev, function(err, c) {
+        log.info("Loading resources done");
+        cache = c; cb(err);
+      });
     },
     function(cb) { cleanupTemp(); cb(); },
     function(cb) { cleanupLinks(cb); },

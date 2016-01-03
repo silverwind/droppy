@@ -8,6 +8,7 @@ publish:
 
 docker:
 	docker build --no-cache=true -t silverwind/droppy .
+	docker push silverwind/droppy
 
 update:
 	ncu -ua
@@ -27,8 +28,8 @@ npm-minor:
 npm-major:
 	npm version major
 
-patch: lint npm-patch publish deploy
-minor: lint npm-minor publish deploy
-major: lint npm-major publish deploy
+patch: lint npm-patch publish deploy docker
+minor: lint npm-minor publish deploy docker
+major: lint npm-major publish deploy docker
 
 .PHONY: lint publish docker update deploy npm-patch npm-minor npm-major patch minor major
