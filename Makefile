@@ -2,13 +2,13 @@ lint:
 	eslint --ignore-pattern *.min.js server client *.js
 
 publish:
-	git push -u --tags origin master
+	if git ls-remote --exit-code origin &>/dev/null; then git push -u -f --tags origin master; fi
 	if git ls-remote --exit-code gogs &>/dev/null; then git push -u -f --tags gogs master; fi
 	npm publish
 
 docker:
-	docker rm -f $(docker ps -a -f="image=silverwind/droppy" -q) 2>1 || echo "No containers to remove"
-	docker rmi $(docker images -qa silverwind/droppy) 2>1 || echo "No images to remove"
+	docker rm -f $(docker ps -a -f="image=silverwind/droppy" -q) 2>/dev/null || echo "No containers to remove"
+	docker rmi $(docker images -qa silverwind/droppy) 2>/dev/null || echo "No images to remove"
 	docker build --no-cache=true -t silverwind/droppy .
 	docker push silverwind/droppy
 
