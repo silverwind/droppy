@@ -1,10 +1,13 @@
 lint:
-	eslint --color --quiet --ignore-pattern *.min.js server client *.js
+	eslint --ignore-pattern *.min.js server client *.js
 
 publish:
 	git push -u --tags origin master
 	if git ls-remote --exit-code gogs &>/dev/null; then git push -u -f --tags gogs master; fi
 	npm publish
+
+docker:
+	docker build --no-cache=true -t silverwind/droppy .
 
 update:
 	ncu -ua
@@ -28,4 +31,4 @@ patch: lint npm-patch publish deploy
 minor: lint npm-minor publish deploy
 major: lint npm-major publish deploy
 
-.PHONY: lint touch publish update deploy patch minor major npm-patch npm-minor npm-major
+.PHONY: lint publish docker update deploy npm-patch npm-minor npm-major patch minor major
