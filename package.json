@@ -15,7 +15,7 @@
     "prepublish": "node droppy.js build"
   },
   "dependencies": {
-    "async": "^1.5.0",
+    "async": "^1.5.1",
     "busboy": "^0.2.12",
     "chalk": "^1.1.1",
     "chokidar": "^1.4.2",
@@ -49,13 +49,13 @@
   "devDependencies": {
     "autoprefixer": "^6.2.3",
     "cheerio": "^0.19.0",
-    "clean-css": "^3.4.8",
+    "clean-css": "^3.4.9",
     "codemirror": "^5.10.0",
     "draggabilly": "^1.2.4",
     "html-minifier": "^1.0.1",
     "jquery": "^2.1.4",
     "mousetrap": "^1.5.3",
-    "postcss": "^5.0.13",
+    "postcss": "^5.0.14",
     "uglify-js": "^2.6.1",
     "uppie": "^0.9.1",
     "video.js": "^5.4.4"

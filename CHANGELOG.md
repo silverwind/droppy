@@ -1,5 +1,10 @@
 *For patch-level releases, see the commit log*
 
+#### Version 3.8.0 - 1/4/2016
+
+- Docker image is now available as silverwind/droppy.
+- Fixed a erron on startup when in a NODE_ENV=production environment.
+
 #### Version 3.7.0 - 12/19/2015
 
 - Client data is now precompiled and published to npm, resulting in drastically reduced startup time after installing a new version.
