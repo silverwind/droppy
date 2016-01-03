@@ -7,6 +7,8 @@ publish:
 	npm publish
 
 docker:
+	docker rm -f $(docker ps -a -f="image=silverwind/droppy" -q) 2>1 || echo "No containers to remove"
+	docker rmi $(docker images -qa silverwind/droppy) 2>1 || echo "No images to remove"
 	docker build --no-cache=true -t silverwind/droppy .
 	docker push silverwind/droppy
 
