@@ -4,18 +4,12 @@
 var resources = {}, svgData = {}, minify, $;
 
 var async        = require("async");
-var autoprefixer = require("autoprefixer");
-var cheerio      = require("cheerio");
-var cleanCSS     = require("clean-css");
 var etag         = require("etag");
 var fs           = require("graceful-fs");
-var htmlMinifier = require("html-minifier");
 var jb           = require("json-buffer");
 var mime         = require("mime-types").lookup;
 var mkdirp       = require("mkdirp");
 var path         = require("path");
-var postcss      = require("postcss");
-var uglify       = require("uglify-js");
 var vm           = require("vm");
 var zlib         = require("zlib");
 
@@ -67,12 +61,25 @@ var opts = {
       removeOptionalTags: true,
       removeRedundantAttributes: true,
       caseSensitive: true,
-      minifyCSS: cleanCSS,
+      minifyCSS: {
+        keepSpecialComments : 0,
+        roundingPrecision: 3,
+        rebase: false,
+      },
     };
   }
 };
 
-cleanCSS = new cleanCSS(opts.cleanCSS);
+var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier;
+try {
+  autoprefixer = require("autoprefixer");
+  cheerio      = require("cheerio");
+  cleanCSS     = require("clean-css");
+  postcss      = require("postcss");
+  uglify       = require("uglify-js");
+  htmlMinifier = require("html-minifier");
+  cleanCSS = new cleanCSS(opts.cleanCSS);
+} catch (e) {}
 
 resources.files = {
   css: [

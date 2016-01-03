@@ -88,8 +88,8 @@ filetree.updateDir = function updateDir(dir, cb) {
       log.info("Caching files ...");
       var r = walk.sync(utils.addFilesPath(dir));
       if (r[0]) handleUpdateDirErrs(r[0]);
-      updateDirInCache(dir, stat, r[1], r[2], cb);
       log.info("Caching files done");
+      updateDirInCache(dir, stat, r[1], r[2], cb);
     } else {
       log.debug("Updating cache of " + dir);
       walk(utils.addFilesPath(dir), function(errs, readDirs, readFiles) {
