@@ -21,6 +21,7 @@
     "chokidar": "^1.4.2",
     "content-disposition": "^0.5.0",
     "cpr": "^1.0.0",
+    "daemon": "^1.1.0",
     "detect-engine": "^1.1.0",
     "dhparam": "^1.0.2",
     "etag": "^1.7.0",

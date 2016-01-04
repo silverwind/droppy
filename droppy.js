@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color"]});
+var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color", "daemon"]});
 var fs    = require("graceful-fs");
 var pkg   = require("./package.json");
 
@@ -15,7 +15,7 @@ var cmds = {
   add       : "add <user> <pass>    Add a user",
   del       : "del <user>           Delete a user",
   build     : "build                Build client resources",
-  version   : "version, -v          Print version"
+  version   : "version, -v          Print version",
 };
 
 var opts = {
@@ -23,12 +23,17 @@ var opts = {
   nocolor   : "--no-color           Force disable color in terminal",
   configdir : "--configdir <dir>    Config directory. Default: ~/.droppy",
   filesdir  : "--filesdir <dir>     Files directory. Default: <configdir>/files",
-  log       : "--log <file>         Log to file instead of stdout"
+  log       : "--log <file>         Log to file instead of stdout",
+  daemon    : "--daemon             Daemonize process",
 };
 
 if (argv.v || argv.V || argv.version) {
   console.info(pkg.version);
   process.exit(0);
+}
+
+if (argv.daemon) {
+  require("daemon")();
 }
 
 if (argv._[0] === "build") {
