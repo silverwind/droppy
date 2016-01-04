@@ -22,7 +22,7 @@ $ [sudo] npm install -g droppy
 $ droppy start
 ```
 
-If you're running Docker, use the official image:
+If you're running Docker, use the official (work in progress) image:
 ```
 $ docker pull silverwind/droppy
 $ docker run -p 8989:8989 -d silverwind/droppy
