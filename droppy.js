@@ -1,30 +1,30 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color", "daemon"]});
+var argv  = require("minimist")(process.argv.slice(2), {boolean: ["color", "d", "daemon"]});
 var fs    = require("graceful-fs");
 var pkg   = require("./package.json");
 
 process.title = pkg.name;
 
 var cmds = {
-  start     : "start                Start the server",
-  update    : "update               Update the server",
-  config    : "config               Edit the config",
-  list      : "list                 List users",
-  add       : "add <user> <pass>    Add a user",
-  del       : "del <user>           Delete a user",
-  build     : "build                Build client resources",
-  version   : "version, -v          Print version",
+  start     : "start                  Start the server",
+  update    : "update                 Self-Update (may require root)",
+  config    : "config                 Edit the config",
+  list      : "list                   List users",
+  add       : "add <user> <pass>      Add a user",
+  del       : "del <user>             Delete a user",
+  build     : "build                  Build client resources",
+  version   : "version, -v            Print version",
 };
 
 var opts = {
-  color     : "--color              Force enable color in terminal",
-  nocolor   : "--no-color           Force disable color in terminal",
-  configdir : "--configdir <dir>    Config directory. Default: ~/.droppy",
-  filesdir  : "--filesdir <dir>     Files directory. Default: <configdir>/files",
-  log       : "--log <file>         Log to file instead of stdout",
-  daemon    : "--daemon             Daemonize process",
+  configdir : "-c, --configdir <dir>  Config directory. Default: ~/.droppy",
+  filesdir  : "-f, --filesdir <dir>   Files directory. Default: <configdir>/files",
+  daemon    : "-d, --daemon           Daemonize (background) process",
+  log       : "-l, --log <file>       Log to file instead of stdout",
+  color     : "--color                Force enable color in terminal",
+  nocolor   : "--no-color             Force disable color in terminal",
 };
 
 if (argv.v || argv.V || argv.version) {
@@ -32,7 +32,7 @@ if (argv.v || argv.V || argv.version) {
   process.exit(0);
 }
 
-if (argv.daemon) {
+if (argv.daemon || argv.d) {
   require("daemon")();
 }
 
@@ -44,18 +44,20 @@ if (argv._[0] === "build") {
   });
 }
 
-if (argv.configdir || argv.filesdir || argv.home) {
+if (argv.configdir || argv.filesdir || argv.home || argv.c || argv.f) {
   if (argv.home)
     console.log("\n Warning: --home is deprecated, use --configdir and --filesdir\n");
 
-  require("./server/paths.js").seed(argv.configdir || argv.home, argv.filesdir);
+  var cfgDir = argv.configdir || argv.c || argv.home;
+  var filesDir = argv.filesdir || argv.f;
+  require("./server/paths.js").seed(cfgDir, filesDir);
 }
 
-if (argv.log) {
+if (argv.log || argv.l) {
   var ut = require("untildify");
   var path = require("path");
   try {
-    require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log)), "a", "644"));
+    require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log || argv.l)), "a", "644"));
   } catch (err) {
     console.error("Unable to open log file for writing: " + err.message);
     process.exit(1);

@@ -575,7 +575,7 @@ function handlePOST(req, res) {
         cookies.create(req, res, postData);
         firstRun = false;
         endReq(res, true);
-        log.info(req, res, "User ", "'", postData.username, "'", chalk.green("' added"));
+        log.info(req, res, "User ", "'", postData.username, "' added");
       } else {
         endReq(res, false);
         log.info(req, res, "Invalid user creation request for user ", "'", postData.username, "'");
