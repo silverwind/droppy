@@ -199,6 +199,10 @@ function isCacheFresh(cb) {
 }
 
 function compile(write, cb) {
+  if (!autoprefixer) {
+    return cb(new Error("Missing devDependencies to compile resource cache, " +
+                        "please reinstall or run `npm install --only=dev` inside the project directory"));
+  }
   async.series([compileAll, readThemes, readModes, readLibs], function(err, results) {
     if (err) return cb(err);
     var cache = {res: results[0], themes: {}, modes: {}, lib: {}};

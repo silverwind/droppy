@@ -110,7 +110,7 @@ log.error = function error(err) {
   else
     output = new Error("Unknown error type: " + typeof err).stack + "\nerr = " + err;
 
-  log(null, null, 1, chalk.red(output));
+  log(null, null, 1, chalk.red(output.replace(/^Error: /, "")));
 };
 
 log.plain = function plain() {
