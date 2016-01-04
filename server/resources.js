@@ -15,7 +15,6 @@ var zlib         = require("zlib");
 
 var log          = require("./log");
 var paths        = require("./paths.js").get();
-var templates    = require("./templates.js");
 
 var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
 var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
@@ -70,7 +69,7 @@ var opts = {
   }
 };
 
-var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier;
+var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates;
 try {
   autoprefixer = require("autoprefixer");
   cheerio      = require("cheerio");
@@ -78,6 +77,7 @@ try {
   postcss      = require("postcss");
   uglify       = require("uglify-js");
   htmlMinifier = require("html-minifier");
+  templates    = require("./templates.js");
   cleanCSS = new cleanCSS(opts.cleanCSS);
 } catch (e) {}
 
