@@ -1872,7 +1872,7 @@
   }
 
   function updateUsers(userlist) {
-    if (Object.keys(userlist).length === 0) location.reload(true);
+    if (Object.keys(userlist).length === 0) return location.reload(true);
     var box = $("#prefs-box");
     box.find(".list-user").remove();
     box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
