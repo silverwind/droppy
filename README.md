@@ -17,19 +17,19 @@ droppy is a self-hosted file storage server with an interface similar to desktop
 ### Install
 With `Node.js` and `npm` installed, run:
 
-```
+```console
 $ [sudo] npm install -g droppy
 $ droppy start
 ```
 
 If you're running Docker, use the official (work in progress) image:
-```
+```console
 $ docker pull silverwind/droppy
 $ docker run -p 8989:8989 -d silverwind/droppy
 ```
 
 To install to a local directory, use `git`:
-```
+```console
 $ git clone https://github.com/silverwind/droppy.git
 $ cd droppy
 $ npm install
