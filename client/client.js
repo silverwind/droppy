@@ -477,15 +477,14 @@
       $("[name=remember]").attr("value", $(".remember").hasClass("checked") ? "1" : "");
     });
 
-    $(".submit").register("click", function() {
-      form.submit();
-    });
-
-    form.register("submit", function() {
-      $.post(getRootPath() + (firstrun ? "adduser" : "login"), form.serialize(), null, "json").always(function(xhr) {
-        if (xhr.status === 202) {
+    form.register("submit", function(e) {
+      e.preventDefault();
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", getRootPath() + (firstrun ? "adduser" : "login"));
+      xhr.onload = function() {
+        if (xhr.status === 200) {
           location.reload(true);
-        } else if (xhr.status === 401) {
+        } else {
           var info = $("#login-info-box");
           info.text(firstrun ? "Please fill both fields." : "Wrong login!");
           if (info.hasClass("error")) {
@@ -494,9 +493,10 @@
               info.removeClass("shake");
             }, 500);
           } else info.attr("class", "error");
-          if (!firstrun) $("#pass").val("").focus();
+          if (!firstrun) $("#pass").focus();
         }
-      });
+      };
+      xhr.send(new FormData(form[0]));
     });
   }
 // ============================================================================
@@ -1872,29 +1872,28 @@
   }
 
   function updateUsers(userlist) {
+    if (Object.keys(userlist).length === 0) location.reload(true);
     var box = $("#prefs-box");
-    if (Object.keys(userlist).length > 0) {
-      box.find(".list-user").remove();
-      box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
-      box.find(".add-user").register("click", function() {
-        var user = prompt("Username?");
-        if (!user) return;
-        var pass = prompt("Password?");
-        if (!pass) return;
-        sendMessage(null, "UPDATE_USER", {
-          name: user,
-          pass: pass,
-          priv: true
-        });
+    box.find(".list-user").remove();
+    box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
+    box.find(".add-user").register("click", function() {
+      var user = prompt("Username?");
+      if (!user) return;
+      var pass = prompt("Password?");
+      if (!pass) return;
+      sendMessage(null, "UPDATE_USER", {
+        name: user,
+        pass: pass,
+        priv: true
       });
-      box.find(".delete-user").register("click", function(event) {
-        event.stopPropagation();
-        sendMessage(null, "UPDATE_USER", {
-          name: $(this).parents("li").children(".username").text(),
-          pass: ""
-        });
+    });
+    box.find(".delete-user").register("click", function(event) {
+      event.stopPropagation();
+      sendMessage(null, "UPDATE_USER", {
+        name: $(this).parents("li").children(".username").text(),
+        pass: ""
       });
-    }
+    });
   }
 
   function showPrefs() {

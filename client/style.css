@@ -1359,6 +1359,7 @@ html:not(.mobile) .vjs-big-play-button {
 .remember, .submit {
   line-height: 2rem;
   height: 2rem;
+  background: transparent;
   bottom: 0;
   color: #666;
   cursor: pointer;

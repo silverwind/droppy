@@ -54,6 +54,8 @@ var droppy = function droppy(options, isStandalone, callback) {
     function(cb) {
       log.init({logLevel: config.logLevel, timestamps: config.timestamps});
       firstRun = Object.keys(db.get("users")).length === 0;
+      // clean up old sessions if no users exist
+      if (firstRun) db.set("sessions", {});
       cb();
     },
     function(cb) {
@@ -374,17 +376,16 @@ function setupSocket(server) {
         if (pass === "") {
           if (!db.get("users")[name]) return;
           if (db.delUser(msg.data.name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
-          sendUsers(sid);
+          if (Object.keys(db.get("users")).length === 0) {
+            firstRun = true;
+            db.set("sessions", {});
+          }
         } else {
           var isNew = !db.get("users")[name];
           db.addOrUpdateUser(name, pass, msg.data.priv);
-          if (isNew)
-            log.info(ws, null, "Added user: ", chalk.magenta(name));
-          else
-            log.info(ws, null, "Updated user: ", chalk.magenta(name));
-          sendUsers(sid);
+          log.info(ws, null, (isNew ? "Added" : "Updated") + " user: ", chalk.magenta(name));
         }
-        if (db.get("sessions")[cookie].privileged) sendUsers(sid);
+        sendUsers(sid);
         break;
       case "CREATE_FILES":
         async.each(msg.data.files, function(file, cb) {
@@ -527,9 +528,9 @@ function handleGET(req, res) {
   }
 }
 
-var blocked = [];
+var rateLimited = [];
 function handlePOST(req, res) {
-  var body = "", URI = decodeURIComponent(req.url);
+  var URI = decodeURIComponent(req.url), postData = {};
 
   if (!utils.isPathSane(URI, true))
     return log.info(req, res, "Invalid POST: " + req.url);
@@ -542,55 +543,55 @@ function handlePOST(req, res) {
     }
     handleUploadRequest(req, res);
   } else if (/\/login/.test(URI)) {
-    // Throttle login attempts to 1 per second
-    if (blocked.indexOf(req.socket.remoteAddress) >= 0) {
-      res.setHeader("Content-Type", "text/html; charset=utf-8");
+    // Rate-limit login attempts to one attempte every 2 seconds
+    if (rateLimited.indexOf(req.socket.remoteAddress) !== -1) {
+      res.statusCode = 429;
       res.end();
       return;
     }
-    blocked.push(req.socket.remoteAddress);
-    (function(ip) {
-      setTimeout(function() {
-        blocked.pop(ip);
-      }, 1000);
-    })(req.socket.remoteAddress);
+    rateLimited.push(req.socket.remoteAddress);
+    setTimeout(function() {
+      rateLimited.pop(req.socket.remoteAddress);
+    }, 2000);
 
-    req.on("data", function(data) { body += data; });
-    req.on("end", function() {
-      var postData = qs.parse(body);
+    req.pipe(new Busboy({headers: req.headers}).on("field", function(fieldname, val) {
+      postData[fieldname] = val;
+    }).on("finish", function() {
       if (db.authUser(postData.username, postData.password)) {
         cookies.create(req, res, postData);
-        endReq(req, res, true);
-        log.info(req, res, "User ", postData.username, chalk.green(" authenticated"));
+        endReq(res, true);
+        log.info(req, res, "User ", "'", postData.username, "'", chalk.green(" authenticated"));
       } else {
-        endReq(req, res, false);
-        log.info(req, res, "User ", postData.username, chalk.red(" unauthorized"));
+        endReq(res, false);
+        log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
       }
-    });
+    }));
   } else if (/\/adduser/.test(URI) && firstRun) {
-    req.on("data", function(data) { body += data; });
-    req.on("end", function() {
-      var postData = qs.parse(body);
+    req.pipe(new Busboy({headers: req.headers}).on("field", function(fieldname, val) {
+      postData[fieldname] = val;
+    }).on("finish", function() {
       if (postData.username !== "" && postData.password !== "") {
         db.addOrUpdateUser(postData.username, postData.password, true);
         cookies.create(req, res, postData);
         firstRun = false;
-        endReq(req, res, true);
+        endReq(res, true);
+        log.info(req, res, "User ", "'", postData.username, "'", chalk.green("' added"));
       } else {
-        endReq(req, res, false);
+        endReq(res, false);
+        log.info(req, res, "Invalid user creation request for user ", "'", postData.username, "'");
       }
-    });
+    }));
   } else {
     res.statusCode = 404;
     res.end();
+    log.info(req, res);
   }
 
-  function endReq(req, res, success) {
-    res.statusCode = success ? 202 : 401;
+  function endReq(res, success) {
+    res.statusCode = success ? 200 : 401;
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Content-Length", 0);
     res.end();
-    log.info(req, res);
   }
 }
 
