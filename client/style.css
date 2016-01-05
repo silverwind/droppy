@@ -660,7 +660,8 @@ html:not(.mobile) #entry-menu a.active svg {
 }
 .media-container:not(.draggable) {transition: all .25s ease }
 .media-container.left  { opacity: 0; transform: translate3d(-33%,0,0) }
-.media-container.right { opacity: 0; transform: translate3d(33%,0,0)  }
+.media-container.right { opacity: 0; transform: translate3d(33%,0,0) }
+.media-container.left img, .media-container.right img { max-width: none }
 
 .media-container img, .nofullscreen .media-container video {
   position: absolute;
