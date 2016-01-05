@@ -499,7 +499,7 @@
     // Open the WebSocket
     openSocket();
 
-    // Re-fit path line after 50ms of no resizing
+    // Re-fit path line after 25ms of no resizing
     $(window).register("resize", function() {
       clearTimeout(droppy.resizeTimer);
       droppy.resizeTimer = setTimeout(function() {
@@ -507,7 +507,7 @@
           checkPathOverflow($(this));
           aspectScale();
         });
-      }, 50);
+      }, 25);
     });
 
     // escape hides modals
@@ -2607,7 +2607,7 @@
   function aspectScale() {
     $(".media-container").each(function() {
       var container = $(this);
-      container.find("img, video").each(function() {
+      container.find("img").each(function() {
         var dims = {
           w: this.naturalWidth || this.videoWidth || this.clientWidth,
           h: this.naturalHeight || this.videoHeight || this.clientHeight

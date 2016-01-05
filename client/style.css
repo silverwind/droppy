@@ -183,11 +183,6 @@ input::-webkit-input-placeholder { color: #999 }
 .content.back    { z-index: 0; position:absolute; transform: translate3d(-100%,0,0) }
 .content.forward { z-index: 0; position:absolute; transform: translate3d(100%,0,0)  }
 
-.content:fullscreen          { top: 0; height: 100% }
-.content:-webkit-full-screen { top: 0; height: 100% }
-.content:-moz-full-screen    { top: 0; height: 100% }
-.content::-ms-fullscreen     { top: 0; height: 100% }
-
 /* ================================== Path ================================= */
 
 .path {
@@ -655,48 +650,40 @@ html:not(.mobile) #entry-menu a.active svg {
 .media-container {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
-  overflow: visible;
-  transform: translate3d(0,0,0);
 }
 .media-container:not(.draggable) {transition: all .25s ease }
-.media-container.left  { opacity: 0; transform: translate3d(-33%,0,0) }
-.media-container.right { opacity: 0; transform: translate3d(33%,0,0) }
-.media-container.left img, .media-container.right img { max-width: none }
+.media-container.left  { opacity: 0; transform: translateX(-33%) }
+.media-container.right { opacity: 0; transform: translateX(33%)  }
 
-.media-container img, .nofullscreen .media-container video {
-  position: absolute;
-  max-height: 100%; max-width: 100%;
-  left: 50%; top: 50%; transform: translate(-50%, -50%);
+.view.left .media-container img, .view.right .media-container img,
+.view.left .media-container video, .view.right .media-container video {
+  max-width: 50vw;
 }
-.media-container video:not(:fullscreen) {
-  position: absolute;
-  max-height: 100%; max-width: 100%;
-  left: 50%; top: 50%; transform: translate(-50%, -50%);
+
+.vjs-fullscreen video { max-width: 100% !important; }
+
+.content:fullscreen { top: 0; height: 100% }
+.content:fullscreen .media-container img,
+.content:fullscreen .media-container video {
+  max-width: 100vw;
 }
-.media-container video:not(:-webkit-full-screen) {
+
+.media-container img {
   position: absolute;
-  max-height: 100%; max-width: 100%;
-  left: 50%; top: 50%; transform: translate(-50%, -50%);
-}
-.media-container video:not(:-moz-full-screen) {
-  position: absolute;
-  max-height: 100%; max-width: 100%;
-  left: 50%; top: 50%; transform: translate(-50%, -50%);
-}
-.media-container video:not(:-ms-fullscreen) {
-  position: absolute;
-  max-height: 100%; max-width: 100%;
+  max-height: 100%; max-width: 100vw;
   left: 50%; top: 50%; transform: translate(-50%, -50%);
 }
 
 .meta {
   position: absolute;
+  font-size: .9rem;
+  padding: .125rem;
   right: .25em; bottom: .25em;
   z-index: 1;
   background: transparent;
-  color: #555;
-  background: rgba(0,0,0,.7);
-  border-radius: .25em;
+  color: #aaa;
+  background: rgba(0,0,0,.4);
+  border-radius: .125em;
   cursor: pointer;
   user-select: none;
   display: flex;
@@ -709,14 +696,14 @@ html:not(.mobile) #entry-menu a.active svg {
   background: transparent;
 }
 .fs svg {
-  fill: #555;
+  fill: #aaa;
   height: 1.25em;
   width: 1.25em;
   position: relative;
   top: .1em;
 }
-.fs:hover svg { fill: #fff }
-.meta:hover span > span { color: #fff}
+.meta:hover svg { fill: #fff }
+.meta:hover span { color: #fff }
 
 .meta .counter { margin: 0 .25em }
 .meta .dims    { display: none }
@@ -724,7 +711,7 @@ html:not(.mobile) #entry-menu a.active svg {
 
 .meta > div { display: inline }
 .meta span > span { color: #bbb }
-.type-video .fs, .type-video .meta, .nofullscreen .fs { display: none }
+.type-video .fs, .type-video .meta { display: none }
 /* ================================= Video.js ================================= */
 
 .media-container video:not(.vjs-tech) {
