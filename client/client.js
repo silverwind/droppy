@@ -1846,7 +1846,7 @@
         });
         doc.find(".ww").register("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
-          droppy.set("lineWrapping", !editor.options.lineWrapping);
+          droppy.set("lineWrapping", editor.options.lineWrapping);
         });
         doc.find(".syntax").register("click", function() {
           var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
