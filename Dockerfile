@@ -11,7 +11,7 @@ WORKDIR /droppy
 RUN mkdir /droppy-data
 
 # Install deps
-COPY package.json /droppy/
+COPY package.json /droppy/package.json
 ENV NODE_ENV=production
 RUN npm install
 
@@ -19,8 +19,7 @@ RUN npm install
 COPY server /droppy/server
 COPY client /droppy/client
 COPY dist /droppy/dist
-COPY droppy.js /droppy/
-COPY index.js /droppy/
+COPY droppy.js /droppy/droppy.js
 
 # Run
 EXPOSE 8989

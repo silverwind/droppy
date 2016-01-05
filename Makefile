@@ -1,10 +1,14 @@
 lint:
 	eslint --ignore-pattern *.min.js server client *.js
 
+build:
+	node droppy.js build
+
 publish:
 	if git ls-remote --exit-code origin &>/dev/null; then git push -u -f --tags origin master; fi
 	if git ls-remote --exit-code gogs &>/dev/null; then git push -u -f --tags gogs master; fi
 	npm publish
+	docker push silverwind/droppy
 
 docker:
 	docker-machine start default || true
@@ -12,7 +16,6 @@ docker:
 	docker rm -f "$$(docker ps -a -f="image=silverwind/droppy" -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa silverwind/droppy)" 2>/dev/null || true
 	docker build --no-cache=true -t silverwind/droppy .
-	docker push silverwind/droppy
 
 update:
 	ncu -ua
@@ -32,8 +35,8 @@ npm-minor:
 npm-major:
 	npm version major
 
-patch: lint npm-patch publish deploy docker
-minor: lint npm-minor publish deploy docker
-major: lint npm-major publish deploy docker
+patch: lint npm-patch build docker publish deploy
+minor: lint npm-minor build docker publish deploy
+major: lint npm-major build docker publish deploy
 
 .PHONY: lint publish docker update deploy npm-patch npm-minor npm-major patch minor major
