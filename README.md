@@ -27,7 +27,7 @@ If you're running Docker, use the official (work in progress) image:
 $ docker pull silverwind/droppy
 $ docker run -p 8989:8989 -v $HOSTDIR:/droppy-data silverwind/droppy
 ```
-Replace `$HOSTDIR` with a directory on the docker host where configuration and files can be stored for persistence outside the container. This isn't strictly necessary, but it enables simple one to update by simply pulling a new image.
+Replace `$HOSTDIR` with a directory on the docker host where configuration and files can be stored for persistence outside the container. This isn't strictly necessary, but it enables one to update by simply pulling a new image.
 
 To install to a local directory:
 ```console
