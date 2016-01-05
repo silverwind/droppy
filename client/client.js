@@ -544,18 +544,10 @@
       screenfull.toggle(getActiveView().find(".content")[0]);
     });
 
-    // fullscreen event
     $(document).register(screenfull.raw.fullscreenchange, function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
-      if (screenfull.isFullscreen) {
-        var view = $(screenfull.element).parents(".view");
-        view.find(".fs").html(droppy.svg.unfullscreen);
-        view.find(".full svg").replaceWith(droppy.svg.unfullscreen);
-      } else {
-        $(".fs").html(droppy.svg.fullscreen);
-        $(".full svg").replaceWith(droppy.svg.fullscreen);
-      }
+      $(".full svg, .fs svg").replaceWith(droppy.svg[screenfull.isFullscreen ? "unfullscreen" : "fullscreen"]);
     });
 
     var fileInput = $("#file");
