@@ -4,22 +4,25 @@ FROM gliderlabs/alpine:3.3
 RUN apk add --update nodejs
 
 # Create app directory
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+RUN mkdir /droppy
+WORKDIR /droppy
 
-# Copy app files
-COPY server /usr/src/app/server
-COPY client /usr/src/app/client
-COPY dist /usr/src/app/dist
-COPY droppy.js /usr/src/app/
-COPY index.js /usr/src/app/
-COPY package.json /usr/src/app/
+# Create data directory
+RUN mkdir /droppy-data
 
 # Install deps
+COPY package.json /droppy/
 ENV NODE_ENV=production
 RUN npm install
 
+# Copy app files
+COPY server /droppy/server
+COPY client /droppy/client
+COPY dist /droppy/dist
+COPY droppy.js /droppy/
+COPY index.js /droppy/
+
 # Run
 EXPOSE 8989
-CMD node droppy.js start --configdir /root --filesdir /root/files
+CMD node droppy.js start --configdir /droppy-data
 
