@@ -650,6 +650,7 @@ html:not(.mobile) #entry-menu a.active svg {
 .media-container {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
+  transform: translateX(0);
 }
 .media-container:not(.draggable) {transition: all .25s ease }
 .media-container.left  { opacity: 0; transform: translateX(-33%) }
