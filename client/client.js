@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, fileExtension, Handlebars, Uppie */
+/* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, fileExtension, Handlebars, Uppie, screenfull */
 (function($, window, document) {
   "use strict";
   var droppy = {};
@@ -16,11 +16,6 @@
       var el = document.createElement("input");
       return droppy.prefixes.directory.some(function(prop) {
         if (prop in el) return true;
-      });
-    })(),
-    fullscreen: (function() {
-      return droppy.prefixes.fullscreenEnabled.some(function(prop) {
-        if (prop in document) return true;
       });
     })(),
     audioTypes: (function() {
@@ -150,8 +145,6 @@
 
   if (droppy.detects.mobile)
     $("html").addClass("mobile");
-  if (!droppy.detects.fullscreen)
-    $("html").addClass("nofullscreen");
   if (droppy.detects.webp)
     droppy.imageTypes.webp = "image/webp";
 // ============================================================================
@@ -548,23 +541,21 @@
     Mousetrap.bind(["alt+enter", "f"], function() {
       var view = getActiveView();
       if (!view || view.data("type") !== "media") return;
-      toggleFullscreen(getActiveView().find(".content")[0]);
+      screenfull.toggle(getActiveView().find(".content")[0]);
     });
 
     // fullscreen event
-    droppy.prefixes.fullscreenchange.forEach(function(eventName) {
-      $(document).register(eventName, function() {
-        var view, fse = fullScreenElement();
-        document.activeElement.blur(); // unfocus the fullscreen button so the space key won't un-toggle fullscreen
-        if (fse) {
-          view = $(fse).parents(".view");
-          view.find(".fs").html(droppy.svg.unfullscreen);
-          view.find(".full svg").replaceWith(droppy.svg.unfullscreen);
-        } else {
-          $(".fs").html(droppy.svg.fullscreen);
-          $(".full svg").replaceWith(droppy.svg.fullscreen);
-        }
-      });
+    $(document).register(screenfull.raw.fullscreenchange, function() {
+      // unfocus the fullscreen button so the space key won't un-toggle fullscreen
+      document.activeElement.blur();
+      if (screenfull.isFullscreen) {
+        var view = $(screenfull.element).parents(".view");
+        view.find(".fs").html(droppy.svg.unfullscreen);
+        view.find(".full svg").replaceWith(droppy.svg.unfullscreen);
+      } else {
+        $(".fs").html(droppy.svg.fullscreen);
+        $(".full svg").replaceWith(droppy.svg.fullscreen);
+      }
     });
 
     var fileInput = $("#file");
@@ -1720,7 +1711,7 @@
       view.find(".fs").register("click", function(event) {
         var view = $(event.target).parents(".view");
         droppy.activeView = view[0].vId;
-        toggleFullscreen($(this).parents(".content")[0]);
+        screenfull.toggle($(this).parents(".content")[0]);
         aspectScale();
         event.stopPropagation();
       });
@@ -1864,7 +1855,7 @@
           view.find(".CodeMirror-search-field").eq(0).focus();
         });
         doc.find(".full").register("click", function() {
-          toggleFullscreen($(this).parents(".content")[0]);
+          screenfull.toggle($(this).parents(".content")[0]);
         });
         hideSpinner(view);
       });
@@ -2302,11 +2293,6 @@
     droppy.prefixes = {
       directory         : ["directory", "webkitdirectory"],
       getAsEntry        : ["getAsEntry", "webkitGetAsEntry"],
-      requestFullscreen : ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "msRequestFullscreen"],
-      fullscreenchange  : ["fullscreenchange", "mozfullscreenchange", "webkitfullscreenchange", "msfullscreenchange"],
-      fullscreenElement : ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
-      fullscreenEnabled : ["fullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled", "msFullscreenEnabled"],
-      exitFullscreen    : ["exitFullscreen", "mozCancelFullScreen", "webkitExitFullscreen", "msExitFullscreen"]
     };
 
     // Extension to icon mappings
@@ -2421,28 +2407,6 @@
       sendMessage(view[0].vId, "REQUEST_SHARELINK", {
         location   : location,
         attachement: attachement
-      });
-    }
-  }
-
-  function fullScreenElement() {
-    var el;
-    droppy.prefixes.fullscreenElement.some(function(prop) {
-      if (prop in document) {
-        el = document[prop];
-      }
-    });
-    return el;
-  }
-
-  function toggleFullscreen(el) {
-    if (!fullScreenElement()) {
-      droppy.prefixes.requestFullscreen.some(function(prop) {
-        if (prop in el) el[prop]();
-      });
-    } else {
-      droppy.prefixes.exitFullscreen.some(function(method) {
-        if (method in document) return document[method]();
       });
     }
   }

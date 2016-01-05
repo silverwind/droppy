@@ -57,6 +57,7 @@
     "jquery": "^2.1.4",
     "mousetrap": "^1.5.3",
     "postcss": "^5.0.14",
+    "screenfull": "^3.0.0",
     "uglify-js": "^2.6.1",
     "uppie": "^0.9.1",
     "video.js": "^5.4.4"

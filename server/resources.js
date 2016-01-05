@@ -94,6 +94,7 @@ resources.files = {
     "node_modules/mousetrap/mousetrap.min.js",
     "node_modules/file-extension/file-extension.js",
     "node_modules/uppie/uppie.js",
+    "node_modules/screenfull/dist/screenfull.js",
     "client/client.js",
   ],
   html: [
