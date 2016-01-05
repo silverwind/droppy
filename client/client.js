@@ -409,7 +409,7 @@
     } else if (typeof sendObject.data === "object") {
       Object.keys(sendObject.data).forEach(function(key) {
         if (typeof sendObject.data[key] === "string") {
-          sendObject.data[key] = sendObject.data[key].normalize();
+          sendObject.data[key] = normalize(sendObject.data[key]);
         }
       });
     }
