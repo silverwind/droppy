@@ -1123,21 +1123,14 @@
     });
 
     content.find(".data-row").register("contextmenu", function(event) {
-      var target = $(event.target), targetRow;
-      if (target.attr("class") === ".data-row")
-        targetRow = target;
-      else
-        targetRow = target.parents(".data-row");
-      if (targetRow.data("type") === "error") return;
-      showEntryMenu(targetRow, event.clientX, event.clientY);
+      var target = $(event.currentTarget);
+      if (target.data("type") === "error") return;
+      showEntryMenu(target, event.clientX, event.clientY);
       event.preventDefault();
-      event.stopPropagation();
     });
 
     content.find(".data-row .entry-menu").register("click", function(event) {
       showEntryMenu($(event.target).parents(".data-row"));
-      event.preventDefault();
-      event.stopPropagation();
     });
 
     // Stop navigation when clicking on an <a>
