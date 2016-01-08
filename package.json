@@ -15,7 +15,7 @@
     "prepublish": "node droppy.js build"
   },
   "dependencies": {
-    "async": "^1.5.1",
+    "async": "^1.5.2",
     "busboy": "^0.2.12",
     "chalk": "^1.1.1",
     "chokidar": "^1.4.2",
@@ -30,7 +30,7 @@
     "isbinaryfile": "^3.0.0",
     "json-buffer": "^2.0.11",
     "lodash": "^3.10.1",
-    "mime-types": "^2.1.8",
+    "mime-types": "^2.1.9",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "mv": "^2.1.1",
@@ -60,7 +60,7 @@
     "screenfull": "^3.0.0",
     "uglify-js": "^2.6.1",
     "uppie": "^0.9.1",
-    "video.js": "^5.4.4"
+    "video.js": "^5.4.6"
   },
   "files": [
     "client",
