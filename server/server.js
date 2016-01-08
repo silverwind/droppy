@@ -184,8 +184,16 @@ function startListeners(callback) {
 function createListener(handler, opts, callback) {
   var server;
   if (opts.proto === "http") {
-    var http = require("http");
-    callback(null, http.createServer(handler));
+    server = require("http").createServer(handler);
+    server.on("clientError", function(err, socket) {
+      if (err) log.debug(socket, null, err);
+      if (socket.writable) {
+        // Node.js 6.0
+        socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+        socket.destroy();
+      }
+    });
+    callback(null, server);
   } else {
     var https = require("https");
     https.CLIENT_RENEG_LIMIT = 0;
@@ -199,12 +207,14 @@ function createListener(handler, opts, callback) {
         handler(req, res);
       });
 
-      server.on("clientError", function(err, conn) {
-        if (err) log.error(err);
-        conn.destroy();
-      });
+      function tlsError(err, socket) {
+        if (err) log.debug(socket, null, err);
+        if (socket.writable) socket.destroy();
+      }
+      server.on("clientError", tlsError);
+      server.on("tlsClientError", tlsError); // Node.js 6.0
 
-      // TLS tickets - regenerate keys every hour
+      // TLS tickets - regenerate keys every hour, Node.js 4.0
       if (server.setTicketKeys) {
         (function rotate() {
           server.setTicketKeys(crypto.randomBytes(48));

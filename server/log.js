@@ -45,7 +45,8 @@ var log = function log(req, res, logLevel) {
       req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-port"] ||
       req._socket && req._socket.remotePort && req._socket.remotePort ||
       req.connection && req.connection.remotePort ||
-      req.connection && req.connection.socket && req.connection.socket.remotePort;
+      req.connection && req.connection.socket && req.connection.socket.remotePort ||
+      req.remotePort && req.remotePort;
 
     var ip =
       req.headers && req.headers["x-forwarded-for"] ||
@@ -54,7 +55,8 @@ var log = function log(req, res, logLevel) {
       req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-ip"] ||
       req._socket && req._socket.remoteAddress && req._socket.remoteAddress ||
       req.connection && req.connection.remoteAddress ||
-      req.connection && req.connection.socket && req.connection.socket.remoteAddress;
+      req.connection && req.connection.socket && req.connection.socket.remoteAddress ||
+      req.remoteAddress && req.remoteAddress;
 
     if (ip && port) elems.unshift(log.formatUrl(ip, port));
   }
@@ -99,18 +101,7 @@ log.info = function info(req, res) {
 };
 
 log.error = function error(err) {
-  var output;
-
-  if (err instanceof Error)
-    output = err.stack;
-  else if (!err)
-    output = new Error("Error handler called without an argument").stack + "\nerr = " + err;
-  else if (typeof err === "string")
-    output = err;
-  else
-    output = new Error("Unknown error type: " + typeof err).stack + "\nerr = " + err;
-
-  log(null, null, 1, chalk.red(output.replace(/^Error: /, "")));
+  log(null, null, 1, chalk.red(log.formatError(err)));
 };
 
 log.plain = function plain() {
@@ -156,6 +147,20 @@ log.formatUrl = function formatUrl(host, port, proto) {
     port = chalk.blue(":" + port);
 
   return chalk.cyan(host) + port;
+};
+
+log.formatError = function formatError(err) {
+  var output;
+  if (err instanceof Error)
+    output = err.stack;
+  else if (!err)
+    output = new Error("Error handler called without an argument").stack + "\nerr = " + err;
+  else if (typeof err === "string")
+    output = err;
+  else
+    output = new Error("Unknown error type: " + typeof err).stack + "\nerr = " + err;
+
+  return output.replace(/^Error: /, "");
 };
 
 module.exports = log;
