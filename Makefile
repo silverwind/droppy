@@ -8,7 +8,6 @@ publish:
 	if git ls-remote --exit-code origin &>/dev/null; then git push -u -f --tags origin master; fi
 	if git ls-remote --exit-code gogs &>/dev/null; then git push -u -f --tags gogs master; fi
 	npm publish
-	docker push silverwind/droppy
 
 docker:
 	docker-machine start default || true
@@ -16,6 +15,7 @@ docker:
 	docker rm -f "$$(docker ps -a -f="image=silverwind/droppy" -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa silverwind/droppy)" 2>/dev/null || true
 	docker build --no-cache=true -t silverwind/droppy .
+	docker push silverwind/droppy
 
 update:
 	ncu -ua
