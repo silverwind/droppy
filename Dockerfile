@@ -1,7 +1,4 @@
-FROM gliderlabs/alpine:3.3
-
-# Install Node.js
-RUN apk add --update nodejs
+FROM mhart/alpine-node
 
 # Create app directory
 RUN mkdir /droppy
