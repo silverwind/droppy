@@ -141,7 +141,7 @@ resources.load = function load(dev, cb) {
   fs.readFile(cachePath, function(err, data) {
     if (err) {
       log.info(err.code, " ", cachePath, ", ", "building cache ...");
-      return compile(false, cb);
+      return compile(true, cb);
     }
     try {
       cb(null, jb.parse(data));
