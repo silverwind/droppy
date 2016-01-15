@@ -293,6 +293,7 @@ function readThemes(callback) {
 
       // add our own theme
       fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function(err, css) {
+        css = String(css);
         if (err) return callback(err);
         themes.droppy = new Buffer(minify ? cleanCSS.minify(css).styles : css);
         callback(null, themes);
@@ -317,7 +318,7 @@ function readModes(callback) {
 
     async.map(Object.keys(modes), function(mode, cb) {
       fs.readFile(path.join(modesPath, mode, mode + ".js"), function(err, data) {
-        cb(err, minify ? new Buffer(uglify.minify(data.toString(), opts.uglify).code) : data);
+        cb(err, minify ? new Buffer(uglify.minify(String(data), opts.uglify).code) : data);
       });
     }, function(err, result) {
       Object.keys(modes).forEach(function(mode, i) {
@@ -348,9 +349,9 @@ function readLibs(callback) {
     if (minify) {
       Object.keys(out).forEach(function(file) {
         if (/\.js$/.test(file)) {
-          out[file] = new Buffer(uglify.minify(out[file].toString(), opts.uglify).code);
+          out[file] = new Buffer(uglify.minify(String(out[file]), opts.uglify).code);
         } else if (/\.css$/.test(file)) {
-          out[file] = new Buffer(cleanCSS.minify(out[file].toString()).styles);
+          out[file] = new Buffer(cleanCSS.minify(String(out[file])).styles);
         }
       });
     }
@@ -361,7 +362,7 @@ function readLibs(callback) {
 function readSVG() {
   fs.readdirSync(paths.svg).forEach(function(name) {
     var className = name.slice(0, name.length - ".svg".length);
-    $ = cheerio.load(fs.readFileSync(path.join(paths.svg, name)).toString(), {xmlMode: true});
+    $ = cheerio.load(String(fs.readFileSync(path.join(paths.svg, name))), {xmlMode: true});
     $("svg").addClass(className);
     svgData[className] = $.html();
   });
@@ -378,7 +379,7 @@ function addSVG(html) {
 resources.compileJS = function compileJS() {
   var js = "";
   resources.files.js.forEach(function(file) {
-    js += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + ";";
+    js += String(fs.readFileSync(path.join(paths.mod, file))) + ";";
   });
 
   // Add SVG object
@@ -399,7 +400,7 @@ resources.compileJS = function compileJS() {
 resources.compileCSS = function compileCSS() {
   var css = "";
   resources.files.css.forEach(function(file) {
-    css += fs.readFileSync(path.join(paths.mod, file)).toString("utf8") + "\n";
+    css += String(fs.readFileSync(path.join(paths.mod, file))) + "\n";
   });
 
   // Vendor prefixes

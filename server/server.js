@@ -960,7 +960,7 @@ function debug() {
     setTimeout(function() { // prevent EBUSY on win32
       if (/\.css$/.test(file)) {
         cache.res["style.css"] = resources.compileCSS();
-        sendObjAll({type: "RELOAD", css: cache.res["style.css"].data.toString("utf8")});
+        sendObjAll({type: "RELOAD", css: String(cache.res["style.css"].data)});
       } else if (/\.js$/.test(file) || /\.handlebars$/.test(file)) {
         cache.res["client.js"] = resources.compileJS();
         sendObjAll({type: "RELOAD"});
