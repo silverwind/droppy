@@ -29,7 +29,7 @@
     "graceful-fs": "^4.1.2",
     "isbinaryfile": "^3.0.0",
     "json-buffer": "^2.0.11",
-    "lodash": "^3.10.1",
+    "lodash": "^4.0.0",
     "mime-types": "^2.1.9",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",

@@ -273,7 +273,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
 filetree.cp = function cp(src, dst, cb) {
   lookAway();
   utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
-    dirs[path.dirname(dst)].files[path.basename(dst)] = _.clone(dirs[path.dirname(src)].files[path.basename(src)], true);
+    dirs[path.dirname(dst)].files[path.basename(dst)] = _.cloneDeep(dirs[path.dirname(src)].files[path.basename(src)]);
     dirs[path.dirname(dst)].files[path.basename(dst)].mtime = Date.now();
     update(path.dirname(dst));
     if (cb) cb();
@@ -284,12 +284,12 @@ filetree.cpdir = function cpdir(src, dst, cb) {
   lookAway();
   utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
     // Basedir
-    dirs[dst] = _.clone(dirs[src], true);
+    dirs[dst] = _.cloneDeep(dirs[src]);
     dirs[dst].mtime = Date.now();
     // Subdirs
     Object.keys(dirs).forEach(function(dir) {
       if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.clone(dirs[dir], true);
+        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.cloneDeep(dirs[dir]);
         dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")].mtime = Date.now();
       }
     });
