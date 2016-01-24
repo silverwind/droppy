@@ -57,6 +57,9 @@
   $.fn.register = function(events, callback) {
     return this.off(events).on(events, callback);
   };
+  $.fn.registerOne = function(events, callback) {
+    return this.off(events).one(events, callback);
+  };
 
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
   $.fn.end = function(callback) {
@@ -223,6 +226,7 @@
     bindDropEvents(view);
     bindHoverEvents(view);
     allowDrop(view);
+    checkClipboard();
     return getView(vId);
   }
 
@@ -1233,15 +1237,15 @@
         $(this).removeClass("active");
       });
       toggleCatcher(true);
-      dropSelect.children(".movefile").off("click").one("click", function() {
+      dropSelect.children(".movefile").registerOne("click", function() {
         sendDrop(view, "cut", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".copyfile").off("click").one("click", function() {
+      dropSelect.children(".copyfile").registerOne("click", function() {
         sendDrop(view, "copy", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".viewfile").off("click").one("click", function() {
+      dropSelect.children(".viewfile").registerOne("click", function() {
         updateLocation(view, src);
         toggleCatcher(false);
       });
@@ -1422,25 +1426,9 @@
 
     // Copy/cut a file/folder
     $("#entry-menu .copy, #entry-menu .cut").register("click", function(event) {
-      var entry = $("#entry-menu").data("target");
-
       toggleCatcher(false);
-      droppy.clipboard = {type: $(this).attr("class"), src: entry.data("id")};
-      $(".view").each(function() {
-        var view = $(this);
-        view.find(".paste-button .filename").text(basename(droppy.clipboard.src));
-        view.find(".paste-button").addClass("in").one("click", function(event) {
-          event.stopPropagation();
-          if (droppy.socketWait) return;
-          droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
-          showSpinner(view);
-          sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
-          droppy.clipboard = null;
-          toggleCatcher(false);
-          $(".paste-button").removeClass("in");
-        });
-        $(".paste-button").setTransitionClass("in");
-      });
+      droppy.clipboard = {type: $(this).attr("class"), src: $("#entry-menu").data("target").data("id")};
+      checkClipboard();
       event.stopPropagation();
     });
 
@@ -1454,6 +1442,27 @@
       showSpinner(entry.parents(".view"));
       sendMessage(null, "DELETE_FILE", entry.data("id"));
     });
+  }
+
+  // Check if there's something in the clipboard
+  function checkClipboard() {
+    if (droppy.clipboard) {
+      $(".view").each(function() {
+        var view = $(this), button = view.find(".paste-button");
+        button.addClass("in").registerOne("click", function(event) {
+          event.stopPropagation();
+          if (droppy.socketWait) return;
+          droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
+          showSpinner(view);
+          sendMessage(view[0].vId, "CLIPBOARD", droppy.clipboard);
+          droppy.clipboard = null;
+          toggleCatcher(false);
+          $(".paste-button").removeClass("in");
+        }).setTransitionClass("in").find(".filename").text(basename(droppy.clipboard.src));
+      });
+    } else {
+      $(".paste-button").removeClass("in");
+    }
   }
 
   function showEntryMenu(entry, x, y) {
