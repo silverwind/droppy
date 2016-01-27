@@ -681,7 +681,10 @@
   //  Upload functions
   // ============================================================================
   function upload(view, fd, files) {
-    if (!files.length) return;
+    if (!files || !files.length) {
+      // Likely a unsupported browser like IE which does not support promises
+      return showError(view, "Unable to upload. Is your browser up to date?");
+    }
 
     // Create the XHR2 and bind the progress events
     var xhr = new XMLHttpRequest();
