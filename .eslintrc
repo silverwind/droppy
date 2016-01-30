@@ -1,3 +1,5 @@
+# https://github.com/eslint/eslint/blob/master/docs/rules/README.md
+
 rules:
   accessor-pairs:              [2]
   arrow-body-style:            [2, "as-needed"]
