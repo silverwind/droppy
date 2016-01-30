@@ -1,4 +1,4 @@
-FROM mhart/alpine-node
+FROM mhart/alpine-node:latest
 
 # Create app directory
 RUN mkdir /droppy
