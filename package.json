@@ -11,8 +11,7 @@
     "ZombieHippie <cole@zombiehippie.com>"
   ],
   "scripts": {
-    "start": "node droppy.js start",
-    "prepublish": "node droppy.js build"
+    "start": "node droppy.js start"
   },
   "dependencies": {
     "async": "^1.5.2",
