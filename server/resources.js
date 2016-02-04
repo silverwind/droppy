@@ -11,7 +11,6 @@ var mime         = require("mime-types").lookup;
 var mkdirp       = require("mkdirp");
 var path         = require("path");
 var vm           = require("vm");
-var zopfli       = require("node-zopfli");
 
 var log          = require("./log");
 var paths        = require("./paths.js").get();
@@ -69,7 +68,7 @@ var opts = {
   }
 };
 
-var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates;
+var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates, zopfli;
 try {
   autoprefixer = require("autoprefixer");
   cheerio      = require("cheerio");
@@ -78,6 +77,7 @@ try {
   uglify       = require("uglify-js");
   htmlMinifier = require("html-minifier");
   templates    = require("./templates.js");
+  zopfli       = require("node-zopfli");
   cleanCSS = new cleanCSS(opts.cleanCSS);
 } catch (e) {}
 
