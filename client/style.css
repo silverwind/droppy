@@ -19,6 +19,8 @@ body, div, a, header, input, label, li, nav, p, section, span, ul, figure, figca
   border: 0;
 }
 
+svg { fill: currentColor }
+button { color: inherit }
 li { list-style: none }
 a  { text-decoration: none; background: transparent }
 :focus, a:active, a:hover { outline: none }
@@ -104,7 +106,6 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width: 750px) { .button span { display: none } }
 
 .button svg {
-  fill: #888;
   height: .8rem;
   width: .8rem;
   margin-right: .2rem;
@@ -126,7 +127,6 @@ input::-webkit-input-placeholder { color: #999 }
 
 .button.disabled       { color: #444 !important; cursor: not-allowed !important }
 .button.disabled:hover { color: #444 !important; background: transparent !important;  }
-.button.disabled svg   { fill:  #444 !important }
 
 #view-container {
   flex: 1 1;
@@ -229,7 +229,6 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .path .home {
-  fill: #ccc;
   height: .8rem;
   width: .8rem;
   position: relative;
@@ -301,7 +300,6 @@ input::-webkit-input-placeholder { color: #999 }
 }
 
 .paste-button svg.paste {
-  fill: #ccc;
   display: inline-block;
   vertical-align: middle;
   position: relative;
@@ -348,7 +346,6 @@ input::-webkit-input-placeholder { color: #999 }
   width: .5em;
   margin-left: .25em;
   transition: all .3s ease;
-  fill: #666;
   z-index: 2;
   top: -.1em;
   left: -.3em;
@@ -356,10 +353,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .file-header .down .triangle { transform: rotate(90deg);  top: -.15em }
 .file-header .up   .triangle { transform: rotate(270deg); top: -.05em }
-
 .file-header .active  { color: #000 }
-.file-header .active .triangle { fill: #000 }
-
 .file-header, .data-row { padding: 0 .5em }
 
 .header-name, .entry-link, .inline-namer {
@@ -575,11 +569,6 @@ html:not(.mobile) #entry-menu a.active {
   color: #fff;
 }
 
-html:not(.mobile) #entry-menu a:hover svg,
-html:not(.mobile) #entry-menu a.active svg {
-  fill: #fff;
-}
-
 #entry-menu a {
   padding: .25em .35em;
   color: #333;
@@ -590,7 +579,6 @@ html:not(.mobile) #entry-menu a.active svg {
   height: 1em;
   width: 1em;
   margin-right: .25em;
-  fill: #333;
   float: left;
 }
 
@@ -696,7 +684,6 @@ html:not(.mobile) #entry-menu a.active svg {
   background: transparent;
 }
 .fs svg {
-  fill: #aaa;
   height: 1.25em;
   width: 1.25em;
   position: relative;
@@ -866,7 +853,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .upload-info {
   background: #181818;
-  color: #999;
+  color: #aaa;
   transition: flex-basis .15s ease;
   width: 100%;
   position: relative;
@@ -944,7 +931,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-info svg {
-  fill: #ccc;
   height: 1em;
   width: 1em;
   vertical-align: middle;
@@ -1122,7 +1108,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 #about-fork .github {
-  fill: #333;
   display: inline-block;
   vertical-align: middle;
   height: 1em;
@@ -1457,7 +1442,6 @@ html:not(.mobile) .vjs-big-play-button {
 .link-options svg {
   height: 1em;
   width: 1em;
-  fill: #fff;
   margin: 0 .25em 0 .5em;
   transition: opacity .2s ease;
 }
