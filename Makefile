@@ -22,6 +22,9 @@ update:
 	rm -rf node_modules
 	npm install
 
+	# ensure cache is rebuilt
+	touch client/client.js
+
 deploy:
 	if git ls-remote --exit-code demo &>/dev/null; then git push -f demo master; fi
 	if git ls-remote --exit-code droppy &>/dev/null; then git push -f droppy master; fi

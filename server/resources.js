@@ -1,4 +1,3 @@
-/* eslint-disable space-before-keywords  */
 "use strict";
 
 var resources = {}, svgData = {}, minify, $;
@@ -20,65 +19,56 @@ var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 var cachePath    = path.join(paths.mod, "dist", "cache.json");
 
 var opts = {
-  get uglify() {
-    return {
-      fromString: true,
-      mangle: true,
-      compress: {
-        unsafe: true,
-        screw_ie8: true,
-        sequences: true,
-        dead_code: true,
-        conditionals: true,
-        booleans: true,
-        unused: true,
-        if_return: true,
-        join_vars: true,
-      },
-    };
+  uglify: {
+    fromString: true,
+    mangle: true,
+    compress: {
+      unsafe: true,
+      screw_ie8: true,
+      sequences: true,
+      dead_code: true,
+      conditionals: true,
+      booleans: true,
+      unused: true,
+      if_return: true,
+      join_vars: true,
+    },
   },
-  get cleanCSS() {
-    return {
+  cleanCSS: {
+    keepSpecialComments : 0,
+    roundingPrecision: 3,
+    rebase: false,
+  },
+  autoprefixer: {
+    browsers: ["last 2 versions"],
+    cascade: false,
+  },
+  htmlMinifier: {
+    removeComments: true,
+    collapseWhitespace: true,
+    collapseBooleanAttributes: true,
+    removeAttributeQuotes: true,
+    removeOptionalTags: true,
+    removeRedundantAttributes: true,
+    caseSensitive: true,
+    minifyCSS: {
       keepSpecialComments : 0,
       roundingPrecision: 3,
       rebase: false,
-    };
+    },
   },
-  get autoprefixer() {
-    return {
-      browsers: ["last 2 versions"],
-      cascade: false,
-    };
-  },
-  get htmlMinifier() {
-    return {
-      removeComments: true,
-      collapseWhitespace: true,
-      collapseBooleanAttributes: true,
-      removeAttributeQuotes: true,
-      removeOptionalTags: true,
-      removeRedundantAttributes: true,
-      caseSensitive: true,
-      minifyCSS: {
-        keepSpecialComments : 0,
-        roundingPrecision: 3,
-        rebase: false,
-      },
-    };
-  }
 };
 
 var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates, zopfli;
 try {
   autoprefixer = require("autoprefixer");
   cheerio      = require("cheerio");
-  cleanCSS     = require("clean-css");
+  cleanCSS     = new (require("clean-css"))(opts.cleanCSS);
   postcss      = require("postcss");
   uglify       = require("uglify-js");
   htmlMinifier = require("html-minifier");
   templates    = require("./templates.js");
   zopfli       = require("node-zopfli");
-  cleanCSS = new cleanCSS(opts.cleanCSS);
 } catch (e) {}
 
 resources.files = {
