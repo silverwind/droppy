@@ -304,8 +304,6 @@ input::-webkit-input-placeholder { color: #999 }
   vertical-align: middle;
   position: relative;
   top: -.05em;
-  height: 1em;
-  width: 1em;
   margin-right: .25em;
 }
 .paste-button:hover svg.triangle {fill: #25a }
@@ -384,7 +382,6 @@ input::-webkit-input-placeholder { color: #999 }
 .line-buttons svg {
   cursor: pointer;
   fill: #555;
-  width: 1em; height: 1em;
   padding: 0 .1em;
   position: relative;
   top: .2em;
@@ -576,8 +573,6 @@ html:not(.mobile) #entry-menu a.active {
 }
 
 #entry-menu svg {
-  height: 1em;
-  width: 1em;
   margin-right: .25em;
   float: left;
 }
@@ -805,8 +800,6 @@ html:not(.mobile) .vjs-big-play-button {
 
 .sidebar svg {
   fill: rgba(128,128,128,.6);
-  height: 1em;
-  width: 1em;
   margin-left: .75em;
 }
 
@@ -931,8 +924,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-info svg {
-  height: 1em;
-  width: 1em;
   vertical-align: middle;
   transition: fill .15s ease;
   position: relative;
@@ -1214,8 +1205,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .list-user svg {
-  height: 1em;
-  width: 1em;
   fill: #bbb;
 }
 
@@ -1342,10 +1331,9 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .remember svg, .submit svg {
-  height: 1em;
   position: relative;
   top: .15rem;
-  width: 1.2em;
+  margin: 0 .1em;
 }
 
 .remember:hover, .remember:focus { color: #222 }
@@ -1440,8 +1428,6 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box.error .link-options { display: none }
 
 .link-options svg {
-  height: 1em;
-  width: 1em;
   margin: 0 .25em 0 .5em;
   transition: opacity .2s ease;
 }
