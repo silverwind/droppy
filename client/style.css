@@ -114,7 +114,6 @@ input::-webkit-input-placeholder { color: #999 }
 }
 @media (max-width:  750px) { .button svg { margin-right: 0 } }
 
-
 #upload-file-button:hover svg        { fill: rgba(102, 166, 255, 1) }
 #upload-folder-button:hover svg      { fill: rgba(255, 102, 252, 1) }
 #create-file-button:hover svg        { fill: rgba(102, 255, 235, 1) }
@@ -126,7 +125,8 @@ input::-webkit-input-placeholder { color: #999 }
 #split-button:hover svg.split .right { fill: rgba(102, 166, 255, 1) }
 
 .button.disabled       { color: #444 !important; cursor: not-allowed !important }
-.button.disabled:hover { color: #444 !important; background: transparent !important;  }
+.button.disabled:hover { color: #444 !important; background: transparent !important }
+.button.disabled:hover svg { fill: #444 !important }
 
 #view-container {
   flex: 1 1;
