@@ -1102,7 +1102,7 @@ html:not(.mobile) .vjs-big-play-button {
   display: inline-block;
   vertical-align: middle;
   height: 1em;
-  margin-bottom: 0.25em;
+  margin: 0 .25em .25em 0;
 }
 
 #about-fork:hover, #about-fork:hover svg, #about-copy a:hover {
