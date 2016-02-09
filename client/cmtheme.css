@@ -27,7 +27,7 @@
 .cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff }
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
 
-.cm-s-droppy .cm-searching { background: #ffff88; color: #000 }
+.cm-s-droppy .cm-searching { background: #ff8; color: #000 }
 
 .cm-s-droppy .CodeMirror-focused .CodeMirror-selected, .cm-s-droppy .CodeMirror-selected,
 .cm-s-droppy .CodeMirror-activeline-background { background: #262626 !important }

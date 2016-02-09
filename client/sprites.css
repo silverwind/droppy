@@ -19,7 +19,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-.sprite {background-image: url(?!/sprites.png)}
+.sprite {background-image: url("?!/sprites.png")}
 .sprite-7zip {background-position: 0 0}
 .sprite-ace {background-position: -24px 0}
 .sprite-archive {background-position: -48px 0}

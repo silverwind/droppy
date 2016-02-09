@@ -1,5 +1,6 @@
 lint:
 	eslint --ignore-pattern *.min.js server client *.js
+	stylelint client/*.css
 
 build:
 	node droppy.js build
