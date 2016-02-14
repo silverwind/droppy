@@ -1,5 +1,5 @@
 /* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, fileExtension, Handlebars, Uppie, screenfull */
-(function($, window, document) {
+(function($) {
   "use strict";
   var droppy = {};
 
@@ -35,14 +35,6 @@
     webp: document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0,
     notification: "Notification" in window,
     mobile: (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent),
-  };
-
-  // Async detect for FormData in workers
-  createWorker(function() {
-    postMessage(typeof FormData === "function");
-    close();
-  }).onmessage = function(e) {
-    droppy.detects.canUseWorker = e.data;
   };
 // ============================================================================
 //  Set up a few more things
@@ -124,9 +116,7 @@
   // Listen for the animation event for our pseudo-animation
   document.addEventListener("animationstart", function(event) {
     if (event.animationName === "nodeInserted") {
-      var target = $(event.target);
-      var newClass = target.data("newclass");
-      var oldClass = target.data("oldclass");
+      var target = $(event.target), newClass = target.data("newclass"), oldClass = target.data("oldclass");
       // Clean up our data attribute and remove the animation
       target.removeData("newclass").css("animation", "");
 
@@ -153,8 +143,7 @@
 // ============================================================================
 //  localStorage wrapper functions
 // ============================================================================
-  var prefs, doSave;
-  var defaults = {
+  var prefs, doSave, defaults = {
     volume: 0.5,
     theme: "droppy",
     editorFontSize: droppy.detects.mobile ? 12 : 16,
@@ -244,10 +233,8 @@
 // ============================================================================
 //  WebSocket handling
 // ============================================================================
-  var retries = 5, retryTimeout = 4000;
-
   function init() {
-    retries = 5; // reset retries on connection loss
+    droppy.wsRetries = 5; // reset retries on connection loss
     // Request settings when droppy.debug is uninitialized, could use another variable too.
     if (droppy.debug === null)
       sendMessage(null, "REQUEST_SETTINGS");
@@ -279,7 +266,6 @@
         });
       }
     };
-
     // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
     droppy.socket.onclose = function(event) {
       if (droppy.get("hasLoggedOut") || event.code === 4000) return;
@@ -287,20 +273,19 @@
         droppy.token = null;
         openSocket();
       } else if (event.code >= 1001 && event.code < 3999) {
-        if (retries > 0) {
+        if (droppy.wsRetries > 0) {
           // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
           // TODO: Indicate connection drop in the UI, especially on close code 1006
           setTimeout(function() {
             openSocket();
-            retries--;
-          }, retryTimeout);
+            droppy.wsRetries--;
+          }, droppy.wsRetryTimeout);
         }
       } else if (droppy.reopen) {
         droppy.reopen = false;
         openSocket();
       }
     };
-
     droppy.socket.onmessage = function(event) {
       var view, msg, vId;
       droppy.socketWait = false;
@@ -464,16 +449,13 @@
 // ============================================================================
   function initAuthPage(firstrun) {
     var form = $("#form");
-
     $("#user, #pass, .submit").register("keydown", function(event) {
       if (event.keyCode === 13) form.submit();
     });
-
     $(".remember").register("click", function() {
       $(".remember").toggleClass("checked");
       $("[name=remember]").attr("value", $(".remember").hasClass("checked") ? "1" : "");
     });
-
     form.register("submit", function(e) {
       e.preventDefault();
       var xhr = new XMLHttpRequest();
@@ -554,8 +536,7 @@
       $(".full svg, .fs svg").replaceWith(droppy.svg[screenfull.isFullscreen ? "unfullscreen" : "fullscreen"]);
     });
 
-    var fileInput = $("#file");
-    var uppie = new Uppie();
+    var fileInput = $("#file"), uppie = new Uppie();
     uppie(fileInput[0], function(event, fd, files) {
       event.preventDefault();
       event.stopPropagation();
@@ -711,8 +692,8 @@
       uploadCancel(view);
     });
 
-    view[0].isUploading   = true;
-    view[0].uploadStart   = Date.now();
+    view[0].isUploading = true;
+    view[0].uploadStart = Date.now();
     view.find(".upload-title").text("Uploading - 0.0%");
 
     if (files.length) {
@@ -727,7 +708,6 @@
 
   function uploadInit(view) {
     var uploadInfo = Handlebars.templates["upload-info"]();
-
     if (!view.find(".upload-info").length) view.append(uploadInfo);
     view.find(".upload-info").setTransitionClass("in");
     view.find(".upload-bar").css("width", "0%");
@@ -851,9 +831,7 @@
       }
     }
     function stopEdit(view) {
-      view.find(".inline-namer").remove();
-      view.find(".data-row.new-file").remove();
-      view.find(".data-row.new-folder").remove();
+      view.find(".inline-namer, .data-row.new-file, .data-row.new-folder").remove();
       entry.removeClass("editing invalid");
       if (wasEmpty) view.find(".content").html('<div class="empty">' +
         droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
@@ -861,8 +839,7 @@
   }
 
   function toggleCatcher(show) {
-    var cc     = $("#click-catcher");
-    var modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
+    var cc = $("#click-catcher"), modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
     if (show === undefined)
       show = modals.some(function(selector) { return $(selector).hasClass("in"); });
@@ -1023,8 +1000,7 @@
     }
 
     function removePart(i) {
-      var toRemove = view.find(".path li").slice(i);
-      toRemove.setTransitionClass("in", "gone").end(function() {
+      view.find(".path li").slice(i).setTransitionClass("in", "gone").end(function() {
         $(this).remove();
       });
     }
@@ -1068,7 +1044,7 @@
         size      : size,
         prettySize: formatBytes(size),
         id        : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
-        sprite    : getSpriteClass(/[^.]*$/.exec(name)[0])
+        sprite    : "sprite sprite-" + getSpriteClass(/[^.]*$/.exec(name)[0])
       };
 
       if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
@@ -1211,20 +1187,17 @@
   }
 
   function handleDrop(view, event, src, dst, spinner) {
-    var dropSelect = $("#drop-select");
+    var dropSelect = $("#drop-select"), dragAction = view[0].dragAction;
     droppy.dragTimer.clear();
-    $(".dropzone").removeClass("in");
-
-    var dragAction = view[0].dragAction;
     delete view[0].dragAction;
+    $(".dropzone").removeClass("in");
 
     if (dragAction === "copy" || event.ctrlKey || event.metaKey || event.altKey) {
       sendDrop(view, "copy", src, dst, spinner);
     } else if (dragAction === "cut" || event.shiftKey) {
       sendDrop(view, "cut", src, dst, spinner);
     } else {
-      var x = event.originalEvent.clientX;
-      var y = event.originalEvent.clientY;
+      var x = event.originalEvent.clientX, y = event.originalEvent.clientY;
 
       // Keep the drop-select in view
       var limit = dropSelect[0].offsetWidth / 2 - 20, left;
@@ -1893,8 +1866,7 @@
   function showPrefs() {
     var box = $("#prefs-box");
     box.empty().append(function() {
-      var i;
-      var opts = [
+      var i, opts = [
         {name: "theme", label: "Editor theme"},
         {name: "editorFontSize", label: "Editor font size"},
         {name: "indentWithTabs", label: "Editor indent type"},
@@ -2225,39 +2197,33 @@
   }
 
   function modeFromShebang(text) {
-    var line = (text || "").split(/\n/)[0].trim();
-
-    // remove arguments like `-c`
-    line = line.split(" ").filter(function(e) {
-      return !/^-/.test(e);
+    // extract first line, trim and remove flags
+    text = (text || "").split(/\n/)[0].trim().split(" ").filter(function(e) {
+      return !/^-+/.test(e);
     }).join(" ");
 
     // shell scripts
-    if (/^#!.*\b(ba|c|da|k|fi|tc|z)?sh$/.test(line)) return "shell";
+    if (/^#!.*\b(ba|c|da|k|fi|tc|z)?sh$/.test(text)) return "shell";
 
     // map binary name to CodeMirror mode
-    var mode;
-    var exes = {
+    var mode, exes = {
       dart: "dart", lua: "lua", node: "javascript", perl: "perl", php: "php",
       python: "python", ruby: "ruby", swift: "swift", tclsh: "tcl"
     };
     Object.keys(exes).some(function(exe) {
-      if (new RegExp("^#!.*\\b" + exe + "$").test(line)) return (mode = exes[exe]);
+      if (new RegExp("^#!.*\\b" + exe + "$").test(text)) return (mode = exes[exe]);
     });
-
     return mode;
   }
 
   // draggabilly
   function makeMediaDraggable(el, isVideo) {
     if ($(el).hasClass("draggable")) return;
-    var opts = isVideo ? {axis: "x", handle: "video"} : {axis: "x"};
     $(el).attr("class", "media-container draggable");
-    var instance = new Draggabilly(el, opts);
+    var instance = new Draggabilly(el, isVideo ? {axis: "x", handle: "video"} : {axis: "x"});
     $(el).on("dragEnd", function() {
       var view      = $(instance.element).parents(".view");
       var threshold = droppy.detects.mobile ? 0.15 : 0.075;
-
       if ((Math.abs(instance.position.x) / instance.element.clientWidth) > threshold) {
         swapMedia(view, instance.position.x > 0 ? "left" : "right");
       } else {
@@ -2276,12 +2242,12 @@
           el.classList.add("video-js", "vjs-default-skin");
         videojs.options.flash.swf = "?!/lib/vjs.swf";
         videojs(el, {
-          controls : true,
-          autoplay : !droppy.detects.mobile,
-          preload  : "auto",
-          loop     : "loop",
-          width    : $(el).parents(".media-container")[0].clientWidth,
-          heigth   : $(el).parents(".media-container")[0].clientHeight
+          controls: true,
+          autoplay: !droppy.detects.mobile,
+          preload : "auto",
+          loop    : "loop",
+          width   : $(el).parents(".media-container")[0].clientWidth,
+          heigth  : $(el).parents(".media-container")[0].clientHeight
         }, cb).on("ready", function() {
           this.volume(droppy.get("volume"));
         }).on("volumechange", function() {
@@ -2316,6 +2282,8 @@
     droppy.socketWait = null;
     droppy.token = null;
     droppy.views = [];
+    droppy.wsRetries = 5;
+    droppy.wsRetryTimeout = 4000;
 
     droppy.prefixes = {
       directory: ["directory", "webkitdirectory"]
@@ -2667,8 +2635,7 @@
     if (!threshold) threshold = 250;
     var last, deferTimer;
     return function() {
-      var now = Date.now(),
-        args = arguments;
+      var now = Date.now(), args = arguments;
       if (last && now < last + threshold) {
         clearTimeout(deferTimer);
         deferTimer = setTimeout(function() {
@@ -2684,11 +2651,9 @@
 
   function getSpriteClass(extension) {
     for (var type in droppy.iconMap) {
-      if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) {
-        return "sprite sprite-" + type;
-      }
+      if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) return type;
     }
-    return "sprite sprite-bin";
+    return "bin";
   }
 
   function formatBytes(num) {
@@ -2731,10 +2696,6 @@
     return 0;
   }
 
-  function createWorker(fn) {
-    return new Worker(URL.createObjectURL(new Blob(["(", String(fn), ")()"])));
-  }
-
   function removeExt(filename) {
     return filename.substring(0, filename.lastIndexOf("."));
   }
@@ -2773,4 +2734,4 @@
   function normalize(str) {
     return String.prototype.normalize ? str.normalize() : str;
   }
-})(jQuery, window, document);
+})(jQuery);

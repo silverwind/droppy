@@ -28,7 +28,7 @@ rules:
   guard-for-in:                  [2]
   handle-callback-err:           [2, ^(err|error)$]
   id-blacklist:                  [0]
-  indent:                        [2, 2]
+  indent:                        [2, 2, {VariableDeclarator: 0}]
   jsx-quotes:                    [0]
   key-spacing:                   [0]
   keyword-spacing:               [2]
