@@ -10,6 +10,7 @@ var mime         = require("mime-types").lookup;
 var mkdirp       = require("mkdirp");
 var path         = require("path");
 var vm           = require("vm");
+var zlib         = require("zlib");
 
 var log          = require("./log");
 var paths        = require("./paths.js").get();
@@ -258,7 +259,8 @@ function gzipMap(map, callback) {
 }
 
 function gzip(data, callback) {
-  zopfli.gzip(data, function(err, gzipped) {
+  var lib = minify ? zopfli : zlib;
+  lib.gzip(data, function(err, gzipped) {
     if (err) return callback(err);
     callback(null, gzipped);
   });
