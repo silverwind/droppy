@@ -1,5 +1,5 @@
 .tip {
-  position: relative
+  position: relative;
 }
 
 .tip:after {
@@ -27,6 +27,10 @@
   pointer-events: none;
   content: "";
   border: 5px solid transparent;
+}
+
+.tip[aria-label='']:before, .tip[aria-label='']:after {
+  display: none !important;
 }
 
 .tip:hover:before, .tip:hover:after, .tip:active:before, .tip:active:after,
