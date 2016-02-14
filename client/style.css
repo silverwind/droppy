@@ -726,11 +726,11 @@ html:not(.mobile) .vjs-big-play-button {
   font-family: Arial,Helvetica,sans-serif !important;
 }
 
-.vjs-default-skin .vjs-slider {
-  background: #555 !important;
+.vjs-slider {
+  background: #666 !important;
 }
 
-.vjs-default-skin .vjs-control-bar {
+.vjs-control-bar {
   background: rgba(16,16,16,.8) !important;
 }
 
