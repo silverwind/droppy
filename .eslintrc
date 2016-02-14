@@ -114,7 +114,7 @@ rules:
   no-restricted-imports:         [0]
   no-restricted-modules:         [2, domain, freelist, smalloc, sys]
   no-restricted-syntax:          [2, WithStatement]
-  no-return-assign:              [2, always]
+  no-return-assign:              [2, except-parens]
   no-script-url:                 [2]
   no-self-assign:                [2]
   no-self-compare:               [2]

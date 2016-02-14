@@ -1779,8 +1779,14 @@
         });
 
         if (!CodeMirror.autoLoadMode) initModeLoad();
-        var modeInfo = CodeMirror.findModeByFileName(filename);
-        var mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
+
+        var mode, fileMode = modeFromShebang(data);
+        if (fileMode) {
+          mode = fileMode;
+        } else {
+          var modeInfo = CodeMirror.findModeByFileName(filename);
+          mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
+        }
         if (mode !== "plain") CodeMirror.autoLoadMode(editor, mode);
         editor.setOption("mode", mode);
         view.find(".mode-select").val(mode);
@@ -2216,6 +2222,30 @@
         });
       }
     };
+  }
+
+  function modeFromShebang(text) {
+    var line = (text || "").split(/\n/)[0].trim();
+
+    // remove arguments like `-c`
+    line = line.split(" ").filter(function(e) {
+      return !/^-/.test(e);
+    }).join(" ");
+
+    // shell scripts
+    if (/^#!.*\b(ba|c|da|k|fi|tc|z)?sh$/.test(line)) return "shell";
+
+    // map binary name to CodeMirror mode
+    var mode;
+    var exes = {
+      dart: "dart", lua: "lua", node: "javascript", perl: "perl", php: "php",
+      python: "python", ruby: "ruby", swift: "swift", tclsh: "tcl"
+    };
+    Object.keys(exes).some(function(exe) {
+      if (new RegExp("^#!.*\\b" + exe + "$").test(line)) return (mode = exes[exe]);
+    });
+
+    return mode;
   }
 
   // draggabilly
