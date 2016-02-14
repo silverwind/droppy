@@ -642,8 +642,6 @@ html:not(.mobile) #entry-menu a.active {
   max-width: 50vw;
 }
 
-.vjs-fullscreen video { max-width: 100% !important; }
-
 .content:fullscreen { top: 0; height: 100% }
 .content:fullscreen .media-container img,
 .content:fullscreen .media-container video {
@@ -694,8 +692,16 @@ html:not(.mobile) #entry-menu a.active {
 .type-video .fs, .type-video .meta { display: none }
 /* ================================= Video.js ================================= */
 
+html:not(.mobile) .vjs-big-play-button {
+  display: none !important;
+}
+
 .media-container video:not(.vjs-tech) {
   display: none;
+}
+
+.vjs-fullscreen video {
+  max-width: 100% !important;
 }
 
 .video-js {
@@ -716,25 +722,16 @@ html:not(.mobile) #entry-menu a.active {
   border: none !important;
 }
 
-.vjs-progress-control, .vjs-default-skin:hover .vjs-progress-control {
-  font-size: 1.2em !important;
+.vjs-mouse-display, .vjs-play-progress:after {
+  font-family: Arial,Helvetica,sans-serif !important;
 }
 
 .vjs-default-skin .vjs-slider {
-  background: #333 !important;
-}
-
-.vjs-default-skin .vjs-load-progress {
-  background: rgba(160, 160, 160, .5) !important;
+  background: #555 !important;
 }
 
 .vjs-default-skin .vjs-control-bar {
-  background: rgba(16,16,16,.9) !important;
-}
-
-/* Non-mobile supports autoplay */
-html:not(.mobile) .vjs-big-play-button {
-  display: none !important;
+  background: rgba(16,16,16,.8) !important;
 }
 
 /* ============================ Document  ============================ */
