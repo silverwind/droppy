@@ -36,7 +36,7 @@
     "node-schedule": "^1.0.0",
     "readdirp": "^2.0.0",
     "request": "^2.69.0",
-    "rimraf": "^2.5.1",
+    "rimraf": "^2.5.2",
     "sanitize-filename": "^1.5.3",
     "untildify": "^2.1.0",
     "url-format-lax": "^1.0.0",
@@ -46,7 +46,7 @@
     "yazl": "^2.3.0"
   },
   "devDependencies": {
-    "autoprefixer": "^6.3.1",
+    "autoprefixer": "^6.3.3",
     "cheerio": "^0.20.0",
     "clean-css": "^3.4.9",
     "codemirror": "^5.11.0",
@@ -56,10 +56,10 @@
     "jquery": "^2.2.0",
     "mousetrap": "^1.5.3",
     "node-zopfli": "^1.4.0",
-    "postcss": "^5.0.14",
+    "postcss": "^5.0.16",
     "screenfull": "^3.0.0",
     "uglify-js": "^2.6.1",
-    "uppie": "^0.9.1",
+    "uppie": "^0.9.2",
     "video.js": "^5.6.0"
   },
   "files": [
