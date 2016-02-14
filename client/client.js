@@ -2318,8 +2318,7 @@
     droppy.views = [];
 
     droppy.prefixes = {
-      directory         : ["directory", "webkitdirectory"],
-      getAsEntry        : ["getAsEntry", "webkitGetAsEntry"],
+      directory: ["directory", "webkitdirectory"]
     };
 
     // Extension to icon mappings
