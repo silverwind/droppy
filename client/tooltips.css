@@ -29,7 +29,7 @@
   border: 5px solid transparent;
 }
 
-.tip[aria-label='']:before, .tip[aria-label='']:after {
+.tip[aria-label=""]:before, .tip[aria-label=""]:after {
   display: none !important;
 }
 
