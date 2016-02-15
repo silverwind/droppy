@@ -1474,8 +1474,8 @@ html:not(.mobile) #drop-select span.active {
   background: #05a; color: #fff;
 }
 
-#drop-select .movefile:hover { border-radius: 6px 0 0 6px }
-#drop-select .viewfile:hover { border-radius: 0 6px 6px 0 }
+.movefile:hover, .movefile.active { border-radius: 6px 0 0 6px }
+.viewfile:hover, .viewfile.active { border-radius: 0 6px 6px 0 }
 
 @media (max-width: 639px) {
   #drop-select {
