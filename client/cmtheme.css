@@ -23,8 +23,7 @@
 .cm-s-droppy .CodeMirror-guttermarker             { color: #aaa }
 .cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
 .cm-s-droppy .CodeMirror-lines .CodeMirror-cursor { border-left: 1px solid #ccc }
-.cm-s-droppy .CodeMirror-activeline .CodeMirror-gutter-wrapper { background: #484848 }
-.cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff }
+.cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff; background: #444 }
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
 
 .cm-s-droppy .cm-searching { background: #ff8; color: #000 }
