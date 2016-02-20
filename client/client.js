@@ -727,7 +727,11 @@
   function uploadFinish(view, id) {
     view[0].isUploading = false;
     updateTitle(basename(view[0].currentFolder));
-    $(".upload-info[data-id=" + id + "]").remove();
+    setTimeout(function () {
+      $(".upload-info[data-id=" + id + "]").removeClass("in").transitionend(function () {
+        $(this).remove();
+      });
+    }, 250);
     showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
   }
 
