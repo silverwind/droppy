@@ -46,7 +46,11 @@ var opts = {
   },
   htmlMinifier: {
     removeComments: true,
+    removeCommentsFromCDATA: true,
+    removeCDATASectionsFromCDATA: true,
+    removeTagWhitespace: true,
     collapseWhitespace: true,
+    collapseInlineTagWhitespace: true,
     collapseBooleanAttributes: true,
     removeAttributeQuotes: true,
     removeOptionalTags: true,
