@@ -273,8 +273,8 @@ function setupSocket(server) {
           public        : config.public,
           engine        : [engine, process.version.substring(1)].join(" "),
           caseSensitive : process.platform !== "win32",
-          themes        : Object.keys(cache.themes).join("|"),
-          modes         : Object.keys(cache.modes).join("|"),
+          themes        : Object.keys(cache.themes).sort().join("|"),
+          modes         : Object.keys(cache.modes).sort().join("|"),
         }});
         break;
       case "REQUEST_UPDATE":
