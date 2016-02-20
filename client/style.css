@@ -866,10 +866,15 @@ html:not(.mobile) .vjs-big-play-button {
   z-index: 3;
 }
 
+.upload-percentage {
+  flex: 0 0 3em;
+  color: #bbb;
+  text-align: center;
+}
+
 .upload-title {
   flex: 1 1;
-  color: #eee;
-  padding-left: .25em;
+  color: #fff;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

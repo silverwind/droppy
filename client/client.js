@@ -53,8 +53,24 @@
     return this.off(events).one(events, callback);
   };
 
+  // Set a new class on an element, and make sure it is ready to be transitioned.
+  $.fn.transition = function(oldclass, newclass) {
+    if (typeof newclass === "undefined") {
+      newclass = oldclass;
+      oldclass = null;
+    }
+    // Add a pseudo-animation to the element. When the "animationstart" event
+    // is fired on the element, we know it is ready to be transitioned.
+    this.css("animation", "nodeInserted 0.001s");
+
+    // Set the new and oldclass as data attributes.
+    if (oldclass) this.data("oldclass", oldclass);
+    this.data("newclass", newclass);
+    return this;
+  };
+
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
-  $.fn.end = function(callback) {
+  $.fn.transitionend = function(callback) {
     var duration, called = false, el = this[0];
 
     function doCallback(event) {
@@ -94,22 +110,6 @@
       else
         elem.className = classes.join(" ");
     }
-    return this;
-  };
-
-  // Set a new class on an element, and make sure it is ready to be transitioned.
-  $.fn.setTransitionClass = function(oldclass, newclass) {
-    if (typeof newclass === "undefined") {
-      newclass = oldclass;
-      oldclass = null;
-    }
-    // Add a pseudo-animation to the element. When the "animationstart" event
-    // is fired on the element, we know it is ready to be transitioned.
-    this.css("animation", "nodeInserted 0.001s");
-
-    // Set the new and oldclass as data attributes.
-    if (oldclass) this.data("oldclass", oldclass);
-    this.data("newclass", newclass);
     return this;
   };
 
@@ -210,6 +210,7 @@
     getView(vId).remove();
     view.appendTo("#view-container");
     view[0].vId = vId;
+    view[0].uId = 0;
     droppy.views[vId] = view[0];
     if (dest) updateLocation(view, dest);
     bindDropEvents(view);
@@ -348,7 +349,7 @@
         file.removeClass("dirty").attr("style", "transition: background .2s ease;")
           .addClass(msg.status === 0 ? "saved" : "save-failed");
         setTimeout(function() {
-          file.removeClass("saved save-failed").end(function() {
+          file.removeClass("saved save-failed").transitionend(function() {
             $(this).attr("style", oldStyle);
             $(this).children("svg").removeAttr("style");
           });
@@ -541,8 +542,7 @@
       event.preventDefault();
       event.stopPropagation();
       var view = getActiveView();
-      uploadInit(view);
-      upload(view, fd, files);
+      upload(view, fd, files, view[0].uId += 1);
       fileInput.val("");
     });
 
@@ -637,7 +637,7 @@
         splitButton.attr("aria-label", "Split view in half").children("span").text("Split");
         replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
       }
-      first.end(function() {
+      first.transitionend(function() {
         droppy.views.forEach(function(view) {
           checkPathOverflow($(view));
         });
@@ -661,40 +661,40 @@
   // ============================================================================
   //  Upload functions
   // ============================================================================
-  function upload(view, fd, files) {
-    if (!files || !files.length) {
-      // Likely a unsupported browser like IE which does not support promises
+  function upload(view, formdata, files, id) {
+    if (!files || !files.length) // Likely a unsupported browser
       return showError(view, "Unable to upload. Is your browser up to date?");
-    }
+
+    var info = uploadInit(view, id, files.length === 1 ? files[0] : files.length + " files");
 
     // Create the XHR2 and bind the progress events
     var xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener("progress", function(event) { uploadProgress(view, event); });
-    xhr.upload.addEventListener("error", function(event) {
-      if (event && event.message) console.info(event.message);
-      showError(view, "An error occured during upload");
-      uploadCancel(view);
+    xhr.upload.addEventListener("progress", function(e) {
+      if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
+    });
+    xhr.upload.addEventListener("error", function(e) {
+      showError(view, "An error occured during upload" + e && e.message ? ": " + e.message : "");
+      uploadCancel(view, id);
     });
     xhr.addEventListener("readystatechange", function() {
       if (xhr.readyState !== 4) return;
       if (xhr.status === 200) {
-        uploadSuccess(view);
+        uploadSuccess(view, id);
       } else {
         if (xhr.status === 0) return; // cancelled by user
         showError(view, "Server responded with HTTP " + xhr.status);
-        uploadCancel(view);
+        uploadCancel(view, id);
       }
-      uploadFinish(view);
+      uploadFinish(view, id);
     });
 
-    $(".upload-cancel").register("click", function() {
+    info.find(".upload-cancel").register("click", function() {
       xhr.abort();
-      uploadCancel(view);
+      uploadCancel(view, id);
     });
 
     view[0].isUploading = true;
     view[0].uploadStart = Date.now();
-    view.find(".upload-title").text("Uploading - 0.0%");
 
     if (files.length) {
       xhr.open("POST", getRootPath() + "upload?" + $.param({
@@ -702,69 +702,54 @@
         to  : encodeURIComponent(view[0].currentFolder),
         r   : droppy.get("renameExistingOnUpload") && "1" || "0"
       }));
-      xhr.send(fd);
+      xhr.send(formdata);
     }
   }
 
-  function uploadInit(view) {
-    var uploadInfo = Handlebars.templates["upload-info"]();
-    if (!view.find(".upload-info").length) view.append(uploadInfo);
-    view.find(".upload-info").setTransitionClass("in");
-    view.find(".upload-bar").css("width", "0%");
-    view.find(".upload-time-left, .upload-speed > span").text("");
-    view.find(".upload-title").text("Reading files ...");
-    updateTitle("Reading - " + basename(view[0].currentFolder));
+  function uploadInit(view, id, name) {
+    updateTitle("Uploading - " + basename(view[0].currentFolder));
+    return $(Handlebars.templates["upload-info"]({id: id, name: name})).appendTo(view).transition("in");
   }
 
-  function uploadSuccess(view) {
-    view.find(".upload-bar").css("width", "100%");
-    view.find(".upload-title").text("Processing ...");
+  function uploadSuccess(view, id) {
+    var info = $(".upload-info[data-id=" + id + "]");
+    info.find(".upload-bar").css("width", "100%");
+    info.find(".upload-percentage").text("100%");
+    info.find(".upload-title").text("Processing ...");
     updateTitle("Processing - " + basename(view[0].currentFolder));
-    showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
   }
 
-  function uploadCancel(view) {
-    uploadFinish(view);
+  function uploadCancel(view, id) {
+    uploadFinish(view, id);
     sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
   }
 
-  function uploadFinish(view) {
+  function uploadFinish(view, id) {
     view[0].isUploading = false;
     updateTitle(basename(view[0].currentFolder));
-    setTimeout(function() {
-      view.find(".upload-info").removeClass("in");
-      view.find(".upload-bar").removeAttr("style");
-    }, 500);
+    $(".upload-info[data-id=" + id + "]").remove();
+    showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
   }
 
   var lastUpdate;
-  function uploadProgress(view, event) {
-    if (!event.lengthComputable) return;
-
+  function uploadProgress(view, id, sent, total) {
     // Update progress every 100ms at most
     if (!lastUpdate || (Date.now() - lastUpdate) >= 100) {
-      var sent     = event.loaded;
-      var total    = event.total;
+      var info     = $(".upload-info[data-id=" + id + "]");
       var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
       var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
       var elapsed, secs;
 
       speed = formatBytes(Math.round(speed / 1e3) * 1e3);
-
-      updateTitle(progress + " - " + basename(view[0].currentFolder));
-      view.find(".upload-bar").css("width", progress);
-      view.find(".upload-speed > span").text(speed + "/s");
-      view.find(".upload-title").text("Uploading - " + progress);
-
-      // Calculate estimated time left
       elapsed = Date.now() - view[0].uploadStart;
       secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
-      if (secs > 60)
-        view.find(".upload-time-left").text(Math.ceil(secs / 60) + " mins");
-      else
-        view.find(".upload-time-left").text(Math.ceil(secs) + " secs");
-
+      if (view.find(".upload-info").length === 1)
+        updateTitle(progress + " - " + basename(view[0].currentFolder));
+      info.find(".upload-bar").css("width", progress);
+      info.find(".upload-speed > span").text(speed + "/s");
+      info.find(".upload-percentage").text(progress);
+      info.find(".upload-time-left").text(secs > 60 ? Math.ceil(secs / 60) + " mins" : Math.ceil(secs) + " secs");
       lastUpdate = Date.now();
     }
   }
@@ -1000,13 +985,13 @@
     }
 
     function removePart(i) {
-      view.find(".path li").slice(i).setTransitionClass("in", "gone").end(function() {
+      view.find(".path li").slice(i).transition("in", "gone").transitionend(function() {
         $(this).remove();
       });
     }
 
     function finalize() {
-      view.find(".path li:not(.gone)").setTransitionClass("in");
+      view.find(".path li:not(.gone)").transition("in");
       setTimeout(function() {checkPathOverflow(view); }, 400);
     }
   }
@@ -1167,7 +1152,7 @@
       view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
         "back" : (view[0].animDirection === "back") ? "forward" : "center");
       getOtherViews(view[0].vId).css("z-index", "1");
-      view.find(".new").addClass(type).setTransitionClass(navRegex, "center").end(finish);
+      view.find(".new").addClass(type).transition(navRegex, "center").transitionend(finish);
     }
     view[0].animDirection = "center";
 
@@ -1318,8 +1303,8 @@
       if (!files.length) return;
       event.stopPropagation();
       var view = getActiveView();
-      uploadInit(view);
-      upload(view, fd, files);
+      view[0].uId += 1;
+      upload(view, fd, files, view[0].uId);
     });
 
     // drag between views
@@ -1434,7 +1419,7 @@
           droppy.clipboard = null;
           toggleCatcher(false);
           $(".paste-button").removeClass("in");
-        }).setTransitionClass("in").find(".filename").text(basename(droppy.clipboard.src));
+        }).transition("in").find(".filename").text(basename(droppy.clipboard.src));
       });
     } else {
       $(".paste-button").removeClass("in");
@@ -1608,7 +1593,7 @@
 
     a.attr("class", "media-container old-media " + (dir === "left" ? "right" : "left"));
     view[0].tranistioning = true;
-    b.appendTo(view.find(".content")).setTransitionClass(/(left|right)/, "").end(function() {
+    b.appendTo(view.find(".content")).transition(/(left|right)/, "").transitionend(function() {
       view[0].tranistioning = false;
       $(".new-media").removeClass("new-media").parents(".content").replaceClass(/type-(image|video)/, isImage ? "type-image" : "type-video");
       $(".old-media").remove();
@@ -1903,7 +1888,7 @@
     });
 
     setTimeout(function() {
-      box.addClass("in").end(function() {
+      box.addClass("in").transitionend(function() {
         $(this).removeAttr("style");
       });
       toggleCatcher(true);
@@ -1992,7 +1977,7 @@
     (function updateBuffer() {
       var progress;
       if (player.buffered.length)
-        progress = (player.buffered.end(0) / player.duration) * 100;
+        progress = (player.buffered.transitionend(0) / player.duration) * 100;
       view[0].querySelector(".seekbar-loaded").style.width = (progress || 0) + "%";
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
@@ -2562,7 +2547,7 @@
       setTimeout(toggleCatcher.bind(null, false), 500);
     });
     box.find(".icon svg").replaceWith(droppy.svg.link);
-    box.attr("class", "info-box link in").end(function() {
+    box.attr("class", "info-box link in").transitionend(function() {
       select();
     });
 
