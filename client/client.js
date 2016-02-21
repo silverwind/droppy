@@ -738,7 +738,7 @@
 //  General helpers
 // ============================================================================
   function entryRename(view, entry, wasEmpty, callback) {
-    var canSubmit, exists, valid, inputText, link, namer, nameLength;
+    var canSubmit, exists, valid, link, nameLength;
     // Populate active files list
     droppy.activeFiles = [];
     view.find(".entry-link").each(function() {
@@ -749,22 +749,19 @@
     // Hide menu, click-catcher and the original link, stop any previous edits
     toggleCatcher(false);
     link = entry.find(".entry-link");
-
-    // Add inline elements
-    namer = $('<input type="text" class="inline-namer" value="' + link.text() + '" placeholder="' + link.text() + '">');
-    link.after(namer);
     entry.addClass("editing");
 
-    var renamer = link.next();
-
+    // Add inline element
+    var renamer = $('<input type="text" class="inline-namer" value="' + link.text() +
+                    '" placeholder="' + link.text() + '">').insertAfter(link);
     renamer.register("input", function() {
-      inputText = namer.val();
-      valid = !/[\\\*\{\}\/\?\|<>"]/.test(inputText);
-      if (inputText === "") valid = false;
+      var input = this.value;
+      valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
+      if (input === "") valid = false;
       exists = droppy.activeFiles.some(function(file) {
-        if (file === (droppy.caseSensitive ? inputText : inputText.toLowerCase())) return true;
+        if (file === (droppy.caseSensitive ? input : input.toLowerCase())) return true;
       });
-      canSubmit = valid && (!exists || inputText === namer.attr("placeholder"));
+      canSubmit = valid && (!exists || input === this.attr("placeholder"));
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
     }).register("focusout", submitEdit.bind(null, view, true, callback));
 
@@ -777,16 +774,13 @@
     trap.bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
-      var success, oldVal = namer.attr("placeholder"), newVal = namer.val();
+      var success, oldVal = renamer.attr("placeholder"), newVal = renamer.val();
       if (canSubmit) {
-        if (oldVal !== newVal) {
-          success = true;
-        }
-        stopEdit(view);
+        if (oldVal !== newVal) success = true;
       } else if (exists && !skipInvalid) {
-        namer.addClass("shake");
+        renamer.addClass("shake");
         setTimeout(function() {
-          namer.removeClass("shake");
+          renamer.removeClass("shake");
         }, 500);
       } else {
         success = false;
@@ -797,10 +791,9 @@
       }
     }
     function stopEdit(view) {
-      view.find(".inline-namer, .data-row.new-file, .data-row.new-folder").remove();
       entry.removeClass("editing invalid");
-      if (wasEmpty) view.find(".content").html('<div class="empty">' +
-        droppy.svg["upload-cloud"] + '<div class="text">Add files</div></div>');
+      view.find(".inline-namer, .data-row.new-file, .data-row.new-folder").remove();
+      if (wasEmpty) view.find(".content").html(Handlebars.templates.directory({entries: []}));
     }
   }
 
