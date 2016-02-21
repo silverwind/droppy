@@ -577,45 +577,22 @@
       });
     }
 
-    $("#create-folder-button").register("click", function() {
-      var dummyFolder, wasEmpty, view = getActiveView();
-      var dummyHtml = Handlebars.templates["new-folder"]();
+    $("#create-file-button, #create-folder-button").register("click", function() {
+      var view    = getActiveView();
+      var isFile  = this.id === "create-file-button";
+      var isEmpty = view.find(".empty").length;
+      var html    = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
 
-      if (view.find(".empty").length > 0) {
-        view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
-        wasEmpty = true;
-      } else {
-        view.find(".content").prepend(dummyHtml);
-      }
-      dummyFolder = $(".data-row.new-folder");
+      if (isEmpty)
+        view.find(".content").html(Handlebars.templates["file-header"]() + html);
+      else
+        view.find(".content").prepend(html);
+
       view.find(".content").scrollTop(0);
-      entryRename(view, dummyFolder, wasEmpty, function(success, _oldVal, newVal) {
-        if (success) {
-          if (view.data("type") === "directory") showSpinner(view);
-          sendMessage(view[0].vId, "CREATE_FOLDER", newVal);
-        }
-        dummyFolder.remove();
-      });
-    });
-
-    $("#create-file-button").register("click", function() {
-      var dummyFile, wasEmpty, view = getActiveView();
-      var dummyHtml = Handlebars.templates["new-file"]();
-
-      if (view.find(".empty").length > 0) {
-        view.find(".content").html(Handlebars.templates["file-header"]() + dummyHtml);
-        wasEmpty = true;
-      } else {
-        view.find(".content").prepend(dummyHtml);
-      }
-      dummyFile = $(".data-row.new-file");
-      view.find(".content").scrollTop(0);
-      entryRename(view, dummyFile, wasEmpty, function(success, _oldVal, newVal) {
-        if (success) {
-          if (view.data("type") === "directory") showSpinner(view);
-          sendMessage(view[0].vId, "CREATE_FILE", newVal);
-        }
-        dummyFile.remove();
+      var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
+      entryRename(view, dummy, isEmpty, function(_success, _oldVal, newVal) {
+        if (view.data("type") === "directory") showSpinner(view);
+        sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
       });
     });
 
@@ -727,8 +704,8 @@
   function uploadFinish(view, id) {
     view[0].isUploading = false;
     updateTitle(basename(view[0].currentFolder));
-    setTimeout(function () {
-      $(".upload-info[data-id=" + id + "]").removeClass("in").transitionend(function () {
+    setTimeout(function() {
+      $(".upload-info[data-id=" + id + "]").removeClass("in").transitionend(function() {
         $(this).remove();
       });
     }, 250);
