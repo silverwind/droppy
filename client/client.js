@@ -225,12 +225,6 @@
     droppy.views = droppy.views.filter(function(_, i) { return i !== vId; });
     sendMessage(vId, "DESTROY_VIEW");
   }
-
-  function contentWrap(view, type) {
-    var classes = ["new", "content", view[0].animDirection];
-    if (type) classes.push("type-" + type);
-    return $('<div class="' + classes.join(" ") + '"></div>');
-  }
 // ============================================================================
 //  WebSocket handling
 // ============================================================================
@@ -1031,14 +1025,11 @@
     var sort = {type: "", mtime: "", size: ""};
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
-    // Create HTML from template
-    var content = contentWrap(view).html(Handlebars.templates.directory({entries: entries, sort: sort}));
-
-    // Load it
-    loadContent(view, content);
+    // Load from template
+    loadContent(view, "directory", Handlebars.templates.directory({entries: entries, sort: sort}));
 
     // Upload button on empty page
-    content.find(".empty").register("click", function() {
+    view.find(".empty").register("click", function() {
       var inp = $("#file");
       if (droppy.detects.directoryUpload)
         inp.removeAttr(droppy.prefixes.directory.join(" "));
@@ -1046,37 +1037,37 @@
     });
 
     // Switch into a folder
-    content.find(".folder-link").register("click", function(event) {
+    view.find(".folder-link").register("click", function(event) {
       if (droppy.socketWait) return;
       updateLocation(view, $(this).parents(".data-row").data("id"));
       event.preventDefault();
     });
 
     // Click on a file link
-    content.find(".file-link").register("click", function(event) {
+    view.find(".file-link").register("click", function(event) {
       if (droppy.socketWait) return;
       var view = $(event.target).parents(".view");
       openFile(view, view[0].currentFolder, $(event.target).text());
       event.preventDefault();
     });
 
-    content.find(".data-row").each(function(index) {
+    view.find(".data-row").each(function(index) {
       this.setAttribute("order", index);
     });
 
-    content.find(".data-row").register("contextmenu", function(event) {
+    view.find(".data-row").register("contextmenu", function(event) {
       var target = $(event.currentTarget);
       if (target.data("type") === "error") return;
       showEntryMenu(target, event.clientX, event.clientY);
       event.preventDefault();
     });
 
-    content.find(".data-row .entry-menu").register("click", function(event) {
+    view.find(".data-row .entry-menu").register("click", function(event) {
       showEntryMenu($(event.target).parents(".data-row"));
     });
 
     // Stop navigation when clicking on an <a>
-    content.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function(event) {
+    view.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function(event) {
       event.stopPropagation();
       if (droppy.socketWait) return;
 
@@ -1089,12 +1080,12 @@
     });
 
     // Request a sharelink
-    content.find(".share-file").register("click", function() {
+    view.find(".share-file").register("click", function() {
       if (droppy.socketWait) return;
       requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
     });
 
-    content.find(".icon-play").register("click", function() {
+    view.find(".icon-play").register("click", function() {
       var view = $(this).parents(".view");
 
       if ($(this).parents(".data-row").hasClass("playing"))
@@ -1103,7 +1094,7 @@
       play(view, $(this).parents(".data-row"));
     });
 
-    content.find(".header-name, .header-mtime, .header-size").register("click", function() {
+    view.find(".header-name, .header-mtime, .header-size").register("click", function() {
       sortByHeader(view, $(this));
     });
 
@@ -1111,9 +1102,11 @@
   }
 
   // Load new view content
-  function loadContent(view, content, callback) {
+  function loadContent(view, type, content, cb) {
     if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
-    var type = view.data("type"), navRegex = /(forward|back|center)/;
+    view.data("type", type);
+    content = '<div class="new content ' + type + " " + view[0].animDirection + '">' + content + "</div>";
+    var navRegex = /(forward|back|center)/;
     if (view[0].animDirection === "center") {
       view.find(".content").replaceClass(navRegex, "center").before(content);
       view.find(".new").addClass(type).data("root", view[0].currentFolder);
@@ -1136,12 +1129,11 @@
       view.find(".content:not(.new)").remove();
       view.find(".new").removeClass("new");
       view.find(".data-row").removeClass("animating");
-      if (view.data("type") === "directory") {
+      if (view.data("type") === "directory")
         bindDragEvents(view);
-      } else if (view.data("type") === "media") {
+      else if (view.data("type") === "media")
         bindMediaArrows(view);
-      }
-      if (callback) callback(view);
+      if (cb) cb(view);
     }
   }
 
@@ -1212,7 +1204,7 @@
 
       droppy.dragTimer.refresh(row.data("id"));
       event.dataTransfer.setData("text", JSON.stringify({
-        type: row.attr("data-type"),
+        type: row.data("type"),
         path: row.data("id")
       }));
       event.dataTransfer.effectAllowed = "copyMove";
@@ -1569,7 +1561,7 @@
     view[0].tranistioning = true;
     b.appendTo(view.find(".content")).transition(/(left|right)/, "").transitionend(function() {
       view[0].tranistioning = false;
-      $(".new-media").removeClass("new-media").parents(".content").replaceClass(/type-(image|video)/, isImage ? "type-image" : "type-video");
+      $(".new-media").removeClass("new-media");
       $(".old-media").remove();
       aspectScale();
       makeMediaDraggable(this, !isImage);
@@ -1622,21 +1614,15 @@
   }
 
   function openMedia(view, sameFolder) {
-    var content, filename = view[0].currentFile;
+    var filename = view[0].currentFile;
     var type = Object.keys(droppy.videoTypes).indexOf(fileExtension(filename)) !== -1 ? "video" : "image";
-    view.data("type", "media");
-    content = $(Handlebars.templates.media({
-      type: type,
-      src: getMediaSrc(view, filename),
-      vid: view[0].vId
-    }));
     if (sameFolder && view[0].currentData) {
       populateMediaCache(view, view[0].currentData);
     } else { // In case we switch into an unknown folder, request its files
       sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
     view[0].animDirection = "forward";
-    loadContent(view, contentWrap(view, type).append(content), function(view) {
+    loadContent(view, "media", Handlebars.templates.media({type: type, src: getMediaSrc(view, filename), vid: view[0].vId}), function(view) {
       view.find(".fs").register("click", function(event) {
         var view = $(event.target).parents(".view");
         droppy.activeView = view[0].vId;
@@ -1671,7 +1657,6 @@
     showSpinner(view);
 
     $.when(file, script, theme).done(function(data) {
-      view.data("type", "document");
       updateTitle(basename(entryId));
       setEditorFontSize(droppy.get("editorFontSize"));
       configCM(data, basename(entryId));
@@ -1691,8 +1676,7 @@
     });
 
     function configCM(data, filename) {
-      var doc = $(Handlebars.templates.document({modes: droppy.modes}));
-      loadContent(view, contentWrap(view).append(doc), function() {
+      loadContent(view, "document", Handlebars.templates.document({modes: droppy.modes}), function() {
         view[0].editorEntryId = entryId;
         view[0].editor = editor = CodeMirror(view.find(".document")[0], {
           autofocus: true,
@@ -1758,11 +1742,11 @@
         editor.setValue(data);
         editor.clearHistory();
 
-        doc.find(".exit").register("click", function() {
+        view.find(".exit").register("click", function() {
           closeDoc($(this).parents(".view"));
           editor = null;
         });
-        doc.find(".save").register("click", function() {
+        view.find(".save").register("click", function() {
           var view = $(this).parents(".view");
           showSpinner(view);
           sendMessage(view[0].vId, "SAVE_FILE", {
@@ -1770,11 +1754,11 @@
             value: editor.getValue()
           });
         });
-        doc.find(".ww").register("click", function() {
+        view.find(".ww").register("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
           droppy.set("lineWrapping", editor.options.lineWrapping);
         });
-        doc.find(".syntax").register("click", function() {
+        view.find(".syntax").register("click", function() {
           var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
           view.find(".mode-select").on("change", function() {
@@ -1785,11 +1769,11 @@
             editor.setOption("mode", mode);
           });
         });
-        doc.find(".find").register("click", function() {
+        view.find(".find").register("click", function() {
           CodeMirror.commands.find(editor);
           view.find(".CodeMirror-search-field").eq(0).focus();
         });
-        doc.find(".full").register("click", function() {
+        view.find(".full").register("click", function() {
           screenfull.toggle($(this).parents(".content")[0]);
         });
         hideSpinner(view);
