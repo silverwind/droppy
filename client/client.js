@@ -1026,79 +1026,81 @@
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
     // Load from template
-    loadContent(view, "directory", null, Handlebars.templates.directory({entries: entries, sort: sort}));
+    loadContent(view, "directory", null, Handlebars.templates.directory({entries: entries, sort: sort}), function () {
 
-    // Upload button on empty page
-    view.find(".empty").register("click", function() {
-      var inp = $("#file");
-      if (droppy.detects.directoryUpload)
-        inp.removeAttr(droppy.prefixes.directory.join(" "));
-      inp.click();
+      // Upload button on empty page
+      view.find(".empty").register("click", function() {
+        var inp = $("#file");
+        if (droppy.detects.directoryUpload)
+          inp.removeAttr(droppy.prefixes.directory.join(" "));
+        inp.click();
+      });
+
+      // Switch into a folder
+      view.find(".folder-link").register("click", function(event) {
+        if (droppy.socketWait) return;
+        updateLocation(view, $(this).parents(".data-row").data("id"));
+        event.preventDefault();
+      });
+
+      // Click on a file link
+      view.find(".file-link").register("click", function(event) {
+        if (droppy.socketWait) return;
+        var view = $(event.target).parents(".view");
+        openFile(view, view[0].currentFolder, $(event.target).text());
+        event.preventDefault();
+      });
+
+      view.find(".data-row").each(function(index) {
+        console.log(index, this);
+        this.setAttribute("order", index);
+      });
+
+      view.find(".data-row").register("contextmenu", function(event) {
+        var target = $(event.currentTarget);
+        if (target.data("type") === "error") return;
+        showEntryMenu(target, event.clientX, event.clientY);
+        event.preventDefault();
+      });
+
+      view.find(".data-row .entry-menu").register("click", function(event) {
+        showEntryMenu($(event.target).parents(".data-row"));
+      });
+
+      // Stop navigation when clicking on an <a>
+      view.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function(event) {
+        event.stopPropagation();
+        if (droppy.socketWait) return;
+
+        // Some browsers (like IE) think that clicking on an <a> is real navigation
+        // and will close the WebSocket in turn. We'll reconnect if neccessary.
+        droppy.reopen = true;
+        setTimeout(function() {
+          droppy.reopen = false;
+        }, 2000);
+      });
+
+      // Request a sharelink
+      view.find(".share-file").register("click", function() {
+        if (droppy.socketWait) return;
+        requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
+      });
+
+      view.find(".icon-play").register("click", function() {
+        var view = $(this).parents(".view");
+
+        if ($(this).parents(".data-row").hasClass("playing"))
+          return;
+
+        play(view, $(this).parents(".data-row"));
+      });
+
+      view.find(".header-name, .header-mtime, .header-size").register("click", function() {
+        sortByHeader(view, $(this));
+      });
+
+      hideSpinner(view);
     });
-
-    // Switch into a folder
-    view.find(".folder-link").register("click", function(event) {
-      if (droppy.socketWait) return;
-      updateLocation(view, $(this).parents(".data-row").data("id"));
-      event.preventDefault();
-    });
-
-    // Click on a file link
-    view.find(".file-link").register("click", function(event) {
-      if (droppy.socketWait) return;
-      var view = $(event.target).parents(".view");
-      openFile(view, view[0].currentFolder, $(event.target).text());
-      event.preventDefault();
-    });
-
-    view.find(".data-row").each(function(index) {
-      this.setAttribute("order", index);
-    });
-
-    view.find(".data-row").register("contextmenu", function(event) {
-      var target = $(event.currentTarget);
-      if (target.data("type") === "error") return;
-      showEntryMenu(target, event.clientX, event.clientY);
-      event.preventDefault();
-    });
-
-    view.find(".data-row .entry-menu").register("click", function(event) {
-      showEntryMenu($(event.target).parents(".data-row"));
-    });
-
-    // Stop navigation when clicking on an <a>
-    view.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function(event) {
-      event.stopPropagation();
-      if (droppy.socketWait) return;
-
-      // Some browsers (like IE) think that clicking on an <a> is real navigation
-      // and will close the WebSocket in turn. We'll reconnect if neccessary.
-      droppy.reopen = true;
-      setTimeout(function() {
-        droppy.reopen = false;
-      }, 2000);
-    });
-
-    // Request a sharelink
-    view.find(".share-file").register("click", function() {
-      if (droppy.socketWait) return;
-      requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
-    });
-
-    view.find(".icon-play").register("click", function() {
-      var view = $(this).parents(".view");
-
-      if ($(this).parents(".data-row").hasClass("playing"))
-        return;
-
-      play(view, $(this).parents(".data-row"));
-    });
-
-    view.find(".header-name, .header-mtime, .header-size").register("click", function() {
-      sortByHeader(view, $(this));
-    });
-
-    hideSpinner(view);
   }
 
   // Load new view content

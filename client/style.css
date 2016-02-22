@@ -405,7 +405,7 @@ input::-webkit-input-placeholder { color: #999 }
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
 }
-.data-row[order="0"] { border-top: none }
+.data-row[order="0"] { border-top-color: transparent !important }
 
 .data-row.editing.invalid input { color: #d22 }
 .data-row.editing .entry-link { display: none }
