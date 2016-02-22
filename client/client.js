@@ -42,9 +42,6 @@
   // Add the dataTransfer property to the drag-and-drop events
   $.event.props.push("dataTransfer");
 
-  // Disable jQuery's appending of _=timestamp parameter to script requests
-  $.ajaxSetup({cache: true});
-
   // Shorthand for safe event listeners
   $.fn.register = function(events, callback) {
     return this.off(events).on(events, callback);
@@ -255,7 +252,7 @@
       if (droppy.token) {
         init();
       } else {
-        $.get("?@").then(function(token) {
+        $.ajax("?@").then(function(token) {
           droppy.token = token;
           init();
         });
@@ -1052,7 +1049,6 @@
       });
 
       view.find(".data-row").each(function(index) {
-        console.log(index, this);
         this.setAttribute("order", index);
       });
 
@@ -1465,7 +1461,6 @@
     } else { // Generic file, ask the server if the file has binary contents
       var entryId = join(newFolder, file);
       $.ajax({
-        type: "GET",
         url: "??" + entryId,
         dataType: "text"
       }).done(function(data, _, request) {
@@ -1670,7 +1665,6 @@
     loadTheme(droppy.get("theme"), theme.resolve);
 
     $.ajax({
-      type: "GET",
       url: "?_" + entryId,
       dataType: "text"
     }).done(function(data) {
@@ -2425,7 +2419,7 @@
 
   function loadStyle(id, url, cb) {
     if (!document.getElementById(id)) {
-      $.get(url).then(function(data) {
+      $.ajax(url).then(function(data) {
         $('<style id="' + id + '"></style>').appendTo("head");
         $("#" + id).text(data);
         if (cb) cb();
