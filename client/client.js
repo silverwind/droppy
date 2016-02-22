@@ -1023,8 +1023,7 @@
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
     // Load from template
-    loadContent(view, "directory", null, Handlebars.templates.directory({entries: entries, sort: sort}), function () {
-
+    loadContent(view, "directory", null, Handlebars.templates.directory({entries: entries, sort: sort}), function() {
       // Upload button on empty page
       view.find(".empty").register("click", function() {
         var inp = $("#file");
