@@ -44,9 +44,10 @@ demo.refresh = function refresh(doneCallback) {
     get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/SYNTH%20AND%20ELECTRONIC%20BPM/534%5Bkb%5D078_tinkles-synth.wav.mp3", "/audio/sample-4.mp3"),
     get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/SYNTH%20AND%20ELECTRONIC%20BPM/689%5Bkb%5D120_dreamy-synth-wave.wav.mp3", "/audio/sample-5.mp3"),
     function(callback) {
-      async.parallel([
+      async.series([
         function(cb) { cpr(paths.client, path.join(paths.files, "/code/client"), cb); },
-        function(cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); }
+        function(cb) { cpr(paths.server, path.join(paths.files, "/code/server"), cb); },
+        function(cb) { utils.rm(path.join(paths.files, "/code/client/svg"), cb); },
       ], callback);
     }
   ], function() {
