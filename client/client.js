@@ -1026,7 +1026,7 @@
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
     // Load from template
-    loadContent(view, "directory", Handlebars.templates.directory({entries: entries, sort: sort}));
+    loadContent(view, "directory", null, Handlebars.templates.directory({entries: entries, sort: sort}));
 
     // Upload button on empty page
     view.find(".empty").register("click", function() {
@@ -1102,10 +1102,11 @@
   }
 
   // Load new view content
-  function loadContent(view, type, content, cb) {
+  function loadContent(view, type, mediaType, content, cb) {
     if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
     view.data("type", type);
-    content = '<div class="new content ' + type + " " + view[0].animDirection + '">' + content + "</div>";
+    mediaType = mediaType ? " type-" + mediaType : "";
+    content = '<div class="new content ' + type + mediaType + " " + view[0].animDirection + '">' + content + "</div>";
     var navRegex = /(forward|back|center)/;
     if (view[0].animDirection === "center") {
       view.find(".content").replaceClass(navRegex, "center").before(content);
@@ -1561,7 +1562,7 @@
     view[0].tranistioning = true;
     b.appendTo(view.find(".content")).transition(/(left|right)/, "").transitionend(function() {
       view[0].tranistioning = false;
-      $(".new-media").removeClass("new-media");
+      $(".new-media").removeClass("new-media").parents(".content").replaceClass(/type-(image|video)/, isImage ? "type-image" : "type-video");
       $(".old-media").remove();
       aspectScale();
       makeMediaDraggable(this, !isImage);
@@ -1615,6 +1616,7 @@
 
   function openMedia(view, sameFolder) {
     var filename = view[0].currentFile;
+    var src = getMediaSrc(view, filename);
     var type = Object.keys(droppy.videoTypes).indexOf(fileExtension(filename)) !== -1 ? "video" : "image";
     if (sameFolder && view[0].currentData) {
       populateMediaCache(view, view[0].currentData);
@@ -1622,7 +1624,7 @@
       sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
     }
     view[0].animDirection = "forward";
-    loadContent(view, "media", Handlebars.templates.media({type: type, src: getMediaSrc(view, filename), vid: view[0].vId}), function(view) {
+    loadContent(view, "media", type, Handlebars.templates.media({type: type, src: src, vid: view[0].vId}), function(view) {
       view.find(".fs").register("click", function(event) {
         var view = $(event.target).parents(".view");
         droppy.activeView = view[0].vId;
@@ -1676,7 +1678,7 @@
     });
 
     function configCM(data, filename) {
-      loadContent(view, "document", Handlebars.templates.document({modes: droppy.modes}), function() {
+      loadContent(view, "document", null, Handlebars.templates.document({modes: droppy.modes}), function() {
         view[0].editorEntryId = entryId;
         view[0].editor = editor = CodeMirror(view.find(".document")[0], {
           autofocus: true,

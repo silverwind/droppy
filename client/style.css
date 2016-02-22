@@ -656,19 +656,18 @@ html:not(.mobile) #entry-menu a.active {
 
 .meta {
   position: absolute;
-  font-size: .9rem;
+  font-size: .75rem;
   padding: .125rem;
   right: .25em; bottom: .25em;
   z-index: 1;
   color: #aaa;
-  background: rgba(0,0,0,.4);
+  background: rgba(0,0,0,.6);
   border-radius: .125em;
   cursor: pointer;
   user-select: none;
   display: flex;
   align-items: center;
 }
-.meta:hover { background: rgba(0,0,0,.9) }
 
 .fs {
   cursor: pointer;
