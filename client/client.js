@@ -1524,19 +1524,15 @@
 
   function bindMediaArrows(view) {
     if (droppy.detects.mobile) return; // Using swipe on mobile
-    var forward = view.find(".arrow-forward");
-    var back    = view.find(".arrow-back");
-    var arrows  = view.find(".arrow-back, .arrow-forward");
-
-    back.register("click", swapMedia.bind(null, view, "left"));
-    forward.register("click", swapMedia.bind(null, view, "right"));
-
+    var arrows = view.find(".arrow-back, .arrow-forward");
+    arrows.first().register("click", swapMedia.bind(null, view, "left"));
+    arrows.last().register("click", swapMedia.bind(null, view, "right"));
     arrows.register("mouseenter mousemove", function() {
       $(this).addClass("in");
     }).register("mouseleave", function() {
       $(this).removeClass("in");
     }).addClass("in");
-    setTimeout(function() {arrows.removeClass("in"); }, 2000);
+    setTimeout(function() { arrows.removeClass("in"); }, 2000);
   }
 
   function swapMedia(view, dir) {
@@ -1551,7 +1547,7 @@
       b.find("img").one("load", aspectScale);
     } else {
       b = $("<div class='media-container new-media " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
-      b = $(bindVideoEvents(b[0]));
+      bindVideoEvents(b[0]);
     }
 
     a.attr("class", "media-container old-media " + (dir === "left" ? "right" : "left"));
@@ -1583,7 +1579,6 @@
 
     (function addSizes(meta, img) {
       var x = img.naturalWidth, y = img.naturalHeight;
-
       if (x && y) {
         meta.find(".x").text(x);
         meta.find(".y").text(y);
@@ -1595,10 +1590,10 @@
     var volume = droppy.get("volume");
     if (volume) el.volume = volume;
     el.addEventListener("loadedmetadata", aspectScale);
-    el.addEventListener("volumechange", function() {
-      droppy.set("volume", this.volume);
-    });
     el.addEventListener("error", aspectScale);
+    el.addEventListener("volumechange", function() {
+      droppy.set("volume", this.muted ? 0 : this.volume);
+    });
     return el;
   }
 
@@ -1634,10 +1629,11 @@
         updateMediaMeta(view);
       });
       view.find("video").each(function() {
-        initVideoJS(this, function() {
+        var self = this;
+        initVideoJS(self, function() {
           aspectScale();
           makeMediaDraggable(view.find(".media-container")[0], true);
-          bindVideoEvents(view.find("video")[0]);
+          bindVideoEvents(self);
         });
       });
 
@@ -1932,7 +1928,7 @@
     (function updateBuffer() {
       var progress;
       if (player.buffered.length)
-        progress = (player.buffered.transitionend(0) / player.duration) * 100;
+        progress = (player.buffered.end(0) / player.duration) * 100;
       view[0].querySelector(".seekbar-loaded").style.width = (progress || 0) + "%";
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
@@ -2178,16 +2174,17 @@
     loadScript("vjs-js", "?!/lib/vjs.js", function() {
       (function verify() {
         if (!("videojs" in window)) return setTimeout(verify, 200);
-        if (!el.classList.contains("video-js"))
-          el.classList.add("video-js", "vjs-default-skin");
+        if (!el.classList.contains("video-js")) el.classList.add("video-js", "vjs-default-skin");
+        if (droppy.get("volume") === 0) el.muted = true;
+        var container = $(el).parents(".media-container")[0];
         videojs.options.flash.swf = "?!/lib/vjs.swf";
         videojs(el, {
           controls: true,
           autoplay: !droppy.detects.mobile,
           preload : "auto",
           loop    : "loop",
-          width   : $(el).parents(".media-container")[0].clientWidth,
-          heigth  : $(el).parents(".media-container")[0].clientHeight
+          width   : container.clientWidth,
+          heigth  : container.clientHeight
         }, cb).on("ready", function() {
           this.volume(droppy.get("volume"));
         }).on("volumechange", function() {
@@ -2411,9 +2408,7 @@
       script.setAttribute("id", id);
       script.setAttribute("src", url);
       document.querySelector("head").appendChild(script);
-    } else {
-      if (cb) cb();
-    }
+    } else if (cb) cb();
   }
 
   function loadStyle(id, url, cb) {
@@ -2423,9 +2418,7 @@
         $("#" + id).text(data);
         if (cb) cb();
       });
-    } else {
-      if (cb) cb();
-    }
+    } else if (cb) cb();
   }
 
   function loadTheme(theme, cb) {
