@@ -151,7 +151,7 @@
     renameExistingOnUpload: false
   };
   // Load prefs and set missing ones to their default
-  prefs = JSON.parse(localStorage.getItem("prefs")) || {};
+  prefs = JSON.parse(localStorage.getItem("prefs") || "{}");
   Object.keys(defaults).forEach(function(pref) {
     if (prefs[pref] === undefined) {
       doSave = true;
