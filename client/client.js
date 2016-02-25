@@ -1775,6 +1775,7 @@
   }
 
   function updateUsers(userlist) {
+    if (userlist === false) return;
     if (Object.keys(userlist).length === 0) return location.reload(true);
     var box = $("#prefs-box");
     box.find(".list-user").remove();

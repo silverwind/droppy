@@ -377,7 +377,7 @@ function setupSocket(server) {
         if (db.get("sessions")[cookie] && db.get("sessions")[cookie].privileged) {
           sendUsers(sid);
         } else { // Unauthorized
-          sendObj(sid, {type: "USER_LIST", users: {}});
+          sendObj(sid, {type: "USER_LIST", users: false});
         }
         break;
       case "UPDATE_USER":
