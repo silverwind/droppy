@@ -659,19 +659,31 @@ function handleResourceRequest(req, res, resourceName) {
       else
         headers["Content-Type"] = resource.mime;
 
-      // Encoding, Length
-      var acceptEncoding = req.headers["accept-encoding"] || "";
-      if (/\bgzip\b/.test(acceptEncoding) && resource.gzip) {
+      // Encoding, length
+      var encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
+        return e.trim();
+      }).filter(function(e) {
+        return Boolean(e);
+      });
+
+      var data;
+      if (encodings.indexOf("br") !== -1 && resource.brotli) {
+        headers["Content-Encoding"] = "br";
+        headers["Vary"] = "Accept-Encoding";
+        headers["Content-Length"] = resource.brotli.length;
+        data = resource.brotli;
+      } else if (encodings.indexOf("gzip") !== -1 && resource.gzip) {
         headers["Content-Encoding"] = "gzip";
         headers["Content-Length"] = resource.gzip.length;
         headers["Vary"] = "Accept-Encoding";
-        res.writeHead(status, headers);
-        res.end(resource.gzip);
+        data = resource.gzip;
       } else {
         headers["Content-Length"] = resource.data.length;
-        res.writeHead(status, headers);
-        res.end(resource.data);
+        data = resource.data;
       }
+
+      res.writeHead(status, headers);
+      res.end(data);
     }
   }
   log.info(req, res);

@@ -3,6 +3,7 @@ lint:
 	stylelint client/*.css
 
 build:
+	touch client/client.js
 	node droppy.js build
 
 publish:
@@ -22,8 +23,6 @@ update:
 	ncu -ua
 	rm -rf node_modules
 	npm install
-
-	# ensure cache is rebuilt
 	touch client/client.js
 
 deploy:

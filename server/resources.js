@@ -64,15 +64,16 @@ var opts = {
   },
 };
 
-var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates, zopfli;
+var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates, zopfli, brotli;
 try {
   autoprefixer = require("autoprefixer");
+  brotli       = require("iltorb").compress;
   cheerio      = require("cheerio");
   cleanCSS     = new (require("clean-css"))(opts.cleanCSS);
-  postcss      = require("postcss");
-  uglify       = require("uglify-js");
   htmlMinifier = require("html-minifier");
+  postcss      = require("postcss");
   templates    = require("./templates.js");
+  uglify       = require("uglify-js");
   zopfli       = require("node-zopfli");
 } catch (e) {}
 
@@ -217,14 +218,17 @@ function compile(write, cb) {
 
     addGzip(cache, function(err, cache) {
       if (err) return cb(err);
-      if (write) {
-        mkdirp(path.dirname(cachePath), function(err) {
-          if (err) return cb(err);
-          fs.writeFile(cachePath, jb.stringify(cache), function(err) {
-            cb(err, cache);
+      addBrotli(cache, function(err, cache) {
+        if (err) return cb(err);
+        if (write) {
+          mkdirp(path.dirname(cachePath), function(err) {
+            if (err) return cb(err);
+            fs.writeFile(cachePath, jb.stringify(cache), function(err) {
+              cb(err, cache);
+            });
           });
-        });
-      } else cb(null, cache);
+        } else cb(null, cache);
+      });
     });
   });
 }
@@ -267,6 +271,46 @@ function gzip(data, callback) {
   lib.gzip(data, function(err, gzipped) {
     if (err) return callback(err);
     callback(null, gzipped);
+  });
+}
+
+// Create brotli compressed data
+function addBrotli(cache, callback) {
+  var types = Object.keys(cache), funcs = [];
+  types.forEach(function(type) {
+    funcs.push(function(cb) {
+      brotliMap(cache[type], cb);
+    });
+  });
+  async.parallel(funcs, function(err, results) {
+    if (err) return callback(err);
+    types.forEach(function(type, index) {
+      cache[type] = results[index];
+    });
+    callback(null, cache);
+  });
+}
+
+function brotliMap(map, callback) {
+  var names = Object.keys(map), funcs = [];
+  names.forEach(function(name) {
+    funcs.push(function(cb) {
+      brotli(map[name].data, cb);
+    });
+  });
+  async.parallel(funcs, function(err, results) {
+    if (err) return callback(err);
+    names.forEach(function(name, index) {
+      map[name].brotli = results[index];
+    });
+    callback(null, map);
+  });
+}
+
+function brotli(data, callback) {
+  brotli(data, function(err, compressed) {
+    if (err) return callback(err);
+    callback(null, compressed);
   });
 }
 
