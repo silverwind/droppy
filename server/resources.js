@@ -254,7 +254,7 @@ function gzipMap(map, callback) {
   var names = Object.keys(map), funcs = [];
   names.forEach(function(name) {
     funcs.push(function(cb) {
-      gzip(map[name].data, cb);
+      (minify ? zopfli : zlib).gzip(map[name].data, cb);
     });
   });
   async.parallel(funcs, function(err, results) {
@@ -263,14 +263,6 @@ function gzipMap(map, callback) {
       map[name].gzip = results[index];
     });
     callback(null, map);
-  });
-}
-
-function gzip(data, callback) {
-  var lib = minify ? zopfli : zlib;
-  lib.gzip(data, function(err, gzipped) {
-    if (err) return callback(err);
-    callback(null, gzipped);
   });
 }
 
@@ -304,13 +296,6 @@ function brotliMap(map, callback) {
       map[name].brotli = results[index];
     });
     callback(null, map);
-  });
-}
-
-function brotli(data, callback) {
-  brotli(data, function(err, compressed) {
-    if (err) return callback(err);
-    callback(null, compressed);
   });
 }
 
