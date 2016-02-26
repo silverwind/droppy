@@ -5,7 +5,7 @@ var handlebars = require("handlebars");
 var fs         = require("graceful-fs");
 var path       = require("path");
 
-var prefix = "(function() {var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};\n";
+var prefix = "(function(){var template=Handlebars.template, templates=Handlebars.templates=Handlebars.templates||{};";
 var suffix = "})();";
 
 templates.compile = function compile(paths) {
@@ -18,7 +18,7 @@ templates.compile = function compile(paths) {
 function getEntry(file, template) {
   var name = path.basename(file).replace(/\..+$/, "");
   var compiled = handlebars.precompile(template, {data: false});
-  return "templates['" + name + "'] = template(" + compiled + ");\n";
+  return "templates['" + name + "']=template(" + compiled + ");";
 }
 
 module.exports = templates;
