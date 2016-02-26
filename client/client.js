@@ -1951,8 +1951,6 @@
     view.find(".audio-player")[0].pause();
     view.find(".audio-title").html("");
     view.find(".data-row.playing").removeClass("playing");
-    clearInterval(view[0].audioUpdateLoaded);
-    clearInterval(view[0].audioUpdatePlayed);
     updateTitle(basename(view[0].currentFolder));
     view.find(".audio-bar").removeClass("in");
   }
