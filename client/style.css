@@ -1354,7 +1354,7 @@ html:not(.mobile) .vjs-big-play-button {
   border-radius: 6px;
   left: 50%;
   top: 50%;
-  transform:  translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   position: absolute;
   transition: opacity .3s ease, visibility 0s .3s;
   z-index: 40;
@@ -1408,13 +1408,16 @@ html:not(.mobile) .vjs-big-play-button {
   padding: .5em;
 }
 
-.info-box .link-out { flex: 1; line-height: 2.5em; overflow: hidden; }
+.info-box .link-out {
+  flex: 1;
+  line-height: 2.5em;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
 
 .link-options {
-  font-size: .7rem;
+  font-size: .8rem;
   white-space: nowrap;
-  display: flex;
-  flex-direction: column;
   justify-content: middle;
   background: #05a;
   color: #fff;
@@ -1426,17 +1429,17 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box.error .link-options { display: none }
 
 .link-options svg {
-  margin: 0 .25em 0 .5em;
+  margin: 0 .5em 0 .75em;
   transition: opacity .2s ease;
 }
 
 .link-options .dl-link:not(.checked) svg { opacity: 0; }
 
 .link-options > div {
-  flex: 1;
+  height: 1.5rem;
   display: flex;
   align-items: center;
-  padding-right: .5em;
+  padding-right: 1em;
 }
 
 .link-options > div:first-of-type { border-top-right-radius: 6px     }
