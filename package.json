@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "3.8.19",
+  "version": "3.8.20",
   "description": "Self-hosted file storage server with a convenient web interface",
   "author": "silverwind <me@silverwind.io>",
   "repository": "silverwind/droppy",
