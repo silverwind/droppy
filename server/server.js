@@ -264,6 +264,8 @@ function setupSocket(server) {
       }
 
       var vId = msg.vId;
+      var priv = Boolean((db.get("sessions")[cookie] || {}).privileged);
+
       switch (msg.type) {
       case "REQUEST_SETTINGS":
         sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
@@ -271,6 +273,7 @@ function setupSocket(server) {
           debug         : config.dev,
           demo          : config.demo,
           public        : config.public,
+          priv          : priv,
           engine        : [engine, process.version.substring(1)].join(" "),
           caseSensitive : process.platform !== "win32",
           themes        : Object.keys(cache.themes).sort().join("|"),
@@ -374,7 +377,7 @@ function setupSocket(server) {
         filetree.move(msg.data.src, msg.data.dst);
         break;
       case "GET_USERS":
-        if (db.get("sessions")[cookie] && db.get("sessions")[cookie].privileged) {
+        if (priv) {
           sendUsers(sid);
         } else { // Unauthorized
           sendObj(sid, {type: "USER_LIST", users: false});
@@ -382,7 +385,7 @@ function setupSocket(server) {
         break;
       case "UPDATE_USER":
         var name = msg.data.name, pass = msg.data.pass;
-        if (!db.get("sessions")[cookie] || !db.get("sessions")[cookie].privileged) return;
+        if (!priv) return;
         if (pass === "") {
           if (!db.get("users")[name]) return;
           if (db.delUser(msg.data.name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));

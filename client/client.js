@@ -621,7 +621,7 @@
 
     $("#prefs-button").register("click", function() {
       showPrefs();
-      sendMessage(null, "GET_USERS");
+      if (droppy.priv) sendMessage(null, "GET_USERS");
     });
 
     initEntryMenu();
@@ -1779,7 +1779,6 @@
   }
 
   function updateUsers(userlist) {
-    if (userlist === false) return;
     if (Object.keys(userlist).length === 0) return location.reload(true);
     var box = $("#prefs-box");
     box.find(".list-user").remove();
