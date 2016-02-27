@@ -1,21 +1,21 @@
 # droppy [![](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![](https://img.shields.io/badge/licence-bsd-blue.svg)](https://raw.githubusercontent.com/silverwind/droppy/master/LICENSE) [![](http://img.shields.io/npm/dm/droppy.svg)](https://www.npmjs.org/package/droppy)
 
-`droppy` is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It focuses on performance and intuitive usage. It can run both standalone or through express. To provide realtime updates, most communication is done through WebSockets. A demo is available <a target="_blank" href="https://droppy.silverwind.io">here</a>.
+`droppy` is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It focuses on performance and intuitive usage. To provide low-overhead realtime updates, most communication is done through WebSockets.
 
-### Features
+### Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
 * Multi-file and folder upload
 * Realtime updates of changes
+* Side-by-Side mode
 * Share public download links
 * Zip download of folders
 * Image and video gallery, audio player
-* Drag & drop and swipe gesture support
+* Drag & drop and swipe gestures
 * Fullscreen support
 * Edit text files in a heavily customized CodeMirror
-* Supports all modern browsers and Node.js 0.10 or greater
 
 ### Install
-With `Node.js` and `npm` installed, run:
+With [`Node.js`](https://nodejs.org) 0.10 or greater installed, run:
 
 ```console
 $ [sudo] npm install -g droppy
