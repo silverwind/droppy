@@ -313,14 +313,14 @@ function readThemes(callback) {
 
       filenames.forEach(function(name, index) {
         var css = String(data[index]);
-        themes[name.replace(/\.css$/, "")] = new Buffer(minify ? cleanCSS.minify(css).styles : css);
+        themes[name.replace(/\.css$/, "")] = Buffer(minifyCSS(css));
       });
 
       // add our own theme
       fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function(err, css) {
         css = String(css);
         if (err) return callback(err);
-        themes.droppy = new Buffer(minify ? cleanCSS.minify(css).styles : css);
+        themes.droppy = Buffer(minifyCSS(css));
         callback(null, themes);
       });
     });
@@ -343,7 +343,7 @@ function readModes(callback) {
 
     async.map(Object.keys(modes), function(mode, cb) {
       fs.readFile(path.join(modesPath, mode, mode + ".js"), function(err, data) {
-        cb(err, minify ? new Buffer(uglify.minify(String(data), opts.uglify).code) : data);
+        cb(err, Buffer(minifyJS(String(data))));
       });
     }, function(err, result) {
       Object.keys(modes).forEach(function(mode, i) {
@@ -374,9 +374,9 @@ function readLibs(callback) {
     if (minify) {
       Object.keys(out).forEach(function(file) {
         if (/\.js$/.test(file)) {
-          out[file] = new Buffer(uglify.minify(String(out[file]), opts.uglify).code);
+          out[file] = Buffer(minifyJS(String(out[file])));
         } else if (/\.css$/.test(file)) {
-          out[file] = new Buffer(cleanCSS.minify(String(out[file])).styles);
+          out[file] = Buffer(minifyCSS(String(out[file])));
         }
       });
     }
@@ -401,6 +401,16 @@ function addSVG(html) {
   return $.html();
 }
 
+function minifyJS(js) {
+  if (!minify) return js;
+  return uglify.minify(js, opts.uglify).code;
+}
+
+function minifyCSS(css) {
+  if (!minify) return css;
+  return cleanCSS.minify(String(css)).styles;
+}
+
 resources.compileJS = function compileJS() {
   var js = "";
   resources.files.js.forEach(function(file) {
@@ -417,9 +427,9 @@ resources.compileJS = function compileJS() {
   js = js.replace("/* {{ templates }} */", templates.compile(temps));
 
   // Minify
-  if (minify) js = uglify.minify(js, opts.uglify).code;
+  js = minifyJS(js);
 
-  return {data: new Buffer(js), etag: etag(js), mime: mime("js")};
+  return {data: Buffer(js), etag: etag(js), mime: mime("js")};
 };
 
 resources.compileCSS = function compileCSS() {
@@ -428,13 +438,10 @@ resources.compileCSS = function compileCSS() {
     css += String(fs.readFileSync(path.join(paths.mod, file))) + "\n";
   });
 
-  // Vendor prefixes
-  css = postcss([autoprefixer]).process(css).css;
+  // Vendor prefixes and minify
+  css = minifyCSS(postcss([autoprefixer]).process(css).css);
 
-  // Minify
-  if (minify) css = cleanCSS.minify(css).styles;
-
-  return {data: new Buffer(css), etag: etag(css), mime: mime("css")};
+  return {data: Buffer(css), etag: etag(css), mime: mime("css")};
 };
 
 resources.compileHTML = function compileHTML(res) {
@@ -451,17 +458,17 @@ resources.compileHTML = function compileHTML(res) {
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "main");
   var main = min($("#page").replaceWith(html["main.html"]).end().html());
-  res["main.html"] = {data: new Buffer(main), etag: etag(main), mime: mime("html")};
+  res["main.html"] = {data: Buffer(main), etag: etag(main), mime: mime("html")};
 
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "auth");
   var auth = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["auth.html"] = {data: new Buffer(auth), etag: etag(auth), mime: mime("html")};
+  res["auth.html"] = {data: Buffer(auth), etag: etag(auth), mime: mime("html")};
 
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "firstrun");
   var firstrun = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["firstrun.html"] = {data: new Buffer(firstrun), etag: etag(firstrun), mime: mime("html")};
+  res["firstrun.html"] = {data: Buffer(firstrun), etag: etag(firstrun), mime: mime("html")};
 
   return res;
 };
