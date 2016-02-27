@@ -10,7 +10,11 @@ var suffix = "})();";
 
 templates.compile = function compile(paths) {
   var strings = paths.map(function(file) {
-    return getEntry(file, String(fs.readFileSync(file)));
+    var string = String(fs.readFileSync(file));
+    string = string.split("\n").map(function(line) {
+      return line.trim();
+    }).join("");
+    return getEntry(file, string);
   });
   return prefix + strings.join("") + suffix;
 };
