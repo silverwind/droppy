@@ -520,8 +520,8 @@ input::-webkit-input-placeholder { color: #999 }
   position: relative;
 }
 
-@media (min-width: 1024px) { .sprite { transform: scale(1.25); margin-right: .4em } }
-@media (max-width: 1023px) { .sprite { transform: scale(1.2);  margin-right: .3em } }
+@media (min-width: 1024px) { .sprite { transform: scale(1.4);  margin-right: .6em } }
+@media (max-width: 1023px) { .sprite { transform: scale(1.25); margin-right: .4em } }
 @media (max-width:  639px) { .sprite { transform: scale(1);    margin-right: .1em } }
 
 .spinner {
