@@ -67,19 +67,20 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 ```
 ### Options
 - `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
-- `public` *Boolean* - When enabled, no authentication is performed.
+- `public` *Boolean* - When enabled, no user authentication is performed.
 - `timestamps` *Boolean* - When enabled, adds timestamps to log output.
-- `linkLength` *Number* - The amount of characters in a share link.
+- `linkLength` *Number* - The amount of characters in a shared link.
 - `logLevel` *Number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
 - `maxFileSize` *Number* - The maximum file size in bytes a user can upload in a single file.
-- `updateInterval` *Number* - Interval in milliseconds which a single client can receive update messages through changes in the file system.
-- `pollingInterval` *Number* - Interval in milliseconds which the file system is polled for changes, which may be necessary on network drives and other non-standard situations. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. Set to `0` to disable polling.
-- `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket. These messages add some overhead but may be needed with proxies are involved. Set to `0` to disable keepalive messages.
+- `updateInterval` *Number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system.
+- `pollingInterval` *Number* - Interval in milliseconds in which the file system is polled for changes, which may be necessary on network drives and other non-standard situations. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
+- `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
+- `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
 <a name="listener-options" />
 #### Listener Options
 
-`listeners` defines on which interfaces, ports and protcol(s) the server will listen. For example:
+`listeners` defines on which network interfaces, ports and protcol(s) the server will listen. For example:
 
 ```javascript
 "listeners": [
@@ -119,7 +120,7 @@ For SSL/TLS these additional options are available:
 *Note: Unless given absolute, SSL/TLS paths are relative to the config folder. If your certificate file includes an concatenated intermediate certificate, it will be detected and used, there's no need to specify `ca` in this case.*
 
 ### API
-droppy can be used with [express](https://github.com/strongloop/express) like this:
+droppy can be used with frameworks like [express](https://github.com/strongloop/express):
 ```js
 var app    = require("express")();
 var droppy = require("droppy")({
@@ -129,9 +130,10 @@ var droppy = require("droppy")({
   logLevel: 0
 });
 
-app.use("/", droppy).listen(process.env.PORT || 8989);
+app.use("/", droppy);
+app.listen(process.env.PORT || 8989);
 ```
-See the [commented express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
+See the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
 
 #### droppy([options])
 - **options** {object}: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
@@ -151,6 +153,6 @@ content-disposition = on
 ```
 
 ### Note about startup performance
-droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are read into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hunderts of thousands of files present.
+droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hunderts of thousands of files present.
 
 © [silverwind](https://github.com/silverwind), distributed under BSD licence.
