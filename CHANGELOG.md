@@ -1,9 +1,14 @@
 *For patch-level releases, see the commit log*
 
+#### Version 3.9.0 - 2/27/2016
+
+- Brotli compression is now supported, resulting in around 15% faster initial load. Works in Firefox >= 44 and Chrome with a flag enabled.
+- `dev` option is now documented.
+
 #### Version 3.8.0 - 1/4/2016
 
 - Docker image is now available as silverwind/droppy.
-- Fixed a erron on startup when in a NODE_ENV=production environment.
+- Fixed a error on startup when in a NODE_ENV=production environment.
 
 #### Version 3.7.0 - 12/19/2015
 
