@@ -119,7 +119,7 @@ function write() {
 }
 
 function getHash(string) {
-  return crypto.createHmac("sha256", new Buffer(string, "utf8")).digest("hex");
+  return crypto.createHmac("sha256", Buffer(string, "utf8")).digest("hex");
 }
 
 module.exports = db;
