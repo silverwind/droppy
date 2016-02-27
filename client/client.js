@@ -34,7 +34,7 @@
     })(),
     webp: document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0,
     notification: "Notification" in window,
-    mobile: (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent),
+    mobile: /Mobi/.test(navigator.userAgent)
   };
 // ============================================================================
 //  Set up a few more things
