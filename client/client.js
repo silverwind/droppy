@@ -483,38 +483,28 @@
       }, 25);
     });
 
-    // escape hides modals
-    Mousetrap.bind("escape", function() {
+    Mousetrap.bind("escape", function() { // escape hides modals
       toggleCatcher(false);
-    });
-
-    // stop default browser behaviour
-    Mousetrap.bind("mod+s", function(e) {
+    }).bind("mod+s", function(e) { // stop default browser save behaviour
       e.preventDefault();
+    }).bind(["space", "right", "down", "return"], function() {
+      var view = getActiveView();
+      if (!view || view.data("type") !== "media") return;
+      swapMedia(view, "right");
+    }).bind(["shift+space", "left", "up", "backspace"], function() {
+      var view = getActiveView();
+      if (!view || view.data("type") !== "media") return;
+      swapMedia(view, "left");
+    }).bind(["alt+enter", "f"], function() {
+      var view = getActiveView();
+      if (!view || view.data("type") !== "media") return;
+      screenfull.toggle(view.find(".content")[0]);
     });
 
     // track active view
     $(window).on("click dblclick contextmenu", function(e) {
       var view = $(e.target).parents(".view");
       if (view.length) droppy.activeView = view[0].vId;
-    });
-
-    Mousetrap.bind(["space", "right", "down", "return"], function() {
-      var view = getActiveView();
-      if (!view || view.data("type") !== "media") return;
-      swapMedia(getActiveView(), "right");
-    });
-
-    Mousetrap.bind(["shift+space", "left", "up", "backspace"], function() {
-      var view = getActiveView();
-      if (!view || view.data("type") !== "media") return;
-      swapMedia(getActiveView(), "left");
-    });
-
-    Mousetrap.bind(["alt+enter", "f"], function() {
-      var view = getActiveView();
-      if (!view || view.data("type") !== "media") return;
-      screenfull.toggle(getActiveView().find(".content")[0]);
     });
 
     $(document).register(screenfull.raw.fullscreenchange, function() {
@@ -755,9 +745,9 @@
     renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
     renamer[0].focus();
 
-    var trap = new Mousetrap(renamer[0]);
-    trap.bind("escape", stopEdit.bind(null, view));
-    trap.bind("return", submitEdit.bind(null, view, false, callback));
+    Mousetrap(renamer[0])
+      .bind("escape", stopEdit.bind(null, view))
+      .bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
       var success, oldVal = renamer.attr("placeholder"), newVal = renamer.val();
