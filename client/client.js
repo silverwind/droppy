@@ -252,8 +252,8 @@
       if (droppy.token) {
         init();
       } else {
-        $.ajax("?@").then(function(token) {
-          droppy.token = token;
+        ajax("?@").then(function(xhr) {
+          droppy.token = xhr.response;
           init();
         });
       }
@@ -445,9 +445,11 @@
     });
     form.register("submit", function(e) {
       e.preventDefault();
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", getRootPath() + (firstrun ? "adduser" : "login"));
-      xhr.onload = function() {
+      ajax({
+        method: "POST",
+        url: getRootPath() + (firstrun ? "adduser" : "login"),
+        data: new FormData(form[0])
+      }).then(function (xhr) {
         if (xhr.status === 200) {
           location.reload(true);
         } else {
@@ -461,8 +463,7 @@
           } else info.attr("class", "error");
           if (!firstrun) $("#pass").focus();
         }
-      };
-      xhr.send(new FormData(form[0]));
+      });
     });
   }
 // ============================================================================
@@ -1443,23 +1444,19 @@
         openMedia(view, oldFolder === newFolder);
       }
     } else { // Generic file, ask the server if the file has binary contents
-      var entryId = join(newFolder, file);
-      $.ajax({
-        url: "??" + entryId,
-        dataType: "text"
-      }).done(function(data, _, request) {
-        if (request.status !== 200) {
+      var filePath = join(newFolder, file);
+      ajax({url: "??" + filePath, responseType: "text"}).then(function(xhr) {
+        if (xhr.status !== 200) {
           showError(view, "Couldn't open or read the file");
           hideSpinner(view);
-        } else if (data === "text") { // Non-Binary content
+        } else if (xhr.response === "text") { // Non-Binary content
           view[0].currentFile = file;
           view[0].currentFolder = newFolder;
-          pushHistory(view, entryId);
+          pushHistory(view, filePath);
           updatePath(view);
-          openDoc(view, entryId);
+          openDoc(view, filePath);
         } else { // Binary content - download it
-          // Download into an iframe to avoid navigation
-          $("[name=nonav]").attr("src", "?~" + entryId);
+          $("[name=nonav]").attr("src", "?~" + filePath);
           hideSpinner(view);
         }
       });
@@ -1644,12 +1641,12 @@
     initCM(script.resolve);
     loadTheme(droppy.get("theme"), theme.resolve);
 
-    $.ajax({
+    ajax({
       url: "?_" + entryId,
-      dataType: "text"
-    }).done(function(data) {
-      file.resolve(data);
-    }).fail(function() {
+      responseType: "text"
+    }).then(function(xhr) {
+      file.resolve(xhr.response);
+    }).catch(function() {
       closeDoc(view);
     });
 
@@ -2400,9 +2397,9 @@
 
   function loadStyle(id, url, cb) {
     if (!document.getElementById(id)) {
-      $.ajax(url).then(function(data) {
+      ajax(url).then(function(xhr) {
         $('<style id="' + id + '"></style>').appendTo("head");
-        $("#" + id).text(data);
+        $("#" + id).text(xhr.response);
         if (cb) cb();
       });
     } else if (cb) cb();
@@ -2614,6 +2611,18 @@
     if (x.length) return -1;
     if (y.length) return 1;
     return 0;
+  }
+
+  function ajax(opts) {
+    if (typeof opts === "string") opts = {url: opts};
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = opts.responseType || "";
+      xhr.open(opts.method || "GET", opts.url);
+      xhr.onload = resolve.bind(null, xhr);
+      xhr.onerror = reject.bind(null, xhr);
+      xhr.send(opts.data);
+    });
   }
 
   function removeExt(filename) {
