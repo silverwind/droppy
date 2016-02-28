@@ -23,6 +23,7 @@ var opts = {
   filesdir  : "-f, --filesdir <dir>   Files directory. Default: <configdir>/files",
   daemon    : "-d, --daemon           Daemonize (background) process",
   log       : "-l, --log <file>       Log to file instead of stdout",
+  dev       : "--dev                  Enable developing mode",
   color     : "--color                Force enable color in terminal",
   nocolor   : "--no-color             Force disable color in terminal",
 };
@@ -76,7 +77,7 @@ if (cmds[cmd]) {
   var db;
   switch (cmd) {
   case "start":
-    require("./server/server.js")(null, true, function(err) {
+    require("./server/server.js")({dev: Boolean(argv.dev)}, true, function(err) {
       if (err) {
         require("./server/log.js").error(err);
         process.exit(1);
