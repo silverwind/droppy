@@ -279,13 +279,11 @@
       }
     };
     droppy.socket.onmessage = function(event) {
-      var view, msg, vId;
+      var msg = JSON.parse(event.data), vId = msg.vId, view = getView(vId);
       droppy.socketWait = false;
       msg = JSON.parse(event.data);
-      vId = msg.vId;
       switch (msg.type) {
       case "UPDATE_DIRECTORY":
-        view = getView(vId);
         if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.data("type", "directory"); // For initial loading
         if (!view.length) return;
 
@@ -317,7 +315,6 @@
         } else location.reload(true);
         break;
       case "SHARELINK":
-        view = getView(vId);
         hideSpinner(view);
         droppy.linkCache.push({
           location: view[0].sharelinkId,
@@ -330,7 +327,6 @@
         updateUsers(msg.users);
         break;
       case "SAVE_STATUS":
-        view = getView(vId);
         hideSpinner(view);
 
         var file = view.find(".path li:last-child");
@@ -376,7 +372,6 @@
           });
         break;
       case "ERROR":
-        view = getView(vId);
         showError(view, msg.text);
         hideSpinner(view);
         break;
