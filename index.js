@@ -22,7 +22,7 @@ module.exports = function droppy(opts) {
   }
 
   var server = require("./server/server.js");
-  server(opts, false, function(err) {
+  server(opts, false, false, function(err) {
     if (err) throw err;
   });
 

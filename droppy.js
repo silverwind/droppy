@@ -77,7 +77,7 @@ if (cmds[cmd]) {
   var db;
   switch (cmd) {
   case "start":
-    require("./server/server.js")({dev: Boolean(argv.dev)}, true, function(err) {
+    require("./server/server.js")(null, true, argv.dev, function(err) {
       if (err) {
         require("./server/log.js").error(err);
         process.exit(1);

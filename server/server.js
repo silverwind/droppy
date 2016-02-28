@@ -35,7 +35,7 @@ var config        = null;
 var firstRun      = null;
 var ready         = false;
 
-var droppy = function droppy(options, isStandalone, callback) {
+var droppy = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
     log.logo();
     log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
@@ -49,7 +49,13 @@ var droppy = function droppy(options, isStandalone, callback) {
   async.series([
     function(cb) { utils.mkdir([paths.files, paths.temp, paths.config], cb); },
     function(cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
-    function(cb) { cfg.init(options, function(err, conf) { config = conf; cb(err); }); },
+    function(cb) {
+      cfg.init(opts, function(err, conf) {
+        config = conf;
+        if (dev) config.dev = dev;
+        cb(err);
+      });
+    },
     function(cb) { db.init(cb); },
     function(cb) {
       log.init({logLevel: config.logLevel, timestamps: config.timestamps});
