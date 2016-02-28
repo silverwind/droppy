@@ -62,6 +62,12 @@ var opts = {
       rebase: false,
     },
   },
+  brotli: {
+    mode: 1,
+    quality: 11,
+    lgwin: 22,
+    lgblock: 0,
+  }
 };
 
 var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates, zopfli, brotli;
@@ -287,7 +293,7 @@ function brotliMap(map, callback) {
   var names = Object.keys(map), funcs = [];
   names.forEach(function(name) {
     funcs.push(function(cb) {
-      brotli(map[name].data, cb);
+      brotli(map[name].data, opts.brotli, cb);
     });
   });
   async.parallel(funcs, function(err, results) {
