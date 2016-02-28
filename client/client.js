@@ -956,9 +956,9 @@
     });
 
     requestAnimationFrame(function() {
-      view.find(".path li").animate({
+      view.find(".path li").css({
         left: (width > space) ? space - width : 0
-      }, {duration: 200});
+      });
     });
   }
 
