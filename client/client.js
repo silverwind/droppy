@@ -955,10 +955,8 @@
       width += $(this)[0].offsetWidth;
     });
 
-    requestAnimationFrame(function() {
-      view.find(".path li").css({
-        left: (width > space) ? space - width : 0
-      });
+    view.find(".path li").css({
+      left: (width > space) ? space - width : 0
     });
   }
 
