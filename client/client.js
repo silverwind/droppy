@@ -449,7 +449,7 @@
         method: "POST",
         url: getRootPath() + (firstrun ? "adduser" : "login"),
         data: new FormData(form[0])
-      }).then(function (xhr) {
+      }).then(function(xhr) {
         if (xhr.status === 200) {
           location.reload(true);
         } else {
@@ -2613,7 +2613,7 @@
 
   function ajax(opts) {
     if (typeof opts === "string") opts = {url: opts};
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
       xhr.responseType = opts.responseType || "";
       xhr.open(opts.method || "GET", opts.url);
