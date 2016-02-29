@@ -48,7 +48,7 @@
   "devDependencies": {
     "autoprefixer": "^6.3.3",
     "cheerio": "^0.20.0",
-    "clean-css": "^3.4.9",
+    "clean-css": "^3.4.10",
     "codemirror": "^5.12.0",
     "draggabilly": "^2.1.0",
     "handlebars": "^4.0.5",
@@ -57,7 +57,7 @@
     "jquery": "^2.2.1",
     "mousetrap": "^1.5.3",
     "node-zopfli": "^1.4.0",
-    "postcss": "^5.0.17",
+    "postcss": "^5.0.18",
     "screenfull": "^3.0.0",
     "uglify-js": "^2.6.2",
     "uppie": "^0.9.3",
