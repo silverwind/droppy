@@ -1624,28 +1624,26 @@
 
   function openDoc(view, entryId) {
     var editor;
-    var script = $.Deferred();
-    var theme  = $.Deferred();
-    var file   = $.Deferred();
-
     showSpinner(view);
-
-    $.when(file, script, theme).done(function(data) {
+    Promise.all([
+      new Promise(function (resolve) {
+        ajax({
+          url: "?_" + entryId,
+          responseType: "text"
+        }).then(function(xhr) {
+          resolve(xhr.response);
+        }).catch(function() {
+          closeDoc(view);
+        });
+      }),
+      new Promise(initCM),
+      new Promise(function (resolve) {
+        loadTheme(droppy.get("theme"), resolve);
+      }),
+    ]).then(function (values) {
       updateTitle(basename(entryId));
       setEditorFontSize(droppy.get("editorFontSize"));
-      configCM(data, basename(entryId));
-    });
-
-    initCM(script.resolve);
-    loadTheme(droppy.get("theme"), theme.resolve);
-
-    ajax({
-      url: "?_" + entryId,
-      responseType: "text"
-    }).then(function(xhr) {
-      file.resolve(xhr.response);
-    }).catch(function() {
-      closeDoc(view);
+      configCM(values[0], basename(entryId));
     });
 
     function configCM(data, filename) {
