@@ -73,7 +73,7 @@ Run `droppy config` to edit `config/config.json`, which is created with these de
 - `logLevel` *Number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
 - `maxFileSize` *Number* - The maximum file size in bytes a user can upload in a single file.
 - `updateInterval` *Number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system.
-- `pollingInterval` *Number* - Interval in milliseconds in which the file system is polled for changes, which is likely necessary for files on external or network-mapped drives. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
+- `pollingInterval` *Number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
 - `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
 - `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
