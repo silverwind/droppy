@@ -1610,7 +1610,7 @@
       });
       view.find("video").each(function() {
         var self = this;
-        initVideoJS(self, function() {
+        initVideoJS(self).then(function() {
           aspectScale();
           makeMediaDraggable(view.find(".media-container")[0], true);
           bindVideoEvents(self);
@@ -1626,24 +1626,15 @@
     var editor;
     showSpinner(view);
     Promise.all([
-      new Promise(function (resolve) {
-        ajax({
-          url: "?_" + entryId,
-          responseType: "text"
-        }).then(function(xhr) {
-          resolve(xhr.response);
-        }).catch(function() {
-          closeDoc(view);
-        });
-      }),
-      new Promise(initCM),
-      new Promise(function (resolve) {
-        loadTheme(droppy.get("theme"), resolve);
-      }),
-    ]).then(function (values) {
+      ajax({url: "?_" + entryId, responseType: "text"}),
+      initCM(),
+      loadTheme(droppy.get("theme")),
+    ]).then(function(values) {
       updateTitle(basename(entryId));
       setEditorFontSize(droppy.get("editorFontSize"));
-      configCM(values[0], basename(entryId));
+      configCM(values[0].response, basename(entryId));
+    }).catch(function(e) {
+      closeDoc(view);
     });
 
     function configCM(data, filename) {
@@ -2149,39 +2140,47 @@
   }
 
   // video.js
-  function initVideoJS(el, cb) {
-    loadStyle("vjs-css", "?!/lib/vjs.css");
-    loadScript("vjs-js", "?!/lib/vjs.js", function() {
-      (function verify() {
-        if (!("videojs" in window)) return setTimeout(verify, 200);
-        if (!el.classList.contains("video-js")) el.classList.add("video-js", "vjs-default-skin");
-        if (droppy.get("volume") === 0) el.muted = true;
-        var container = $(el).parents(".media-container")[0];
-        videojs.options.flash.swf = "?!/lib/vjs.swf";
-        videojs(el, {
-          controls: true,
-          autoplay: !droppy.detects.mobile,
-          preload : "auto",
-          loop    : "loop",
-          width   : container.clientWidth,
-          heigth  : container.clientHeight
-        }, cb).on("ready", function() {
-          this.volume(droppy.get("volume"));
-        }).on("volumechange", function() {
-          droppy.set("volume", this.muted() ? 0 : this.volume());
-        });
-      })();
+  function initVideoJS(el) {
+    return new Promise(function(resolve) {
+      Promise.all([
+        loadStyle("vjs-css", "?!/lib/vjs.css"),
+        loadScript("vjs-js", "?!/lib/vjs.js"),
+      ]).then(function() {
+        (function verify() {
+          if (!("videojs" in window)) return setTimeout(verify, 200);
+          if (!el.classList.contains("video-js")) el.classList.add("video-js", "vjs-default-skin");
+          if (droppy.get("volume") === 0) el.muted = true;
+          var container = $(el).parents(".media-container")[0];
+          videojs.options.flash.swf = "?!/lib/vjs.swf";
+          videojs(el, {
+            controls: true,
+            autoplay: !droppy.detects.mobile,
+            preload : "auto",
+            loop    : "loop",
+            width   : container.clientWidth,
+            heigth  : container.clientHeight
+          }, resolve).on("ready", function() {
+            this.volume(droppy.get("volume"));
+          }).on("volumechange", function() {
+            droppy.set("volume", this.muted() ? 0 : this.volume());
+          });
+        })();
+      });
     });
   }
 
   // CodeMirror
-  function initCM(cb) {
-    loadStyle("cm-css", "?!/lib/cm.css");
-    loadScript("cm-js", "?!/lib/cm.js", function() {
-      (function verify() {
-        if (!("CodeMirror" in window)) return setTimeout(verify, 200);
-        cb();
-      })();
+  function initCM() {
+    return new Promise(function(resolve) {
+      Promise.all([
+        loadStyle("cm-css", "?!/lib/cm.css"),
+        loadScript("cm-js", "?!/lib/cm.js"),
+      ]).then(function() {
+        (function verify() {
+          if (!("CodeMirror" in window)) return setTimeout(verify, 200);
+          resolve();
+        })();
+      });
     });
   }
 
@@ -2381,28 +2380,34 @@
     }
   }, 5000);
 
-  function loadScript(id, url, cb) {
-    if (!document.getElementById(id)) {
-      var script = document.createElement("script");
-      script.onload = cb;
-      script.setAttribute("id", id);
-      script.setAttribute("src", url);
-      document.querySelector("head").appendChild(script);
-    } else if (cb) cb();
+  function loadScript(id, url) {
+    return new Promise(function(resolve) {
+      if (!document.getElementById(id)) {
+        var script = document.createElement("script");
+        script.onload = resolve;
+        script.setAttribute("id", id);
+        script.setAttribute("src", url);
+        document.querySelector("head").appendChild(script);
+      } else resolve();
+    });
   }
 
-  function loadStyle(id, url, cb) {
-    if (!document.getElementById(id)) {
-      ajax(url).then(function(xhr) {
-        $('<style id="' + id + '"></style>').appendTo("head");
-        $("#" + id).text(xhr.response);
-        if (cb) cb();
-      });
-    } else if (cb) cb();
+  function loadStyle(id, url) {
+    return new Promise(function(resolve) {
+      if (!document.getElementById(id)) {
+        ajax(url).then(function(xhr) {
+          $('<style id="' + id + '"></style>').appendTo("head");
+          $("#" + id).text(xhr.response);
+          resolve();
+        });
+      } else resolve();
+    });
   }
 
-  function loadTheme(theme, cb) {
-    loadStyle("theme-" + theme.replace(/[^a-z0-9\-]/gim, ""), "?!/theme/" + theme, cb);
+  function loadTheme(theme) {
+    return new Promise(function(resolve) {
+      loadStyle("theme-" + theme.replace(/[^a-z0-9\-]/gim, ""), "?!/theme/" + theme).then(resolve);
+    });
   }
 
   function setEditorFontSize(size) {
