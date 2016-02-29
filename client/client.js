@@ -1633,7 +1633,7 @@
       updateTitle(basename(entryId));
       setEditorFontSize(droppy.get("editorFontSize"));
       configCM(values[0].response, basename(entryId));
-    }).catch(function(e) {
+    }).catch(function() {
       closeDoc(view);
     });
 
