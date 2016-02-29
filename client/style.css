@@ -866,8 +866,8 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-percentage {
-  flex: 0 0 3em;
-  color: #bbb;
+  flex: 0 0 2.5em;
+  color: #fff;
   text-align: center;
 }
 
@@ -876,20 +876,19 @@ html:not(.mobile) .vjs-big-play-button {
   color: #fff;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.upload-speed {
-  color: #ccc;
-  flex: 0 0 6em;
-  text-align: center;
-  white-space: nowrap;
+  overflow: hidden;
+  margin-right: .5em;
 }
 
 .upload-time {
   color: #ccc;
-  flex: 0 0 6em;
+  flex: 0 0 10em;
   text-align: center;
   white-space: nowrap;
+}
+
+.upload-speed {
+  margin-left: .2em;
 }
 
 .upload-cancel {
@@ -905,11 +904,9 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 @media (max-width: 479px) {
-  .upload-title       { display: none !important }
-  .upload-speed       { flex: 1 1 !important     }
-  .upload-time        { flex: 1 1 !important     }
-  .upload-cancel      { flex: 0 0 2em !important }
-  .upload-cancel span { display: none !important }
+  .upload-time svg, .upload-speed, .upload-cancel span { display: none !important }
+  .upload-time   { flex: 0 0 4em !important   }
+  .upload-cancel { flex: 0 0 1.5em !important }
 }
 
 .upload-bar {
@@ -927,6 +924,7 @@ html:not(.mobile) .vjs-big-play-button {
   transition: fill .15s ease;
   position: relative;
   top: -.1em;
+  margin-right: .25em;
 }
 
 .upload-cancel:hover { color: #f44 }

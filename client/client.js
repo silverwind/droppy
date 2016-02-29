@@ -705,9 +705,9 @@
       if (view.find(".upload-info").length === 1)
         updateTitle(progress + " - " + basename(view[0].currentFolder));
       info.find(".upload-bar").css("width", progress);
-      info.find(".upload-speed > span").text(speed + "/s");
       info.find(".upload-percentage").text(progress);
-      info.find(".upload-time-left").text(secs > 60 ? Math.ceil(secs / 60) + " mins" : Math.ceil(secs) + " secs");
+      info.find(".upload-time-left").text(secs > 60 ? Math.ceil(secs / 60) + " min" : Math.ceil(secs) + " sec");
+      info.find(".upload-speed").text("(" + speed + "/s)");
       lastUpdate = Date.now();
     }
   }
@@ -2396,8 +2396,10 @@
     return new Promise(function(resolve) {
       if (!document.getElementById(id)) {
         ajax(url).then(function(xhr) {
-          $('<style id="' + id + '"></style>').appendTo("head");
-          $("#" + id).text(xhr.response);
+          var style = document.createElement("style");
+          style.setAttribute("id", id);
+          style.textContent = xhr.response;
+          document.querySelector("head").appendChild(style);
           resolve();
         });
       } else resolve();
