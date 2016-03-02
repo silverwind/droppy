@@ -825,7 +825,7 @@ function handleUploadRequest(req, res) {
   busboy = new Busboy(opts);
   busboy.on("error", log.error);
   busboy.on("file", function(_, file, filePath) {
-    if (!utils.isPathSane(filePath)) return;
+    if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
     var dst = path.join(paths.files, dstDir, filePath);
     var tmp = path.join(paths.temp, crypto.randomBytes(32).toString("hex"));
     var ws  = fs.createWriteStream(tmp, {mode: "644"});
