@@ -54,7 +54,6 @@
     "handlebars": "^4.0.5",
     "html-minifier": "^1.2.0",
     "iltorb": "^1.0.9",
-    "jquery": "^2.2.1",
     "mousetrap": "^1.5.3",
     "node-zopfli": "^1.4.0",
     "postcss": "^5.0.19",
