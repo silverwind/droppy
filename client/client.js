@@ -554,11 +554,14 @@
       });
     }
 
-    $("#create-file-button, #create-folder-button").register("click", function() {
+    var createButtons = $("#create-file-button, #create-folder-button");
+    function createEntry() {
       var view    = getActiveView();
       var isFile  = this.id === "create-file-button";
       var isEmpty = view.find(".empty").length;
       var html    = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
+
+      stopEdit(view, view.find(".editing"), !view.find(".data-row").length);
 
       if (isEmpty)
         view.find(".content").html(Handlebars.templates["file-header"]() + html);
@@ -571,7 +574,14 @@
         if (view.data("type") === "directory") showSpinner(view);
         sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
       });
-    });
+
+      $(this).one("click", function(e) {
+        e.stopImmediatePropagation();
+        stopEdit(view, dummy, isEmpty);
+        createButtons.register("click", createEntry);
+      });
+    }
+    createButtons.register("click", createEntry);
 
     var splitButton = $("#split-button"), splitting;
     droppy.split = function(dest) {
@@ -761,17 +771,18 @@
         }, 500);
       } else {
         success = false;
-        stopEdit(view);
+        stopEdit(view, entry, wasEmpty);
       }
       if (typeof success === "boolean" && typeof callback === "function") {
         callback(success, join(view[0].currentFolder, oldVal), join(view[0].currentFolder, newVal));
       }
     }
-    function stopEdit(view) {
-      entry.removeClass("editing invalid");
-      view.find(".inline-namer, .data-row.new-file, .data-row.new-folder").remove();
-      if (wasEmpty) view.find(".content").html(Handlebars.templates.directory({entries: []}));
-    }
+  }
+
+  function stopEdit(view, entry, wasEmpty) {
+    entry.removeClass("editing invalid");
+    view.find(".inline-namer, .data-row.new-file, .data-row.new-folder").remove();
+    if (wasEmpty) view.find(".content").html(Handlebars.templates.directory({entries: []}));
   }
 
   function toggleCatcher(show) {
