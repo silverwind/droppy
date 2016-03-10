@@ -33,7 +33,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "mv": "^2.1.1",
-    "node-schedule": "^1.0.0",
+    "node-schedule": "^1.1.0",
     "readdirp": "^2.0.0",
     "request": "^2.69.0",
     "rimraf": "^2.5.2",
