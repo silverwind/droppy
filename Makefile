@@ -1,3 +1,5 @@
+JQUERY_FLAGS=-ajax,-css/showHide,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd
+
 lint:
 	eslint --ignore-pattern *.min.js server client *.js
 	stylelint client/*.css
@@ -27,6 +29,12 @@ deploy:
 	if git ls-remote --exit-code demo &>/dev/null; then git push -f demo master; fi
 	if git ls-remote --exit-code droppy &>/dev/null; then git push -f droppy master; fi
 
+jquery:
+	git clone --depth 1 https://github.com/jquery/jquery /tmp/jquery
+	cd /tmp/jquery; npm run build; grunt custom:$(JQUERY_FLAGS); grunt remove_map_comment
+	cp /tmp/jquery/dist/jquery.min.js $(CURDIR)/client/jquery-custom.min.js
+	rm -rf /tmp/jquery
+
 npm-patch:
 	npm version patch
 
@@ -40,4 +48,4 @@ patch: lint npm-patch build docker deploy publish
 minor: lint npm-minor build docker deploy publish
 major: lint npm-major build docker deploy publish
 
-.PHONY: lint publish docker update deploy npm-patch npm-minor npm-major patch minor major
+.PHONY: lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
