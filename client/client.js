@@ -528,7 +528,7 @@
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.directoryUpload)
         fileInput.removeAttr(droppy.prefixes.directory.join(" "));
-      fileInput.click();
+      fileInput[0].click();
     });
 
     // Folder upload button - check if we support directory uploads
@@ -540,11 +540,11 @@
           fileInput.attr(prefix, prefix);
         });
         if (fileInput[0].isFilesAndDirectoriesSupported) {
-          fileInput.click();
+          fileInput[0].click();
         } else if (fileInput[0].chooseDirectory) {
           fileInput[0].chooseDirectory();
         } else {
-          fileInput.click();
+          fileInput[0].click();
         }
       });
     } else {
@@ -676,7 +676,7 @@
   }
 
   function uploadSuccess(view, id) {
-    var info = $(".upload-info[data-id=" + id + "]");
+    var info = $(".upload-info[data-id=\"" + id + "\"]");
     info.find(".upload-bar").css("width", "100%");
     info.find(".upload-percentage").text("100%");
     info.find(".upload-title").text("Processing ...");
@@ -692,7 +692,7 @@
     view[0].isUploading = false;
     updateTitle(basename(view[0].currentFolder));
     setTimeout(function() {
-      $(".upload-info[data-id=" + id + "]").removeClass("in").transitionend(function() {
+      $(".upload-info[data-id=\"" + id + "\"]").removeClass("in").transitionend(function() {
         $(this).remove();
       });
     }, 250);
@@ -703,7 +703,7 @@
   function uploadProgress(view, id, sent, total) {
     // Update progress every 100ms at most
     if (!lastUpdate || (Date.now() - lastUpdate) >= 100) {
-      var info     = $(".upload-info[data-id=" + id + "]");
+      var info     = $(".upload-info[data-id=\"" + id + "\"]");
       var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
       var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
       var elapsed, secs;
@@ -1024,7 +1024,7 @@
         var inp = $("#file");
         if (droppy.detects.directoryUpload)
           inp.removeAttr(droppy.prefixes.directory.join(" "));
-        inp.click();
+        inp[0].click();
       });
 
       // Switch into a folder
@@ -1418,10 +1418,7 @@
     var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header.attr("data-sort"));
     if (view[0].sortAsc) entries = entries.reverse();
     entries.forEach(function(_, i) {
-      view.find("[data-name='" + entries[i].sortname + "']:first").css({
-        "order": String(i),
-        "-ms-flex-order": String(i)
-      }).attr("order", String(i));
+      view.find("[data-name=\"" + entries[i].sortname + "\"]").css("order", i).attr("order", i);
     });
   }
 
@@ -1709,7 +1706,7 @@
               "\t" : Array(droppy.get("indentUnit") + 1).join(" "));
           },
           "Cmd-S": save,
-          "Ctrl-S": save,
+          "Ctrl-S": save
         });
 
         // Let Mod-T through to the browser
