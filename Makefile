@@ -26,7 +26,7 @@ update:
 	touch client/client.js
 
 deploy:
-	git commit --allow-empty --allow-empty-message
+	git commit --allow-empty --allow-empty-message -m ""
 	if git ls-remote --exit-code demo &>/dev/null; then git push -f demo master; fi
 	if git ls-remote --exit-code droppy &>/dev/null; then git push -f droppy master; fi
 	git reset --hard HEAD~1
