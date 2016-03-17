@@ -26,8 +26,10 @@ update:
 	touch client/client.js
 
 deploy:
+	git commit --allow-empty --allow-empty-message
 	if git ls-remote --exit-code demo &>/dev/null; then git push -f demo master; fi
 	if git ls-remote --exit-code droppy &>/dev/null; then git push -f droppy master; fi
+	git reset --hard HEAD~1
 
 jquery:
 	git clone --depth 1 https://github.com/jquery/jquery /tmp/jquery
