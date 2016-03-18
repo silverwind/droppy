@@ -383,11 +383,7 @@ function setupSocket(server) {
         filetree.move(msg.data.src, msg.data.dst);
         break;
       case "GET_USERS":
-        if (priv && !config.public) {
-          sendUsers(sid);
-        } else { // Unauthorized or no user accounts
-          sendObj(sid, {type: "USER_LIST", users: false});
-        }
+        if (priv && !config.public) sendUsers(sid);
         break;
       case "UPDATE_USER":
         var name = msg.data.name, pass = msg.data.pass;
