@@ -532,7 +532,7 @@ input::-webkit-input-placeholder { color: #999 }
   width: 1.5rem;
   visibility: hidden;
   pointer-events: none;
-  fill: #ccc;
+  fill: #bbb;
 }
 .spinner.in { visibility: visible; animation: spin .75s infinite linear }
 
