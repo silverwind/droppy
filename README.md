@@ -9,43 +9,51 @@
 * Side-by-Side mode
 * Share public download links
 * Zip download of folders
+* Convenient editor for text files
 * Image and video gallery, audio player
 * Drag & drop and swipe gestures
 * Fullscreen support
-* Edit text files in a heavily customized CodeMirror
 
-### Install
-With [`Node.js`](https://nodejs.org) 0.10 or greater installed, run:
+### Installation
+
+Note that two directories will be used for file access:
+
+- `config` directory: set with `--configdir <dir>`, default `~/.droppy/config`.
+- `files` directory: set with `--filesdir <dir>`, default `~/.droppy/files`.
+
+#### Local Installation
+With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 
 ```console
+# Install latest version and dependencies.
 $ [sudo] npm install -g droppy
-$ droppy start
+
+# Start with `/srv/droppy/files` containing the shared files.
+$ droppy start --configdir /srv/droppy/config --filesdir /srv/droppy/files
+
+# Open http://localhost:8989/ in your browser.
 ```
 
-If you're running Docker :whale:, use the official (work in progress) image:
+#### Docker installation :whale:
 ```console
+# Pull the latest image from Docker Hub.
 $ docker pull silverwind/droppy
-$ docker run -p 8989:8989 -v $HOSTDIR:/droppy-data silverwind/droppy
+
+# Create directories for the volumes. These are mounted in the next step.
+$ mkdir -p /srv/droppy/files
+$ mkdir -p /srv/droppy/config
+
+# Start the container, binding to port 8989 on the docker host and mouning the directories.
+$ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
+
+# Open http://localhost:8989/ in your browser.
 ```
-Replace `$HOSTDIR` with a directory on the docker host where configuration and files can be stored for persistence outside the container. This isn't strictly necessary, but it enables one to update by simply pulling a new image.
 
-To install to a local directory:
-```console
-$ git clone https://github.com/silverwind/droppy.git
-$ cd droppy
-$ npm install
-$ node droppy.js start
-```
+### Configuration
 
-To store configuration and files, these two directories will be used:
+By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt for login data for the first account will appear, after which a login is necessary. Additional accounts can be created in the options interface or the command line.
 
-- `~/.droppy`: configuration directory. Override with `--configdir <dir>`.
-- `~/.droppy/files`: files directory. Override with `--filesdir <dir>`.
-
-By default, the server listens on all interfaces, port 8989. On first login, a prompt for username and password for the first account will appear. Additional accounts can be created in the options interface or the command line.
-
-### Configure
-Run `droppy config` to edit `config/config.json`, which is created with these defaults:
+Configuration is done in `config/config.json`, which is created with these defaults:
 ```javascript
 {
   "listeners" : [
@@ -146,10 +154,23 @@ Returns `function onRequest(req, res)`. All arguments are optional.
 - [Reverse proxying through nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 
 ### Note about wget
-For correct filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
+For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
 
 ```ini
 content-disposition = on
+```
+
+#### Upgrading a local installation
+```console
+$ [sudo] npm install -g droppy
+```
+
+#### Upgrading a Docker installation
+```console
+$ docker pull silverwind/droppy
+$ docker stop droppy
+$ docker rm droppy
+$ docker run --name droppy -p 8989:80 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
 ```
 
 ### Note about startup performance

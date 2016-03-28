@@ -45,13 +45,8 @@ if (argv._[0] === "build") {
   });
 }
 
-if (argv.configdir || argv.filesdir || argv.home || argv.c || argv.f) {
-  if (argv.home)
-    console.log("\n Warning: --home is deprecated, use --configdir and --filesdir\n");
-
-  var cfgDir = argv.configdir || argv.c || argv.home;
-  var filesDir = argv.filesdir || argv.f;
-  require("./server/paths.js").seed(cfgDir, filesDir);
+if (argv.configdir || argv.filesdir || argv.c || argv.f) {
+  require("./server/paths.js").seed(argv.configdir || argv.c, argv.filesdir || argv.f);
 }
 
 if (argv.log || argv.l) {

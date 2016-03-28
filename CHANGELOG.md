@@ -1,5 +1,12 @@
 *For patch-level releases, see the commit log*
 
+#### Version 4.0.0 - 3/29/2016
+
+- Changed default config directory from `~/.droppy` to `~/.droppy/config`. Please move the `.json` config files to this new directory for before upgrading local installations.
+- Dropped support for having `files` inside the `config` (e.g. only specifying `--configdir` or the old `--home`). If `--filesdir` is unspecified it will now fall back to the default.
+- Changed the Docker mount points inside the container. `/droppy-data/files` is now `/files`, `/droppy-data` is now `/config` to match the options.
+- CTRL-C should now work when using `docker run` without `-d`.
+
 #### Version 3.9.0 - 2/27/2016
 
 - Brotli compression is now supported, resulting in around 15% faster initial load. Works in Firefox >= 44 and Chrome with a flag enabled.
