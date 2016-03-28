@@ -16,7 +16,7 @@
 
 ### Installation
 
-Note that two directories will be used for file access:
+Note that two directories will be used for file system access:
 
 - `config` directory: set with `--configdir <dir>`, default `~/.droppy/config`.
 - `files` directory: set with `--filesdir <dir>`, default `~/.droppy/files`.
