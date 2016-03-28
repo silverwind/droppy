@@ -24,7 +24,7 @@ Note that two directories will be used for file access:
 #### Local Installation
 With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 
-```console
+```sh
 # Install latest version and dependencies.
 $ [sudo] npm install -g droppy
 
@@ -35,7 +35,7 @@ $ droppy start --configdir /srv/droppy/config --filesdir /srv/droppy/files
 ```
 
 #### Docker installation :whale:
-```console
+```sh
 # Pull the latest image from Docker Hub.
 $ docker pull silverwind/droppy
 
@@ -161,12 +161,12 @@ content-disposition = on
 ```
 
 #### Upgrading a local installation
-```console
+```sh
 $ [sudo] npm install -g droppy
 ```
 
 #### Upgrading a Docker installation
-```console
+```sh
 $ docker pull silverwind/droppy
 $ docker stop droppy
 $ docker rm droppy
