@@ -28,7 +28,7 @@ With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 # Install latest version and dependencies.
 $ [sudo] npm install -g droppy
 
-# Start with `/srv/droppy/files` containing the shared files.
+# Start with `/srv/droppy/config` for config and `/srv/droppy/files` for files.
 $ droppy start --configdir /srv/droppy/config --filesdir /srv/droppy/files
 
 # Open http://localhost:8989/ in your browser.
