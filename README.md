@@ -43,7 +43,7 @@ $ docker pull silverwind/droppy
 $ mkdir -p /srv/droppy/files
 $ mkdir -p /srv/droppy/config
 
-# Start the container, binding to port 8989 on the docker host and mouning the directories.
+# Start the container, binding to port 8989 on the docker host and mounting the directories.
 $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
 
 # Open http://localhost:8989/ in your browser.
