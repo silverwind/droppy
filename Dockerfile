@@ -6,7 +6,6 @@ RUN mkdir /config
 RUN mkdir /files
 RUN mkdir /app
 
-
 # Install dependencies
 WORKDIR /app
 COPY package.json /app/package.json
