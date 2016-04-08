@@ -325,7 +325,7 @@ input::-webkit-input-placeholder { color: #999 }
   order: -1;
   color: #666;
   font-size: .8rem;
-  line-height: 1rem;
+  line-height: 1.3em;
   border-bottom: 1px solid #bbb;
   background: #ddd;
   user-select: none;
@@ -401,7 +401,7 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row {
   display: flex;
   align-items: center;
-  line-height: 1.4em;
+  line-height: 1.3em;
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
 }
