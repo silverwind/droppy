@@ -1,7 +1,10 @@
 .cm-s-droppy.CodeMirror {
   color: #ccc;
-  background: #161616;
-  box-shadow: inset 0 0 10px #000;
+  background: #141414;
+}
+
+.cm-s-droppy .CodeMirror-sizer {
+  box-shadow: inset 0 0 10px rgba(0,0,0,.6);
 }
 
 @media screen and (max-resolution: 1.99dppx) {
@@ -12,9 +15,8 @@
 }
 
 .cm-s-droppy .CodeMirror-gutters {
-  background: #242424;
-  border-right: none;
-  box-shadow: 0 0 10px #000;
+  background: #282828;
+  border: none;
 }
 
 .cm-s-droppy .CodeMirror-matchingbracket          { color: #0f0 }
@@ -22,16 +24,25 @@
 .cm-s-droppy .CodeMirror-linenumber               { color: #999; padding: 0 5px }
 .cm-s-droppy .CodeMirror-guttermarker             { color: #aaa }
 .cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
-.cm-s-droppy .CodeMirror-lines .CodeMirror-cursor { border-left: 1px solid #ccc }
-.cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber { color: #fff; background: #444 }
+
+.cm-s-droppy .CodeMirror-lines .CodeMirror-cursor {
+  border-left: 1px solid #ccc
+}
+
+.cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber {
+  color: #fff;
+  background: rgba(255,255,255,.1);
+}
+.cm-s-droppy .CodeMirror-activeline-background {
+  background: rgba(255,255,255,.035);
+}
+
+.cm-s-droppy .CodeMirror-selected         { background: rgba(255,255,255,.1) }
+.cm-s-droppy .CodeMirror ::selection      { background: rgba(255,255,255,.1) }
+.cm-s-droppy .CodeMirror ::-moz-selection { background: rgba(255,255,255,.1) }
+
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
-
 .cm-s-droppy .cm-searching { background: #ff8; color: #000 }
-
-.cm-s-droppy .CodeMirror-focused .CodeMirror-selected, .cm-s-droppy .CodeMirror-selected,
-.cm-s-droppy .CodeMirror-activeline-background { background: #262626 !important }
-.cm-s-droppy .CodeMirror ::selection      { background: #262626 }
-.cm-s-droppy .CodeMirror ::-moz-selection { background: #262626 }
 
 .cm-s-droppy .cm-keyword    { color: #cda869 }
 .cm-s-droppy .cm-atom       { color: #cf6a4c }
