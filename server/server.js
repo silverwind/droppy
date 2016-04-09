@@ -512,7 +512,7 @@ function handleGET(req, res) {
 
   if (/^\/\?!\//.test(URI)) {
     handleResourceRequest(req, res, /\?!\/([\s\S]+)$/.exec(URI)[1]);
-  } else if (/^\/\?\@$/.test(URI)) {
+  } else if (/^\/\?@$/.test(URI)) {
     if (validateRequest(req)) {
       res.writeHead(200, {"Content-Type": "text/plain", Expires: "0"});
       res.end(csrf.get(req));
