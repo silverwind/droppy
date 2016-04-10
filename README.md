@@ -151,7 +151,8 @@ Returns `function onRequest(req, res)`. All arguments are optional.
 ### Installation guides
 - [Installation as systemd service](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 - [Installation as debian initscript](https://github.com/silverwind/droppy/wiki/Debian-Installation)
-- [Reverse proxying through nginx](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
+- [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
+- [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
 
 ### Note about wget
 For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
