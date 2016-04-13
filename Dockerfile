@@ -2,8 +2,6 @@ FROM mhart/alpine-node:latest
 MAINTAINER silverwind
 
 # Create directories
-RUN mkdir /config
-RUN mkdir /files
 RUN mkdir /app
 
 # Install dependencies
@@ -17,6 +15,9 @@ COPY client /app/client
 COPY dist /app/dist
 COPY droppy.js /app/droppy.js
 
+# Copy statup script
+COPY docker-start.sh /start.sh
+
 # Run
 EXPOSE 8989
-CMD ["node", "droppy.js", "start", "--configdir",  "/config" , "--filesdir",  "/files", "--color"]
+CMD ["/start.sh"]
