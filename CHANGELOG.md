@@ -1,5 +1,9 @@
 *For patch-level releases, see the commit log*
 
+#### Version 4.1.0 - 4/14/2016
+
+- Added UID and GID arguments for Docker deployments
+
 #### Version 4.0.0 - 3/29/2016
 
 - Changed default config directory from `~/.droppy` to `~/.droppy/config`. Please move the `.json` config files to this new directory for before upgrading local installations.
