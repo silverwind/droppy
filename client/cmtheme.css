@@ -26,7 +26,7 @@
 .cm-s-droppy .CodeMirror-guttermarker-subtle      { color: #666 }
 
 .cm-s-droppy .CodeMirror-lines .CodeMirror-cursor {
-  border-left: 1px solid #ccc
+  border-left: 1px solid #ccc;
 }
 
 .cm-s-droppy .CodeMirror-activeline .CodeMirror-linenumber {
@@ -37,9 +37,13 @@
   background: rgba(255,255,255,.035);
 }
 
-.cm-s-droppy .CodeMirror-selected         { background: rgba(255,255,255,.1) }
-.cm-s-droppy .CodeMirror ::selection      { background: rgba(255,255,255,.1) }
-.cm-s-droppy .CodeMirror ::-moz-selection { background: rgba(255,255,255,.1) }
+.cm-s-droppy .CodeMirror-selected,
+.cm-s-droppy .CodeMirror-focused .CodeMirror-selected,
+.cm-s-droppy .CodeMirror-activeline-background {
+  background: #383838 !important;
+}
+.cm-s-droppy .CodeMirror ::selection      { background: #383838 !important }
+.cm-s-droppy .CodeMirror ::-moz-selection { background: #383838 !important }
 
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
 .cm-s-droppy .cm-searching { background: #ff8; color: #000 }
