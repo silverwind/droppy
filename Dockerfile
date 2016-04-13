@@ -15,7 +15,7 @@ COPY client /app/client
 COPY dist /app/dist
 COPY droppy.js /app/droppy.js
 
-# Copy statup script
+# Copy startup script
 COPY docker-start.sh /start.sh
 
 # Run
