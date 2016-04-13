@@ -36,18 +36,16 @@ $ droppy start --configdir /srv/droppy/config --filesdir /srv/droppy/files
 
 #### Docker installation :whale:
 ```sh
-# Pull the latest image from Docker Hub.
-$ docker pull silverwind/droppy
-
-# Create directories for the volumes. These are mounted in the next step.
+# Create directories for the volumes. These are mounted inside the container in the next step.
 $ mkdir -p /srv/droppy/files
 $ mkdir -p /srv/droppy/config
 
-# Start the container, binding to port 8989 on the docker host and mounting the directories.
+# Start the container, forwarding port 8989 on the host.
 $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
 
 # Open http://localhost:8989/ in your browser.
 ```
+*Note: While it's adviceable that all files in the `files` and `config` directory are owned by the user running the application, changing the ownership of files is supported through passing  the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
 
 ### Configuration
 
