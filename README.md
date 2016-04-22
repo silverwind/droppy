@@ -1,21 +1,22 @@
 # droppy [![](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![](https://img.shields.io/badge/licence-bsd-blue.svg)](https://raw.githubusercontent.com/silverwind/droppy/master/LICENSE) [![](http://img.shields.io/npm/dm/droppy.svg)](https://www.npmjs.org/package/droppy)
 
-`droppy` is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It is especially well suited to be ran on low-end hardware like the Raspberry Pi.
+`droppy` is a self-hosted file storage server with an interface similar to desktop file managers, with capabilites to edit files and view media directly in the browser. It is especially well suited to be ran on low-end hardware like the Raspberry Pi.
 
 ### Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
-* Multi-file and folder upload
 * Realtime updates of changes
-* Side-by-Side mode
-* Share public download links
-* Zip download of folders
-* Convenient editor for text files
-* Image and video gallery, audio player
+* Directory upload support
 * Drag & drop and swipe gestures
-* Fullscreen support
+* Side-by-Side mode
+* Shareable public download links
+* Zip download of directories
+* Powerful editor for text files
+* Image and video gallery, audio player
+* Fullscreen support for media galleries
+* Supports installing to the homescreen
 
 ### Installation
-Note that two directories will be used for file system access:
+Note that two directories will be used by droppy:
 
 - `config` directory: set with `--configdir <dir>`, default `~/.droppy/config`.
 - `files` directory: set with `--filesdir <dir>`, default `~/.droppy/files`.
