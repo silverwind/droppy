@@ -52,19 +52,41 @@
 
   // Set a new class on an element, and make sure it is ready to be transitioned.
   $.fn.transition = function(oldclass, newclass) {
-    if (typeof newclass === "undefined") {
+    if (!newclass) {
       newclass = oldclass;
       oldclass = null;
     }
-    // Add a pseudo-animation to the element. When the "animationstart" event
-    // is fired on the element, we know it is ready to be transitioned.
-    this.css("animation", "nodeInserted 0.001s");
 
     // Set the new and oldclass as data attributes.
     if (oldclass) this.data("oldclass", oldclass);
     this.data("newclass", newclass);
+
+    // Add a pseudo-animation to the element. When the "animationstart" event
+    // is fired on the element, we know it is ready to be transitioned.
+    this.each(function() {
+      this.style.animation = "nodeInserted 0.001s";
+    });
     return this;
   };
+
+  // Listen for the animation event for our pseudo-animation
+  document.addEventListener("animationstart", function(event) {
+    if (event.animationName === "nodeInserted") {
+      var target   = $(event.target);
+      var newClass = target.data("newclass");
+      var oldClass = target.data("oldclass");
+
+      // Clean up our data attribute and remove the animation
+      target.removeData("newclass");
+      target[0].style.removeProperty("animation");
+
+      // Set transition classes
+      if (oldClass)
+        target.removeData("oldclass").replaceClass(oldClass, newClass);
+      else
+        target.addClass(newClass);
+    }
+  });
 
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
   $.fn.transitionend = function(callback) {
@@ -88,11 +110,11 @@
 
   // Class swapping helper
   $.fn.replaceClass = function(search, replacement) {
-    var elem, classes, matches, i = this.length, hasClass = false;
+    var el, classes, matches, i = this.length, hasClass = false;
     while (--i >= 0) {
-      elem = this[i];
-      if (typeof elem === "undefined") return false;
-      classes = elem.className.split(" ").filter(function(className) {
+      el = this[i];
+      if (el === undefined) return false;
+      classes = el.className.split(" ").filter(function(className) {
         if (className === search) return false;
         if (className === replacement) hasClass = true;
 
@@ -103,25 +125,12 @@
       });
       if (!hasClass) classes.push(replacement);
       if (classes.length === 0 || (classes.length === 1 && classes[0] === ""))
-        elem.removeAttribute("class");
+        el.removeAttribute("class");
       else
-        elem.className = classes.join(" ");
+        el.className = classes.join(" ");
     }
     return this;
   };
-
-  // Listen for the animation event for our pseudo-animation
-  document.addEventListener("animationstart", function(event) {
-    if (event.animationName === "nodeInserted") {
-      var target = $(event.target), newClass = target.data("newclass"), oldClass = target.data("oldclass");
-      // Clean up our data attribute and remove the animation
-      target.removeData("newclass").css("animation", "");
-
-      // Set transition classes
-      if (oldClass) target.removeData("oldclass").replaceClass(oldClass, newClass);
-      else target.addClass(newClass);
-    }
-  });
 
   Handlebars.registerHelper("select", function(sel, opts) {
     return opts.fn(this).replace(new RegExp(' value="' + sel + '"'), "$& selected=");
@@ -172,21 +181,17 @@
     localStorage.setItem("prefs", JSON.stringify(prefs));
   };
 // ============================================================================
-//  Page load
+//  Entry point
 // ============================================================================
-  $(function() {
-    var type = $("html").data("type");
-    if (type === "main") {
-      initMainPage();
-    } else {
-      if (type === "firstrun") {
-        $("#login-info").text("Hello! Choose your credentials.");
-      } else if (droppy.get("hasLoggedOut")) {
-        droppy.set("hasLoggedOut", false);
-      }
-      initAuthPage(type === "firstrun");
-    }
-  });
+  var type = $("html").data("type");
+  if (type === "main") {
+    initMainPage();
+  } else {
+    var isFirst = type === "firstrun";
+    if (isFirst) $("#login-info").text("Hello! Choose your credentials.");
+    droppy.set("hasLoggedOut", false);
+    initAuthPage(isFirst);
+  }
 // ============================================================================
 //  View handling
 // ============================================================================
@@ -332,7 +337,7 @@
         var file = view.find(".path li:last-child");
         var oldStyle = file.attr("style");
 
-        file.find("svg").css("transition", "fill .2s ease");
+        file.find("svg")[0].style.transition = "fill .2s ease";
         file.removeClass("dirty").attr("style", "transition: background .2s ease;")
           .addClass(msg.status === 0 ? "saved" : "save-failed");
         setTimeout(function() {
@@ -568,7 +573,7 @@
       else
         view.find(".content").prepend(html);
 
-      view.find(".content").scrollTop(0);
+      view.find(".content")[0].scrollTop = 0;
       var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
       entryRename(view, dummy, isEmpty, function(_success, _oldVal, newVal) {
         if (view.data("type") === "directory") showSpinner(view);
@@ -677,7 +682,7 @@
 
   function uploadSuccess(view, id) {
     var info = $(".upload-info[data-id=\"" + id + "\"]");
-    info.find(".upload-bar").css("width", "100%");
+    info.find(".upload-bar")[0].style.width = "100%";
     info.find(".upload-percentage").text("100%");
     info.find(".upload-title").text("Processing ...");
     updateTitle("Processing - " + basename(view[0].currentFolder));
@@ -714,7 +719,7 @@
 
       if (view.find(".upload-info").length === 1)
         updateTitle(progress + " - " + basename(view[0].currentFolder));
-      info.find(".upload-bar").css("width", progress);
+      info.find(".upload-bar")[0].style.width = progress;
       info.find(".upload-percentage").text(progress);
       info.find(".upload-time-left").text(secs > 60 ? Math.ceil(secs / 60) + " min" : Math.ceil(secs) + " sec");
       info.find(".upload-speed").text("(" + speed + "/s)");
@@ -757,7 +762,7 @@
     renamer[0].focus();
 
     Mousetrap(renamer[0])
-      .bind("escape", stopEdit.bind(null, view))
+      .bind("escape", stopEdit.bind(null, view, entry, wasEmpty))
       .bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
@@ -914,15 +919,16 @@
         }
         i++;
       }
-      finalize();
     } else {
       addPart(parts[0], "/");
       for (var len = parts.length; i < len; i++) {
         pathStr += "/" + parts[i];
         addPart(parts[i], pathStr);
       }
-      finalize();
     }
+
+    view.find(".path li:not(.gone)").transition("in");
+    setTimeout(function() {checkPathOverflow(view); }, 400);
 
     view[0].savedParts = parts;
 
@@ -951,23 +957,16 @@
         $(this).remove();
       });
     }
-
-    function finalize() {
-      view.find(".path li:not(.gone)").transition("in");
-      setTimeout(function() {checkPathOverflow(view); }, 400);
-    }
   }
 
   // Check if the path indicator overflows and scroll it if neccessary
   function checkPathOverflow(view) {
-    var width = 40, space = view.width();
-
+    var width = 40, space = view[0].clientWidth;
     view.find(".path li.in").each(function() {
-      width += $(this)[0].offsetWidth;
+      width += $(this)[0].clientWidth;
     });
-
-    view.find(".path li").css({
-      left: (width > space) ? space - width : 0
+    view.find(".path li").each(function() {
+      this.style.left = width > space ? (space - width) + "px" : 0;
     });
   }
 
@@ -1049,12 +1048,12 @@
       view.find(".data-row").register("contextmenu", function(event) {
         var target = $(event.currentTarget);
         if (target.data("type") === "error") return;
-        showEntryMenu(target, event.clientX, event.clientY);
+        showEntryMenu(target, event.clientX, event.clientY, true);
         event.preventDefault();
       });
 
       view.find(".data-row .entry-menu").register("click", function(event) {
-        showEntryMenu($(event.target).parents(".data-row"));
+        showEntryMenu($(event.target).parents(".data-row"), event.clientX, event.clientY);
       });
 
       // Stop navigation when clicking on an <a>
@@ -1111,14 +1110,18 @@
       view.find(".data-row").addClass("animating");
       view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
         "back" : (view[0].animDirection === "back") ? "forward" : "center");
-      getOtherViews(view[0].vId).css("z-index", "1");
+      getOtherViews(view[0].vId).each(function() {
+        this.style.zIndex = "1";
+      });
       view.find(".new").addClass(type).transition(navRegex, "center").transitionend(finish);
     }
     view[0].animDirection = "center";
 
     function finish() {
       view[0].isAnimating = false;
-      getOtherViews(view[0].vId).css("z-index", "auto");
+      getOtherViews(view[0].vId).each(function() {
+        this.style.zIndex = "auto";
+      });
       view.find(".content:not(.new)").remove();
       view.find(".new").removeClass("new");
       view.find(".data-row").removeClass("animating");
@@ -1152,7 +1155,10 @@
       else
         left = x;
 
-      dropSelect.css({left: left, top: event.originalEvent.clientY}).addClass("in");
+      dropSelect[0].style.left = left + "px";
+      dropSelect[0].style.top = event.originalEvent.clientY + "px";
+      dropSelect.addClass("in");
+
       $(document.elementFromPoint(x, y)).addClass("active").one("mouseleave", function() {
         $(this).removeClass("active");
       });
@@ -1385,29 +1391,28 @@
     }
   }
 
-  function showEntryMenu(entry, x, y) {
-    var left, top, maxTop;
+  function showEntryMenu(entry, x, y, rightClick) {
     var type   = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1];
     var button = entry.find(".entry-menu");
     var menu   = $("#entry-menu");
+    var top    = entry[0].getBoundingClientRect().top + document.body.scrollTop;
+    var maxTop = window.innerHeight - menu[0].clientHeight;
+    var left   = rightClick ? x - menu[0].clientWidth / 2 :
+      button[0].getBoundingClientRect().left + document.body.scrollLeft +
+      button[0].clientWidth - menu[0].clientWidth;
+
     menu.attr("class", "type-" + type);
-    left   = x ? (x - menu.width() / 2) : (button.offset().left + button.width() - menu.width());
-    top    = entry.offset().top;
-    maxTop = $(document).height() - menu.height();
     entry.addClass("active");
     toggleCatcher(true);
-    menu.css({
-      left: (left > 0 ? left : 0) + "px",
-      top: (top > maxTop ? maxTop : top) + "px"
-    }).data("target", entry).addClass("in");
+    menu[0].style.left = (left > 0 ? left : 0) + "px";
+    menu[0].style.top = (top > maxTop ? maxTop : top) + "px";
+    menu.data("target", entry).addClass("in");
 
-    if (x && y) {
-      var target = document.elementFromPoint(x, y);
-      target = target.tagName.toLowerCase() === "a" ? $(target) : $(target).parents("a");
-      target.addClass("active").one("mouseleave", function() {
-        $(this).removeClass("active");
-      });
-    }
+    var target = document.elementFromPoint(x, y);
+    target = target.tagName.toLowerCase() === "a" ? $(target) : $(target).parents("a");
+    target.addClass("active").one("mouseleave", function() {
+      $(this).removeClass("active");
+    });
   }
 
   function sortByHeader(view, header) {
@@ -1418,7 +1423,9 @@
     var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header.attr("data-sort"));
     if (view[0].sortAsc) entries = entries.reverse();
     entries.forEach(function(_, i) {
-      view.find("[data-name=\"" + entries[i].sortname + "\"]").css("order", i).attr("order", i);
+      var entry = view.find("[data-name=\"" + entries[i].sortname + "\"]")[0];
+      entry.style.order = i;
+      entry.setAttribute("order", i);
     });
   }
 
@@ -1852,7 +1859,7 @@
   // ============================================================================
 
   function play(view, index) {
-    var row, source, content, player = view.find(".audio-player")[0];
+    var row, source, player = view.find(".audio-player")[0];
 
     if (typeof index === "number")
       row = view.find('.data-row[data-playindex="' + index + '"]');
@@ -1869,7 +1876,7 @@
     }
 
     source = "?_" + row.data("id");
-    view.find(".seekbar-played, .seekbar-loaded").css("width", "0%");
+    view.find(".seekbar-played, .seekbar-loaded")[0].style.width = "0%";
 
     if (player.canPlayType(droppy.audioTypes[fileExtension(source)])) {
       player.src = source;
@@ -1883,9 +1890,9 @@
     row.addClass("playing").siblings().removeClass("playing");
 
     if (row.length) {
-      content = row.parents(".content-container");
-      if (row[0].offsetTop < content.scrollTop() ||
-        row[0].offsetTop > content.scrollTop() + content.height()) {
+      var content = row.parents(".content-container");
+      if (row[0].offsetTop < content[0].scrollTop ||
+          row[0].offsetTop > content[0].scrollTop + content[0].clientHeight) {
         row[0].scrollIntoView();
       }
 
@@ -1971,7 +1978,8 @@
       event.stopPropagation();
     });
     bar.register("click", function(event) {
-      var time = player.duration * ((event.pageX - bar.offset().left) / bar.innerWidth());
+      var time = player.duration *
+        ((event.pageX - bar[0].getBoundingClientRect().left) / bar[0].clientWidth);
       if (!isNaN(parseFloat(time)) && isFinite(time))
         player.currentTime = time;
       else
@@ -2031,7 +2039,7 @@
       else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
       else if (player.volume <= 0.67) volumeIcon.html(droppy.svg["volume-medium"]);
       else volumeIcon.html(droppy.svg["volume-high"]);
-      view.find(".volume-slider-inner").width((volume * 100) + "%");
+      view.find(".volume-slider-inner")[0].style.width = (volume * 100) + "%";
     }
     function playRandom(view) {
       var nextIndex;
@@ -2543,16 +2551,18 @@
           h: this.naturalHeight || this.videoHeight || this.clientHeight
         };
         var space = {
-          w: container.width(),
-          h: container.height()
+          w: container[0].clientWidth,
+          h: container[0].clientHeight
         };
         if (dims.w > space.w || dims.h > space.h) {
           $(this).removeAttr("style"); // Let CSS handle the downscale
         } else {
           if (dims.w / dims.h > space.w / space.h) {
-            $(this).css({width: "100%", height: "auto"});
+            this.style.width  = "100%";
+            this.style.height = "auto";
           } else {
-            $(this).css({width: "auto", height: "100%"});
+            this.style.width  = "auto";
+            this.style.height = "100%";
           }
         }
       });
