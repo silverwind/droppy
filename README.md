@@ -1,6 +1,6 @@
 # droppy [![](https://img.shields.io/npm/v/droppy.svg)](https://www.npmjs.org/package/droppy) [![](https://img.shields.io/badge/licence-bsd-blue.svg)](https://raw.githubusercontent.com/silverwind/droppy/master/LICENSE) [![](http://img.shields.io/npm/dm/droppy.svg)](https://www.npmjs.org/package/droppy)
 
-`droppy` is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It focuses on performance and intuitive usage. To provide low-overhead realtime updates, most communication is done through WebSockets.
+`droppy` is a self-hosted file storage server with an interface similar to desktop file managers and has capabilites to edit files as well as view media directly in the browser. It is especially well suited to be ran on low-end hardware like the Raspberry Pi.
 
 ### Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
@@ -15,7 +15,6 @@
 * Fullscreen support
 
 ### Installation
-
 Note that two directories will be used for file system access:
 
 - `config` directory: set with `--configdir <dir>`, default `~/.droppy/config`.
@@ -48,10 +47,8 @@ $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/dr
 *Note: While it's adviceable that all files in the `config` and `files` directory are owned by the user running the application, changing the ownership of files is supported through passing  the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
 
 ### Configuration
+By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
 
-By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt for login data for the first account will appear, after which a login is necessary. Additional accounts can be created in the options interface or the command line.
-
-Configuration is done in `config/config.json`, which is created with these defaults:
 ```javascript
 {
   "listeners" : [
@@ -71,6 +68,7 @@ Configuration is done in `config/config.json`, which is created with these defau
   "keepAlive"       : 20000
 }
 ```
+
 ### Options
 - `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
 - `public` *Boolean* - When enabled, no user authentication is performed.
@@ -86,7 +84,7 @@ Configuration is done in `config/config.json`, which is created with these defau
 <a name="listener-options" />
 #### Listener Options
 
-`listeners` defines on which network interfaces, ports and protcol(s) the server will listen. For example:
+`listeners` defines on which network interfaces, ports and protocol(s) the server will listen. For example:
 
 ```javascript
 "listeners": [
@@ -152,13 +150,6 @@ Returns `function onRequest(req, res)`. All arguments are optional.
 - [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 - [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
 
-### Note about wget
-For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
-
-```ini
-content-disposition = on
-```
-
 #### Upgrading a local installation
 ```sh
 $ [sudo] npm install -g droppy
@@ -169,10 +160,16 @@ $ [sudo] npm install -g droppy
 $ docker pull silverwind/droppy
 $ docker stop droppy
 $ docker rm droppy
-$ docker run --name droppy -p 8989:80 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
+$ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
 ```
 
 ### Note about startup performance
 droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hunderts of thousands of files present.
 
+### Note about wget
+For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
+
+```ini
+content-disposition = on
+```
 © [silverwind](https://github.com/silverwind), distributed under BSD licence.
