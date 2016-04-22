@@ -79,13 +79,10 @@
     "server",
     "http",
     "https",
-    "web",
-    "html5",
     "media",
     "cloud",
     "storage",
     "self",
     "hosted",
-    "codemirror"
   ]
 }
