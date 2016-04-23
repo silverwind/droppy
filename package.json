@@ -52,7 +52,7 @@
     "codemirror": "^5.14.2",
     "draggabilly": "^2.1.0",
     "handlebars": "^4.0.5",
-    "html-minifier": "^2.0.0",
+    "html-minifier": "^2.1.0",
     "iltorb": "^1.0.9",
     "mousetrap": "^1.5.3",
     "node-zopfli": "^1.4.0",
