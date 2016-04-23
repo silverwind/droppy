@@ -34,7 +34,7 @@ deploy:
 jquery:
 	git clone --depth 1 https://github.com/jquery/jquery /tmp/jquery
 	cd /tmp/jquery; npm run build; grunt custom:$(JQUERY_FLAGS); grunt remove_map_comment
-	cp /tmp/jquery/dist/jquery.min.js $(CURDIR)/client/jquery-custom.min.js
+	cat /tmp/jquery/dist/jquery.min.js | perl -pe 's|"3\..+?"|"3"|' > $(CURDIR)/client/jquery-custom.min.js
 	rm -rf /tmp/jquery
 
 npm-patch:
