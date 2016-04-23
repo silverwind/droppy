@@ -666,11 +666,10 @@
     view[0].uploadStart = Date.now();
 
     if (files.length) {
-      xhr.open("POST", getRootPath() + "upload?" + $.param({
-        vId : view[0].vId,
-        to  : encodeURIComponent(view[0].currentFolder),
-        r   : droppy.get("renameExistingOnUpload") && "1" || "0"
-      }));
+      xhr.open("POST", getRootPath() + "upload?vId=" + view[0].vId +
+       "&to=" + encodeURIComponent(view[0].currentFolder) +
+       "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
+      );
       xhr.send(formdata);
     }
   }

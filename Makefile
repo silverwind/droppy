@@ -1,4 +1,4 @@
-JQUERY_FLAGS=-ajax,-css/showHide,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-css
+JQUERY_FLAGS=-ajax,-css/showHide,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-css,-serialize,-queue,-callbacks,-event/support,-event/ajax
 
 lint:
 	eslint --ignore-pattern *.min.js server client *.js
