@@ -562,6 +562,7 @@
     var createButtons = $("#create-file-button, #create-folder-button");
     function createEntry() {
       var view    = getActiveView();
+      if (view.data("type") !== "directory") return;
       var isFile  = this.id === "create-file-button";
       var isEmpty = view.find(".empty").length;
       var html    = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
@@ -1128,6 +1129,8 @@
         bindDragEvents(view);
       else if (view.data("type") === "media")
         bindMediaArrows(view);
+
+      $("#create-file-button, #create-folder-button")[type === "directory" ? "removeClass" : "addClass"]("disabled");
       if (cb) cb(view);
     }
   }
