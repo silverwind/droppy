@@ -21,6 +21,8 @@ Note that two directories will be used by droppy:
 - `config` directory: set with `--configdir <dir>`, default `~/.droppy/config`.
 - `files` directory: set with `--filesdir <dir>`, default `~/.droppy/files`.
 
+Make sure these directories exist and owned by the user running the application/container.
+
 #### Local Installation
 With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 
@@ -36,16 +38,12 @@ $ droppy start --configdir /srv/droppy/config --filesdir /srv/droppy/files
 
 #### Docker installation :whale:
 ```sh
-# Create directories for the volumes. These are mounted inside the container in the next step.
-$ mkdir -p /srv/droppy/config
-$ mkdir -p /srv/droppy/files
-
-# Start the container, forwarding port 8989 on the host.
+# Pull the image and start the container. Port 8989 on the host will be forwarded to the container.
 $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
 
 # Open http://localhost:8989/ in your browser.
 ```
-*Note: While it's adviceable that all files in the `config` and `files` directory are owned by the user running the application, changing the ownership of files is supported through passing  the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
+*Note: While it's adviceable that all files in the `config` and `files` directory are owned by the user running the container, changing the ownership of the directories is supported through passing the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
 
 ### Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
