@@ -754,7 +754,7 @@
       });
       canSubmit = valid && (!exists || input === this.attr("placeholder"));
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
-    }).register("focusout", submitEdit.bind(null, view, true, callback));
+    }).register("blur focusout", submitEdit.bind(null, view, true, callback));
 
     nameLength = link.text().lastIndexOf(".");
     renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
