@@ -402,10 +402,7 @@ input::-webkit-input-placeholder { color: #999 }
   display: flex;
   align-items: center;
   line-height: 1.3em;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
 }
-.data-row[order="0"] { border-top-color: transparent !important }
 
 .data-row.editing.invalid input { color: #d22 }
 .data-row.editing .entry-link { display: none }
@@ -414,17 +411,17 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
   background: #e6e6e6;
-  border-color: #d2d2d2;
 }
 
 .data-row.playing {
   background: #05a;
-  border-color: #04b;
 }
 
 .data-row.playing a.entry-link, .playing span { color: #fff }
 .data-row.playing svg { fill: #ccc !important }
 .data-row.playing svg:hover { fill: #fff !important }
+
+.data-row.editing { background: #f8f8f8 !important }
 
 .entry-link {
   overflow: hidden;
