@@ -111,7 +111,6 @@ resources.files = {
     "client/font.woff",
     "client/font.woff2",
     "client/images/logo.svg",
-    "client/images/logo16.png",
     "client/images/logo32.png",
     "client/images/logo128.png",
     "client/images/logo152.png",

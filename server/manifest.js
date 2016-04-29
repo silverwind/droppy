@@ -10,7 +10,6 @@ module.exports = function manifest(req) {
     display: "fullscreen",
     orientation: "any",
     icons: [
-      {src: "?!/icon_16.png",  sizes: "16x16",   type: "image/png"},
       {src: "?!/icon_32.png",  sizes: "32x32",   type: "image/png"},
       {src: "?!/icon_120.png", sizes: "120x120", type: "image/png"},
       {src: "?!/icon_128.png", sizes: "128x128", type: "image/png"},
