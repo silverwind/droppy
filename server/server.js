@@ -649,19 +649,18 @@ function handleResourceRequest(req, res, resourceName) {
           headers["X-UA-Compatible"] = "IE=Edge, chrome=1";
       }
 
-      if (/.+\.(ico|svg|woff)$/.test(resourceName)) {
-        headers["Cache-Control"] = "public, max-age=604800";
+      // Caching
+      if (/\.(png|ico|svg|woff2?)$/.test(resourceName)) {
         headers["Expires"] = new Date(Date.now() + 604800000).toUTCString();
       } else {
-        if (resource.etag && !/\.html$/.test(resourceName)) {
-          headers["ETag"] = resource.etag;
-        }
-        headers["Cache-Control"] = "private, max-age=0";
         headers["Expires"] = "0";
+      }
+      if (resource.etag && !/\.html$/.test(resourceName)) {
+        headers["ETag"] = resource.etag;
       }
 
       // Content-Type
-      if (/.+\.(js|css|html|svg)$/.test(resourceName))
+      if (/\.(js|css|html|svg)$/.test(resourceName))
         headers["Content-Type"] = resource.mime + "; charset=utf-8";
       else
         headers["Content-Type"] = resource.mime;
