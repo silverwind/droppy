@@ -7,7 +7,7 @@
   <a href="https://www.npmjs.org/package/droppy"><img src="https://img.shields.io/npm/dm/droppy.svg"></a>
 </p>
 
-`droppy` is a self-hosted file storage server with an interface similar to desktop file managers, with capabilites to edit files and view media directly in the browser. It is especially well suited to be ran on low-end hardware like the Raspberry Pi.
+droppy is a self-hosted file storage server with a web interface and capabilites to edit files and view media directly in the browser. It is particularly well suited to be ran on low-end hardware like the Raspberry Pi.
 
 ### Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
