@@ -7,7 +7,7 @@
   <a href="https://www.npmjs.org/package/droppy"><img src="https://img.shields.io/npm/dm/droppy.svg"></a>
 </p>
 
-droppy is a self-hosted file storage server with a web interface and capabilites to edit files and view media directly in the browser. It is particularly well suited to be ran on low-end hardware like the Raspberry Pi.
+droppy is a self-hosted file storage server with a web interface and capabilites to edit files and view media directly in the browser. It is particularly well-suited to be run on low-end hardware like the Raspberry Pi.
 
 ### Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
@@ -50,7 +50,7 @@ $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/dr
 
 # Open http://localhost:8989/ in your browser.
 ```
-*Note: While it's adviceable that all files in the `config` and `files` directory are owned by the user running the container, changing the ownership of the directories is supported through passing the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
+*Note: While it's advisable that all files in the `config` and `files` directory are owned by the user running the container, changing the ownership of the directories is supported through passing the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
 
 ### Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
@@ -170,7 +170,7 @@ $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/dr
 ```
 
 ### Note about startup performance
-droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hunderts of thousands of files present.
+droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hundreds of thousands of files present.
 
 ### Note about wget
 For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
