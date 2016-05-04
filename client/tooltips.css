@@ -58,7 +58,7 @@
 .tip-s:before, .tip-se:before, .tip-sw:before {
   top: auto;
   right: 50%;
-  bottom: -5px;
+  bottom: -6px;
   margin-right: -5px;
   border-bottom-color: rgba(0,0,0,.85);
 }
@@ -70,7 +70,7 @@
 }
 
 .tip-n:before, .tip-ne:before, .tip-nw:before {
-  top: -5px;
+  top: -6px;
   right: 50%;
   bottom: auto;
   margin-right: -5px;
