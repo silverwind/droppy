@@ -730,17 +730,13 @@ function handleFileRequest(req, res, download) {
         } else {
           headers["Accept-Ranges"] = "bytes"; // advertise ranges support
           if (req.headers.range) {
-            var total        = stats.size;
-            var range        = req.headers.range;
-            var parts        = range.replace(/bytes=/, "").split("-");
-            var partialstart = parts[0];
-            var partialend   = parts[1];
-            var start        = parseInt(partialstart);
-            var end          = partialend ? parseInt(partialend) : total - 1;
+            var parts = req.headers.range.replace(/bytes=/, "").split("-");
+            var start = parseInt(parts[0]);
+            var end   = parts[1] ? parseInt(parts[1]) : stats.size - 1;
 
             status = 206;
             headers["Content-Length"] = end - start + 1;
-            headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + total;
+            headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + stats.size;
             res.writeHead(status, headers);
             fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
           } else {
