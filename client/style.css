@@ -1493,13 +1493,13 @@ html:not(.mobile) #drop-select span.active {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background: #05a;
+  background: radial-gradient(rgba(0,0,0,.25) 0%,rgba(0,0,0,.45) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 @media (max-width:  639px) { .dropzone { top: 1.25rem } }
-.dropzone.in { opacity: .5; visibility: visible }
+.dropzone.in { opacity: .9; visibility: visible }
 
 .dropzone svg {
   height: 50%;
