@@ -17,6 +17,7 @@ docker:
 	docker rm -f "$$(docker ps -a -f="image=silverwind/droppy" -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa silverwind/droppy)" 2>/dev/null || true
 	docker build --no-cache=true -t silverwind/droppy .
+	docker tag "$$(docker images -qa silverwind/droppy)" silverwind/droppy:"$$(cat package.json | jq -r .version)"
 	docker push silverwind/droppy
 
 update:
@@ -46,8 +47,8 @@ npm-minor:
 npm-major:
 	npm version major
 
-patch: lint npm-patch build docker deploy publish
-minor: lint npm-minor build docker deploy publish
-major: lint npm-major build docker deploy publish
+patch: lint build npm-patch docker deploy publish
+minor: lint build npm-minor docker deploy publish
+major: lint build npm-major docker deploy publish
 
 .PHONY: lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
