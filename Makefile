@@ -17,7 +17,7 @@ docker:
 	docker rm -f "$$(docker ps -a -f="image=silverwind/droppy" -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa silverwind/droppy)" 2>/dev/null || true
 	docker build --no-cache=true -t silverwind/droppy .
-	docker tag "$$(docker images -qa silverwind/droppy)" silverwind/droppy:"$$(cat package.json | jq -r .version)"
+	docker tag "$$(docker images -qa silverwind/droppy:latest)" silverwind/droppy:"$$(cat package.json | jq -r .version)"
 	docker push silverwind/droppy
 
 update:
