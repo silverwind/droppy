@@ -18,6 +18,9 @@ COPY droppy.js /app/droppy.js
 # Copy startup script
 COPY docker-start.sh /start.sh
 
+# Create volume mountpoints
+VOLUME ["/config", "/files"]
+
 # Run
 EXPOSE 8989
 CMD ["/start.sh"]
