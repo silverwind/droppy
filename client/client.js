@@ -845,15 +845,15 @@
   }
 
   function getHashPaths(modview, dest) {
-    var hash = "";
+    var path = document.location.pathname;
     droppy.views.forEach(function(view) {
       view = $(view);
       if (modview && modview.is(view))
-        hash += "/#" + dest;
+        path += "/#" + dest;
       else
-        hash += "/#" + getViewLocation(view);
+        path += "/#" + getViewLocation(view);
     });
-    return hash.replace(/\/+/g, "/");
+    return path.replace(/\/+/g, "/");
   }
 
   function pushHistory(view, dest) {
