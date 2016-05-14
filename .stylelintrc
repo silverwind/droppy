@@ -1,12 +1,13 @@
 # https://github.com/stylelint/stylelint/blob/master/docs/user-guide/rules.md
+
 rules:
   string-quotes: double
   max-empty-lines: 1
   no-eol-whitespace: true
   no-missing-eof-newline: true
   color-hex-length: short
+  color-named: never
   color-no-invalid-hex: true
-  color-no-named: true
   number-leading-zero: never
   number-max-precision: 4
   number-no-trailing-zeros: true
