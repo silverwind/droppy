@@ -1,30 +1,30 @@
 # https://github.com/stylelint/stylelint/blob/master/docs/user-guide/rules.md
 
 rules:
-  string-quotes: double
-  max-empty-lines: 1
-  no-eol-whitespace: true
-  no-missing-eof-newline: true
   color-hex-length: short
   color-named: never
   color-no-invalid-hex: true
-  number-leading-zero: never
-  number-max-precision: 4
-  number-no-trailing-zeros: true
-  number-zero-length-no-unit: true
+  declaration-bang-space-after: never
+  declaration-block-no-duplicate-properties: true
+  declaration-block-no-shorthand-property-overrides: true
+  declaration-block-semicolon-space-before: never
+  declaration-colon-space-before: never
   function-calc-no-unspaced-operator: true
   function-linear-gradient-no-nonstandard-direction: true
   function-parentheses-newline-inside: never-multi-line
   function-parentheses-space-inside: never
   function-url-quotes: double
-  declaration-bang-space-after: never
-  declaration-colon-space-before: never
-  declaration-block-semicolon-space-before: never
-  selector-pseudo-element-colon-notation: single
+  max-empty-lines: 1
+  media-feature-colon-space-before: never
+  media-feature-range-operator-space-after: always
+  media-feature-range-operator-space-before: always
+  no-eol-whitespace: true
+  no-missing-eof-newline: true
+  number-leading-zero: never
+  number-max-precision: 4
+  number-no-trailing-zeros: true
+  number-zero-length-no-unit: true
   selector-list-comma-space-after: always-single-line
   selector-list-comma-space-before: never-single-line
-  rule-no-duplicate-properties: true
-  rule-no-shorthand-property-overrides: true
-  media-feature-colon-space-before: never
-  media-feature-range-operator-space-before: always
-  media-feature-range-operator-space-after: always
+  selector-pseudo-element-colon-notation: single
+  string-quotes: double
