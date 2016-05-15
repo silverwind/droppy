@@ -25,6 +25,7 @@ var defaults = {
   updateInterval  : 1000,
   pollingInterval : 0,
   keepAlive       : 20000,
+  allowFrame      : false,
 };
 
 var hiddenOpts = ["dev", "demo"];

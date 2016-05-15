@@ -642,7 +642,7 @@ function handleResourceRequest(req, res, resourceName) {
 
       if (/\.html$/.test(resourceName)) {
         headers["Content-Security-Policy"] = "script-src 'self' 'unsafe-eval' blob: data:; child-src 'self' blob: data:; object-src 'self'; media-src 'self' blob: data:";
-        headers["X-Frame-Options"] = "DENY";
+        if (!config.allowFrame) headers["X-Frame-Options"] = "DENY";
         headers["X-Content-Type-Options"] = "nosniff";
         headers["X-XSS-Protection"] = "1; mode=block";
         if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
