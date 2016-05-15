@@ -7,6 +7,8 @@ var pkg = require("./../package.json");
 module.exports = function manifest(req) {
   var data = {
     name: pkg.name,
+    lang: "en-US",
+    background_color: "#181818",
     display: "fullscreen",
     orientation: "any",
     icons: [
@@ -19,9 +21,9 @@ module.exports = function manifest(req) {
     ]
   };
 
-  if (typeof req.connection.encrypted === "boolean" && req.headers.host)
-    data.start_url = (req.connection.encrypted ? "https://" : "http://") + req.headers["host"] + "/";
-  else if (req.headers.referer || req.headers.referrer)
-    data.start_url = req.headers.referer || req.headers.referrer;
+  var proto = (req.connection && req.connection.encrypted) ? "https://" : "http://";
+  var path = (req.url.match(/(.+)\?!\/manifest\.json/) || [null, "/"])[1];
+  data.start_url = proto + req.headers["host"] + path;
+
   return JSON.stringify(data);
 };
