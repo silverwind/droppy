@@ -1,5 +1,9 @@
 *For patch-level releases, see the commit log*
 
+#### Version 4.2.0 - 5/15/2016
+
+- Added the `allowFrame` option to allow the site to be put into `<frame>` or `<iframe>`.
+
 #### Version 4.1.0 - 4/14/2016
 
 - Added UID and GID arguments for Docker deployments
