@@ -26,11 +26,6 @@ button, input { line-height: normal }
 ::-moz-focus-inner { border: none; padding: none; outline: none }
 ::-moz-focus-outer { border: none }
 
-::-webkit-scrollbar, ::-webkit-scrollbar-track { background: transparent }
-::-webkit-scrollbar-thumb      { background: #888 }
-::-webkit-scrollbar:horizontal { height: 4px }
-::-webkit-scrollbar:vertical   { width:  4px }
-
 ::selection      { background: #05a; color: #fff }
 ::-moz-selection { background: #05a; color: #fff }
 
@@ -140,7 +135,6 @@ input::-webkit-input-placeholder { color: #999 }
 
 .content-container {
   position: relative;
-  background: #111;
   overflow-x: hidden;
   flex: 1;
   order: 2;
@@ -164,7 +158,6 @@ input::-webkit-input-placeholder { color: #999 }
   background: #eee;
   display: flex;
   flex-direction: column;
-  transform: translate3d(0,0,0);
 }
 
 .content.media, .content.document {
