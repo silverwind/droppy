@@ -2147,7 +2147,7 @@
     if ($(el).hasClass("draggable")) return;
     $(el).attr("class", "media-container draggable");
     var instance = new Draggabilly(el, isVideo ? {axis: "x", handle: "video"} : {axis: "x"});
-    $(el).on("dragEnd", function() {
+    instance.on("dragEnd", function() {
       var view      = $(instance.element).parents(".view");
       var threshold = droppy.detects.mobile ? 0.15 : 0.075;
       if ((Math.abs(instance.position.x) / instance.element.clientWidth) > threshold) {

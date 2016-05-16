@@ -94,8 +94,8 @@ resources.files = {
   ],
   js: [
     "node_modules/handlebars/dist/handlebars.runtime.min.js",
-    "client/jquery-custom.min.js",
     "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
+    "client/jquery-custom.min.js",
     "node_modules/mousetrap/mousetrap.min.js",
     "node_modules/file-extension/file-extension.js",
     "node_modules/uppie/uppie.js",
