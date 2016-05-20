@@ -89,6 +89,17 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
         cb();
       });
     },
+    function(cb) {
+      if (typeof config.keepAlive === "number" && config.keepAlive > 0) {
+        setInterval(function() {
+          Object.keys(clients).forEach(function(client) {
+            if (!clients[client].ws) return;
+            clients[client].ws.ping(undefined, undefined, true);
+          });
+        }, config.keepAlive);
+      }
+      cb();
+    },
   ], function(err) {
     if (err) return callback(err);
     ready = true;
@@ -247,11 +258,6 @@ function setupSocket(server) {
       }
     }
   });
-  if (typeof config.keepAlive === "number" && config.keepAlive > 0) {
-    Object.keys(wss.clients).forEach(function(client) {
-      client.ws.ping();
-    });
-  }
   wss.on("connection", function(ws) {
     var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
     var cookie = cookies.get(ws.upgradeReq.headers.cookie);
@@ -443,6 +449,8 @@ function setupSocket(server) {
 
     ws.on("error", log.error);
   });
+
+  wss.on("error", log.error);
 }
 
 // Send a file list update
