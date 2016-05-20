@@ -174,7 +174,6 @@ input::-webkit-input-placeholder { color: #999 }
 /* ================================== Path ================================= */
 
 .path {
-  background: #181818;
   box-shadow: 0 0 .5em rgba(0,0,0,.15);
   overflow: hidden;
   white-space: nowrap;
@@ -400,7 +399,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row:not(.playing):not(.animating):not(.editing):hover,
 .data-row:not(.playing):not(.animating):not(.editing).active {
-  background: #e6e6e6;
+  background: #e3e3e3;
 }
 
 .data-row.playing {
