@@ -739,7 +739,7 @@
       droppy.activeFiles.push(droppy.caseSensitive ? $(this).text() : $(this).text().toLowerCase());
     });
 
-    // Hide menu, click-catcher and the original link, stop any previous edits
+    // Hide menu, overlay and the original link, stop any previous edits
     toggleCatcher(false);
     link = entry.find(".entry-link");
     entry.addClass("editing");
@@ -792,7 +792,7 @@
   }
 
   function toggleCatcher(show) {
-    var cc = $("#click-catcher"), modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
+    var cc = $("#overlay"), modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
     if (show === undefined)
       show = modals.some(function(selector) { return $(selector).hasClass("in"); });
@@ -1834,7 +1834,7 @@
         $(this).removeAttr("style");
       });
       toggleCatcher(true);
-      $("#click-catcher").one("click", function() {
+      $("#overlay").one("click", function() {
         box.find("select").each(function() {
           var option = $(this).attr("class");
           var value  = $(this).val();

@@ -118,13 +118,14 @@ input::-webkit-input-placeholder { color: #999 }
 .button.disabled:hover { color: #444 !important; background: transparent !important }
 .button.disabled:hover svg { fill: #444 !important }
 
+/* ================================== View ================================= */
+
 #view-container {
   flex: 1 1;
   order: 2;
   overflow-y: auto;
 }
 
-/* ================================== View ================================= */
 .view {
   position: absolute;
   bottom: 0; left:0; right:0; top:1.5rem;
@@ -187,29 +188,6 @@ input::-webkit-input-placeholder { color: #999 }
 @media (max-width: 1023px) { .path {font-size: .8em } }
 @media (max-width:  639px) { .path {font-size: .7em; flex-basis: 1.25rem } }
 
-.path li {
-  color: #ccc;
-  cursor: pointer;
-  display: inline-block;
-  line-height: 1.5rem;
-  opacity: 0;
-  position: relative;
-  transform: translateX(-2em);
-  transition: transform .2s ease, opacity .2s ease;
-}
-.path li.in { opacity: 1; transform: translateX(0) }
-
-.path li.dirty { color: #f71 !important}
-.path li.saved { background: #361 !important}
-.path li.saved svg { fill: #361 !important}
-.path li.save-failed { background: #b44 !important }
-.path li.save-failed svg { background: #b44 !important }
-.path li.dirty:after { content: "*" }
-
-@media (min-width: 1024px) { .path li { padding: 0 .4em 0 1.6em } }
-@media (max-width: 1023px) { .path li { padding: 0 .2em 0 1.4em } }
-@media (max-width:  639px) { .path li { padding: 0 .2em 0 1.4em; line-height: 1.25rem } }
-
 .path .triangle { position: absolute; height: 1.5rem; width: 1.5rem; right: -.875rem }
 @media (max-width:  639px) {
   .path .triangle { height: 1.25rem; width: 1.25rem; right: -.74rem }
@@ -222,18 +200,35 @@ input::-webkit-input-placeholder { color: #999 }
   top: -2px;
   vertical-align: middle;
 }
+
+.path li {
+  color: #ccc;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1.5rem;
+  opacity: 0;
+  position: relative;
+  transform: translateX(-2em);
+  transition: transform .2s ease, opacity .2s ease;
+}
+.path li.in { opacity: 1; transform: translateX(0) }
+
+@media (min-width: 1024px) { .path li { padding: 0 .4em 0 1.6em } }
+@media (max-width: 1023px) { .path li { padding: 0 .2em 0 1.4em } }
+@media (max-width:  639px) { .path li { padding: 0 .2em 0 1.4em; line-height: 1.25rem } }
+
 .path li:hover .home { fill: #fff }
 .path li:first-of-type { padding-left: .5em }
 
 .path li:nth-child(odd)        { background: #404040 }
-.path li:nth-child(odd) > .triangle  { fill: #404040 }
+.path li:nth-child(odd) .triangle    { fill: #404040 }
 .path li:nth-child(even)       { background: #2d2d2d }
-.path li:nth-child(even) > .triangle { fill: #2d2d2d }
+.path li:nth-child(even) .triangle   { fill: #2d2d2d }
 
 .path li:nth-child(odd):hover        { background: #812; color: #fff }
-.path li:nth-child(odd):hover > .triangle  { fill: #812 }
+.path li:nth-child(odd):hover .triangle    { fill: #812 }
 .path li:nth-child(even):hover       { background: #25a; color: #fff }
-.path li:nth-child(even):hover > .triangle { fill: #25a }
+.path li:nth-child(even):hover .triangle   { fill: #25a }
 
 .path li:nth-child(1)  { z-index: 15 }
 .path li:nth-child(2)  { z-index: 14 }
@@ -250,6 +245,13 @@ input::-webkit-input-placeholder { color: #999 }
 .path li:nth-child(14) { z-index: 3 }
 .path li:nth-child(15) { z-index: 2 }
 .path li:nth-child(16) { z-index: 1 }
+
+.path li.dirty { color: #f71 }
+.path li.saved { background: #361 }
+.path li.saved svg { fill: #361 !important }
+.path li.save-failed { background: #b44 }
+.path li.save-failed svg { fill: #b44 !important }
+.path li.dirty:after { content: "*" }
 
 /* ========================= File/Folder Display =========================== */
 
@@ -297,7 +299,7 @@ input::-webkit-input-placeholder { color: #999 }
 .paste-button:hover { background: #25a; color: #fff }
 .paste-button .filename { color: #fff }
 
-#click-catcher {
+#overlay {
   background: #000;
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
@@ -306,7 +308,7 @@ input::-webkit-input-placeholder { color: #999 }
   visibility: hidden;
   user-select: none;
 }
-#click-catcher.in { opacity: .4; visibility: visible }
+#overlay.in { opacity: .4; visibility: visible }
 
 .file-header {
   display: flex;
