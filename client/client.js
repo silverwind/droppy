@@ -1755,7 +1755,7 @@
         });
         view.find(".find").register("click", function() {
           CodeMirror.commands.find(editor);
-          view.find(".CodeMirror-search-field").eq(0).focus();
+          view.find(".CodeMirror-search-field")[0].focus();
         });
         view.find(".full").register("click", function() {
           screenfull.toggle($(this).parents(".content")[0]);
