@@ -212,8 +212,12 @@ function createListener(handler, opts, callback) {
     });
     callback(null, server);
   } else {
+    // disable client session renegotiation
+    var tls = require("tls");
+    tls.CLIENT_RENEG_LIMIT = 0;
+    tls.CLIENT_RENEG_WINDOW = Infinity;
+
     var https = require("https");
-    https.CLIENT_RENEG_LIMIT = 0;
     utils.tlsInit(opts, function(err, tlsOptions) {
       if (err) return callback(err);
       server = https.createServer(tlsOptions);
