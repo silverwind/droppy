@@ -28,7 +28,7 @@
     "graceful-fs": "^4.1.4",
     "isbinaryfile": "^3.0.0",
     "json-buffer": "^2.0.11",
-    "lodash": "^4.12.0",
+    "lodash": "^4.13.1",
     "mime-types": "^2.1.11",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
@@ -48,7 +48,7 @@
   "devDependencies": {
     "autoprefixer": "^6.3.6",
     "cheerio": "^0.20.0",
-    "clean-css": "^3.4.12",
+    "clean-css": "^3.4.13",
     "codemirror": "^5.15.2",
     "draggabilly": "https://github.com/silverwind/draggabilly/tarball/master",
     "handlebars": "^4.0.5",
@@ -60,7 +60,7 @@
     "screenfull": "^3.0.0",
     "uglify-js": "^2.6.2",
     "uppie": "^0.10.3",
-    "video.js": "^5.9.2"
+    "video.js": "^5.10.2"
   },
   "files": [
     "client",
