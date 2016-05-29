@@ -59,7 +59,7 @@
     "postcss": "^5.0.21",
     "screenfull": "^3.0.0",
     "uglify-js": "^2.6.2",
-    "uppie": "^0.10.3",
+    "uppie": "^0.10.4",
     "video.js": "^5.10.2"
   },
   "files": [
