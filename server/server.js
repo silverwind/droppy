@@ -8,7 +8,6 @@ var _        = require("lodash");
 var async    = require("async");
 var Busboy   = require("busboy");
 var chalk    = require("chalk");
-var engine   = require("detect-engine");
 var fs       = require("graceful-fs");
 var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
@@ -39,7 +38,7 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
     log.logo();
     log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-      chalk.blue(engine), " ", chalk.green(process.version.substring(1)), "\n ",
+      chalk.blue("node"), " ", chalk.green(process.version.substring(1)), "\n ",
       chalk.blue("config"), " at ", chalk.green(paths.config), "\n ",
       chalk.blue("files"), " at ", chalk.green(paths.files), "\n"
     );
@@ -290,7 +289,7 @@ function setupSocket(server) {
           demo          : config.demo,
           public        : config.public,
           priv          : priv,
-          engine        : [engine, process.version.substring(1)].join(" "),
+          engine        : "node " + process.version.substring(1),
           caseSensitive : process.platform !== "win32",
           themes        : Object.keys(cache.themes).sort().join("|"),
           modes         : Object.keys(cache.modes).sort().join("|"),

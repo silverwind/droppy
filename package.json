@@ -21,7 +21,6 @@
     "content-disposition": "^0.5.1",
     "cpr": "^1.1.1",
     "daemon": "^1.1.0",
-    "detect-engine": "^1.1.0",
     "dhparam": "^1.0.3",
     "etag": "^1.7.0",
     "file-extension": "^2.0.1",
