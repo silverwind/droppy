@@ -14,7 +14,7 @@
   droppy.detects = {
     directoryUpload: (function() {
       var el = document.createElement("input");
-      return droppy.prefixes.directory.some(function(prop) {
+      return droppy.dir.some(function(prop) {
         if (prop in el) return true;
       });
     })(),
@@ -533,7 +533,7 @@
     $("#upload-file-button").register("click", function() {
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.directoryUpload)
-        fileInput.removeAttr(droppy.prefixes.directory.join(" "));
+        fileInput.removeAttr(droppy.dir.join(" "));
       fileInput[0].click();
     });
 
@@ -542,7 +542,7 @@
       // Directory uploads supported - enable the button
       $("#upload-folder-button").register("click", function() {
         // Set the directory attribute so we get a directory picker dialog
-        droppy.prefixes.directory.forEach(function(prefix) {
+        droppy.dir.forEach(function(prefix) {
           fileInput.attr(prefix, prefix);
         });
         if (fileInput[0].isFilesAndDirectoriesSupported) {
@@ -1023,7 +1023,7 @@
       view.find(".empty").register("click", function() {
         var inp = $("#file");
         if (droppy.detects.directoryUpload)
-          inp.removeAttr(droppy.prefixes.directory.join(" "));
+          inp.removeAttr(droppy.dir.join(" "));
         inp[0].click();
       });
 
@@ -2220,9 +2220,7 @@
     droppy.wsRetries = 5;
     droppy.wsRetryTimeout = 4000;
 
-    droppy.prefixes = {
-      directory: ["directory", "webkitdirectory"]
-    };
+    droppy.dir = ["directory", "webkitdirectory"];
 
     // Extension to icon mappings
     droppy.iconMap = {
