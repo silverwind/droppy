@@ -269,6 +269,13 @@ utils.countOccurences = function countOccurences(string, search) {
   return num;
 };
 
+utils.formatBytes = function formatBytes(num) {
+  if (num < 1) return num + " B";
+  var units = ["B", "kB", "MB", "GB", "TB", "PB"];
+  var exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
+  return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
+};
+
 function createDH() {
   log.info("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
   var dh = dhparam(DHPARAM_BITS);

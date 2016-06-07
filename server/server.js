@@ -731,7 +731,7 @@ function handleFileRequest(req, res, download) {
     filepath = utils.addFilesPath(link.location);
     download = link.attachement;
   } else {
-    filepath = utils.addFilesPath("/" + filepath[2]);
+    filepath = utils.addFilesPath("/" + suffix);
   }
 
   // Validate the cookie for the remaining requests
@@ -796,7 +796,7 @@ function handleTypeRequest(req, res) {
 }
 
 function handleUploadRequest(req, res) {
-  var busboy, opts, dstDir, done = false, files = {};
+  var busboy, opts, dstDir, done = false, files = {}, limitHit;
 
   if (!validateRequest(req)) {
     res.statusCode = 401;
@@ -841,16 +841,29 @@ function handleUploadRequest(req, res) {
   busboy.on("error", log.error);
   busboy.on("file", function(_, file, filePath) {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
+
     var dst = path.join(paths.files, dstDir, filePath);
     var tmp = path.join(paths.temp, crypto.randomBytes(32).toString("hex"));
     var ws  = fs.createWriteStream(tmp, {mode: "644"});
     files[filePath] = {src: tmp, dst : dst, ws: ws};
-    file.pipe(ws);
-  });
 
-  busboy.on("filesLimit", function() {
-    log.info(req, res, "Maximum files limit reached, cancelling upload");
-    closeConnection();
+    file.on("end", function() {
+      console.log(this.truncated);
+    });
+
+    file.on("limit", function() {
+      log.info(req, res, "Maximum file size reached, cancelling upload");
+      sendObj(req.sid, {
+        type: "ERROR",
+        vId: req.query.vId,
+        text: "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded.",
+      });
+      limitHit = true;
+      closeConnection();
+      removeTempFiles();
+    });
+
+    file.pipe(ws);
   });
 
   busboy.on("finish", function() {
@@ -858,12 +871,15 @@ function handleUploadRequest(req, res) {
     log.info(req, res, "Received " + names.length + " files");
     done = true;
 
+    // remove all temporary files if one hit the limit
+    if (limitHit) return removeTempFiles();
+
     while (names.length > 0) {
       (function(name) {
-        fs.stat(files[name].dst, function(error) {
-          if (error) { // File doesn't exist
-            fs.stat(path.dirname(files[name].dst), function(error) {
-              if (error) { // Dir doesn't exist
+        fs.stat(files[name].dst, function(err) {
+          if (err) { // File doesn't exist
+            fs.stat(path.dirname(files[name].dst), function(err) {
+              if (err) { // Dir doesn't exist
                 utils.mkdir(path.dirname(files[name].dst), function() {
                   toMove.push([files[name].src, files[name].dst]);
                   if (++added === total) run();
@@ -906,19 +922,19 @@ function handleUploadRequest(req, res) {
   req.on("close", function() {
     if (!done) log.info(req, res, "Upload cancelled");
     closeConnection();
-
-    // Clean up the temp files
-    Object.keys(files).forEach(function(relPath) {
-      var ws = files[relPath].ws;
-      fs.unlink(files[relPath].src, function() {});
-      ws.on("finish", function() { // Wait for a possible stream to close before deleting
-        fs.unlink(files[relPath].src, function() {});
-      });
-      ws.end();
-    });
+    removeTempFiles();
   });
 
   req.pipe(busboy);
+
+  function removeTempFiles() {
+    async.each(Object.keys(files), function(name, cb) {
+      utils.rm(files[name].src, function() {
+        delete files[name];
+        cb();
+      });
+    });
+  }
 
   function closeConnection() {
     res.statusCode = 200;

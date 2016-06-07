@@ -814,7 +814,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .upload-info {
   background: #181818;
-  color: #aaa;
+  color: #eee;
   transition: flex-basis .15s ease;
   width: 100%;
   position: relative;
@@ -836,14 +836,12 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-percentage {
-  flex: 0 0 2.5em;
-  color: #fff;
-  text-align: center;
+  flex: 0 0 3.25em;
+  padding-left: .5rem;
 }
 
 .upload-title {
   flex: 1 1;
-  color: #fff;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -851,7 +849,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-time {
-  color: #ccc;
   flex: 0 0 10em;
   text-align: center;
   white-space: nowrap;
