@@ -142,6 +142,14 @@ function startListeners(callback) {
 
       if (listener[prop] === undefined && !config.demo)
         return callback(new Error("Config Error: listener " + prop + " undefined"));
+
+      if (prop === "port" && typeof prop !== "number") {
+        var num = parseInt(listener[prop]);
+        if (Number.isNaN(num)) {
+          return callback(new Error("Config Error: invalid port: " + listener[prop]));
+        }
+        listener[prop] = num;
+      }
     });
 
     (Array.isArray(listener.host) ? listener.host : [listener.host]).forEach(function(host) {
