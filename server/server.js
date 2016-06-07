@@ -492,6 +492,13 @@ function sendObjAll(data) {
   });
 }
 
+function redirectToRoot(req, res) {
+  res.writeHead(301, {Location: "/"});
+  res.end();
+  log.info(req, res);
+  return;
+}
+
 // Do the actual sending
 function send(ws, data) {
   (function queue(ws, data, time) {
@@ -709,23 +716,27 @@ function handleResourceRequest(req, res, resourceName) {
 function handleFileRequest(req, res, download) {
   var URI = decodeURIComponent(req.url), shareLink, filepath;
 
-  // Check for a shareLink
-  filepath = /\?([\$~_])\/([\s\S]+)$/.exec(URI);
-  if (filepath.length && filepath[1] === "$") {
-    var link = db.get("links")[filepath[2]];
+  // All requests here should be in the format /?$/x, /?~/y or /?_/z
+  var parts = /^\/\?([\$~_])\/(.+)/.exec(URI);
+  if (!parts || !utils.isPathSane(URI.substring(4))) {
+    return redirectToRoot(req, res);
+  }
+
+  // Check if it's a shareLink
+  var type = parts[1], suffix = parts[2];
+  if (type === "$") {
+    var link = db.get("links")[suffix];
+    if (!link) return redirectToRoot(req, res);
     shareLink = true;
     filepath = utils.addFilesPath(link.location);
     download = link.attachement;
-  } else if (filepath[1] === "~" || filepath[1] === "_") {
+  } else {
     filepath = utils.addFilesPath("/" + filepath[2]);
   }
 
   // Validate the cookie for the remaining requests
   if (!validateRequest(req) && !shareLink) {
-    res.writeHead(301, {Location: "/"});
-    res.end();
-    log.info(req, res);
-    return;
+    return redirectToRoot(req, res);
   }
 
   fs.stat(filepath, function(error, stats) {
@@ -1004,7 +1015,7 @@ function cleanupTemp() {
   });
 }
 
-// Clean up shortlinks by removing links to nonexistant files
+// Clean up sharelinks by removing links to nonexistant files
 function cleanupLinks(callback) {
   var linkcount = 0, cbcount = 0, links = db.get("links");
   if (Object.keys(links).length === 0)
@@ -1030,12 +1041,7 @@ function cleanupLinks(callback) {
 
 // Create a zip file from a directory and stream it to a client
 function streamArchive(req, res, zipPath, download) {
-  if (!validateRequest(req)) {
-    res.writeHead(301, {Location: "/"});
-    res.end();
-    log.info(req, res);
-    return;
-  }
+  if (!validateRequest(req)) return redirectToRoot(req, res);
   fs.stat(zipPath, function(err, stats) {
     if (err) {
       log.error(err);
