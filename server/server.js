@@ -50,8 +50,10 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
     function(cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
     function(cb) {
       cfg.init(opts, function(err, conf) {
-        config = conf;
-        if (dev) config.dev = dev;
+        if (!err) {
+          config = conf;
+          if (dev) config.dev = dev;
+        }
         cb(err);
       });
     },
