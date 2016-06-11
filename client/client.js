@@ -666,7 +666,7 @@
     view[0].uploadStart = Date.now();
 
     xhr.open("POST", getRootPath() + "upload?vId=" + view[0].vId +
-     "&to=" + view[0].currentFolder +
+     "&to=" + encodeURIComponent(view[0].currentFolder) +
      "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
     );
     xhr.send(fd);
