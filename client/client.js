@@ -519,11 +519,11 @@
     });
 
     var fileInput = $("#file"), uppie = new Uppie();
-    uppie(fileInput[0], function(event, fd) {
+    uppie(fileInput[0], function(event, fd, files) {
       event.preventDefault();
       event.stopPropagation();
       var view = getActiveView();
-      upload(view, fd, view[0].uId += 1);
+      upload(view, fd, files, view[0].uId += 1);
       fileInput.val("");
     });
 
@@ -630,14 +630,8 @@
   // ============================================================================
   //  Upload functions
   // ============================================================================
-  function upload(view, fd, id) {
-    var files, title = "";
-
-    if ("getAll" in fd) {
-      files = fd.getAll("file");
-      if (!files || !files.length) return showError(view, "Unable to upload.");
-      title = files.length === 1 ? basename(files[0].name) : files.length + " files";
-    }
+  function upload(view, fd, files, id) {
+    if (!files || !files.length) return showError(view, "Unable to upload.");
 
     // Create the XHR2 and bind the progress events
     var xhr = new XMLHttpRequest();
@@ -662,7 +656,7 @@
 
     $(Handlebars.templates["upload-info"]({
       id: id,
-      title: title,
+      title: files.length === 1 ? basename(files[0]) : files.length + " files",
     })).appendTo(view).transition("in").find(".upload-cancel").register("click", function() {
       xhr.abort();
       uploadCancel(view, id);
@@ -711,7 +705,6 @@
       var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
       var elapsed, secs;
 
-      speed = formatBytes(Math.round(speed / 1e3) * 1e3);
       elapsed = Date.now() - view[0].uploadStart;
       secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
@@ -719,8 +712,10 @@
         updateTitle(progress + " - " + basename(view[0].currentFolder));
       info.find(".upload-bar")[0].style.width = progress;
       info.find(".upload-percentage").text(progress);
-      info.find(".upload-time-left").text(secs > 60 ? Math.ceil(secs / 60) + " min" : Math.ceil(secs) + " sec");
-      info.find(".upload-speed").text("(" + speed + "/s)");
+      info.find(".upload-time").text([
+        secs > 60 ? Math.ceil(secs / 60) + "mins" : Math.ceil(secs) + "secs",
+        formatBytes(Math.round(speed / 1e3) * 1e3) + "/s",
+      ].join(" @ "));
       lastUpdate = Date.now();
     }
   }
@@ -1264,11 +1259,11 @@
   function bindDropEvents(view) {
     // file drop
     var uppie = new Uppie();
-    uppie(view[0], function(event, fd) {
+    uppie(view[0], function(event, fd, files) {
       event.stopPropagation();
       var view = getActiveView();
       view[0].uId += 1;
-      upload(view, fd, view[0].uId);
+      upload(view, fd, files, view[0].uId);
     });
 
     // drag between views
@@ -2592,7 +2587,7 @@
   }
 
   function formatBytes(num) {
-    if (num < 1) return num + " B";
+    if (num < 1000) return num + " B";
     var units = ["B", "kB", "MB", "GB", "TB", "PB"];
     var exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
     return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];

@@ -821,59 +821,39 @@ html:not(.mobile) .vjs-big-play-button {
   display: flex;
   flex: 0 0 0;
   order: 4;
-  align-items: stretch;
-  justify-content: space-between;
-  overflow: hidden;
-  z-index: 1;
 }
 .upload-info.in  { flex-basis: 1.5em }
 
 .upload-info > span {
-  vertical-align: middle;
-  display: inline-block;
   line-height: 1.5em;
-  z-index: 3;
+  position: relative;
+  z-index: 2;
 }
 
 .upload-percentage {
-  flex: 0 0 3.25em;
-  padding-left: .5rem;
+  flex: 0 0 2em;
+  text-align: right;
+  margin: 0 .5em;
 }
 
 .upload-title {
-  flex: 1 1;
+  flex: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
-  margin-right: .5em;
 }
 
 .upload-time {
-  flex: 0 0 11em;
-  text-align: center;
+  text-align: right;
   white-space: nowrap;
-}
-
-.upload-speed {
-  margin-left: .2em;
+  margin: 0 .25em;
 }
 
 .upload-cancel {
   transition: color .2s ease;
   cursor: pointer;
-  flex: 0 0 1.5em;
-}
-
-@media (max-width: 959px) {
-  .view.left .upload-title, .view.right .upload-title   { display: none !important }
-  .view.left .upload-cancel, .view.right .upload-cancel { flex: 0 0 2em !important }
-  .view.left .upload-cancel span, .view.right .upload-cancel span { display: none !important }
-}
-
-@media (max-width: 479px) {
-  .upload-time svg, .upload-speed, .upload-cancel span { display: none !important }
-  .upload-time   { flex: 0 0 4em !important   }
-  .upload-cancel { flex: 0 0 1.5em !important }
+  flex: 0 0 1.25em;
+  text-align: center;
 }
 
 .upload-bar {
@@ -882,7 +862,7 @@ html:not(.mobile) .vjs-big-play-button {
   top: 0; bottom: 0; left: 0;
   transition: width .2s ease;
   width: 0;
-  z-index: 2;
+  z-index: 1;
   pointer-event: none;
 }
 
