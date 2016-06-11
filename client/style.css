@@ -849,7 +849,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-time {
-  flex: 0 0 10em;
+  flex: 0 0 11em;
   text-align: center;
   white-space: nowrap;
 }

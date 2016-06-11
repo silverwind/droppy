@@ -631,9 +631,13 @@
   //  Upload functions
   // ============================================================================
   function upload(view, fd, id) {
-    var files = fd.getAll("file");
-    if (!files || !files.length) // Likely a unsupported browser
-      return showError(view, "Unable to upload. Is your browser up to date?");
+    var files, title = "";
+
+    if ("getAll" in fd) {
+      files = fd.getAll("file");
+      if (!files || !files.length) return showError(view, "Unable to upload.");
+      title = files.length === 1 ? basename(files[0].name) : files.length + " files";
+    }
 
     // Create the XHR2 and bind the progress events
     var xhr = new XMLHttpRequest();
@@ -656,8 +660,10 @@
       uploadFinish(view, id);
     });
 
-    var info = uploadInit(view, id, files.length === 1 ? files[0] : files.length + " files");
-    info.find(".upload-cancel").register("click", function() {
+    $(Handlebars.templates["upload-info"]({
+      id: id,
+      title: title,
+    })).appendTo(view).transition("in").find(".upload-cancel").register("click", function() {
       xhr.abort();
       uploadCancel(view, id);
     });
@@ -670,11 +676,6 @@
      "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
     );
     xhr.send(fd);
-  }
-
-  function uploadInit(view, id, name) {
-    updateTitle("Uploading - " + basename(view[0].currentFolder));
-    return $(Handlebars.templates["upload-info"]({id: id, name: name})).appendTo(view).transition("in");
   }
 
   function uploadSuccess(view, id) {
