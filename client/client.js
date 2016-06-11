@@ -87,6 +87,7 @@
 
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
   $.fn.transitionend = function(callback) {
+    if (!this.length) return;
     var duration, called = false, el = this[0];
 
     function doCallback(event) {
@@ -95,7 +96,7 @@
       callback.apply(el, event);
     }
 
-    duration = getComputedStyle(this[0]).transitionDuration;
+    duration = getComputedStyle(el).transitionDuration;
     duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
     setTimeout(function() { // Call back if "transitionend" hasn't fired in duration + 30
@@ -518,11 +519,11 @@
     });
 
     var fileInput = $("#file"), uppie = new Uppie();
-    uppie(fileInput[0], function(event, fd, files) {
+    uppie(fileInput[0], function(event, fd) {
       event.preventDefault();
       event.stopPropagation();
       var view = getActiveView();
-      upload(view, fd, files, view[0].uId += 1);
+      upload(view, fd, view[0].uId += 1);
       fileInput.val("");
     });
 
@@ -629,19 +630,18 @@
   // ============================================================================
   //  Upload functions
   // ============================================================================
-  function upload(view, formdata, files, id) {
+  function upload(view, fd, id) {
+    var files = fd.getAll("file");
     if (!files || !files.length) // Likely a unsupported browser
       return showError(view, "Unable to upload. Is your browser up to date?");
-
-    var info = uploadInit(view, id, files.length === 1 ? files[0] : files.length + " files");
 
     // Create the XHR2 and bind the progress events
     var xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", function(e) {
       if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     });
-    xhr.upload.addEventListener("error", function(e) {
-      showError(view, "An error occured during upload" + e && e.message ? ": " + e.message : "");
+    xhr.upload.addEventListener("error", function() {
+      showError(view, "An error occured during upload.");
       uploadCancel(view, id);
     });
     xhr.addEventListener("readystatechange", function() {
@@ -656,6 +656,7 @@
       uploadFinish(view, id);
     });
 
+    var info = uploadInit(view, id, files.length === 1 ? files[0] : files.length + " files");
     info.find(".upload-cancel").register("click", function() {
       xhr.abort();
       uploadCancel(view, id);
@@ -664,13 +665,11 @@
     view[0].isUploading = true;
     view[0].uploadStart = Date.now();
 
-    if (files.length) {
-      xhr.open("POST", getRootPath() + "upload?vId=" + view[0].vId +
-       "&to=" + encodeURIComponent(view[0].currentFolder) +
-       "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
-      );
-      xhr.send(formdata);
-    }
+    xhr.open("POST", getRootPath() + "upload?vId=" + view[0].vId +
+     "&to=" + view[0].currentFolder +
+     "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
+    );
+    xhr.send(fd);
   }
 
   function uploadInit(view, id, name) {
@@ -1264,12 +1263,11 @@
   function bindDropEvents(view) {
     // file drop
     var uppie = new Uppie();
-    uppie(view[0], function(event, fd, files) {
-      if (!files.length) return;
+    uppie(view[0], function(event, fd) {
       event.stopPropagation();
       var view = getActiveView();
       view[0].uId += 1;
-      upload(view, fd, files, view[0].uId);
+      upload(view, fd, view[0].uId);
     });
 
     // drag between views

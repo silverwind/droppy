@@ -857,10 +857,6 @@ function handleUploadRequest(req, res) {
     var ws  = fs.createWriteStream(tmp, {mode: "644"});
     files[filePath] = {src: tmp, dst : dst, ws: ws};
 
-    file.on("end", function() {
-      console.log(this.truncated);
-    });
-
     file.on("limit", function() {
       log.info(req, res, "Maximum file size reached, cancelling upload");
       sendObj(req.sid, {
