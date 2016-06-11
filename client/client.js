@@ -39,9 +39,6 @@
 // ============================================================================
 //  Set up a few more things
 // ============================================================================
-  // Add the dataTransfer property to the drag-and-drop events
-  $.event.props.push("dataTransfer");
-
   // Shorthand for safe event listeners
   $.fn.register = function(events, callback) {
     return this.off(events).on(events, callback);
@@ -1205,13 +1202,13 @@
         view[0].dragAction = "cut";
 
       droppy.dragTimer.refresh(row.data("id"));
-      event.dataTransfer.setData("text", JSON.stringify({
+      event.originalEvent.dataTransfer.setData("text", JSON.stringify({
         type: row.data("type"),
         path: row.data("id")
       }));
-      event.dataTransfer.effectAllowed = "copyMove";
-      if ("setDragImage" in event.dataTransfer)
-        event.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
+      event.originalEvent.dataTransfer.effectAllowed = "copyMove";
+      if ("setDragImage" in event.originalEvent.dataTransfer)
+        event.originalEvent.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
     });
   }
 
@@ -1249,7 +1246,7 @@
     view.register("dragenter", function(event) {
       event.stopPropagation();
       droppy.activeView = view[0].vId;
-      var svg, isInternal = event.dataTransfer.effectAllowed === "copyMove";
+      var svg, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
       if (view.data("type") === "directory" && isInternal)
         svg = "menu";
       else if (!isInternal)
@@ -1281,9 +1278,9 @@
       event.preventDefault();
       $(".dropzone").removeClass("in");
 
-      if (event.dataTransfer.getData("text").length) { // drag between views
+      if (event.originalEvent.dataTransfer.getData("text").length) { // drag between views
         event.stopPropagation();
-        dragData = JSON.parse(event.dataTransfer.getData("text"));
+        dragData = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
         if (view.data("type") === "directory") { // dropping into a directory view
           handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
         } else { // dropping into a document/media view
