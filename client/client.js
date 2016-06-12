@@ -713,7 +713,7 @@
       info.find(".upload-bar")[0].style.width = progress;
       info.find(".upload-percentage").text(progress);
       info.find(".upload-time").text([
-        secs > 60 ? Math.ceil(secs / 60) + "mins" : Math.ceil(secs) + "secs",
+        secs > 60 ? Math.ceil(secs / 60) + " mins" : Math.ceil(secs) + " secs",
         formatBytes(Math.round(speed / 1e3) * 1e3) + "/s",
       ].join(" @ "));
       lastUpdate = Date.now();

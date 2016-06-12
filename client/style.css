@@ -832,7 +832,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .upload-percentage {
   flex: 0 0 2em;
-  text-align: right;
+  text-align: center;
   margin: 0 .5em;
 }
 
