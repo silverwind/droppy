@@ -946,7 +946,7 @@
     }
 
     function removePart(i) {
-      view.find(".path li").slice(i).transition("in", "gone").transitionend(function() {
+      view.find(".path li").slice(i).replaceClass("in", "gone").transitionend(function() {
         $(this).remove();
       });
     }
