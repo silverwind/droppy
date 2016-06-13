@@ -46,9 +46,6 @@ input::-webkit-input-placeholder { color: #999 }
 
 /* =============================== Animations ============================== */
 
-@keyframes nodeInserted {
-  50% { opacity: .99 }
-}
 @keyframes jump {
   0%, 100% { transform: translateY(-3px) }
   50%      { transform: translateY(3px)  }

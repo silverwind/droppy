@@ -47,43 +47,22 @@
     return this.off(events).one(events, callback);
   };
 
-  // Set a new class on an element, and make sure it is ready to be transitioned.
-  $.fn.transition = function(oldclass, newclass) {
-    if (!newclass) {
-      newclass = oldclass;
-      oldclass = null;
-    }
+  // Transition of freshly inserted elements
+  $.fn.transition = function(oldClass, newClass) {
+    if (!newClass) { newClass = oldClass; oldClass = null; }
 
-    // Set the new and oldclass as data attributes.
-    if (oldclass) this.data("oldclass", oldclass);
-    this.data("newclass", newclass);
+    // Force a reflow
+    // https://gist.github.com/paulirish/5d52fb081b3570c81e3a
+    this.r = this[0].offsetTop;
+    delete this.r;
 
-    // Add a pseudo-animation to the element. When the "animationstart" event
-    // is fired on the element, we know it is ready to be transitioned.
-    this.each(function() {
-      this.style.animation = "nodeInserted 0.001s";
-    });
+    if (oldClass)
+      this.replaceClass(oldClass, newClass);
+    else
+      this.addClass(newClass);
+
     return this;
   };
-
-  // Listen for the animation event for our pseudo-animation
-  document.addEventListener("animationstart", function(event) {
-    if (event.animationName === "nodeInserted") {
-      var target   = $(event.target);
-      var newClass = target.data("newclass");
-      var oldClass = target.data("oldclass");
-
-      // Clean up our data attribute and remove the animation
-      target.removeData("newclass");
-      target[0].style.removeProperty("animation");
-
-      // Set transition classes
-      if (oldClass)
-        target.removeData("oldclass").replaceClass(oldClass, newClass);
-      else
-        target.addClass(newClass);
-    }
-  });
 
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
   $.fn.transitionend = function(callback) {
