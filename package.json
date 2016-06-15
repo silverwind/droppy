@@ -47,7 +47,7 @@
   "devDependencies": {
     "autoprefixer": "^6.3.6",
     "cheerio": "^0.20.0",
-    "clean-css": "^3.4.17",
+    "clean-css": "^3.4.18",
     "codemirror": "^5.15.2",
     "draggabilly": "https://github.com/silverwind/draggabilly/tarball/master",
     "handlebars": "^4.0.5",
