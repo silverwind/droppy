@@ -365,11 +365,10 @@ input::-webkit-input-placeholder { color: #999 }
 .line-buttons svg {
   cursor: pointer;
   fill: #555;
-  padding: 0 .1em;
-  position: relative;
-  top: .2em;
+  padding: 0 .1rem;
+  margin: .15rem 0;
 }
-.line-buttons svg:hover { fill: #000 }
+.line-buttons span:hover svg, .line-buttons a:hover svg { fill: #000 }
 
 .playable:not(.playing):hover .sprite { background: none }
 .playable:not(.playing):hover .icon-play svg { visibility: visible }
@@ -384,12 +383,10 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row {
   display: flex;
-  align-items: center;
   height: 1.3rem;
-  padding: 0 .25rem;
+  padding: 0 .1rem;
+  align-items: stretch;
 }
-
-@media (max-width: 639px) { .data-row { padding: 0 .125rem } }
 
 .data-row.editing.invalid input { color: #d22 }
 .data-row.editing .entry-link { display: none }
@@ -433,8 +430,8 @@ input::-webkit-input-placeholder { color: #999 }
   .header-mtime, .mtime               { display: none     }
 }
 @media (max-width: 319px) {
-  .header-size, .size { display: none    }
-  .line-buttons       { flex: 0 0 2.5rem }
+  .header-size, .size { display: none  }
+  .line-buttons       { flex: 0 0 3rem }
 }
 
 /* Hide them sooner when the view is split */
@@ -490,14 +487,13 @@ input::-webkit-input-placeholder { color: #999 }
   background-clip: content-box;
   height: 24px;
   background-size: 240px 216px;
+  transform-origin: center top;
   overflow: hidden;
-  transform-origin: 0 50%;
-  position: relative;
 }
 
-@media (min-width: 1024px) { .sprite { transform: scale(1.4);  margin-right: .6em } }
-@media (max-width: 1023px) { .sprite { transform: scale(1.25); margin-right: .4em } }
-@media (max-width:  639px) { .sprite { transform: scale(1);    margin-right: .1em } }
+@media (min-width: 1024px) { .sprite { transform: scale(1.4); margin: 0 .4em } }
+@media (max-width: 1023px) { .sprite { transform: scale(1.2); margin: .05em .2em } }
+@media (max-width:  639px) { .sprite { transform: scale(1);   margin: .05em .1em } }
 
 .spinner {
   position: absolute;
