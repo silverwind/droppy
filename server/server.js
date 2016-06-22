@@ -201,6 +201,7 @@ function startListeners(callback) {
       }).listen(socket.port, socket.host);
     });
   }, function(err) {
+    if (err) log.error(err);
     // Don't abort if we have at least one listening socket
     callback(listeningSockets === 0 ? err : null);
   });
