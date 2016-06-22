@@ -1,6 +1,7 @@
 "use strict";
 
 var crypto = require("crypto");
+var os     = require("os");
 var path   = require("path");
 var qs     = require("querystring");
 
@@ -142,6 +143,14 @@ function startListeners(callback) {
 
       if (listener[prop] === undefined && !config.demo)
         return callback(new Error("Config Error: listener " + prop + " undefined"));
+
+      // On Linux, Node.js listens on v4 and v6 when :: is given as host. Don't attempt
+      // to bind to v4 to prevent an misleading error being logged.
+      // https://github.com/nodejs/node/issues/7200
+      if (prop === "host" && Array.isArray(listener[prop]) && os.platform() === "linux" &&
+          listener[prop].indexOf("::") !== -1 && listener[prop].indexOf("0.0.0.0") !== -1) {
+        listener[prop].splice(listener[prop].indexOf("0.0.0.0"), 1);
+      }
 
       if (prop === "port" && typeof prop !== "number") {
         var num = parseInt(listener[prop]);
