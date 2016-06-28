@@ -33,16 +33,16 @@
     "mkdirp": "^0.5.1",
     "mv": "^2.1.1",
     "node-schedule": "^1.1.1",
-    "readdirp": "^2.0.0",
+    "readdirp": "^2.1.0",
     "request": "^2.72.0",
     "rimraf": "^2.5.2",
     "sanitize-filename": "^1.6.0",
     "untildify": "^2.1.0",
     "url-format-lax": "^1.0.0",
     "which": "^1.2.10",
-    "ws": "^1.1.0",
+    "ws": "^1.1.1",
     "yauzl": "^2.6.0",
-    "yazl": "^2.3.1"
+    "yazl": "^2.4.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",
@@ -51,7 +51,7 @@
     "codemirror": "^5.16.0",
     "draggabilly": "https://github.com/silverwind/draggabilly/tarball/master",
     "handlebars": "^4.0.5",
-    "html-minifier": "^2.1.5",
+    "html-minifier": "^2.1.6",
     "iltorb": "^1.0.12",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^1.4.0",
