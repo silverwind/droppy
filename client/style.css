@@ -1067,9 +1067,9 @@ html:not(.mobile) .vjs-big-play-button {
 
 @media (min-width: 800px) { #prefs-box { width: 24em } }
 @media (max-width: 799px) { #prefs-box { width: 80%  } }
-#prefs-box li:hover { background: #ddd; color: #000; border-radius: 3px }
+#prefs-box li:hover { background: #ddd; color: #000; }
 
-.list-prefs li { display: flex; padding: .125em .25em }
+.list-prefs li { display: flex; padding: .125em .25em; border-radius: 3px }
 .list-prefs li:first-of-type { margin-top: 0 }
 
 .list-prefs label {
@@ -1112,10 +1112,11 @@ html:not(.mobile) .vjs-big-play-button {
 }
 #prefs-box li:hover select { color: #000 }
 
-.list-user { padding:.3em 0}
+.list-user { padding:.3em 0 }
 .list-user:before {
   content: "Users";
   border-bottom: 1px solid #aaa;
+  margin-bottom: 1px;
   color: #333;
   padding: .125em;
   display: block;
