@@ -624,7 +624,7 @@
     xhr.addEventListener("readystatechange", function() {
       if (xhr.readyState !== 4) return;
       if (xhr.status === 200) {
-        uploadSuccess(view, id);
+        uploadSuccess(id);
       } else {
         if (xhr.status === 0) return; // cancelled by user
         showError(view, "Server responded with HTTP " + xhr.status);
@@ -651,7 +651,7 @@
     xhr.send(fd);
   }
 
-  function uploadSuccess(view, id) {
+  function uploadSuccess(id) {
     var info = $(".upload-info[data-id=\"" + id + "\"]");
     info.find(".upload-bar")[0].style.width = "100%";
     info.find(".upload-percentage").text("100%");
