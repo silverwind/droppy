@@ -274,7 +274,7 @@
           if (msg.folder !== getViewLocation(view)) {
             view[0].currentFile = null;
             view[0].currentFolder = msg.folder;
-            if (view[0].vId === 0) updateTitle(basename(msg.folder));
+            if (view[0].vId === 0) setTitle(basename(msg.folder));
             replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
             updatePath(view);
           }
@@ -656,7 +656,6 @@
     info.find(".upload-bar")[0].style.width = "100%";
     info.find(".upload-percentage").text("100%");
     info.find(".upload-title").text("Processing ...");
-    updateTitle("Processing - " + basename(view[0].currentFolder));
   }
 
   function uploadCancel(view, id) {
@@ -666,7 +665,7 @@
 
   function uploadFinish(view, id) {
     view[0].isUploading = false;
-    updateTitle(basename(view[0].currentFolder));
+    setTitle(basename(view[0].currentFolder));
     setTimeout(function() {
       $(".upload-info[data-id=\"" + id + "\"]").removeClass("in").transitionend(function() {
         $(this).remove();
@@ -687,8 +686,8 @@
       elapsed = Date.now() - view[0].uploadStart;
       secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
-      if (view.find(".upload-info").length === 1)
-        updateTitle(progress + " - " + basename(view[0].currentFolder));
+      if (Number(view.find(".upload-info")[0].dataset.id) === id)
+        setTitle(progress + " - " + basename(view[0].currentFolder));
       info.find(".upload-bar")[0].style.width = progress;
       info.find(".upload-percentage").text(progress);
       info.find(".upload-time").text([
@@ -778,7 +777,7 @@
   }
 
   // Update the page title
-  function updateTitle(text) {
+  function setTitle(text) {
     document.title = (text || "/") + " - droppy";
   }
 
@@ -1531,7 +1530,7 @@
       replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
       updatePath(view);
       if (isImage) updateMediaMeta(view); else initVideoJS(b.find("video")[0]);
-      if (view[0].vId === 0) updateTitle(nextFile); // Only update the page's title from view 0
+      if (view[0].vId === 0) setTitle(nextFile); // Only update the page's title from view 0
     });
   }
 
@@ -1605,7 +1604,7 @@
         });
       });
 
-      if (view[0].vId === 0) updateTitle(filename);
+      if (view[0].vId === 0) setTitle(filename);
       hideSpinner(view);
     });
   }
@@ -1618,7 +1617,7 @@
       initCM(),
       loadTheme(droppy.get("theme")),
     ]).then(function(values) {
-      updateTitle(basename(entryId));
+      setTitle(basename(entryId));
       setEditorFontSize(droppy.get("editorFontSize"));
       configCM(values[0].response, basename(entryId));
     }).catch(function() {
@@ -1884,7 +1883,7 @@
 
     view.find(".audio-bar").addClass("in");
     view.find(".audio-title").text(title);
-    updateTitle(title);
+    setTitle(title);
 
     (function updateBuffer() {
       var progress;
@@ -1907,7 +1906,7 @@
     view.find(".audio-player")[0].pause();
     view.find(".audio-title").html("");
     view.find(".data-row.playing").removeClass("playing");
-    updateTitle(basename(view[0].currentFolder));
+    setTitle(basename(view[0].currentFolder));
     view.find(".audio-bar").removeClass("in");
   }
 
