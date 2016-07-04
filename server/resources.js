@@ -29,7 +29,6 @@ var opts = {
       dead_code: true,
       if_return: true,
       join_vars: true,
-      screw_ie8: true,
       sequences: true,
       unsafe: true,
       unused: true,
