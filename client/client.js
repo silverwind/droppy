@@ -2218,19 +2218,19 @@
       ico      : ["ico"],
       image    : ["svg", "xpm", "webp"],
       install  : ["install", "msi"],
-      java     : ["java"],
+      java     : ["java", "jar"],
       jpg      : ["jpg", "jpeg"],
       js       : ["js", "jsx", "es", "es6", "dart", "ls"],
       json     : ["json", "gyp"],
       log      : ["log", "changelog"],
-      makefile : ["makefile", "pom"],
+      makefile : ["makefile", "pom", "reg"],
       markdown : ["markdown", "md"],
       pdf      : ["pdf"],
       php      : ["php"],
       playlist : ["m3u", "m3u8", "pls"],
       png      : ["png", "apng"],
       pres     : ["odp", "otp", "pps", "ppt", "pptx"],
-      ps       : ["ps", "ttf", "otf", "woff", "eot"],
+      ps       : ["ps", "ttf", "otf", "eot", "woff", "woff2"],
       psd      : ["psd"],
       py       : ["py"],
       rar      : ["rar"],
@@ -2248,7 +2248,7 @@
       vcal     : ["vcal"],
       video    : ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "ogx", "rm", "swf", "vob", "wmv", "webm"],
       xml      : ["xml"],
-      zip      : ["7z", "bz2", "jar", "lzma", "war", "z", "zip", "xz"]
+      zip      : ["7z", "bz2", "lzma", "war", "z", "zip", "xz"]
     };
 
     droppy.audioTypes = {
