@@ -1238,6 +1238,7 @@
     // file drop
     var uppie = new Uppie();
     uppie(view[0], function(event, fd, files) {
+      if (!files.length) return;
       event.stopPropagation();
       var view = getActiveView();
       view[0].uId += 1;
