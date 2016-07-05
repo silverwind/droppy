@@ -1385,8 +1385,7 @@ html:not(.mobile) .vjs-big-play-button {
   position: fixed;
   left: 50%;
   top: 50%;
-  width: 10em;
-  line-height: 2em;
+  width: 12em;
   z-index: 34;
   transform: translate(-50%, -50%);
   background: #fff;
@@ -1404,7 +1403,7 @@ html:not(.mobile) .vjs-big-play-button {
   display: inline-block;
   text-align: center;
   flex: 1;
-  font-size: .75em;
+  line-height: 2em;
 }
 
 html:not(.mobile) #drop-select span:hover,
