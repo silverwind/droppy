@@ -115,7 +115,6 @@ resources.files = {
     "client/images/logo152.png",
     "client/images/logo180.png",
     "client/images/logo192.png",
-    "client/images/favicon.ico",
     "client/images/sprites.png",
   ]
 };

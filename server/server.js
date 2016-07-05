@@ -564,9 +564,8 @@ function handleGET(req, res) {
     handleFileRequest(req, res, false);
   } else if (/^\/\?~~\//.test(URI)) {
     streamArchive(req, res, utils.addFilesPath(URI.substring(4)), true);
-  } else if (/^\/favicon.ico$/.test(URI)) {
-    handleResourceRequest(req, res, "favicon.ico");
   } else {
+    // TODO: 404 invalid urls
     if (validateRequest(req)) {
       handleResourceRequest(req, res, "main.html");
       if (config.public) return;
