@@ -25,12 +25,12 @@ droppy is a self-hosted file storage server with a web interface and capabilites
 ### Installation
 Note that two directories will be used by droppy:
 
-- `config` directory: set with `--configdir <dir>`, default `~/.droppy/config`.
-- `files` directory: set with `--filesdir <dir>`, default `~/.droppy/files`.
+- `config` directory: set with `-c <dir>`, default `~/.droppy/config`.
+- `files` directory: set with `-f <dir>`, default `~/.droppy/files`.
 
 Make sure these directories exist and owned by the user running the application/container.
 
-#### Local Installation
+#### Local Installation :package:
 With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 
 ```sh
@@ -38,19 +38,19 @@ With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 $ [sudo] npm install -g droppy
 
 # Start with `/srv/droppy/config` for config and `/srv/droppy/files` for files.
-$ droppy start --configdir /srv/droppy/config --filesdir /srv/droppy/files
+$ droppy start -c /srv/droppy/config -f /srv/droppy/files
 
-# Open http://localhost:8989/ in your browser.
+# Open http://localhost:8989/
 ```
 
 #### Docker installation :whale:
 ```sh
-# Pull the image and start the container. Port 8989 on the host will be forwarded to the container.
-$ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
+# Pull and start the container, forwarding port 8989 to localhost:8989
+$ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 
-# Open http://localhost:8989/ in your browser.
+# Open http://localhost:8989/
 ```
-*Note: While it's advisable that all files in the `config` and `files` directory are owned by the user running the container, changing the ownership of the directories is supported through passing the environment variables `UID` and `GID` to the container, e.g. `docker run -e UID=1000 -e GID=1000`.*
+The image provides automatic volumes for the two mount points /config and /files which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files` respectively. If you're using existing files, it's adviceable to use the UID and GID container environment variables to get files written with correct ownership, e.g `-e UID=1000` and `-e GID=1000`.
 
 ### Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
