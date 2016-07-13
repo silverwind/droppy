@@ -19,8 +19,8 @@ var cmds = {
 };
 
 var opts = {
-  configdir : "-c, --configdir <dir>  Config directory. Default: ~/.droppy",
-  filesdir  : "-f, --filesdir <dir>   Files directory. Default: <configdir>/files",
+  configdir : "-c, --configdir <dir>  Config directory. Default: ~/.droppy/config",
+  filesdir  : "-f, --filesdir <dir>   Files directory. Default: ~/.droppy/files",
   daemon    : "-d, --daemon           Daemonize (background) process",
   log       : "-l, --log <file>       Log to file instead of stdout",
   dev       : "--dev                  Enable developing mode",
