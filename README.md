@@ -9,7 +9,7 @@
 
 droppy is a self-hosted file storage server with a web interface and capabilites to edit files and view media directly in the browser. It is particularly well-suited to be run on low-end hardware like the Raspberry Pi.
 
-### Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
+## Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
 * Realtime updates of changes
 * Directory upload support
@@ -22,7 +22,7 @@ droppy is a self-hosted file storage server with a web interface and capabilites
 * Fullscreen support for media galleries
 * Supports installing to the homescreen
 
-### Installation
+## Installation
 Note that two directories will be used by droppy:
 
 - `config` directory: set with `-c <dir>`, default `~/.droppy/config`.
@@ -30,7 +30,7 @@ Note that two directories will be used by droppy:
 
 Make sure these directories exist and owned by the user running the application/container.
 
-#### Local Installation :package:
+### Local Installation :package:
 With [`Node.js`](https://nodejs.org) >= 0.10 and `npm` installed, run:
 
 ```sh
@@ -39,20 +39,18 @@ $ [sudo] npm install -g droppy
 
 # Start with `/srv/droppy/config` for config and `/srv/droppy/files` for files.
 $ droppy start -c /srv/droppy/config -f /srv/droppy/files
-
 # Open http://localhost:8989/
 ```
 
-#### Docker installation :whale:
+### Docker installation :whale:
 ```sh
 # Pull and start the container, forwarding port 8989 to localhost:8989
 $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
-
 # Open http://localhost:8989/
 ```
 The image provides automatic volumes for the two mount points /config and /files which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files` respectively. If you're using existing files, it's adviceable to use the UID and GID container environment variables to get files written with correct ownership, e.g `-e UID=1000` and `-e GID=1000`.
 
-### Configuration
+## Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
 
 ```javascript
@@ -76,7 +74,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 }
 ```
 
-### Options
+## Options
 - `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
 - `public` *Boolean* - When enabled, no user authentication is performed.
 - `timestamps` *Boolean* - When enabled, adds timestamps to log output.
@@ -90,7 +88,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
 <a name="listener-options" />
-#### Listener Options
+### Listener Options
 
 `listeners` defines on which network interfaces, ports and protocol(s) the server will listen. For example:
 
@@ -131,7 +129,7 @@ For SSL/TLS these additional options are available:
 
 *Note: Unless given absolute, SSL/TLS paths are relative to the config folder. If your certificate file includes an concatenated intermediate certificate, it will be detected and used, there's no need to specify `ca` in this case.*
 
-### API
+## API
 droppy can be used with frameworks like [express](https://github.com/strongloop/express):
 ```js
 var app    = require("express")();
@@ -147,23 +145,23 @@ app.listen(process.env.PORT || 8989);
 ```
 See the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
 
-#### droppy([options])
+### droppy([options])
 - **options** {object}: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
-### Installation guides
+## Installation guides
 - [Installation as systemd service](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 - [Installation as debian initscript](https://github.com/silverwind/droppy/wiki/Debian-Installation)
 - [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 - [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
 
-#### Upgrading a local installation
+### Upgrading a local installation :package:
 ```sh
 $ [sudo] npm install -g droppy
 ```
 
-#### Upgrading a Docker installation
+### Upgrading a Docker installation :whale:
 ```sh
 $ docker pull silverwind/droppy
 $ docker stop droppy
@@ -171,10 +169,10 @@ $ docker rm droppy
 $ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
 ```
 
-### Note about startup performance
+## Note about startup performance
 droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hundreds of thousands of files present.
 
-### Note about wget
+## Note about wget
 For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
 
 ```ini
