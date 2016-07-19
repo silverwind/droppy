@@ -1439,6 +1439,7 @@
       }
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
+      showSpinner(view);
       ajax({url: "!/type" + filePath, responseType: "text"}).then(function(xhr) {
         if (xhr.status !== 200) {
           showError(view, "Couldn't open or read the file");
