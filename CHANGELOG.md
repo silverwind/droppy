@@ -3,8 +3,8 @@
 #### Version 4.3.0 - 19/7/2016
 
 - Shortlinks are now 1 character shorter, e.g. `/$/hash` instead of `/?$/hash`. Old links are still supported.
-- New URL scheme for resources which among other benefits results in save-as on images delivering the correct file name.
-
+- Shortlinks are now invalidated when their length changes, e.g when link length changes from 5 to 6, all links with length of 5 will be invalidated and pruned after a short while.
+- Implemented a new URL scheme for resources which among other benefits results in save-as on images delivering the correct file name.
 
 #### Version 4.2.0 - 5/15/2016
 
