@@ -1,10 +1,10 @@
 .cm-s-droppy.CodeMirror {
+  background: #111 !important;
   color: #ccc;
-  background: #141414;
 }
 
-.cm-s-droppy .CodeMirror-sizer {
-  box-shadow: inset 0 0 10px rgba(0,0,0,.6);
+.cm-s-droppy .CodeMirror-lines {
+  background: #161616;
 }
 
 @media screen and (max-resolution: 1.99dppx) {

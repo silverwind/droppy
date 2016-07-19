@@ -1623,7 +1623,7 @@
     var editor;
     showSpinner(view);
     Promise.all([
-      ajax({url: "!/file/" + entryId}),
+      ajax({url: "!/file" + entryId}),
       initCM(),
       loadTheme(droppy.get("theme")),
     ]).then(function(values) {
@@ -1857,7 +1857,7 @@
       return endAudio(view);
     }
 
-    source = "!/file/" + row.data("id");
+    source = "!/file" + row.data("id");
     view.find(".seekbar-played, .seekbar-loaded")[0].style.width = "0%";
 
     if (player.canPlayType(droppy.audioTypes[fileExtension(source)])) {
