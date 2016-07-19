@@ -119,7 +119,7 @@ resources.files = {
   ]
 };
 
-// On-demand loadable libs. Will be available as ?!/lib/[prop]
+// On-demand loadable libs. Will be available as !/res/lib/[prop]
 var libs = {
   "vjs.js": "node_modules/video.js/dist/video.min.js",
   "vjs.css": "node_modules/video.js/dist/video-js.min.css",

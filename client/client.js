@@ -237,13 +237,13 @@
 
   function openSocket() {
     var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-    var url = protocol + document.location.host + document.location.pathname + "?socket";
+    var url = protocol + document.location.host + document.location.pathname + "!/socket";
     droppy.socket = new WebSocket(url);
     droppy.socket.onopen = function() {
       if (droppy.token) {
         init();
       } else {
-        ajax("?@").then(function(xhr) {
+        ajax("!/token").then(function(xhr) {
           droppy.token = xhr.response;
           init();
         });
@@ -438,7 +438,7 @@
       e.preventDefault();
       ajax({
         method: "POST",
-        url: getRootPath() + (firstrun ? "adduser" : "login"),
+        url: getRootPath() + "!/" + (firstrun ? "adduser" : "login"),
         data: new FormData(form[0])
       }).then(function(xhr) {
         if (xhr.status === 200) {
@@ -652,7 +652,7 @@
     view[0].isUploading = true;
     view[0].uploadStart = Date.now();
 
-    xhr.open("POST", getRootPath() + "upload?vId=" + view[0].vId +
+    xhr.open("POST", getRootPath() + "!/upload?vId=" + view[0].vId +
      "&to=" + encodeURIComponent(view[0].currentFolder) +
      "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
     );
@@ -1578,7 +1578,7 @@
     var i = encodedId.length - 1;
     for (;i >= 0; i--)
       encodedId[i] = encodeURIComponent(encodedId[i]);
-    return "?_" + encodedId.join("/");
+    return "!/file/" + encodedId.join("/");
   }
 
   function openMedia(view, sameFolder) {
@@ -1622,7 +1622,7 @@
     var editor;
     showSpinner(view);
     Promise.all([
-      ajax({url: "?_" + entryId}),
+      ajax({url: "!/file/" + entryId}),
       initCM(),
       loadTheme(droppy.get("theme")),
     ]).then(function(values) {
@@ -1856,7 +1856,7 @@
       return endAudio(view);
     }
 
-    source = "?_" + row.data("id");
+    source = "!/file/" + row.data("id");
     view.find(".seekbar-played, .seekbar-loaded")[0].style.width = "0%";
 
     if (player.canPlayType(droppy.audioTypes[fileExtension(source)])) {
@@ -2074,7 +2074,7 @@
       if (loading.hasOwnProperty(mode)) return loading[mode].push(cont);
 
       var script = document.createElement("script");
-      script.src = "?!/mode/" + mode;
+      script.src = "!/res/mode/" + mode;
       var others = document.getElementsByTagName("script")[0];
       others.parentNode.insertBefore(script, others);
       var list = loading[mode] = [cont];
@@ -2140,15 +2140,15 @@
   function initVideoJS(el) {
     return new Promise(function(resolve) {
       Promise.all([
-        loadStyle("vjs-css", "?!/lib/vjs.css"),
-        loadScript("vjs-js", "?!/lib/vjs.js"),
+        loadStyle("vjs-css", "!/res/lib/vjs.css"),
+        loadScript("vjs-js", "!/res/lib/vjs.js"),
       ]).then(function() {
         (function verify() {
           if (!("videojs" in window)) return setTimeout(verify, 200);
           if (!el.classList.contains("video-js")) el.classList.add("video-js", "vjs-default-skin");
           if (droppy.get("volume") === 0) el.muted = true;
           var container = $(el).parents(".media-container")[0];
-          videojs.options.flash.swf = "?!/lib/vjs.swf";
+          videojs.options.flash.swf = "!/res/lib/vjs.swf";
           videojs(el, {
             controls: true,
             autoplay: !droppy.detects.mobile,
@@ -2170,8 +2170,8 @@
   function initCM() {
     return new Promise(function(resolve) {
       Promise.all([
-        loadStyle("cm-css", "?!/lib/cm.css"),
-        loadScript("cm-js", "?!/lib/cm.js"),
+        loadStyle("cm-css", "!/res/lib/cm.css"),
+        loadScript("cm-js", "!/res/lib/cm.js"),
       ]).then(function() {
         (function verify() {
           if (!("CodeMirror" in window)) return setTimeout(verify, 200);
@@ -2403,7 +2403,7 @@
 
   function loadTheme(theme) {
     return new Promise(function(resolve) {
-      loadStyle("theme-" + theme.replace(/[^a-z0-9\-]/gim, ""), "?!/theme/" + theme).then(resolve);
+      loadStyle("theme-" + theme.replace(/[^a-z0-9\-]/gim, ""), "!/res/theme/" + theme).then(resolve);
     });
   }
 
@@ -2469,7 +2469,7 @@
     };
 
     var getFullLink = function(hash) {
-      return location.protocol + "//" + location.host + location.pathname + "?$/" + hash;
+      return location.protocol + "//" + location.host + location.pathname + "$/" + hash;
     };
 
     out.text(getFullLink(link));
@@ -2501,7 +2501,7 @@
   function showNotification(msg, body) {
     if (droppy.detects.notification && document.hidden) {
       var show = function(msg, body) {
-        var opts = {icon: "?!/logo192.png"};
+        var opts = {icon: "!/res/logo192.png"};
         if (body) opts.body = body;
         var n = new Notification(msg, opts);
         n.onshow = function() { // Compat: Chrome

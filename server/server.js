@@ -548,24 +548,7 @@ function handleGET(req, res) {
   if (config.public && !cookies.get(req.headers.cookie))
     cookies.free(req, res);
 
-  if (/^\/\?!\//.test(URI)) {
-    handleResourceRequest(req, res, /\?!\/([\s\S]+)$/.exec(URI)[1]);
-  } else if (/^\/\?@$/.test(URI)) {
-    if (validateRequest(req)) {
-      res.writeHead(200, {"Content-Type": "text/plain", Expires: "0"});
-      res.end(csrf.get(req));
-      log.info(req, res);
-    }
-  } else if (/^\/\?[~\$]\//.test(URI)) {
-    handleFileRequest(req, res, true);
-  } else if (/^\/\?\?\//.test(URI)) {
-    handleTypeRequest(req, res);
-  } else if (/^\/\?_\//.test(URI)) {
-    handleFileRequest(req, res, false);
-  } else if (/^\/\?~~\//.test(URI)) {
-    streamArchive(req, res, utils.addFilesPath(URI.substring(4)), true);
-  } else {
-    // TODO: 404 invalid urls
+  if (URI === "/") {
     if (validateRequest(req)) {
       handleResourceRequest(req, res, "main.html");
       if (config.public) return;
@@ -577,6 +560,24 @@ function handleGET(req, res) {
     } else {
       handleResourceRequest(req, res, "auth.html");
     }
+  } else if (/^\/!\/res\/[\s\S]+/.test(URI)) {
+    handleResourceRequest(req, res, URI.substring(7));
+  } else if (/^\/!\/token$/.test(URI)) {
+    if (validateRequest(req)) {
+      res.writeHead(200, {"Content-Type": "text/plain", Expires: "0"});
+      res.end(csrf.get(req));
+      log.info(req, res);
+    }
+  } else if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
+    handleFileRequest(req, res, true);
+  } else if (/^\/!\/type\/[\s\S]+/.test(URI)) {
+    handleTypeRequest(req, res);
+  } else if (/^\/!\/file\/[\s\S]+/.test(URI)) {
+    handleFileRequest(req, res, false);
+  } else if (/^\/!\/zip\/[\s\S]+/.test(URI)) {
+    streamArchive(req, res, utils.addFilesPath(URI.substring(6)), true);
+  } else {
+    redirectToRoot(req, res);
   }
 }
 
@@ -587,14 +588,14 @@ function handlePOST(req, res) {
   if (!utils.isPathSane(URI, true))
     return log.info(req, res, "Invalid POST: " + req.url);
 
-  if (/\/upload/.test(URI)) {
+  if (/^\/!\/upload/.test(URI)) {
     if (!validateRequest(req)) {
       res.statusCode = 401;
       res.end();
       log.info(req, res);
     }
     handleUploadRequest(req, res);
-  } else if (/\/login/.test(URI)) {
+  } else if (/^\/!\/login/.test(URI)) {
     // Rate-limit login attempts to one attempte every 2 seconds
     if (rateLimited.indexOf(req.socket.remoteAddress) !== -1) {
       res.statusCode = 429;
@@ -618,7 +619,7 @@ function handlePOST(req, res) {
         log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
       }
     }));
-  } else if (/\/adduser/.test(URI) && firstRun) {
+  } else if (/^\/!\/adduser/.test(URI) && firstRun) {
     req.pipe(new Busboy({headers: req.headers}).on("field", function(fieldname, val) {
       postData[fieldname] = val;
     }).on("finish", function() {
@@ -651,13 +652,13 @@ function handleResourceRequest(req, res, resourceName) {
   var resource;
 
   // Assign filename, must be unique for resource requests
-  if (/^\/\?!\/theme\//.test(req.url)) {
-    resource = cache.themes[req.url.substring("/?!/theme/".length)];
-  } else if (/^\/\?!\/mode\//.test(req.url)) {
-    resource = cache.modes[req.url.substring("/?!/mode/".length)];
-  } else if (/^\/\?!\/lib\//.test(req.url)) {
-    resource = cache.lib[req.url.substring("/?!/lib/".length)];
-  } else if (/^\/\?!\/manifest\.json$/.test(req.url)) {
+  if (/^\/!\/res\/theme\//.test(req.url)) {
+    resource = cache.themes[req.url.substring("/!/res/theme/".length)];
+  } else if (/^\/!\/res\/mode\//.test(req.url)) {
+    resource = cache.modes[req.url.substring("/!/res/mode/".length)];
+  } else if (/^\/!\/res\/lib\//.test(req.url)) {
+    resource = cache.lib[req.url.substring("/!/res/lib/".length)];
+  } else if (/^\/!\/res\/manifest\.json$/.test(req.url)) {
     resource = {
       data: manifest(req),
       mime: "application/manifest+json"
@@ -734,23 +735,22 @@ function handleResourceRequest(req, res, resourceName) {
 
 function handleFileRequest(req, res, download) {
   var URI = decodeURIComponent(req.url), shareLink, filepath;
+  var linkRe = new RegExp("^/\\??\\$/([" + utils.linkChars + "]{" + config.linkLength + "})$");
 
-  // All requests here should be in the format /?$/x, /?~/y or /?_/z
-  var parts = /^\/\?([\$~_])\/(.+)/.exec(URI);
-  if (!parts || !utils.isPathSane(URI.substring(4))) {
-    return redirectToRoot(req, res);
-  }
-
-  // Check if it's a shareLink
-  var type = parts[1], suffix = parts[2];
-  if (type === "$") {
-    var link = db.get("links")[suffix];
+  var parts = linkRe.exec(URI);
+  if (parts && parts[1]) { // check for sharelink
+    var link = db.get("links")[parts[1]];
     if (!link) return redirectToRoot(req, res);
     shareLink = true;
-    filepath = utils.addFilesPath(link.location);
     download = link.attachement;
-  } else {
-    filepath = utils.addFilesPath("/" + suffix);
+    filepath = utils.addFilesPath(link.location);
+  } else { // it's a direct file request
+    parts = /^\/!\/(.+)\/(.+)$/.exec(URI);
+    if (!parts || !parts[1] || !parts[2] || !utils.isPathSane(parts[2])) {
+      return redirectToRoot(req, res);
+    }
+    download = parts[1] === "dl";
+    filepath = utils.addFilesPath("/" + [parts[2]]);
   }
 
   // Validate the cookie for the remaining requests
@@ -763,28 +763,7 @@ function handleFileRequest(req, res, download) {
       if (stats.isDirectory() && shareLink) {
         streamArchive(req, res, filepath, download);
       } else {
-        var headers = {"Content-Type": mime(filepath), "Content-Length": stats.size}, status = 200;
-        if (download) {
-          headers["Content-Disposition"] = utils.getDispo(filepath);
-          res.writeHead(status, headers);
-          fs.createReadStream(filepath).pipe(res);
-        } else {
-          headers["Accept-Ranges"] = "bytes"; // advertise ranges support
-          if (req.headers.range) {
-            var parts = req.headers.range.replace(/bytes=/, "").split("-");
-            var start = parseInt(parts[0]);
-            var end   = parts[1] ? parseInt(parts[1]) : stats.size - 1;
-
-            status = 206;
-            headers["Content-Length"] = end - start + 1;
-            headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + stats.size;
-            res.writeHead(status, headers);
-            fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
-          } else {
-            res.writeHead(status, headers);
-            fs.createReadStream(filepath).pipe(res);
-          }
-        }
+        streamFile(req, res, filepath, download, stats);
       }
     } else {
       if (error.code === "ENOENT")
@@ -1049,18 +1028,29 @@ function cleanupTemp() {
 // Clean up sharelinks by removing links to nonexistant files
 function cleanupLinks(callback) {
   var linkcount = 0, cbcount = 0, links = db.get("links");
-  if (Object.keys(links).length === 0)
+  if (Object.keys(links).length === 0) {
     callback();
-  else {
+  } else {
     Object.keys(links).forEach(function(link) {
       linkcount++;
       (function(shareLink, location) {
+        // check for links not matching the configured length
+        if (shareLink.length !== config.linkLength) {
+          log.debug("deleting link not matching the configured length: " + shareLink);
+          delete links[shareLink];
+          if (++cbcount === linkcount) {
+            db.set("links", links);
+            callback();
+          }
+          return;
+        }
+        // check for links where the target does not exist anymore
         fs.stat(path.join(paths.files, location), function(error, stats) {
-          cbcount++;
           if (!stats || error) {
+            log.debug("deleting nonexistant link: " + shareLink);
             delete links[shareLink];
           }
-          if (cbcount === linkcount) {
+          if (++cbcount === linkcount) {
             db.set("links", links);
             callback();
           }
@@ -1104,6 +1094,31 @@ function streamArchive(req, res, zipPath, download) {
       log.info(req, res);
     }
   });
+}
+
+function streamFile(req, res, filepath, download, stats) {
+  var headers = {"Content-Type": mime(filepath), "Content-Length": stats.size}, status = 200;
+  if (download) {
+    headers["Content-Disposition"] = utils.getDispo(filepath);
+    res.writeHead(status, headers);
+    fs.createReadStream(filepath).pipe(res);
+  } else {
+    headers["Accept-Ranges"] = "bytes"; // advertise ranges support
+    if (req.headers.range) {
+      var parts = req.headers.range.replace(/bytes=/, "").split("-");
+      var start = parseInt(parts[0]);
+      var end   = parts[1] ? parseInt(parts[1]) : stats.size - 1;
+
+      status = 206;
+      headers["Content-Length"] = end - start + 1;
+      headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + stats.size;
+      res.writeHead(status, headers);
+      fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
+    } else {
+      res.writeHead(status, headers);
+      fs.createReadStream(filepath).pipe(res);
+    }
+  }
 }
 
 function validateRequest(req) {

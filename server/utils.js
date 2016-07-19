@@ -93,13 +93,16 @@ utils.copyDir = function copyDir(src, dst, cb) {
   });
 };
 
-// Get a pseudo-random n-character lowercase string. The characters
-// "l", "1", "i", "o", "0" characters are skipped for easier communication of links.
+// Valid link character, the characters "l", "1", "i", "o", "0" characters are skipped
+// for easier communication of links.
+utils.linkChars = "abcdefghjkmnpqrstuvwxyz23456789";
+
+// Get a pseudo-random n-character lowercase string.
 utils.getLink = function getLink(links, length) {
-  var chars = "abcdefghjkmnpqrstuvwxyz23456789", link = "";
+  var link = "";
   do {
     while (link.length < length) {
-      link += chars.charAt(Math.floor(Math.random() * chars.length));
+      link += utils.linkChars.charAt(Math.floor(Math.random() * utils.linkChars.length));
     }
   } while (links[link]); // In case the RNG generates an existing link, go again
 

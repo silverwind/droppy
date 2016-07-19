@@ -60,7 +60,7 @@
     "screenfull": "^3.0.0",
     "uglify-js": "^2.7.0",
     "uppie": "^0.11.1",
-    "video.js": "^5.10.4"
+    "video.js": "^5.10.7"
   },
   "files": [
     "client",
