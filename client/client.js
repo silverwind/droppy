@@ -1579,7 +1579,7 @@
     var i = encodedId.length - 1;
     for (;i >= 0; i--)
       encodedId[i] = encodeURIComponent(encodedId[i]);
-    return "!/file/" + encodedId.join("/");
+    return "!/file" + encodedId.join("/");
   }
 
   function openMedia(view, sameFolder) {

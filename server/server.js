@@ -745,7 +745,7 @@ function handleFileRequest(req, res, download) {
     download = link.attachement;
     filepath = utils.addFilesPath(link.location);
   } else { // it's a direct file request
-    parts = /^\/!\/(.+)\/(.+)$/.exec(URI);
+    parts = /^\/!\/(.+?)\/(.+)$/.exec(URI);
     if (!parts || !parts[1] || !parts[2] || !utils.isPathSane(parts[2])) {
       return redirectToRoot(req, res);
     }
