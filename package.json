@@ -37,6 +37,7 @@
     "request": "^2.73.0",
     "rimraf": "^2.5.3",
     "sanitize-filename": "^1.6.0",
+    "strip-ansi": "^3.0.1",
     "untildify": "^2.1.0",
     "url-format-lax": "^1.0.0",
     "which": "^1.2.10",

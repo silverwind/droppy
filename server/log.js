@@ -2,9 +2,10 @@
 
 var opts, logfile;
 
-var fs     = require("graceful-fs");
-var chalk  = require("chalk");
-var format = require("url-format-lax");
+var fs        = require("graceful-fs");
+var chalk     = require("chalk");
+var format    = require("url-format-lax");
+var stripAnsi = require("strip-ansi");
 
 var logColors = ["reset", "red", "yellow", "cyan"];
 var logLabels = ["", "ERROR", "INFO", "DEBG"];
@@ -72,7 +73,7 @@ var log = function log(req, res, logLevel) {
   });
 
   if (logfile) {
-    fs.write(logfile, chalk.stripColor(elems.join(" ")) + "\n");
+    fs.write(logfile, stripAnsi(elems.join(" ")) + "\n");
   } else {
     console.log.apply(console, elems);
   }
