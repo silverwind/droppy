@@ -1439,7 +1439,7 @@
       }
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
-      ajax({url: "??" + filePath, responseType: "text"}).then(function(xhr) {
+      ajax({url: "!/type" + filePath, responseType: "text"}).then(function(xhr) {
         if (xhr.status !== 200) {
           showError(view, "Couldn't open or read the file");
           hideSpinner(view);
@@ -1450,7 +1450,7 @@
           updatePath(view);
           openDoc(view, filePath);
         } else { // Binary content - download it
-          $("[name=nonav]").attr("src", "?~" + filePath);
+          $("[name=nonav]").attr("src", "!/file" + filePath);
           hideSpinner(view);
         }
       });

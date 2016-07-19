@@ -571,7 +571,7 @@ function handleGET(req, res) {
   } else if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
     handleFileRequest(req, res, true);
   } else if (/^\/!\/type\/[\s\S]+/.test(URI)) {
-    handleTypeRequest(req, res);
+    handleTypeRequest(req, res, utils.addFilesPath(URI.substring(7)));
   } else if (/^\/!\/file\/[\s\S]+/.test(URI)) {
     handleFileRequest(req, res, false);
   } else if (/^\/!\/zip\/[\s\S]+/.test(URI)) {
@@ -779,8 +779,8 @@ function handleFileRequest(req, res, download) {
   });
 }
 
-function handleTypeRequest(req, res) {
-  utils.isBinary(utils.addFilesPath(decodeURIComponent(req.url).substring(4)), function(err, result) {
+function handleTypeRequest(_req, res, file) {
+  utils.isBinary(file, function(err, result) {
     if (err) {
       res.statusCode = 500;
       res.end();
