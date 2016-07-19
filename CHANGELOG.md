@@ -1,5 +1,11 @@
 *For patch-level releases, see the commit log*
 
+#### Version 4.3.0 - 19/7/2016
+
+- Shortlinks are now 1 character shorter, e.g. `/$/hash` instead of `/?$/hash`. Old links are still supported.
+- New URL scheme for resources which among other benefits results in save-as on images delivering the correct file name.
+
+
 #### Version 4.2.0 - 5/15/2016
 
 - Added the `allowFrame` option to allow the site to be put into `<frame>` or `<iframe>`.
