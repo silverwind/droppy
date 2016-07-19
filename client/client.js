@@ -1623,7 +1623,7 @@
     var editor;
     showSpinner(view);
     Promise.all([
-      ajax({url: "!/file" + entryId}),
+      ajax("!/file" + entryId),
       initCM(),
       loadTheme(droppy.get("theme")),
     ]).then(function(values) {
