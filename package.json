@@ -49,7 +49,7 @@
     "autoprefixer": "^6.3.7",
     "cheerio": "^0.20.0",
     "clean-css": "^3.4.18",
-    "codemirror": "^5.16.0",
+    "codemirror": "^5.17.0",
     "draggabilly": "https://github.com/silverwind/draggabilly/tarball/master",
     "handlebars": "^4.0.5",
     "html-minifier": "^3.0.1",
