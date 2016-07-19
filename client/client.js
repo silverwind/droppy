@@ -127,7 +127,7 @@
 //  localStorage wrapper functions
 // ============================================================================
   var prefs, doSave, defaults = {
-    volume: 0.5,
+    volume: .5,
     theme: "droppy",
     editorFontSize: droppy.detects.mobile ? 12 : 16,
     indentWithTabs: false,
@@ -136,26 +136,34 @@
     hasLoggedOut: false,
     renameExistingOnUpload: false
   };
+
+  function savePrefs(prefs) {
+    try { localStorage.setItem("prefs", JSON.stringify(prefs)); } catch (e) {}
+  }
+  function loadPrefs() {
+    return JSON.parse(localStorage.getItem("prefs") || "{}");
+  }
+
   // Load prefs and set missing ones to their default
-  prefs = JSON.parse(localStorage.getItem("prefs") || "{}");
+  prefs = loadPrefs();
   Object.keys(defaults).forEach(function(pref) {
     if (prefs[pref] === undefined) {
       doSave = true;
       prefs[pref] = defaults[pref];
     }
   });
-  if (doSave) localStorage.setItem("prefs", JSON.stringify(prefs));
+  if (doSave) savePrefs(prefs);
 
   // Get a variable from localStorage
   droppy.get = function(pref) {
-    prefs = JSON.parse(localStorage.getItem("prefs"));
+    prefs = loadPrefs();
     return prefs[pref];
   };
 
   // Save a variable to localStorage
   droppy.set = function(pref, value) {
     prefs[pref] = value;
-    localStorage.setItem("prefs", JSON.stringify(prefs));
+    savePrefs(prefs);
   };
 // ============================================================================
 //  Entry point
