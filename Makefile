@@ -21,7 +21,7 @@ docker:
 	docker push silverwind/droppy
 
 update:
-	ncu --packageFile package.json -x untildify -ua
+	ncu --packageFile package.json -ua
 	rm -rf node_modules
 	npm install
 	touch client/client.js

@@ -2,6 +2,7 @@
 
 #### Versio 5.0.0 - 20/7/2016
 
+- Node.js v4.0.0 or greater is now required.
 - Yesterday's version contained a breaking change for Apache reverse proxying which, which leads to this version bump. Users running droppy behind Apache should update their configuration to proxy WebSocket request to /!/socket instead of /?socket:
 
 ````diff
