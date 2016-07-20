@@ -1,5 +1,17 @@
 *For patch-level releases, see the commit log*
 
+#### Versio 5.0.0 - 20/7/2016
+
+- Yesterday's version contained a breaking change for Apache reverse proxying which, which leads to this version bump. Users running droppy behind Apache should update their configuration to proxy WebSocket request to /!/socket instead of /?socket:
+
+````diff
+  RewriteEngine On
+- RewriteCond %{REQUEST_URI} ^/droppy [NC]
+- RewriteCond %{QUERY_STRING} socket [NC]
++ RewriteCond %{REQUEST_URI} ^/droppy/!/socket [NC]
+  RewriteRule /(.*) ws://127.0.0.1:8989/$1 [P,L]
+````
+
 #### Version 4.3.0 - 19/7/2016
 
 - Shortlinks are now 1 character shorter, e.g. `/$/hash` instead of `/?$/hash`. Old links are still supported.
