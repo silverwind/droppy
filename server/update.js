@@ -1,7 +1,5 @@
 "use strict";
 
-var npm;
-
 var async = require("async");
 var chalk = require("chalk");
 var fs    = require("graceful-fs");
@@ -10,7 +8,9 @@ var path  = require("path");
 var paths = require("./paths.js").get();
 var rm    = require("./utils").rm;
 
-function updateSelf(pkg, callback) {
+var npm;
+
+module.exports = function update(pkg, callback) {
   function loadNPM(cb) {
     // obtain a reference to the global npm to avoid having to install npm locally
     require("child_process").exec("npm", function(_, stdout) {
@@ -98,5 +98,3 @@ function updateSelf(pkg, callback) {
     update();
   }
 }
-
-module.exports = updateSelf;

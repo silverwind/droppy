@@ -1,7 +1,6 @@
 "use strict";
 
-var database, db = {}, defaults = {users: {}, sessions: {}, links: {}};
-
+var db       = module.exports = {};
 var _        = require("lodash");
 var fs       = require("graceful-fs");
 var crypto   = require("crypto");
@@ -9,6 +8,8 @@ var mkdirp   = require("mkdirp");
 var path     = require("path");
 
 var dbFile   = require("./paths.js").get().db;
+var defaults = {users: {}, sessions: {}, links: {}};
+var database;
 
 db.init = function init(callback) {
   fs.stat(dbFile, function(err) {
@@ -121,5 +122,3 @@ function write() {
 function getHash(string) {
   return crypto.createHmac("sha256", Buffer(string, "utf8")).digest("hex");
 }
-
-module.exports = db;

@@ -1,6 +1,6 @@
 "use strict";
 
-var cookies = {};
+var cookies = module.exports = {};
 var db      = require("./db.js");
 var utils   = require("./utils.js");
 
@@ -60,5 +60,3 @@ cookies.create = function create(_req, res, postData) {
 function inOneMonth() {
   return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
 }
-
-module.exports = cookies;

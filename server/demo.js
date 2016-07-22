@@ -1,6 +1,6 @@
 "use strict";
 
-var demo     = {};
+var demo     = module.exports = {};
 var async    = require("async");
 var cpr      = require("cpr");
 var chalk    = require("chalk");
@@ -133,5 +133,3 @@ function unzip(data, dest, callback) {
     });
   });
 }
-
-module.exports = demo;

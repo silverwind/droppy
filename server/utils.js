@@ -1,7 +1,6 @@
 "use strict";
 
-var utils  = {};
-
+var utils    = module.exports = {};
 var async    = require("async");
 var cd       = require("content-disposition");
 var cpr      = require("cpr");
@@ -299,5 +298,3 @@ function readFile(p, cb) {
     }
   });
 }
-
-module.exports = utils;

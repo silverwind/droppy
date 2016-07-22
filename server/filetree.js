@@ -1,7 +1,6 @@
 "use strict";
 
-var filetree = new (require("events").EventEmitter)();
-var dirs     = {}, todoDirs = [], initial = true, watching = true, timer = null;
+var filetree = module.exports = new (require("events").EventEmitter)();
 
 var _        = require("lodash");
 var chokidar = require("chokidar");
@@ -12,6 +11,12 @@ var log      = require("./log.js");
 var paths    = require("./paths.js").get();
 var utils    = require("./utils.js");
 var walk     = require("./walk.js");
+
+var dirs     = {};
+var todoDirs = [];
+var initial  = true;
+var watching = true;
+var timer    = null;
 
 var WATCHER_DELAY = 3000;
 
@@ -335,5 +340,3 @@ filetree.getDirContents = function getDirContents(p) {
 function normalize(str) {
   return String.prototype.normalize ? str.normalize() : str;
 }
-
-module.exports = filetree;

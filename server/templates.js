@@ -1,6 +1,6 @@
 "use strict";
 
-var templates  = {};
+var templates  = module.exports = {};
 var handlebars = require("handlebars");
 var fs         = require("graceful-fs");
 var path       = require("path");
@@ -24,5 +24,3 @@ function getEntry(file, template) {
   var compiled = handlebars.precompile(template, {data: false});
   return "templates['" + name + "']=template(" + compiled + ");";
 }
-
-module.exports = templates;

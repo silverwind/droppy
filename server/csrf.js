@@ -1,8 +1,8 @@
 "use strict";
 
-var csrf = {}, store = [];
-
-var crypto  = require("crypto");
+var csrf   = module.exports = {};
+var crypto = require("crypto");
+var store  = [];
 
 csrf.get = function(req) {
   var index, token, ip = getIp(req);
@@ -41,5 +41,3 @@ function getIp(req) {
     req.connection && req.connection.remoteAddress ||
     req.connection && req.connection.socket && req.connection.socket.remoteAddress;
 }
-
-module.exports = csrf;

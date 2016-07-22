@@ -1,7 +1,6 @@
 "use strict";
 
-var resources = {}, svgData = {}, minify, $;
-
+var resources    = module.exports = {};
 var async        = require("async");
 var etag         = require("etag");
 var fs           = require("graceful-fs");
@@ -18,6 +17,9 @@ var paths        = require("./paths.js").get();
 var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
 var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 var cachePath    = path.join(paths.mod, "dist", "cache.json");
+
+var svgData      = {};
+var minify, $;
 
 var opts = {
   uglify: {
@@ -505,5 +507,3 @@ function compileAll(callback) {
   });
   callback(null, res);
 }
-
-module.exports = resources;

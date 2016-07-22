@@ -1,6 +1,6 @@
 "use strict";
 
-var paths     = {};
+var paths     = module.exports = {};
 var path      = require("path");
 var untildify = require("untildify");
 
@@ -32,8 +32,6 @@ paths.seed = function seed(config, files) {
   if (config) configDir = config;
   if (files) filesDir = files;
 };
-
-module.exports = paths;
 
 function resolve() {
   var p = path.join.apply(null, arguments);

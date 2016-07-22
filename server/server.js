@@ -128,7 +128,7 @@ function onRequest(req, res) {
 }
 
 droppy._onRequest = onRequest;
-exports = module.exports = droppy;
+module.exports = droppy;
 
 function startListeners(callback) {
   var listeners = config.listeners, sockets = [];

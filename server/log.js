@@ -1,7 +1,5 @@
 "use strict";
 
-var opts, logfile;
-
 var fs        = require("graceful-fs");
 var chalk     = require("chalk");
 var format    = require("url-format-lax");
@@ -9,8 +7,9 @@ var stripAnsi = require("strip-ansi");
 
 var logColors = ["reset", "red", "yellow", "cyan"];
 var logLabels = ["", "ERROR", "INFO", "DEBG"];
+var opts, logfile;
 
-var log = function log(req, res, logLevel) {
+var log = module.exports = function log(req, res, logLevel) {
   if (opts && opts.logLevel < logLevel) return;
   var elems = Array.prototype.slice.call(arguments, 3), statusCode;
 
@@ -163,5 +162,3 @@ log.formatError = function formatError(err) {
 
   return output.replace(/^Error: /, "");
 };
-
-module.exports = log;
