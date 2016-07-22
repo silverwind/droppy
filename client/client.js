@@ -2199,7 +2199,7 @@
     droppy.wsRetries = 5;
     droppy.wsRetryTimeout = 4000;
 
-    droppy.dir = ["directory", "webkitdirectory"];
+    droppy.dir = ["directory", "webkitdirectory", "allowdirs"];
 
     // Extension to icon mappings
     droppy.iconMap = {
