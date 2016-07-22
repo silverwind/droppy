@@ -4,6 +4,8 @@ var cookies = {};
 var db      = require("./db.js");
 var utils   = require("./utils.js");
 
+var cookieParams = ["HttpOnly", "SameSite=strict", "path=/"];
+
 cookies.get = function get(cookie) {
   var entries = {};
   if (typeof cookie === "string" && cookie.length) {
@@ -25,19 +27,38 @@ cookies.validate = function validate(entries) {
 
 cookies.free = function free(_req, res) {
   var sessions = db.get("sessions"), sessionID = utils.getSid();
-  res.setHeader("Set-Cookie", "s=" + sessionID + "; expires=" + new Date(Date.now() + 31536000000).toUTCString() + "; path=/; HttpOnly");
-  sessions[sessionID] = {privileged : true, lastSeen : Date.now()};
+  res.setHeader("Set-Cookie", [
+    "s=" + sessionID,
+    "expires=" + inOneMonth(),
+  ].concat(cookieParams).join("; "));
+  sessions[sessionID] = {
+    privileged : true,
+    lastSeen : Date.now()
+  };
   db.set("sessions", sessions);
 };
 
 cookies.create = function create(_req, res, postData) {
   var sessions = db.get("sessions"), sessionID = utils.getSid();
-  if (postData.remember) // semi-permanent cookie
-    res.setHeader("Set-Cookie", "s=" + sessionID + "; expires=" + new Date(Date.now() + 31536000000).toUTCString() + "; path=/; HttpOnly");
-  else // single-session cookie
-    res.setHeader("Set-Cookie", "s=" + sessionID + "; path=/; HttpOnly");
-  sessions[sessionID] = {privileged : db.get("users")[postData.username].privileged, lastSeen : Date.now()};
+  if (postData.remember) { // semi-permanent cookie
+    res.setHeader("Set-Cookie", [
+      "s=" + sessionID,
+      "expires=" + inOneMonth(),
+    ].concat(cookieParams).join("; "));
+  } else { // single-session cookie
+    res.setHeader("Set-Cookie", [
+      "s=" + sessionID,
+    ].concat(cookieParams).join("; "));
+  }
+  sessions[sessionID] = {
+    privileged : db.get("users")[postData.username].privileged,
+    lastSeen : Date.now()
+  };
   db.set("sessions", sessions);
 };
+
+function inOneMonth() {
+  return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+}
 
 module.exports = cookies;
