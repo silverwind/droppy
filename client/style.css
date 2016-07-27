@@ -543,15 +543,6 @@ html:not(.mobile) #entry-menu a.active {
   float: left;
 }
 
-#entry-menu div {
-  width: 100%;
-}
-
-#entry-menu div > span {
-  display: inline-block;
-  vertical-align: top;
-}
-
 #entry-menu a.play, #entry-menu.type-folder a.edit {
   display: none;
 }
