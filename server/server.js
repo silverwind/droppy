@@ -952,7 +952,7 @@ filetree.on("update", function(dir) {
     }
     if (dir === "/") break;
     dir = path.dirname(dir);
-  };
+  }
 });
 
 function updateClientLocation(dir, sid, vId) {

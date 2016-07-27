@@ -261,9 +261,12 @@ utils.tlsSetup = function tlsSetup(opts, cb) {
 
 utils.countOccurences = function countOccurences(string, search) {
   var num = 0, pos = 0;
-  while ((pos = string.indexOf(search, pos)) >= 0) {
-    num += 1;
-    pos += search.length;
+  while (true) {
+    pos = string.indexOf(search, pos);
+    if (pos >= 0) {
+      num += 1;
+      pos += search.length;
+    } else break;
   }
   return num;
 };
