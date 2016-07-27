@@ -272,16 +272,13 @@ function setupSocket(server) {
   var wss = new Wss({
     server: server,
     verifyClient: function(info, cb) {
-      if (validateRequest(info.req)) {
-        log.info(info.req, null, "WebSocket [", chalk.green("connected"), "] ");
-        cb(true);
-      } else {
-        log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
-        cb(false, 401, "Unauthorized");
-      }
+      if (validateRequest(info.req)) return cb(true);
+      log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
+      cb(false, 401, "Unauthorized");
     }
   });
   wss.on("connection", function(ws) {
+    log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
     var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
     var cookie = cookies.get(ws.upgradeReq.headers.cookie);
     clients[sid] = {views: [], cookie: cookie, ws: ws};
