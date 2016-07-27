@@ -9,6 +9,7 @@ module.exports = function manifest(req) {
     name: pkg.name,
     lang: "en-US",
     background_color: "#181818",
+    theme_color: "#181818",
     display: "fullscreen",
     orientation: "any",
     icons: [
