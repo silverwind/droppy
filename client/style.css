@@ -104,8 +104,8 @@ input::-webkit-input-placeholder { color: #999 }
 }
 @media (max-width: 750px) { .button svg { margin-right: 0 } }
 
-#upload-file-button:hover svg        { fill: rgba(102,166,255,1) }
-#upload-folder-button:hover svg      { fill: rgba(255,102,252,1) }
+#add-file-button:hover svg           { fill: rgba(102,166,255,1) }
+#add-folder-button:hover svg         { fill: rgba(255,102,252,1) }
 #create-file-button:hover svg        { fill: rgba(102,255,235,1) }
 #create-folder-button:hover svg      { fill: rgba(102,255,125,1) }
 #about-button:hover svg              { fill: rgba(148,102,255,1) }

@@ -515,7 +515,8 @@
     });
 
     // File upload button
-    $("#upload-file-button").register("click", function() {
+    $("#add-file-button").register("click", function() {
+      if ($(this).hasClass("disabled")) return;
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.directoryUpload)
         fileInput.removeAttr(droppy.dir.join(" "));
@@ -525,7 +526,8 @@
     // Folder upload button - check if we support directory uploads
     if (droppy.detects.directoryUpload) {
       // Directory uploads supported - enable the button
-      $("#upload-folder-button").register("click", function() {
+      $("#add-folder-button").register("click", function() {
+        if ($(this).hasClass("disabled")) return;
         // Set the directory attribute so we get a directory picker dialog
         droppy.dir.forEach(function(prefix) {
           fileInput.attr(prefix, prefix);
@@ -540,7 +542,7 @@
       });
     } else {
       // No directory upload support - disable the button
-      $("#upload-folder-button").addClass("disabled").on("click", function() {
+      $("#add-folder-button").addClass("disabled").on("click", function() {
         showError(getView(0), "Your browser doesn't support directory uploading");
       });
     }
@@ -1109,7 +1111,8 @@
       else if (view.data("type") === "media")
         bindMediaArrows(view);
 
-      $("#create-file-button, #create-folder-button")[type === "directory" ? "removeClass" : "addClass"]("disabled");
+      var buttons = "#add-file-button, #add-folder-button, #create-file-button, #create-folder-button";
+      $(buttons)[type === "directory" ? "removeClass" : "addClass"]("disabled");
       if (cb) cb(view);
     }
   }
