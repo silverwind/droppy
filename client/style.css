@@ -307,14 +307,14 @@ input::-webkit-input-placeholder { color: #999 }
 .file-header {
   display: flex;
   order: -1;
-  color: #666;
+  color: #555;
   font-size: .8rem;
   height: 1.3em;
   border-bottom: 1px solid #bbb;
-  background: #ddd;
+  background: #e0e0e0;
   user-select: none;
   align-items: center;
-  padding: 0 .5rem;
+  padding: 0 .1rem;
 }
 
 .file-header span {
@@ -341,6 +341,10 @@ input::-webkit-input-placeholder { color: #999 }
   flex: 1 1;
   display: inline-block;
   overflow: hidden;
+}
+
+.header-name {
+  margin-left: .25rem;
 }
 
 .header-mtime, .mtime {
