@@ -947,23 +947,13 @@ filetree.on("updateall", function() {
 });
 
 filetree.on("update", function(dir) {
-  if (clientsPerDir[dir]) {
-    clientsPerDir[dir].forEach(function(client) {
-      client.update();
-    });
-  }
-
-  var parent = dir;
-  while (true) {
-    parent = path.dirname(parent);
-    if (parent === dir) return;
-    if (clientsPerDir[parent]) {
-      clientsPerDir[parent].forEach(function(client) {
+  do {
+    if (clientsPerDir[dir]) {
+      clientsPerDir[dir].forEach(function(client) {
         client.update();
       });
     }
-    if (parent === "/") break;
-  }
+  } while ((dir = path.dirname(dir)) !== "/");
 });
 
 function updateClientLocation(dir, sid, vId) {

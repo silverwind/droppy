@@ -703,7 +703,7 @@ html:not(.mobile) .vjs-big-play-button {
 /* ============================ Document  ============================ */
 
 .CodeMirror {
-  font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace !important;
+  font-family: Consolas, Monaco, "Droid Sans Mono", monospace !important;
   line-height: 1.2em !important;
   height: 100% !important;
   width: 100% !important;
@@ -734,7 +734,7 @@ html:not(.mobile) .vjs-big-play-button {
   background: transparent;
   width: 20em !important;
   color: #eee;
-  font-family: "Consolas", "Monaco", "Droid Sans Mono", monospace;
+  font-family: Consolas, Monaco, "Droid Sans Mono", monospace;
 }
 
 .CodeMirror-dialog button {

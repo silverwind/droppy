@@ -97,4 +97,4 @@ module.exports = function update(pkg, callback) {
   } else {
     update();
   }
-}
+};

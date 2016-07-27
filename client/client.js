@@ -959,15 +959,15 @@
       name = normalize(name);
 
       var entry = {
-        name      : name,
-        sortname  : name.replace(/['"]/g, "_").toLowerCase(),
-        type      : type,
-        mtime     : mtime,
-        age       : timeDifference(mtime),
-        size      : size,
-        prettySize: formatBytes(size),
-        id        : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
-        sprite    : "sprite sprite-" + getSpriteClass(/[^.]*$/.exec(name)[0])
+        name    : name,
+        sortname: name.replace(/['"]/g, "_").toLowerCase(),
+        type    : type,
+        mtime   : mtime,
+        age     : timeDifference(mtime),
+        size    : size,
+        psize   : formatBytes(size),
+        id      : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
+        sprite  : "sprite sprite-" + getSpriteClass(/[^.]*$/.exec(name)[0])
       };
 
       if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {

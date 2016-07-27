@@ -9,21 +9,22 @@ rules:
   declaration-block-no-shorthand-property-overrides: true
   declaration-block-semicolon-space-before: never
   declaration-colon-space-before: never
+  font-family-name-quotes: always-where-recommended
   function-calc-no-unspaced-operator: true
   function-linear-gradient-no-nonstandard-direction: true
   function-parentheses-newline-inside: never-multi-line
   function-parentheses-space-inside: never
-  function-url-quotes: double
+  function-url-quotes: always
+  length-zero-no-unit: true
   max-empty-lines: 1
   media-feature-colon-space-before: never
   media-feature-range-operator-space-after: always
   media-feature-range-operator-space-before: always
   no-eol-whitespace: true
-  no-missing-eof-newline: true
+  no-missing-end-of-source-newline: true
   number-leading-zero: never
   number-max-precision: 4
   number-no-trailing-zeros: true
-  number-zero-length-no-unit: true
   selector-list-comma-space-after: always-single-line
   selector-list-comma-space-before: never-single-line
   selector-pseudo-element-colon-notation: single
