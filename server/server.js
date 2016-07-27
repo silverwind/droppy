@@ -944,13 +944,15 @@ filetree.on("updateall", function() {
 });
 
 filetree.on("update", function(dir) {
-  do {
+  while (true) {
     if (clientsPerDir[dir]) {
       clientsPerDir[dir].forEach(function(client) {
         client.update();
       });
     }
-  } while ((dir = path.dirname(dir)) !== "/");
+    if (dir === "/") break;
+    dir = path.dirname(dir);
+  };
 });
 
 function updateClientLocation(dir, sid, vId) {
