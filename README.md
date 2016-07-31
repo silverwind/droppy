@@ -151,8 +151,8 @@ See the [express example](https://github.com/silverwind/droppy/blob/master/examp
 Returns `function onRequest(req, res)`. All arguments are optional.
 
 ## Installation guides
-- [Installation as systemd service](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
-- [Installation as debian initscript](https://github.com/silverwind/droppy/wiki/Debian-Installation)
+- [Systemd-based distributions](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+- [Debian (Pre-Jessie)](https://github.com/silverwind/droppy/wiki/Debian-Installation-(Pre-Jessie))
 - [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 - [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
 
