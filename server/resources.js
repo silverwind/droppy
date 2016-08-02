@@ -42,7 +42,7 @@ var opts = {
     roundingPrecision: 3,
   },
   autoprefixer: {
-    browsers: "> 2%, not ie < 11",
+    browsers: "> 3%, last 2 firefox versions, last 2 safari versions",
     cascade: false,
   },
   htmlMinifier: {
