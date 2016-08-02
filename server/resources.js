@@ -42,7 +42,7 @@ var opts = {
     roundingPrecision: 3,
   },
   autoprefixer: {
-    browsers: ["last 2 versions"],
+    browsers: "> 2%, not ie < 11",
     cascade: false,
   },
   htmlMinifier: {
@@ -449,7 +449,7 @@ resources.compileCSS = function compileCSS() {
   });
 
   // Vendor prefixes and minify
-  css = minifyCSS(postcss([autoprefixer]).process(css).css);
+  css = minifyCSS(postcss([autoprefixer(opts.autoprefixer)]).process(css).css);
 
   return {data: Buffer(css), etag: etag(css), mime: mime("css")};
 };
