@@ -380,7 +380,6 @@ input::-webkit-input-placeholder { color: #999 }
 
 .data-row {
   display: flex;
-  height: 1.3rem;
   padding: 0 .1rem;
 }
 
@@ -406,15 +405,16 @@ input::-webkit-input-placeholder { color: #999 }
 .data-row > *, .file-header > *, .line-buttons > * {
   display: flex;
   align-items: center;
-  align-self: center;
+  align-self: stretch;
 }
 
 .entry-link {
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: top;
   white-space: nowrap;
   cursor: pointer;
+  display: block; /* needed for ellipsis */
+  padding: .1rem 0;
 }
 
 .error-link {
@@ -489,6 +489,7 @@ input::-webkit-input-placeholder { color: #999 }
   height: 24px;
   background-size: 240px 216px;
   transform-origin: center;
+  align-self: center;
 }
 
 @media (min-width: 1024px) { .sprite { transform: scale(1.4); margin: 0 .4em } }

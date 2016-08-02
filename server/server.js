@@ -995,7 +995,10 @@ function debug() {
     setTimeout(function() { // prevent EBUSY on win32
       if (/\.css$/.test(file)) {
         cache.res["style.css"] = resources.compileCSS();
-        sendObjAll({type: "RELOAD", css: String(cache.res["style.css"].data)});
+        sendObjAll({
+          type: "RELOAD",
+          css: String(cache.res["style.css"].data).replace('"sprites.png"', '"!/res/sprites.png"')
+        });
       } else if (/\.js$/.test(file) || /\.handlebars$/.test(file)) {
         cache.res["client.js"] = resources.compileJS();
         sendObjAll({type: "RELOAD"});
