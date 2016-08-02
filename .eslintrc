@@ -135,6 +135,7 @@ rules:
   no-shadow:                     [0]
   no-spaced-func:                [2]
   no-sparse-arrays:              [2]
+  no-tabs:                       [2]
   multiline-ternary:             [0]
   no-this-before-super:          [2]
   no-throw-literal:              [2]
