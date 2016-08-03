@@ -372,10 +372,9 @@ input::-webkit-input-placeholder { color: #999 }
 
 .icon-play svg {
   width: 100%; height: 100%;
+  margin-top: .25rem;
   visibility: hidden;
   cursor: pointer;
-  position: absolute;
-  fill: #222;
 }
 
 .data-row {
