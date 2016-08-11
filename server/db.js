@@ -120,5 +120,5 @@ function write() {
 }
 
 function getHash(string) {
-  return crypto.createHmac("sha256", Buffer(string, "utf8")).digest("hex");
+  return crypto.createHmac("sha256", string).digest("hex");
 }
