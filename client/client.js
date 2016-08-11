@@ -697,7 +697,7 @@
       secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
       if (Number(view.find(".upload-info")[0].dataset.id) === id)
-        setTitle(progress + " - " + basename(view[0].currentFolder));
+        setTitle(progress);
       info.find(".upload-bar")[0].style.width = progress;
       info.find(".upload-percentage").text(progress);
       info.find(".upload-time").text([
@@ -2646,7 +2646,7 @@
 
   // turn /path/to to file
   function dirname(path) {
-    return path.replace(/\\/g, "/").replace(/\/[^\/]*$/, "");
+    return path.replace(/\\/g, "/").replace(/\/[^\/]*$/, "") || "/";
   }
 
   // Join and clean up paths (can also take a single argument to just clean it up)
