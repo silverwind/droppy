@@ -177,6 +177,11 @@ resources.build = function build(cb) {
   });
 };
 
+// compat: Node.js < 6
+function buf(str) {
+  return "from" in Buffer ? Buffer.from(str) : Buffer(str);
+}
+
 function isCacheFresh(cb) {
   fs.stat(cachePath, function(err, stats) {
     if (err) return cb(false);
@@ -323,14 +328,14 @@ function readThemes(callback) {
 
       filenames.forEach(function(name, index) {
         var css = String(data[index]);
-        themes[name.replace(/\.css$/, "")] = Buffer(minifyCSS(css));
+        themes[name.replace(/\.css$/, "")] = buf(minifyCSS(css));
       });
 
       // add our own theme
       fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function(err, css) {
         css = String(css);
         if (err) return callback(err);
-        themes.droppy = Buffer(minifyCSS(css));
+        themes.droppy = buf(minifyCSS(css));
         callback(null, themes);
       });
     });
@@ -353,7 +358,7 @@ function readModes(callback) {
 
     async.map(Object.keys(modes), function(mode, cb) {
       fs.readFile(path.join(modesPath, mode, mode + ".js"), function(err, data) {
-        cb(err, Buffer(minifyJS(String(data))));
+        cb(err, buf(minifyJS(String(data))));
       });
     }, function(err, result) {
       Object.keys(modes).forEach(function(mode, i) {
@@ -384,9 +389,9 @@ function readLibs(callback) {
     if (minify) {
       Object.keys(out).forEach(function(file) {
         if (/\.js$/.test(file)) {
-          out[file] = Buffer(minifyJS(String(out[file])));
+          out[file] = buf(minifyJS(String(out[file])));
         } else if (/\.css$/.test(file)) {
-          out[file] = Buffer(minifyCSS(String(out[file])));
+          out[file] = buf(minifyCSS(String(out[file])));
         }
       });
     }
@@ -439,7 +444,7 @@ resources.compileJS = function compileJS() {
   // Minify
   js = minifyJS(js);
 
-  return {data: Buffer(js), etag: etag(js), mime: mime("js")};
+  return {data: buf(js), etag: etag(js), mime: mime("js")};
 };
 
 resources.compileCSS = function compileCSS() {
@@ -451,7 +456,7 @@ resources.compileCSS = function compileCSS() {
   // Vendor prefixes and minify
   css = minifyCSS(postcss([autoprefixer(opts.autoprefixer)]).process(css).css);
 
-  return {data: Buffer(css), etag: etag(css), mime: mime("css")};
+  return {data: buf(css), etag: etag(css), mime: mime("css")};
 };
 
 resources.compileHTML = function compileHTML(res) {
@@ -468,17 +473,17 @@ resources.compileHTML = function compileHTML(res) {
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "main");
   var main = min($("#page").replaceWith(html["main.html"]).end().html());
-  res["main.html"] = {data: Buffer(main), etag: etag(main), mime: mime("html")};
+  res["main.html"] = {data: buf(main), etag: etag(main), mime: mime("html")};
 
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "auth");
   var auth = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["auth.html"] = {data: Buffer(auth), etag: etag(auth), mime: mime("html")};
+  res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: mime("html")};
 
   $ = cheerio.load(html["base.html"]);
   $("html").attr("data-type", "firstrun");
   var firstrun = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["firstrun.html"] = {data: Buffer(firstrun), etag: etag(firstrun), mime: mime("html")};
+  res["firstrun.html"] = {data: buf(firstrun), etag: etag(firstrun), mime: mime("html")};
 
   return res;
 };
