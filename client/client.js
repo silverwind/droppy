@@ -1688,7 +1688,7 @@
           showSpinner(view);
           sendMessage(view[0].vId, "SAVE_FILE", {
             to: view[0].editorEntryId,
-            value: cm.getValue()
+            value: cm.getValue(view[0].lineEnding)
           });
         }
 
@@ -1705,6 +1705,7 @@
         CodeMirror.keyMap.sublime["Cmd-T"] = false;
         CodeMirror.keyMap.sublime["Ctrl-T"] = false;
 
+        view[0].lineEnding = dominantLineEnding(data);
         editor.setValue(data);
         editor.clearHistory();
 
@@ -1713,12 +1714,7 @@
           editor = null;
         });
         view.find(".save").register("click", function() {
-          var view = $(this).parents(".view");
-          showSpinner(view);
-          sendMessage(view[0].vId, "SAVE_FILE", {
-            to: entryId,
-            value: editor.getValue()
-          });
+          save($(this).parents(".view")[0].editor);
         });
         view.find(".ww").register("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
@@ -2647,6 +2643,13 @@
   // turn /path/to to file
   function dirname(path) {
     return path.replace(/\\/g, "/").replace(/\/[^\/]*$/, "") || "/";
+  }
+
+  // detect dominant line ending style (CRLF vs LF)
+  function dominantLineEnding(str) {
+    var numCRLF = (str.match(/\r\n/gm) || []).length;
+    var numLF = (str.match(/[^\r]\n/gm) || []).length;
+    return (numCRLF > numLF) ? "\r\n" : "\n";
   }
 
   // Join and clean up paths (can also take a single argument to just clean it up)
