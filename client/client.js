@@ -2648,7 +2648,7 @@
   // detect dominant line ending style (CRLF vs LF)
   function dominantLineEnding(str) {
     var numCRLF = (str.match(/\r\n/gm) || []).length;
-    var numLF = (str.match(/[^\r]?\n/gm) || []).length;
+    var numLF = (str.match(/([^\r]|^)\n/gm) || []).length;
     return (numCRLF > numLF) ? "\r\n" : "\n";
   }
 
