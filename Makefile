@@ -1,13 +1,12 @@
 # os dependencies: jq git node npm docker
 # npm dependencies: eslint stylelint uglify-js grunt npm-check-updates
 
-UNAME_M := $(shell uname -m)
-ifneq ($(filter %86,$(UNAME_M)),)
-	IMAGE=silverwind/droppy
-else
+X86 := $(shell uname -m | grep 86)
+ifeq ($(X86),)
 	IMAGE=silverwind/armhf-droppy
+else
+	IMAGE=silverwind/droppy
 endif
-
 
 JQUERY_FLAGS=-ajax,-css/showHide,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-css,-serialize,-queue,-callbacks,-event/support,-event/ajax
 
@@ -26,7 +25,7 @@ publish:
 
 docker:
 	@echo Preparing docker image $(IMAGE)...
-	docker rm -f "$$(docker ps -a -f='image=$(IMAGE)'' -q)" 2>/dev/null || true
+	docker rm -f "$$(docker ps -a -f='image=$(IMAGE)' -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	docker build --no-cache=true -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
