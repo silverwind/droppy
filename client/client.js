@@ -2648,8 +2648,8 @@
   // detect dominant line ending style (CRLF vs LF)
   function dominantLineEnding(str) {
     var numCRLF = (str.match(/\r\n/gm) || []).length;
-    // emulating negative lookbehind - http://stackoverflow.com/a/7376612/808699
-    var numLF = (str.match(/^(?:(?!\r\n$).)*\n$/gm) || []).length;
+    // emulating negative lookbehind by reversing the string
+    var numLF = (str.split("").reverse().join("").match(/\n(?!(\r))/gm) || []).length;
     return (numCRLF > numLF) ? "\r\n" : "\n";
   }
 
