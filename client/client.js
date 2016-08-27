@@ -116,7 +116,7 @@
   });
 
   function svg(which) {
-    return '<svg class="' +which + '"><use xlink:href="#' + which + '"></svg>';
+    return '<svg class="' + which + '"><use xlink:href="#' + which + '"></svg>';
   }
   Handlebars.registerHelper("svg", svg);
 
@@ -1239,7 +1239,7 @@
       else
         icon = "open";
 
-      view.find(".dropzone svg").replaceWith(svg(svg));
+      view.find(".dropzone svg").replaceWith(svg(icon));
       if (!dropZone.hasClass("in")) dropZone.addClass("in");
 
       getOtherViews($(event.target).parents(".view")[0].vId).find(".dropzone").removeClass("in");
@@ -2017,7 +2017,7 @@
       if (volume < 0) volume = 0;
       player.volume = volume;
       droppy.set("volume", volume);
-      if (player.volume === 0) volumeIcon.html(sv("volume-mute"));
+      if (player.volume === 0) volumeIcon.html(svg("volume-mute"));
       else if (player.volume <= 0.33) volumeIcon.html(svg("volume-low"));
       else if (player.volume <= 0.67) volumeIcon.html(svg("volume-medium"));
       else volumeIcon.html(svg("volume-high"));
