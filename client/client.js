@@ -116,7 +116,7 @@
   });
 
   function svg(which) {
-    return '<svg class="' + which + '"><use xlink:href="#' + which + '"></svg>';
+    return '<svg class="' + which + '"><use xlink:href="#i-' + which + '"></svg>';
   }
   Handlebars.registerHelper("svg", svg);
 
