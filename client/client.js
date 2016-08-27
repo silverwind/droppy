@@ -4,7 +4,6 @@
   var droppy = {};
 
   /* The lines below will get replaced during compilation by the server */
-  /* {{ svg }} */
   /* {{ templates }} */
 
   initVariables();
@@ -112,12 +111,14 @@
   Handlebars.registerHelper("select", function(sel, opts) {
     return opts.fn(this).replace(new RegExp(' value="' + sel + '"'), "$& selected=");
   });
-  Handlebars.registerHelper("svg", function(type) {
-    return new Handlebars.SafeString(droppy.svg[type]);
-  });
   Handlebars.registerHelper("is", function(a, b, opts) {
     return a === b ? opts.fn(this) : opts.inverse(this);
   });
+
+  function svg(which) {
+    return '<svg class="' +which + '"><use xlink:href="#' + which + '"></svg>';
+  }
+  Handlebars.registerHelper("svg", svg);
 
   if (droppy.detects.mobile)
     $("html").addClass("mobile");
@@ -502,7 +503,7 @@
     $(document).register(screenfull.raw.fullscreenchange, function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
-      $(".full svg, .fs svg").replaceWith(droppy.svg[screenfull.isFullscreen ? "unfullscreen" : "fullscreen"]);
+      $(".full svg, .fs svg").replaceWith(svg(screenfull.isFullscreen ? "unfullscreen" : "fullscreen"));
     });
 
     var fileInput = $("#file"), uppie = new Uppie();
@@ -884,7 +885,7 @@
     parts = join(view[0].currentFolder).split("/");
     if (parts[parts.length - 1] === "") parts.pop();
     if (view[0].currentFile !== null) parts.push(view[0].currentFile);
-    parts[0] = droppy.svg.home; // Replace empty string with our home icon
+    parts[0] = svg("home"); // Replace empty string with our home icon
     if (view[0].savedParts) {
       oldParts = view[0].savedParts;
       while (parts[i] || oldParts[i]) {
@@ -895,7 +896,7 @@
           } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
             addPart(parts[i], pathStr);
           } else { // rename part
-            $(view.find(".path li")[i]).html(parts[i] + droppy.svg.triangle).data("destination", pathStr);
+            $(view.find(".path li")[i]).html(parts[i] + svg("triangle")).data("destination", pathStr);
           }
         }
         i++;
@@ -930,7 +931,7 @@
         setTimeout(function() {checkPathOverflow(view); }, 400);
       });
       view.find(".path").append(li);
-      li.append(droppy.svg.triangle);
+      li.append(svg("triangle"));
     }
 
     function removePart(i) {
@@ -1230,15 +1231,15 @@
     view.register("dragenter", function(event) {
       event.stopPropagation();
       droppy.activeView = view[0].vId;
-      var svg, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
+      var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
       if (view.data("type") === "directory" && isInternal)
-        svg = "menu";
+        icon = "menu";
       else if (!isInternal)
-        svg = "upload-cloud";
+        icon = "upload-cloud";
       else
-        svg = "open";
+        icon = "open";
 
-      view.find(".dropzone svg").replaceWith(droppy.svg[svg]);
+      view.find(".dropzone svg").replaceWith(svg(svg));
       if (!dropZone.hasClass("in")) dropZone.addClass("in");
 
       getOtherViews($(event.target).parents(".view")[0].vId).find(".dropzone").removeClass("in");
@@ -1978,10 +1979,10 @@
       var icon   = $(this).children("svg");
       var player = $(this).parents(".audio-bar").find(".audio-player")[0];
       if (icon.attr("class") === "play") {
-        icon.replaceWith($(droppy.svg.pause));
+        icon.replaceWith($(svg("pause")));
         player.play();
       } else {
-        icon.replaceWith($(droppy.svg.play));
+        icon.replaceWith($(svg("play")));
         player.pause();
       }
       event.stopPropagation();
@@ -2016,10 +2017,10 @@
       if (volume < 0) volume = 0;
       player.volume = volume;
       droppy.set("volume", volume);
-      if (player.volume === 0) volumeIcon.html(droppy.svg["volume-mute"]);
-      else if (player.volume <= 0.33) volumeIcon.html(droppy.svg["volume-low"]);
-      else if (player.volume <= 0.67) volumeIcon.html(droppy.svg["volume-medium"]);
-      else volumeIcon.html(droppy.svg["volume-high"]);
+      if (player.volume === 0) volumeIcon.html(sv("volume-mute"));
+      else if (player.volume <= 0.33) volumeIcon.html(svg("volume-low"));
+      else if (player.volume <= 0.67) volumeIcon.html(svg("volume-medium"));
+      else volumeIcon.html(svg("volume-high"));
       view.find(".volume-slider-inner")[0].style.width = (volume * 100) + "%";
     }
     function playRandom(view) {
@@ -2423,7 +2424,7 @@
 
   function showSpinner(view) {
     if (!view.find(".spinner").length)
-      view.find(".path").append(droppy.svg.spinner);
+      view.find(".path").append(svg("spinner"));
 
     view.find(".spinner").attr("class", "spinner in");
 
@@ -2445,7 +2446,7 @@
   function showError(view, text) {
     var box = view.find(".info-box");
     clearTimeout(droppy.errorTimer);
-    box.find(".icon svg").replaceWith(droppy.svg.exclamation);
+    box.find(".icon svg").replaceWith(svg("exclamation"));
     box.children("span").text(text);
     box.attr("class", "info-box error in");
     droppy.errorTimer = setTimeout(function() {
@@ -2476,7 +2477,7 @@
     out.register("copy", function() {
       setTimeout(toggleCatcher.bind(null, false), 500);
     });
-    box.find(".icon svg").replaceWith(droppy.svg.link);
+    box.find(".icon svg").replaceWith(svg("link"));
     box.attr("class", "info-box link in").transitionend(function() {
       select();
     });

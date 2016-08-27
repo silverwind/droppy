@@ -20,6 +20,9 @@ body, div, a, header, input, button, label, li, nav, p, section, span, ul, figur
 @media (max-width:  639px) { html { font-size: 22px } }
 
 svg { fill: currentColor }
+svg > use > svg { all: inherit } /* https://bugzilla.mozilla.org/show_bug.cgi?id=1298557 */
+body > svg { display: none }
+
 button { color: inherit }
 li { list-style: none }
 a  { text-decoration: none; background: transparent }

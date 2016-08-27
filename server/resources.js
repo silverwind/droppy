@@ -18,7 +18,6 @@ var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
 var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 var cachePath    = path.join(paths.mod, "dist", "cache.json");
 
-var svgData      = {};
 var minify, $;
 
 var opts = {
@@ -74,7 +73,8 @@ var opts = {
   }
 };
 
-var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, templates, zopfli, brotli;
+var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli;
+var svg, templates;
 try {
   autoprefixer = require("autoprefixer");
   brotli       = require("iltorb").compress;
@@ -82,9 +82,10 @@ try {
   cleanCSS     = new (require("clean-css"))(opts.cleanCSS);
   htmlMinifier = require("html-minifier");
   postcss      = require("postcss");
-  templates    = require("./templates.js");
   uglify       = require("uglify-js");
   zopfli       = require("node-zopfli");
+  svg          = require("./svg");
+  templates    = require("./templates.js");
 } catch (e) {}
 
 resources.files = {
@@ -399,23 +400,6 @@ function readLibs(callback) {
   });
 }
 
-function readSVG() {
-  fs.readdirSync(paths.svg).forEach(function(name) {
-    var className = name.slice(0, name.length - ".svg".length);
-    $ = cheerio.load(String(fs.readFileSync(path.join(paths.svg, name))), {xmlMode: true});
-    $("svg").addClass(className);
-    svgData[className] = $.html();
-  });
-}
-
-function addSVG(html) {
-  $ = cheerio.load(html);
-  $("svg").each(function() {
-    $(this).replaceWith(svgData[$(this).attr("class")]);
-  });
-  return $.html();
-}
-
 function minifyJS(js) {
   if (!minify) return js;
   return uglify.minify(js, opts.uglify).code;
@@ -431,9 +415,6 @@ resources.compileJS = function compileJS() {
   resources.files.js.forEach(function(file) {
     js += String(fs.readFileSync(path.join(paths.mod, file))) + ";";
   });
-
-  // Add SVG object
-  js = js.replace("/* {{ svg }} */", "droppy.svg = " + JSON.stringify(svgData) + ";");
 
   // Add Handlebars precompiled templates
   var temps = fs.readdirSync(paths.templates).map(function(p) {
@@ -466,8 +447,11 @@ resources.compileHTML = function compileHTML(res) {
   };
 
   resources.files.html.forEach(function(file) {
-    html[path.basename(file)] = addSVG(String(fs.readFileSync(path.join(paths.mod, file))));
+    html[path.basename(file)] = String(fs.readFileSync(path.join(paths.mod, file)));
   });
+
+  // Add SVGs
+  html["base.html"] = html["base.html"].replace("<!-- {{svg}} -->", svg());
 
   // Combine pages
   $ = cheerio.load(html["base.html"]);
@@ -491,7 +475,6 @@ resources.compileHTML = function compileHTML(res) {
 function compileAll(callback) {
   var res = {};
 
-  readSVG();
   res["client.js"] = resources.compileJS();
   res["style.css"] = resources.compileCSS();
   res = resources.compileHTML(res);
