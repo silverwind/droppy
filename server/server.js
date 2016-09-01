@@ -616,6 +616,12 @@ function handlePOST(req, res) {
         log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
       }
     }));
+  } else if (/^\/!\/logout$/.test(URI)) {
+    res.statusCode = 301;
+    cookies.unset(req, res);
+    res.setHeader("Location", "/");
+    res.end();
+    log.info(req, res);
   } else if (/^\/!\/adduser/.test(URI) && firstRun) {
     req.pipe(new Busboy({headers: req.headers}).on("field", function(fieldname, val) {
       postData[fieldname] = val;

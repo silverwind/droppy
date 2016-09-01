@@ -3,7 +3,6 @@
   "use strict";
   var droppy = {};
 
-  /* The lines below will get replaced during compilation by the server */
   /* {{ templates }} */
 
   initVariables();
@@ -134,7 +133,6 @@
     indentWithTabs: false,
     indentUnit: 4,
     lineWrapping: false,
-    hasLoggedOut: false,
     renameExistingOnUpload: false
   };
 
@@ -175,7 +173,6 @@
   } else {
     var isFirst = type === "firstrun";
     if (isFirst) $("#login-info").text("Hello! Choose your credentials.");
-    droppy.set("hasLoggedOut", false);
     initAuthPage(isFirst);
   }
 // ============================================================================
@@ -252,7 +249,7 @@
     };
     // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
     droppy.socket.onclose = function(event) {
-      if (droppy.get("hasLoggedOut") || event.code === 4000) return;
+      if (event.code === 4000) return;
       if (event.code === 1011) {
         droppy.token = null;
         openSocket();
@@ -357,10 +354,9 @@
             .register("click", showError.bind(null, getView(0), "Signing out is disabled"));
         else
           $("#logout-button").register("click", function() {
-            droppy.set("hasLoggedOut", true);
-            if (droppy.socket) droppy.socket.close(4001);
-            history.pushState(null, null, getRootPath());
-            location.reload(true);
+            ajax({method: "POST", url: getRootPath() + "!/logout"}).then(function() {
+              location.reload(true);
+            });
           });
         break;
       case "ERROR":
