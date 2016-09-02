@@ -77,7 +77,7 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
     function(cb) { cleanupLinks(cb); },
     function(cb) { if (config.dev) debug(); cb(); },
     function(cb) {
-      if (config.demo || process.env.DROPPY_MODE === "demo") {
+      if (config.demo) {
         process.title = "droppy-demo";
         config.demo = true;
         config.public = true;
@@ -255,12 +255,10 @@ function createListener(handler, opts, callback) {
       server.on("tlsClientError", tlsError); // Node.js 6.0
 
       // TLS tickets - regenerate keys every hour, Node.js 4.0
-      if (server.setTicketKeys) {
-        (function rotate() {
-          server.setTicketKeys(crypto.randomBytes(48));
-          setTimeout(rotate, 60 * 60 * 1000);
-        })();
-      }
+      (function rotate() {
+        server.setTicketKeys(crypto.randomBytes(48));
+        setTimeout(rotate, 60 * 60 * 1000);
+      })();
 
       callback(null, server);
     });
@@ -278,7 +276,7 @@ function setupSocket(server) {
     }
   });
   wss.on("connection", function(ws) {
-    log.info(ws, null, "WebSocket [", chalk.green("connected"), "] ");
+    log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
     var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
     var cookie = cookies.get(ws.upgradeReq.headers.cookie);
     clients[sid] = {views: [], cookie: cookie, ws: ws};
@@ -687,7 +685,7 @@ function handleResourceRequest(req, res, resourceName) {
         headers["X-Content-Type-Options"] = "nosniff";
         headers["X-XSS-Protection"] = "1; mode=block";
         if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-          headers["X-UA-Compatible"] = "IE=Edge, chrome=1";
+          headers["X-UA-Compatible"] = "IE=Edge";
       }
 
       // Caching
