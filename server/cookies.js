@@ -15,7 +15,7 @@ cookies.parse = function parse(cookie) {
     });
   }
   return entries;
-}
+};
 
 cookies.get = function get(cookie) {
   var entries = cookies.parse(cookie);
@@ -56,7 +56,7 @@ cookies.unset = function unset(req, res) {
   delete sessions[session];
   db.set("sessions", sessions);
   res.setHeader("Set-Cookie", cookieString({s: "gone", expires: epoch()}));
-}
+};
 
 function inOneYear() {
   return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
