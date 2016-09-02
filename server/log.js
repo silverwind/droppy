@@ -87,14 +87,14 @@ log.setLogFile = function setLogFile(fd) {
 };
 
 log.debug = function debug(req, res) {
-  if (req && req._events !== undefined) // Try to distinguish between calls containing req/res and calls without them
+  if (req && (req.headers || req.upgradeReq))
     log(req, res, 3, Array.prototype.slice.call(arguments, 2).join(""));
   else
     log(null, null, 3, Array.prototype.slice.call(arguments, 0).join(""));
 };
 
 log.info = function info(req, res) {
-  if (req && req._events !== undefined) // Try to distinguish between calls containing req/res and calls without them
+  if (req && (req.headers || req.upgradeReq))
     log(req, res, 2, Array.prototype.slice.call(arguments, 2).join(""));
   else
     log(null, null, 2, Array.prototype.slice.call(arguments, 0).join(""));

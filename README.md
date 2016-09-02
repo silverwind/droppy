@@ -28,14 +28,14 @@ Note that two directories will be used by droppy:
 - `config` directory: set with `-c <dir>`, default `~/.droppy/config`.
 - `files` directory: set with `-f <dir>`, default `~/.droppy/files`.
 
-Make sure these directories exist and owned by the user running the application/container.
+Make sure these directories are owned by the user running the application/container.
 
 ### Local Installation :package:
-With [`Node.js`](https://nodejs.org) >= 4.0.0 and `npm` installed, run:
+With [`Node.js`](https://nodejs.org) >= 4.0.0 (>= 6.4.0 on Windows) and `npm` installed, run:
 
 ```sh
 # Install latest version and dependencies.
-$ [sudo] npm install -g droppy
+$ npm install -g droppy
 
 # Start with `/srv/droppy/config` for config and `/srv/droppy/files` for files.
 $ droppy start -c /srv/droppy/config -f /srv/droppy/files

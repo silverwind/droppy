@@ -13,7 +13,7 @@ var fs       = require("graceful-fs");
 var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
-var Wss      = require("ws").Server;
+var Wss      = require("uws").Server;
 var yazl     = require("yazl");
 
 var pkg       = require("./../package.json");
