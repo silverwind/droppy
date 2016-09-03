@@ -2259,16 +2259,17 @@
 
     droppy.audioTypes = {
       aac  : "audio/aac",
+      flac : "audio/flac",
       m4a  : "audio/mp4",
       m4p  : "application/mp4",
       mp1  : "audio/mpeg",
       mp2  : "audio/mpeg",
       mp3  : "audio/mpeg",
       mpa  : "audio/mpeg",
-      mpg  : "audio/mpeg",
       mpeg : "audio/mpeg",
-      ogg  : "audio/ogg",
+      mpg  : "audio/mpeg",
       oga  : "audio/ogg",
+      ogg  : "audio/ogg",
       opus : "audio/ogg",
       wav  : "audio/wav"
     };
