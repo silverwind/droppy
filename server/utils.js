@@ -287,7 +287,7 @@ utils.ip = function ip(req) {
     req.connection && req.connection.remoteAddress ||
     req.connection && req.connection.socket && req.connection.socket.remoteAddress ||
     req.remoteAddress && req.remoteAddress;
-}
+};
 
 utils.port = function port(req) {
   return req.headers && req.headers["x-real-port"] ||
@@ -295,7 +295,7 @@ utils.port = function port(req) {
     req.connection && req.connection.remotePort ||
     req.connection && req.connection.socket && req.connection.socket.remotePort ||
     req.remotePort && req.remotePort;
-}
+};
 
 function createDH() {
   log.info("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
