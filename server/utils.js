@@ -278,6 +278,25 @@ utils.formatBytes = function formatBytes(num) {
   return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
 };
 
+// TODO: https://tools.ietf.org/html/rfc7239
+utils.ip = function ip(req) {
+  return req.headers && req.headers["x-forwarded-for"] &&
+      req.headers["x-forwarded-for"].split(",")[0].trim() ||
+    req.headers && req.headers["x-real-ip"] ||
+    req.upgradeReq && req.upgradeReq.connection && req.upgradeReq.connection.remoteAddress ||
+    req.connection && req.connection.remoteAddress ||
+    req.connection && req.connection.socket && req.connection.socket.remoteAddress ||
+    req.remoteAddress && req.remoteAddress;
+}
+
+utils.port = function port(req) {
+  return req.headers && req.headers["x-real-port"] ||
+    req.upgradeReq && req.upgradeReq.connection && req.upgradeReq.connection.remotePort ||
+    req.connection && req.connection.remotePort ||
+    req.connection && req.connection.socket && req.connection.socket.remotePort ||
+    req.remotePort && req.remotePort;
+}
+
 function createDH() {
   log.info("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
   var dh = dhparam(DHPARAM_BITS);

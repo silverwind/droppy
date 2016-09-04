@@ -2,10 +2,11 @@
 
 var csrf   = module.exports = {};
 var crypto = require("crypto");
+var utils  = require("./utils.js");
 var store  = [];
 
 csrf.get = function(req) {
-  var index, token, ip = getIp(req);
+  var index, token, ip = utils.ip(req);
   store.some(function(pair, i) {
     if (pair[0] === ip) {
       index = i;
@@ -30,14 +31,4 @@ csrf.validate = function validate(token) {
 
 function getToken() {
   return crypto.randomBytes(16).toString("hex");
-}
-
-function getIp(req) {
-  return req.headers && req.headers["x-forwarded-for"] ||
-    req.headers && req.headers["x-real-ip"] ||
-    req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-forwarded-for"] ||
-    req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-ip"] ||
-    req._socket && req._socket.remoteAddress && req._socket.remoteAddress ||
-    req.connection && req.connection.remoteAddress ||
-    req.connection && req.connection.socket && req.connection.socket.remoteAddress;
 }

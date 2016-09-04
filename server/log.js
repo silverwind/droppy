@@ -5,6 +5,8 @@ var chalk     = require("chalk");
 var format    = require("url-format-lax");
 var stripAnsi = require("strip-ansi");
 
+var utils     = require("./utils.js");
+
 var logColors = ["reset", "red", "yellow", "cyan"];
 var logLabels = ["", "ERROR", "INFO", "DEBG"];
 var opts, logfile;
@@ -38,27 +40,10 @@ var log = module.exports = function log(req, res, logLevel) {
     if (req.url) elems.unshift(decodeURIComponent(decodeURIComponent(req.url))); // For some reason, this need double decoding for upload URLs
     if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
-    var port =
-      req.headers && req.headers["x-forwarded-port"] ||
-      req.headers && req.headers["x-real-port"] ||
-      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-forwarded-port"] ||
-      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-port"] ||
-      req._socket && req._socket.remotePort && req._socket.remotePort ||
-      req.connection && req.connection.remotePort ||
-      req.connection && req.connection.socket && req.connection.socket.remotePort ||
-      req.remotePort && req.remotePort;
+    var ip = utils.ip(req);
 
-    var ip =
-      req.headers && req.headers["x-forwarded-for"] ||
-      req.headers && req.headers["x-real-ip"] ||
-      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-forwarded-for"] ||
-      req.upgradeReq && req.upgradeReq.headers && req.upgradeReq.headers["x-real-ip"] ||
-      req._socket && req._socket.remoteAddress && req._socket.remoteAddress ||
-      req.connection && req.connection.remoteAddress ||
-      req.connection && req.connection.socket && req.connection.socket.remoteAddress ||
-      req.remoteAddress && req.remoteAddress;
-
-    if (ip && port) elems.unshift(log.formatUrl(ip, port));
+    if (ip)
+      elems.unshift(log.formatUrl(ip, utils.port(req) || "0"));
   }
 
   if (logLevel > 0)
