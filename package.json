@@ -41,10 +41,13 @@
     "svgstore": "^1.1.0",
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
-    "uws": "^0.8.0",
     "which": "^1.2.10",
+    "ws": "^1.1.1",
     "yauzl": "^2.6.0",
     "yazl": "^2.4.1"
+  },
+  "optionalDependencies": {
+    "uws": "^0.8.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.4.0",
