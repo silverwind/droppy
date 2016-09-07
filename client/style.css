@@ -175,8 +175,6 @@ input::-webkit-input-placeholder { color: #999 }
   font-size: .9rem;
 }
 
-@media (max-width: 639px) { flex-basis: 1.25rem }
-
 .path .triangle {
   position: absolute;
   height: 1.5rem;
@@ -273,7 +271,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 .paste-button .triangle { position: absolute; height: 1.5rem; width: 1.5rem; left: -.875rem }
 @media (max-width:  639px) {
-  .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: -.74rem  }
+  .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: -.74rem }
 }
 
 .paste-button svg.paste {
@@ -1423,7 +1421,7 @@ html:not(.mobile) #drop-select span.active {
   align-items: center;
   justify-content: center;
 }
-@media (max-width:  639px) { .dropzone { top: 1.25rem } }
+@media (max-width: 639px) { .dropzone { top: 1.25rem } }
 .dropzone.in { opacity: .9; visibility: visible }
 
 .dropzone svg {
