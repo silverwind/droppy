@@ -41,7 +41,7 @@
     "svgstore": "^1.1.0",
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
-    "which": "^1.2.10",
+    "which": "^1.2.11",
     "ws": "^1.1.1",
     "yauzl": "^2.6.0",
     "yazl": "^2.4.1"
@@ -50,7 +50,7 @@
     "uws": "^0.8.0"
   },
   "devDependencies": {
-    "autoprefixer": "^6.4.0",
+    "autoprefixer": "^6.4.1",
     "cheerio": "^0.22.0",
     "clean-css": "^3.4.19",
     "codemirror": "^5.18.2",
@@ -60,7 +60,7 @@
     "iltorb": "^1.0.12",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.0",
-    "postcss": "^5.1.2",
+    "postcss": "^5.2.0",
     "screenfull": "^3.0.2",
     "uglify-js": "^2.7.3",
     "uppie": "^0.11.3",
