@@ -1234,7 +1234,7 @@ html:not(.mobile) .vjs-big-play-button {
   box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
-.remember, .submit {
+#remember, #submit {
   line-height: 2rem;
   height: 2rem;
   background: transparent;
@@ -1246,22 +1246,22 @@ html:not(.mobile) .vjs-big-play-button {
   flex: 1;
 }
 
-.remember svg, .submit svg {
+#remember svg, #submit svg {
   position: relative;
   top: .15rem;
   margin: 0 .1em;
 }
 
-.remember:hover, .remember:focus { color: #222 }
-.submit:hover, .submit:focus     { color: #222 }
-.submit svg                      { fill: #666; margin-right: .2em }
-.remember svg                    { fill: transparent }
-.remember.checked svg            { fill: #666 }
-.submit:hover svg                { fill: #222 }
-.remember.checked:hover svg      { fill: #222 }
+#remember:hover, #remember:focus { color: #222 }
+#submit:hover, #submit:focus     { color: #222 }
+#submit svg                      { fill: #666; margin-right: .2em }
+#remember svg                    { fill: transparent }
+#remember.checked svg            { fill: #666 }
+#submit:hover svg                { fill: #222 }
+#remember.checked:hover svg      { fill: #222 }
 
 @media (max-width: 639px), (max-height: 399px) {
-  .remember, .submit {
+  #remember, #submit {
     border-radius: 0;
   }
 }

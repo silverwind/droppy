@@ -413,7 +413,7 @@
 //  Authentication page
 // ============================================================================
   function initAuthPage(firstrun) {
-    $(".remember").register("click", function() {
+    $("#remember").register("click", function() {
       $(this).toggleClass("checked");
     });
     $("#form").register("submit", function(e) {
@@ -425,7 +425,7 @@
         data: {
           username: $("#user").val(),
           password: $("#pass").val(),
-          remember: $(".remember").hasClass("checked"),
+          remember: $("#remember").hasClass("checked"),
           path: path.replace(/\/$/, ""),
         }
       }).then(function(xhr) {
