@@ -586,7 +586,7 @@ function handleGET(req, res) {
 
 var rateLimited = [];
 function handlePOST(req, res) {
-  var URI = decodeURIComponent(req.url), postData = {};
+  var URI = decodeURIComponent(req.url);
 
   if (!utils.isPathSane(URI, true))
     return log.info(req, res, "Invalid POST: " + req.url);
@@ -610,9 +610,7 @@ function handlePOST(req, res) {
       rateLimited.pop(req.socket.remoteAddress);
     }, 2000);
 
-    req.pipe(new Busboy({headers: req.headers}).on("field", function(fieldname, val) {
-      postData[fieldname] = val;
-    }).on("finish", function() {
+    utils.readJsonBody(req).then(function(postData) {
       if (db.authUser(postData.username, postData.password)) {
         cookies.create(req, res, postData);
         endReq(res, true);
@@ -621,17 +619,24 @@ function handlePOST(req, res) {
         endReq(res, false);
         log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
       }
-    }));
+    }).catch(function() {
+      res.statusCode = 400;
+      res.end();
+      log.info(req, res);
+    });
   } else if (/^\/!\/logout$/.test(URI)) {
-    res.statusCode = 301;
-    cookies.unset(req, res);
-    res.setHeader("Location", "/");
-    res.end();
-    log.info(req, res);
+    utils.readJsonBody(req).then(function(postData) {
+      res.statusCode = 200;
+      cookies.unset(req, res, postData);
+      res.end();
+      log.info(req, res);
+    }).catch(function() {
+      res.statusCode = 400;
+      res.end();
+      log.info(req, res);
+    });
   } else if (/^\/!\/adduser/.test(URI) && firstRun) {
-    req.pipe(new Busboy({headers: req.headers}).on("field", function(fieldname, val) {
-      postData[fieldname] = val;
-    }).on("finish", function() {
+    utils.readJsonBody(req).then(function(postData) {
       if (postData.username !== "" && postData.password !== "") {
         db.addOrUpdateUser(postData.username, postData.password, true);
         cookies.create(req, res, postData);
@@ -642,7 +647,11 @@ function handlePOST(req, res) {
         endReq(res, false);
         log.info(req, res, "Invalid user creation request for user ", "'", postData.username, "'");
       }
-    }));
+    }).catch(function() {
+      res.statusCode = 400;
+      res.end();
+      log.info(req, res);
+    });
   } else {
     res.statusCode = 404;
     res.end();

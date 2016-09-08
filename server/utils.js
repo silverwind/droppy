@@ -199,8 +199,24 @@ utils.getDispo = function getDispo(fileName) {
   return cd(path.basename(fileName));
 };
 
-utils.getSid = function getSid() {
+utils.createSid = function getSid() {
   return crypto.randomBytes(64).toString("base64").substring(0, 48);
+};
+
+utils.readJsonBody = function readJsonBody(req) {
+  return new Promise(function(resolve, reject) {
+    var body = [];
+    req.on("data", function(chunk) {
+      body.push(chunk);
+    }).on("end", function() {
+      body = String(Buffer.concat(body));
+      try {
+        resolve(JSON.parse(body));
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
 };
 
 var cbs = [];

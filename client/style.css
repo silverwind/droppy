@@ -1304,8 +1304,6 @@ html:not(.mobile) .vjs-big-play-button {
 }
 .info-box.link span       { display: none }
 .info-box.error .link-out { display: none }
-.info-box.link  .icon svg { height: 2.5em             }
-.info-box.error .icon svg { height: calc(100% - .5em) }
 
 .info-box span, .link-out {
   color: #444;

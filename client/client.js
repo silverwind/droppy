@@ -241,7 +241,7 @@
       if (droppy.token) {
         init();
       } else {
-        ajax("!/token").then(function(xhr) {
+        ajax({url: "!/token", responseType: "text"}).then(function(xhr) {
           droppy.token = xhr.response;
           init();
         });
@@ -350,11 +350,16 @@
         droppy.modes.unshift("plain");
 
         if (droppy.demo || droppy.public)
-          $("#logout-button").addClass("disabled")
-            .register("click", showError.bind(null, getView(0), "Signing out is disabled"));
+          $("#logout-button").addClass("disabled").register("click", function() {
+            showError(getView(0), "Signing out is disabled");
+          });
         else
           $("#logout-button").register("click", function() {
-            ajax({method: "POST", url: getRootPath() + "!/logout"}).then(function() {
+            ajax({
+              method: "POST",
+              url: getRootPath() + "!/logout",
+              data: {path: getRootPath()}
+            }).then(function() {
               location.reload(true);
             });
           });
@@ -408,20 +413,21 @@
 //  Authentication page
 // ============================================================================
   function initAuthPage(firstrun) {
-    var form = $("#form");
-    $("#user, #pass, .submit").register("keydown", function(event) {
-      if (event.keyCode === 13) form.submit();
-    });
     $(".remember").register("click", function() {
-      $(".remember").toggleClass("checked");
-      $("[name=remember]").attr("value", $(".remember").hasClass("checked") ? "1" : "");
+      $(this).toggleClass("checked");
     });
-    form.register("submit", function(e) {
+    $("#form").register("submit", function(e) {
+      var path = getRootPath();
       e.preventDefault();
       ajax({
         method: "POST",
-        url: getRootPath() + "!/" + (firstrun ? "adduser" : "login"),
-        data: new FormData(form[0])
+        url: path + "!/" + (firstrun ? "adduser" : "login"),
+        data: {
+          username: $("#user").val(),
+          password: $("#pass").val(),
+          remember: $(".remember").hasClass("checked"),
+          path: path.replace(/\/$/, ""),
+        }
       }).then(function(xhr) {
         if (xhr.status === 200) {
           location.reload(true);
@@ -434,7 +440,7 @@
               info.removeClass("shake");
             }, 500);
           } else info.attr("class", "error");
-          if (!firstrun) $("#pass").focus();
+          if (!firstrun) $("#pass")[0].focus();
         }
       });
     });
@@ -1429,7 +1435,7 @@
         if (xhr.status !== 200) {
           showError(view, "Couldn't open or read the file");
           hideSpinner(view);
-        } else if (xhr.response === "text") { // Non-Binary content
+        } else if (xhr.response === "text") { // Text content
           view[0].currentFile = file;
           view[0].currentFolder = newFolder;
           pushHistory(view, filePath);
@@ -2600,11 +2606,11 @@
     if (typeof opts === "string") opts = {url: opts};
     return new Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
-      xhr.responseType = opts.responseType || "";
+      xhr.responseType = opts.responseType || "json";
       xhr.open(opts.method || "GET", opts.url);
       xhr.onload = resolve.bind(null, xhr);
       xhr.onerror = reject.bind(null, xhr);
-      xhr.send(opts.data);
+      xhr.send(opts.data ? JSON.stringify(opts.data) : undefined);
     });
   }
 
