@@ -34,12 +34,11 @@ var config        = null;
 var firstRun      = null;
 var ready         = false;
 
-
 // fall back from uws to ws in case it failed to build
 var Wss;
 try {
   Wss = require("uws").Server;
-} catch(e) {
+} catch (e) {
   log.info("`uws` module failed to build, falling back to `ws`");
   Wss = require("ws").Server;
 }
