@@ -65,14 +65,13 @@ function epoch() {
 }
 
 function cookieHeaders(sid, path, expires) {
+  var realCookie = {s: sid, path: path || "/"};
+  var deleteCookie = {s: "gone", expires: epoch(), path: "/"};
   if (path === "/" || !path) {
-    var realCookie = {s: sid, path: path || "/"}
     if (expires) realCookie.expires = inOneYear();
     return cookieString(realCookie);
   } else {
     // expire a possible invalid old cookie on the / path
-    var deleteCookie = {s: "gone", expires: epoch(), path: "/"}
-    var realCookie = {s: sid, path: path || "/"}
     if (expires) realCookie.expires = inOneYear();
     return [cookieString(deleteCookie), cookieString(realCookie)];
   }
