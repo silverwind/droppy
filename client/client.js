@@ -2606,7 +2606,7 @@
     if (typeof opts === "string") opts = {url: opts};
     return new Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
-      xhr.responseType = opts.responseType || "json";
+      xhr.responseType = opts.responseType || "";
       xhr.open(opts.method || "GET", opts.url);
       xhr.onload = resolve.bind(null, xhr);
       xhr.onerror = reject.bind(null, xhr);

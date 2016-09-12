@@ -1110,7 +1110,10 @@ function streamArchive(req, res, zipPath, download) {
 }
 
 function streamFile(req, res, filepath, download, stats) {
-  var headers = {"Content-Type": mime(filepath), "Content-Length": stats.size}, status = 200;
+  var status = 200, headers = {
+    "Content-Type": mime(filepath) || "text/plain",
+    "Content-Length": stats.size
+  };
   if (download) {
     headers["Content-Disposition"] = utils.getDispo(filepath);
     res.writeHead(status, headers);
