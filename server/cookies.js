@@ -24,9 +24,10 @@ cookies.get = function get(cookie) {
   return entries.s;
 };
 
-cookies.free = function free(_req, res, postData) {
+cookies.free = function free(_req, res, _postData) {
   var sessions = db.get("sessions"), sid = utils.createSid();
-  res.setHeader("Set-Cookie", cookieHeaders(sid, postData.path, inOneYear()));
+  // TODO: obtain path
+  res.setHeader("Set-Cookie", cookieHeaders(sid, "/", inOneYear()));
   sessions[sid] = {
     privileged: true,
     lastSeen: Date.now(),

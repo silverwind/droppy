@@ -43,7 +43,6 @@
     "url-format-lax": "^1.0.0",
     "which": "^1.2.11",
     "ws": "^1.1.1",
-    "yauzl": "^2.6.0",
     "yazl": "^2.4.1"
   },
   "optionalDependencies": {
