@@ -1,6 +1,7 @@
 /* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, fileExtension, Handlebars, Uppie, screenfull */
 (function($) {
   "use strict";
+
   var droppy = {};
 
   /* {{ templates }} */
