@@ -543,6 +543,14 @@ html:not(.mobile) #entry-menu a.active {
   display: block;
 }
 
+.readonly a.rename, .readonly a.copy, .readonly a.cut, .readonly a.delete,
+.readonly #add-file-button, .readonly #add-folder-button,
+.readonly #create-file-button, .readonly #create-folder-button,
+.readonly .movefile, .readonly .copyfile,
+.readonly .sidebar .save {
+  display: none !important;
+}
+
 /* ============================ Media View ============================ */
 .arrow-back, .arrow-forward {
   position: absolute;
@@ -1394,6 +1402,7 @@ html:not(.mobile) #drop-select span.active {
 
 .movefile:hover, .movefile.active { border-radius: 6px 0 0 6px }
 .viewfile:hover, .viewfile.active { border-radius: 0 6px 6px 0 }
+.readonly .viewfile:hover, .readonly .viewfile.active { border-radius: 6px }
 
 @media (max-width: 639px) {
   #drop-select {

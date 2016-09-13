@@ -349,11 +349,11 @@
         // Insert plain mode on the top
         droppy.modes.unshift("plain");
 
-        if (droppy.demo || droppy.public)
+        if (droppy.demo || droppy.public) {
           $("#logout-button").addClass("disabled").register("click", function() {
             showError(getView(0), "Signing out is disabled");
           });
-        else
+        } else {
           $("#logout-button").register("click", function() {
             ajax({
               method: "POST",
@@ -363,6 +363,11 @@
               location.reload(true);
             });
           });
+        }
+
+        if (droppy.readOnly) {
+          $("html").addClass("readonly");
+        }
         break;
       case "ERROR":
         showError(view, msg.text);
@@ -1337,8 +1342,9 @@
 
       toggleCatcher(false);
       var entry = $("#entry-menu").data("target");
-      showSpinner(entry.parents(".view"));
-      sendMessage(null, "DELETE_FILE", entry.data("id"));
+      var view = entry.parents(".view");
+      showSpinner(view);
+      sendMessage(view[0].vId, "DELETE_FILE", entry.data("id"));
     });
   }
 

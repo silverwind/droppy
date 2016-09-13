@@ -311,6 +311,7 @@ function setupSocket(server) {
           debug         : config.dev,
           demo          : config.demo,
           public        : config.public,
+          readOnly      : config.readOnly,
           priv          : priv,
           engine        : "node " + process.version.substring(1),
           caseSensitive : process.platform !== "win32",
@@ -367,11 +368,13 @@ function setupSocket(server) {
         break;
       case "DELETE_FILE":
         log.info(ws, null, "Deleting: " + msg.data);
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
         filetree.del(msg.data);
         break;
       case "SAVE_FILE":
         log.info(ws, null, "Saving: " + msg.data.to);
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
         filetree.save(msg.data.to, msg.data.value, function(err) {
           if (err)
@@ -382,6 +385,7 @@ function setupSocket(server) {
         break;
       case "CLIPBOARD":
         log.info(ws, null, "Clipboard " + msg.data.type + ": " + msg.data.src + " -> " + msg.data.dst);
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         if (!utils.isPathSane(msg.data.src)) return log.info(ws, null, "Invalid clipboard src: " + msg.data.src);
         if (!utils.isPathSane(msg.data.dst)) return log.info(ws, null, "Invalid clipboard dst: " + msg.data.dst);
         if (new RegExp("^" + msg.data.src + "/").test(msg.data.dst))
@@ -398,14 +402,17 @@ function setupSocket(server) {
         });
         break;
       case "CREATE_FOLDER":
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
         filetree.mkdir(msg.data);
         break;
       case "CREATE_FILE":
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file creation request: " + msg.data);
         filetree.mk(msg.data);
         break;
       case "RENAME":
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         // Disallow whitespace-only and empty strings in renames
         if (!utils.isPathSane(msg.data.dst) || /^\s*$/.test(msg.data.dst) || msg.data.dst === "" || msg.data.src === msg.data.dst) {
           log.info(ws, null, "Invalid rename request: " + msg.data.src + "-> " + msg.data.dst);
@@ -435,6 +442,7 @@ function setupSocket(server) {
         sendUsers(sid);
         break;
       case "CREATE_FILES":
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         async.each(msg.data.files, function(file, cb) {
           if (!utils.isPathSane(file)) return cb(new Error("Invalid file creation request: " + file));
           filetree.mkdir(utils.addFilesPath(path.dirname(file)), function() {
@@ -445,6 +453,7 @@ function setupSocket(server) {
         });
         break;
       case "CREATE_FOLDERS":
+        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         async.each(msg.data.folders, function(folder, cb) {
           if (!utils.isPathSane(folder)) return cb(new Error("Invalid folder creation request: " + folder));
           filetree.mkdir(utils.addFilesPath(folder), cb);
@@ -513,6 +522,11 @@ function sendObjAll(data) {
   Object.keys(clients).forEach(function(sid) {
     send(clients[sid].ws, JSON.stringify(data));
   });
+}
+
+function sendError(ws, sid, vId, text) {
+  sendObj(sid, {type: "ERROR", vId: vId, text: text});
+  log.info(ws, null, "Sent error: " + text);
 }
 
 function redirectToRoot(req, res) {
@@ -818,9 +832,14 @@ function handleUploadRequest(req, res) {
     res.statusCode = 401;
     res.setHeader("Content-Type", "text/plain");
     res.end();
-    log.info(req, res, "Unauthorized upload request");
-    log.info(req, res);
+    log.info(req, res, "Aborted unauthorized upload request");
     return;
+  }
+
+  if (config.readOnly) {
+    res.statusCode = 403;
+    res.end();
+    log.info(req, res, "Upload cancelled because of read-only mode");
   }
 
   // Set huge timeout for big file uploads and/or slow connection

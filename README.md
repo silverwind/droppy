@@ -70,7 +70,8 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
   "updateInterval"  : 1000,
   "pollingInterval" : 0,
   "keepAlive"       : 20000,
-  "allowFrame"      : false
+  "allowFrame"      : false,
+  "readOnly"        : false
 }
 ```
 
@@ -85,6 +86,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `pollingInterval` *Number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
 - `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
 - `allowFrame` *Boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`.
+- `readOnly` *Boolean* - All served files will be treated as being read-only.
 - `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
 <a name="listener-options" />
