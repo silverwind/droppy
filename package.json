@@ -62,7 +62,7 @@
     "postcss": "^5.2.0",
     "screenfull": "^3.0.2",
     "uglify-js": "^2.7.3",
-    "uppie": "^0.11.3",
+    "uppie": "^0.11.5",
     "video.js": "^5.11.6"
   },
   "files": [
