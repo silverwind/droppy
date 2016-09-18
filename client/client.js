@@ -1438,7 +1438,7 @@
       var filePath = join(newFolder, file);
       showSpinner(view);
       ajax({url: "!/type" + filePath}).then(function(xhr) {
-         if (xhr.response === "text") { // Text content
+        if (xhr.response === "text") { // Text content
           view[0].currentFile = file;
           view[0].currentFolder = newFolder;
           pushHistory(view, filePath);
@@ -2615,8 +2615,8 @@
       var xhr = new XMLHttpRequest();
       xhr.open(opts.method || "GET", opts.url);
       if (opts.responseType) xhr.responseType = opts.responseType;
-      xhr.onload = function() { resolve(xhr); }
-      xhr.onerror = function() { reject(xhr); }
+      xhr.onload = function() { resolve(xhr); };
+      xhr.onerror = function() { reject(xhr); };
       xhr.send(opts.data ? JSON.stringify(opts.data) : undefined);
     });
   }
