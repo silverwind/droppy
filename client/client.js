@@ -194,7 +194,7 @@
   function newView(dest, vId) {
     var view = $(Handlebars.templates.view());
     getView(vId).remove();
-    view.appendTo("#view-container");
+    view.appendTo("#views");
     view[0].vId = vId;
     view[0].uId = 0;
     droppy.views[vId] = view[0];
@@ -351,11 +351,11 @@
         droppy.modes.unshift("plain");
 
         if (droppy.demo || droppy.public) {
-          $("#logout-button").addClass("disabled").register("click", function() {
+          $("#logout").addClass("disabled").register("click", function() {
             showError(getView(0), "Signing out is disabled");
           });
         } else {
-          $("#logout-button").register("click", function() {
+          $("#logout").register("click", function() {
             ajax({
               method: "POST",
               url: getRootPath() + "!/logout",
@@ -509,7 +509,7 @@
     });
 
     // File upload button
-    $("#add-file-button").register("click", function() {
+    $("#af").register("click", function() {
       if ($(this).hasClass("disabled")) return;
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.directoryUpload)
@@ -520,7 +520,7 @@
     // Folder upload button - check if we support directory uploads
     if (droppy.detects.directoryUpload) {
       // Directory uploads supported - enable the button
-      $("#add-folder-button").register("click", function() {
+      $("#ad").register("click", function() {
         if ($(this).hasClass("disabled")) return;
         // Set the directory attribute so we get a directory picker dialog
         droppy.dir.forEach(function(prefix) {
@@ -536,16 +536,16 @@
       });
     } else {
       // No directory upload support - disable the button
-      $("#add-folder-button").addClass("disabled").on("click", function() {
+      $("#ad").addClass("disabled").on("click", function() {
         showError(getView(0), "Your browser doesn't support directory uploading");
       });
     }
 
-    var createButtons = $("#create-file-button, #create-folder-button");
+    var createButtons = $("#cf, #cd");
     function createEntry() {
       var view    = getActiveView();
       if (view.data("type") !== "directory") return;
-      var isFile  = this.id === "create-file-button";
+      var isFile  = this.id === "cf";
       var isEmpty = view.find(".empty").length;
       var html    = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
 
@@ -571,7 +571,7 @@
     }
     createButtons.register("click", createEntry);
 
-    var splitButton = $("#split-button"), splitting;
+    var splitButton = $("#split"), splitting;
     droppy.split = function(dest) {
       var first, second;
       if (splitting) return;
@@ -596,14 +596,14 @@
         splitting = false;
       });
     };
-    $("#split-button").register("click", droppy.split);
+    $("#split").register("click", droppy.split);
 
-    $("#about-button").register("click", function() {
+    $("#about").register("click", function() {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    $("#prefs-button").register("click", function() {
+    $("#prefs").register("click", function() {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
@@ -1105,8 +1105,7 @@
       else if (view.data("type") === "media")
         bindMediaArrows(view);
 
-      var buttons = "#add-file-button, #add-folder-button, #create-file-button, #create-folder-button";
-      $(buttons)[type === "directory" ? "removeClass" : "addClass"]("disabled");
+      $("#af, #ad, #cf, #cd")[type === "directory" ? "removeClass" : "addClass"]("disabled");
       if (cb) cb(view);
     }
   }
@@ -1449,7 +1448,7 @@
           updatePath(view);
           openDoc(view, filePath);
         } else { // Binary content - download it
-          $("[name=nonav]").attr("src", "!/file" + filePath);
+          $("[name=nn]").attr("src", "!/file" + filePath);
           hideSpinner(view);
         }
       });

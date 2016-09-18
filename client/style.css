@@ -40,7 +40,7 @@ input:-ms-input-placeholder      { color: #999 }
 input::-webkit-input-placeholder { color: #999 }
 
 @media screen and (max-resolution: 1.99dppx) {
-  #navigation, .path, .tip:before {
+  #nav, .path, .tip:before {
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
   }
@@ -59,14 +59,14 @@ input::-webkit-input-placeholder { color: #999 }
 
 /* ============================ Main Page Layout =========================== */
 
-#flex-container {
+main {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
   display: flex;
   flex-direction: column;
 }
 
-#navigation {
+#nav {
   background: #181818;
   text-align: center;
   order: 1;
@@ -98,15 +98,15 @@ input::-webkit-input-placeholder { color: #999 }
 }
 @media (max-width: 750px) { .button svg { margin-right: 0 } }
 
-#add-file-button:hover svg           { fill: rgba(102,166,255,1) }
-#add-folder-button:hover svg         { fill: rgba(255,102,252,1) }
-#create-file-button:hover svg        { fill: rgba(102,255,235,1) }
-#create-folder-button:hover svg      { fill: rgba(102,255,125,1) }
-#about-button:hover svg              { fill: rgba(148,102,255,1) }
-#prefs-button:hover svg              { fill: rgba(255,212,102,1) }
-#logout-button:hover svg             { fill: rgba(255, 82, 82,1) }
-#split-button:hover svg.split .left  { fill: rgba(255, 82, 82,1) }
-#split-button:hover svg.split .right { fill: rgba(102,166,255,1) }
+#af:hover svg                 { fill: rgba(102,166,255,1) }
+#ad:hover svg                 { fill: rgba(255,102,252,1) }
+#cf:hover svg                 { fill: rgba(102,255,235,1) }
+#cd:hover svg                 { fill: rgba(102,255,125,1) }
+#about:hover svg              { fill: rgba(148,102,255,1) }
+#prefs:hover svg              { fill: rgba(255,212,102,1) }
+#logout:hover svg             { fill: rgba(255, 82, 82,1) }
+#split:hover svg.split .left  { fill: rgba(255, 82, 82,1) }
+#split:hover svg.split .right { fill: rgba(102,166,255,1) }
 
 .button.disabled       { color: #444 !important; cursor: not-allowed !important }
 .button.disabled:hover { color: #444 !important; background: transparent !important }
@@ -114,7 +114,7 @@ input::-webkit-input-placeholder { color: #999 }
 
 /* ================================== View ================================= */
 
-#view-container {
+#views {
   flex: 1 1;
   order: 2;
   overflow-y: auto;
@@ -544,8 +544,7 @@ html:not(.mobile) #entry-menu a.active {
 }
 
 .readonly a.rename, .readonly a.copy, .readonly a.cut, .readonly a.delete,
-.readonly #add-file-button, .readonly #add-folder-button,
-.readonly #create-file-button, .readonly #create-folder-button,
+.readonly #af, .readonly #ad, .readonly #cf, .readonly #cd,
 .readonly .movefile, .readonly .copyfile,
 .readonly .sidebar .save {
   display: none !important;
