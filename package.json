@@ -34,7 +34,7 @@
     "mv": "^2.1.1",
     "node-schedule": "^1.1.1",
     "readdirp": "^2.1.0",
-    "request": "^2.74.0",
+    "request": "^2.75.0",
     "rimraf": "^2.5.4",
     "sanitize-filename": "^1.6.0",
     "strip-ansi": "^3.0.1",
