@@ -168,11 +168,11 @@
 // ============================================================================
 //  Entry point
 // ============================================================================
-  var type = $("html").data("type");
-  if (type === "main") {
+  var type = $("body").data("type");
+  if (type === "m") {
     initMainPage();
   } else {
-    var isFirst = type === "firstrun";
+    var isFirst = type === "f";
     if (isFirst) $("#login-info").text("Hello! Choose your credentials.");
     initAuthPage(isFirst);
   }
