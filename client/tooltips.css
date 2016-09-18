@@ -34,8 +34,7 @@
   display: none !important;
 }
 
-.tip:hover:before, .tip:hover:after, .tip:active:before, .tip:active:after,
-.tip:focus:before, .tip:focus:after {
+.tip:hover:before, .tip:hover:after {
   display: inline-block;
   text-decoration: none;
 }
