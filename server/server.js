@@ -581,7 +581,7 @@ function handleGET(req, res) {
     handleResourceRequest(req, res, URI.substring(7));
   } else if (/^\/!\/token$/.test(URI)) {
     if (validateRequest(req)) {
-      res.writeHead(200, {"Content-Type": "text/plain", Expires: "0"});
+      res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8", Expires: "0"});
       res.end(csrf.get(req));
       log.info(req, res);
     }
@@ -674,8 +674,6 @@ function handlePOST(req, res) {
 
   function endReq(res, success) {
     res.statusCode = success ? 200 : 401;
-    res.setHeader("Content-Type", "text/plain");
-    res.setHeader("Content-Length", 0);
     res.end();
   }
 }
@@ -811,7 +809,7 @@ function handleFileRequest(req, res, download) {
   });
 }
 
-function handleTypeRequest(_req, res, file) {
+function handleTypeRequest(req, res, file) {
   utils.isBinary(file, function(err, result) {
     if (err) {
       res.statusCode = 500;
@@ -819,10 +817,11 @@ function handleTypeRequest(_req, res, file) {
       log.error(err);
     } else {
       res.statusCode = 200;
-      res.setHeader("Content-Type", "text/plain");
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.end(result ? "binary" : "text");
     }
   });
+  log.info(req, res);
 }
 
 function handleUploadRequest(req, res) {
@@ -830,7 +829,6 @@ function handleUploadRequest(req, res) {
 
   if (!validateRequest(req)) {
     res.statusCode = 401;
-    res.setHeader("Content-Type", "text/plain");
     res.end();
     log.info(req, res, "Aborted unauthorized upload request");
     return;
@@ -849,7 +847,6 @@ function handleUploadRequest(req, res) {
 
   if (!req.query || !req.query.to) {
     res.statusCode = 500;
-    res.setHeader("Content-Type", "text/plain");
     res.end();
     log.info(req, res, "Invalid upload request");
     return;
@@ -969,7 +966,6 @@ function handleUploadRequest(req, res) {
 
   function closeConnection() {
     res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain");
     res.setHeader("Connection", "close");
     res.end();
   }
@@ -1130,7 +1126,7 @@ function streamArchive(req, res, zipPath, download) {
 
 function streamFile(req, res, filepath, download, stats) {
   var status = 200, headers = {
-    "Content-Type": mime(filepath) || "text/plain",
+    "Content-Type": mime(filepath) || "text/plain; charset=utf-8",
     "Content-Length": stats.size
   };
   if (download) {

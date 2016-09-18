@@ -1437,11 +1437,8 @@
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
       showSpinner(view);
-      ajax({url: "!/type" + filePath, responseType: "text"}).then(function(xhr) {
-        if (xhr.status !== 200) {
-          showError(view, "Couldn't open or read the file");
-          hideSpinner(view);
-        } else if (xhr.response === "text") { // Text content
+      ajax({url: "!/type" + filePath}).then(function(xhr) {
+         if (xhr.response === "text") { // Text content
           view[0].currentFile = file;
           view[0].currentFolder = newFolder;
           pushHistory(view, filePath);
@@ -1451,6 +1448,9 @@
           $("[name=nn]").attr("src", "!/file" + filePath);
           hideSpinner(view);
         }
+      }).catch(function() {
+        showError(view, "Couldn't load the file. Maybe disable your ad-blocker?");
+        hideSpinner(view);
       });
     }
   }
@@ -2450,6 +2450,7 @@
 
   function showLink(view, link, attachement) {
     toggleCatcher(true);
+    clearTimeout(droppy.errorTimer);
     var box  = view.find(".info-box");
     var out  = box.find(".link-out");
     var copy = box.find(".copy-link");
@@ -2612,10 +2613,10 @@
     if (typeof opts === "string") opts = {url: opts};
     return new Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
-      xhr.responseType = opts.responseType || "";
       xhr.open(opts.method || "GET", opts.url);
-      xhr.onload = resolve.bind(null, xhr);
-      xhr.onerror = reject.bind(null, xhr);
+      if (opts.responseType) xhr.responseType = opts.responseType;
+      xhr.onload = function() { resolve(xhr); }
+      xhr.onerror = function() { reject(xhr); }
       xhr.send(opts.data ? JSON.stringify(opts.data) : undefined);
     });
   }
