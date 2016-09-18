@@ -1,6 +1,7 @@
 "use strict";
 
 var paths     = module.exports = {};
+var fs        = require("fs");
 var path      = require("path");
 var untildify = require("untildify");
 
@@ -35,5 +36,9 @@ paths.seed = function seed(config, files) {
 
 function resolve() {
   var p = path.join.apply(null, arguments);
-  return path.resolve(/^~/.test(p) ? untildify(p) : p);
+  p = path.resolve(/^~/.test(p) ? untildify(p) : p);
+  try {
+    p = fs.realpathSync(p);
+  } catch (e) {}
+  return p;
 }
