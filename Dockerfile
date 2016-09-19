@@ -12,4 +12,4 @@ VOLUME ["/config", "/files"]
 
 # Run
 EXPOSE 8989
-CMD ["/app/docker-start.sh"]
+CMD ["/usr/lib/node_modules/droppy/docker-start.sh"]

@@ -17,4 +17,3 @@ chown -R droppy:droppy /config
 chown droppy:droppy /files
 
 exec /bin/su -m -s "/bin/sh" -c 'exec droppy start -f /files -c /config --color' droppy
-
