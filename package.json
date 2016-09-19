@@ -70,7 +70,8 @@
     "server",
     "dist",
     "droppy.js",
-    "index.js"
+    "index.js",
+    "docker-start.sh"
   ],
   "engines": {
     "node": ">=4"
