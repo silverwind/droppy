@@ -3,7 +3,7 @@ MAINTAINER silverwind
 
 # Install and build modules
 RUN apk add --no-cache make gcc g++ python && \
-  npm install -g droppy@latest && \
+  npm install --production --global droppy@latest && \
   npm cache clean && \
   apk del make gcc g++ python;
 
