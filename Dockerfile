@@ -1,6 +1,9 @@
 FROM mhart/alpine-node:latest
 MAINTAINER silverwind
 
+# Add alpine package libc6-compat needed by node package uws
+RUN apk update && apk add libc6-compat
+
 # Create directories
 RUN mkdir /app
 
