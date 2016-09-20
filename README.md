@@ -48,7 +48,7 @@ $ droppy start -c /srv/droppy/config -f /srv/droppy/files
 $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 # Open http://localhost:8989/
 ```
-The image provides automatic volumes for the two mount points /config and /files which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files` respectively. If you're using existing files, it's adviceable to use the UID and GID container environment variables to get files written with correct ownership, e.g `-e UID=1000` and `-e GID=1000`.
+[The image](https://hub.docker.com/r/silverwind/droppy/) provides automatic volumes for the two mount points /config and /files which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files` respectively. If you're using existing files, it's adviceable to use the UID and GID container environment variables to get files written with correct ownership, e.g `-e UID=1000` and `-e GID=1000`.
 
 ## Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
