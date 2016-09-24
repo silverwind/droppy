@@ -27,7 +27,7 @@
     "graceful-fs": "^4.1.6",
     "isbinaryfile": "^3.0.1",
     "json-buffer": "^2.0.11",
-    "lodash": "^4.16.0",
+    "lodash": "^4.16.1",
     "mime-types": "^2.1.12",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
@@ -52,7 +52,7 @@
     "autoprefixer": "^6.4.1",
     "cheerio": "^0.22.0",
     "clean-css": "^3.4.19",
-    "codemirror": "^5.18.2",
+    "codemirror": "^5.19.0",
     "draggabilly": "https://github.com/silverwind/draggabilly/tarball/master",
     "handlebars": "^4.0.5",
     "html-minifier": "^3.0.3",
@@ -62,7 +62,7 @@
     "postcss": "^5.2.0",
     "screenfull": "^3.0.2",
     "uglify-js": "^2.7.3",
-    "uppie": "^0.11.5",
+    "uppie": "^0.11.6",
     "video.js": "^5.11.6"
   },
   "files": [
