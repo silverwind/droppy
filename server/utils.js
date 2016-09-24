@@ -35,9 +35,7 @@ utils.mkdir = function mkdir(dir, cb) {
   if (Array.isArray(dir)) {
     async.each(dir, function(p, cb) {
       mkdirp(p, {fs: fs, mode: "755"}, cb);
-    }, function(err) {
-      cb(err);
-    });
+    }, cb);
   } else if (typeof dir === "string") {
     mkdirp(dir, {fs: fs, mode: "755"}, cb);
   } else {
