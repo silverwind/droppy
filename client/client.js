@@ -652,6 +652,7 @@
      "&to=" + encodeURIComponent(view[0].currentFolder) +
      "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
     );
+    xhr.responseType = "text";
     xhr.send(fd);
   }
 
