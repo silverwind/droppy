@@ -964,7 +964,7 @@
         size    : size,
         psize   : formatBytes(size),
         id      : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
-        sprite  : "sprite sprite-" + getSpriteClass(/[^.]*$/.exec(name)[0])
+        sprite  : "sprite sprite-" + getSpriteClass(fileExtension(name))
       };
 
       if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
