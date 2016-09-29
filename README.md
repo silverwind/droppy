@@ -44,21 +44,21 @@ $ droppy start -c /srv/droppy/config -f /srv/droppy/files
 
 ### Docker installation :whale:
 
-To pull [the image](https://hub.docker.com/r/silverwind/droppy/) and start the container using automatic [volumes](https://docs.docker.com/engine/tutorials/dockervolumes/):
+To pull [the image](https://hub.docker.com/r/silverwind/droppy/) and start the container:
 ```sh
 $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
+This method uses automatic volumes for `/config` and `/files` which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files`.
 
-Alternatively, you can use `docker-compose` with the example [`docker-compose.yml`](https://github.com/silverwind/droppy/blob/master/examples/docker-compose.yml), which uses local directories for volumes:
+Alternatively, you can use `docker-compose` with the example [`docker-compose.yml`](https://github.com/silverwind/droppy/blob/master/examples/docker-compose.yml):
 
 ```sh
-$ curl -sO https://raw.githubusercontent.com/silverwind/droppy/master/examples/docker-compose.yml
+$ curl -O https://raw.githubusercontent.com/silverwind/droppy/master/examples/docker-compose.yml
 $ docker-compose up
 ```
+This example `docker-compose.yml` uses the subdirectories `config` and `files` of the current working directory for storing data.
 
-The image uses automatic volumes for `/config` and `/files` which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files` respectively.
-
-If you're using existing files, it's adviceable to use `-e UID=1000` and `-e GID=1000` container environment variables to get new files written with correct ownership.
+Note: If you're using existing files, it's advisable to use `-e UID=1000` and `-e GID=1000` container environment variables to get new files written with correct ownership.
 
 ## Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
