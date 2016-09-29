@@ -26,7 +26,7 @@ publish:
 docker:
 	@echo Preparing docker image $(IMAGE)...
 	docker pull mhart/alpine-node:latest
-	docker rm -f "$$(docker ps -a -f='image=$(IMAGE)' -q)" 2>/dev/null || true
+	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	docker build --no-cache=true -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
