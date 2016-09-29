@@ -38,7 +38,7 @@ db.init = function init(callback) {
           database = {};
         }
 
-        database = _.defaults(database, defaults);
+        database = Object.assign(defaults, database);
 
         // migrate old shortlinks
         if (database.shortlinks) {

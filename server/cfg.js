@@ -33,7 +33,7 @@ var hiddenOpts = ["dev", "demo"];
 cfg.init = function init(config, callback) {
   if (typeof config === "object" && config !== null) {
     config = migrate(config);
-    config = _.defaults(config, defaults); // Add missing options
+    config = Object.assign(defaults, config);
     callback(null, config);
   } else {
     fs.stat(configFile, function(err) {
@@ -61,7 +61,7 @@ cfg.init = function init(config, callback) {
           if (!config) config = {};
 
           config = migrate(config);
-          config = _.defaults(config, defaults);
+          config = Object.assign(defaults, config);
 
           // Remove options no longer present
           Object.keys(config).forEach(function(key) {

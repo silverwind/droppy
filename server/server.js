@@ -5,7 +5,6 @@ var os     = require("os");
 var path   = require("path");
 var qs     = require("querystring");
 
-var _        = require("lodash");
 var async    = require("async");
 var Busboy   = require("busboy");
 var chalk    = require("chalk");
@@ -13,6 +12,7 @@ var fs       = require("graceful-fs");
 var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
+var throttle = require("lodash.throttle");
 var yazl     = require("yazl");
 
 var pkg       = require("./../package.json");
@@ -1000,7 +1000,7 @@ function updateClientLocation(dir, sid, vId) {
   clientsPerDir[dir].push({
     sid    : sid,
     vId    : vId,
-    update : _.throttle(function() {
+    update : throttle(function() {
       sendFiles(this.sid, this.vId);
     }, config.updateInterval, {leading: true, trailing: true})
   });
