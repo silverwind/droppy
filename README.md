@@ -178,7 +178,7 @@ $ [sudo] npm install -g droppy
 $ docker pull silverwind/droppy
 $ docker stop droppy
 $ docker rm droppy
-$ docker run --name droppy -p 8989:8989 silverwind/droppy
+$ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
 Remember to specify `-v /srv/droppy/config:/config -v /srv/droppy/files:/files` if you're not using automatic volumes.
 
