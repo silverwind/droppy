@@ -178,8 +178,9 @@ $ [sudo] npm install -g droppy
 $ docker pull silverwind/droppy
 $ docker stop droppy
 $ docker rm droppy
-$ docker run --name droppy -p 8989:8989 -v /srv/droppy/config:/config -v /srv/droppy/files:/files silverwind/droppy
+$ docker run --name droppy -p 8989:8989 silverwind/droppy
 ```
+Remember to specify `-v /srv/droppy/config:/config -v /srv/droppy/files:/files` if you're not using automatic volumes.
 
 ## Note about startup performance
 droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hundreds of thousands of files present.
