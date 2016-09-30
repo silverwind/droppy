@@ -31,7 +31,7 @@ Note that two directories will be used by droppy:
 Make sure these directories are owned by the user running the application/container.
 
 ### Local Installation :package:
-With [`Node.js`](https://nodejs.org) >= 4.0.0 (>= 6.4.0 on Windows) and `npm` installed, run:
+With [`Node.js`](https://nodejs.org) >= 4.0.0 and `npm` installed, run:
 
 ```sh
 # Install latest version and dependencies.
