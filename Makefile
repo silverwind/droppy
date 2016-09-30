@@ -59,8 +59,8 @@ npm-minor:
 npm-major:
 	npm version major
 
-patch: lint build npm-patch docker deploy publish
-minor: lint build npm-minor docker deploy publish
-major: lint build npm-major docker deploy publish
+patch: lint build npm-patch deploy publish docker
+minor: lint build npm-minor deploy publish docker
+major: lint build npm-major deploy publish docker
 
 .PHONY: lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
