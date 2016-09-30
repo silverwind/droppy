@@ -1,7 +1,6 @@
 "use strict";
 
 var cfg    = module.exports = {};
-var _      = require("lodash");
 var fs     = require("graceful-fs");
 var mkdirp = require("mkdirp");
 var path   = require("path");

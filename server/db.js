@@ -1,7 +1,6 @@
 "use strict";
 
 var db       = module.exports = {};
-var _        = require("lodash");
 var fs       = require("graceful-fs");
 var crypto   = require("crypto");
 var mkdirp   = require("mkdirp");
