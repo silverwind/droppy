@@ -153,10 +153,7 @@ utils.normalizePath = function normalizePath(p) {
 };
 
 utils.addFilesPath = function addFilesPath(p) {
-  if (p === "/")
-    return paths.files;
-  else
-    return path.join(paths.files + "/" + p);
+  return p === "/" ? paths.files : path.join(paths.files + "/" + p);
 };
 
 utils.removeFilesPath = function removeFilesPath(p) {
@@ -164,10 +161,6 @@ utils.removeFilesPath = function removeFilesPath(p) {
     return utils.normalizePath(p.substring(paths.files.length));
   else if (p === paths.files)
     return "/";
-};
-
-utils.relativeZipPath = function relativeZipPath(p, base) {
-  return utils.normalizePath(path.relative(utils.normalizePath(utils.addFilesPath(base)), utils.normalizePath(p)));
 };
 
 utils.isPathSane = function isPathSane(p, isURL) {

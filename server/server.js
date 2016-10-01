@@ -1096,21 +1096,22 @@ function streamArchive(req, res, zipPath, download) {
       log.error(err);
     } else if (stats.isDirectory()) {
       var zip = new yazl.ZipFile();
-      var basePath = path.dirname(utils.removeFilesPath(zipPath));
+      var relPath = utils.removeFilesPath(zipPath);
+      var targetDir = path.basename(relPath);
       log.info(req, res);
-      log.info("Streaming zip of ", chalk.blue(utils.removeFilesPath(zipPath)));
+      log.info("Streaming zip of ", chalk.blue(relPath));
       res.statusCode = 200;
       res.setHeader("Content-Type", mime(zip));
       res.setHeader("Transfer-Encoding", "chunked");
       if (download) res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
       readdirp({root: zipPath, entryType: "both"})
         .on("warn", log.info).on("error", log.error).on("data", function(file) {
-          var stats = file.stat;
-          var relPath = utils.relativeZipPath(file.fullPath, basePath);
+          var pathInZip = path.join(targetDir, file.path);
+          var metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
           if (stats.isDirectory())
-            zip.addEmptyDirectory(relPath, {mtime: stats.mtime, mode: stats.mode});
+            zip.addEmptyDirectory(pathInZip, metaData);
           else
-            zip.addFile(file.fullPath, relPath, {mtime: stats.mtime, mode: stats.mode});
+            zip.addFile(file.fullPath, pathInZip);
         })
         .on("end", function() {
           zip.outputStream.pipe(res);
