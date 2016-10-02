@@ -40,7 +40,6 @@
     "rimraf": "^2.5.4",
     "sanitize-filename": "^1.6.1",
     "strip-ansi": "^3.0.1",
-    "svgstore": "^1.1.0",
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
     "which": "^1.2.11",
@@ -63,6 +62,7 @@
     "node-zopfli": "^2.0.1",
     "postcss": "^5.2.4",
     "screenfull": "^3.0.2",
+    "svgstore": "^1.1.0",
     "uglify-js": "^2.7.3",
     "uppie": "^0.11.8",
     "video.js": "^5.11.7"

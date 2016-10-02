@@ -84,7 +84,7 @@ try {
   postcss      = require("postcss");
   uglify       = require("uglify-js");
   zopfli       = require("node-zopfli");
-  svg          = require("./svg");
+  svg          = require("./svg.js");
   templates    = require("./templates.js");
 } catch (e) {}
 
