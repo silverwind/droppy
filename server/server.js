@@ -1108,7 +1108,7 @@ function streamArchive(req, res, zipPath, download) {
         .on("warn", log.info).on("error", log.error).on("data", function(file) {
           var pathInZip = path.join(targetDir, file.path);
           var metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
-          if (stats.isDirectory())
+          if (file.stat.isDirectory())
             zip.addEmptyDirectory(pathInZip, metaData);
           else
             zip.addFile(file.fullPath, pathInZip);
