@@ -1104,19 +1104,17 @@ function streamArchive(req, res, zipPath, download) {
       res.setHeader("Content-Type", mime(zip));
       res.setHeader("Transfer-Encoding", "chunked");
       if (download) res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
-      readdirp({root: zipPath, entryType: "both"})
-        .on("warn", log.info).on("error", log.error).on("data", function(file) {
-          var pathInZip = path.join(targetDir, file.path);
-          var metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
-          if (file.stat.isDirectory())
-            zip.addEmptyDirectory(pathInZip, metaData);
-          else
-            zip.addFile(file.fullPath, pathInZip);
-        })
-        .on("end", function() {
-          zip.outputStream.pipe(res);
-          zip.end();
-        });
+      readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
+        var pathInZip = path.join(targetDir, file.path);
+        var metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
+        if (file.stat.isDirectory())
+          zip.addEmptyDirectory(pathInZip, metaData);
+        else
+          zip.addFile(file.fullPath, pathInZip, metaData);
+      }).on("warn", log.info).on("error", log.error).on("end", function() {
+        zip.outputStream.pipe(res);
+        zip.end();
+      });
     } else {
       res.statusCode = 404;
       res.end();
