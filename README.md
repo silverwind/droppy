@@ -182,13 +182,14 @@ $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
 Remember to specify `-v /srv/droppy/config:/config -v /srv/droppy/files:/files` if you're not using automatic volumes.
 
+## Downloading from the command line
+To download shared links with `curl` and `wget` to the correct filename:
+````sh
+$ curl -OJ url
+$ wget --content-disposition url
+````
+
 ## Note about startup performance
-droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup will take considerable time on slow storage with hundreds of thousands of files present.
+droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup may take considerable time on slow storage with hundreds of thousands of files present.
 
-## Note about wget
-For correct download filenames of shared links, use `--content-disposition` or add this to `~/.wgetrc`:
-
-```ini
-content-disposition = on
-```
 © [silverwind](https://github.com/silverwind), distributed under BSD licence.
