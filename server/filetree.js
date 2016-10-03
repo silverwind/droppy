@@ -2,10 +2,9 @@
 
 var filetree = module.exports = new (require("events").EventEmitter)();
 
+var _         = require("lodash");
 var chokidar  = require("chokidar");
 var fs        = require("graceful-fs");
-var cloneDeep = require("lodash.clonedeep");
-var debounce  = require("lodash.debounce");
 var path      = require("path");
 
 var log      = require("./log.js");
@@ -36,7 +35,7 @@ filetree.init = function init(pollingInterval) {
   });
 };
 
-filetree.updateAll = debounce(function updateAll() {
+filetree.updateAll = _.debounce(function updateAll() {
   log.debug("Updating file tree because of local filesystem changes");
   filetree.updateDir(null, function() {
     filetree.emit("updateall");
@@ -63,7 +62,7 @@ function filterDirs(dirs) {
   });
 }
 
-var debouncedUpdate = debounce(function() {
+var debouncedUpdate = _.debounce(function() {
   filterDirs(todoDirs).forEach(function(dir) {
     filetree.emit("update", dir);
   });
@@ -279,7 +278,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
 filetree.cp = function cp(src, dst, cb) {
   lookAway();
   utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
-    dirs[path.dirname(dst)].files[path.basename(dst)] = cloneDeep(dirs[path.dirname(src)].files[path.basename(src)]);
+    dirs[path.dirname(dst)].files[path.basename(dst)] = _.cloneDeep(dirs[path.dirname(src)].files[path.basename(src)]);
     dirs[path.dirname(dst)].files[path.basename(dst)].mtime = Date.now();
     update(path.dirname(dst));
     if (cb) cb();
@@ -290,12 +289,12 @@ filetree.cpdir = function cpdir(src, dst, cb) {
   lookAway();
   utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
     // Basedir
-    dirs[dst] = cloneDeep(dirs[src]);
+    dirs[dst] = _.cloneDeep(dirs[src]);
     dirs[dst].mtime = Date.now();
     // Subdirs
     Object.keys(dirs).forEach(function(dir) {
       if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = cloneDeep(dirs[dir]);
+        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.cloneDeep(dirs[dir]);
         dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")].mtime = Date.now();
       }
     });
