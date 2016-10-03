@@ -23,28 +23,22 @@ droppy is a self-hosted file storage server with a web interface and capabilites
 * Supports installing to the homescreen
 
 ## Installation
-Note that two directories will be used by droppy:
+Note that two directories will be used by droppy. Make sure these directories are owned by the user running the application/container:
 
 - `config` directory: set with `-c <dir>`, default `~/.droppy/config`.
 - `files` directory: set with `-f <dir>`, default `~/.droppy/files`.
-
-Make sure these directories are owned by the user running the application/container.
 
 ### Local Installation :package:
 With [`Node.js`](https://nodejs.org) >= 4.0.0 and `npm` installed, run:
 
 ```sh
-# Install latest version and dependencies.
-$ npm install -g droppy
-
-# Start with `/srv/droppy/config` for config and `/srv/droppy/files` for files.
+$ [sudo] npm install -g droppy
 $ droppy start -c /srv/droppy/config -f /srv/droppy/files
-# Open http://localhost:8989/
 ```
-To upgrade, run
+To update, run
 
 ```sh
-$ [sudo] npm install -g droppy
+$ [sudo] npm update -g droppy
 ```
 
 ### Docker installation :whale:
@@ -53,11 +47,9 @@ To pull [the image](https://hub.docker.com/r/silverwind/droppy/) and start the c
 ```sh
 $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
-This method uses automatic volumes for `/config` and `/files` which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files`.
+This method uses automatic volumes for `/config` and `/files` which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files`. If you're using existing files, it's advisable to use `-e UID=1000 -e GID=1000` to get new files written with correct ownership.
 
-Note: If you're using existing files, it's advisable to use `-e UID=1000` and `-e GID=1000` container environment variables to get new files written with correct ownership.
-
-To upgrade a docker installation, run
+To update a docker installation, run
 ```sh
 $ docker pull silverwind/droppy
 $ docker stop droppy && docker rm droppy
@@ -65,7 +57,7 @@ $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
 
 ### docker-compose
-Alternatively, you can use `docker-compose` with the example [`docker-compose.yml`](https://github.com/silverwind/droppy/blob/master/examples/docker-compose.yml):
+Alternatively, you can use the example [`docker-compose.yml`](https://github.com/silverwind/droppy/blob/master/examples/docker-compose.yml):
 
 ```sh
 $ curl -O https://raw.githubusercontent.com/silverwind/droppy/master/examples/docker-compose.yml
