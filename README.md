@@ -41,6 +41,11 @@ $ npm install -g droppy
 $ droppy start -c /srv/droppy/config -f /srv/droppy/files
 # Open http://localhost:8989/
 ```
+To upgrade, run
+
+```sh
+$ [sudo] npm install -g droppy
+```
 
 ### Docker installation :whale:
 
@@ -50,6 +55,16 @@ $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
 This method uses automatic volumes for `/config` and `/files` which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files`.
 
+Note: If you're using existing files, it's advisable to use `-e UID=1000` and `-e GID=1000` container environment variables to get new files written with correct ownership.
+
+To upgrade a docker installation, run
+```sh
+$ docker pull silverwind/droppy
+$ docker stop droppy && docker rm droppy
+$ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
+```
+
+### docker-compose
 Alternatively, you can use `docker-compose` with the example [`docker-compose.yml`](https://github.com/silverwind/droppy/blob/master/examples/docker-compose.yml):
 
 ```sh
@@ -57,8 +72,6 @@ $ curl -O https://raw.githubusercontent.com/silverwind/droppy/master/examples/do
 $ docker-compose up
 ```
 This example `docker-compose.yml` uses the subdirectories `config` and `files` of the current working directory for storing data.
-
-Note: If you're using existing files, it's advisable to use `-e UID=1000` and `-e GID=1000` container environment variables to get new files written with correct ownership.
 
 ## Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
@@ -162,25 +175,11 @@ See the [express example](https://github.com/silverwind/droppy/blob/master/examp
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
-## Installation guides
+## Additional Installation guides
 - [Systemd-based distributions](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 - [Debian (Pre-Jessie)](https://github.com/silverwind/droppy/wiki/Debian-Installation-(Pre-Jessie))
 - [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
 - [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
-
-### Upgrading a local installation :package:
-```sh
-$ [sudo] npm install -g droppy
-```
-
-### Upgrading a Docker installation :whale:
-```sh
-$ docker pull silverwind/droppy
-$ docker stop droppy
-$ docker rm droppy
-$ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
-```
-Remember to specify `-v /srv/droppy/config:/config -v /srv/droppy/files:/files` if you're not using automatic volumes.
 
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:
