@@ -30,6 +30,8 @@ docker:
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	docker build --no-cache=true -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
+
+docker-push:
 	docker push $(IMAGE)
 
 update:
@@ -59,8 +61,8 @@ npm-minor:
 npm-major:
 	npm version major
 
-patch: lint build npm-patch deploy publish docker
-minor: lint build npm-minor deploy publish docker
-major: lint build npm-major deploy publish docker
+patch: lint build npm-patch deploy publish docker docker-push
+minor: lint build npm-minor deploy publish docker docker-push
+major: lint build npm-major deploy publish docker docker-push
 
 .PHONY: lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
