@@ -504,6 +504,7 @@
       event.preventDefault();
       event.stopPropagation();
       var view = getActiveView();
+      if (!validateFiles(files, view)) return;
       upload(view, fd, files, view[0].uId += 1);
       fileInput.val("");
     });
@@ -1236,6 +1237,7 @@
       if (!files.length) return;
       event.stopPropagation();
       var view = getActiveView();
+      if (!validateFiles(files, view)) return;
       view[0].uId += 1;
       upload(view, fd, files, view[0].uId);
     });
@@ -2436,7 +2438,7 @@
     box.attr("class", "info-box error in");
     droppy.errorTimer = setTimeout(function() {
       box.removeClass("in");
-    }, 4000);
+    }, 5000);
   }
 
   function showLink(view, link, attachement) {
@@ -2613,15 +2615,19 @@
   }
 
   // validate a filename for a platform
-  function validFilename(filename, platform) {
-    if (filename === "") return false;
-    if (platform === "win32")
-      return !/[<>:"\\/\|\?\*\u0000-\u0031]/.test(filename);
-    else if (platform === "darwin")
-      return !/[\u0000\/]/.test(filename);
-    else { // POSIX
-      return !/\//.test(filename);
-    }
+  function validFilename(filename) {
+    return !/[<>:"\/\\|?*\x00-\x1F]/g.test(filename); // eslint-disable-line no-control-regex
+  }
+
+  function validateFiles(files, view) {
+    files.every(function(file) {
+      if (validFilename(file)) {
+        return true;
+      } else {
+        showError(view, "Invalid filename: " + file);
+        return false;
+      }
+    });
   }
 
   function removeExt(filename) {

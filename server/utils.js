@@ -171,6 +171,7 @@ utils.isPathSane = function isPathSane(p, isURL) {
     return true;
   } else {
     return p.split(/[\\\/]/gm).every(function(name) {
+      if (/[<>:"|?*\x00-\x1F]/.test(p)) return false; // eslint-disable-line no-control-regex
       return name === sanitize(name);
     });
   }
