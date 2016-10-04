@@ -2620,7 +2620,7 @@
   }
 
   function validateFiles(files, view) {
-    files.every(function(file) {
+    return files.every(function(file) {
       if (validFilename(file)) {
         return true;
       } else {
