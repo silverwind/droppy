@@ -1252,25 +1252,25 @@
 
     // drag between views
     view.register("drop", function(event) {
-      var dragData, view = $(event.target).parents(".view");
+      var dragData = event.originalEvent.dataTransfer.getData("text");
+      var view = $(event.target).parents(".view");
       event.preventDefault();
       $(".dropzone").removeClass("in");
 
-      if (event.originalEvent.dataTransfer.getData("text").length) { // drag between views
-        event.stopPropagation();
-        dragData = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
-        if (view.data("type") === "directory") { // dropping into a directory view
-          handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
-        } else { // dropping into a document/media view
-          if (dragData.type === "folder") {
-            view.data("type", "directory");
-            updateLocation(view, dragData.path);
-          } else {
-            if (join(view[0].currentFolder, view[0].currentFile) !== dragData.path)
-              openFile(view, dirname(dragData.path), basename(dragData.path));
-          }
+      if (!dragData) return;
+
+      event.stopPropagation();
+      dragData = JSON.parse(dragData);
+      if (view.data("type") === "directory") { // dropping into a directory view
+        handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
+      } else { // dropping into a document/media view
+        if (dragData.type === "folder") {
+          view.data("type", "directory");
+          updateLocation(view, dragData.path);
+        } else {
+          if (join(view[0].currentFolder, view[0].currentFile) !== dragData.path)
+            openFile(view, dirname(dragData.path), basename(dragData.path));
         }
-        return;
       }
     });
   }
