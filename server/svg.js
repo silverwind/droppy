@@ -14,4 +14,3 @@ module.exports = function spritesheet() {
 
   return sprites.toString({inline: true});
 };
-
