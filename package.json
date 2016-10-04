@@ -22,6 +22,7 @@
     "cpr": "^2.0.0",
     "daemon": "^1.1.0",
     "dhparam": "^1.0.3",
+    "escape-string-regexp": "^1.0.5",
     "etag": "^1.7.0",
     "file-extension": "^3.0.2",
     "graceful-fs": "^4.1.9",

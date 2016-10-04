@@ -9,6 +9,7 @@ var _        = require("lodash");
 var async    = require("async");
 var Busboy   = require("busboy");
 var chalk    = require("chalk");
+var escRe    = require("escape-string-regexp");
 var fs       = require("graceful-fs");
 var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
@@ -388,7 +389,7 @@ function setupSocket(server) {
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
         if (!utils.isPathSane(msg.data.src)) return log.info(ws, null, "Invalid clipboard src: " + msg.data.src);
         if (!utils.isPathSane(msg.data.dst)) return log.info(ws, null, "Invalid clipboard dst: " + msg.data.dst);
-        if (new RegExp("^" + msg.data.src + "/").test(msg.data.dst))
+        if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst))
           return sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
 
         fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {

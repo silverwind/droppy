@@ -2,10 +2,11 @@
 
 var filetree = module.exports = new (require("events").EventEmitter)();
 
-var _         = require("lodash");
-var chokidar  = require("chokidar");
-var fs        = require("graceful-fs");
-var path      = require("path");
+var _        = require("lodash");
+var chokidar = require("chokidar");
+var escRe    = require("escape-string-regexp");
+var fs       = require("graceful-fs");
+var path     = require("path");
 
 var log      = require("./log.js");
 var paths    = require("./paths.js").get();
@@ -175,7 +176,7 @@ filetree.unlinkdir = function unlinkdir(dir) {
     if (err) log.error(err);
     delete dirs[dir];
     Object.keys(dirs).forEach(function(d) {
-      if (new RegExp("^" + dir + "/").test(d)) delete dirs[d];
+      if (new RegExp("^" + escRe(dir) + "/").test(d)) delete dirs[d];
     });
     update(path.dirname(dir));
   });
@@ -264,8 +265,8 @@ filetree.mvdir = function mvdir(src, dst, cb) {
     delete dirs[src];
     // Subdirs
     Object.keys(dirs).forEach(function(dir) {
-      if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = dirs[dir];
+      if (new RegExp("^" + escRe(src) + "/").test(dir) && dir !== src && dir !== dst) {
+        dirs[dir.replace(new RegExp("^" + escRe(src) + "/"), dst + "/")] = dirs[dir];
         delete dirs[dir];
       }
     });
@@ -293,9 +294,9 @@ filetree.cpdir = function cpdir(src, dst, cb) {
     dirs[dst].mtime = Date.now();
     // Subdirs
     Object.keys(dirs).forEach(function(dir) {
-      if (new RegExp("^" + src + "/").test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")] = _.cloneDeep(dirs[dir]);
-        dirs[dir.replace(new RegExp("^" + src + "/"), dst + "/")].mtime = Date.now();
+      if (new RegExp("^" + escRe(src) + "/").test(dir) && dir !== src && dir !== dst) {
+        dirs[dir.replace(new RegExp("^" + escRe(src) + "/"), dst + "/")] = _.cloneDeep(dirs[dir]);
+        dirs[dir.replace(new RegExp("^" + escRe(src) + "/"), dst + "/")].mtime = Date.now();
       }
     });
     update(path.dirname(dst));
