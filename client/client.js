@@ -541,35 +541,25 @@
       });
     }
 
-    var createButtons = $("#cf, #cd");
-    function createEntry() {
-      var view    = getActiveView();
+    $("#cf, #cd").register("click", function() {
+      var view = getActiveView();
       if (view.data("type") !== "directory") return;
-      var isFile  = this.id === "cf";
-      var isEmpty = view.find(".empty").length;
-      var html    = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
+      var content = view.find(".content");
+      var isFile = this.id === "cf";
+      var isEmpty = Boolean(view.find(".empty").length);
+      var html = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
 
-      stopEdit(view, view.find(".editing"), !view.find(".data-row").length);
-
-      if (isEmpty)
-        view.find(".content").html(Handlebars.templates["file-header"]() + html);
-      else
-        view.find(".content").prepend(html);
-
-      view.find(".content")[0].scrollTop = 0;
+      stopEdit(view, view.find(".editing"), isEmpty);
+      if (isEmpty) content.html(Handlebars.templates["file-header"]());
+      content.prepend(html);
+      content[0].scrollTop = 0;
       var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
-      entryRename(view, dummy, isEmpty, function(_success, _oldVal, newVal) {
+      entryRename(view, dummy, isEmpty, function(success, _oldVal, newVal) {
+        if (!success) return;
         if (view.data("type") === "directory") showSpinner(view);
         sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
       });
-
-      $(this).one("click", function(e) {
-        e.stopImmediatePropagation();
-        stopEdit(view, dummy, isEmpty);
-        createButtons.register("click", createEntry);
-      });
-    }
-    createButtons.register("click", createEntry);
+    });
 
     var splitButton = $("#split"), splitting;
     droppy.split = function(dest) {
@@ -706,7 +696,6 @@
 //  General helpers
 // ============================================================================
   function entryRename(view, entry, wasEmpty, callback) {
-    var canSubmit, exists, valid, link, nameLength;
     // Populate active files list
     droppy.activeFiles = [];
     view.find(".entry-link").each(function() {
@@ -716,7 +705,9 @@
 
     // Hide menu, overlay and the original link, stop any previous edits
     toggleCatcher(false);
-    link = entry.find(".entry-link");
+    var link = entry.find(".entry-link");
+    var canSubmit = validFilename(link.text(), droppy.platform);
+    var exists;
     entry.addClass("editing");
 
     // Add inline element
@@ -724,16 +715,15 @@
                     '" placeholder="' + link.text() + '">').insertAfter(link);
     renamer.register("input", function() {
       var input = this.value;
-      valid = !/[\\\*\{\}\/\?\|<>"]/.test(input);
-      if (input === "") valid = false;
+      var valid = validFilename(input, droppy.platform);
       exists = droppy.activeFiles.some(function(file) {
         if (file === (droppy.caseSensitive ? input : input.toLowerCase())) return true;
       });
-      canSubmit = valid && (!exists || input === this.attr("placeholder"));
+      canSubmit = valid && !exists;
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
     }).register("blur focusout", submitEdit.bind(null, view, true, callback));
 
-    nameLength = link.text().lastIndexOf(".");
+    var nameLength = link.text().lastIndexOf(".");
     renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
     renamer[0].focus();
 
@@ -744,8 +734,8 @@
     function submitEdit(view, skipInvalid, callback) {
       var success, oldVal = renamer.attr("placeholder"), newVal = renamer.val();
       if (canSubmit) {
-        if (oldVal !== newVal) success = true;
-      } else if (exists && !skipInvalid) {
+        success = true;
+      } else if (!skipInvalid) {
         renamer.addClass("shake");
         setTimeout(function() {
           renamer.removeClass("shake");
@@ -2620,6 +2610,18 @@
       xhr.onerror = function() { reject(xhr); };
       xhr.send(opts.data ? JSON.stringify(opts.data) : undefined);
     });
+  }
+
+  // validate a filename for a platform
+  function validFilename(filename, platform) {
+    if (filename === "") return false;
+    if (platform === "win32")
+      return !/[<>:"\\/\|\?\*\u0000-\u0031]/.test(filename);
+    else if (platform === "darwin")
+      return !/[\u0000\/]/.test(filename);
+    else { // POSIX
+      return !/\//.test(filename);
+    }
   }
 
   function removeExt(filename) {

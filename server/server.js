@@ -315,7 +315,8 @@ function setupSocket(server) {
           readOnly      : config.readOnly,
           priv          : priv,
           engine        : "node " + process.version.substring(1),
-          caseSensitive : process.platform !== "win32",
+          platform      : process.platform,
+          caseSensitive : process.platform === "linux", // TODO: actually test the filesystem
           themes        : Object.keys(cache.themes).sort().join("|"),
           modes         : Object.keys(cache.modes).sort().join("|"),
         }});
