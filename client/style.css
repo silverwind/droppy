@@ -413,7 +413,10 @@ nav {
   color: #f44 !important;
 }
 
-.inline-namer { background: transparent }
+.inline-namer {
+  background: transparent;
+  padding: .1rem 0;
+}
 
 /* Hide certain list elements when width gets too small */
 @media (max-width: 639px) {
