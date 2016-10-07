@@ -2616,7 +2616,7 @@
 
   // validate a filename for a platform
   function validFilename(filename) {
-    return !/[<>:"\/\\|?*\x00-\x1F]/g.test(filename); // eslint-disable-line no-control-regex
+    return !/[<>:"|?*\x00-\x1F]/g.test(filename); // eslint-disable-line no-control-regex
   }
 
   function validateFiles(files, view) {
