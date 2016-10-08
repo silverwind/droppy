@@ -116,7 +116,11 @@
   });
 
   function svg(which) {
-    return '<svg class="' + which + '"><use xlink:href="#i-' + which + '"></svg>';
+    // manually clone instead of <use> because of a weird bug with media arrows in Firefox
+    var svg = document.getElementById("i-" + which).cloneNode(true);
+    svg.setAttribute("class", svg.id.replace("i-", ""));
+    svg.removeAttribute("id");
+    return svg.outerHTML.replace(/(?!<\/)?symbol/g, "svg");
   }
   Handlebars.registerHelper("svg", svg);
 
@@ -2463,7 +2467,7 @@
 
     out.text(getFullLink(link));
     out.register("copy", function() {
-      setTimeout(toggleCatcher.bind(null, false), 500);
+      setTimeout(toggleCatcher.bind(null, false), 100);
     });
     box.find(".icon svg").replaceWith(svg("link"));
     box.attr("class", "info-box link in").transitionend(function() {
@@ -2525,6 +2529,7 @@
         if (dims.w > space.w || dims.h > space.h) {
           $(this).removeAttr("style"); // Let CSS handle the downscale
         } else {
+          this.style.objectFit = "contain";
           if (dims.w / dims.h > space.w / space.h) {
             this.style.width  = "100%";
             this.style.height = "auto";

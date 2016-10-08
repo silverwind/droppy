@@ -125,7 +125,7 @@ nav {
   bottom: 0; left:0; right:0; top:1.5rem;
   display: flex;
   flex-direction: column;
-  transition: left .2s ease, right .2s ease;
+  transition: left .2s, right .2s;
 }
 
 .content-container {
@@ -142,7 +142,7 @@ nav {
 .content {
   left: 0;
   width: 100%;
-  transition: transform .175s ease;
+  transition: transform .175s;
   transform: translateX(0);
 }
 
@@ -198,7 +198,7 @@ nav {
   opacity: 0;
   position: relative;
   transform: translateX(-2em);
-  transition: transform .2s ease, opacity .2s ease;
+  transition: transform .2s, opacity .2s;
 }
 .path li.in { opacity: 1; transform: translateX(0) }
 
@@ -254,12 +254,12 @@ nav {
   right: 0;
   top: 0;
   cursor: pointer;
-  transition: opacity .3s ease, visibility 0s .3s;
+  transition: opacity .3s, visibility 0s .3s;
   user-select: none;
   opacity: 0; visibility: hidden;
   line-height: 1.5rem;
 }
-.paste-button.in  { opacity: 1; visibility: visible; transition: opacity .3s ease }
+.paste-button.in  { opacity: 1; visibility: visible; transition: opacity .3s }
 
 @media (max-width: 639px) { .paste-button { line-height: 1.25rem } }
 
@@ -293,6 +293,7 @@ nav {
   opacity: 0;
   visibility: hidden;
   user-select: none;
+  transition: .2s;
 }
 #overlay.in { opacity: .4; visibility: visible }
 
@@ -318,7 +319,7 @@ nav {
   height: .5em;
   width: .5em;
   margin-left: .25em;
-  transition: all .3s ease;
+  transition: .3s;
 }
 
 .file-header .down .triangle { transform: rotate(90deg);  top: -.15em }
@@ -460,7 +461,7 @@ nav {
   fill: #666;
   height: 70px;
   width: 70px;
-  transition: all .3s ease;
+  transition: .3s;
   position: relative;
   bottom: -12px;
 }
@@ -470,7 +471,7 @@ nav {
   color: #666;
   top: -25px;
   opacity: 0;
-  transition: all .3s ease;
+  transition: .3s;
 }
 
 .empty:hover svg   { opacity: 1; bottom: 0; fill:  #000 }
@@ -566,7 +567,7 @@ html:not(.mobile) #entry-menu a.active {
   stroke: #eee;
   stroke-width: 15;
   opacity: 0;
-  transition: opacity .3s ease;
+  transition: opacity .3s;
 }
 .mobile .arrow-back, .mobile .arrow-forward { display: none }
 
@@ -579,7 +580,7 @@ html:not(.mobile) #entry-menu a.active {
   height: 2em;
   width: 2em;
   position: absolute;
-  transition: all .25s ease;
+  transition: .25s;
   top: calc(50% + 1.25rem);
 }
 
@@ -593,7 +594,7 @@ html:not(.mobile) #entry-menu a.active {
   left: 0; right: 0; top: 0; bottom: 0;
   transform: translateX(0);
 }
-.media-container:not(.draggable) {transition: all .25s ease }
+.media-container:not(.draggable) {transition: .25s }
 .media-container.left  { opacity: 0; transform: translateX(-33%) }
 .media-container.right { opacity: 0; transform: translateX(33%)  }
 
@@ -620,7 +621,7 @@ html:not(.mobile) #entry-menu a.active {
   padding: .125rem;
   right: .25em; bottom: .25em;
   z-index: 1;
-  color: #aaa;
+  color: #ccc;
   background: rgba(0,0,0,.6);
   border-radius: .125em;
   cursor: pointer;
@@ -633,21 +634,20 @@ html:not(.mobile) #entry-menu a.active {
   cursor: pointer;
   background: transparent;
 }
+.fs:hover { color: #fff }
+
 .fs svg {
   height: 1.25em;
   width: 1.25em;
   position: relative;
   top: .1em;
 }
-.meta:hover svg { fill: #fff }
-.meta:hover span { color: #fff }
 
-.meta .counter { margin: 0 .25em }
+.meta .counter { margin: 0 .3em }
 .meta .dims    { display: none }
-.meta .dims.in { display: inline }
+.meta .dims.in { display: inline; margin-right: .3em }
 
 .meta > div { display: inline }
-.meta span > span { color: #bbb }
 .type-video .fs, .type-video .meta { display: none }
 /* ================================= Video.js ================================= */
 
@@ -801,7 +801,7 @@ html:not(.mobile) .vjs-big-play-button {
 .upload-info {
   background: #181818;
   color: #eee;
-  transition: flex-basis .15s ease;
+  transition: flex-basis .15s;
   width: 100%;
   position: relative;
   display: flex;
@@ -836,7 +836,7 @@ html:not(.mobile) .vjs-big-play-button {
 }
 
 .upload-cancel {
-  transition: color .2s ease;
+  transition: color .2s;
   cursor: pointer;
   flex: 0 0 1.25em;
   text-align: center;
@@ -846,7 +846,7 @@ html:not(.mobile) .vjs-big-play-button {
   position: absolute;
   background: #05a;
   top: 0; bottom: 0; left: 0;
-  transition: width .2s ease;
+  transition: width .2s;
   width: 0;
   z-index: 1;
   pointer-event: none;
@@ -854,7 +854,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .upload-info svg {
   vertical-align: middle;
-  transition: fill .15s ease;
+  transition: fill .15s;
   position: relative;
   top: -.1em;
   margin-right: .25em;
@@ -873,7 +873,7 @@ html:not(.mobile) .vjs-big-play-button {
   order: 3;
   display: flex;
   position: relative;
-  transition: flex-basis .15s ease;
+  transition: flex-basis .15s;
   width: 100%;
   user-select: none;
   overflow: hidden;
@@ -907,7 +907,7 @@ html:not(.mobile) .vjs-big-play-button {
 .volume-slider {
   z-index: 4;
   height: .75em;
-  transition: flex-basis .2s ease;
+  transition: flex-basis .2s;
   flex: 0 0 0;
   margin: .375em 0;
 }
@@ -933,7 +933,7 @@ html:not(.mobile) .vjs-big-play-button {
 .seekbar {
   position: absolute;
   left: 0; right: 0; bottom: 0; top: 0;
-  transition: all .2s ease;
+  transition: .2s;
   overflow: visible;
 }
 
@@ -978,17 +978,17 @@ html:not(.mobile) .vjs-big-play-button {
   color: #333;
   height: 150px;
   left: 50%;
-  top: 50%;
+  top: 75%;
   opacity: 0;
   visibility: hidden;
   position: fixed;
-  transition: opacity .3s ease, visibility 0s .3s;
+  transition: .4s, visibility 0s .4s;
   transform: translate(-50%, -50%);
   width: 300px;
   text-align: center;
   z-index: 64;
 }
-#about-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
+#about-box.in { top: 50%; opacity: 1; visibility: visible; transition: .4s }
 
 #about-title {
   font-size: 1.3em;
@@ -1046,17 +1046,17 @@ html:not(.mobile) .vjs-big-play-button {
   color: #555;
   max-height: 95%;
   left: 50%;
-  top: 50%;
+  top: 75%;
   position: fixed;
-  transition: opacity .3s ease, visibility 0s .3s;
+  transition: .4s, visibility 0s .4s;
   transform: translate(-50%, -50%);
   z-index: 64;
-  padding: .33em;
+  padding: .5em;
   overflow-y: auto;
   opacity: 0;
   visibility: hidden;
 }
-#prefs-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
+#prefs-box.in { top: 50%; opacity: 1; visibility: visible; transition: .4s }
 
 @media (min-width: 800px) { #prefs-box { width: 24em } }
 @media (max-width: 799px) { #prefs-box { width: 80%  } }
@@ -1129,32 +1129,24 @@ html:not(.mobile) .vjs-big-play-button {
   flex: 0 0 1rem;
   display: flex;
 }
-
-.list-user svg {
-  fill: #bbb;
-}
-
-.list-user li:hover .trash { fill: #f44 }
+.delete-user:hover { color: #f44 }
 
 .add-user {
   cursor: pointer;
   text-align: center;
   user-select: none;
 }
-.add-user:hover svg { fill: #000 }
-
 .add-user svg {
   height: .8em;
   width: .8em;
   margin-right: .25em;
-  fill: #666;
 }
 
 /* ============================== Login Form =============================== */
 
 #login-box {
   color: #222;
-  background: #ccc;
+  background: #eee;
   border-radius: 6px;
   box-shadow: 0 8px 24px #000;
   height: 11rem;
@@ -1196,7 +1188,7 @@ html:not(.mobile) .vjs-big-play-button {
   background: linear-gradient(#ccc,#fff);
   box-shadow: 0 0 10px rgba(0,0,0,.3);
   border-radius: 5px 5px 0 0;
-  transition: background .2s ease;
+  transition: background .2s;
   position: absolute;
   top: 0;
   width: 100%;
@@ -1264,11 +1256,8 @@ html:not(.mobile) .vjs-big-play-button {
 
 #remember:hover, #remember:focus { color: #222 }
 #submit:hover, #submit:focus     { color: #222 }
-#submit svg                      { fill: #666; margin-right: .2em }
-#remember svg                    { fill: transparent }
-#remember.checked svg            { fill: #666 }
-#submit:hover svg                { fill: #222 }
-#remember.checked:hover svg      { fill: #222 }
+#submit svg                      { margin-right: .35em }
+#remember:not(.checked) svg      { fill: transparent }
 
 @media (max-width: 639px), (max-height: 399px) {
   #remember, #submit {
@@ -1281,10 +1270,10 @@ html:not(.mobile) .vjs-big-play-button {
 .info-box {
   border-radius: 6px;
   left: 50%;
-  top: 50%;
+  top: 75%;
   transform: translate(-50%, -50%);
   position: absolute;
-  transition: opacity .3s ease, visibility 0s .3s;
+  transition: .4s, visibility 0s .4s;
   z-index: 40;
   display: flex;
   opacity: 0;
@@ -1294,7 +1283,7 @@ html:not(.mobile) .vjs-big-play-button {
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
   max-width: 90%;
 }
-.info-box.in { opacity: 1; visibility: visible; transition: opacity .3s ease }
+.info-box.in { top: 50%; opacity: 1; visibility: visible; transition: .4s }
 
 .info-box .icon {
   display: flex;
@@ -1302,15 +1291,15 @@ html:not(.mobile) .vjs-big-play-button {
   border-radius: 6px 0 0 6px;
   justify-content: center;
   align-items: center;
+  color: #fff;
 }
 
 .info-box.link .icon  { background: #05a }
 .info-box.error .icon { background: #f44 }
 
 .info-box .icon svg {
-  height: 2.5em;
-  width: 2.5em;
-  fill: #fff;
+  height: 2em;
+  width: 2em;
 }
 .info-box.link span       { display: none }
 .info-box.error .link-out { display: none }
@@ -1321,7 +1310,14 @@ html:not(.mobile) .vjs-big-play-button {
 
 .link-out {
   white-space: nowrap;
-  padding: .25em .75em;
+  padding: .25em .5em;
+  position: relative;
+}
+.link-out:after {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 1rem;
+  background: red;
 }
 
 .info-box span {
@@ -1352,7 +1348,7 @@ html:not(.mobile) .vjs-big-play-button {
 
 .link-options svg {
   margin: 0 .5em 0 .75em;
-  transition: opacity .2s ease;
+  transition: opacity .2s;
 }
 
 .link-options .dl-link:not(.checked) svg { opacity: 0; }
@@ -1425,7 +1421,7 @@ html:not(.mobile) #drop-select span.active {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background: radial-gradient(rgba(0,0,0,.25) 0%,rgba(0,0,0,.45) 100%);
+  background: rgba(0,0,0,.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1439,6 +1435,6 @@ html:not(.mobile) #drop-select span.active {
   fill: #fff;
 }
 
-.shake { animation: shake .3s ease }
+.shake { animation: shake .3s }
 
 iframe { display: none }
