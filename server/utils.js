@@ -9,6 +9,7 @@ var dhparam  = require("dhparam");
 var ext      = require("file-extension");
 var fs       = require("graceful-fs");
 var isBin    = require("isbinaryfile");
+var mime     = require("mime-types").lookup;
 var mkdirp   = require("mkdirp");
 var mv       = require("mv");
 var path     = require("path");
@@ -177,14 +178,25 @@ utils.isPathSane = function isPathSane(p, isURL) {
   }
 };
 
-utils.isBinary = function isBinary(path, callback) {
-  if (forceBinaryTypes.indexOf(ext(path)) !== -1)
+utils.isBinary = function isBinary(p, callback) {
+  if (forceBinaryTypes.indexOf(ext(p)) !== -1)
     return callback(null, true);
 
-  isBin(path, function(err, result) {
+  isBin(p, function(err, result) {
     if (err) return callback(err);
     callback(null, result);
   });
+};
+
+// TODO async/await this in Node.js 7.0
+utils.mime = function mimeWrap(p) {
+  var mimeType = mime();
+  if (mimeType) return mimeType;
+  try {
+    return isBin.sync(p) ? "application/octet-stream" : "text/plain; charset=utf-8";
+  } catch (e) {
+    return "application/octet-stream";
+  }
 };
 
 utils.getDispo = function getDispo(fileName) {

@@ -11,7 +11,6 @@ var Busboy   = require("busboy");
 var chalk    = require("chalk");
 var escRe    = require("escape-string-regexp");
 var fs       = require("graceful-fs");
-var mime     = require("mime-types").lookup;
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
 var yazl     = require("yazl");
@@ -1103,7 +1102,7 @@ function streamArchive(req, res, zipPath, download) {
       log.info(req, res);
       log.info("Streaming zip of ", chalk.blue(relPath));
       res.statusCode = 200;
-      res.setHeader("Content-Type", mime(zip));
+      res.setHeader("Content-Type", utils.mime(zip));
       res.setHeader("Transfer-Encoding", "chunked");
       if (download) res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
       readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
@@ -1127,7 +1126,7 @@ function streamArchive(req, res, zipPath, download) {
 
 function streamFile(req, res, filepath, download, stats) {
   var status = 200, headers = {
-    "Content-Type": mime(filepath) || "text/plain; charset=utf-8",
+    "Content-Type": utils.mime(filepath),
     "Content-Length": stats.size
   };
   if (download) {

@@ -1441,7 +1441,7 @@
           updatePath(view);
           openDoc(view, filePath);
         } else { // Binary content - download it
-          $("[name=nn]").attr("src", "!/file" + filePath);
+          $("[name=nn]").attr("src", "!/dl" + filePath);
           hideSpinner(view);
         }
       }).catch(function() {
