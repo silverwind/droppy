@@ -9,6 +9,10 @@ RUN apk add --no-cache make gcc g++ python git && \
   npm uninstall -g dmn npm && \
   rm -rf /root/.npm && \
   rm -rf /tmp/npm* && \
+  rm -rf /usr/lib/node_modules/droppy/node_modules/uws/*darwin*.node && \
+  rm -rf /usr/lib/node_modules/droppy/node_modules/uws/*win32*.node && \
+  rm -rf /usr/lib/node_modules/droppy/node_modules/uws/build && \
+  rm -rf /usr/lib/node_modules/droppy/node_modules/lodash/fp && \
   apk del make gcc g++ python git
 
 EXPOSE 8989
