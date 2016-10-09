@@ -32,7 +32,8 @@ docker:
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
 
 docker-push:
-	docker push $(IMAGE)
+	docker push $(IMAGE):"$$(cat package.json | jq -r .version)"
+	docker push $(IMAGE):latest
 
 update:
 	ncu --packageFile package.json -ua
