@@ -708,12 +708,13 @@ function handleResourceRequest(req, res, resourceName) {
       res.end();
     } else {
       var headers = {}, status = 200;
-
       if (/\.html$/.test(resourceName)) {
         headers["Content-Security-Policy"] = "script-src 'self' 'unsafe-eval' blob: data:; child-src 'self' blob: data:; object-src 'self'; media-src 'self' blob: data:";
-        if (!config.allowFrame) headers["X-Frame-Options"] = "DENY";
         headers["X-Content-Type-Options"] = "nosniff";
         headers["X-XSS-Protection"] = "1; mode=block";
+        headers["Referrer-Policy"] = "no-referrer";
+        if (!config.allowFrame)
+          headers["X-Frame-Options"] = "DENY";
         if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
           headers["X-UA-Compatible"] = "IE=Edge";
       }
