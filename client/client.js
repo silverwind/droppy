@@ -324,17 +324,11 @@
         hideSpinner(view);
 
         var file = view.find(".path li:last-child");
-        var oldStyle = file.attr("style");
 
-        file.find("svg")[0].style.transition = "fill .2s ease";
-        file.removeClass("dirty").attr("style", "transition: background .2s ease;")
-          .addClass(msg.status === 0 ? "saved" : "save-failed");
+        file.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
         setTimeout(function() {
-          file.removeClass("saved save-failed").transitionend(function() {
-            $(this).attr("style", oldStyle);
-            $(this).children("svg").removeAttr("style");
-          });
-        }, 1000);
+          file.removeClass("saved save-failed");
+        }, 3000);
         break;
       case "SETTINGS":
         Object.keys(msg.settings).forEach(function(setting) {
@@ -494,7 +488,9 @@
     // track active view
     $(window).on("click dblclick contextmenu", function(e) {
       var view = $(e.target).parents(".view");
-      if (view.length) droppy.activeView = view[0].vId;
+      if (!view.length) return;
+      droppy.activeView = view[0].vId;
+      toggleButtons(view.data("type"));
     });
 
     $(document).register(screenfull.raw.fullscreenchange, function() {
@@ -547,8 +543,8 @@
     }
 
     $("#cf, #cd").register("click", function() {
+      if ($(this).hasClass("disabled")) return;
       var view = getActiveView();
-      if (view.data("type") !== "directory") return;
       var content = view.find(".content");
       var isFile = this.id === "cf";
       var isEmpty = Boolean(view.find(".empty").length);
@@ -1100,10 +1096,13 @@
         bindDragEvents(view);
       else if (view.data("type") === "media")
         bindMediaArrows(view);
-
-      $("#af, #ad, #cf, #cd")[type === "directory" ? "removeClass" : "addClass"]("disabled");
+      toggleButtons(type);
       if (cb) cb(view);
     }
+  }
+
+  function toggleButtons(type) {
+    $("#af, #ad, #cf, #cd")[type === "directory" ? "removeClass" : "addClass"]("disabled");
   }
 
   function handleDrop(view, event, src, dst, spinner) {
