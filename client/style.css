@@ -787,7 +787,6 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar > .find:hover svg  {  fill: #a4c }
 .sidebar > .full:hover svg  {  fill: #bb4 }
 
-
 .mode-select {
   background: #282828;
   border: none;
@@ -1326,7 +1325,6 @@ html:not(.mobile) .vjs-big-play-button {
   position: absolute;
   right: 0; top: 0; bottom: 0;
   width: 1rem;
-  background: red;
 }
 
 .info-box span {
