@@ -190,7 +190,7 @@ utils.isBinary = function isBinary(p, callback) {
 
 // TODO async/await this in Node.js 7.0
 utils.mime = function mimeWrap(p) {
-  var mimeType = mime();
+  var mimeType = mime(p);
   if (mimeType) return mimeType;
   try {
     return isBin.sync(p) ? "application/octet-stream" : "text/plain; charset=utf-8";
