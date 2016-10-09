@@ -278,7 +278,7 @@
       msg = JSON.parse(event.data);
       switch (msg.type) {
       case "UPDATE_DIRECTORY":
-        if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.data("type", "directory"); // For initial loading
+        if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.attr("data-type", "directory"); // For initial loading
         if (!view.length) return;
 
         if (view.data("type") === "directory") {
@@ -1062,7 +1062,7 @@
   // Load new view content
   function loadContent(view, type, mediaType, content, cb) {
     if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
-    view.data("type", type);
+    view.attr("data-type", type);
     mediaType = mediaType ? " type-" + mediaType : "";
     content = '<div class="new content ' + type + mediaType + " " + view[0].animDirection + '">' + content + "</div>";
     var navRegex = /(forward|back|center)/;

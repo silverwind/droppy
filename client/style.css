@@ -696,6 +696,16 @@ html:not(.mobile) .vjs-big-play-button {
 
 /* ============================ Document  ============================ */
 
+.view[data-type="document"] ::-webkit-scrollbar {
+  background: transparent !important;
+}
+.view[data-type="document"] ::-webkit-scrollbar-thumb {
+  background: rgba(128,128,128,.5) !important;
+}
+.view[data-type="document"] ::-webkit-scrollbar-thumb:hover {
+  background: #18f !important;
+}
+
 .CodeMirror {
   font-family: Consolas, Monaco, "Droid Sans Mono", monospace !important;
   line-height: 1.2em !important;
@@ -743,18 +753,18 @@ html:not(.mobile) .vjs-big-play-button {
 .sidebar {
   position: absolute;
   top: .25em;
-  right: .25em;
+  right: 0;
   width: 2.5em;
+
   user-select: none;
 }
 .sidebar > li {
   position: relative;
   z-index: 5;
-  margin-bottom: .25rem;
 }
 
 .sidebar svg {
-  fill: rgba(128,128,128,.6);
+  fill: rgba(128,128,128,.5);
   margin-left: .75em;
 }
 
@@ -763,22 +773,20 @@ html:not(.mobile) .vjs-big-play-button {
   text-align: center;
   opacity: 0;
   font-size: .7em;
+  position: relative;
+  top: -.3em;
 }
 
 .sidebar > li:hover         { cursor: pointer }
 .sidebar > li:hover span    { color: #fff; opacity: 1 }
 .sidebar > .exit:hover svg  {  fill: #d44 }
-.sidebar > .exit:hover span { color: #d44 }
 .sidebar > .save:hover svg  {  fill: #5c5 }
-.sidebar > .save:hover span { color: #5c5 }
 .sidebar > .ww:hover svg    {  fill: #18f }
-.sidebar > .ww:hover span   { color: #18f }
 .sidebar > .syntax:hover svg, .sidebar > .syntax.in svg { fill: #f82 }
-.sidebar > .syntax:hover span, .sidebar > .syntax.in span { color: #f82; opacity: 1 }
+.sidebar > .syntax.in span  { color: #fff; opacity: 1 }
 .sidebar > .find:hover svg  {  fill: #a4c }
-.sidebar > .find:hover span { color: #a4c }
 .sidebar > .full:hover svg  {  fill: #bb4 }
-.sidebar > .full:hover span { color: #bb4 }
+
 
 .mode-select {
   background: #282828;
