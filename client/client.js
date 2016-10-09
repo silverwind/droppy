@@ -278,10 +278,9 @@
       msg = JSON.parse(event.data);
       switch (msg.type) {
       case "UPDATE_DIRECTORY":
-        if (typeof view.data("type") === "undefined" || view[0].switchRequest) view.attr("data-type", "directory"); // For initial loading
+        if (typeof view.attr("data-type") === "undefined" || view[0].switchRequest) view.attr("data-type", "directory"); // For initial loading
         if (!view.length) return;
-
-        if (view.data("type") === "directory") {
+        if (view.attr("data-type") === "directory") {
           if (msg.folder !== getViewLocation(view)) {
             view[0].currentFile = null;
             view[0].currentFolder = msg.folder;
@@ -292,7 +291,7 @@
           view[0].switchRequest = false;
           view[0].currentData = msg.data;
           openDirectory(view);
-        } else if (view.data("type") === "media") {
+        } else if (view.attr("data-type") === "media") {
           view[0].currentData = msg.data;
           populateMediaCache(view, msg.data);
           updateMediaMeta(view);
@@ -322,9 +321,7 @@
         break;
       case "SAVE_STATUS":
         hideSpinner(view);
-
         var file = view.find(".path li:last-child");
-
         file.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
         setTimeout(function() {
           file.removeClass("saved save-failed");
@@ -473,15 +470,15 @@
       e.preventDefault();
     }).bind(["space", "right", "down", "return"], function() {
       var view = getActiveView();
-      if (!view || view.data("type") !== "media") return;
+      if (!view || view.attr("data-type") !== "media") return;
       swapMedia(view, "right");
     }).bind(["shift+space", "left", "up", "backspace"], function() {
       var view = getActiveView();
-      if (!view || view.data("type") !== "media") return;
+      if (!view || view.attr("data-type") !== "media") return;
       swapMedia(view, "left");
     }).bind(["alt+enter", "f"], function() {
       var view = getActiveView();
-      if (!view || view.data("type") !== "media") return;
+      if (!view || view.attr("data-type") !== "media") return;
       screenfull.toggle(view.find(".content")[0]);
     });
 
@@ -490,7 +487,7 @@
       var view = $(e.target).parents(".view");
       if (!view.length) return;
       droppy.activeView = view[0].vId;
-      toggleButtons(view.data("type"));
+      toggleButtons(view.attr("data-type"));
     });
 
     $(document).register(screenfull.raw.fullscreenchange, function() {
@@ -557,7 +554,7 @@
       var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
       entryRename(view, dummy, isEmpty, function(success, _oldVal, newVal) {
         if (!success) return;
-        if (view.data("type") === "directory") showSpinner(view);
+        if (view.attr("data-type") === "directory") showSpinner(view);
         sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
       });
     });
@@ -1092,9 +1089,9 @@
       view.find(".content:not(.new)").remove();
       view.find(".new").removeClass("new");
       view.find(".data-row").removeClass("animating");
-      if (view.data("type") === "directory")
+      if (view.attr("data-type") === "directory")
         bindDragEvents(view);
-      else if (view.data("type") === "media")
+      else if (view.attr("data-type") === "media")
         bindMediaArrows(view);
       toggleButtons(type);
       if (cb) cb(view);
@@ -1219,7 +1216,7 @@
       event.stopPropagation();
       droppy.activeView = view[0].vId;
       var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
-      if (view.data("type") === "directory" && isInternal)
+      if (view.attr("data-type") === "directory" && isInternal)
         icon = "menu";
       else if (!isInternal)
         icon = "upload-cloud";
@@ -1256,7 +1253,7 @@
 
       event.stopPropagation();
       dragData = JSON.parse(dragData);
-      if (view.data("type") === "directory") { // dropping into a directory view
+      if (view.attr("data-type") === "directory") { // dropping into a directory view
         handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
       } else { // dropping into a document/media view
         if (dragData.type === "folder") {
@@ -2419,7 +2416,7 @@
     view.find(".spinner").attr("class", "spinner in");
 
     // HACK: Safeguard so a view won't get stuck in loading state
-    if (view.data("type") === "directory") {
+    if (view.attr("data-type") === "directory") {
       clearTimeout(view[0].stuckTimeout);
       view[0].stuckTimeout = setTimeout(function() {
         sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
