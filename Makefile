@@ -26,13 +26,13 @@ publish:
 docker:
 	@echo Preparing docker image $(IMAGE)...
 	docker pull mhart/alpine-node:latest
-	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
-	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
+	docker rm -f $(shell docker ps -qaf='ancestor=$(IMAGE)') 2>/dev/null || true
+	docker rmi $(shell docker images -qa $(IMAGE)) 2>/dev/null || true
 	docker build --no-cache=true -t $(IMAGE) .
-	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
+	docker tag $(shell docker images -qa $(IMAGE):latest) $(IMAGE):$(shell cat package.json | jq -r .version)
 
 docker-push:
-	docker push $(IMAGE):"$$(cat package.json | jq -r .version)"
+	docker push $(IMAGE):$(shell cat package.json | jq -r .version)
 	docker push $(IMAGE):latest
 
 update:
