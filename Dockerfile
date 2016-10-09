@@ -1,10 +1,9 @@
 FROM mhart/alpine-node:latest
 MAINTAINER silverwind
-WORKDIR /
 
 # Install and build modules
 RUN apk add --no-cache make gcc g++ python git && \
-  npm install --production --g droppy@latest dmn && \
+  npm install --production -g droppy@latest dmn && \
   cd /usr/lib/node_modules/droppy && \
   dmn clean -f && \
   npm uninstall -g dmn npm && \
