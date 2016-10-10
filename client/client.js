@@ -2615,6 +2615,24 @@
     });
   }
 
+  function validateFiles(files, view) {
+    return files.every(function(file) {
+      if (validPath(file)) {
+        return true;
+      } else {
+        showError(view, "Invalid file path: " + file);
+        return false;
+      }
+    });
+  }
+
+  function validPath(path) {
+    return path.split("/").every(function(name) {
+      if (!name) return true;
+      return validFilename(name);
+    });
+  }
+
   function validFilename(name) {
     if (!name || name.length > 255)
       return false;
@@ -2625,17 +2643,6 @@
     if (/^\.\.?$/.test(name))
       return false;
     return true;
-  }
-
-  function validateFiles(files, view) {
-    return files.every(function(file) {
-      if (validFilename(file)) {
-        return true;
-      } else {
-        showError(view, "Invalid filename: " + file);
-        return false;
-      }
-    });
   }
 
   function removeExt(filename) {
