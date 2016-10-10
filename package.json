@@ -28,7 +28,7 @@
     "graceful-fs": "^4.1.9",
     "isbinaryfile": "^3.0.1",
     "json-buffer": "^2.0.11",
-    "lodash": "^4.16.3",
+    "lodash": "^4.16.4",
     "mime-types": "^2.1.12",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
@@ -46,7 +46,7 @@
     "yazl": "^2.4.1"
   },
   "optionalDependencies": {
-    "uws": "^0.9.0"
+    "uws": "^0.10.7"
   },
   "devDependencies": {
     "autoprefixer": "^6.5.0",
@@ -56,7 +56,7 @@
     "draggabilly": "https://github.com/silverwind/draggabilly/tarball/master",
     "handlebars": "^4.0.5",
     "html-minifier": "^3.1.0",
-    "iltorb": "^1.0.12",
+    "iltorb": "^1.0.13",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.1",
     "postcss": "^5.2.4",

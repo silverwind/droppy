@@ -303,17 +303,17 @@ utils.ip = function ip(req) {
   return req.headers && req.headers["x-forwarded-for"] &&
       req.headers["x-forwarded-for"].split(",")[0].trim() ||
     req.headers && req.headers["x-real-ip"] ||
-    req.upgradeReq && req.upgradeReq.connection && req.upgradeReq.connection.remoteAddress ||
     req.connection && req.connection.remoteAddress ||
     req.connection && req.connection.socket && req.connection.socket.remoteAddress ||
+    req._socket && req._socket.remoteAddress ||
     req.remoteAddress && req.remoteAddress;
 };
 
 utils.port = function port(req) {
   return req.headers && req.headers["x-real-port"] ||
-    req.upgradeReq && req.upgradeReq.connection && req.upgradeReq.connection.remotePort ||
     req.connection && req.connection.remotePort ||
     req.connection && req.connection.socket && req.connection.socket.remotePort ||
+    req._socket && req._socket.remotePort ||
     req.remotePort && req.remotePort;
 };
 
