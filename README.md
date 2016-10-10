@@ -104,7 +104,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `readOnly` *Boolean* - All served files will be treated as being read-only.
 - `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
-<a name="listener-options" />
+<a name="listener-options"></a>
 ### Listener Options
 
 `listeners` defines on which network interfaces, ports and protocol(s) the server will listen. For example:
