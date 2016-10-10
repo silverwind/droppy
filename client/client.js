@@ -2615,9 +2615,16 @@
     });
   }
 
-  // validate a filename for a platform
-  function validFilename(filename) {
-    return !/[<>:"|?*\x00-\x1F]/g.test(filename); // eslint-disable-line no-control-regex
+  function validFilename(name) {
+    if (!name || name.length > 255)
+      return false;
+    if (/[<>:"|?*\x00-\x1F]/.test(name)) // eslint-disable-line no-control-regex
+      return false;
+    if (/^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i.test(name))
+      return false;
+    if (/^\.\.?$/.test(name))
+      return false;
+    return true;
   }
 
   function validateFiles(files, view) {

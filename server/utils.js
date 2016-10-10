@@ -14,9 +14,9 @@ var mkdirp   = require("mkdirp");
 var mv       = require("mv");
 var path     = require("path");
 var rimraf   = require("rimraf");
-var sanitize = require("sanitize-filename");
 var util     = require("util");
 var ut       = require("untildify");
+var validate = require("valid-filename");
 
 var db     = require("./db.js");
 var log    = require("./log.js");
@@ -172,8 +172,8 @@ utils.isPathSane = function isPathSane(p, isURL) {
     return true;
   } else {
     return p.split(/[\\\/]/gm).every(function(name) {
-      if (/[<>:"|?*\x00-\x1F]/.test(p)) return false; // eslint-disable-line no-control-regex
-      return name === sanitize(name);
+      if (!name) return true;
+      return validate(name);
     });
   }
 };
