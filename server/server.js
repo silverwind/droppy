@@ -32,16 +32,9 @@ var clients       = {};
 var clientsPerDir = {};
 var config        = null;
 var firstRun      = null;
+var Wss           = null;
+var uwsLogged     = false;
 var ready         = false;
-
-// fall back from uws to ws in case it failed to build
-var Wss;
-try {
-  Wss = require("uws").Server;
-} catch (e) {
-  log.info("`uws` module failed to build, falling back to `ws`");
-  Wss = require("ws").Server;
-}
 
 var droppy = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
@@ -275,6 +268,16 @@ function createListener(handler, opts, callback) {
 
 // WebSocket functions
 function setupSocket(server) {
+  // fall back from uws to ws in case it failed to build
+  try {
+    Wss = require("uws").Server;
+  } catch (e) {
+    if (!uwsLogged) {
+      log.info("`uws` module failed to build, falling back to `ws`");
+      uwsLogged = true;
+    }
+    Wss = require("ws").Server;
+  }
   var wss = new Wss({
     server: server,
     verifyClient: function(info, cb) {
