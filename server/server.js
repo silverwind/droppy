@@ -284,6 +284,8 @@ function setupSocket(server) {
     }
   });
   wss.on("connection", function(ws) {
+    ws.addr = ws._socket.remoteAddress;
+    ws.port = ws._socket.remotePort;
     log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
     var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
     var cookie = cookies.get(ws.upgradeReq.headers.cookie);

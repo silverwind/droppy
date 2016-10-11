@@ -72,14 +72,14 @@ log.setLogFile = function setLogFile(fd) {
 };
 
 log.debug = function debug(req, res) {
-  if (req && (req.headers || req._socket))
+  if (req && (req.headers || req.addr))
     log(req, res, 3, Array.prototype.slice.call(arguments, 2).join(""));
   else
     log(null, null, 3, Array.prototype.slice.call(arguments, 0).join(""));
 };
 
 log.info = function info(req, res) {
-  if (req && (req.headers || req._socket))
+  if (req && (req.headers || req.addr))
     log(req, res, 2, Array.prototype.slice.call(arguments, 2).join(""));
   else
     log(null, null, 2, Array.prototype.slice.call(arguments, 0).join(""));

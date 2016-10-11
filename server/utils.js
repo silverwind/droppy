@@ -305,7 +305,7 @@ utils.ip = function ip(req) {
     req.headers && req.headers["x-real-ip"] ||
     req.connection && req.connection.remoteAddress ||
     req.connection && req.connection.socket && req.connection.socket.remoteAddress ||
-    req._socket && req._socket.remoteAddress ||
+    req.addr || // custom cached property
     req.remoteAddress && req.remoteAddress;
 };
 
@@ -313,7 +313,7 @@ utils.port = function port(req) {
   return req.headers && req.headers["x-real-port"] ||
     req.connection && req.connection.remotePort ||
     req.connection && req.connection.socket && req.connection.socket.remotePort ||
-    req._socket && req._socket.remotePort ||
+    req.port || // custom cached property
     req.remotePort && req.remotePort;
 };
 
