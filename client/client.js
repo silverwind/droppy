@@ -2473,9 +2473,9 @@
     if (typeof a === "number" && typeof b === "number") {
       return b - a;
     } else if (typeof a === "string" && typeof b === "string") {
-     a = a.replace(/['"]/g, "_").toLowerCase();
-     b = b.replace(/['"]/g, "_").toLowerCase();
-     return naturalSort(a, b);
+      a = a.replace(/['"]/g, "_").toLowerCase();
+      b = b.replace(/['"]/g, "_").toLowerCase();
+      return naturalSort(a, b);
     } else return 0;
   }
 
