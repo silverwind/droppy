@@ -11,6 +11,7 @@ var Busboy   = require("busboy");
 var chalk    = require("chalk");
 var escRe    = require("escape-string-regexp");
 var fs       = require("graceful-fs");
+var imgSize  = require("image-size");
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
 var yazl     = require("yazl");
@@ -222,8 +223,7 @@ function createListener(handler, opts, callback) {
   var server;
   if (opts.proto === "http") {
     server = require("http").createServer(handler);
-    server.on("clientError", function(err, socket) {
-      if (err) log.debug(socket, null, err);
+    server.on("clientError", function(_err, socket) {
       if (socket.writable) {
         // Node.js 6.0
         socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
@@ -326,7 +326,7 @@ function setupSocket(server) {
         }});
         break;
       case "REQUEST_UPDATE":
-        if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid update request: " + msg.data);
+        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
         fs.stat(utils.addFilesPath(msg.data), function(err, stats) {
           var clientDir, clientFile;
@@ -354,7 +354,7 @@ function setupSocket(server) {
         clients[sid].views[vId] = null;
         break;
       case "REQUEST_SHARELINK":
-        if (!utils.isPathSane(msg.data.location)) return log.info(ws, null, "Invalid share link request: " + msg.data);
+        if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
         var link, links = db.get("links");
 
         // Check if we already have a link for that file
@@ -375,13 +375,13 @@ function setupSocket(server) {
       case "DELETE_FILE":
         log.info(ws, null, "Deleting: " + msg.data);
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file deletion request: " + msg.data);
+        if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
         filetree.del(msg.data);
         break;
       case "SAVE_FILE":
         log.info(ws, null, "Saving: " + msg.data.to);
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!utils.isPathSane(msg.data.to)) return log.info(ws, null, "Invalid save request: " + msg.data);
+        if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
         filetree.save(msg.data.to, msg.data.value, function(err) {
           if (err)
             sendObj(sid, {type: "ERROR", vId: vId, text: "Error saving " + msg.data.to + ": " + err});
@@ -390,10 +390,10 @@ function setupSocket(server) {
         });
         break;
       case "CLIPBOARD":
-        log.info(ws, null, "Clipboard " + msg.data.type + ": " + msg.data.src + " -> " + msg.data.dst);
+        var src = msg.data.src, dst = msg.data.dst, type = msg.data.type;
+        log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!utils.isPathSane(msg.data.src)) return log.info(ws, null, "Invalid clipboard src: " + msg.data.src);
-        if (!utils.isPathSane(msg.data.dst)) return log.info(ws, null, "Invalid clipboard dst: " + msg.data.dst);
+        if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
         if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst))
           return sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
 
@@ -409,23 +409,25 @@ function setupSocket(server) {
         break;
       case "CREATE_FOLDER":
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid directory creation request: " + msg.data);
+        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.mkdir(msg.data);
         break;
       case "CREATE_FILE":
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!utils.isPathSane(msg.data)) return log.info(ws, null, "Invalid file creation request: " + msg.data);
+        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.mk(msg.data);
         break;
       case "RENAME":
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        var rSrc = msg.data.src, rDst = msg.data.dst;
         // Disallow whitespace-only and empty strings in renames
-        if (!utils.isPathSane(msg.data.dst) || /^\s*$/.test(msg.data.dst) || msg.data.dst === "" || msg.data.src === msg.data.dst) {
-          log.info(ws, null, "Invalid rename request: " + msg.data.src + "-> " + msg.data.dst);
+        if (!validatePaths([rSrc, rDst], msg.type, ws, sid, vId) ||
+            /^\s*$/.test(rDst) || dst === "" || rSrc === dst) {
+          log.info(ws, null, "Invalid rename request: " + rSrc + "-> " + rDst);
           sendObj(sid, {type: "ERROR", text: "Invalid rename request"});
           return;
         }
-        filetree.move(msg.data.src, msg.data.dst);
+        filetree.move(rSrc, rDst);
         break;
       case "GET_USERS":
         if (priv && !config.public) sendUsers(sid);
@@ -449,8 +451,8 @@ function setupSocket(server) {
         break;
       case "CREATE_FILES":
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
         async.each(msg.data.files, function(file, cb) {
-          if (!utils.isPathSane(file)) return cb(new Error("Invalid file creation request: " + file));
           filetree.mkdir(utils.addFilesPath(path.dirname(file)), function() {
             filetree.mk(utils.addFilesPath(file), cb);
           });
@@ -460,11 +462,31 @@ function setupSocket(server) {
         break;
       case "CREATE_FOLDERS":
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
         async.each(msg.data.folders, function(folder, cb) {
-          if (!utils.isPathSane(folder)) return cb(new Error("Invalid folder creation request: " + folder));
           filetree.mkdir(utils.addFilesPath(folder), cb);
         }, function(err) {
           if (err) log.error(ws, null, err);
+        });
+        break;
+      case "GET_MEDIA":
+        var dir = msg.data.dir, exts = msg.data.exts;
+        if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
+        var files = filetree.lsFilter(dir, utils.extensionRe(exts.img.concat(exts.vid)));
+        if (!files) return sendError(ws, sid, vId, "No displayable files in directory");
+        async.map(files, function(file, cb) {
+          if (utils.extensionRe(exts.img).test(file)) {
+            imgSize(path.join(utils.addFilesPath(dir), file), function(err, dims) {
+              if (err) log.error(err);
+              cb(null, {
+                src: file,
+                w: dims.width || 0,
+                h: dims.height || 0,
+              });
+            });
+          } else cb(null, {video: true, src: file});
+        }, function(_, obj) {
+          sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
         });
         break;
       }
@@ -487,11 +509,22 @@ function setupSocket(server) {
       else
         log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
     });
-
     ws.on("error", log.error);
   });
-
   wss.on("error", log.error);
+}
+
+// Ensure that a given path does not contain invalid file names
+function validatePaths(paths, type, ws, sid, vId) {
+  return (Array.isArray(paths) ? paths : [paths]).every(function(p) {
+    if (!utils.isPathSane(p)) {
+      sendError(ws, sid, vId, "Invalid request");
+      log.info(ws, null, "Invalid " + type + " request: " + p);
+      return false;
+    } else {
+      return true;
+    }
+  });
 }
 
 // Send a file list update
@@ -502,7 +535,7 @@ function sendFiles(sid, vId) {
     type   : "UPDATE_DIRECTORY",
     vId    : vId,
     folder : dir,
-    data   : filetree.getDirContents(dir)
+    data   : filetree.ls(dir)
   });
 }
 

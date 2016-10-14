@@ -96,7 +96,6 @@ resources.files = {
   ],
   js: [
     "node_modules/handlebars/dist/handlebars.runtime.min.js",
-    "node_modules/draggabilly/dist/draggabilly.pkgd.min.js",
     "node_modules/file-extension/file-extension.js",
     "node_modules/screenfull/dist/screenfull.js",
     "node_modules/mousetrap/mousetrap.min.js",
@@ -138,7 +137,18 @@ var libs = {
     "node_modules/codemirror/addon/search/search.js",
     "node_modules/codemirror/keymap/sublime.js"
   ],
-  "cm.css": "node_modules/codemirror/lib/codemirror.css"
+  "cm.css": "node_modules/codemirror/lib/codemirror.css",
+  "ps.js": [
+    "node_modules/photoswipe/dist/photoswipe.min.js",
+    "node_modules/photoswipe/dist/photoswipe-ui-default.min.js",
+  ],
+  "ps.css": [
+    "node_modules/photoswipe/dist/photoswipe.css",
+    "node_modules/photoswipe/dist/default-skin/default-skin.css",
+  ],
+  // photoswipe skin files included by their CSS
+  "default-skin.png": "node_modules/photoswipe/dist/default-skin/default-skin.png",
+  "default-skin.svg": "node_modules/photoswipe/dist/default-skin/default-skin.svg",
 };
 
 resources.load = function load(dev, cb) {
@@ -387,6 +397,13 @@ function readLibs(callback) {
       });
     }
   }, function(err) {
+    // Prefix PS urls
+    Object.keys(out).some(function(file) {
+      if (file === "ps.css") {
+        out[file] = buf(String(out[file]).replace(/url\(/gm, "url(!/res/lib/"));
+      }
+    });
+
     if (minify) {
       Object.keys(out).forEach(function(file) {
         if (/\.js$/.test(file)) {
@@ -396,6 +413,7 @@ function readLibs(callback) {
         }
       });
     }
+
     callback(err, out);
   });
 }

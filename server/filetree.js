@@ -110,14 +110,18 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
   dirs[root] = {files: {}, size: 0, mtime: stat ? stat.mtime.getTime() : Date.now()};
 
   // Add dirs
-  readDirs.forEach(function(d) {
+  readDirs.sort(function(a, b) {
+    return utils.naturalSort(a.path, b.path);
+  }).forEach(function(d) {
     dirs[normalize(utils.removeFilesPath(d.path))] = {
       files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0
     };
   });
 
   // Add files
-  readFiles.forEach(function(f) {
+  readFiles.sort(function(a, b) {
+    return utils.naturalSort(a.path, b.path);
+  }).forEach(function(f) {
     var parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
     dirs[parentDir].files[normalize(path.basename(f.path))] = {
       size: f.stat.size, mtime: f.stat.mtime.getTime() || 0
@@ -316,7 +320,7 @@ filetree.save = function save(dst, data, cb) {
   });
 };
 
-filetree.getDirContents = function getDirContents(p) {
+filetree.ls = function ls(p) {
   if (!dirs[p]) return;
   var entries = {}, files = dirs[p].files;
   Object.keys(files).forEach(function(file) {
@@ -336,6 +340,13 @@ filetree.getDirContents = function getDirContents(p) {
     }
   });
   return entries;
+};
+
+filetree.lsFilter = function lsFilter(p, re) {
+  if (!dirs[p]) return;
+  return Object.keys(dirs[p].files).filter(function(file) {
+    return re.test(file);
+  });
 };
 
 function normalize(str) {

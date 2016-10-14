@@ -6,6 +6,7 @@ var cd       = require("content-disposition");
 var cpr      = require("cpr");
 var crypto   = require("crypto");
 var dhparam  = require("dhparam");
+var escRe    = require("escape-string-regexp");
 var ext      = require("file-extension");
 var fs       = require("graceful-fs");
 var isBin    = require("isbinaryfile");
@@ -315,6 +316,29 @@ utils.port = function port(req) {
     req.connection && req.connection.socket && req.connection.socket.remotePort ||
     req.port || // custom cached property
     req.remotePort && req.remotePort;
+};
+
+utils.naturalSort = function naturalSort(a, b) {
+  var x = [], y = [];
+  function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
+  a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
+  b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
+  while (x.length && y.length) {
+    var xx = x.shift();
+    var yy = y.shift();
+    var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
+    if (nn) return nn;
+  }
+  if (x.length) return -1;
+  if (y.length) return 1;
+  return 0;
+};
+
+utils.extensionRe = function extensionRe(arr) {
+  arr = arr.map(function(ext) {
+    return escRe(ext);
+  });
+  return RegExp("\\.(" + arr.join("|") + ")$");
 };
 
 function createDH() {

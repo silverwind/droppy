@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, videojs, Draggabilly, Mousetrap, fileExtension, Handlebars, Uppie, screenfull */
+/* global jQuery, CodeMirror, videojs, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default */
 (function($) {
   "use strict";
 
@@ -177,7 +177,7 @@
     initMainPage();
   } else {
     var isFirst = type === "f";
-    if (isFirst) $("#login-info").text("Hello! Choose your credentials.");
+    if (isFirst) $("#login-info").text("Set your login credentials.");
     initAuthPage(isFirst);
   }
 // ============================================================================
@@ -293,9 +293,7 @@
           openDirectory(view);
         } else if (view.attr("data-type") === "media") {
           view[0].currentData = msg.data;
-          populateMediaCache(view, msg.data);
-          updateMediaMeta(view);
-          bindMediaArrows(view);
+          // TODO: Update media array
         }
         break;
       case "UPDATE_BE_FILE":
@@ -364,6 +362,9 @@
         if (droppy.readOnly) {
           $("html").addClass("readonly");
         }
+        break;
+      case "MEDIA_FILES":
+        loadMedia(view, msg.files);
         break;
       case "ERROR":
         showError(view, msg.text);
@@ -459,7 +460,6 @@
       droppy.resizeTimer = setTimeout(function() {
         $(".view").each(function() {
           checkPathOverflow($(this));
-          aspectScale();
         });
       }, 25);
     });
@@ -468,14 +468,12 @@
       toggleCatcher(false);
     }).bind("mod+s", function(e) { // stop default browser save behaviour
       e.preventDefault();
-    }).bind(["space", "right", "down", "return"], function() {
+    }).bind(["space", "down", "right", "return"], function() {
       var view = getActiveView();
-      if (!view || view.attr("data-type") !== "media") return;
-      swapMedia(view, "right");
-    }).bind(["shift+space", "left", "up", "backspace"], function() {
+      if (view.attr("data-type") === "media") view[0].ps.next();
+    }).bind(["shift+space", "up", "left", "backspace"], function() {
       var view = getActiveView();
-      if (!view || view.attr("data-type") !== "media") return;
-      swapMedia(view, "left");
+      if (view.attr("data-type") === "media") view[0].ps.prev();
     }).bind(["alt+enter", "f"], function() {
       var view = getActiveView();
       if (!view || view.attr("data-type") !== "media") return;
@@ -577,9 +575,17 @@
         splitButton.attr("aria-label", "Split view in half").children("span").text("Split");
         replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
       }
-      first.transitionend(function() {
+      var interval = setInterval(function() {
         droppy.views.forEach(function(view) {
           checkPathOverflow($(view));
+          if (view.ps) view.ps.updateSize(true);
+        });
+      }, 10);
+      first.transitionend(function() {
+        clearInterval(interval);
+        droppy.views.forEach(function(view) {
+          checkPathOverflow($(view));
+          if (view.ps) view.ps.updateSize(true);
         });
         splitting = false;
       });
@@ -980,8 +986,8 @@
     var sort = {type: "", mtime: "", size: ""};
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
-    // Load from template
-    loadContent(view, "directory", null, Handlebars.templates.directory({entries: entries, sort: sort}), function() {
+    var html = Handlebars.templates.directory({entries: entries, sort: sort});
+    loadContent(view, "directory", null, html).then(function() {
       // Upload button on empty page
       view.find(".empty").register("click", function() {
         var inp = $("#file");
@@ -1057,45 +1063,45 @@
   }
 
   // Load new view content
-  function loadContent(view, type, mediaType, content, cb) {
-    if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
-    view.attr("data-type", type);
-    mediaType = mediaType ? " type-" + mediaType : "";
-    content = '<div class="new content ' + type + mediaType + " " + view[0].animDirection + '">' + content + "</div>";
-    var navRegex = /(forward|back|center)/;
-    if (view[0].animDirection === "center") {
-      view.find(".content").replaceClass(navRegex, "center").before(content);
-      view.find(".new").addClass(type).data("root", view[0].currentFolder);
-      finish();
-    } else {
-      view.children(".content-container").append(content);
-      view.find(".new").data("root", view[0].currentFolder);
-      view[0].isAnimating = true;
-      view.find(".data-row").addClass("animating");
-      view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
-        "back" : (view[0].animDirection === "back") ? "forward" : "center");
-      getOtherViews(view[0].vId).each(function() {
-        this.style.zIndex = "1";
-      });
-      view.find(".new").addClass(type).transition(navRegex, "center").transitionend(finish);
-    }
-    view[0].animDirection = "center";
+  function loadContent(view, type, mediaType, content) {
+    return new Promise(function(resolve) {
+      if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
+      view.attr("data-type", type);
+      mediaType = mediaType ? " type-" + mediaType : "";
+      content = '<div class="new content ' + type + mediaType + " " + view[0].animDirection + '">' + content + "</div>";
+      var navRegex = /(forward|back|center)/;
+      if (view[0].animDirection === "center") {
+        view.find(".content").replaceClass(navRegex, "center").before(content);
+        view.find(".new").addClass(type).data("root", view[0].currentFolder);
+        finish();
+      } else {
+        view.children(".content-container").append(content);
+        view.find(".new").data("root", view[0].currentFolder);
+        view[0].isAnimating = true;
+        view.find(".data-row").addClass("animating");
+        view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
+          "back" : (view[0].animDirection === "back") ? "forward" : "center");
+        getOtherViews(view[0].vId).each(function() {
+          this.style.zIndex = "1";
+        });
+        view.find(".new").addClass(type).transition(navRegex, "center").transitionend(finish);
+      }
+      view[0].animDirection = "center";
 
-    function finish() {
-      view[0].isAnimating = false;
-      getOtherViews(view[0].vId).each(function() {
-        this.style.zIndex = "auto";
-      });
-      view.find(".content:not(.new)").remove();
-      view.find(".new").removeClass("new");
-      view.find(".data-row").removeClass("animating");
-      if (view.attr("data-type") === "directory")
-        bindDragEvents(view);
-      else if (view.attr("data-type") === "media")
-        bindMediaArrows(view);
-      toggleButtons(type);
-      if (cb) cb(view);
-    }
+      function finish() {
+        view[0].isAnimating = false;
+        getOtherViews(view[0].vId).each(function() {
+          this.style.zIndex = "auto";
+        });
+        view.find(".content:not(.new)").remove();
+        view.find(".new").removeClass("new");
+        view.find(".data-row").removeClass("animating");
+        if (view.attr("data-type") === "directory")
+          bindDragEvents(view);
+        toggleButtons(type);
+        resolve();
+      }
+    });
   }
 
   function toggleButtons(type) {
@@ -1407,7 +1413,7 @@
   }
 
   function openFile(view, newFolder, file) {
-    var e = fileExtension(file), oldFolder = view[0].currentFolder;
+    var e = fileExtension(file);
 
     // Determine filetype and how to open it
     if (Object.keys(droppy.imageTypes).indexOf(e) !== -1) { // Image
@@ -1415,7 +1421,7 @@
       view[0].currentFolder = newFolder;
       pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
       updatePath(view);
-      openMedia(view, oldFolder === newFolder);
+      openMedia(view);
     } else if (Object.keys(droppy.videoTypes).indexOf(e) !== -1) { // Video
       if (!droppy.detects.videoTypes[droppy.videoTypes[e]]) {
         showError(view, "Your browser can't play this file");
@@ -1425,7 +1431,7 @@
         view[0].currentFolder = newFolder;
         pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
         updatePath(view);
-        openMedia(view, oldFolder === newFolder);
+        openMedia(view);
       }
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
@@ -1448,122 +1454,6 @@
     }
   }
 
-  function populateMediaCache(view, data) {
-    var extensions = Object.keys(droppy.imageTypes).concat(Object.keys(droppy.videoTypes));
-    view[0].mediaFiles = [];
-    Object.keys(data).forEach(function(filename) {
-      var e = fileExtension(filename);
-      if (typeof data[filename] === "string") {
-        if (data[filename][0] !== "f") return;
-      } else if (typeof data[filename] === "object") {
-        if (data[filename].type !== "f") return;
-      }
-      if (extensions.indexOf(e) !== -1) {
-        if (droppy.videoTypes[e] && !droppy.detects.videoTypes[droppy.videoTypes[e]]) return;
-        view[0].mediaFiles.push(filename);
-      }
-    });
-    view[0].mediaFiles = view[0].mediaFiles.sort(naturalSort);
-    [getPrevMedia(view), getNextMedia(view)].forEach(function(filename) {
-      var src = getMediaSrc(view, filename);
-      if (!src) return;
-      if (Object.keys(droppy.imageTypes).indexOf(fileExtension(filename)) !== -1) {
-        (document.createElement("img")).src = src;
-      }
-    });
-  }
-
-  function getPrevMedia(view) {
-    var curr = view[0].mediaFiles.indexOf(view[0].currentFile);
-    if (curr > 0)
-      return view[0].mediaFiles[curr - 1];
-    else
-      return view[0].mediaFiles[view[0].mediaFiles.length - 1];
-  }
-
-  function getNextMedia(view) {
-    var curr = view[0].mediaFiles.indexOf(view[0].currentFile);
-    if (curr < (view[0].mediaFiles.length - 1))
-      return view[0].mediaFiles[curr + 1];
-    else
-      return view[0].mediaFiles[0];
-  }
-
-  function bindMediaArrows(view) {
-    if (droppy.detects.mobile) return; // Using swipe on mobile
-    var arrows = view.find(".arrow-back, .arrow-forward");
-    arrows.first().register("click", swapMedia.bind(null, view, "left"));
-    arrows.last().register("click", swapMedia.bind(null, view, "right"));
-    arrows.register("mouseenter mousemove", function() {
-      $(this).addClass("in");
-    }).register("mouseleave", function() {
-      $(this).removeClass("in");
-    }).addClass("in");
-    setTimeout(function() { arrows.removeClass("in"); }, 2000);
-  }
-
-  function swapMedia(view, dir) {
-    if (view[0].tranistioning) return;
-    var a        = view.find(".media-container"), b;
-    var nextFile = (dir === "left") ? getPrevMedia(view) : getNextMedia(view);
-    var isImage  = Object.keys(droppy.imageTypes).indexOf(fileExtension(nextFile)) !== -1;
-    var src      = getMediaSrc(view, nextFile);
-
-    if (isImage) {
-      b = $("<div class='media-container new-media " + dir + "'><img src='" + src + "'></div>");
-      b.find("img").one("load", aspectScale);
-    } else {
-      b = $("<div class='media-container new-media " + dir + "'><video src='" + src + "' id='video-" + view[0].vId + "'></div>");
-      bindVideoEvents(b[0]);
-    }
-
-    a.attr("class", "media-container old-media " + (dir === "left" ? "right" : "left"));
-    view[0].tranistioning = true;
-    b.appendTo(view.find(".content")).transition(/(left|right)/, "").transitionend(function() {
-      view[0].tranistioning = false;
-      $(".new-media").removeClass("new-media").parents(".content").replaceClass(/type-(image|video)/, isImage ? "type-image" : "type-video");
-      $(".old-media").remove();
-      aspectScale();
-      makeMediaDraggable(this, !isImage);
-      view[0].currentFile = nextFile;
-      populateMediaCache(view, view[0].currentData);
-      replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
-      updatePath(view);
-      if (isImage) updateMediaMeta(view); else initVideoJS(b.find("video")[0]);
-      if (view[0].vId === 0) setTitle(nextFile); // Only update the page's title from view 0
-    });
-  }
-
-  function updateMediaMeta(view) {
-    var meta = view.find(".meta"), img = view.find("img");
-    if (!img.length) return;
-
-    meta.find(".cur").text(view[0].mediaFiles.indexOf(view[0].currentFile) + 1);
-    meta.find(".max").text(view[0].mediaFiles.length);
-    meta.register("click", function() {
-      view.find(".dims").toggleClass("in");
-    });
-
-    (function addSizes(meta, img) {
-      var x = img.naturalWidth, y = img.naturalHeight;
-      if (x && y) {
-        meta.find(".x").text(x);
-        meta.find(".y").text(y);
-      } else setTimeout(addSizes.bind(null, meta, img), 500);
-    })(meta, img[0]);
-  }
-
-  function bindVideoEvents(el) {
-    var volume = droppy.get("volume");
-    if (volume) el.volume = volume;
-    el.addEventListener("loadedmetadata", aspectScale);
-    el.addEventListener("error", aspectScale);
-    el.addEventListener("volumechange", function() {
-      droppy.set("volume", this.muted ? 0 : this.volume);
-    });
-    return el;
-  }
-
   function getMediaSrc(view, filename) {
     var encodedId = join(view[0].currentFolder, filename).split("/");
     var i = encodedId.length - 1;
@@ -1572,40 +1462,89 @@
     return "!/file" + encodedId.join("/");
   }
 
-  function openMedia(view, sameFolder) {
-    var filename = view[0].currentFile;
-    var src = getMediaSrc(view, filename);
-    var type = Object.keys(droppy.videoTypes).indexOf(fileExtension(filename)) !== -1 ? "video" : "image";
-    if (sameFolder && view[0].currentData) {
-      populateMediaCache(view, view[0].currentData);
-    } else { // In case we switch into an unknown folder, request its files
-      sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
-    }
-    view[0].animDirection = "forward";
-    loadContent(view, "media", type, Handlebars.templates.media({type: type, src: src, vid: view[0].vId}), function(view) {
-      view.find(".fs").register("click", function(event) {
-        var view = $(event.target).parents(".view");
-        droppy.activeView = view[0].vId;
-        screenfull.toggle($(this).parents(".content")[0]);
-        aspectScale();
-        event.stopPropagation();
-      });
-      view.find("img").each(function() {
-        aspectScale();
-        makeMediaDraggable(this.parentNode, false);
-        updateMediaMeta(view);
-      });
-      view.find("video").each(function() {
-        var self = this;
-        initVideoJS(self).then(function() {
-          aspectScale();
-          makeMediaDraggable(view.find(".media-container")[0], true);
-          bindVideoEvents(self);
-        });
-      });
+  function openMedia(view) {
+    sendMessage(view[0].vId, "GET_MEDIA", {
+      dir: view[0].currentFolder,
+      exts: {
+        img: Object.keys(droppy.imageTypes),
+        vid: Object.keys(droppy.videoTypes),
+      },
+    });
+  }
 
-      if (view[0].vId === 0) setTitle(filename);
-      hideSpinner(view);
+  function loadMedia(view, files) {
+    var startIndex;
+    // turn filenames into URLs and obtain index of current file
+    files.forEach(function(file, i) {
+      if (file.src === view[0].currentFile) startIndex = i;
+      file.src = getMediaSrc(view, file.src);
+      file.filename = basename(file.src);
+      if (file.video) {
+        delete file.video;
+        file.html = Handlebars.templates.video({
+          vid: view[0].vId,
+          src: file.src,
+        });
+        delete file.src;
+      }
+    });
+    Promise.all([
+      loadStyle("ps-css", "!/res/lib/ps.css"),
+      loadScript("ps-js", "!/res/lib/ps.js"),
+    ]).then(function() {
+      view[0].animDirection = "forward";
+      var html = Handlebars.templates.media();
+      loadContent(view, "media", type, html).then(function() {
+        var el = view.find(".pswp")[0];
+        view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, { // eslint-disable-line camelcase
+          index: startIndex,
+          spacing: 0,
+          pinchToClose: false,
+          closeOnScroll: false,
+          closeOnVerticalDrag: false,
+          history: false,
+          modal: false,
+          barsSize: {top:0, bottom:0},
+          showAnimationDuration: 0,
+          hideAnimationDuration: 0,
+          bgOpacity: 1,
+          maxSpreadZoom: 4,
+          escKey: false,
+          arrowKeys: false,
+          shareEl: false,
+          captionEl: false,
+          clickToCloseNonZoomable: false,
+          closeElClasses: [],
+          shareButtons: [],
+        });
+        view[0].ps.listen("afterChange", function() {
+          view[0].currentFile = this.currItem.filename;
+          if (this.currItem.html) { // video
+            initVideoJS($(this.currItem.container).find("video")[0]);
+            view.find(".pswp__button--fs").addClass("hidden");
+          } else { // image
+            view.find(".pswp__button--fs").removeClass("hidden");
+          }
+          setTitle(this.currItem.filename.replace(/\..*/g, ""));
+          replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
+          updatePath(view);
+        });
+        view[0].ps.listen("preventDragEvent", function(_, isDown) {
+          view.find(".pswp__container")[0].classList[isDown ? "add" : "remove"]("no-transition");
+        });
+        view[0].ps.listen("destroy", function() {
+          view[0].switchRequest = true;
+          view[0].ps = null;
+          updateLocation(view, view[0].currentFolder);
+        });
+        view[0].ps.init();
+        // Forward click event to svg parents, probably a ps bug
+        var arrowsSVG = view.find(".pswp__button--arrow--left svg, .pswp__button--arrow--right svg");
+        arrowsSVG.on("click", function(e) {
+          $(e.target).parents(".pswp__button")[0].click();
+        });
+        hideSpinner(view);
+      });
     });
   }
 
@@ -1625,7 +1564,8 @@
     });
 
     function configCM(data, filename) {
-      loadContent(view, "document", null, Handlebars.templates.document({modes: droppy.modes}), function() {
+      var html = Handlebars.templates.document({modes: droppy.modes});
+      loadContent(view, "document", null, html).then(function() {
         view[0].editorEntryId = entryId;
         view[0].editor = editor = CodeMirror(view.find(".document")[0], {
           autofocus: true,
@@ -2107,22 +2047,6 @@
     return mode;
   }
 
-  // draggabilly
-  function makeMediaDraggable(el, isVideo) {
-    if ($(el).hasClass("draggable")) return;
-    $(el).attr("class", "media-container draggable");
-    var instance = new Draggabilly(el, isVideo ? {axis: "x", handle: "video"} : {axis: "x"});
-    instance.on("dragEnd", function() {
-      var view      = $(instance.element).parents(".view");
-      var threshold = droppy.detects.mobile ? 0.15 : 0.075;
-      if ((Math.abs(instance.position.x) / instance.element.clientWidth) > threshold) {
-        swapMedia(view, instance.position.x > 0 ? "left" : "right");
-      } else {
-        $(instance.element).removeAttr("style");
-      }
-    });
-  }
-
   // video.js
   function initVideoJS(el) {
     return new Promise(function(resolve) {
@@ -2134,7 +2058,7 @@
           if (!("videojs" in window)) return setTimeout(verify, 200);
           if (!el.classList.contains("video-js")) el.classList.add("video-js", "vjs-default-skin");
           if (droppy.get("volume") === 0) el.muted = true;
-          var container = $(el).parents(".media-container")[0];
+          var container = $(el).parent()[0];
           videojs.options.flash.swf = "!/res/lib/vjs.swf";
           videojs(el, {
             controls: true,
@@ -2145,8 +2069,11 @@
             heigth  : container.clientHeight
           }, resolve).on("ready", function() {
             this.volume(droppy.get("volume"));
-          }).on("volumechange", function() {
-            droppy.set("volume", this.muted() ? 0 : this.volume());
+          });
+          var volume = droppy.get("volume");
+          if (volume) el.volume = volume;
+          el.addEventListener("volumechange", function() {
+            droppy.set("volume", this.muted ? 0 : this.volume);
           });
         })();
       });
@@ -2510,35 +2437,6 @@
     }
   }
 
-  // Media up/down-scaling while maintaining aspect ratio.
-  function aspectScale() {
-    $(".media-container").each(function() {
-      var container = $(this);
-      container.find("img").each(function() {
-        var dims = {
-          w: this.naturalWidth || this.videoWidth || this.clientWidth,
-          h: this.naturalHeight || this.videoHeight || this.clientHeight
-        };
-        var space = {
-          w: container[0].clientWidth,
-          h: container[0].clientHeight
-        };
-        if (dims.w > space.w || dims.h > space.h) {
-          $(this).removeAttr("style"); // Let CSS handle the downscale
-        } else {
-          this.style.objectFit = "contain";
-          if (dims.w / dims.h > space.w / space.h) {
-            this.style.width  = "100%";
-            this.style.height = "auto";
-          } else {
-            this.style.width  = "auto";
-            this.style.height = "100%";
-          }
-        }
-      });
-    });
-  }
-
   function throttle(func, threshold) {
     if (!threshold) threshold = 250;
     var last, deferTimer;
@@ -2572,12 +2470,13 @@
   }
 
   function sortCompare(a, b) {
-    if (typeof a === "number" && typeof b === "number")
+    if (typeof a === "number" && typeof b === "number") {
       return b - a;
-    else if (typeof a === "string" && typeof b === "string")
-      return naturalSort(a.replace(/['"]/g, "_").toLowerCase(), b.replace(/['"]/g, "_").toLowerCase());
-    else
-      return 0;
+    } else if (typeof a === "string" && typeof b === "string") {
+     a = a.replace(/['"]/g, "_").toLowerCase();
+     b = b.replace(/['"]/g, "_").toLowerCase();
+     return naturalSort(a, b);
+    } else return 0;
   }
 
   function sortByProp(entries, prop) {
