@@ -375,13 +375,13 @@ function setupSocket(server) {
       case "DELETE_FILE":
         log.info(ws, null, "Deleting: " + msg.data);
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
+        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.del(msg.data);
         break;
       case "SAVE_FILE":
         log.info(ws, null, "Saving: " + msg.data.to);
         if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
+        if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
         filetree.save(msg.data.to, msg.data.value, function(err) {
           if (err)
             sendObj(sid, {type: "ERROR", vId: vId, text: "Error saving " + msg.data.to + ": " + err});
