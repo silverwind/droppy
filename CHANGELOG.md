@@ -1,5 +1,10 @@
 *For patch-level releases, see the commit log*
 
+#### Version 5.2.0 - 13/09/2016
+
+- Media gallery rewritten. Cleaner transitions and zooming support.
+- Known issue: Zooming on the second view may not target the right x coordinate.
+
 #### Version 5.1.0 - 13/09/2016
 
 - Added read-only mode through new `readOnly` config option.
