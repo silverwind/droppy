@@ -1478,7 +1478,7 @@
     files.forEach(function(file, i) {
       if (file.src === view[0].currentFile) startIndex = i;
       file.src = getMediaSrc(view, file.src);
-      file.filename = basename(file.src);
+      file.filename = basename(decodeURIComponent(file.src));
       if (file.video) {
         delete file.video;
         file.html = Handlebars.templates.video({
