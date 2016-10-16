@@ -16,4 +16,5 @@ mkdir -p /files
 chown -R droppy:droppy /config
 chown droppy:droppy /files
 
-exec /bin/su -pc "NODE_ENV=production /usr/bin/droppy start --color -f /files -c /config"
+exec /bin/su -p -s "/bin/sh" -c "NODE_ENV=production exec /usr/bin/droppy start --color -f /files -c /config" droppy
+
