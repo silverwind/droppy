@@ -239,9 +239,10 @@
   }
 
   function openSocket() {
-    var protocol = document.location.protocol === "https:" ? "wss://" : "ws://";
-    var url = protocol + document.location.host + document.location.pathname + "!/socket";
-    droppy.socket = new WebSocket(url);
+    droppy.socket = new WebSocket(
+      document.location.origin.replace(/^http/, "ws") +
+      document.location.pathname + "!/socket"
+    );
     droppy.socket.onopen = function() {
       if (droppy.token) {
         init();
