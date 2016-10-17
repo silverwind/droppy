@@ -1538,15 +1538,45 @@
           view[0].ps = null;
           updateLocation(view, view[0].currentFolder);
         });
-        view[0].ps.init();
         // Forward click event to svg parents, probably a ps bug
         var arrowsSVG = view.find(".pswp__button--arrow--left svg, .pswp__button--arrow--right svg");
         arrowsSVG.on("click", function(e) {
           $(e.target).parents(".pswp__button")[0].click();
         });
+        var rootEl = view.find(".pswp")[0];
+        observeClassChange(rootEl, "pswp--zoomed-in", function() {
+          view.find(".pswp__button--zoom").html(svg("zoomout"));
+        }, function() {
+          view.find(".pswp__button--zoom").html(svg("zoomin"));
+        });
+        observeClassChange(rootEl, "pswp--fs", function() {
+          view.find(".pswp__button--fs").html(svg("unfullscreen"));
+        }, function() {
+          view.find(".pswp__button--fs").html(svg("fullscreen"));
+        });
+        view[0].ps.init();
         hideSpinner(view);
       });
     });
+  }
+
+  function observeClassChange(target, className, added, removed) {
+    var hadClass = false;
+    (new MutationObserver(function(muts) {
+      muts.some(function(mut) {
+        if (mut.attributeName !== "class") return;
+        var hasClass = Array.from(target.classList).includes(className);
+        if (hasClass && !hadClass) {
+          hadClass = true;
+          added();
+          return true;
+        } else if (!hasClass && hadClass) {
+          hadClass = false;
+          removed();
+          return true;
+        }
+      });
+    })).observe(target, {attributes: true});
   }
 
   function openDoc(view, entryId) {

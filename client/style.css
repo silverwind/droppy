@@ -565,6 +565,26 @@ html:not(.mobile) #entry-menu a.active {
   background: #0a0a0a !important;
 }
 
+.pswp__top-bar {
+  background: none !important;
+  pointer-events: none;
+  color: #eee;
+}
+
+.pswp__top-bar .pswp__button, .pswp__counter {
+  pointer-events: auto;
+  background: rgba(0,0,0,0.4) !important;
+  opacity: 1;
+}
+.pswp__top-bar svg {
+  margin-top: 4px;
+  height: 36px;
+  width: 36px;
+}
+.pswp__button--zoom:hover { color: #f82 }
+.pswp__button--close:hover { color: #d44 }
+.pswp__button--fs:hover { color: #ff4 }
+
 .pswp__counter {
   font-size: 1rem !important;
 }
@@ -580,10 +600,9 @@ html:not(.mobile) #entry-menu a.active {
   cursor: pointer;
   fill: #222;
   stroke: #eee;
-  stroke-width: 15;
+  stroke-width: 12;
   transition: opacity .3s;
 }
-/*.mobile .pswp__button--arrow--left, .mobile .pswp__button--arrow--right { display: none }*/
 
 .pswp__button--arrow--left svg, .pswp__button--arrow--right svg {
   height: 2em;
@@ -736,7 +755,7 @@ video:not(.vjs-tech) {
 .sidebar > .syntax:hover svg, .sidebar > .syntax.in svg { fill: #f82 }
 .sidebar > .syntax.in span  { color: #fff; opacity: 1 }
 .sidebar > .find:hover svg  {  fill: #a4c }
-.sidebar > .full:hover svg  {  fill: #bb4 }
+.sidebar > .full:hover svg  {  fill: #ff4 }
 
 .mode-select {
   background: #282828;
