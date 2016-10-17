@@ -14,7 +14,7 @@
     "start": "node droppy.js start"
   },
   "dependencies": {
-    "async": "^2.1.1",
+    "async": "^2.1.2",
     "busboy": "^0.2.13",
     "chalk": "^1.1.3",
     "chokidar": "^1.6.1",
@@ -65,7 +65,7 @@
     "svgstore": "^1.1.0",
     "uglify-js": "^2.7.3",
     "uppie": "^0.11.8",
-    "video.js": "^5.11.7"
+    "video.js": "^5.11.8"
   },
   "files": [
     "client",
