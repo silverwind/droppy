@@ -1544,15 +1544,11 @@
           $(e.target).parents(".pswp__button")[0].click();
         });
         var rootEl = view.find(".pswp")[0];
-        observeClassChange(rootEl, "pswp--zoomed-in", function() {
-          view.find(".pswp__button--zoom").html(svg("zoomout"));
-        }, function() {
-          view.find(".pswp__button--zoom").html(svg("zoomin"));
+        observeClassChange(rootEl, "pswp--zoomed-in", function(added) {
+          view.find(".pswp__button--zoom").html(svg(added ? "zoomout" : "zoomin"));
         });
-        observeClassChange(rootEl, "pswp--fs", function() {
-          view.find(".pswp__button--fs").html(svg("unfullscreen"));
-        }, function() {
-          view.find(".pswp__button--fs").html(svg("fullscreen"));
+        observeClassChange(rootEl, "pswp--fs", function(added) {
+          view.find(".pswp__button--fs").html(svg(added ? "unfullscreen" : "fullscreen"));
         });
         view[0].ps.init();
         hideSpinner(view);
@@ -1560,7 +1556,7 @@
     });
   }
 
-  function observeClassChange(target, className, added, removed) {
+  function observeClassChange(target, className, cb) {
     var hadClass = false;
     (new MutationObserver(function(muts) {
       muts.some(function(mut) {
@@ -1568,11 +1564,11 @@
         var hasClass = Array.from(target.classList).includes(className);
         if (hasClass && !hadClass) {
           hadClass = true;
-          added();
+          cb(true);
           return true;
         } else if (!hasClass && hadClass) {
           hadClass = false;
-          removed();
+          cb(false);
           return true;
         }
       });

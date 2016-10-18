@@ -568,26 +568,36 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__top-bar {
   background: none !important;
   pointer-events: none;
-  color: #eee;
+}
+
+.pswp__button {
+  opacity: 1;
+  background: none !important;
+}
+
+.pswp__counter {
+  color: #fff !important;
+  font-size: 1.2rem !important;
+  font-family: sans-serif;
+  line-height: 1.6rem !important;
+  -webkit-text-stroke: 1.3px #444;
 }
 
 .pswp__top-bar .pswp__button, .pswp__counter {
+  color: #eee;
   pointer-events: auto;
-  background: rgba(0,0,0,.4) !important;
+  background: none;
   opacity: 1;
 }
 .pswp__top-bar svg {
-  margin-top: 4px;
   height: 36px;
   width: 36px;
+  stroke: #444;
+  stroke-width: 1;
 }
 .pswp__button--zoom:hover { color: #f82 }
 .pswp__button--close:hover { color: #d44 }
 .pswp__button--fs:hover { color: #ff4 }
-
-.pswp__counter {
-  font-size: 1rem !important;
-}
 
 .pswp__button--arrow--left:before,
 .pswp__button--arrow--right:before {
@@ -598,10 +608,9 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--arrow--left, .pswp__button--arrow--right {
   width: 3em;
   cursor: pointer;
-  fill: #222;
-  stroke: #eee;
+  color: #eee;
+  stroke: #444;
   stroke-width: 12;
-  transition: opacity .3s;
 }
 
 .pswp__button--arrow--left svg, .pswp__button--arrow--right svg {
@@ -611,10 +620,10 @@ html:not(.mobile) #entry-menu a.active {
   transition: .25s;
 }
 
-.pswp__button--arrow--left svg  { transform: rotate(270deg) translateX(50%);  left:  0 }
-.pswp__button--arrow--right svg { transform: rotate(90deg)  translateX(-50%); right: 0 }
-.pswp__button--arrow--left:hover svg  { height: 3em; width: 3em; left:  -.25em }
-.pswp__button--arrow--right:hover svg { height: 3em; width: 3em; right: -.25em }
+.pswp__button--arrow--left svg  { transform: rotate(270deg) translateX(50%);  left:  -.25em }
+.pswp__button--arrow--right svg { transform: rotate(90deg)  translateX(-50%); right: -.25em }
+.pswp__button--arrow--left:hover svg  { height: 3em; width: 3em; left:  -.75em }
+.pswp__button--arrow--right:hover svg { height: 3em; width: 3em; right: -.75em }
 
 /* ================================= Video.js ================================= */
 
