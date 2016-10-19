@@ -1,5 +1,5 @@
 # os deps: node npm git jq docker
-# npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates
+# npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates yarn
 
 X86 := $(shell uname -m | grep 86)
 ifeq ($(X86),)
@@ -38,7 +38,7 @@ docker-push:
 update:
 	ncu --packageFile package.json -ua
 	rm -rf node_modules
-	npm install
+	yarn
 	touch client/client.js
 
 deploy:
