@@ -2,7 +2,7 @@
 
 var fs = require("fs");
 
-module.exports = function walk(dir, cb) {
+module.exports.walk = function walk(dir, cb) {
   var files = [], dirs = [], errs = [];
   fs.readdir(dir, function(err, list) {
     if (err) errs.push(err);
@@ -30,7 +30,7 @@ module.exports = function walk(dir, cb) {
   });
 };
 
-module.exports.sync = function walkSync(dir) {
+module.exports.walkSync = function walkSync(dir) {
   var files = [], dirs = [], errs = [], list;
   try {
     list = fs.readdirSync(dir);

@@ -11,7 +11,7 @@ var path     = require("path");
 var log      = require("./log.js");
 var paths    = require("./paths.js").get();
 var utils    = require("./utils.js");
-var walk     = require("./walk.js");
+var walker   = require("./walker.js");
 
 var dirs     = {};
 var todoDirs = [];
@@ -92,13 +92,13 @@ filetree.updateDir = function updateDir(dir, cb) {
     if (initial) { // use sync walk for performance
       initial = false;
       log.info("Caching files ...");
-      var r = walk.sync(utils.addFilesPath(dir));
+      var r = walker.walkSync(utils.addFilesPath(dir));
       if (r[0]) handleUpdateDirErrs(r[0]);
       log.info("Caching files done");
       updateDirInCache(dir, stat, r[1], r[2], cb);
     } else {
       log.debug("Updating cache of " + dir);
-      walk(utils.addFilesPath(dir), function(errs, readDirs, readFiles) {
+      walker.walk(utils.addFilesPath(dir), function(errs, readDirs, readFiles) {
         if (errs) handleUpdateDirErrs(errs, cb);
         updateDirInCache(dir, stat, readDirs, readFiles, cb);
       });
@@ -243,7 +243,7 @@ filetree.move = function move(src, dst, cb) {
   });
 };
 
-filetree.moveTemps = function move(src, dst, cb) {
+filetree.moveTemps = function moveTemps(src, dst, cb) {
   lookAway();
   utils.move(src, dst, cb);
 };

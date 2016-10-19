@@ -25,6 +25,7 @@ rules:
   eol-last: [2]
   eqeqeq: [2]
   func-call-spacing: [2, never]
+  func-name-matching: [2]
   func-names: [0]
   generator-star-spacing: [2, before]
   global-require: [0]

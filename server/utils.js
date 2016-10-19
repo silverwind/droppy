@@ -10,7 +10,7 @@ var escRe    = require("escape-string-regexp");
 var ext      = require("file-extension");
 var fs       = require("graceful-fs");
 var isBin    = require("isbinaryfile");
-var mime     = require("mime-types").lookup;
+var mimetype = require("mime-types").lookup;
 var mkdirp   = require("mkdirp");
 var mv       = require("mv");
 var path     = require("path");
@@ -190,8 +190,8 @@ utils.isBinary = function isBinary(p, callback) {
 };
 
 // TODO async/await this in Node.js 7.0
-utils.mime = function mimeWrap(p) {
-  var mimeType = mime(p);
+utils.mime = function mime(p) {
+  var mimeType = mimetype(p);
   if (mimeType) return mimeType;
   try {
     return isBin.sync(p) ? "application/octet-stream" : "text/plain; charset=utf-8";
@@ -204,7 +204,7 @@ utils.getDispo = function getDispo(fileName) {
   return cd(path.basename(fileName));
 };
 
-utils.createSid = function getSid() {
+utils.createSid = function createSid() {
   return crypto.randomBytes(64).toString("base64").substring(0, 48);
 };
 
