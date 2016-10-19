@@ -39,6 +39,6 @@ function resolve() {
   p = path.resolve(/^~/.test(p) ? untildify(p) : p);
   try {
     p = fs.realpathSync(p);
-  } catch (e) {}
+  } catch (err) {}
   return p;
 }

@@ -11,23 +11,27 @@ droppy is a self-hosted file storage server with a web interface and capabilites
 
 ## Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
-* Realtime updates of changes
+* Realtime updates of file system changes
 * Directory upload support
-* Drag & drop and swipe gestures
+* Drag & drop support for file operations
 * Side-by-Side mode
 * Shareable public download links
 * Zip download of directories
-* Powerful editor for text files
-* Image and video gallery, audio player
-* Fullscreen support for media galleries
+* Powerful text editor with themes and broad language support
+* Image and video gallery with full touch support
+* Audio player with seek support
+* Fullscreen support for editor and gallery
 * Supports installing to the homescreen
 
+## General Information
+Two directories will be used. droppy is a well-behaved app and will not write anywhere else:
+
+- `config`: defaults to `~/.droppy/config`, override with `-c /some/dir`
+- `files`: default `~/.droppy/files` override with `-f /some/dir`
+
+droppy maintains a in-memory representation of the `files` directory. If you're on slow storage and/or serving 100k+ files, the indexing on startup will take some time.
+
 ## Installation
-Note that two directories will be used by droppy. Make sure these directories are owned by the user running the application/container:
-
-- `config` directory: set with `-c <dir>`, default `~/.droppy/config`.
-- `files` directory: set with `-f <dir>`, default `~/.droppy/files`.
-
 ### Local Installation :package:
 With [`Node.js`](https://nodejs.org) >= 4.0.0 and `npm` installed, run:
 
@@ -71,22 +75,22 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 ```javascript
 {
   "listeners" : [
-      {
-          "host"     : ["0.0.0.0", "::"],
-          "port"     : 8989,
-          "protocol" : "http"
-      }
+    {
+      "host": ["0.0.0.0", "::"],
+      "port": 8989,
+      "protocol": "http"
+    }
   ],
-  "public"          : false,
-  "timestamps"      : true,
-  "linkLength"      : 5,
-  "logLevel"        : 2,
-  "maxFileSize"     : 0,
-  "updateInterval"  : 1000,
-  "pollingInterval" : 0,
-  "keepAlive"       : 20000,
-  "allowFrame"      : false,
-  "readOnly"        : false
+  "public": false,
+  "timestamps": true,
+  "linkLength": 5,
+  "logLevel": 2,
+  "maxFileSize": 0,
+  "updateInterval": 1000,
+  "pollingInterval": 0,
+  "keepAlive": 20000,
+  "allowFrame": false,
+  "readOnly": false
 }
 ```
 
@@ -111,10 +115,10 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 
 ```javascript
 "listeners": [
-    {
-        "host"     : [ "0.0.0.0", "::" ],
-        "port"     : 80,
-        "protocol" : "http"
+  {
+    "host"     : [ "0.0.0.0", "::" ],
+    "port"     : 80,
+    "protocol" : "http"
     },
     {
         "host"     : "0.0.0.0",
@@ -180,7 +184,13 @@ $ curl -OJ url
 $ wget --content-disposition url
 ````
 
-## Note about startup performance
-droppy is currently optimized for a moderate amount of files. To aid in performance, all directories are indexed into memory once on startup. The downside of this is that the startup may take considerable time on slow storage with hundreds of thousands of files present.
+# Development
+To start a live-reloading dev server:
+````
+$ git clone https://github.com/silverwind/droppy && cd droppy
+$ npm i
+$ node droppy --dev
+````
+The [Makefile](https://github.com/silverwind/droppy/blob/master/Makefile) has a few tasks for updating dependencies, pushing docker images, see the comment above for dependencies of those tasks.
 
 © [silverwind](https://github.com/silverwind), distributed under BSD licence.

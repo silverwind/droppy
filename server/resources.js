@@ -86,7 +86,7 @@ try {
   zopfli       = require("node-zopfli");
   svg          = require("./svg.js");
   templates    = require("./templates.js");
-} catch (e) {}
+} catch (err) {}
 
 resources.files = {
   css: [

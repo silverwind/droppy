@@ -30,7 +30,7 @@ db.init = function init(callback) {
         if (data.trim() !== "") {
           try {
             database = JSON.parse(data);
-          } catch (error) {
+          } catch (err) {
             return callback(err);
           }
         } else {

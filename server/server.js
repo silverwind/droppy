@@ -271,7 +271,7 @@ function setupSocket(server) {
   // fall back from uws to ws in case it failed to build
   try {
     Wss = require("uws").Server;
-  } catch (e) {
+  } catch (err) {
     if (!uwsLogged) {
       log.info("`uws` module failed to build, falling back to `ws`");
       uwsLogged = true;

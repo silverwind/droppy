@@ -56,7 +56,7 @@ utils.rmSync = function rmSync(p) {
   (function run() {
     try {
       rimraf.sync(p, {glob: {dot: true}});
-    } catch (e) {
+    } catch (err) {
       if (tries-- > 0) run();
     }
   })();
@@ -195,7 +195,7 @@ utils.mime = function mime(p) {
   if (mimeType) return mimeType;
   try {
     return isBin.sync(p) ? "application/octet-stream" : "text/plain; charset=utf-8";
-  } catch (e) {
+  } catch (err) {
     return "application/octet-stream";
   }
 };
@@ -217,8 +217,8 @@ utils.readJsonBody = function readJsonBody(req) {
       body = String(Buffer.concat(body));
       try {
         resolve(JSON.parse(body));
-      } catch (e) {
-        reject(e);
+      } catch (err) {
+        reject(err);
       }
     });
   });

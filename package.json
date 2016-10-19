@@ -55,6 +55,7 @@
     "cheerio": "^0.22.0",
     "clean-css": "^3.4.20",
     "codemirror": "^5.19.0",
+    "eslint-plugin-unicorn": "^1.0.0",
     "handlebars": "^4.0.5",
     "html-minifier": "^3.1.0",
     "iltorb": "^1.0.13",

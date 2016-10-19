@@ -142,7 +142,7 @@
   };
 
   function savePrefs(prefs) {
-    try { localStorage.setItem("prefs", JSON.stringify(prefs)); } catch (e) {}
+    try { localStorage.setItem("prefs", JSON.stringify(prefs)); } catch (err) {}
   }
   function loadPrefs() {
     return JSON.parse(localStorage.getItem("prefs") || "{}");
@@ -2428,7 +2428,7 @@
     copy.register("click", function() {
       var done;
       select();
-      try { done = document.execCommand("copy"); } catch (e) {}
+      try { done = document.execCommand("copy"); } catch (err) {}
       copy.attr("aria-label", done === true ? "Copied!" : "Copy failed");
     }).on("mouseleave", function() {
       copy.attr("aria-label", "Copy to clipboard");

@@ -1,5 +1,5 @@
-# os dependencies: jq git node npm docker
-# npm dependencies: eslint stylelint uglify-js grunt npm-check-updates
+# os deps: node npm git jq docker
+# npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates
 
 X86 := $(shell uname -m | grep 86)
 ifeq ($(X86),)
@@ -11,7 +11,7 @@ endif
 JQUERY_FLAGS=-ajax,-css/showHide,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-css,-serialize,-queue,-callbacks,-event/support,-event/ajax
 
 lint:
-	eslint --ignore-pattern *.min.js server client *.js
+	eslint --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
 	stylelint client/*.css
 
 build:
