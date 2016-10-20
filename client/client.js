@@ -1019,7 +1019,7 @@
       view.find(".data-row").register("contextmenu", function(event) {
         var target = $(event.currentTarget);
         if (target.data("type") === "error") return;
-        showEntryMenu(target, event.clientX, event.clientY, true);
+        showEntryMenu(target, event.clientX, event.clientY);
         event.preventDefault();
       });
 
@@ -1369,20 +1369,17 @@
     }
   }
 
-  function showEntryMenu(entry, x, y, rightClick) {
-    var type   = /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1];
-    var button = entry.find(".entry-menu");
-    var menu   = $("#entry-menu");
-    var top    = entry[0].getBoundingClientRect().top + document.body.scrollTop;
-    var maxTop = window.innerHeight - menu[0].clientHeight;
-    var left   = rightClick ? x - menu[0].clientWidth / 2 :
-      button[0].getBoundingClientRect().left + document.body.scrollLeft +
-      button[0].clientWidth - menu[0].clientWidth;
+  function showEntryMenu(entry, x, y) {
+    var menu = $("#entry-menu");
+    var maxTop = window.innerHeight - menu[0].clientHeight - 4;
+    var maxLeft = window.innerWidth - menu[0].clientWidth - 4;
+    var top = entry[0].getBoundingClientRect().top + document.body.scrollTop;
+    var left = x - menu[0].clientWidth / 2;
 
-    menu.attr("class", "type-" + type);
+    menu.attr("class", "type-" + /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1]);
     entry.addClass("active");
     toggleCatcher(true);
-    menu[0].style.left = (left > 0 ? left : 0) + "px";
+    menu[0].style.left = (left > 0 ? (left > maxLeft ? maxLeft : left) : 0) + "px";
     menu[0].style.top = (top > maxTop ? maxTop : top) + "px";
     menu.data("target", entry).addClass("in");
 
