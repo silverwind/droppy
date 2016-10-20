@@ -1132,8 +1132,8 @@ video:not(.vjs-tech) {
 /* ============================== Login Form =============================== */
 
 #login-box {
-  color: #222;
-  background: #eee;
+  color: #aaa;
+  background: #181818;
   border-radius: 6px;
   box-shadow: 0 8px 24px #000;
   height: 11rem;
@@ -1143,6 +1143,8 @@ video:not(.vjs-tech) {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  box-shadow: 0 .25rem 1rem #000;
+  border: 1px solid #333;
 }
 
 @media (max-width: 639px), (max-height: 399px) {
@@ -1171,9 +1173,10 @@ video:not(.vjs-tech) {
 }
 
 #login-info-box {
-  line-height: 2rem;
-  background: linear-gradient(#ccc,#fff);
-  box-shadow: 0 0 10px rgba(0,0,0,.3);
+  line-height: 2.25rem;
+  background: #202020;
+  color: #ddd;
+  border-bottom: 1px solid #333;
   border-radius: 5px 5px 0 0;
   transition: background .2s;
   position: absolute;
@@ -1181,7 +1184,15 @@ video:not(.vjs-tech) {
   width: 100%;
 }
 
-#login-info-box.error { background: #a33; color: #fff }
+#login-info-box svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 .25rem;
+}
+
+#login-info-box.error { background: #911; color: #fff }
 @media (max-width: 639px), (max-height: 399px) { #login-info-box { border-radius: 0 } }
 
 #login-info {
@@ -1197,15 +1208,22 @@ video:not(.vjs-tech) {
 }
 
 #fields input {
-  background: rgba(255,255,255,.5);
+  background: #202020;
+  color: #fff;
   padding: 0 10px;
   height: 2rem;
   width: 100%;
-  border-radius: 5px;
+  border-radius: 3px;
+  border: 1px solid #383838;
 }
 
+#fields input::-moz-placeholder          { color: #555; opacity: 1 }
+#fields input:-ms-input-placeholder      { color: #555 }
+#fields input::-webkit-input-placeholder { color: #555 }
+
 #fields input:focus {
-  background: rgba(255,255,255,1);
+  background: #282828;
+  border: 1px solid #404040;
 }
 
 #fields input + input {
@@ -1216,19 +1234,17 @@ video:not(.vjs-tech) {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 2rem;
+  height: 2.25rem;
   display: flex;
-  background: linear-gradient(#fff,#ccc);
+  background: #202020;
+  border-top: 1px solid #333;
   border-radius: 0 0 5px 5px;
-  box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
 #remember, #submit {
-  line-height: 2rem;
-  height: 2rem;
+  line-height: 2.25rem;
   background: transparent;
   bottom: 0;
-  color: #666;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -1236,15 +1252,16 @@ video:not(.vjs-tech) {
 }
 
 #remember svg, #submit svg {
+  display: inline-block;
+  vertical-align: middle;
   position: relative;
-  top: .15rem;
-  margin: 0 .1em;
+  top: -.05rem;
+  margin: 0 .25rem;
 }
 
-#remember:hover, #remember:focus { color: #222 }
-#submit:hover, #submit:focus     { color: #222 }
-#submit svg                      { margin-right: .35em }
-#remember:not(.checked) svg      { fill: transparent }
+#remember:hover, #remember:focus, #submit:hover, #submit:focus { color: #fff }
+#submit svg { margin-right: .35em }
+#remember:not(.checked) svg { fill: transparent }
 
 @media (max-width: 639px), (max-height: 399px) {
   #remember, #submit {

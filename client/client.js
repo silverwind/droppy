@@ -125,7 +125,7 @@
   Handlebars.registerHelper("svg", svg);
 
   if (droppy.detects.mobile)
-    $("html").addClass("mobile");
+    document.documentElement.classList.add("mobile");
   if (droppy.detects.webp)
     droppy.imageTypes.webp = "image/webp";
 // ============================================================================
@@ -172,7 +172,7 @@
 // ============================================================================
 //  Entry point
 // ============================================================================
-  var type = $("body").data("type");
+  var type = document.body.dataset.type;
   if (type === "m") {
     initMainPage();
   } else {
@@ -355,13 +355,13 @@
               url: getRootPath() + "!/logout",
               data: {path: getRootPath()}
             }).then(function() {
-              location.reload(true);
+              location.reload();
             });
           });
         }
 
         if (droppy.readOnly) {
-          $("html").addClass("readonly");
+          document.documentElement.classList.add("readonly");
         }
         break;
       case "MEDIA_FILES":
