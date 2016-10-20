@@ -1135,7 +1135,6 @@ video:not(.vjs-tech) {
   color: #aaa;
   background: #181818;
   border-radius: 6px;
-  box-shadow: 0 8px 24px #000;
   height: 11rem;
   width: 24rem;
   position: absolute;

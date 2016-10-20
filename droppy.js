@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv = require("minimist")(process.argv.slice(2), {boolean: ["color", "d", "daemon"]});
+var argv = require("minimist")(process.argv.slice(2), {
+  boolean: ["color", "d", "daemon", "dev"]
+});
+
+if (!argv.dev) {
+  process.env.NODE_ENV = "production";
+}
+
 var fs   = require("graceful-fs");
 var pkg  = require("./package.json");
 

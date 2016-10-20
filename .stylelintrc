@@ -27,5 +27,6 @@ rules:
   number-no-trailing-zeros: true
   selector-list-comma-space-after: always-single-line
   selector-list-comma-space-before: never-single-line
+  selector-no-empty: true
   selector-pseudo-element-colon-notation: single
   string-quotes: double

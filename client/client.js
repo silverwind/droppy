@@ -355,7 +355,7 @@
               url: getRootPath() + "!/logout",
               data: {path: getRootPath()}
             }).then(function() {
-              location.reload();
+              location.reload(true);
             });
           });
         }
