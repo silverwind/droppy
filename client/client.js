@@ -610,9 +610,18 @@
   // ============================================================================
   function upload(view, fd, files, id) {
     if (!files || !files.length) return showError(view, "Unable to upload.");
+    var xhr;
+
+    $(Handlebars.templates["upload-info"]({
+      id: id,
+      title: files.length === 1 ? basename(files[0]) : files.length + " files",
+    })).appendTo(view).transition("in").find(".upload-cancel").register("click", function() {
+      xhr.abort();
+      uploadCancel(view, id);
+    });
 
     // Create the XHR2 and bind the progress events
-    var xhr = new XMLHttpRequest();
+    xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", function(e) {
       if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     });
@@ -630,14 +639,6 @@
         uploadCancel(view, id);
       }
       uploadFinish(view, id);
-    });
-
-    $(Handlebars.templates["upload-info"]({
-      id: id,
-      title: files.length === 1 ? basename(files[0]) : files.length + " files",
-    })).appendTo(view).transition("in").find(".upload-cancel").register("click", function() {
-      xhr.abort();
-      uploadCancel(view, id);
     });
 
     view[0].isUploading = true;
