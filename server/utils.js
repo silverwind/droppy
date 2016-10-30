@@ -338,7 +338,7 @@ utils.extensionRe = function extensionRe(arr) {
   arr = arr.map(function(ext) {
     return escRe(ext);
   });
-  return RegExp("\\.(" + arr.join("|") + ")$");
+  return RegExp("\\.(" + arr.join("|") + ")$", "i");
 };
 
 function createDH() {
