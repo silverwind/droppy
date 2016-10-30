@@ -2,7 +2,7 @@ FROM mhart/alpine-node:latest
 MAINTAINER silverwind
 
 # Install and build modules
-RUN apk add --no-cache make gcc g++ python git && \
+RUN apk add --update-cache --no-cache make gcc g++ python git && \
   npm install --production -g droppy@latest dmn && \
   cd /usr/lib/node_modules/droppy && \
   dmn clean -f && \
@@ -13,7 +13,8 @@ RUN apk add --no-cache make gcc g++ python git && \
   rm -rf /usr/lib/node_modules/droppy/node_modules/uws/*win32*.node && \
   rm -rf /usr/lib/node_modules/droppy/node_modules/uws/build && \
   rm -rf /usr/lib/node_modules/droppy/node_modules/lodash/fp && \
-  apk del make gcc g++ python git
+  apk del --purge make gcc g++ python git && \
+  rm -rf /var/cache/apk/*
 
 EXPOSE 8989
 VOLUME ["/config", "/files"]
