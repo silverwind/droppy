@@ -374,28 +374,28 @@ function setupSocket(server) {
         break;
       case "DELETE_FILE":
         log.info(ws, null, "Deleting: " + msg.data);
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.del(msg.data);
         break;
       case "SAVE_FILE":
         log.info(ws, null, "Saving: " + msg.data.to);
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
         filetree.save(msg.data.to, msg.data.value, function(err) {
-          if (err)
-            sendObj(sid, {type: "ERROR", vId: vId, text: "Error saving " + msg.data.to + ": " + err});
-          else
-            sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
+          if (err) {
+            sendError(sid, vId, "Error saving " + msg.data.to);
+            log.error(err);
+          } else sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
         });
         break;
       case "CLIPBOARD":
         var src = msg.data.src, dst = msg.data.dst, type = msg.data.type;
         log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
         if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst))
-          return sendObj(sid, {type: "ERROR", vId: vId, text: "Can't copy directory into itself"});
+          return sendError(sid, vId, "Can't copy directory into itself");
 
         fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {
           if (!err && stats || msg.data.src === msg.data.dst) {
@@ -408,23 +408,23 @@ function setupSocket(server) {
         });
         break;
       case "CREATE_FOLDER":
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.mkdir(msg.data);
         break;
       case "CREATE_FILE":
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.mk(msg.data);
         break;
       case "RENAME":
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         var rSrc = msg.data.src, rDst = msg.data.dst;
         // Disallow whitespace-only and empty strings in renames
         if (!validatePaths([rSrc, rDst], msg.type, ws, sid, vId) ||
-            /^\s*$/.test(rDst) || dst === "" || rSrc === dst) {
+            /^\s*$/.test(rDst) || rDst === "" || rSrc === rDst) {
           log.info(ws, null, "Invalid rename request: " + rSrc + "-> " + rDst);
-          sendObj(sid, {type: "ERROR", text: "Invalid rename request"});
+          sendError(sid, vId, "Invalid rename request");
           return;
         }
         filetree.move(rSrc, rDst);
@@ -450,7 +450,7 @@ function setupSocket(server) {
         sendUsers(sid);
         break;
       case "CREATE_FILES":
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
         async.each(msg.data.files, function(file, cb) {
           filetree.mkdir(utils.addFilesPath(path.dirname(file)), function() {
@@ -461,7 +461,7 @@ function setupSocket(server) {
         });
         break;
       case "CREATE_FOLDERS":
-        if (config.readOnly) return sendError(ws, sid, vId, "Files are read-only.");
+        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
         async.each(msg.data.folders, function(folder, cb) {
           filetree.mkdir(utils.addFilesPath(folder), cb);
@@ -473,7 +473,7 @@ function setupSocket(server) {
         var dir = msg.data.dir, exts = msg.data.exts;
         if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
         var files = filetree.lsFilter(dir, utils.extensionRe(exts.img.concat(exts.vid)));
-        if (!files) return sendError(ws, sid, vId, "No displayable files in directory");
+        if (!files) return sendError(sid, vId, "No displayable files in directory");
         async.map(files, function(file, cb) {
           if (utils.extensionRe(exts.img).test(file)) {
             imgSize(path.join(utils.addFilesPath(dir), file), function(err, dims) {
@@ -518,7 +518,7 @@ function setupSocket(server) {
 function validatePaths(paths, type, ws, sid, vId) {
   return (Array.isArray(paths) ? paths : [paths]).every(function(p) {
     if (!utils.isPathSane(p)) {
-      sendError(ws, sid, vId, "Invalid request");
+      sendError(sid, vId, "Invalid request");
       log.info(ws, null, "Invalid " + type + " request: " + p);
       return false;
     } else {
@@ -563,9 +563,9 @@ function sendObjAll(data) {
   });
 }
 
-function sendError(ws, sid, vId, text) {
+function sendError(sid, vId, text) {
   sendObj(sid, {type: "ERROR", vId: vId, text: text});
-  log.info(ws, null, "Sent error: " + text);
+  log.info(clients[sid].ws, null, "Sent error: " + text);
 }
 
 function redirectToRoot(req, res) {
@@ -921,11 +921,10 @@ function handleUploadRequest(req, res) {
 
     file.on("limit", function() {
       log.info(req, res, "Maximum file size reached, cancelling upload");
-      sendObj(req.sid, {
-        type: "ERROR",
-        vId: req.query.vId,
-        text: "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded.",
-      });
+      sendError(
+        req.sid, req.query.vId,
+        "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded."
+      );
       limitHit = true;
       closeConnection();
       removeTempFiles();

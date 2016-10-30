@@ -703,17 +703,17 @@
 // ============================================================================
   function entryRename(view, entry, wasEmpty, callback) {
     // Populate active files list
-    droppy.activeFiles = [];
-    view.find(".entry-link").each(function() {
+    var activeFiles = []; // TODO: Update when files change
+    entry.siblings(".data-row").each(function() { // exclude existing entry for case-only rename
       $(this).removeClass("editing invalid");
-      droppy.activeFiles.push(droppy.caseSensitive ? $(this).text() : $(this).text().toLowerCase());
+      var name = droppy.caseSensitive ? this.dataset.name : this.dataset.name.toLowerCase();
+      if (name) activeFiles.push(name);
     });
 
     // Hide menu, overlay and the original link, stop any previous edits
     toggleCatcher(false);
     var link = entry.find(".entry-link");
     var canSubmit = validFilename(link.text(), droppy.platform);
-    var exists;
     entry.addClass("editing");
 
     // Add inline element
@@ -722,7 +722,7 @@
     renamer.register("input", function() {
       var input = this.value;
       var valid = validFilename(input, droppy.platform);
-      exists = droppy.activeFiles.some(function(file) {
+      var exists = activeFiles.some(function(file) {
         if (file === (droppy.caseSensitive ? input : input.toLowerCase())) return true;
       });
       canSubmit = valid && !exists;
@@ -741,6 +741,7 @@
       var success, oldVal = renamer.attr("placeholder"), newVal = renamer.val();
       if (canSubmit) {
         success = true;
+        stopEdit(view, entry, wasEmpty);
       } else if (!skipInvalid) {
         renamer.addClass("shake");
         setTimeout(function() {
@@ -1320,7 +1321,7 @@
 
       toggleCatcher(false);
       entryRename(view, entry, false, function(success, oldVal, newVal) {
-        if (success) {
+        if (success && newVal !== oldVal) {
           showSpinner(view);
           sendMessage(view[0].vId, "RENAME", {src: oldVal, dst: newVal});
         }
@@ -2121,7 +2122,6 @@
   }
 
   function initVariables() {
-    droppy.activeFiles = [];
     droppy.activeView = 0;
     droppy.debug = null;
     droppy.demo = null;
@@ -2370,7 +2370,7 @@
 
     // HACK: Safeguard so a view won't get stuck in loading state
     if (view.attr("data-type") === "directory") {
-      clearTimeout(view[0].stuckTimeout);
+      if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
       view[0].stuckTimeout = setTimeout(function() {
         sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
       }, 2000);
