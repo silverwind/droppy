@@ -47,7 +47,7 @@
 .cm-s-droppy a, .cm-s-droppy a:visited { color: #607392 }
 .cm-s-droppy .cm-searching { background: #ff8; color: #000 }
 
-.cm-s-droppy .cm-keyword    { color: #cda869 }
+.cm-s-droppy .cm-keyword    { color: #f65 }
 .cm-s-droppy .cm-atom       { color: #cf6a4c }
 .cm-s-droppy .cm-number     { color: #cf6a4c }
 .cm-s-droppy .cm-def        { color: #7587a6 }
@@ -61,7 +61,7 @@
 .cm-s-droppy .cm-string-2   { color: #e9c062 }
 .cm-s-droppy .cm-meta       { color: #f7f7f7 }
 .cm-s-droppy .cm-qualifier  { color: #e9c062 }
-.cm-s-droppy .cm-builtin    { color: #e9c062 }
+.cm-s-droppy .cm-builtin    { color: #ac885b }
 .cm-s-droppy .cm-bracket    { color: #9b859d }
 .cm-s-droppy .cm-tag        { color: #997643 }
 .cm-s-droppy .cm-attribute  { color: #cda869 }

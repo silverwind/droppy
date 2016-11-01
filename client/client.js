@@ -426,8 +426,8 @@
         method: "POST",
         url: path + "!/" + (firstrun ? "adduser" : "login"),
         data: {
-          username: $("#user").val(),
-          password: $("#pass").val(),
+          username: $("#user")[0].value,
+          password: $("#pass")[0].value,
           remember: $("#remember").hasClass("checked"),
           path: path.replace(/\/$/, ""),
         }
@@ -502,7 +502,7 @@
       var view = getActiveView();
       if (!validateFiles(files, view)) return;
       upload(view, fd, files, view[0].uId += 1);
-      fileInput.val("");
+      fileInput[0].value = "";
     });
 
     // File upload button
@@ -738,7 +738,9 @@
       .bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
-      var success, oldVal = renamer.attr("placeholder"), newVal = renamer.val();
+      var success;
+      var oldVal = renamer.attr("placeholder");
+      var newVal = renamer[0].value;
       if (canSubmit) {
         success = true;
         stopEdit(view, entry, wasEmpty);
@@ -1624,7 +1626,7 @@
         }
         if (mode !== "plain") CodeMirror.autoLoadMode(editor, mode);
         editor.setOption("mode", mode);
-        view.find(".mode-select").val(mode);
+        view.find(".mode-select")[0].value = mode;
 
         editor.on("change", function(cm, change) {
           var view = getCMView(cm);
@@ -1677,11 +1679,10 @@
           var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
           view.find(".mode-select").on("change", function() {
-            var mode = $(this).val();
             view.find(".syntax").removeClass("in");
             view.find(".mode-select").removeClass("in");
-            CodeMirror.autoLoadMode(editor, mode);
-            editor.setOption("mode", mode);
+            CodeMirror.autoLoadMode(editor, this.value);
+            editor.setOption("mode", this.value);
           });
         });
         view.find(".find").register("click", function() {
@@ -1747,7 +1748,7 @@
     });
 
     $("select.theme").register("change", function() {
-      var theme = $(this).val();
+      var theme = this.value;
       loadTheme(theme, function() {
         droppy.set("theme", theme);
         $(".view").each(function() {
@@ -1757,7 +1758,7 @@
     });
 
     $("select.editorFontSize").register("change", function() {
-      setEditorFontSize($(this).val());
+      setEditorFontSize(this.value);
     });
 
     setTimeout(function() {
@@ -1768,7 +1769,7 @@
       $("#overlay").one("click", function() {
         box.find("select").each(function() {
           var option = $(this).attr("class");
-          var value  = $(this).val();
+          var value  = this.value;
 
           if (value === "true") value = true;
           else if (value === "false") value = false;
@@ -2188,7 +2189,7 @@
       rss      : ["rss"],
       rtf      : ["rtf"],
       script   : ["csh", "ksh", "sh", "shar", "tcl"],
-      source   : ["ini", "properties", "lisp", "ovpn"],
+      source   : ["ini", "properties", "lisp", "ovpn", "lua"],
       sql      : ["sql", "dump"],
       tar      : ["tar"],
       tex      : ["tex"],
