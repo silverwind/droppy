@@ -279,9 +279,11 @@
       msg = JSON.parse(event.data);
       switch (msg.type) {
       case "UPDATE_DIRECTORY":
-        if (typeof view.attr("data-type") === "undefined" || view[0].switchRequest) view.attr("data-type", "directory"); // For initial loading
+        if (typeof view[0].dataset.type === "undefined" || view[0].switchRequest) {
+          view[0].dataset.type = "directory"; // For initial loading
+        }
         if (!view.length) return;
-        if (view.attr("data-type") === "directory") {
+        if (view[0].dataset.type === "directory") {
           if (msg.folder !== getViewLocation(view)) {
             view[0].currentFile = null;
             view[0].currentFolder = msg.folder;
@@ -292,7 +294,7 @@
           view[0].switchRequest = false;
           view[0].currentData = msg.data;
           openDirectory(view);
-        } else if (view.attr("data-type") === "media") {
+        } else if (view[0].dataset.type === "media") {
           view[0].currentData = msg.data;
           // TODO: Update media array
         }
@@ -442,7 +444,7 @@
             setTimeout(function() {
               info.removeClass("shake");
             }, 500);
-          } else info.attr("class", "error");
+          } else info[0].className = "error";
           if (!firstrun) $("#pass")[0].focus();
         }
       });
@@ -471,13 +473,13 @@
       e.preventDefault();
     }).bind(["space", "down", "right", "return"], function() {
       var view = getActiveView();
-      if (view.attr("data-type") === "media") view[0].ps.next();
+      if (view[0].dataset.type === "media") view[0].ps.next();
     }).bind(["shift+space", "up", "left", "backspace"], function() {
       var view = getActiveView();
-      if (view.attr("data-type") === "media") view[0].ps.prev();
+      if (view[0].dataset.type === "media") view[0].ps.prev();
     }).bind(["alt+enter", "f"], function() {
       var view = getActiveView();
-      if (!view || view.attr("data-type") !== "media") return;
+      if (!view || view[0].dataset.type !== "media") return;
       screenfull.toggle(view.find(".content")[0]);
     });
 
@@ -486,7 +488,7 @@
       var view = $(e.target).parents(".view");
       if (!view.length) return;
       droppy.activeView = view[0].vId;
-      toggleButtons(view.attr("data-type"));
+      toggleButtons(view[0].dataset.type);
     });
 
     $(document).register(screenfull.raw.fullscreenchange, function() {
@@ -509,8 +511,11 @@
     $("#af").register("click", function() {
       if ($(this).hasClass("disabled")) return;
       // Remove the directory attributes so we get a file picker dialog!
-      if (droppy.detects.directoryUpload)
-        fileInput.removeAttr(droppy.dir.join(" "));
+      if (droppy.detects.directoryUpload) {
+        droppy.dir.forEach(function(attr) {
+          fileInput[0].removeAttribute(attr);
+        });
+      }
       fileInput[0].click();
     });
 
@@ -520,8 +525,8 @@
       $("#ad").register("click", function() {
         if ($(this).hasClass("disabled")) return;
         // Set the directory attribute so we get a directory picker dialog
-        droppy.dir.forEach(function(prefix) {
-          fileInput.attr(prefix, prefix);
+        droppy.dir.forEach(function(attr) {
+          fileInput[0].setAttribute(attr, attr);
         });
         if (fileInput[0].isFilesAndDirectoriesSupported) {
           fileInput[0].click();
@@ -553,7 +558,7 @@
       var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
       entryRename(view, dummy, isEmpty, function(success, _oldVal, newVal) {
         if (!success) return;
-        if (view.attr("data-type") === "directory") showSpinner(view);
+        if (view[0].dataset.type === "directory") showSpinner(view);
         sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
       });
     });
@@ -568,12 +573,14 @@
         first.addClass("left");
         if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
         second = newView(dest, 1).addClass("right");
-        splitButton.attr("aria-label", "Merge views together").children("span").text("Merge");
+        splitButton[0].setAttribute("aria-label", "Merge views");
+        splitButton.children("span").text("Merge");
         replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
       } else {
         destroyView(1);
         getView(0).removeClass("left");
-        splitButton.attr("aria-label", "Split view in half").children("span").text("Split");
+        splitButton[0].setAttribute("aria-label", "Split view in half");
+        splitButton.children("span").text("Split");
         replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
       }
       var interval = setInterval(function() {
@@ -739,7 +746,7 @@
 
     function submitEdit(view, skipInvalid, callback) {
       var success;
-      var oldVal = renamer.attr("placeholder");
+      var oldVal = renamer[0].getAttribute("placeholder");
       var newVal = renamer[0].value;
       if (canSubmit) {
         success = true;
@@ -996,8 +1003,11 @@
       // Upload button on empty page
       view.find(".empty").register("click", function() {
         var inp = $("#file");
-        if (droppy.detects.directoryUpload)
-          inp.removeAttr(droppy.dir.join(" "));
+        if (droppy.detects.directoryUpload) {
+          droppy.dir.forEach(function(attr) {
+            inp[0].removeAttribute(attr);
+          });
+        }
         inp[0].click();
       });
 
@@ -1071,7 +1081,7 @@
   function loadContent(view, type, mediaType, content) {
     return new Promise(function(resolve) {
       if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
-      view.attr("data-type", type);
+      view[0].dataset.type = type;
       mediaType = mediaType ? " type-" + mediaType : "";
       content = '<div class="new content ' + type + mediaType + " " + view[0].animDirection + '">' + content + "</div>";
       var navRegex = /(forward|back|center)/;
@@ -1101,7 +1111,7 @@
         view.find(".content:not(.new)").remove();
         view.find(".new").removeClass("new");
         view.find(".data-row").removeClass("animating");
-        if (view.attr("data-type") === "directory")
+        if (view[0].dataset.type === "directory")
           bindDragEvents(view);
         toggleButtons(type);
         resolve();
@@ -1172,7 +1182,9 @@
 
   // Set drag properties for internal drag sources
   function bindDragEvents(view) {
-    view.find(".data-row .entry-link").attr("draggable", "true");
+    view.find(".data-row .entry-link").each(function() {
+      this.setAttribute("draggable", "true");
+    });
     view.register("dragstart", function(event) {
       var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
 
@@ -1227,7 +1239,7 @@
       event.stopPropagation();
       droppy.activeView = view[0].vId;
       var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
-      if (view.attr("data-type") === "directory" && isInternal)
+      if (view[0].dataset.type === "directory" && isInternal)
         icon = "menu";
       else if (!isInternal)
         icon = "upload-cloud";
@@ -1264,7 +1276,7 @@
 
       event.stopPropagation();
       dragData = JSON.parse(dragData);
-      if (view.attr("data-type") === "directory") { // dropping into a directory view
+      if (view[0].dataset.type === "directory") { // dropping into a directory view
         handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
       } else { // dropping into a document/media view
         if (dragData.type === "folder") {
@@ -1281,46 +1293,39 @@
   function initEntryMenu() {
     // Play an audio file
     $("#entry-menu .play").register("click", function(event) {
-      var entry = $("#entry-menu").data("target");
-      var view  = entry.parents(".view");
       event.stopPropagation();
+      var entry = droppy.menuTarget, view = entry.parents(".view");
       play(view, entry);
       toggleCatcher(false);
     });
 
     $("#entry-menu .edit").register("click", function(event) {
-      var location;
-      var entry = $("#entry-menu").data("target");
-      var view  = entry.parents(".view");
-
+      event.stopPropagation();
+      var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
       view[0].currentFile = entry.find(".file-link").text();
-      location = join(view[0].currentFolder, view[0].currentFile);
+      var location = join(view[0].currentFolder, view[0].currentFile);
       pushHistory(view, location);
       updatePath(view);
       openDoc(view, location);
-      event.stopPropagation();
     });
 
     // Click on a "open" link
     $("#entry-menu .openfile").register("click", function(event) {
-      var entry = $("#entry-menu").data("target");
-      var view  = entry.parents(".view");
-
+      event.stopPropagation();
+      var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
       if (entry.data("type") === "folder")
         updateLocation(view, entry.data("id"));
       else
         openFile(view, view[0].currentFolder, entry.find(".file-link").text());
-      event.stopPropagation();
     });
 
     // Rename a file/folder
     $("#entry-menu .rename").register("click", function(event) {
-      var entry = $("#entry-menu").data("target");
-      var view  = entry.parents(".view");
+      event.stopPropagation();
+      var entry = droppy.menuTarget, view = entry.parents(".view");
       if (droppy.socketWait) return;
-
       toggleCatcher(false);
       entryRename(view, entry, false, function(success, oldVal, newVal) {
         if (success && newVal !== oldVal) {
@@ -1328,25 +1333,26 @@
           sendMessage(view[0].vId, "RENAME", {src: oldVal, dst: newVal});
         }
       });
-      event.stopPropagation();
     });
 
     // Copy/cut a file/folder
     $("#entry-menu .copy, #entry-menu .cut").register("click", function(event) {
-      toggleCatcher(false);
-      droppy.clipboard = {type: $(this).attr("class"), src: $("#entry-menu").data("target").data("id")};
-      checkClipboard();
       event.stopPropagation();
+      toggleCatcher(false);
+      droppy.clipboard = {
+        type: this.className,
+        src: droppy.menuTarget[0].dataset.id
+      };
+      checkClipboard();
     });
 
     // Delete a file/folder
     $("#entry-menu .delete").register("click", function(event) {
+      var entry = droppy.menuTarget, view = entry.parents(".view");
       event.stopPropagation();
       if (droppy.socketWait) return;
 
       toggleCatcher(false);
-      var entry = $("#entry-menu").data("target");
-      var view = entry.parents(".view");
       showSpinner(view);
       sendMessage(view[0].vId, "DELETE_FILE", entry.data("id"));
     });
@@ -1379,13 +1385,15 @@
     var maxLeft = window.innerWidth - menu[0].clientWidth - 4;
     var top = entry[0].getBoundingClientRect().top + document.body.scrollTop;
     var left = x - menu[0].clientWidth / 2;
+    var spriteClass = entry.find(".sprite")[0].className;
 
-    menu.attr("class", "type-" + /sprite\-(\w+)/.exec(entry.find(".sprite").attr("class"))[1]);
+    menu[0].className = "type-" + /sprite\-(\w+)/.exec(spriteClass)[1];
     entry.addClass("active");
     toggleCatcher(true);
     menu[0].style.left = (left > 0 ? (left > maxLeft ? maxLeft : left) : 0) + "px";
     menu[0].style.top = (top > maxTop ? maxTop : top) + "px";
-    menu.data("target", entry).addClass("in");
+    droppy.menuTarget = entry;
+    menu[0].classList.add("in");
 
     var target = document.elementFromPoint(x, y);
     target = target.tagName.toLowerCase() === "a" ? $(target) : $(target).parents("a");
@@ -1397,9 +1405,9 @@
   function sortByHeader(view, header) {
     view[0].sortBy = /header\-(\w+)/.exec(header[0].className)[1];
     view[0].sortAsc = header.hasClass("down");
-    header.attr("class", "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active");
+    header[0].classname = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
     header.siblings().removeClass("active up down");
-    var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header.attr("data-sort"));
+    var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header[0].dataset.sort);
     if (view[0].sortAsc) entries = entries.reverse();
     entries.forEach(function(_, i) {
       var entry = view.find("[data-name=\"" + entries[i].sortname + "\"]")[0];
@@ -1446,7 +1454,7 @@
           updatePath(view);
           openDoc(view, filePath);
         } else { // Binary content - download it
-          $("[name=nn]").attr("src", "!/dl" + filePath);
+          $("[name=nn]")[0].setAttribute("src", "!/dl" + filePath);
           hideSpinner(view);
         }
       }).catch(function() {
@@ -1763,12 +1771,12 @@
 
     setTimeout(function() {
       box.addClass("in").transitionend(function() {
-        $(this).removeAttr("style");
+        this.removeAttribute("style");
       });
       toggleCatcher(true);
       $("#overlay").one("click", function() {
         box.find("select").each(function() {
-          var option = $(this).attr("class");
+          var option = this.className;
           var value  = this.value;
 
           if (value === "true") value = true;
@@ -1833,7 +1841,7 @@
 
       var i = 0;
       row.parent().children(".playable").each(function() {
-        $(this).attr("data-playindex", i++);
+        this.setAttribute("data-playindex", i++);
       });
       view[0].playlistLength = i;
     }
@@ -1931,7 +1939,7 @@
     bar.find(".pause-play").register("click", function(event) {
       var icon   = $(this).children("svg");
       var player = $(this).parents(".audio-bar").find(".audio-player")[0];
-      if (icon.attr("class") === "play") {
+      if (icon[0].className === "play") {
         icon.replaceWith($(svg("pause")));
         player.play();
       } else {
@@ -2127,6 +2135,7 @@
     droppy.debug = null;
     droppy.demo = null;
     droppy.linkCache = [];
+    droppy.menuTarget = null;
     droppy.public = null;
     droppy.queuedData = null;
     droppy.reopen = null;
@@ -2367,10 +2376,10 @@
     if (!view.find(".spinner").length)
       view.find(".path").append(svg("spinner"));
 
-    view.find(".spinner").attr("class", "spinner in");
+    view.find(".spinner")[0].setAttribute("class", "spinner in");
 
     // HACK: Safeguard so a view won't get stuck in loading state
-    if (view.attr("data-type") === "directory") {
+    if (view[0].dataset.type === "directory") {
       if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
       view[0].stuckTimeout = setTimeout(function() {
         sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
@@ -2380,7 +2389,7 @@
 
   function hideSpinner(view) {
     var spinner = view.find(".spinner");
-    if (spinner.length) spinner.attr("class", "spinner");
+    if (spinner.length) spinner[0].setAttribute("class", "spinner");
     if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
   }
 
@@ -2389,7 +2398,7 @@
     clearTimeout(droppy.errorTimer);
     box.find(".icon svg").replaceWith(svg("exclamation"));
     box.children("span").text(text);
-    box.attr("class", "info-box error in");
+    box[0].className = "info-box error in";
     droppy.errorTimer = setTimeout(function() {
       box.removeClass("in");
     }, 5000);
@@ -2420,7 +2429,8 @@
       setTimeout(toggleCatcher.bind(null, false), 100);
     });
     box.find(".icon svg").replaceWith(svg("link"));
-    box.attr("class", "info-box link in").transitionend(function() {
+    box[0].className = "info-box link in";
+    box.transitionend(function() {
       select();
     });
 
@@ -2428,9 +2438,9 @@
       var done;
       select();
       try { done = document.execCommand("copy"); } catch (err) {}
-      copy.attr("aria-label", done === true ? "Copied!" : "Copy failed");
+      copy[0].setAttribute("aria-label", done === true ? "Copied!" : "Copy failed");
     }).on("mouseleave", function() {
-      copy.attr("aria-label", "Copy to clipboard");
+      copy[0].setAttribute("aria-label", "Copy to clipboard");
     });
 
     dl.register("click", function() {
