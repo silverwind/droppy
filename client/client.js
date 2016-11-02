@@ -1443,6 +1443,12 @@
         updatePath(view);
         openMedia(view);
       }
+    } else if (e === "pdf") {
+      view[0].currentFile = file;
+      view[0].currentFolder = newFolder;
+      pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
+      updatePath(view);
+      loadPdf(view, file);
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
       showSpinner(view);
@@ -1561,6 +1567,27 @@
         });
         view[0].ps.init();
         hideSpinner(view);
+      });
+    });
+  }
+
+  function loadPdf(view, file) {
+    loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
+      var html = Handlebars.templates.pdf();
+      loadContent(view, "pdf", null, html).then(function() {
+        PDFJS.getDocument("!/file/" + file).then(function(pdf) {
+          pdf.getPage(1).then(function(page) {
+            var viewport = page.getViewport(1.5);
+            var canvas = view.find(".pdf-canvas")[0];
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            page.render({
+              canvasContext: canvas.getContext("2d"),
+              viewport: viewport
+            });
+            hideSpinner(view);
+          });
+        });
       });
     });
   }
