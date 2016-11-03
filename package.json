@@ -1,7 +1,7 @@
 {
   "name": "droppy",
   "version": "5.2.8",
-  "description": "Self-hosted file storage server",
+  "description": "Self-hosted file storage",
   "author": "silverwind <me@silverwind.io>",
   "repository": "silverwind/droppy",
   "license": "BSD-2-Clause",
