@@ -251,6 +251,10 @@ nav {
   line-height: 1.5rem;
 }
 
+.view.left .path li a, .view.right .path li a {
+  max-width: calc(50vw - 4rem);
+}
+
 /* ========================= File/Folder Display =========================== */
 
 .paste-button {
