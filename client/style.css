@@ -242,6 +242,15 @@ nav {
 .path li.save-failed svg { fill: #b44 !important }
 .path li.dirty:after { content: "*" }
 
+.path li a {
+  max-width: calc(100vw - 4rem);
+  overflow: hidden;
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.5rem;
+}
+
 /* ========================= File/Folder Display =========================== */
 
 .paste-button {
