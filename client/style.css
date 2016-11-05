@@ -240,7 +240,7 @@ nav {
 .path li.saved svg { fill: #361 !important }
 .path li.save-failed { background: #b44 }
 .path li.save-failed svg { fill: #b44 !important }
-.path li.dirty:after { content: "*" }
+.path li.dirty:after { content: "*"; position: absolute; }
 
 .path li a {
   max-width: calc(100vw - 4rem);

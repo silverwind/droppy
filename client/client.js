@@ -177,7 +177,7 @@
     initMainPage();
   } else {
     var isFirst = type === "f";
-    if (isFirst) $("#login-info").text("Set your login credentials.");
+    if (isFirst) $("#login-info")[0].textContent = "Set your login credentials.";
     initAuthPage(isFirst);
   }
 // ============================================================================
@@ -305,7 +305,7 @@
       case "RELOAD":
         if (msg.css) {
           $("#css").remove();
-          $("<style id='css'></style>").text(msg.css).appendTo($("head"));
+          $("<style id='css'>" + msg.css + "</style>").appendTo($("head"));
         } else location.reload(true);
         break;
       case "SHARELINK":
@@ -333,8 +333,8 @@
           droppy[setting] = msg.settings[setting];
         });
 
-        $("#about-title").text("droppy " + droppy.version);
-        $("#about-engine").text(droppy.engine);
+        $("#about-title")[0].textContent = "droppy " + droppy.version;
+        $("#about-engine")[0].textContent = droppy.engine;
 
         droppy.themes = droppy.themes.split("|");
         droppy.modes = droppy.modes.split("|");
@@ -438,7 +438,7 @@
           location.reload(true);
         } else {
           var info = $("#login-info-box");
-          info.text(firstrun ? "Please fill both fields." : "Wrong login!");
+          info.textContent = firstrun ? "Please fill both fields." : "Wrong login!";
           if (info.hasClass("error")) {
             info.addClass("shake");
             setTimeout(function() {
@@ -574,13 +574,13 @@
         if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
         second = newView(dest, 1).addClass("right");
         splitButton[0].setAttribute("aria-label", "Merge views");
-        splitButton.children("span").text("Merge");
+        splitButton.children("span")[0].textContent = "Merge";
         replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
       } else {
         destroyView(1);
         getView(0).removeClass("left");
         splitButton[0].setAttribute("aria-label", "Split view in half");
-        splitButton.children("span").text("Split");
+        splitButton.children("span")[0].textContent = "Split";
         replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
       }
       var interval = setInterval(function() {
@@ -662,8 +662,8 @@
   function uploadSuccess(id) {
     var info = $(".upload-info[data-id=\"" + id + "\"]");
     info.find(".upload-bar")[0].style.width = "100%";
-    info.find(".upload-percentage").text("100%");
-    info.find(".upload-title").text("Processing ...");
+    info.find(".upload-percentage")[0].textContent = "100%";
+    info.find(".upload-title")[0].textContent = "Processing ...";
   }
 
   function uploadCancel(view, id) {
@@ -697,11 +697,11 @@
       if (Number(view.find(".upload-info")[0].dataset.id) === id)
         setTitle(progress);
       info.find(".upload-bar")[0].style.width = progress;
-      info.find(".upload-percentage").text(progress);
-      info.find(".upload-time").text([
+      info.find(".upload-percentage")[0].textContent = progress;
+      info.find(".upload-time")[0].textContent = [
         secs > 60 ? Math.ceil(secs / 60) + " mins" : Math.ceil(secs) + " secs",
         formatBytes(Math.round(speed / 1e3) * 1e3) + "/s",
-      ].join(" @ "));
+      ].join(" @ ");
       lastUpdate = Date.now();
     }
   }
@@ -720,12 +720,13 @@
     // Hide menu, overlay and the original link, stop any previous edits
     toggleCatcher(false);
     var link = entry.find(".entry-link");
-    var canSubmit = validFilename(link.text(), droppy.platform);
+    var linkText = link[0].textContent;
+    var canSubmit = validFilename(linkText, droppy.platform);
     entry.addClass("editing");
 
     // Add inline element
-    var renamer = $('<input type="text" class="inline-namer" value="' + link.text() +
-                    '" placeholder="' + link.text() + '">').insertAfter(link);
+    var renamer = $('<input type="text" class="inline-namer" value="' + linkText +
+                    '" placeholder="' + linkText + '">').insertAfter(link);
     renamer.register("input", function() {
       var input = this.value;
       var valid = validFilename(input, droppy.platform);
@@ -736,8 +737,8 @@
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
     }).register("blur focusout", submitEdit.bind(null, view, true, callback));
 
-    var nameLength = link.text().lastIndexOf(".");
-    renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : link.text().length);
+    var nameLength = linkText.lastIndexOf(".");
+    renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : linkText.length);
     renamer[0].focus();
 
     Mousetrap(renamer[0])
@@ -896,7 +897,9 @@
           } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
             addPart(parts[i], pathStr);
           } else { // rename part
-            $(view.find(".path li")[i]).html(parts[i] + svg("triangle")).data("destination", pathStr);
+            var part = $(view.find(".path li")[i]);
+            part.html("<a>" + parts[i] + "</a>" + svg("triangle"));
+            part[0].dataset.destination = pathStr;
           }
         }
         i++;
@@ -916,17 +919,17 @@
 
     function addPart(name, path) {
       var li = $("<li><a>" + name + "</a></li>");
-      li.data("destination", path);
+      li[0].dataset.destination = path;
       li.register("click", function(event) {
         var view = $(event.target).parents(".view");
         if (droppy.socketWait) return;
         if ($(this).is(":last-child")) {
-          if ($(this).parents(".view").data("type") === "directory") {
-            updateLocation(view, $(this).data("destination"));
+          if ($(this).parents(".view")[0].dataset.type === "directory") {
+            updateLocation(view, this.dataset.destination);
           }
         } else {
           view[0].switchRequest = true; // This is set so we can switch out of a editor view
-          updateLocation(view, $(this).data("destination"));
+          updateLocation(view, this.dataset.destination);
         }
         setTimeout(function() {checkPathOverflow(view); }, 400);
       });
@@ -974,7 +977,11 @@
       };
 
       if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
-        entry.classes = name.toLowerCase() === view.find(".playing").data("name") ? "playable playing" : "playable";
+        var playing = view.find(".playing"), classes = "playable";
+        if (playing.length && name.toLowerCase() === playing[0].dataset.name) {
+          classes += " playable";
+        }
+        entry.classes = classes;
         entry.playable = true;
       }
 
@@ -1014,7 +1021,7 @@
       // Switch into a folder
       view.find(".folder-link").register("click", function(event) {
         if (droppy.socketWait) return;
-        updateLocation(view, $(this).parents(".data-row").data("id"));
+        updateLocation(view, $(this).parents(".data-row")[0].dataset.id);
         event.preventDefault();
       });
 
@@ -1022,7 +1029,7 @@
       view.find(".file-link").register("click", function(event) {
         if (droppy.socketWait) return;
         var view = $(event.target).parents(".view");
-        openFile(view, view[0].currentFolder, $(event.target).text());
+        openFile(view, view[0].currentFolder, event.target.textContent);
         event.preventDefault();
       });
 
@@ -1032,7 +1039,7 @@
 
       view.find(".data-row").register("contextmenu", function(event) {
         var target = $(event.currentTarget);
-        if (target.data("type") === "error") return;
+        if (target[0].dataset.type === "error") return;
         showEntryMenu(target, event.clientX, event.clientY);
         event.preventDefault();
       });
@@ -1057,7 +1064,7 @@
       // Request a sharelink
       view.find(".share-file").register("click", function() {
         if (droppy.socketWait) return;
-        requestLink($(this).parents(".view"), $(this).parents(".data-row").data("id"), true);
+        requestLink($(this).parents(".view"), $(this).parents(".data-row")[0].dataset.id, true);
       });
 
       view.find(".icon-play").register("click", function() {
@@ -1087,11 +1094,10 @@
       var navRegex = /(forward|back|center)/;
       if (view[0].animDirection === "center") {
         view.find(".content").replaceClass(navRegex, "center").before(content);
-        view.find(".new").addClass(type).data("root", view[0].currentFolder);
+        view.find(".new").addClass(type);
         finish();
       } else {
         view.children(".content-container").append(content);
-        view.find(".new").data("root", view[0].currentFolder);
         view[0].isAnimating = true;
         view.find(".data-row").addClass("animating");
         view.find(".content:not(.new)").replaceClass(navRegex, (view[0].animDirection === "forward") ?
@@ -1193,10 +1199,10 @@
       else if (event.shiftKey)
         view[0].dragAction = "cut";
 
-      droppy.dragTimer.refresh(row.data("id"));
+      droppy.dragTimer.refresh(row[0].dataset.id);
       event.originalEvent.dataTransfer.setData("text", JSON.stringify({
-        type: row.data("type"),
-        path: row.data("id")
+        type: row[0].dataset.type,
+        path: row[0].dataset.id,
       }));
       event.originalEvent.dataTransfer.effectAllowed = "copyMove";
       if ("setDragImage" in event.originalEvent.dataTransfer)
@@ -1280,7 +1286,7 @@
         handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
       } else { // dropping into a document/media view
         if (dragData.type === "folder") {
-          view.data("type", "directory");
+          view[0].dataset.type = "directory";
           updateLocation(view, dragData.path);
         } else {
           if (join(view[0].currentFolder, view[0].currentFile) !== dragData.path)
@@ -1303,7 +1309,7 @@
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
-      view[0].currentFile = entry.find(".file-link").text();
+      view[0].currentFile = entry.find(".file-link")[0].textContent();
       var location = join(view[0].currentFolder, view[0].currentFile);
       pushHistory(view, location);
       updatePath(view);
@@ -1315,10 +1321,10 @@
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
-      if (entry.data("type") === "folder")
-        updateLocation(view, entry.data("id"));
+      if (entry[0].dataset.type === "folder")
+        updateLocation(view, entry[0].dataset.id);
       else
-        openFile(view, view[0].currentFolder, entry.find(".file-link").text());
+        openFile(view, view[0].currentFolder, entry.find(".file-link")[0].textContent);
     });
 
     // Rename a file/folder
@@ -1326,7 +1332,6 @@
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       if (droppy.socketWait) return;
-      toggleCatcher(false);
       entryRename(view, entry, false, function(success, oldVal, newVal) {
         if (success && newVal !== oldVal) {
           showSpinner(view);
@@ -1354,7 +1359,7 @@
 
       toggleCatcher(false);
       showSpinner(view);
-      sendMessage(view[0].vId, "DELETE_FILE", entry.data("id"));
+      sendMessage(view[0].vId, "DELETE_FILE", entry[0].dataset.id);
     });
   }
 
@@ -1372,7 +1377,7 @@
           droppy.clipboard = null;
           toggleCatcher(false);
           $(".paste-button").removeClass("in");
-        }).transition("in").find(".filename").text(basename(droppy.clipboard.src));
+        }).transition("in").find(".filename")[0].textContent = basename(droppy.clipboard.src);
       });
     } else {
       $(".paste-button").removeClass("in");
@@ -1507,25 +1512,28 @@
       loadContent(view, "media", type, html).then(function() {
         var el = view.find(".pswp")[0];
         view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, { // eslint-disable-line camelcase
-          index: startIndex,
-          spacing: 0,
-          pinchToClose: false,
-          closeOnScroll: false,
-          closeOnVerticalDrag: false,
-          history: false,
-          modal: false,
-          barsSize: {top:0, bottom:0},
-          showAnimationDuration: 0,
-          hideAnimationDuration: 0,
-          bgOpacity: 1,
-          maxSpreadZoom: 4,
-          escKey: false,
           arrowKeys: false,
-          shareEl: false,
+          barsSize: {top:0, bottom:0},
+          bgOpacity: 1,
           captionEl: false,
           clickToCloseNonZoomable: false,
           closeElClasses: [],
+          closeOnScroll: false,
+          closeOnVerticalDrag: false,
+          escKey: false,
+          getDoubleTapZoom: function(_, item) {
+            return item.initialZoomLevel * 2;
+          },
+          hideAnimationDuration: 0,
+          history: false,
+          index: startIndex,
+          maxSpreadZoom: 4,
+          modal: false,
+          pinchToClose: false,
           shareButtons: [],
+          shareEl: false,
+          showAnimationDuration: 0,
+          spacing: 0,
         });
         view[0].ps.listen("afterChange", function() {
           view[0].currentFile = this.currItem.filename;
@@ -1724,7 +1732,7 @@
     box.find(".delete-user").register("click", function(event) {
       event.stopPropagation();
       sendMessage(null, "UPDATE_USER", {
-        name: $(this).parents("li").children(".username").text(),
+        name: $(this).parents("li").children(".username").textContent,
         pass: ""
       });
     });
@@ -1814,11 +1822,11 @@
       view[0].audioInitialized = true;
     }
 
-    if (!row.data("id")) {
+    if (!row[0].dataset.id) {
       return endAudio(view);
     }
 
-    source = "!/file" + row.data("id");
+    source = "!/file" + row[0].dataset.id;
     view.find(".seekbar-played, .seekbar-loaded")[0].style.width = "0%";
 
     if (player.canPlayType(droppy.audioTypes[fileExtension(source)])) {
@@ -1845,7 +1853,7 @@
       });
       view[0].playlistLength = i;
     }
-    view[0].playlistIndex = typeof index === "number" ? index : row.data("playindex");
+    view[0].playlistIndex = typeof index === "number" ? index : row[0].dataset.playindex;
   }
 
   function onNewAudio(view) {
@@ -1853,7 +1861,7 @@
     var title  = decodeURIComponent(removeExt(basename(player.src).replace(/_/g, " ").replace(/\s+/, " ")));
 
     view.find(".audio-bar").addClass("in");
-    view.find(".audio-title").text(title);
+    view.find(".audio-title")[0].textContent = title;
     setTitle(title);
 
     (function updateBuffer() {
@@ -2397,7 +2405,7 @@
     var box = view.find(".info-box");
     clearTimeout(droppy.errorTimer);
     box.find(".icon svg").replaceWith(svg("exclamation"));
-    box.children("span").text(text);
+    box.children("span")[0].textContent = text;
     box[0].className = "info-box error in";
     droppy.errorTimer = setTimeout(function() {
       box.removeClass("in");
@@ -2424,7 +2432,7 @@
       return location.protocol + "//" + location.host + location.pathname + "$/" + hash;
     };
 
-    out.text(getFullLink(link));
+    out[0].textContent = getFullLink(link);
     out.register("copy", function() {
       setTimeout(toggleCatcher.bind(null, false), 100);
     });
@@ -2446,7 +2454,7 @@
     dl.register("click", function() {
       $(this).toggleClass("checked");
       requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"), function(link) {
-        out.text(getFullLink(link));
+        out[0].textContent = getFullLink(link);
       });
     });
   }
