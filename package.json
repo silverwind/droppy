@@ -1,6 +1,6 @@
 {
   "name": "droppy",
-  "version": "5.2.9",
+  "version": "5.3.0",
   "description": "Self-hosted file storage",
   "author": "silverwind <me@silverwind.io>",
   "repository": "silverwind/droppy",
