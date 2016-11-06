@@ -127,7 +127,7 @@ utils.getNewPath = function getNewPath(origPath, callback) {
         filename  = filename.substring(0, filename.lastIndexOf("."));
       }
 
-      if (!/\-\d+$/.test(filename)) filename += "-1";
+      if (!/-\d+$/.test(filename)) filename += "-1";
 
       var canCreate = false;
       async.until(
@@ -151,7 +151,7 @@ utils.getNewPath = function getNewPath(origPath, callback) {
 };
 
 utils.normalizePath = function normalizePath(p) {
-  return p.replace(/[\\|\/]+/g, "/");
+  return p.replace(/[\\|/]+/g, "/");
 };
 
 utils.addFilesPath = function addFilesPath(p) {
@@ -167,12 +167,12 @@ utils.removeFilesPath = function removeFilesPath(p) {
 
 utils.isPathSane = function isPathSane(p, isURL) {
   if (isURL) {
-    if (/[\/\\]\.\./.test(p)) return false;      // Navigating down the tree (prefix)
-    if (/\.\.[\/\\]/.test(p)) return false;      // Navigating down the tree (postfix)
-    if (/[\*\{\}\|<>"]/.test(p)) return false;   // Invalid characters
+    if (/[/\\]\.\./.test(p)) return false;      // Navigating down the tree (prefix)
+    if (/\.\.[/\\]/.test(p)) return false;      // Navigating down the tree (postfix)
+    if (/[*{}|<>"]/.test(p)) return false;   // Invalid characters
     return true;
   } else {
-    return p.split(/[\\\/]/gm).every(function(name) {
+    return p.split(/[\\/]/gm).every(function(name) {
       if (!name) return true;
       return validate(name);
     });

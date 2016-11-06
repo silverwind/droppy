@@ -1392,7 +1392,7 @@
     var left = x - menu[0].clientWidth / 2;
     var spriteClass = entry.find(".sprite")[0].className;
 
-    menu[0].className = "type-" + /sprite\-(\w+)/.exec(spriteClass)[1];
+    menu[0].className = "type-" + /sprite-(\w+)/.exec(spriteClass)[1];
     entry.addClass("active");
     toggleCatcher(true);
     menu[0].style.left = (left > 0 ? (left > maxLeft ? maxLeft : left) : 0) + "px";
@@ -1408,7 +1408,7 @@
   }
 
   function sortByHeader(view, header) {
-    view[0].sortBy = /header\-(\w+)/.exec(header[0].className)[1];
+    view[0].sortBy = /header-(\w+)/.exec(header[0].className)[1];
     view[0].sortAsc = header.hasClass("down");
     header[0].classname = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
     header.siblings().removeClass("active up down");
@@ -2393,7 +2393,7 @@
 
   function loadTheme(theme) {
     return new Promise(function(resolve) {
-      loadStyle("theme-" + theme.replace(/[^a-z0-9\-]/gim, ""), "!/res/theme/" + theme).then(resolve);
+      loadStyle("theme-" + theme.replace(/[^a-z0-9-]/gim, ""), "!/res/theme/" + theme).then(resolve);
     });
   }
 
@@ -2637,7 +2637,7 @@
 
   // turn /path/to to file
   function dirname(path) {
-    return path.replace(/\\/g, "/").replace(/\/[^\/]*$/, "") || "/";
+    return path.replace(/\\/g, "/").replace(/\/[^/]*$/, "") || "/";
   }
 
   // detect dominant line ending style (CRLF vs LF)
