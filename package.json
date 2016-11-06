@@ -50,12 +50,12 @@
     "uws": "^0.11.0"
   },
   "devDependencies": {
-    "autoprefixer": "^6.5.1",
+    "autoprefixer": "^6.5.2",
     "cheerio": "^0.22.0",
     "clean-css": "^3.4.20",
     "codemirror": "^5.20.2",
     "handlebars": "^4.0.5",
-    "html-minifier": "^3.1.0",
+    "html-minifier": "^3.1.1",
     "iltorb": "^1.0.13",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.1",

@@ -249,11 +249,12 @@ function createListener(handler, opts, callback) {
       });
 
       function tlsError(err, socket) {
-        if (err) log.debug(socket, null, err);
+        // can't get the remote address at this point, just log the error
+        if (err && err.message) log.debug(null, null, err.message);
         if (socket.writable) socket.destroy();
       }
-      server.on("clientError", tlsError);
-      server.on("tlsClientError", tlsError); // Node.js 6.0
+      server.on("clientError", tlsError); // Node.js < 6.0
+      server.on("tlsClientError", tlsError); // Node.js 6.0 (event renamed)
 
       // TLS tickets - regenerate keys every hour, Node.js 4.0
       (function rotate() {
