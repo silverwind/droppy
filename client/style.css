@@ -579,25 +579,28 @@ html:not(.mobile) #entry-menu a.active {
 }
 
 .pswp__top-bar {
-  background: none !important;
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAADGCAYAAAAT+OqFAAAAdklEQVQoz42QQQ7AIAgEF/T/D+kbq/RWAlnQyyazA4aoAB4FsBSA/bFjuF1EOL7VbrIrBuusmrt4ZZORfb6ehbWdnRHEIiITaEUKa5EJqUakRSaEYBJSCY2dEstQY7AuxahwXFrvZmWl2rh4JZ07z9dLtesfNj5q0FU3A5ObbwAAAABJRU5ErkJggg==") !important;
+  background-repeat: repeat-x;
+  height: 98px !important;
   pointer-events: none;
+  color: #e6e6e6;
 }
 
 .pswp__button {
   opacity: 1;
   background: none !important;
+  margin-top: .1rem;
 }
 
 .pswp__counter {
-  color: #fff !important;
-  font-size: 1.2rem !important;
+  opacity: 1 !important;
+  color: inherit !important;
+  font-size: 1rem !important;
   font-family: sans-serif;
-  line-height: 1.6rem !important;
-  -webkit-text-stroke: 1.3px #444;
+  line-height: 1.7rem !important;
 }
 
 .pswp__top-bar .pswp__button, .pswp__counter {
-  color: #eee;
   pointer-events: auto;
   background: none;
   opacity: 1;
@@ -605,12 +608,13 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__top-bar svg {
   height: 36px;
   width: 36px;
-  stroke: #444;
   stroke-width: 1;
 }
 .pswp__button--zoom:hover { color: #f82 }
 .pswp__button--close:hover { color: #d44 }
 .pswp__button--fs:hover { color: #ff4 }
+.fit-h:hover { color: #18f }
+.fit-v:hover { color: #5c5 }
 
 .pswp__button--arrow--left:before,
 .pswp__button--arrow--right:before {

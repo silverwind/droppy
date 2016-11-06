@@ -1511,7 +1511,7 @@
       var html = Handlebars.templates.media();
       loadContent(view, "media", type, html).then(function() {
         var el = view.find(".pswp")[0];
-        view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, { // eslint-disable-line camelcase
+        view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, {
           arrowKeys: false,
           barsSize: {top:0, bottom:0},
           bgOpacity: 1,
@@ -1537,11 +1537,12 @@
         });
         view[0].ps.listen("afterChange", function() {
           view[0].currentFile = this.currItem.filename;
+          var btnToggles = view.find(".pswp__button--fs, .fit-h, .fit-v");
           if (this.currItem.html) { // video
             initVideoJS($(this.currItem.container).find("video")[0]);
-            view.find(".pswp__button--fs").addClass("hidden");
+            btnToggles.addClass("hidden");
           } else { // image
-            view.find(".pswp__button--fs").removeClass("hidden");
+            btnToggles.removeClass("hidden");
           }
           setTitle(this.currItem.filename.replace(/\..*/g, ""));
           replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
@@ -1557,9 +1558,39 @@
         });
         // Forward click event to svg parents, probably a ps bug
         var arrowsSVG = view.find(".pswp__button--arrow--left svg, .pswp__button--arrow--right svg");
-        arrowsSVG.on("click", function(e) {
+        arrowsSVG.register("click", function(e) {
           $(e.target).parents(".pswp__button")[0].click();
         });
+        // fit zoom buttons
+        view[0].ps.zoomed = {h: false, v: false};
+        function fitH(dur) {
+          var vw = view[0].ps.viewportSize.x, iw = view[0].ps.currItem.w;
+          var initial = view[0].ps.currItem.initialZoomLevel;
+          var middle = {x: vw / 2, y: view[0].ps.viewportSize.y / 2};
+          view[0].ps.zoomTo(view[0].ps.zoomed.h ? initial : vw / iw, middle, dur);
+          view[0].ps.zoomed.v = false;
+          view[0].ps.zoomed.h = !view[0].ps.zoomed.h;
+        }
+        function fitV(dur) {
+          var vh = view[0].ps.viewportSize.y, ih = view[0].ps.currItem.h;
+          var initial = view[0].ps.currItem.initialZoomLevel;
+          var middle = {x: view[0].ps.viewportSize.x / 2, y: vh / 2};
+          view[0].ps.zoomTo(view[0].ps.zoomed.v ? initial : vh / ih, middle, dur);
+          view[0].ps.zoomed.h = false;
+          view[0].ps.zoomed.v = !view[0].ps.zoomed.v;
+        }
+        view.find(".fit-h").register("click", fitH.bind(null, 300));
+        view.find(".fit-v").register("click", fitV.bind(null, 300));
+        view[0].ps.listen("afterChange", function() {
+          if (view[0].ps.zoomed.h) {
+            view[0].ps.zoomed.h = false;
+            fitH(0);
+          } else if (view[0].ps.zoomed.v) {
+            view[0].ps.zoomed.v = false;
+            fitV(0);
+          }
+        });
+        // swap SVGs
         var rootEl = view.find(".pswp")[0];
         observeClassChange(rootEl, "pswp--zoomed-in", function(added) {
           view.find(".pswp__button--zoom").html(svg(added ? "zoomout" : "zoomin"));
