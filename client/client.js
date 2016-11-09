@@ -1055,6 +1055,9 @@
 
         // Some browsers (like IE) think that clicking on an <a> is real navigation
         // and will close the WebSocket in turn. We'll reconnect if neccessary.
+        // Firefox is not affected as long as the <a> bears a `download` attribute,
+        // if it's missing it will disconnect a WebSocket as long as
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=896666 is not fixed.
         droppy.reopen = true;
         setTimeout(function() {
           droppy.reopen = false;
