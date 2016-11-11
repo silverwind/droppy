@@ -39,7 +39,7 @@
 
 .cm-s-droppy .CodeMirror-selected,
 .cm-s-droppy .CodeMirror-focused .CodeMirror-selected {
-  background: #303030 !important;
+  background: #036 !important;
 }
 .cm-s-droppy .CodeMirror ::selection      { background: #383838 !important }
 .cm-s-droppy .CodeMirror ::-moz-selection { background: #383838 !important }
