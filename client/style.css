@@ -1454,5 +1454,4 @@ html:not(.mobile) #drop-select span.active {
 }
 
 .shake { animation: shake .3s }
-.hidden { display: none !important }
 .no-transition { transition: none !important }
