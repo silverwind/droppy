@@ -133,6 +133,7 @@ rules:
   no-restricted-modules: [2, domain, freelist, smalloc, sys]
   no-restricted-syntax: [2, WithStatement]
   no-return-assign: [2, except-parens]
+  no-return-await: [2]
   no-script-url: [2]
   no-self-assign: [2, {props: true}]
   no-self-compare: [2]
@@ -204,8 +205,13 @@ rules:
   yield-star-spacing: [2, {before: true, after: false}]
   yoda: [2, never]
 
+parserOptions:
+  ecmaVersion: 2017
+
 env:
+  amd: true
   browser: true
+  commonjs: true
   es6: true
   greasemonkey: true
   jquery: true
