@@ -853,7 +853,6 @@ video:not(.vjs-tech) {
   transition: width .2s;
   width: 0;
   z-index: 1;
-  pointer-event: none;
 }
 
 .upload-info svg {
@@ -996,7 +995,7 @@ video:not(.vjs-tech) {
 
 #about-title {
   font-size: 1.3em;
-  padding: .5em 0 .25em 0;
+  padding: .5em 0 .25em;
 }
 
 #about-engine {
@@ -1079,18 +1078,18 @@ video:not(.vjs-tech) {
 @media (max-width: 639px) {
   #prefs-box { font-size: .8em }
   .list-prefs li {
-   flex-direction: column;
-   height: auto;
+    flex-direction: column;
+    height: auto;
   }
   .list-prefs label {
-   width: 100%;
-   text-align: center;
-   margin-bottom: .25em;
-   line-height: 1em;
+    width: 100%;
+    text-align: center;
+    margin-bottom: .25em;
+    line-height: 1em;
   }
   .list-prefs select {
-   width: 100%;
-   margin-bottom: .25em;
+    width: 100%;
+    margin-bottom: .25em;
   }
 }
 
@@ -1165,14 +1164,14 @@ video:not(.vjs-tech) {
 
 @media (max-width: 639px), (max-height: 399px) {
   #login-box {
-   border-radius: 0;
-   box-shadow: none;
-   font-size: .7em;
-   top: 50%;
-   left: 50%;
-   height: 100%;
-   width: 100%;
-   margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: .7em;
+    top: 50%;
+    left: 50%;
+    height: 100%;
+    width: 100%;
+    margin: 0;
   }
 }
 
@@ -1423,10 +1422,10 @@ html:not(.mobile) #drop-select span.active {
 
 @media (max-width: 639px) {
   #drop-select {
-   flex-direction: column;
-   width: 3.5em;
-   font-size: .8em;
-   line-height: 1.75em;
+    flex-direction: column;
+    width: 3.5em;
+    font-size: .8em;
+    line-height: 1.75em;
   }
   #drop-select .movefile:hover { border-radius: 6px 6px 0 0 }
   #drop-select .viewfile:hover { border-radius: 0 0 6px 6px }
