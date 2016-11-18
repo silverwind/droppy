@@ -629,9 +629,9 @@
 
     // Create the XHR2 and bind the progress events
     xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener("progress", function(e) {
+    xhr.upload.addEventListener("progress", throttle(function(e) {
       if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
-    });
+    }, 100));
     xhr.upload.addEventListener("error", function() {
       showError(view, "An error occured during upload.");
       uploadCancel(view, id);
@@ -649,7 +649,7 @@
     });
 
     view[0].isUploading = true;
-    view[0].uploadStart = Date.now();
+    view[0].uploadStart = now();
 
     xhr.open("POST", getRootPath() + "!/upload?vId=" + view[0].vId +
      "&to=" + encodeURIComponent(view[0].currentFolder) +
@@ -682,28 +682,22 @@
     showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
   }
 
-  var lastUpdate;
   function uploadProgress(view, id, sent, total) {
-    // Update progress every 100ms at most
-    if (!lastUpdate || (Date.now() - lastUpdate) >= 100) {
-      var info     = $(".upload-info[data-id=\"" + id + "\"]");
-      var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
-      var speed    = sent / ((Date.now() - view[0].uploadStart) / 1e3);
-      var elapsed, secs;
+    var info = $(".upload-info[data-id=\"" + id + "\"]");
+    var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
+    var speed = sent / ((now() - view[0].uploadStart) / 1e3);
+    var elapsed, secs;
 
-      elapsed = Date.now() - view[0].uploadStart;
-      secs = ((total / (sent / elapsed)) - elapsed) / 1000;
+    elapsed = now() - view[0].uploadStart;
+    secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
-      if (Number(view.find(".upload-info")[0].dataset.id) === id)
-        setTitle(progress);
-      info.find(".upload-bar")[0].style.width = progress;
-      info.find(".upload-percentage")[0].textContent = progress;
-      info.find(".upload-time")[0].textContent = [
-        secs > 60 ? Math.ceil(secs / 60) + " mins" : Math.ceil(secs) + " secs",
-        formatBytes(Math.round(speed / 1e3) * 1e3) + "/s",
-      ].join(" @ ");
-      lastUpdate = Date.now();
-    }
+    if (Number(view.find(".upload-info")[0].dataset.id) === id) setTitle(progress);
+    info.find(".upload-bar")[0].style.width = progress;
+    info.find(".upload-percentage")[0].textContent = progress;
+    info.find(".upload-time")[0].textContent = [
+      secs > 60 ? Math.ceil(secs / 60) + " mins" : Math.ceil(secs) + " secs",
+      formatBytes(Math.round(speed / 1e3) * 1e3) + "/s",
+    ].join(" @ ");
   }
 // ============================================================================
 //  General helpers
@@ -2515,19 +2509,23 @@
     }
   }
 
+  function now() {
+    return Math.round(performance.now());
+  }
+
   function throttle(func, threshold) {
     if (!threshold) threshold = 250;
     var last, deferTimer;
     return function() {
-      var now = Date.now(), args = arguments;
-      if (last && now < last + threshold) {
+      var cur = now(), args = arguments;
+      if (last && cur < last + threshold) {
         clearTimeout(deferTimer);
         deferTimer = setTimeout(function() {
-          last = now;
+          last = cur;
           func.apply(this, args);
         }, threshold);
       } else {
-        last = now;
+        last = cur;
         func.apply(this, args);
       }
     };
