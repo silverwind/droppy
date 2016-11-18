@@ -649,7 +649,7 @@
     });
 
     view[0].isUploading = true;
-    view[0].uploadStart = now();
+    view[0].uploadStart = performance.now();
 
     xhr.open("POST", getRootPath() + "!/upload?vId=" + view[0].vId +
      "&to=" + encodeURIComponent(view[0].currentFolder) +
@@ -685,10 +685,11 @@
   function uploadProgress(view, id, sent, total) {
     var info = $(".upload-info[data-id=\"" + id + "\"]");
     var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
-    var speed = sent / ((now() - view[0].uploadStart) / 1e3);
+    var now = performance.now();
+    var speed = sent / ((now - view[0].uploadStart) / 1e3);
     var elapsed, secs;
 
-    elapsed = now() - view[0].uploadStart;
+    elapsed = now - view[0].uploadStart;
     secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
     if (Number(view.find(".upload-info")[0].dataset.id) === id) setTitle(progress);
@@ -2509,15 +2510,11 @@
     }
   }
 
-  function now() {
-    return Math.round(performance.now());
-  }
-
   function throttle(func, threshold) {
     if (!threshold) threshold = 250;
     var last, deferTimer;
     return function() {
-      var cur = now(), args = arguments;
+      var cur = performance.now(), args = arguments;
       if (last && cur < last + threshold) {
         clearTimeout(deferTimer);
         deferTimer = setTimeout(function() {
