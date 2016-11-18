@@ -805,7 +805,7 @@ video:not(.vjs-tech) {
 .upload-info {
   background: #181818;
   color: #eee;
-  transition: flex-basis .15s;
+  transition: flex-basis .2s;
   width: 100%;
   position: relative;
   display: flex;

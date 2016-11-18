@@ -674,15 +674,14 @@
   function uploadFinish(view, id) {
     view[0].isUploading = false;
     setTitle(basename(view[0].currentFolder));
-    setTimeout(function() {
-      $(".upload-info[data-id=\"" + id + "\"]").removeClass("in").transitionend(function() {
-        $(this).remove();
-      });
-    }, 250);
+    $('.upload-info[data-id="' + id + '"]').removeClass("in").transitionend(function() {
+      $(this).remove();
+    });
     showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
   }
 
   function uploadProgress(view, id, sent, total) {
+    if (!view[0].isUploading) return;
     var info = $(".upload-info[data-id=\"" + id + "\"]");
     var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
     var now = performance.now();
