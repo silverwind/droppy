@@ -660,7 +660,7 @@
   }
 
   function uploadSuccess(id) {
-    var info = $(".upload-info[data-id=\"" + id + "\"]");
+    var info = $('.upload-info[data-id="' + id + '"]');
     info.find(".upload-bar")[0].style.width = "100%";
     info.find(".upload-percentage")[0].textContent = "100%";
     info.find(".upload-title")[0].textContent = "Processing ...";
@@ -682,7 +682,7 @@
 
   function uploadProgress(view, id, sent, total) {
     if (!view[0].isUploading) return;
-    var info = $(".upload-info[data-id=\"" + id + "\"]");
+    var info = $('.upload-info[data-id="' + id + '"]');
     var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
     var now = performance.now();
     var speed = sent / ((now - view[0].uploadStart) / 1e3);
@@ -1412,7 +1412,7 @@
     var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header[0].dataset.sort);
     if (view[0].sortAsc) entries = entries.reverse();
     entries.forEach(function(_, i) {
-      var entry = view.find("[data-name=\"" + entries[i].sortname + "\"]")[0];
+      var entry = view.find('[data-name="' + entries[i].sortname + '"]')[0];
       entry.style.order = i;
       entry.setAttribute("order", i);
     });
