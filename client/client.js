@@ -1553,11 +1553,6 @@
           view[0].ps = null;
           updateLocation(view, view[0].currentFolder);
         });
-        // Forward click event to svg parents, probably a ps bug
-        var arrowsSVG = view.find(".pswp__button--arrow--left svg, .pswp__button--arrow--right svg");
-        arrowsSVG.register("click", function(e) {
-          $(e.target).parents(".pswp__button")[0].click();
-        });
         // fit zoom buttons
         view[0].ps.zoomed = {h: false, v: false};
         function fitH(dur) {
@@ -1567,6 +1562,7 @@
           view[0].ps.zoomTo(view[0].ps.zoomed.h ? initial : vw / iw, middle, dur);
           view[0].ps.zoomed.v = false;
           view[0].ps.zoomed.h = !view[0].ps.zoomed.h;
+          setZoomed(Boolean(view[0].ps.zoomed.h));
         }
         function fitV(dur) {
           var vh = view[0].ps.viewportSize.y, ih = view[0].ps.currItem.h;
@@ -1575,6 +1571,10 @@
           view[0].ps.zoomTo(view[0].ps.zoomed.v ? initial : vh / ih, middle, dur);
           view[0].ps.zoomed.h = false;
           view[0].ps.zoomed.v = !view[0].ps.zoomed.v;
+          setZoomed(Boolean(view[0].ps.zoomed.v));
+        }
+        function setZoomed(zoomed) {
+          view.find(".pswp__button--zoom").html(svg(zoomed ? "zoomout" : "zoomin"));
         }
         view.find(".fit-h").register("click", fitH.bind(null, 300));
         view.find(".fit-v").register("click", fitV.bind(null, 300));
@@ -1589,12 +1589,8 @@
         });
         // swap SVGs
         var rootEl = view.find(".pswp")[0];
-        observeClassChange(rootEl, "pswp--zoomed-in", function(added) {
-          view.find(".pswp__button--zoom").html(svg(added ? "zoomout" : "zoomin"));
-        });
-        observeClassChange(rootEl, "pswp--fs", function(added) {
-          view.find(".pswp__button--fs").html(svg(added ? "unfullscreen" : "fullscreen"));
-        });
+        observeClassChange(rootEl, "pswp--zoomed-in", setZoomed);
+        observeClassChange(rootEl, "pswp--fs", setZoomed);
         view[0].ps.init();
         hideSpinner(view);
       });

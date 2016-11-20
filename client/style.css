@@ -637,6 +637,7 @@ html:not(.mobile) #entry-menu a.active {
   width: 2em;
   position: absolute;
   transition: .25s;
+  pointer-events: none;
 }
 
 .pswp__button--arrow--left svg  { transform: rotate(270deg) translateX(50%);  left:  -.25em }
