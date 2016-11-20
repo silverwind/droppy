@@ -584,12 +584,12 @@ html:not(.mobile) #entry-menu a.active {
   height: 98px !important;
   pointer-events: none;
   color: #e6e6e6;
+  z-index: 1;
 }
 
 .pswp__button {
   opacity: 1;
   background: none !important;
-  margin-top: .1rem;
 }
 
 .pswp__counter {
@@ -606,9 +606,8 @@ html:not(.mobile) #entry-menu a.active {
   opacity: 1;
 }
 .pswp__top-bar svg {
-  height: 36px;
-  width: 36px;
-  stroke-width: 1;
+  height: 34px;
+  width: 34px;
 }
 .pswp__button--zoom:hover { color: #f82 }
 .pswp__button--close:hover { color: #d44 }
@@ -625,9 +624,12 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--arrow--left, .pswp__button--arrow--right {
   width: 3em;
   cursor: pointer;
-  color: #eee;
+  color: #fff;
   stroke: #444;
   stroke-width: 12;
+  height: 100% !important;
+  top: 0 !important;
+  margin-top: 0 !important;
 }
 
 .pswp__button--arrow--left svg, .pswp__button--arrow--right svg {
@@ -639,8 +641,8 @@ html:not(.mobile) #entry-menu a.active {
 
 .pswp__button--arrow--left svg  { transform: rotate(270deg) translateX(50%);  left:  -.25em }
 .pswp__button--arrow--right svg { transform: rotate(90deg)  translateX(-50%); right: -.25em }
-.pswp__button--arrow--left:hover svg  { height: 3em; width: 3em; left:  -.75em }
-.pswp__button--arrow--right:hover svg { height: 3em; width: 3em; right: -.75em }
+.pswp__button--arrow--left:hover svg  { height: 2.5em; width: 2.5em; left:  -.5em }
+.pswp__button--arrow--right:hover svg { height: 2.5em; width: 2.5em; right: -.5em }
 
 /* ================================= Video.js ================================= */
 
