@@ -116,19 +116,13 @@
   });
 
   function svg(which) {
-    // manually clone instead of <use> because of a weird bug with media arrows in Firefox
+    // Manually clone instead of <use> because of a weird bug with media arrows in Firefox
     var svg = document.getElementById("i-" + which).cloneNode(true);
     svg.setAttribute("class", svg.id.replace("i-", ""));
     svg.removeAttribute("id");
 
     // Edge doesn't support outerHTML on SVG
-    var html = svg.outerHTML;
-    if (!html) {
-      var tmp = document.createElement("div");
-      tmp.appendChild(svg);
-      html = tmp.innerHTML;
-    }
-
+    var html = svg.outerHTML || document.createElement("div").appendChild(svg).parentNode.innerHTML;
     return html.replace(/(?!<\/)?symbol/g, "svg");
   }
   Handlebars.registerHelper("svg", svg);
