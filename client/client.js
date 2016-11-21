@@ -1877,7 +1877,7 @@
       });
       view[0].playlistLength = i;
     }
-    view[0].playlistIndex = typeof index === "number" ? index : row[0].dataset.playindex;
+    view[0].playlistIndex = typeof index === "number" ? index : Number(row[0].dataset.playindex);
   }
 
   function onNewAudio(view) {
