@@ -120,7 +120,16 @@
     var svg = document.getElementById("i-" + which).cloneNode(true);
     svg.setAttribute("class", svg.id.replace("i-", ""));
     svg.removeAttribute("id");
-    return svg.outerHTML.replace(/(?!<\/)?symbol/g, "svg");
+
+    // Edge doesn't support outerHTML on SVG
+    var html = svg.outerHTML;
+    if (!html) {
+      var tmp = document.createElement("div");
+      tmp.appendChild(svg);
+      html = tmp.innerHTML;
+    }
+
+    return html.replace(/(?!<\/)?symbol/g, "svg");
   }
   Handlebars.registerHelper("svg", svg);
 
