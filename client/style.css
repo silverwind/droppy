@@ -592,6 +592,10 @@ html:not(.mobile) #entry-menu a.active {
   background: none !important;
 }
 
+.pswp__button svg {
+  pointer-events: none;
+}
+
 .pswp__counter {
   opacity: 1 !important;
   color: inherit !important;
@@ -637,7 +641,6 @@ html:not(.mobile) #entry-menu a.active {
   width: 2em;
   position: absolute;
   transition: .25s;
-  pointer-events: none;
 }
 
 .pswp__button--arrow--left svg  { transform: rotate(270deg) translateX(50%);  left:  -.25em }
@@ -697,6 +700,8 @@ video:not(.vjs-tech) {
 
 .view[data-type="document"] ::-webkit-scrollbar {
   background: transparent !important;
+  max-width: 6px !important;
+  max-height: 6px !important;
 }
 .view[data-type="document"] ::-webkit-scrollbar-thumb {
   background: rgba(128,128,128,.5) !important;

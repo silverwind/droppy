@@ -53,7 +53,7 @@
     "autoprefixer": "^6.5.3",
     "cheerio": "^0.22.0",
     "clean-css": "^3.4.21",
-    "codemirror": "^5.20.2",
+    "codemirror": "^5.21.0",
     "handlebars": "^4.0.6",
     "html-minifier": "^3.2.2",
     "iltorb": "^1.0.13",
