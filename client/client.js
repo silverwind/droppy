@@ -39,10 +39,10 @@
 //  Set up a few more things
 // ============================================================================
   // Shorthand for safe event listeners
-  $.fn.register = function(events, callback) {
+  $.fn.reg = function(events, callback) {
     return this.off(events).on(events, callback);
   };
-  $.fn.registerOne = function(events, callback) {
+  $.fn.regOne = function(events, callback) {
     return this.off(events).one(events, callback);
   };
 
@@ -350,11 +350,11 @@
         droppy.modes.unshift("plain");
 
         if (droppy.demo || droppy.public) {
-          $("#logout").addClass("disabled").register("click", function() {
+          $("#logout").addClass("disabled").reg("click", function() {
             showError(getView(0), "Signing out is disabled");
           });
         } else {
-          $("#logout").register("click", function() {
+          $("#logout").reg("click", function() {
             ajax({
               method: "POST",
               url: getRootPath() + "!/logout",
@@ -421,10 +421,10 @@
 //  Authentication page
 // ============================================================================
   function initAuthPage(firstrun) {
-    $("#remember").register("click", function() {
+    $("#remember").reg("click", function() {
       $(this).toggleClass("checked");
     });
-    $("#form").register("submit", function(e) {
+    $("#form").reg("submit", function(e) {
       var path = getRootPath();
       e.preventDefault();
       ajax({
@@ -461,7 +461,7 @@
     openSocket();
 
     // Re-fit path line after 25ms of no resizing
-    $(window).register("resize", function() {
+    $(window).reg("resize", function() {
       clearTimeout(droppy.resizeTimer);
       droppy.resizeTimer = setTimeout(function() {
         $(".view").each(function() {
@@ -494,7 +494,7 @@
       toggleButtons(view[0].dataset.type);
     });
 
-    $(document).register(screenfull.raw.fullscreenchange, function() {
+    $(document).reg(screenfull.raw.fullscreenchange, function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
       $(".full svg, .fs svg").replaceWith(svg(screenfull.isFullscreen ? "unfullscreen" : "fullscreen"));
@@ -511,7 +511,7 @@
     });
 
     // File upload button
-    $("#af").register("click", function() {
+    $("#af").reg("click", function() {
       if ($(this).hasClass("disabled")) return;
       // Remove the directory attributes so we get a file picker dialog!
       if (droppy.detects.directoryUpload) {
@@ -525,7 +525,7 @@
     // Folder upload button - check if we support directory uploads
     if (droppy.detects.directoryUpload) {
       // Directory uploads supported - enable the button
-      $("#ad").register("click", function() {
+      $("#ad").reg("click", function() {
         if ($(this).hasClass("disabled")) return;
         // Set the directory attribute so we get a directory picker dialog
         droppy.dir.forEach(function(attr) {
@@ -546,7 +546,7 @@
       });
     }
 
-    $("#cf, #cd").register("click", function() {
+    $("#cf, #cd").reg("click", function() {
       if ($(this).hasClass("disabled")) return;
       var view = getActiveView();
       var content = view.find(".content");
@@ -601,14 +601,14 @@
         splitting = false;
       });
     };
-    $("#split").register("click", droppy.split);
+    $("#split").reg("click", droppy.split);
 
-    $("#about").register("click", function() {
+    $("#about").reg("click", function() {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    $("#prefs").register("click", function() {
+    $("#prefs").reg("click", function() {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
@@ -625,7 +625,7 @@
     $(Handlebars.templates["upload-info"]({
       id: id,
       title: files.length === 1 ? basename(files[0]) : files.length + " files",
-    })).appendTo(view).transition("in").find(".upload-cancel").register("click", function() {
+    })).appendTo(view).transition("in").find(".upload-cancel").reg("click", function() {
       xhr.abort();
       uploadCancel(view, id);
     });
@@ -724,7 +724,7 @@
     // Add inline element
     var renamer = $('<input type="text" class="inline-namer" value="' + linkText +
                     '" placeholder="' + linkText + '">').insertAfter(link);
-    renamer.register("input", function() {
+    renamer.reg("input", function() {
       var input = this.value;
       var valid = validFilename(input, droppy.platform);
       var exists = activeFiles.some(function(file) {
@@ -732,7 +732,7 @@
       });
       canSubmit = valid && !exists;
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
-    }).register("blur focusout", submitEdit.bind(null, view, true, callback));
+    }).reg("blur focusout", submitEdit.bind(null, view, true, callback));
 
     var nameLength = linkText.lastIndexOf(".");
     renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : linkText.length);
@@ -781,7 +781,7 @@
       $(".data-row.active").removeClass("active");
     }
 
-    cc.register("click", toggleCatcher.bind(null, false));
+    cc.reg("click", toggleCatcher.bind(null, false));
     cc[show ? "addClass" : "removeClass"]("in");
   }
 
@@ -791,7 +791,7 @@
   }
 
   // Listen for popstate events, which indicate the user navigated back
-  $(window).register("popstate", function() {
+  $(window).reg("popstate", function() {
     if (!droppy.socket) return;
     var locs = getLocationsFromHash();
     droppy.views.forEach(function(view) {
@@ -917,7 +917,7 @@
     function addPart(name, path) {
       var li = $("<li><a>" + name + "</a></li>");
       li[0].dataset.destination = path;
-      li.register("click", function(event) {
+      li.reg("click", function(event) {
         var view = $(event.target).parents(".view");
         if (droppy.socketWait) return;
         if ($(this).is(":last-child")) {
@@ -1005,7 +1005,7 @@
     var html = Handlebars.templates.directory({entries: entries, sort: sort});
     loadContent(view, "directory", null, html).then(function() {
       // Upload button on empty page
-      view.find(".empty").register("click", function() {
+      view.find(".empty").reg("click", function() {
         var inp = $("#file");
         if (droppy.detects.directoryUpload) {
           droppy.dir.forEach(function(attr) {
@@ -1016,14 +1016,14 @@
       });
 
       // Switch into a folder
-      view.find(".folder-link").register("click", function(event) {
+      view.find(".folder-link").reg("click", function(event) {
         if (droppy.socketWait) return;
         updateLocation(view, $(this).parents(".data-row")[0].dataset.id);
         event.preventDefault();
       });
 
       // Click on a file link
-      view.find(".file-link").register("click", function(event) {
+      view.find(".file-link").reg("click", function(event) {
         if (droppy.socketWait) return;
         var view = $(event.target).parents(".view");
         openFile(view, view[0].currentFolder, event.target.textContent);
@@ -1034,19 +1034,19 @@
         this.setAttribute("order", index);
       });
 
-      view.find(".data-row").register("contextmenu", function(event) {
+      view.find(".data-row").reg("contextmenu", function(event) {
         var target = $(event.currentTarget);
         if (target[0].dataset.type === "error") return;
         showEntryMenu(target, event.clientX, event.clientY);
         event.preventDefault();
       });
 
-      view.find(".data-row .entry-menu").register("click", function(event) {
+      view.find(".data-row .entry-menu").reg("click", function(event) {
         showEntryMenu($(event.target).parents(".data-row"), event.clientX, event.clientY);
       });
 
       // Stop navigation when clicking on an <a>
-      view.find(".data-row .zip, .data-row .download, .entry-link.file").register("click", function(event) {
+      view.find(".data-row .zip, .data-row .download, .entry-link.file").reg("click", function(event) {
         event.stopPropagation();
         if (droppy.socketWait) return;
 
@@ -1062,12 +1062,12 @@
       });
 
       // Request a sharelink
-      view.find(".share-file").register("click", function() {
+      view.find(".share-file").reg("click", function() {
         if (droppy.socketWait) return;
         requestLink($(this).parents(".view"), $(this).parents(".data-row")[0].dataset.id, true);
       });
 
-      view.find(".icon-play").register("click", function() {
+      view.find(".icon-play").reg("click", function() {
         var view = $(this).parents(".view");
 
         if ($(this).parents(".data-row").hasClass("playing"))
@@ -1076,7 +1076,7 @@
         play(view, $(this).parents(".data-row"));
       });
 
-      view.find(".header-name, .header-mtime, .header-size").register("click", function() {
+      view.find(".header-name, .header-mtime, .header-size").reg("click", function() {
         sortByHeader(view, $(this));
       });
 
@@ -1159,15 +1159,15 @@
         $(this).removeClass("active");
       });
       toggleCatcher(true);
-      dropSelect.children(".movefile").registerOne("click", function() {
+      dropSelect.children(".movefile").regOne("click", function() {
         sendDrop(view, "cut", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".copyfile").registerOne("click", function() {
+      dropSelect.children(".copyfile").regOne("click", function() {
         sendDrop(view, "copy", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".viewfile").registerOne("click", function() {
+      dropSelect.children(".viewfile").regOne("click", function() {
         updateLocation(view, src);
         toggleCatcher(false);
       });
@@ -1191,7 +1191,7 @@
     view.find(".data-row .entry-link").each(function() {
       this.setAttribute("draggable", "true");
     });
-    view.register("dragstart", function(event) {
+    view.reg("dragstart", function(event) {
       var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
 
       if (event.ctrlKey || event.metaKey || event.altKey)
@@ -1233,7 +1233,7 @@
   droppy.dragTimer = new DragTimer();
 
   function allowDrop(el) {
-    el.register("dragover", function(event) {
+    el.reg("dragover", function(event) {
       event.preventDefault();
       droppy.dragTimer.refresh();
     });
@@ -1241,7 +1241,7 @@
 
   function bindHoverEvents(view) {
     var dropZone = view.find(".dropzone");
-    view.register("dragenter", function(event) {
+    view.reg("dragenter", function(event) {
       event.stopPropagation();
       droppy.activeView = view[0].vId;
       var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
@@ -1272,7 +1272,7 @@
     });
 
     // drag between views
-    view.register("drop", function(event) {
+    view.reg("drop", function(event) {
       var dragData = event.originalEvent.dataTransfer.getData("text");
       var view = $(event.target).parents(".view");
       event.preventDefault();
@@ -1298,14 +1298,14 @@
 
   function initEntryMenu() {
     // Play an audio file
-    $("#entry-menu .play").register("click", function(event) {
+    $("#entry-menu .play").reg("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       play(view, entry);
       toggleCatcher(false);
     });
 
-    $("#entry-menu .edit").register("click", function(event) {
+    $("#entry-menu .edit").reg("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
@@ -1317,7 +1317,7 @@
     });
 
     // Click on a "open" link
-    $("#entry-menu .openfile").register("click", function(event) {
+    $("#entry-menu .openfile").reg("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
@@ -1328,7 +1328,7 @@
     });
 
     // Rename a file/folder
-    $("#entry-menu .rename").register("click", function(event) {
+    $("#entry-menu .rename").reg("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       if (droppy.socketWait) return;
@@ -1341,7 +1341,7 @@
     });
 
     // Copy/cut a file/folder
-    $("#entry-menu .copy, #entry-menu .cut").register("click", function(event) {
+    $("#entry-menu .copy, #entry-menu .cut").reg("click", function(event) {
       event.stopPropagation();
       toggleCatcher(false);
       droppy.clipboard = {
@@ -1352,7 +1352,7 @@
     });
 
     // Delete a file/folder
-    $("#entry-menu .delete").register("click", function(event) {
+    $("#entry-menu .delete").reg("click", function(event) {
       var entry = droppy.menuTarget, view = entry.parents(".view");
       event.stopPropagation();
       if (droppy.socketWait) return;
@@ -1368,7 +1368,7 @@
     if (droppy.clipboard) {
       $(".view").each(function() {
         var view = $(this), button = view.find(".paste-button");
-        button.addClass("in").registerOne("click", function(event) {
+        button.addClass("in").regOne("click", function(event) {
           event.stopPropagation();
           if (droppy.socketWait) return;
           droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
@@ -1579,8 +1579,8 @@
         function setZoomed(zoomed) {
           view.find(".pswp__button--zoom").html(svg(zoomed ? "zoomout" : "zoomin"));
         }
-        view.find(".fit-h").register("click", fitH.bind(null, 300));
-        view.find(".fit-v").register("click", fitV.bind(null, 300));
+        view.find(".fit-h").reg("click", fitH.bind(null, 300));
+        view.find(".fit-v").reg("click", fitV.bind(null, 300));
         view[0].ps.listen("afterChange", function() {
           if (view[0].ps.zoomed.h) {
             view[0].ps.zoomed.h = false;
@@ -1707,18 +1707,18 @@
         editor.setValue(data);
         editor.clearHistory();
 
-        view.find(".exit").register("click", function() {
+        view.find(".exit").reg("click", function() {
           closeDoc($(this).parents(".view"));
           editor = null;
         });
-        view.find(".save").register("click", function() {
+        view.find(".save").reg("click", function() {
           save($(this).parents(".view")[0].editor);
         });
-        view.find(".ww").register("click", function() {
+        view.find(".ww").reg("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
           droppy.set("lineWrapping", editor.options.lineWrapping);
         });
-        view.find(".syntax").register("click", function() {
+        view.find(".syntax").reg("click", function() {
           var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
           view.find(".mode-select").on("change", function() {
@@ -1728,11 +1728,11 @@
             editor.setOption("mode", this.value);
           });
         });
-        view.find(".find").register("click", function() {
+        view.find(".find").reg("click", function() {
           CodeMirror.commands.find(editor);
           view.find(".CodeMirror-search-field")[0].focus();
         });
-        view.find(".full").register("click", function() {
+        view.find(".full").reg("click", function() {
           screenfull.toggle($(this).parents(".content")[0]);
         });
         hideSpinner(view);
@@ -1745,7 +1745,7 @@
     var box = $("#prefs-box");
     box.find(".list-user").remove();
     box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
-    box.find(".add-user").register("click", function() {
+    box.find(".add-user").reg("click", function() {
       var user = prompt("Username?");
       if (!user) return;
       var pass = prompt("Password?");
@@ -1756,7 +1756,7 @@
         priv: true
       });
     });
-    box.find(".delete-user").register("click", function(event) {
+    box.find(".delete-user").reg("click", function(event) {
       event.stopPropagation();
       sendMessage(null, "UPDATE_USER", {
         name: $(this).parents("li").children(".username").textContent,
@@ -1790,7 +1790,7 @@
       return Handlebars.templates.options({opts: opts});
     });
 
-    $("select.theme").register("change", function() {
+    $("select.theme").reg("change", function() {
       var theme = this.value;
       loadTheme(theme, function() {
         droppy.set("theme", theme);
@@ -1800,7 +1800,7 @@
       });
     });
 
-    $("select.editorFontSize").register("change", function() {
+    $("select.editorFontSize").reg("change", function() {
       setEditorFontSize(this.value);
     });
 
@@ -1899,7 +1899,7 @@
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
 
-    $(player).register("timeupdate", function() {
+    $(player).reg("timeupdate", function() {
       var cur = player.currentTime, max = player.duration;
       if (!cur || !max) return;
       view[0].querySelector(".seekbar-played").style.width = (cur / max) * 100 + "%";
@@ -1940,22 +1940,22 @@
       var right  = slider.getBoundingClientRect().right;
       setVolume((event.pageX - left) / (right - left));
     }, 1000 / 60);
-    slider.register("mousedown", function(event) {
+    slider.reg("mousedown", function(event) {
       heldVolume = true;
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.register("mousemove", function(event) {
+    bar.reg("mousemove", function(event) {
       if (heldVolume) updateVolume(event);
     });
-    bar.register("mouseup", function() {
+    bar.reg("mouseup", function() {
       heldVolume = false;
     });
-    slider.register("click", function(event) {
+    slider.reg("click", function(event) {
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.register("click", function(event) {
+    bar.reg("click", function(event) {
       var time = player.duration *
         ((event.pageX - bar[0].getBoundingClientRect().left) / bar[0].clientWidth);
       if (!isNaN(parseFloat(time)) && isFinite(time))
@@ -1963,15 +1963,15 @@
       else
         endAudio($(this).parents(".view"));
     });
-    bar.find(".previous").register("click", function(event) {
+    bar.find(".previous").reg("click", function(event) {
       playPrev($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".next").register("click", function(event) {
+    bar.find(".next").reg("click", function(event) {
       playNext($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".pause-play").register("click", function(event) {
+    bar.find(".pause-play").reg("click", function(event) {
       var icon   = $(this).children("svg");
       var player = $(this).parents(".audio-bar").find(".audio-player")[0];
       if (icon[0].className === "play") {
@@ -1984,11 +1984,11 @@
       event.stopPropagation();
     });
 
-    bar.find(".stop").register("click", function(event) {
+    bar.find(".stop").reg("click", function(event) {
       endAudio($(this).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".shuffle").register("click", function(event) {
+    bar.find(".shuffle").reg("click", function(event) {
       $(this).toggleClass("active");
       $(this).parents(".view")[0].shuffle = $(this).hasClass("active");
       event.stopPropagation();
@@ -2003,7 +2003,7 @@
     slider[0].addEventListener("DOMMouseScroll", onWheel);
     volumeIcon[0].addEventListener("mousewheel", onWheel);
     volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
-    volumeIcon.register("click", function(event) {
+    volumeIcon.reg("click", function(event) {
       slider.toggleClass("in");
       volumeIcon.toggleClass("active");
       event.stopPropagation();
@@ -2460,7 +2460,7 @@
     };
 
     out[0].textContent = getFullLink(link);
-    out.register("copy", function() {
+    out.reg("copy", function() {
       setTimeout(toggleCatcher.bind(null, false), 100);
     });
     box.find(".icon svg").replaceWith(svg("link"));
@@ -2469,7 +2469,7 @@
       select();
     });
 
-    copy.register("click", function() {
+    copy.reg("click", function() {
       var done;
       select();
       try { done = document.execCommand("copy"); } catch (err) {}
@@ -2478,7 +2478,7 @@
       copy[0].setAttribute("aria-label", "Copy to clipboard");
     });
 
-    dl.register("click", function() {
+    dl.reg("click", function() {
       $(this).toggleClass("checked");
       requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"), function(link) {
         out[0].textContent = getFullLink(link);
