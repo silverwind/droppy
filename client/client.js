@@ -1592,15 +1592,14 @@
         });
         // swap SVGs
         var rootEl = view.find(".pswp")[0];
-        observeClassChange(rootEl, "pswp--zoomed-in", setZoomed);
-        observeClassChange(rootEl, "pswp--fs", setZoomed);
+        onClassChange(rootEl, "pswp--zoomed-in", setZoomed);
+        onClassChange(rootEl, "pswp--fs", setZoomed);
         view[0].ps.init();
-        hideSpinner(view);
-      });
+        });
     });
   }
 
-  function observeClassChange(target, className, cb) {
+  function onClassChange(target, className, cb) {
     var hadClass = false;
     (new MutationObserver(function(muts) {
       muts.some(function(mut) {
