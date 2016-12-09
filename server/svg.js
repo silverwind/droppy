@@ -6,7 +6,11 @@ var path = require("path");
 var paths = require("./paths.js").get();
 
 module.exports = function spritesheet() {
-  var sprites = svgstore();
+  var sprites = svgstore({
+    svgAttrs: {
+      style: "display: none",
+    },
+  });
 
   fs.readdirSync(paths.svg).forEach(function(file) {
     sprites.add("i-" + file.replace(/\.svg/, ""), fs.readFileSync(path.join(paths.svg, file)));
