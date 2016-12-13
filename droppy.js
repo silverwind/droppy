@@ -13,6 +13,7 @@ var fs   = require("graceful-fs");
 var pkg  = require("./package.json");
 
 process.title = pkg.name;
+process.chdir(__dirname);
 
 var cmds = {
   start     : "start                  Start the server",
