@@ -219,15 +219,16 @@ nav {
 .path li:nth-child(even):hover       { background: #25a; color: #fff }
 .path li:nth-child(even):hover .triangle   { fill: #25a }
 
-.path li:nth-child(1)  { z-index: 15 }
-.path li:nth-child(2)  { z-index: 14 }
-.path li:nth-child(3)  { z-index: 13 }
-.path li:nth-child(4)  { z-index: 12 }
-.path li:nth-child(5)  { z-index: 11 }
-.path li:nth-child(6)  { z-index: 10 }
-.path li:nth-child(7)  { z-index: 9 }
-.path li:nth-child(8)  { z-index: 8 }
-.path li:nth-child(9)  { z-index: 7 }
+.path li:nth-child(1)  { z-index: 16 }
+.path li:nth-child(2)  { z-index: 15 }
+.path li:nth-child(3)  { z-index: 14 }
+.path li:nth-child(4)  { z-index: 13 }
+.path li:nth-child(5)  { z-index: 12 }
+.path li:nth-child(6)  { z-index: 11 }
+.path li:nth-child(7)  { z-index: 10 }
+.path li:nth-child(8)  { z-index: 9 }
+.path li:nth-child(9)  { z-index: 8 }
+.path li:nth-child(10) { z-index: 7 }
 .path li:nth-child(11) { z-index: 6 }
 .path li:nth-child(12) { z-index: 5 }
 .path li:nth-child(13) { z-index: 4 }
