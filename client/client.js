@@ -1595,7 +1595,7 @@
         onClassChange(rootEl, "pswp--zoomed-in", setZoomed);
         onClassChange(rootEl, "pswp--fs", setZoomed);
         view[0].ps.init();
-        });
+      });
     });
   }
 
