@@ -1410,7 +1410,7 @@
   function sortByHeader(view, header) {
     view[0].sortBy = /header-(\w+)/.exec(header[0].className)[1];
     view[0].sortAsc = header.hasClass("down");
-    header[0].classname = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
+    header[0].className = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
     header.siblings().removeClass("active up down");
     var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header[0].dataset.sort);
     if (view[0].sortAsc) entries = entries.reverse();
