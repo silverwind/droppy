@@ -498,7 +498,6 @@ nav {
   flex: 0 0 24px;
   height: 24px;
   background-size: 240px 216px;
-  transform-origin: center;
   align-self: center;
 }
 
@@ -1338,13 +1337,15 @@ video:not(.vjs-tech) {
 
 .link-out {
   white-space: nowrap;
-  padding: .25em .5em;
+  padding: .25em;
   position: relative;
 }
 .link-out:after {
+  content: "";
   position: absolute;
   right: 0; top: 0; bottom: 0;
   width: 1rem;
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1))
 }
 
 .info-box span {
@@ -1368,7 +1369,6 @@ video:not(.vjs-tech) {
   color: #fff;
   border-radius: 0 6px 6px 0;
   cursor: pointer;
-  margin-left: .25em;
   user-select: none;
 }
 .info-box.error .link-options { display: none }
