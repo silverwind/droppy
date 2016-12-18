@@ -10,6 +10,9 @@ endif
 
 JQUERY_FLAGS=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
 
+deps:
+	yarn global add eslint@latest eslint-plugin-unicorn@latest stylelint@latest uglify-js@latest grunt@latest npm-check-updates@latest
+
 lint:
 	eslint --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
 	stylelint client/*.css
@@ -66,4 +69,4 @@ patch: lint build npm-patch deploy publish docker docker-push
 minor: lint build npm-minor deploy publish docker docker-push
 major: lint build npm-major deploy publish docker docker-push
 
-.PHONY: lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
+.PHONY: deps lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
