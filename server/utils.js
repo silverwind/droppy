@@ -5,7 +5,6 @@ var async    = require("async");
 var cd       = require("content-disposition");
 var cpr      = require("cpr");
 var crypto   = require("crypto");
-var dhparam  = require("dhparam");
 var escRe    = require("escape-string-regexp");
 var ext      = require("file-extension");
 var fs       = require("graceful-fs");
@@ -16,12 +15,10 @@ var mv       = require("mv");
 var path     = require("path");
 var rimraf   = require("rimraf");
 var util     = require("util");
-var ut       = require("untildify");
 var validate = require("valid-filename");
 
-var db     = require("./db.js");
-var log    = require("./log.js");
 var paths  = require("./paths.js").get();
+var log    = require("./log.js");
 
 var forceBinaryTypes = [
   "pdf",
@@ -29,8 +26,6 @@ var forceBinaryTypes = [
   "eps",
   "ai"
 ];
-
-var DHPARAM_BITS = 2048;
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
@@ -224,62 +219,6 @@ utils.readJsonBody = function readJsonBody(req) {
   });
 };
 
-var cbs = [];
-utils.tlsInit = function tlsInit(opts, cb) {
-  if (!cbs[opts.index]) {
-    cbs[opts.index] = [cb];
-    utils.tlsSetup(opts, function(err, tlsData) {
-      cbs[opts.index].forEach(function(cb) {
-        cb(err, tlsData);
-      });
-    });
-  } else cbs[opts.index].push(cb);
-};
-
-utils.tlsSetup = function tlsSetup(opts, cb) {
-  opts.honorCipherOrder = true;
-
-  if (typeof opts.key !== "string")
-    return cb(new Error("Missing TLS option 'key'"));
-  if (typeof opts.cert !== "string")
-    return cb(new Error("Missing TLS option 'cert'"));
-
-  var certPaths = [
-    path.resolve(paths.config, ut(opts.key)),
-    path.resolve(paths.config, ut(opts.cert)),
-    opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
-    opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
-  ];
-
-  async.map(certPaths, readFile, function(_, data) {
-    var certStart = "-----BEGIN CERTIFICATE-----";
-    var certEnd   = "-----END CERTIFICATE-----";
-
-    var key     = data[0];
-    var cert    = data[1];
-    var ca      = data[2];
-    var dhparam = data[3];
-
-    if (!key)  return cb(new Error("Unable to read TLS key: " + certPaths[0]));
-    if (!cert) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
-    if (opts.ca && !ca) return cb(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
-    if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
-
-    // Split combined certificate and intermediate
-    if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
-      ca   = cert.substring(cert.lastIndexOf(certStart));
-      cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
-    }
-
-    cb(null, {
-      key     : key,
-      cert    : cert,
-      ca      : ca,
-      dhparam : dhparam || db.get("dhparam") || createDH()
-    });
-  });
-};
-
 utils.countOccurences = function countOccurences(string, search) {
   var num = 0, pos = 0;
   while (true) {
@@ -341,14 +280,7 @@ utils.extensionRe = function extensionRe(arr) {
   return RegExp("\\.(" + arr.join("|") + ")$", "i");
 };
 
-function createDH() {
-  log.info("Generating " + DHPARAM_BITS + " bit DH parameters. This will take a long time.");
-  var dh = dhparam(DHPARAM_BITS);
-  db.set("dhparam", dh);
-  return dh;
-}
-
-function readFile(p, cb) {
+utils.readFile = function(p, cb) {
   if (typeof p !== "string") return cb(null);
   fs.stat(p, function(_, stats) {
     if (stats && stats.isFile()) {
@@ -360,4 +292,4 @@ function readFile(p, cb) {
       cb(null);
     }
   });
-}
+};

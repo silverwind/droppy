@@ -14,6 +14,7 @@ var fs       = require("graceful-fs");
 var imgSize  = require("image-size");
 var readdirp = require("readdirp");
 var schedule = require("node-schedule");
+var ut       = require("untildify");
 var yazl     = require("yazl");
 
 var pkg       = require("./../package.json");
@@ -238,7 +239,7 @@ function createListener(handler, opts, callback) {
     tls.CLIENT_RENEG_WINDOW = Infinity;
 
     var https = require("https");
-    utils.tlsInit(opts, function(err, tlsOptions) {
+    tlsInit(opts, function(err, tlsOptions) {
       if (err) return callback(err);
       server = https.createServer(tlsOptions);
 
@@ -1193,6 +1194,69 @@ function streamFile(req, res, filepath, download, stats) {
 
 function validateRequest(req) {
   return Boolean(cookies.get(req.headers.cookie) || config.public);
+}
+
+var cbs = [];
+function tlsInit(opts, cb) {
+  if (!cbs[opts.index]) {
+    cbs[opts.index] = [cb];
+    tlsSetup(opts, function(err, tlsData) {
+      cbs[opts.index].forEach(function(cb) {
+        cb(err, tlsData);
+      });
+    });
+  } else cbs[opts.index].push(cb);
+}
+
+function tlsSetup(opts, cb) {
+  opts.honorCipherOrder = true;
+
+  if (typeof opts.key !== "string")
+    return cb(new Error("Missing TLS option 'key'"));
+  if (typeof opts.cert !== "string")
+    return cb(new Error("Missing TLS option 'cert'"));
+
+  var certPaths = [
+    path.resolve(paths.config, ut(opts.key)),
+    path.resolve(paths.config, ut(opts.cert)),
+    opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
+    opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
+  ];
+
+  async.map(certPaths, utils.readFile, function(_, data) {
+    var certStart = "-----BEGIN CERTIFICATE-----";
+    var certEnd   = "-----END CERTIFICATE-----";
+
+    var key     = data[0];
+    var cert    = data[1];
+    var ca      = data[2];
+    var dhparam = data[3];
+
+    if (!key)  return cb(new Error("Unable to read TLS key: " + certPaths[0]));
+    if (!cert) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
+    if (opts.ca && !ca) return cb(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
+    if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
+
+    // Split combined certificate and intermediate
+    if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
+      ca   = cert.substring(cert.lastIndexOf(certStart));
+      cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
+    }
+
+    function createDH() {
+      log.info("Generating 2048 bit DH parameters. This will take a long time.");
+      var dh = require("dhparam")(2048);
+      db.set("dhparam", dh);
+      return dh;
+    }
+
+    cb(null, {
+      key     : key,
+      cert    : cert,
+      ca      : ca,
+      dhparam : dhparam || db.get("dhparam") || createDH()
+    });
+  });
 }
 
 // Hourly tasks
