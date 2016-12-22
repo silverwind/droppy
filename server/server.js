@@ -777,7 +777,7 @@ function handleResourceRequest(req, res, resourceName) {
 
       // Encoding, length
       var encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
-        return e.trim();
+        return e.trim().toLowerCase();
       }).filter(function(e) {
         return Boolean(e);
       });
