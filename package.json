@@ -26,10 +26,10 @@
     "etag": "^1.7.0",
     "file-extension": "^3.1.0",
     "graceful-fs": "^4.1.11",
-    "image-size": "^0.5.0",
-    "isbinaryfile": "^3.0.1",
+    "image-size": "^0.5.1",
+    "isbinaryfile": "^3.0.2",
     "json-buffer": "^2.0.11",
-    "lodash": "^4.17.2",
+    "lodash": "^4.17.4",
     "mime-types": "^2.1.13",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
@@ -50,7 +50,7 @@
     "uws": "^0.12.0"
   },
   "devDependencies": {
-    "autoprefixer": "^6.5.4",
+    "autoprefixer": "^6.6.1",
     "cheerio": "^0.22.0",
     "clean-css": "^3.4.23",
     "codemirror": "^5.22.0",
@@ -59,13 +59,13 @@
     "iltorb": "^1.0.13",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.2",
-    "postcss": "^5.2.6",
+    "postcss": "^5.2.8",
     "request": "^2.79.0",
     "screenfull": "^3.0.2",
     "svgstore": "^2.0.2",
     "uglify-js": "^2.7.5",
     "uppie": "^0.11.9",
-    "video.js": "^5.12.6"
+    "video.js": "^5.14.1"
   },
   "files": [
     "client",
