@@ -1377,7 +1377,7 @@
           droppy.clipboard = null;
           toggleCatcher(false);
           $(".paste-button").removeClass("in");
-        }).transition("in").find(".filename")[0].textContent = basename(droppy.clipboard.src);
+        }).transition("in");
       });
     } else {
       $(".paste-button").removeClass("in");
