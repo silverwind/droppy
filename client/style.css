@@ -634,6 +634,7 @@ html:not(.mobile) #entry-menu a.active {
   height: 100% !important;
   top: 0 !important;
   margin-top: 0 !important;
+  height: calc(100% - 1rem) !important;
 }
 
 .pswp__button--arrow--left svg, .pswp__button--arrow--right svg {
