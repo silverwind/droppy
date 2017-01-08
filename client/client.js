@@ -2126,25 +2126,35 @@
       ]).then(function() {
         (function verify() {
           if (!("videojs" in window)) return setTimeout(verify, 200);
-          if (!el.classList.contains("video-js")) el.classList.add("video-js", "vjs-default-skin");
-          if (droppy.get("volume") === 0) el.muted = true;
-          var container = $(el).parent()[0];
-          videojs.options.flash.swf = "!/res/lib/vjs.swf";
-          videojs(el, {
-            controls: true,
-            autoplay: !droppy.detects.mobile,
-            preload : "auto",
-            loop    : "loop",
-            width   : container.clientWidth,
-            heigth  : container.clientHeight
-          }, resolve).on("ready", function() {
-            this.volume(droppy.get("volume"));
+
+          // pause other loaded videos in this view
+          $(el).parents(".view").find("video").each(function() {
+            if (this !== el) this.pause();
           });
-          var volume = droppy.get("volume");
-          if (volume) el.volume = volume;
-          el.addEventListener("volumechange", function() {
-            droppy.set("volume", this.muted ? 0 : this.volume);
-          });
+
+          if (!el.classList.contains("vjs-tech")) { // init new video
+            el.classList.add("video-js", "vjs-default-skin");
+            if (droppy.get("volume") === 0) el.muted = true;
+            var container = $(el).parent()[0];
+            videojs.options.flash.swf = "!/res/lib/vjs.swf";
+            videojs(el, {
+              controls: true,
+              autoplay: !droppy.detects.mobile,
+              preload : "auto",
+              loop    : "loop",
+              width   : container.clientWidth,
+              heigth  : container.clientHeight
+            }, resolve).on("ready", function() {
+              this.volume(droppy.get("volume"));
+            });
+            var volume = droppy.get("volume");
+            if (volume) el.volume = volume;
+            el.addEventListener("volumechange", function() {
+              droppy.set("volume", this.muted ? 0 : this.volume);
+            });
+          } else { // already initialized, just un-pause
+            el.play();
+          }
         })();
       });
     });
