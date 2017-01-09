@@ -59,7 +59,7 @@
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.2",
     "photoswipe": "^4.1.1",
-    "postcss": "^5.2.8",
+    "postcss": "^5.2.9",
     "request": "^2.79.0",
     "screenfull": "^3.0.2",
     "svgstore": "^2.0.2",
