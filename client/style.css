@@ -618,6 +618,8 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--fs:hover { color: #ff4 }
 .fit-h:hover { color: #18f }
 .fit-v:hover { color: #5c5 }
+.autonext, .loop { color: #666 }
+.on { color: #fff }
 
 .pswp__button--arrow--left:before,
 .pswp__button--arrow--right:before {
@@ -631,10 +633,9 @@ html:not(.mobile) #entry-menu a.active {
   color: #fff;
   stroke: #444;
   stroke-width: 12;
-  height: 100% !important;
+  height: calc(100% - 1rem) !important;
   top: 0 !important;
   margin-top: 0 !important;
-  height: calc(100% - 1rem) !important;
 }
 
 .pswp__button--arrow--left svg, .pswp__button--arrow--right svg {

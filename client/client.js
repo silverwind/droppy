@@ -141,7 +141,9 @@
     indentWithTabs: false,
     indentUnit: 4,
     lineWrapping: false,
-    renameExistingOnUpload: false
+    loop: true,
+    autonext: false,
+    renameExistingOnUpload: false,
   };
 
   function savePrefs(prefs) {
@@ -1508,7 +1510,11 @@
       loadScript("ps-js", "!/res/lib/ps.js"),
     ]).then(function() {
       view[0].animDirection = "forward";
-      var html = Handlebars.templates.media();
+      var html = Handlebars.templates.media({
+        autonext: droppy.get("autonext") ? "on " : "",
+        loop: droppy.get("loop") ? "on " : "",
+      });
+
       loadContent(view, "media", type, html).then(function() {
         var el = view.find(".pswp")[0];
         view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, {
@@ -1535,14 +1541,31 @@
           showAnimationDuration: 0,
           spacing: 0,
         });
+
+        var autonext = view.find(".autonext");
+        var loop = view.find(".loop");
+        autonext.reg("click", function() {
+          var on = !droppy.get("autonext");
+          droppy.set("autonext", on);
+          autonext[on ? "addClass" : "removeClass"]("on");
+        });
+        loop.reg("click", function() {
+          var on = !droppy.get("loop");
+          droppy.set("loop", on);
+          loop[on ? "addClass" : "removeClass"]("on");
+        });
+
         view[0].ps.listen("afterChange", function() {
           view[0].currentFile = this.currItem.filename;
-          var btnToggles = view.find(".pswp__button--fs, .fit-h, .fit-v");
+          var imgButtons = view.find(".pswp__button--fs, .fit-h, .fit-v");
+          var videoButtons = view.find(".loop, .autonext");
           if (this.currItem.html) { // video
             initVideoJS($(this.currItem.container).find("video")[0]);
-            btnToggles.addClass("hidden");
+            imgButtons.addClass("hidden");
+            videoButtons.removeClass("hidden");
           } else { // image
-            btnToggles.removeClass("hidden");
+            imgButtons.removeClass("hidden");
+            videoButtons.removeClass("hidden");
           }
           setTitle(this.currItem.filename.replace(/\..*/g, ""));
           replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
@@ -2127,8 +2150,10 @@
         (function verify() {
           if (!("videojs" in window)) return setTimeout(verify, 200);
 
+          var view = $(el).parents(".view");
+
           // pause other loaded videos in this view
-          $(el).parents(".view").find("video").each(function() {
+          view.find("video").each(function() {
             if (this !== el) this.pause();
           });
 
@@ -2141,12 +2166,18 @@
               controls: true,
               autoplay: !droppy.detects.mobile,
               preload : "auto",
-              loop    : "loop",
               width   : container.clientWidth,
               heigth  : container.clientHeight
             }, resolve).on("ready", function() {
               this.volume(droppy.get("volume"));
+            }).on("ended", function() {
+              if (droppy.get("loop")) {
+                this.play();
+              } else if (droppy.get("autonext")) {
+                view[0].ps.next();
+              }
             });
+
             var volume = droppy.get("volume");
             if (volume) el.volume = volume;
             el.addEventListener("volumechange", function() {
