@@ -36,9 +36,8 @@ var opts = {
     },
   },
   cleanCSS: {
-    keepSpecialComments : 0,
+    specialComments : 0,
     rebase: false,
-    roundingPrecision: 3,
   },
   autoprefixer: {
     browsers: "> 3%, last 2 firefox versions, last 2 safari versions",
