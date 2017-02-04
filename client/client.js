@@ -1565,7 +1565,7 @@
             videoButtons.removeClass("hidden");
           } else { // image
             imgButtons.removeClass("hidden");
-            videoButtons.removeClass("hidden");
+            videoButtons.addClass("hidden");
           }
           setTitle(this.currItem.filename.replace(/\..*/g, ""));
           replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
