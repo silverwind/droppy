@@ -39,11 +39,11 @@
 //  Set up a few more things
 // ============================================================================
   // Shorthand for safe event listeners
-  $.fn.reg = function(events, callback) {
-    return this.off(events).on(events, callback);
+  $.fn.reg = function() {
+    return this.off.apply(this, arguments).on.apply(this, arguments);
   };
-  $.fn.regOne = function(events, callback) {
-    return this.off(events).one(events, callback);
+  $.fn.regOne = function() {
+    return this.off.apply(this, arguments).one.apply(this, arguments);
   };
 
   // Transition of freshly inserted elements
