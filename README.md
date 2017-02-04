@@ -142,8 +142,8 @@ A listener object accepts these options:
 - `protocol` *String* - Protocol to use, `http` or `https`. Required.
 
 For TLS these additional options are available:
+- `cert` *String* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. This path can be relative to the config directory. Required.
 - `key` *String* - Path to PEM-encoded TLS private key file. This path can be relative to the config directory. Required.
-- `cert` *String* - Path to PEM-encoded TLS certificate file, which can optionally include additional intermediate certificates. This path can be relative to the config directory. Required.
 - `dhparam` *String* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
 - `passphrase` *String* - Passphrase for the TLS private key in case it is encrypted.
 - `hsts` *Number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.

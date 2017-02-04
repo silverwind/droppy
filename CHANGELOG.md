@@ -1,5 +1,10 @@
 *For patch-level releases, see the commit log*
 
+#### Version 6.0.0 - 4/2/2017
+
+- The previous `ca` option of TLS listeners has been removed. Intermediate certificates should be concatenated in the `cert` file instead.
+- Added a new `passphrase` option to TLS listeners, which is used to decrypt encrypted keys.
+
 #### Version 5.3.0 - 6/11/2016
 
 - New buttons to zoom images so they fit horizontally or vertically, slight redesign.
