@@ -134,17 +134,18 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 ```
 The above configuration will result in:
 - HTTP listening on all IPv4 and IPv6 interfaces, port 80.
-- HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided SSL/TLS files.
+- HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided TLS files.
 
 A listener object accepts these options:
 - `host` *String/Array* - Network interface(s) to listen on. Required.
 - `port` *Number/Array* - Network port(s) to listen on. Required.
 - `protocol` *String* - Protocol to use, `http` or `https`. Required.
 
-For SSL/TLS these additional options are available:
-- `key` *String* - Path to PEM-encoded SSL/TLS private key file. This path can be relative to the config directory. Required.
-- `cert` *String* - Path to PEM-encoded SSL/TLS certificate file, which can optionally include additional intermediate certificates. This path can be relative to the config directory. Required.
-- `dhparam` *String* - Path to PEM-encoded SSL/TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
+For TLS these additional options are available:
+- `key` *String* - Path to PEM-encoded TLS private key file. This path can be relative to the config directory. Required.
+- `cert` *String* - Path to PEM-encoded TLS certificate file, which can optionally include additional intermediate certificates. This path can be relative to the config directory. Required.
+- `dhparam` *String* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
+- `passphrase` *String* - Passphrase for the TLS private key in case it is encrypted.
 - `hsts` *Number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 
 ## API

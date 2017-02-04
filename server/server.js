@@ -167,16 +167,16 @@ function startListeners(callback) {
     (Array.isArray(listener.host) ? listener.host : [listener.host]).forEach(function(host) {
       (Array.isArray(listener.port) ? listener.port : [listener.port]).forEach(function(port) {
         sockets.push({
-          host  : host,
-          port  : port,
-          opts  : {
-            proto   : listener.protocol,
-            hsts    : listener.hsts,
-            key     : listener.key,
-            cert    : listener.cert,
-            ca      : listener.ca,
-            dhparam : listener.dhparam,
-            index   : i,
+          host: host,
+          port: port,
+          opts: {
+            proto: listener.protocol,
+            hsts: listener.hsts,
+            key: listener.key,
+            cert: listener.cert,
+            dhparam: listener.dhparam,
+            passphrase: listener.passphrase,
+            index: i,
           }
         });
       });
@@ -238,8 +238,16 @@ function createListener(handler, opts, callback) {
       try {
         server = https.createServer(tlsOptions);
       } catch (err) {
-        if (/bad password/.test(String(err))) {
-          return callback(new Error("TLS key '" + opts.key + "' is password-protected"));
+        if (/(bad password|bad decrypt)/.test(err)) {
+          var errText;
+          if (!tlsOptions.passphrase) {
+            errText = "TLS key '" + opts.key + "' is encrypted with a passphrase. " +
+              "You can either decrypt the key using `openssl rsa -in " + opts.key +
+              " -out " + opts.key + "` or use the `passphrase` option on the listener.";
+          } else {
+            errText = "Wrong passphrase for TLS key '" + opts.key + "'";
+          }
+          return callback(new Error(errText));
         } else {
           return callback(err);
         }
@@ -1241,9 +1249,10 @@ function tlsSetup(opts, cb) {
     }
 
     cb(null, {
-      key     : key,
-      cert    : cert,
-      dhparam : dhparam || db.get("dhparam") || createDH()
+      key: key,
+      cert: cert,
+      dhparam: dhparam || db.get("dhparam") || createDH(),
+      passphrase: opts.passphrase,
     });
   });
 }
