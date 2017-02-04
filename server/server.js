@@ -183,13 +183,10 @@ function startListeners(callback) {
     });
   });
 
-  var listeningSockets = 0;
-
   async.each(sockets, function(socket, cb) {
     createListener(onRequest, socket.opts, function(err, server) {
       if (err) return cb(err);
       server.on("listening", function() {
-        listeningSockets++;
         server.removeAllListeners("error");
         setupSocket(server);
         var proto = socket.opts.proto.toLowerCase();
@@ -212,11 +209,7 @@ function startListeners(callback) {
         return cb(err);
       }).listen(socket.port, socket.host);
     });
-  }, function(err) {
-    if (err) log.error(err);
-    // Don't abort if we have at least one listening socket
-    callback(listeningSockets === 0 ? err : null);
-  });
+  }, callback);
 }
 
 // Create socket listener
@@ -241,7 +234,16 @@ function createListener(handler, opts, callback) {
     var https = require("https");
     tlsInit(opts, function(err, tlsOptions) {
       if (err) return callback(err);
-      server = https.createServer(tlsOptions);
+
+      try {
+        server = https.createServer(tlsOptions);
+      } catch (err) {
+        if (/bad password/.test(String(err))) {
+          return callback(new Error("TLS key '" + opts.key + "' is password-protected"));
+        } else {
+          return callback(err);
+        }
+      }
 
       server.on("request", function(req, res) {
         if (opts.hsts && opts.hsts > 0)
@@ -1219,32 +1221,20 @@ function tlsSetup(opts, cb) {
   var certPaths = [
     path.resolve(paths.config, ut(opts.key)),
     path.resolve(paths.config, ut(opts.cert)),
-    opts.ca ? path.resolve(paths.config, opts.ca) : undefined,
     opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
   ];
 
   async.map(certPaths, utils.readFile, function(_, data) {
-    var certStart = "-----BEGIN CERTIFICATE-----";
-    var certEnd   = "-----END CERTIFICATE-----";
-
     var key     = data[0];
     var cert    = data[1];
-    var ca      = data[2];
     var dhparam = data[3];
 
     if (!key)  return cb(new Error("Unable to read TLS key: " + certPaths[0]));
     if (!cert) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
-    if (opts.ca && !ca) return cb(new Error("Unable to read TLS intermediate certificate: " + certPaths[2]));
     if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
-    // Split combined certificate and intermediate
-    if (!ca && cert.indexOf(certStart) !== cert.lastIndexOf(certStart)) {
-      ca   = cert.substring(cert.lastIndexOf(certStart));
-      cert = cert.substring(0, cert.indexOf(certEnd) + certEnd.length);
-    }
-
     function createDH() {
-      log.info("Generating 2048 bit DH parameters. This will take a long time.");
+      log.info("Generating 2048 bit Diffie-Hellman parameters. This will take a long time.");
       var dh = require("dhparam")(2048);
       db.set("dhparam", dh);
       return dh;
@@ -1253,7 +1243,6 @@ function tlsSetup(opts, cb) {
     cb(null, {
       key     : key,
       cert    : cert,
-      ca      : ca,
       dhparam : dhparam || db.get("dhparam") || createDH()
     });
   });

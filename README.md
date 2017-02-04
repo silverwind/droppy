@@ -142,13 +142,10 @@ A listener object accepts these options:
 - `protocol` *String* - Protocol to use, `http` or `https`. Required.
 
 For SSL/TLS these additional options are available:
-- `key` *String* - Path to PEM-encoded SSL/TLS private key file. Required.
-- `cert` *String* - Path to PEM-encoded SSL/TLS certificate file. Required.
-- `ca` *String* - Path to PEM-encoded SSL/TLS intermediate certificate file.
-- `dhparam` *String* - Path to PEM-encoded SSL/TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use.
+- `key` *String* - Path to PEM-encoded SSL/TLS private key file. This path can be relative to the config directory. Required.
+- `cert` *String* - Path to PEM-encoded SSL/TLS certificate file, which can optionally include additional intermediate certificates. This path can be relative to the config directory. Required.
+- `dhparam` *String* - Path to PEM-encoded SSL/TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
 - `hsts` *Number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
-
-*Note: Unless given absolute, SSL/TLS paths are relative to the config folder. If your certificate file includes an concatenated intermediate certificate, it will be detected and used, there's no need to specify `ca` in this case.*
 
 ## API
 droppy can be used with frameworks like [express](https://github.com/strongloop/express):
