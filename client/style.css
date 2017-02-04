@@ -579,9 +579,8 @@ html:not(.mobile) #entry-menu a.active {
 }
 
 .pswp__top-bar {
-  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAADGCAYAAAAT+OqFAAAAdklEQVQoz42QQQ7AIAgEF/T/D+kbq/RWAlnQyyazA4aoAB4FsBSA/bFjuF1EOL7VbrIrBuusmrt4ZZORfb6ehbWdnRHEIiITaEUKa5EJqUakRSaEYBJSCY2dEstQY7AuxahwXFrvZmWl2rh4JZ07z9dLtesfNj5q0FU3A5ObbwAAAABJRU5ErkJggg==") !important;
-  background-repeat: repeat-x;
-  height: 98px !important;
+  background: linear-gradient(to bottom, rgba(0,0,0,.6) 0%,rgba(0,0,0,.08) 80%,rgba(0,0,0,.04) 90%,rgba(0,0,0,0) 100%) !important;
+  height: 1.5rem !important;
   pointer-events: none;
   color: #e6e6e6;
   z-index: 1;
@@ -601,7 +600,7 @@ html:not(.mobile) #entry-menu a.active {
   color: inherit !important;
   font-size: 1rem !important;
   font-family: sans-serif;
-  line-height: 1.7rem !important;
+  line-height: 1.5rem !important;
 }
 
 .pswp__top-bar .pswp__button, .pswp__counter {
@@ -687,15 +686,19 @@ video:not(.vjs-tech) {
 }
 
 .vjs-slider {
-  background: #666 !important;
+  background: rgba(128,128,128,.6) !important;
 }
 
 .vjs-control-bar {
-  background: rgba(16,16,16,.8) !important;
+  background: linear-gradient(to top, rgba(0,0,0,.6) 0%,rgba(0,0,0,.08) 80%,rgba(0,0,0,.04) 90%,rgba(0,0,0,0) 100%) !important;
 }
 
 .vjs-remaining-time-display {
   line-height: inherit !important;
+}
+
+.vjs-play-progress:before, .vjs-volume-level:before {
+  display: none !important;
 }
 
 /* ============================ Document  ============================ */

@@ -2170,6 +2170,10 @@
               heigth  : container.clientHeight
             }, resolve).on("ready", function() {
               this.volume(droppy.get("volume"));
+              // stop drags from propagating outside the control bar
+              $(view).find(".vjs-control-bar").on("mousemove touchmove", function(e) {
+                e.stopPropagation();
+              });
             }).on("ended", function() {
               if (droppy.get("loop")) {
                 this.play();
