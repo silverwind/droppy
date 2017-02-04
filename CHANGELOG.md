@@ -1,4 +1,5 @@
-*For patch-level releases, see the commit log*
+# droppy Changelog
+*This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
 #### Version 6.0.0 - 4/2/2017
 
