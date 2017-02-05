@@ -1242,7 +1242,7 @@ function tlsSetup(opts, cb) {
     if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
 
     certs = certs.match(/-+BEGIN CERTIFICATE-+([\s\S]+?)-+END CERTIFICATE-+/gm);
-    if (!certs.length) return cb(new Error("No certificates found in " + certPaths[1]));
+    if (!certs || !certs.length) return cb(new Error("No certificates found in " + certPaths[1]));
 
     function createDH() {
       log.info("Generating 2048 bit Diffie-Hellman parameters. This will take a long time.");
