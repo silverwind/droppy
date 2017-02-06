@@ -20,12 +20,17 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   # remove unnecessary module files
   rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/*darwin*.node && \
   rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/*win32*.node && \
+  rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/*linux_4*.node && \
   rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/build && \
   rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/fp && \
+  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/_* && \
+  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/*.min.js && \
+  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/core.js && \
   # remove npm
   npm uninstall -g npm && \
   rm -rf /root/.npm && \
   rm -rf /tmp/npm* && \
+  rm -rf /root/.node-gyp && \
   # cleanup apk
   apk del --purge deps && \
   rm -rf /var/cache/apk/*
