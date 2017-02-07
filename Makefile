@@ -31,7 +31,7 @@ docker:
 	docker pull mhart/alpine-node:latest
 	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
-	docker build --no-cache=true -t $(IMAGE) .
+	docker build --no-cache=true --squash  -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
 
 docker-push:
