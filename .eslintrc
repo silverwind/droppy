@@ -207,6 +207,7 @@ rules:
 
 parserOptions:
   ecmaVersion: 2017
+  sourceType: module
 
 env:
   amd: true
