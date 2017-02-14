@@ -1238,11 +1238,8 @@ function tlsSetup(opts, cb) {
     var dhparam = data[3];
 
     if (!key) return cb(new Error("Unable to read TLS key: " + certPaths[0]));
-    if (!certs) return cb(new Error("Unable to read TLS certificate: " + certPaths[1]));
+    if (!certs) return cb(new Error("Unable to read TLS certificates: " + certPaths[1]));
     if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
-
-    certs = certs.match(/-+BEGIN CERTIFICATE-+([\s\S]+?)-+END CERTIFICATE-+/gm);
-    if (!certs || !certs.length) return cb(new Error("No certificates found in " + certPaths[1]));
 
     function createDH() {
       log.info("Generating 2048 bit Diffie-Hellman parameters. This will take a long time.");
@@ -1252,9 +1249,8 @@ function tlsSetup(opts, cb) {
     }
 
     cb(null, {
+      cert: certs,
       key: key,
-      cert: certs.shift(),
-      ca: certs,
       dhparam: dhparam || db.get("dhparam") || createDH(),
       passphrase: opts.passphrase,
     });
