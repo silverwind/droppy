@@ -993,8 +993,8 @@ video:not(.vjs-tech) {
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
   color: #333;
   height: 150px;
+  top: 50%;
   left: 50%;
-  top: 75%;
   opacity: 0;
   visibility: hidden;
   position: fixed;
@@ -1004,7 +1004,7 @@ video:not(.vjs-tech) {
   text-align: center;
   z-index: 64;
 }
-#about-box.in { top: 50%; opacity: 1; visibility: visible; transition: .4s }
+#about-box.in { opacity: 1; visibility: visible; transition: .4s }
 
 #about-title {
   font-size: 1.3em;
@@ -1062,7 +1062,7 @@ video:not(.vjs-tech) {
   color: #555;
   max-height: 95%;
   left: 50%;
-  top: 75%;
+  top: 50%;
   position: fixed;
   transition: .4s, visibility 0s .4s;
   transform: translate(-50%, -50%);
@@ -1072,7 +1072,7 @@ video:not(.vjs-tech) {
   opacity: 0;
   visibility: hidden;
 }
-#prefs-box.in { top: 50%; opacity: 1; visibility: visible; transition: .4s }
+#prefs-box.in { opacity: 1; visibility: visible; transition: .4s }
 
 @media (min-width: 800px) { #prefs-box { width: 24em } }
 @media (max-width: 799px) { #prefs-box { width: 80%  } }
@@ -1302,7 +1302,7 @@ video:not(.vjs-tech) {
 .info-box {
   border-radius: 6px;
   left: 50%;
-  top: 75%;
+  top: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
   transition: .4s, visibility 0s .4s;
@@ -1315,7 +1315,7 @@ video:not(.vjs-tech) {
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
   max-width: 90%;
 }
-.info-box.in { top: 50%; opacity: 1; visibility: visible; transition: .4s }
+.info-box.in { opacity: 1; visibility: visible; transition: .4s }
 
 .info-box .icon {
   display: flex;
