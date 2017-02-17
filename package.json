@@ -49,7 +49,7 @@
     "uws": "^0.12.0"
   },
   "devDependencies": {
-    "autoprefixer": "^6.7.2",
+    "autoprefixer": "^6.7.3",
     "cheerio": "^0.22.0",
     "clean-css": "^4.0.7",
     "codemirror": "^5.23.0",
@@ -59,7 +59,7 @@
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.2",
     "photoswipe": "^4.1.1",
-    "postcss": "^5.2.13",
+    "postcss": "^5.2.14",
     "request": "^2.79.0",
     "screenfull": "^3.0.2",
     "svgstore": "^2.0.2",

@@ -2304,27 +2304,27 @@
       oga  : "audio/ogg",
       ogg  : "audio/ogg",
       opus : "audio/ogg",
-      wav  : "audio/wav"
+      wav  : "audio/wav",
     };
 
     droppy.videoTypes = {
-      mp4  : "video/mp4", // can be audio/mp4 too
       m4v  : "video/mp4",
+      mkv  : "video/webm", // video/webm over video/x-matroska for better browser compat
+      mp4  : "video/mp4", // can be audio/mp4 too
       ogv  : "video/ogg",
       ogx  : "application/ogg",
       webm : "video/webm", // can be audio/webm too
-      mkv  : "video/webm" // video/webm over video/x-matroska for better browser compat
     };
 
     droppy.imageTypes = {
-      jpg  : "image/jpeg",
-      jpeg : "image/jpeg",
-      gif  : "image/gif",
-      png  : "image/png",
       apng : "image/png",
-      svg  : "image/svg+xml",
       bmp  : "image/bmp",
-      ico  : "image/x-icon"
+      gif  : "image/gif",
+      ico  : "image/x-icon",
+      jpeg : "image/jpeg",
+      jpg  : "image/jpeg",
+      png  : "image/png",
+      svg  : "image/svg+xml",
     };
   }
 
