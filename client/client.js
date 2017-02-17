@@ -2312,7 +2312,8 @@
       m4v  : "video/mp4",
       ogv  : "video/ogg",
       ogx  : "application/ogg",
-      webm : "video/webm" // can be audio/webm too
+      webm : "video/webm", // can be audio/webm too
+      mkv  : "video/webm" // video/webm over video/x-matroska for better browser compat
     };
 
     droppy.imageTypes = {

@@ -24,8 +24,12 @@ var forceBinaryTypes = [
   "pdf",
   "ps",
   "eps",
-  "ai"
+  "ai",
 ];
+
+var overrideMimeTypes = {
+  "video/x-matroska": "video/webm",
+};
 
 // mkdirp wrapper with array support
 utils.mkdir = function mkdir(dir, cb) {
@@ -184,9 +188,10 @@ utils.isBinary = function isBinary(p, callback) {
   });
 };
 
-// TODO async/await this in Node.js 7.0
+// TODO async/await this in Node.js 8.0
 utils.mime = function mime(p) {
   var mimeType = mimetype(p);
+  if (overrideMimeTypes[mimeType]) return overrideMimeTypes[mimeType];
   if (mimeType) return mimeType;
   try {
     return isBin.sync(p) ? "application/octet-stream" : "text/plain; charset=utf-8";
