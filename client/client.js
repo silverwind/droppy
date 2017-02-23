@@ -245,8 +245,7 @@
 
   function openSocket() {
     droppy.socket = new WebSocket(
-      document.location.origin.replace(/^http/, "ws") +
-      document.location.pathname + "!/socket"
+      location.origin.replace(/^http/, "ws") + location.pathname + "!/socket"
     );
     droppy.socket.onopen = function() {
       if (droppy.token) {
@@ -812,7 +811,7 @@
   }
 
   function getLocationsFromHash() {
-    var locations = document.location.hash.split("#");
+    var locations = location.hash.split("#");
     locations.shift();
 
     if (locations.length === 0)
@@ -826,7 +825,7 @@
   }
 
   function getHashPaths(modview, dest) {
-    var path = document.location.pathname;
+    var path = location.pathname;
     droppy.views.forEach(function(view) {
       view = $(view);
       if (modview && modview.is(view))
