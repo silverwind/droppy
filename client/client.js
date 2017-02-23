@@ -1310,7 +1310,7 @@
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
-      view[0].currentFile = entry.find(".file-link")[0].textContent();
+      view[0].currentFile = entry.find(".file-link")[0].textContent;
       var location = join(view[0].currentFolder, view[0].currentFile);
       pushHistory(view, location);
       updatePath(view);
