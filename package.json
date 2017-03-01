@@ -36,25 +36,25 @@
     "mv": "^2.1.1",
     "node-schedule": "^1.2.0",
     "readdirp": "^2.1.0",
-    "rimraf": "^2.6.0",
+    "rimraf": "^2.6.1",
     "strip-ansi": "^3.0.1",
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
     "valid-filename": "^2.0.1",
     "which": "^1.2.12",
-    "ws": "^2.1.0",
+    "ws": "^2.2.0",
     "yazl": "^2.4.2"
   },
   "optionalDependencies": {
     "uws": "^0.13.0"
   },
   "devDependencies": {
-    "autoprefixer": "^6.7.5",
+    "autoprefixer": "^6.7.6",
     "cheerio": "^0.22.0",
     "clean-css": "^4.0.8",
     "codemirror": "^5.24.2",
     "handlebars": "^4.0.6",
-    "html-minifier": "^3.3.3",
+    "html-minifier": "^3.4.0",
     "iltorb": "^1.0.13",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.2",
@@ -63,7 +63,7 @@
     "request": "^2.79.0",
     "screenfull": "^3.0.2",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.7.5",
+    "uglify-js": "^2.8.1",
     "uppie": "^1.0.1",
     "video.js": "^5.16.0"
   },
