@@ -997,7 +997,7 @@
     if (!view[0].sortAsc) view[0].sortAsc = false;
     sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
 
-    entries = sortByProp(entries, sortBy);
+    entries = sortArrayByProp(entries, sortBy);
     if (view[0].sortAsc) entries.reverse();
 
     var sort = {type: "", mtime: "", size: ""};
@@ -1413,7 +1413,7 @@
     view[0].sortAsc = header.hasClass("down");
     header[0].className = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
     header.siblings().removeClass("active up down");
-    var entries = sortByProp(getTemplateEntries(view, view[0].currentData), header[0].dataset.sort);
+    var entries = sortArrayByProp(getTemplateEntries(view, view[0].currentData), header[0].dataset.sort);
     if (view[0].sortAsc) entries = entries.reverse();
     entries.forEach(function(_, i) {
       var entry = view.find('[data-name="' + entries[i].sortname + '"]')[0];
@@ -2585,38 +2585,36 @@
     return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
   }
 
-  function sortCompare(a, b) {
+  function naturalSortWithNumbers(a, b) {
+    function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
     if (typeof a === "number" && typeof b === "number") {
       return b - a;
     } else if (typeof a === "string" && typeof b === "string") {
       a = a.replace(/['"]/g, "_").toLowerCase();
       b = b.replace(/['"]/g, "_").toLowerCase();
-      return naturalSort(a, b);
+      // natural sort algorithm start
+      var x = [], y = [];
+      a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
+      b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
+      while (x.length && y.length) {
+        var xx = x.shift();
+        var yy = y.shift();
+        var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
+        if (nn) return nn;
+      }
+      if (x.length) return -1;
+      if (y.length) return 1;
+      return 0;
+      // natural sort algorithm end
     } else return 0;
   }
 
-  function sortByProp(entries, prop) {
-    return entries.sort(function(a, b) {
-      var result = sortCompare(a[prop], b[prop]);
-      if (result === 0) result = sortCompare(a.sortname, b.sortname);
+  function sortArrayByProp(arr, prop) {
+    return arr.sort(function(a, b) {
+      var result = naturalSortWithNumbers(a[prop], b[prop]);
+      if (result === 0) result = naturalSortWithNumbers(a.sortname, b.sortname);
       return result;
     });
-  }
-
-  function naturalSort(a, b) {
-    var x = [], y = [];
-    function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
-    a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
-    b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
-    while (x.length && y.length) {
-      var xx = x.shift();
-      var yy = y.shift();
-      var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
-      if (nn) return nn;
-    }
-    if (x.length) return -1;
-    if (y.length) return 1;
-    return 0;
   }
 
   function ajax(opts) {
