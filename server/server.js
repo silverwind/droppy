@@ -759,7 +759,13 @@ function handleResourceRequest(req, res, resourceName) {
     } else {
       var headers = {}, status = 200;
       if (/\.html$/.test(resourceName)) {
-        headers["Content-Security-Policy"] = "script-src 'self' 'unsafe-eval' blob: data:; child-src 'self' blob: data:; object-src 'self'; media-src 'self' blob: data:";
+        headers["Content-Security-Policy"] = [
+          "script-src 'self' 'unsafe-eval' blob: data:",
+          "child-src 'self' blob: data:",
+          "object-src 'self'",
+          "media-src 'self' blob: data:",
+          "connect-src 'self' " + utils.origin(req).replace(/^http/, "ws"),
+        ].join("; ");
         headers["X-Content-Type-Options"] = "nosniff";
         headers["X-XSS-Protection"] = "1; mode=block";
         headers["Referrer-Policy"] = "no-referrer";

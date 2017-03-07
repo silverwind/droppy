@@ -14,6 +14,7 @@ var mkdirp   = require("mkdirp");
 var mv       = require("mv");
 var path     = require("path");
 var rimraf   = require("rimraf");
+var url      = require("url");
 var util     = require("util");
 var validate = require("valid-filename");
 
@@ -297,4 +298,20 @@ utils.readFile = function(p, cb) {
       cb(null);
     }
   });
+};
+
+utils.origin = function(req) {
+  var u = new url.Url();
+  u.protocol = (req.connection && req.connection.encrypted) ? "https:" : "http:";
+  u.host = req.headers["host"];
+  return u.format();
+};
+
+utils.originPath = function(req) {
+  var u = new url.Url();
+  u.protocol = (req.connection && req.connection.encrypted) ? "https:" : "http:";
+  u.host = req.headers["host"];
+  u.path = req.url;
+  u.pathname = req.url.replace(/[#?].*$/, "");
+  return u.format();
 };
