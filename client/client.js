@@ -2160,7 +2160,6 @@
             el.classList.add("video-js", "vjs-default-skin");
             if (droppy.get("volume") === 0) el.muted = true;
             var container = $(el).parent()[0];
-            videojs.options.flash.swf = "!/res/lib/vjs.swf";
             videojs(el, {
               controls: true,
               autoplay: !droppy.detects.mobile,

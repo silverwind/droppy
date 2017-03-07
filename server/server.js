@@ -762,7 +762,7 @@ function handleResourceRequest(req, res, resourceName) {
         headers["Content-Security-Policy"] = [
           "script-src 'self' 'unsafe-eval' blob: data:",
           "child-src 'self' blob: data:",
-          "object-src 'self'",
+          "object-src 'none'",
           "media-src 'self' blob: data:",
           "connect-src 'self' " + utils.origin(req).replace(/^http/, "ws"),
         ].join("; ");

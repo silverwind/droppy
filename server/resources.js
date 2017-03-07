@@ -136,7 +136,6 @@ resources.files = {
 var libs = {
   "vjs.js": "node_modules/video.js/dist/video.min.js",
   "vjs.css": "node_modules/video.js/dist/video-js.min.css",
-  "vjs.swf": "node_modules/video.js/dist/video-js.swf",
   "cm.js": [
     "node_modules/codemirror/lib/codemirror.js",
     "node_modules/codemirror/mode/meta.js",
