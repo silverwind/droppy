@@ -760,7 +760,7 @@ function handleResourceRequest(req, res, resourceName) {
       var headers = {}, status = 200;
       if (/\.html$/.test(resourceName)) {
         headers["Content-Security-Policy"] = [
-          "script-src 'self' 'unsafe-eval' blob: data:",
+          "script-src 'self' 'unsafe-inline' blob: data:",
           "child-src 'self' blob: data:",
           "object-src 'none'",
           "media-src 'self' blob: data:",
