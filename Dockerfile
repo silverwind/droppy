@@ -11,21 +11,21 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   # install global modules
   yarn global add droppy@latest dmn@latest --production && \
   # cleanup node modules
-  cd /usr/local/share/.config/yarn/global && \
+  cd /root/.config/yarn/global && \
   dmn clean -f && \
   yarn global remove dmn && \
   # remove yarn
-  rm -rf /usr/local/share/.cache/yarn && \
+  rm -rf /root/.cache/yarn && \
   rm -rf /opt && \
   # remove unnecessary module files
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/*darwin*.node && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/*win32*.node && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/*linux_4*.node && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/uws/build && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/fp && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/_* && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/*.min.js && \
-  rm -rf /usr/local/share/.config/yarn/global/node_modules/lodash/core.js && \
+  rm -rf /root/.config/yarn/global/node_modules/uws/*darwin*.node && \
+  rm -rf /root/.config/yarn/global/node_modules/uws/*win32*.node && \
+  rm -rf /root/.config/yarn/global/node_modules/uws/*linux_4*.node && \
+  rm -rf /root/.config/yarn/global/node_modules/uws/build && \
+  rm -rf /root/.config/yarn/global/node_modules/lodash/fp && \
+  rm -rf /root/.config/yarn/global/node_modules/lodash/_* && \
+  rm -rf /root/.config/yarn/global/node_modules/lodash/*.min.js && \
+  rm -rf /root/.config/yarn/global/node_modules/lodash/core.js && \
   # remove npm
   npm uninstall -g npm && \
   rm -rf /root/.npm && \
@@ -37,4 +37,4 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
 
 EXPOSE 8989
 VOLUME ["/config", "/files"]
-CMD ["/usr/local/share/.config/yarn/global/node_modules/droppy/docker-start.sh"]
+CMD ["/root/.config/yarn/global/node_modules/droppy/docker-start.sh"]
