@@ -759,12 +759,17 @@ function handleResourceRequest(req, res, resourceName) {
     } else {
       var headers = {}, status = 200;
       if (/\.html$/.test(resourceName)) {
+        var origin = utils.origin(req).replace(/^.*\/\//, "//");
         headers["Content-Security-Policy"] = [
           "script-src 'self' 'unsafe-inline' blob: data:",
           "child-src 'self' blob: data:",
           "object-src 'none'",
           "media-src 'self' blob: data:",
-          "connect-src 'self' " + utils.origin(req).replace(/^http/, "ws"),
+          // connect-src 'self' does not include websockets in Firefox and Safari.
+          // The proper way to solve it would require a X-Forwarded-Proto to be set
+          // by a reverse proxy, which would be a breaking change.
+          // Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1345615
+          "connect-src 'self' ws:" + origin + " wss:" + origin,
         ].join("; ");
         headers["X-Content-Type-Options"] = "nosniff";
         headers["X-XSS-Protection"] = "1; mode=block";
