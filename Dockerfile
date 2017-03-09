@@ -9,23 +9,28 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   mv /opt/dist /opt/yarn && \
   ln -s /opt/yarn/bin/yarn /usr/local/bin && \
   # install global modules
-  yarn global add droppy@latest dmn@latest --production && \
+  yarn global add droppy@latest dmn@latest --production --global-folder /yarn && \
   # cleanup node modules
-  cd /root/.config/yarn/global && \
+  cd /yarn && \
   dmn clean -f && \
-  yarn global remove dmn && \
+  yarn global remove dmn --global-folder /yarn && \
   # remove yarn
   rm -rf /root/.cache/yarn && \
   rm -rf /opt && \
+  # fix permissions in /yarn which assumes root will start the app
+  find /yarn -type d -exec chmod 0755 {} + && \
+  find /yarn -type f -exec chmod 0644 {} + && \
+  chmod 0755 /yarn/node_modules/droppy/docker-start.sh && \
+  chmod 0755 /yarn/node_modules/droppy/droppy.js && \
   # remove unnecessary module files
-  rm -rf /root/.config/yarn/global/node_modules/uws/*darwin*.node && \
-  rm -rf /root/.config/yarn/global/node_modules/uws/*win32*.node && \
-  rm -rf /root/.config/yarn/global/node_modules/uws/*linux_4*.node && \
-  rm -rf /root/.config/yarn/global/node_modules/uws/build && \
-  rm -rf /root/.config/yarn/global/node_modules/lodash/fp && \
-  rm -rf /root/.config/yarn/global/node_modules/lodash/_* && \
-  rm -rf /root/.config/yarn/global/node_modules/lodash/*.min.js && \
-  rm -rf /root/.config/yarn/global/node_modules/lodash/core.js && \
+  rm -rf /yarn/node_modules/uws/*darwin*.node && \
+  rm -rf /yarn/node_modules/uws/*win32*.node && \
+  rm -rf /yarn/node_modules/uws/*linux_4*.node && \
+  rm -rf /yarn/node_modules/uws/build && \
+  rm -rf /yarn/node_modules/lodash/fp && \
+  rm -rf /yarn/node_modules/lodash/_* && \
+  rm -rf /yarn/node_modules/lodash/*.min.js && \
+  rm -rf /yarn/node_modules/lodash/core.js && \
   # remove npm
   npm uninstall -g npm && \
   rm -rf /root/.npm && \
@@ -37,4 +42,4 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
 
 EXPOSE 8989
 VOLUME ["/config", "/files"]
-CMD ["/root/.config/yarn/global/node_modules/droppy/docker-start.sh"]
+CMD ["/yarn/node_modules/droppy/docker-start.sh"]
