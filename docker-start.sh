@@ -13,7 +13,7 @@ echo -e "droppy:x:${GID}:droppy\n" >> /etc/group
 mkdir -p /config
 mkdir -p /files
 
-chown -R droppy:droppy /config /yarn
+chown -R droppy:droppy /config
 chown droppy:droppy /files
 
 exec /bin/su -p -s "/bin/sh" -c "exec /usr/bin/droppy start --color -f /files -c /config" droppy
