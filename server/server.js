@@ -761,7 +761,7 @@ function handleResourceRequest(req, res, resourceName) {
       if (/\.html$/.test(resourceName)) {
         var origin = utils.origin(req).replace(/^.*\/\//, "//");
         headers["Content-Security-Policy"] = [
-          "script-src 'self' 'unsafe-inline' blob: data:",
+          "script-src 'self' blob: data:",
           "child-src 'self' blob: data:",
           "object-src 'none'",
           "media-src 'self' blob: data:",
@@ -772,7 +772,6 @@ function handleResourceRequest(req, res, resourceName) {
           "connect-src 'self' ws:" + origin + " wss:" + origin,
         ].join("; ");
         headers["X-Content-Type-Options"] = "nosniff";
-        headers["X-XSS-Protection"] = "1; mode=block";
         headers["Referrer-Policy"] = "no-referrer";
         if (!config.allowFrame)
           headers["X-Frame-Options"] = "DENY";
