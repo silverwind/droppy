@@ -16,9 +16,6 @@ body, div, a, header, input, button, label, li, nav, p, section, span, ul, figur
   border: 0;
 }
 
-@media (max-width: 1023px) { html { font-size: 24px } }
-@media (max-width:  639px) { html { font-size: 22px } }
-
 svg { fill: currentColor }
 svg use > svg { all: inherit } /* https://bugzilla.mozilla.org/show_bug.cgi?id=1298557 */
 
