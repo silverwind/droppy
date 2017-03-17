@@ -495,10 +495,12 @@
       toggleButtons(view[0].dataset.type);
     });
 
-    $(document).reg(screenfull.raw.fullscreenchange, function() {
+    screenfull.onchange(function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
-      $(".full svg, .fs svg").replaceWith(svg(screenfull.isFullscreen ? "unfullscreen" : "fullscreen"));
+      $("svg.fullscreen").replaceWith(
+        svg(screenfull.isFullscreen ? "unfullscreen" : "fullscreen")
+      );
     });
 
     var fileInput = $("#file"), uppie = new Uppie();
