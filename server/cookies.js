@@ -4,6 +4,7 @@ var cookies = module.exports = {};
 var db      = require("./db.js");
 var utils   = require("./utils.js");
 
+// TODO: set secure flag on cookie. Requires X-Forwarded-Proto from the proxy
 var cookieParams = ["HttpOnly", "SameSite=strict"];
 
 cookies.parse = function parse(cookie) {
