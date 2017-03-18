@@ -144,51 +144,53 @@ function startListeners(callback) {
       listener.protocol = "http";
     }
 
+    // arrify and filter `undefined`
+    var hosts = utils.arrify(listener.host).filter(host => Boolean(host));
+    var ports = utils.arrify(listener.port).filter(port => Boolean(port));
+    var paths = utils.arrify(listener.socket).filter(port => Boolean(port));
+
     // validate listener options
-    if (typeof listener.socket !== "string") { // host + port
-      if (typeof listener.host !== "string") {
-        return callback(new Error("Invalid config value: 'host' = " + listener.host));
+    hosts.forEach(host => {
+      if (typeof host !== "string") {
+        return callback(new Error("Invalid config value: 'host' = " + hosts[host]));
       }
-      if (typeof listener.port !== "number" && typeof listener.port !== "string") {
-        return callback(new Error("Invalid config value: 'port' = " + listener.host));
-      } else if (typeof listener.port === "string") {
-        var num = parseInt(listener.port);
+    });
+    ports.forEach((port, i) => {
+      if (typeof port !== "number" && typeof port !== "string") {
+        return callback(new Error("Invalid config value: 'port' = " + port));
+      }
+
+      if (typeof port === "string") {
+        var num = parseInt(port);
         if (Number.isNaN(num)) {
-          return callback(new Error("Config Error: invalid port: " + listener.port));
+          return callback(new Error("Invalid config value: 'port' = " + port));
         }
-        listener.port = num;
+        ports[i] = num;
       }
-    } else { // socket
-      if (typeof listener.socket !== "string") {
-        return callback(new Error("Invalid config value: 'socket' = " + listener.host));
+    });
+    paths.forEach(path => {
+      if (typeof path !== "string") {
+        return callback(new Error("Invalid config value: 'socket' = " + path));
       }
-      // always unlink socket first because .listen will fail if it exists
+
       try {
-        fs.unlinkSync(listener.socket);
+        fs.unlinkSync(path);
       } catch (err) {
         if (err.code !== "ENOENT") {
           return callback(
-            new Error("Unable to write to socket " +  listener.socket + ": " + err.code)
+            new Error("Unable to write to unix socket '" +  path + "': " + err.code)
           );
         }
       }
-    }
+    });
 
     // On Linux, Node.js listens on v4 and v6 when :: is given as host. Don't attempt
     // to bind to v4 to prevent an misleading error being logged.
     // https://github.com/nodejs/node/issues/7200
-    if (Array.isArray(listener.host) && os.platform() === "linux" &&
-        listener.host.includes("::") && listener.host.includes("0.0.0.0")) {
-      listener.host.splice(listener.host.indexOf("0.0.0.0"), 1);
+    if (hosts.length > 1 && os.platform() === "linux" &&
+        hosts.includes("::") && hosts.includes("0.0.0.0")) {
+      hosts.splice(hosts.indexOf("0.0.0.0"), 1);
     }
-
-    // arrify
-    var hosts = (Array.isArray(listener.host) ? listener.host : [listener.host]);
-    var ports = (Array.isArray(listener.port) ? listener.port : [listener.port]);
-
-    // filter `undefined`
-    hosts = hosts.filter(host => Boolean(host));
-    ports = ports.filter(port => Boolean(port));
 
     var opts = {
       proto: listener.protocol,
@@ -201,25 +203,23 @@ function startListeners(callback) {
     };
 
     // listen on all host + port combinations
-    if (hosts.length && ports.length) {
-      hosts.forEach(function(host) {
-        ports.forEach(function(port) {
-          sockets.push({
-            host: host,
-            port: port,
-            opts: opts,
-          });
+    hosts.forEach(function(host) {
+      ports.forEach(function(port) {
+        sockets.push({
+          host: host,
+          port: port,
+          opts: opts,
         });
       });
-    }
+    });
 
     // listen on unix socket
-    if (listener.socket) {
-      sockets.push({
-        path: listener.socket,
+    paths.forEach(function(path) {
+      paths.push({
+        path: path,
         opts: opts,
       });
-    }
+    });
   });
 
   async.each(sockets, function(socket, cb) {

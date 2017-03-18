@@ -317,3 +317,7 @@ utils.originPath = function(req) {
   u.pathname = req.url.replace(/[#?].*$/, "");
   return u.format();
 };
+
+utils.arrify = function(val) {
+  return Array.isArray(val) ? val : [val];
+};
