@@ -803,12 +803,12 @@ function handleResourceRequest(req, res, resourceName) {
       });
 
       var data;
-      if (encodings.indexOf("br") !== -1 && resource.brotli) {
+      if (config.compression && encodings.includes("br") && resource.brotli) {
         headers["Content-Encoding"] = "br";
         headers["Vary"] = "Accept-Encoding";
         headers["Content-Length"] = resource.brotli.length;
         data = resource.brotli;
-      } else if (encodings.indexOf("gzip") !== -1 && resource.gzip) {
+      } else if (config.compression && encodings.includes("gzip") && resource.gzip) {
         headers["Content-Encoding"] = "gzip";
         headers["Content-Length"] = resource.gzip.length;
         headers["Vary"] = "Accept-Encoding";

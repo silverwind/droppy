@@ -106,6 +106,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
 - `allowFrame` *Boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`.
 - `readOnly` *Boolean* - All served files will be treated as being read-only.
+- `compression` *Boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution.
 - `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
 <a name="listener-options"></a>

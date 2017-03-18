@@ -25,6 +25,7 @@ var defaults = {
   keepAlive       : 20000,
   allowFrame      : false,
   readOnly        : false,
+  compression     : true,
 };
 
 var hiddenOpts = ["dev", "demo"];
