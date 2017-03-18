@@ -1,7 +1,7 @@
 # droppy Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
-#### Version 6.1.0 - 4/2/2017
+#### Version 6.1.0 - 18/3/2017
 
 - Added the `compression` option which is enabled by default. It very unlikely that this needs to changed, even with a reverse proxy in place as compression does not incur a performance penalty. It is suggested to turn of compression in your reverse proxy's configuration.
 - It is strongly recommended to set `X-Forwarded-Proto` in your reverse proxy configuration (see Wiki) as a future version might explicitely require this header to be present for increased browser security.
