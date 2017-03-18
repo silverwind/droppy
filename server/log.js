@@ -43,7 +43,7 @@ var log = module.exports = function log(req, res, logLevel) {
     var ip = utils.ip(req);
 
     if (ip)
-      elems.unshift(log.formatUrl(ip, utils.port(req) || "0"));
+      elems.unshift(log.formatHostPort(ip, utils.port(req) || "0"));
   }
 
   if (logLevel > 0)
@@ -121,7 +121,7 @@ log.logo = function logo() {
   ].join("")));
 };
 
-log.formatUrl = function formatUrl(host, port, proto) {
+log.formatHostPort = function(host, port, proto) {
   var str = format({hostname: host, port: port});
   host = str.substring(0, str.lastIndexOf(":"));
   port = str.substring(str.lastIndexOf(":") + 1, str.length);

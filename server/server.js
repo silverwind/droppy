@@ -233,15 +233,16 @@ function startListeners(callback) {
 
         if (socket.socket) { // socket
           fs.chmodSync(socket, 0o666); // make it rw
-          // unix socket url based on https://stackoverflow.com/a/27268999/808699
+          // a unix socket URL should normally percent-encode the path, but
+          // we're printing a path-less URL so pretty-print it with slashes.
           log.info("Listening on ",
             chalk.blue(proto  + "+unix://") +
-            log.formatUrl(encodeURIComponent(server.address()))
+            chalk.cyan(server.address())
           );
         } else { // host + port
           log.info("Listening on ",
             chalk.blue(proto + "://") +
-            log.formatUrl(server.address().address, server.address().port, proto)
+            log.formatHostPort(server.address().address, server.address().port, proto)
           );
         }
         cb();
