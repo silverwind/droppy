@@ -140,74 +140,138 @@ function startListeners(callback) {
     return callback(new Error("Config Error: 'listeners' must be an array"));
 
   listeners.forEach(function(listener, i) {
-    ["host", "port", "protocol"].forEach(function(prop) {
-      if (prop === "protocol" && listener[prop] === undefined)
-        listener[prop] = "http";
+    if (listener.protocol === undefined) {
+      listener.protocol = "http";
+    }
 
-      if (listener[prop] === undefined && !config.demo)
-        return callback(new Error("Config Error: listener " + prop + " undefined"));
-
-      // On Linux, Node.js listens on v4 and v6 when :: is given as host. Don't attempt
-      // to bind to v4 to prevent an misleading error being logged.
-      // https://github.com/nodejs/node/issues/7200
-      if (prop === "host" && Array.isArray(listener[prop]) && os.platform() === "linux" &&
-          listener[prop].indexOf("::") !== -1 && listener[prop].indexOf("0.0.0.0") !== -1) {
-        listener[prop].splice(listener[prop].indexOf("0.0.0.0"), 1);
+    // validate listener options
+    if (typeof listener.socket !== "string") { // host + port
+      if (typeof listener.host !== "string") {
+        return callback(new Error("Invalid config value: 'host' = " + listener.host));
       }
-
-      if (prop === "port" && typeof prop !== "number") {
-        var num = parseInt(listener[prop]);
+      if (typeof listener.port !== "number" && typeof listener.port !== "string") {
+        return callback(new Error("Invalid config value: 'port' = " + listener.host));
+      } else if (typeof listener.port === "string") {
+        var num = parseInt(listener.port);
         if (Number.isNaN(num)) {
-          return callback(new Error("Config Error: invalid port: " + listener[prop]));
+          return callback(new Error("Config Error: invalid port: " + listener.port));
         }
-        listener[prop] = num;
+        listener.port = num;
       }
-    });
+    } else { // socket
+      if (typeof listener.socket !== "string") {
+        return callback(new Error("Invalid config value: 'socket' = " + listener.host));
+      }
+      // always unlink socket first because .listen will fail if it exists
+      try {
+        fs.unlinkSync(listener.socket);
+      } catch (err) {
+        if (err.code !== "ENOENT") {
+          return callback(
+            new Error("Unable to write to socket " +  listener.socket + ": " + err.code)
+          );
+        }
+      }
+    }
 
-    (Array.isArray(listener.host) ? listener.host : [listener.host]).forEach(function(host) {
-      (Array.isArray(listener.port) ? listener.port : [listener.port]).forEach(function(port) {
-        sockets.push({
-          host: host,
-          port: port,
-          opts: {
-            proto: listener.protocol,
-            hsts: listener.hsts,
-            key: listener.key,
-            cert: listener.cert,
-            dhparam: listener.dhparam,
-            passphrase: listener.passphrase,
-            index: i,
-          }
+    // On Linux, Node.js listens on v4 and v6 when :: is given as host. Don't attempt
+    // to bind to v4 to prevent an misleading error being logged.
+    // https://github.com/nodejs/node/issues/7200
+    if (Array.isArray(listener.host) && os.platform() === "linux" &&
+        listener.host.includes("::") && listener.host.includes("0.0.0.0")) {
+      listener.host.splice(listener.host.indexOf("0.0.0.0"), 1);
+    }
+
+    // arrify
+    var hosts = (Array.isArray(listener.host) ? listener.host : [listener.host]);
+    var ports = (Array.isArray(listener.port) ? listener.port : [listener.port]);
+
+    // filter `undefined`
+    hosts = hosts.filter(host => Boolean(host));
+    ports = ports.filter(port => Boolean(port));
+
+    var opts = {
+      proto: listener.protocol,
+      hsts: listener.hsts,
+      key: listener.key,
+      cert: listener.cert,
+      dhparam: listener.dhparam,
+      passphrase: listener.passphrase,
+      index: i,
+    };
+
+    // listen on all host + port combinations
+    if (hosts.length && ports.length) {
+      hosts.forEach(function(host) {
+        ports.forEach(function(port) {
+          sockets.push({
+            host: host,
+            port: port,
+            opts: opts,
+          });
         });
       });
-    });
+    }
+
+    // listen on unix socket
+    if (listener.socket) {
+      sockets.push({
+        path: listener.socket,
+        opts: opts,
+      });
+    }
   });
 
   async.each(sockets, function(socket, cb) {
     createListener(onRequest, socket.opts, function(err, server) {
       if (err) return cb(err);
+
       server.on("listening", function() {
         server.removeAllListeners("error");
         setupSocket(server);
         var proto = socket.opts.proto.toLowerCase();
-        log.info("Listening on ",
-          chalk.blue(proto + "://") +
-          log.formatUrl(server.address().address, server.address().port, proto)
-        );
+
+        if (socket.socket) { // socket
+          fs.chmodSync(socket, 0o666); // make it rw
+          // unix socket url based on https://stackoverflow.com/a/27268999/808699
+          log.info("Listening on ",
+            chalk.blue(proto  + "+unix://") +
+            log.formatUrl(encodeURIComponent(server.address()))
+          );
+        } else { // host + port
+          log.info("Listening on ",
+            chalk.blue(proto + "://") +
+            log.formatUrl(server.address().address, server.address().port, proto)
+          );
+        }
         cb();
-      }).on("error", function(err) {
+      });
+
+      server.on("error", function(err) {
         if (err.code === "EADDRINUSE") {
-          log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
-                chalk.blue(socket.port), chalk.red(". Address already in use."));
+          log.info(
+            chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+            chalk.blue(socket.port), chalk.red(". Address already in use.")
+          );
         } else if (err.code === "EACCES") {
-          log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
-                chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024."));
+          log.info(
+            chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+            chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024.")
+          );
         } else if (err.code === "EAFNOSUPPORT") {
-          log.info(chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
-                chalk.blue(socket.port), chalk.red(". Protocol unsupported."));
+          log.info(
+            chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
+            chalk.blue(socket.port), chalk.red(". Protocol unsupported.")
+          );
         } else log.error(err);
         return cb(err);
-      }).listen(socket.port, socket.host);
+      });
+
+      if (socket.path) {
+        server.listen(socket.socket);
+      } else {
+        server.listen(socket.port, socket.host);
+      }
     });
   }, callback);
 }
