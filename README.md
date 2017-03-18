@@ -96,18 +96,18 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 
 ## Options
 - `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
-- `public` *Boolean* - When enabled, no user authentication is performed.
-- `timestamps` *Boolean* - When enabled, adds timestamps to log output.
-- `linkLength` *Number* - The amount of characters in a shared link.
-- `logLevel` *Number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
-- `maxFileSize` *Number* - The maximum file size in bytes a user can upload in a single file.
-- `updateInterval` *Number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system.
-- `pollingInterval` *Number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
-- `keepAlive` *Number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
-- `allowFrame` *Boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`.
-- `readOnly` *Boolean* - All served files will be treated as being read-only.
-- `compression` *Boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution.
-- `dev` *Boolean* - Enable developer mode, skipping resource minification and enabling live reload.
+- `public` *boolean* - When enabled, no user authentication is performed.
+- `timestamps` *boolean* - When enabled, adds timestamps to log output.
+- `linkLength` *number* - The amount of characters in a shared link.
+- `logLevel` *number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
+- `maxFileSize` *number* - The maximum file size in bytes a user can upload in a single file.
+- `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system.
+- `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
+- `keepAlive` *number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
+- `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`.
+- `readOnly` *boolean* - All served files will be treated as being read-only.
+- `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution.
+- `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload.
 
 <a name="listener-options"></a>
 ### Listener Options
@@ -138,16 +138,16 @@ The above configuration will result in:
 - HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided TLS files.
 
 A listener object accepts these options:
-- `host` *String/Array* - Network interface(s) to listen on. Required.
-- `port` *Number/Array* - Network port(s) to listen on. Required.
-- `protocol` *String* - Protocol to use, `http` or `https`. Required.
+- `host` *string/Array* - Network interface(s) to listen on. Required.
+- `port` *number/Array* - Network port(s) to listen on. Required.
+- `protocol` *string* - Protocol to use, `http` or `https`. Required.
 
 For TLS these additional options are available:
-- `cert` *String* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. This path can be relative to the config directory. Required.
-- `key` *String* - Path to PEM-encoded TLS private key file. This path can be relative to the config directory. Required.
-- `dhparam` *String* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
-- `passphrase` *String* - Passphrase for the TLS private key in case it is encrypted.
-- `hsts` *Number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
+- `cert` *string* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. This path can be relative to the config directory. Required.
+- `key` *string* - Path to PEM-encoded TLS private key file. This path can be relative to the config directory. Required.
+- `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
+- `passphrase` *string* - Passphrase for the TLS private key in case it is encrypted.
+- `hsts` *number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 
 ## API
 droppy can be used with frameworks like [express](https://github.com/strongloop/express):
@@ -166,7 +166,7 @@ app.listen(process.env.PORT || 8989);
 See the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
 
 ### droppy([options])
-- **options** {object}: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
+- `options` *Object*: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
 
 Returns `function onRequest(req, res)`. All arguments are optional.
 
@@ -185,7 +185,7 @@ $ wget --content-disposition url
 
 # Development
 To start a live-reloading dev server:
-````
+````sh
 $ git clone https://github.com/silverwind/droppy && cd droppy
 $ npm i
 $ node droppy --dev
