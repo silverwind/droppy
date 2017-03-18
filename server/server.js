@@ -134,7 +134,7 @@ droppy._onRequest = onRequest;
 module.exports = droppy;
 
 function startListeners(callback) {
-  var listeners = config.listeners, sockets = [];
+  var listeners = config.listeners, targets = [];
 
   if (!Array.isArray(listeners))
     return callback(new Error("Config Error: 'listeners' must be an array"));
@@ -147,7 +147,7 @@ function startListeners(callback) {
     // arrify and filter `undefined`
     var hosts = utils.arrify(listener.host).filter(host => Boolean(host));
     var ports = utils.arrify(listener.port).filter(port => Boolean(port));
-    var paths = utils.arrify(listener.socket).filter(port => Boolean(port));
+    var sockets = utils.arrify(listener.socket).filter(socket => Boolean(socket));
 
     // validate listener options
     hosts.forEach(host => {
@@ -168,17 +168,17 @@ function startListeners(callback) {
         ports[i] = num;
       }
     });
-    paths.forEach(path => {
-      if (typeof path !== "string") {
-        return callback(new Error("Invalid config value: 'socket' = " + path));
+    sockets.forEach(socket => {
+      if (typeof socket !== "string") {
+        return callback(new Error("Invalid config value: 'socket' = " + socket));
       }
 
       try {
-        fs.unlinkSync(path);
+        fs.unlinkSync(socket);
       } catch (err) {
         if (err.code !== "ENOENT") {
           return callback(
-            new Error("Unable to write to unix socket '" +  path + "': " + err.code)
+            new Error("Unable to write to unix socket '" +  socket + "': " + err.code)
           );
         }
       }
@@ -205,7 +205,7 @@ function startListeners(callback) {
     // listen on all host + port combinations
     hosts.forEach(function(host) {
       ports.forEach(function(port) {
-        sockets.push({
+        targets.push({
           host: host,
           port: port,
           opts: opts,
@@ -214,25 +214,25 @@ function startListeners(callback) {
     });
 
     // listen on unix socket
-    paths.forEach(function(path) {
-      paths.push({
-        path: path,
+    sockets.forEach(function(socket) {
+      targets.push({
+        socket: socket,
         opts: opts,
       });
     });
   });
 
-  async.each(sockets, function(socket, cb) {
-    createListener(onRequest, socket.opts, function(err, server) {
+  async.each(targets, function(target, cb) {
+    createListener(onRequest, target.opts, function(err, server) {
       if (err) return cb(err);
 
       server.on("listening", function() {
         server.removeAllListeners("error");
         setupSocket(server);
-        var proto = socket.opts.proto.toLowerCase();
+        var proto = target.opts.proto.toLowerCase();
 
-        if (socket.socket) { // socket
-          fs.chmodSync(socket, 0o666); // make it rw
+        if (target.socket) { // socket
+          fs.chmodSync(target.socket, 0o666); // make it rw
           // a unix socket URL should normally percent-encode the path, but
           // we're printing a path-less URL so pretty-print it with slashes.
           log.info("Listening on ",
@@ -249,35 +249,36 @@ function startListeners(callback) {
       });
 
       server.on("error", function(err) {
-        if (err.code === "EADDRINUSE") {
-          log.info(
-            chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
-            chalk.blue(socket.port), chalk.red(". Address already in use.")
-          );
-        } else if (err.code === "EACCES") {
-          log.info(
-            chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
-            chalk.blue(socket.port), chalk.red(". Need permission to bind to ports < 1024.")
-          );
-        } else if (err.code === "EAFNOSUPPORT") {
-          log.info(
-            chalk.red("Failed to bind to "), chalk.cyan(socket.host), chalk.red(":"),
-            chalk.blue(socket.port), chalk.red(". Protocol unsupported.")
-          );
+        if (target.host && target.port) {
+          if (err.code === "EADDRINUSE") {
+            log.info(
+              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
+              chalk.blue(target.port), chalk.red(". Address already in use.")
+            );
+          } else if (err.code === "EACCES") {
+            log.info(
+              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
+              chalk.blue(target.port), chalk.red(". Need permission to bind to ports < 1024.")
+            );
+          } else if (err.code === "EAFNOSUPPORT") {
+            log.info(
+              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
+              chalk.blue(target.port), chalk.red(". Protocol unsupported.")
+            );
+          } else log.error(err);
         } else log.error(err);
         return cb(err);
       });
 
-      if (socket.path) {
-        server.listen(socket.socket);
+      if (target.socket) {
+        server.listen(target.socket);
       } else {
-        server.listen(socket.port, socket.host);
+        server.listen(target.port, target.host);
       }
     });
   }, callback);
 }
 
-// Create socket listener
 function createListener(handler, opts, callback) {
   var server;
   if (opts.proto === "http") {
