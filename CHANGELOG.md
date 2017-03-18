@@ -1,5 +1,10 @@
 # droppy Changelog
-*This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
+*This changelog only lists breaking and otherwise notable changes. See the commit log for more details
+*
+
+#### Version 6.2.0 - 18/3/2017
+
+- Added support for listening on unix domain sockets.
 
 #### Version 6.1.0 - 18/3/2017
 

@@ -117,35 +117,39 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 ```javascript
 "listeners": [
   {
-    "host"     : [ "0.0.0.0", "::" ],
-    "port"     : 80,
-    "protocol" : "http"
-    },
-    {
-        "host"     : "0.0.0.0",
-        "port"     : 443,
-        "protocol" : "https",
-        "key"      : "~/certs/tls.key",
-        "cert"     : "~/certs/tls.crt",
-        "ca"       : "~/certs/tls.ca",
-        "dhparam"  : "~/certs/tls.dhparam",
-        "hsts"     : 31536000
-    }
+    "host": [ "0.0.0.0", "::" ],
+    "socket": "/tmp/droppy",
+    "port": 80,
+    "protocol": "http"
+  },
+  {
+    "host": "0.0.0.0",
+    "port": 443,
+    "protocol": "https",
+    "key": "~/certs/example.com.key",
+    "cert": "~/certs/example.com.crt",
+    "dhparam": "~/certs/example.com.dh",
+    "hsts": 31536000
+  }
 ]
 ```
 The above configuration will result in:
-- HTTP listening on all IPv4 and IPv6 interfaces, port 80.
+
+- HTTP listening on all IPv4 and IPv6 interfaces, port 80 and on the unix domain socket `/tmp/droppy`.
 - HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided TLS files.
 
 A listener object accepts these options:
-- `host` *string/Array* - Network interface(s) to listen on. Required.
-- `port` *number/Array* - Network port(s) to listen on. Required.
+
+- `host` *string/Array* - Network interface(s) to listen on. Required when `port` is given.
+- `port` *number/string/Array* - Network port(s) to listen on. Required when `host` is given.
+- `socket` *string/Array* - Unix domain socket(s) to listen on.
 - `protocol` *string* - Protocol to use, `http` or `https`. Required.
 
-For TLS these additional options are available:
-- `cert` *string* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. This path can be relative to the config directory. Required.
-- `key` *string* - Path to PEM-encoded TLS private key file. This path can be relative to the config directory. Required.
-- `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated and saved for future use. This path can be relative to the config directory.
+For TLS the following additional options are available. Paths can be given relative to the configuration directory and `~` is resolved as expected.
+
+- `cert` *string* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. Required.
+- `key` *string* - Path to PEM-encoded TLS private key file. Required.
+- `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated on launch and saved for future use.
 - `passphrase` *string* - Passphrase for the TLS private key in case it is encrypted.
 - `hsts` *number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 
