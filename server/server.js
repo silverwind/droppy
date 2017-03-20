@@ -710,6 +710,9 @@ function handleGET(req, res) {
     handleFileRequest(req, res, false);
   } else if (/^\/!\/zip\/[\s\S]+/.test(URI)) {
     streamArchive(req, res, utils.addFilesPath(URI.substring(6)), true);
+  } else if (/^\/robots\.txt$/i.test(URI)) {
+    res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
+    res.end("User-agent: *\nDisallow: /\n");
   } else {
     redirectToRoot(req, res);
   }
