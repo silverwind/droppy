@@ -52,9 +52,9 @@
     "autoprefixer": "^6.7.7",
     "cheerio": "^0.22.0",
     "clean-css": "^4.0.9",
-    "codemirror": "^5.24.2",
+    "codemirror": "^5.25.0",
     "handlebars": "^4.0.6",
-    "html-minifier": "^3.4.1",
+    "html-minifier": "^3.4.2",
     "iltorb": "^1.0.13",
     "mousetrap": "^1.6.0",
     "node-zopfli": "^2.0.2",
@@ -63,8 +63,8 @@
     "request": "^2.81.0",
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.8.13",
-    "uppie": "^1.0.2",
+    "uglify-js": "^2.8.14",
+    "uppie": "^1.0.3",
     "video.js": "^5.18.4"
   },
   "files": [
