@@ -831,9 +831,11 @@ function handleResourceRequest(req, res, resourceName) {
         var origin = utils.origin(req).replace(/^.*\/\//, "//");
         headers["Content-Security-Policy"] = [
           "script-src 'self' blob: data:",
-          "child-src 'self' blob: data:",
-          "object-src 'none'",
           "media-src 'self' blob: data:",
+          "font-src 'self' blob: data:",
+          "child-src 'none'",
+          "object-src 'none'",
+          "form-action 'self'",
           // connect-src 'self' does not include websockets in Firefox and Safari.
           // The proper way to solve it would require a X-Forwarded-Proto to be set
           // by a reverse proxy, which would be a breaking change.
