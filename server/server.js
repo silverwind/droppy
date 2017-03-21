@@ -833,7 +833,7 @@ function handleResourceRequest(req, res, resourceName) {
           "script-src 'self' blob: data:",
           "media-src 'self' blob: data:",
           "font-src 'self' blob: data:",
-          // TODO: investigate why child-scr 'none' blocks downloads
+          "child-src 'none'",
           "object-src 'none'",
           "form-action 'self'",
           // connect-src 'self' does not include websockets in Firefox and Safari.

@@ -1462,7 +1462,7 @@
           updatePath(view);
           openDoc(view, filePath);
         } else { // Binary content - download it
-          $("[name=nn]")[0].setAttribute("src", "!/dl" + filePath);
+          download(filePath);
           hideSpinner(view);
         }
       }).catch(function() {
@@ -1470,6 +1470,14 @@
         hideSpinner(view);
       });
     }
+  }
+
+  function download(path) {
+    var a = document.createElement("a");
+    a.href = "!/dl" + path;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   function getMediaSrc(view, filename) {
