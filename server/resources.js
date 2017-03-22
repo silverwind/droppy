@@ -134,11 +134,15 @@ resources.files = {
 
 // On-demand loadable libs. Will be available as !/res/lib/[prop]
 var libs = {
-  "vjs.js": "node_modules/video.js/dist/video.min.js",
-  "vjs.css": "node_modules/video.js/dist/video-js.min.css",
+  // plyr
+  "plyr.js": "node_modules/plyr/src/js/plyr.js",
+  "plyr.css": "node_modules/plyr/dist/plyr.css",
+  "plyr.svg": "node_modules/plyr/dist/plyr.svg",
+  // codemirror
   "cm.js": [
     "node_modules/codemirror/lib/codemirror.js",
     "node_modules/codemirror/mode/meta.js",
+    "node_modules/codemirror/addon/mode/overlay.js",
     "node_modules/codemirror/addon/dialog/dialog.js",
     "node_modules/codemirror/addon/selection/active-line.js",
     "node_modules/codemirror/addon/selection/mark-selection.js",
@@ -148,6 +152,7 @@ var libs = {
     "node_modules/codemirror/keymap/sublime.js"
   ],
   "cm.css": "node_modules/codemirror/lib/codemirror.css",
+  // photoswipe
   "ps.js": [
     "node_modules/photoswipe/dist/photoswipe.min.js",
     "node_modules/photoswipe/dist/photoswipe-ui-default.min.js",

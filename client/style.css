@@ -26,7 +26,7 @@ a  { text-decoration: none; background: transparent }
 select, textarea { font-family: inherit; font-size: 100%; margin: 0 }
 button, input { line-height: normal }
 
-::-moz-focus-inner { border: none; padding: none; outline: none }
+::-moz-focus-inner { border: none; padding: 0; outline: none }
 ::-moz-focus-outer { border: none }
 
 ::selection      { background: #05a; color: #fff }
@@ -629,7 +629,7 @@ html:not(.mobile) #entry-menu a.active {
   color: #fff;
   stroke: #444;
   stroke-width: 12;
-  height: calc(100% - 1rem) !important;
+  height: calc(100% - 1.75rem) !important;
   top: 0 !important;
   margin-top: 0 !important;
 }
@@ -646,57 +646,19 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--arrow--left:hover svg  { height: 2.5em; width: 2.5em; left:  -.5em }
 .pswp__button--arrow--right:hover svg { height: 2.5em; width: 2.5em; right: -.5em }
 
-/* ================================= Video.js ================================= */
+/* ================================= Video ================================= */
 
-html:not(.mobile) .vjs-big-play-button {
-  display: none !important;
+.plyr__video-wrapper {
+  background: none !important;
 }
 
-video:not(.vjs-tech) {
-  display: none;
+video {
+  height: calc(100vh - 3rem) !important;
 }
 
-.vjs-fullscreen video {
-  max-width: 100% !important;
-}
-
-.video-js {
-  height: 100% !important;
-  width: 100% !important;
-  background: transparent !important;
-}
-
-.video-js.vjs-fullscreen {
-  background: #000 !important;
-}
-
-.vjs-big-play-button {
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  color: #fff !important;
-  border: none !important;
-}
-
-.vjs-mouse-display, .vjs-play-progress:after {
-  font-family: Arial,Helvetica,sans-serif !important;
-}
-
-.vjs-slider {
-  background: rgba(128,128,128,.6) !important;
-}
-
-.vjs-control-bar {
-  background: linear-gradient(to top, rgba(0,0,0,.6) 0%,rgba(0,0,0,.08) 80%,rgba(0,0,0,.04) 90%,rgba(0,0,0,0) 100%) !important;
-}
-
-.vjs-remaining-time-display {
-  line-height: inherit !important;
-}
-
-.vjs-play-progress:before, .vjs-volume-level:before {
-  display: none !important;
-}
+:-moz-full-screen video { height: 100vh !important; }
+:-webkit-full-screen video { height: 100vh !important; }
+:fullscreen video { height: 100vh !important; }
 
 /* ============================ Document  ============================ */
 
@@ -761,9 +723,9 @@ video:not(.vjs-tech) {
   top: .25em;
   right: 0;
   width: 2.5em;
-
   user-select: none;
 }
+
 .sidebar > li {
   position: relative;
   z-index: 5;
@@ -1366,7 +1328,7 @@ video:not(.vjs-tech) {
 .link-options {
   font-size: .8rem;
   white-space: nowrap;
-  justify-content: middle;
+  justify-content: center;
   background: #05a;
   color: #fff;
   border-radius: 0 6px 6px 0;

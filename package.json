@@ -35,6 +35,7 @@
     "mkdirp": "^0.5.1",
     "mv": "^2.1.1",
     "node-schedule": "^1.2.1",
+    "plyr": "^2.0.11",
     "readdirp": "^2.1.0",
     "rimraf": "^2.6.1",
     "strip-ansi": "^3.0.1",
@@ -64,8 +65,7 @@
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
     "uglify-js": "^2.8.14",
-    "uppie": "^1.0.3",
-    "video.js": "^5.18.4"
+    "uppie": "^1.0.3"
   },
   "files": [
     "client",

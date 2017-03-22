@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, videojs, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default */
+/* global jQuery, CodeMirror, plyr, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default */
 (function($) {
   "use strict";
 
@@ -498,7 +498,7 @@
     screenfull.onchange(function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
-      $("svg.fullscreen").replaceWith(
+      $("svg.fullscreen, svg.unfullscreen").replaceWith(
         svg(screenfull.isFullscreen ? "unfullscreen" : "fullscreen")
       );
     });
@@ -1564,12 +1564,16 @@
           loop[on ? "addClass" : "removeClass"]("on");
         });
 
+        // needed for plyr seeking
+        view[0].ps.listen("preventDragEvent", function(_e, _isDown, preventObj) {
+          preventObj.prevent = false;
+        });
         view[0].ps.listen("afterChange", function() {
           view[0].currentFile = this.currItem.filename;
-          var imgButtons = view.find(".pswp__button--fs, .fit-h, .fit-v");
+          var imgButtons = view.find(".fit-h, .fit-v");
           var videoButtons = view.find(".loop, .autonext");
           if (this.currItem.html) { // video
-            initVideoJS($(this.currItem.container).find("video")[0]);
+            initVideo($(this.currItem.container).find("video")[0]);
             imgButtons.addClass("hidden");
             videoButtons.removeClass("hidden");
           } else { // image
@@ -1656,12 +1660,16 @@
     showSpinner(view);
     Promise.all([
       ajax("!/file" + entryId),
-      initCM(),
+      loadStyle("cm-css", "!/res/lib/cm.css"),
+      loadScript("cm-js", "!/res/lib/cm.js"),
       loadTheme(droppy.get("theme")),
     ]).then(function(values) {
-      setTitle(basename(entryId));
-      setEditorFontSize(droppy.get("editorFontSize"));
-      configCM(values[0].response, basename(entryId));
+      (function verify() {
+        if (!("CodeMirror" in window)) return setTimeout(verify, 200);
+        setTitle(basename(entryId));
+        setEditorFontSize(droppy.get("editorFontSize"));
+        configCM(values[0].response, basename(entryId));
+      })();
     }).catch(function() {
       closeDoc(view);
     });
@@ -2150,71 +2158,65 @@
   }
 
   // video.js
-  function initVideoJS(el) {
-    return new Promise(function(resolve) {
-      Promise.all([
-        loadStyle("vjs-css", "!/res/lib/vjs.css"),
-        loadScript("vjs-js", "!/res/lib/vjs.js"),
-      ]).then(function() {
-        (function verify() {
-          if (!("videojs" in window)) return setTimeout(verify, 200);
+  function initVideo(el) {
+    var view = $(el).parents(".view");
+    Promise.all([
+      loadStyle("plyr-css", "!/res/lib/plyr.css"),
+      loadScript("plyr-js", "!/res/lib/plyr.js"),
+    ]).then(function() {
+      (function verify() {
+        if (!("plyr" in window)) {
+          return setTimeout(verify, 200);
+        }
 
-          var view = $(el).parents(".view");
+        // pause other loaded videos in this view
+        view.find("video").each(function() {
+          if (this !== el) this.pause();
+        });
 
-          // pause other loaded videos in this view
-          view.find("video").each(function() {
-            if (this !== el) this.pause();
+        var player = plyr.setup(el, {
+          controls: ["play", "progress", "current-time", "mute", "volume"],
+          iconUrl: "!/res/lib/plyr.svg",
+          autoplay: !droppy.detects.mobile,
+          volume: droppy.get("volume") / 10,
+          keyboardShortcuts: {focused: true, global: true},
+          tooltips: {controls: false, seek: true},
+          disableContextMenu: false,
+          storage: {enabled: false},
+          fullscreen: {enable: false},
+          hideControls: true,
+        })[0];
+
+        player.on("ready", function() {
+          // stop drags from propagating outside the control bar
+          $(view).find(".plyr__controls").on("mousemove", function(e) {
+            if (e.originalEvent && e.originalEvent.buttons !== 0) {
+              e.stopPropagation();
+            }
           });
+        });
 
-          if (!el.classList.contains("vjs-tech")) { // init new video
-            el.classList.add("video-js", "vjs-default-skin");
-            if (droppy.get("volume") === 0) el.muted = true;
-            var container = $(el).parent()[0];
-            videojs(el, {
-              controls: true,
-              autoplay: !droppy.detects.mobile,
-              preload : "auto",
-              width   : container.clientWidth,
-              heigth  : container.clientHeight
-            }, resolve).on("ready", function() {
-              this.volume(droppy.get("volume"));
-              // stop drags from propagating outside the control bar
-              $(view).find(".vjs-control-bar").on("mousemove touchmove", function(e) {
-                e.stopPropagation();
-              });
-            }).on("ended", function() {
-              if (droppy.get("loop")) {
-                this.play();
-              } else if (droppy.get("autonext")) {
-                view[0].ps.next();
-              }
-            });
-
-            var volume = droppy.get("volume");
-            if (volume) el.volume = volume;
-            el.addEventListener("volumechange", function() {
-              droppy.set("volume", this.muted ? 0 : this.volume);
-            });
-          } else { // already initialized, just un-pause
-            el.play();
+        player.on("ended", function() {
+          if (droppy.get("loop")) {
+            player.play();
+          } else if (droppy.get("autonext")) {
+            view[0].ps.next();
           }
-        })();
-      });
-    });
-  }
+        });
 
-  // CodeMirror
-  function initCM() {
-    return new Promise(function(resolve) {
-      Promise.all([
-        loadStyle("cm-css", "!/res/lib/cm.css"),
-        loadScript("cm-js", "!/res/lib/cm.js"),
-      ]).then(function() {
-        (function verify() {
-          if (!("CodeMirror" in window)) return setTimeout(verify, 200);
-          resolve();
-        })();
-      });
+        function onError() {
+          showError(view, "Your browser probably can't play this file");
+        }
+        player.getMedia().onerror = onError;
+        player.on("error", onError);
+
+        // skip initial volume set
+        setTimeout(function() {
+          player.on("volumechange", function() {
+            droppy.set("volume", Math.round(player.getVolume() * 100));
+          });
+        }, 0);
+      })();
     });
   }
 
