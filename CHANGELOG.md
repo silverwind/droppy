@@ -2,6 +2,11 @@
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details
 *
 
+#### Version 6.3.0 - 22/3/2017
+
+- Now using [plyr](https://github.com/Selz/plyr) for video playback.
+- Added the overlay addon to CodeMirror, which allows syntax highlighting to work better with mixed language files.
+
 #### Version 6.2.0 - 18/3/2017
 
 - Added support for listening on unix domain sockets.
