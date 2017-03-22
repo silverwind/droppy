@@ -43,7 +43,7 @@
     "url-format-lax": "^1.0.0",
     "valid-filename": "^2.0.1",
     "which": "^1.2.12",
-    "ws": "^2.2.1",
+    "ws": "^2.2.2",
     "yazl": "^2.4.2"
   },
   "optionalDependencies": {
@@ -52,7 +52,7 @@
   "devDependencies": {
     "autoprefixer": "^6.7.7",
     "cheerio": "^0.22.0",
-    "clean-css": "^4.0.9",
+    "clean-css": "^4.0.10",
     "codemirror": "^5.25.0",
     "handlebars": "^4.0.6",
     "html-minifier": "^3.4.2",
