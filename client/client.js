@@ -2178,7 +2178,7 @@
           controls: ["play", "progress", "current-time", "mute", "volume"],
           iconUrl: "!/res/lib/plyr.svg",
           autoplay: !droppy.detects.mobile,
-          volume: droppy.get("volume") / 10,
+          volume: droppy.get("volume") * 10,
           keyboardShortcuts: {focused: true, global: true},
           tooltips: {controls: false, seek: true},
           disableContextMenu: false,
@@ -2213,7 +2213,7 @@
         // skip initial volume set
         setTimeout(function() {
           player.on("volumechange", function() {
-            droppy.set("volume", Math.round(player.getVolume() * 100));
+            droppy.set("volume", Math.round(player.getVolume()));
           });
         }, 0);
       })();
