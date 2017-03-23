@@ -42,7 +42,7 @@
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
     "valid-filename": "^2.0.1",
-    "which": "^1.2.12",
+    "which": "^1.2.14",
     "ws": "^2.2.2",
     "yazl": "^2.4.2"
   },
@@ -64,7 +64,7 @@
     "request": "^2.81.0",
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.8.14",
+    "uglify-js": "^2.8.15",
     "uppie": "^1.0.3"
   },
   "files": [
