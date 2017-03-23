@@ -698,7 +698,11 @@ function handleGET(req, res) {
     handleResourceRequest(req, res, URI.substring(7));
   } else if (/^\/!\/token$/.test(URI)) {
     if (validateRequest(req)) {
-      res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8", Expires: "0"});
+      res.writeHead(200, {
+        "Cache-Control": "private, no-store",
+        "Content-Type": "text/plain; charset=utf-8",
+        "Expires": "0"
+      });
       res.end(csrf.get(req));
       log.info(req, res);
     }
@@ -818,81 +822,76 @@ function handleResourceRequest(req, res, resourceName) {
   }
 
   // Regular resource handling
+  var headers = {}, status = 200, data;
+
   if (resource === undefined) {
-    res.statusCode = 404;
-    res.end();
+    status = 400;
   } else {
+    headers["Vary"] = "Accept-Encoding";
+
+    // Caching
+    headers["Cache-Control"] = "max-age=60";
+    if (resource.etag) {
+      headers["ETag"] = resource.etag;
+    }
+
+    // Check Etag
     if ((req.headers["if-none-match"] || "") === resource.etag) {
-      res.statusCode = 304;
+      res.writeHead(304, headers);
       res.end();
+    }
+
+    // Headers on HTML requests
+    if (/\.html$/.test(resourceName)) {
+      var origin = utils.origin(req).replace(/^.*\/\//, "//");
+      headers["Content-Security-Policy"] = [
+        "script-src 'self' blob: data:",
+        "media-src 'self' blob: data:",
+        "font-src 'self' blob: data:",
+        "child-src 'none'",
+        "object-src 'none'",
+        "form-action 'self'",
+        // connect-src 'self' does not include websockets in Firefox and Safari.
+        // The proper way to solve it would require a X-Forwarded-Proto to be set
+        // by a reverse proxy, which would be a breaking change.
+        // Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1345615
+        "connect-src 'self' ws:" + origin + " wss:" + origin,
+      ].join("; ");
+      headers["X-Content-Type-Options"] = "nosniff";
+      headers["Referrer-Policy"] = "no-referrer";
+      if (!config.allowFrame)
+        headers["X-Frame-Options"] = "DENY";
+      if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+        headers["X-UA-Compatible"] = "IE=Edge";
+    }
+
+    // Content-Type
+    if (/\.(js|css|html|svg)$/.test(resourceName))
+      headers["Content-Type"] = resource.mime + "; charset=utf-8";
+    else
+      headers["Content-Type"] = resource.mime;
+
+    // Encoding, length
+    var encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
+      return e.trim().toLowerCase();
+    }).filter(function(e) {
+      return Boolean(e);
+    });
+    if (config.compression && encodings.includes("br") && resource.brotli) {
+      headers["Content-Encoding"] = "br";
+      headers["Content-Length"] = resource.brotli.length;
+      data = resource.brotli;
+    } else if (config.compression && encodings.includes("gzip") && resource.gzip) {
+      headers["Content-Encoding"] = "gzip";
+      headers["Content-Length"] = resource.gzip.length;
+      data = resource.gzip;
     } else {
-      var headers = {}, status = 200;
-      if (/\.html$/.test(resourceName)) {
-        var origin = utils.origin(req).replace(/^.*\/\//, "//");
-        headers["Content-Security-Policy"] = [
-          "script-src 'self' blob: data:",
-          "media-src 'self' blob: data:",
-          "font-src 'self' blob: data:",
-          "child-src 'none'",
-          "object-src 'none'",
-          "form-action 'self'",
-          // connect-src 'self' does not include websockets in Firefox and Safari.
-          // The proper way to solve it would require a X-Forwarded-Proto to be set
-          // by a reverse proxy, which would be a breaking change.
-          // Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1345615
-          "connect-src 'self' ws:" + origin + " wss:" + origin,
-        ].join("; ");
-        headers["X-Content-Type-Options"] = "nosniff";
-        headers["Referrer-Policy"] = "no-referrer";
-        if (!config.allowFrame)
-          headers["X-Frame-Options"] = "DENY";
-        if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
-          headers["X-UA-Compatible"] = "IE=Edge";
-      }
-
-      // Caching
-      if (/\.(png|ico|svg|woff2?)$/.test(resourceName)) {
-        headers["Expires"] = new Date(Date.now() + 604800000).toUTCString();
-      } else {
-        headers["Expires"] = "0";
-      }
-      if (resource.etag && !/\.html$/.test(resourceName)) {
-        headers["ETag"] = resource.etag;
-      }
-
-      // Content-Type
-      if (/\.(js|css|html|svg)$/.test(resourceName))
-        headers["Content-Type"] = resource.mime + "; charset=utf-8";
-      else
-        headers["Content-Type"] = resource.mime;
-
-      // Encoding, length
-      var encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
-        return e.trim().toLowerCase();
-      }).filter(function(e) {
-        return Boolean(e);
-      });
-
-      var data;
-      if (config.compression && encodings.includes("br") && resource.brotli) {
-        headers["Content-Encoding"] = "br";
-        headers["Vary"] = "Accept-Encoding";
-        headers["Content-Length"] = resource.brotli.length;
-        data = resource.brotli;
-      } else if (config.compression && encodings.includes("gzip") && resource.gzip) {
-        headers["Content-Encoding"] = "gzip";
-        headers["Content-Length"] = resource.gzip.length;
-        headers["Vary"] = "Accept-Encoding";
-        data = resource.gzip;
-      } else {
-        headers["Content-Length"] = resource.data.length;
-        data = resource.data;
-      }
-
-      res.writeHead(status, headers);
-      res.end(data);
+      headers["Content-Length"] = resource.data.length;
+      data = resource.data;
     }
   }
+  res.writeHead(status, headers);
+  res.end(data);
   log.info(req, res);
 }
 
