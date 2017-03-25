@@ -1,4 +1,4 @@
-# https://github.com/eslint/eslint/blob/master/docs/rules/README.md
+# https://github.com/eslint/eslint/tree/master/docs/rules
 
 rules:
   accessor-pairs: [2]
