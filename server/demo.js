@@ -31,6 +31,9 @@ demo.refresh = function refresh(doneCallback) {
       });
     },
 
+    // Text samples
+    get("https://silverwind.io/example.html", "example.html"),
+
     // Image samples
     get("https://silverwind.io/droppy-samples/sample-1.jpg", "/images/sample-1.jpg"),
     get("https://silverwind.io/droppy-samples/sample-2.jpg", "/images/sample-2.jpg"),
@@ -50,9 +53,12 @@ demo.refresh = function refresh(doneCallback) {
     get("https://silverwind.io/droppy-samples/sample-16.jpg", "/images/sample-16.jpg"),
     get("https://silverwind.io/droppy-samples/sample-17.jpg", "/images/sample-17.jpg"),
     get("https://silverwind.io/droppy-samples/sample-18.jpg", "/images/sample-18.jpg"),
+    get("https://raw.githubusercontent.com/silverwind/droppy/master/client/images/readme-logo.svg", "example.svg"),
+    get("https://github.com/silverwind/droppy/raw/master/client/images/logo180.png", "example.png"),
 
     // Video samples - Provided by webmfiles.org
-    get("http://video.webmfiles.org/big-buck-bunny_trailer.webm", "/video/Big Buck Bunny.webm"),
+    get("http://dl1.webmfiles.org/big-buck-bunny_trailer.webm", "example.webm"),
+    get("http://video.blendertestbuilds.de/download.blender.org/peach/trailer_480p.mov", "example.mp4"),
 
     // Audio samples - Provided by sampleswap.org
     get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/258%5Bkb%5D160_roll-to-the-moon-and-back.wav.mp3", "/audio/sample-1.mp3"),
