@@ -2179,6 +2179,7 @@
         var player = plyr.setup(el, {
           controls: ["play", "progress", "current-time", "mute", "volume"],
           iconUrl: "!/res/lib/plyr.svg",
+          blankUrl: "!/res/lib/blank.mp4",
           autoplay: !droppy.detects.mobile,
           volume: droppy.get("volume") * 10,
           keyboardShortcuts: {focused: true, global: true},

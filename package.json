@@ -30,12 +30,12 @@
     "isbinaryfile": "^3.0.2",
     "json-buffer": "^2.0.11",
     "lodash": "^4.17.4",
-    "mime-types": "^2.1.14",
+    "mime-types": "^2.1.15",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "mv": "^2.1.1",
     "node-schedule": "^1.2.1",
-    "plyr": "^2.0.11",
+    "plyr": "^2.0.12",
     "readdirp": "^2.1.0",
     "rimraf": "^2.6.1",
     "strip-ansi": "^3.0.1",
@@ -47,7 +47,7 @@
     "yazl": "^2.4.2"
   },
   "optionalDependencies": {
-    "uws": "^0.13.0"
+    "uws": "^0.14.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.7",
@@ -64,7 +64,7 @@
     "request": "^2.81.0",
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.8.15",
+    "uglify-js": "^2.8.16",
     "uppie": "^1.0.3"
   },
   "files": [

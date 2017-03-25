@@ -138,6 +138,7 @@ var libs = {
   "plyr.js": "node_modules/plyr/src/js/plyr.js",
   "plyr.css": "node_modules/plyr/dist/plyr.css",
   "plyr.svg": "node_modules/plyr/dist/plyr.svg",
+  "blank.mp4": "client/blank.mp4",
   // codemirror
   "cm.js": [
     "node_modules/codemirror/lib/codemirror.js",
