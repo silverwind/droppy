@@ -1549,6 +1549,8 @@
           shareEl: false,
           showAnimationDuration: 0,
           spacing: 0,
+          timeToIdle: 2500,
+          timeToIdleOutside: 2500,
         });
 
         var autonext = view.find(".autonext");
