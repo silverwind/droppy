@@ -1688,12 +1688,13 @@
           keyMap: "sublime",
           lineNumbers: true,
           lineWrapping: droppy.get("lineWrapping"),
+          mode: "text/plain",
+          readOnly: droppy.readOnly,
           showCursorWhenSelecting: true,
-          styleSelectedText: true,
           styleActiveLine: true,
+          styleSelectedText: true,
           tabSize: droppy.get("indentUnit"),
           theme: droppy.get("theme"),
-          mode: "text/plain"
         });
 
         if (!CodeMirror.autoLoadMode) initModeLoad();
