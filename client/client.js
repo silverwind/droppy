@@ -147,10 +147,15 @@
   };
 
   function savePrefs(prefs) {
-    try { localStorage.setItem("prefs", JSON.stringify(prefs)); } catch (err) {}
+    try {
+      localStorage.setItem("prefs", JSON.stringify(prefs));
+    } catch (err) {
+      console.error(err);
+    }
   }
   function loadPrefs() {
-    return JSON.parse(localStorage.getItem("prefs") || "{}");
+    // fallback to defaults for Safari in Private Browsing mode
+    return JSON.parse(localStorage.getItem("prefs")) || defaults;
   }
 
   // Load prefs and set missing ones to their default
@@ -1673,7 +1678,8 @@
         setEditorFontSize(droppy.get("editorFontSize"));
         configCM(values[0].response, basename(entryId));
       })();
-    }).catch(function() {
+    }).catch(function(e) {
+      showError(view, e);
       closeDoc(view);
     });
 
