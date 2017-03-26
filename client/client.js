@@ -1678,8 +1678,8 @@
         setEditorFontSize(droppy.get("editorFontSize"));
         configCM(values[0].response, basename(entryId));
       })();
-    }).catch(function(e) {
-      showError(view, e);
+    }).catch(function(err) {
+      showError(view, err);
       closeDoc(view);
     });
 
