@@ -154,8 +154,15 @@
     }
   }
   function loadPrefs() {
-    // fallback to defaults for Safari in Private Browsing mode
-    return JSON.parse(localStorage.getItem("prefs")) || defaults;
+    var ret;
+    try {
+      ret = JSON.parse(localStorage.getItem("prefs"));
+      if (!ret) throw new Error();
+    } catch (err) {
+      // saved will be 'null' for Safari in private browsing mode
+      ret = defaults;
+    }
+    return ret;
   }
 
   // Load prefs and set missing ones to their default
