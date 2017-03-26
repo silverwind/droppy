@@ -1266,9 +1266,10 @@
     // file drop
     var uppie = new Uppie();
     uppie(view[0], function(event, fd, files) {
+      var view = getActiveView();
+      if (droppy.readOnly) return showError(view, "Files are read-only.");
       if (!files.length) return;
       event.stopPropagation();
-      var view = getActiveView();
       if (!validateFiles(files, view)) return;
       view[0].uId += 1;
       upload(view, fd, files, view[0].uId);
