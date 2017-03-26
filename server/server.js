@@ -970,6 +970,7 @@ function handleUploadRequest(req, res) {
     res.statusCode = 403;
     res.end();
     log.info(req, res, "Upload cancelled because of read-only mode");
+    return;
   }
 
   // Set huge timeout for big file uploads and/or slow connection
