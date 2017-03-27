@@ -647,7 +647,7 @@ function sendError(sid, vId, text) {
 }
 
 function redirectToRoot(req, res) {
-  res.writeHead(301, {Location: "/", Expires: "0"});
+  res.writeHead(301, {Location: "/", "Cache-Control": "max-age=3600"});
   res.end();
   log.info(req, res);
   return;
@@ -699,9 +699,8 @@ function handleGET(req, res) {
   } else if (/^\/!\/token$/.test(URI)) {
     if (validateRequest(req)) {
       res.writeHead(200, {
-        "Cache-Control": "private, no-store",
-        "Content-Type": "text/plain; charset=utf-8",
-        "Expires": "0"
+        "Cache-Control": "private, no-store, max-age=0",
+        "Content-Type": "text/plain; charset=utf-8"
       });
       res.end(csrf.get(req));
       log.info(req, res);
@@ -830,7 +829,7 @@ function handleResourceRequest(req, res, resourceName) {
     headers["Vary"] = "Accept-Encoding";
 
     // Caching
-    headers["Expires"] = config.dev ? "0" : "3600";
+    headers["Cache-Control"] = "max-age=" + (config.dev ? "0" : "3600");
     if (resource.etag) {
       headers["ETag"] = resource.etag;
     }
