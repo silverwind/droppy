@@ -647,7 +647,7 @@ function sendError(sid, vId, text) {
 }
 
 function redirectToRoot(req, res) {
-  res.writeHead(301, {Location: "/"});
+  res.writeHead(301, {Location: "/", Expires: "0"});
   res.end();
   log.info(req, res);
   return;
