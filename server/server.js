@@ -830,7 +830,7 @@ function handleResourceRequest(req, res, resourceName) {
     headers["Vary"] = "Accept-Encoding";
 
     // Caching
-    headers["Cache-Control"] = "max-age=60";
+    headers["Expires"] = config.dev ? "0" : "3600";
     if (resource.etag) {
       headers["ETag"] = resource.etag;
     }
