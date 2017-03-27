@@ -1487,6 +1487,7 @@
 
   function download(path) {
     var a = document.createElement("a");
+    a.download = basename(path); // to keep websocket alive
     a.href = "!/dl" + path;
     document.body.appendChild(a);
     a.click();
