@@ -14,7 +14,7 @@
     "start": "node droppy.js start"
   },
   "dependencies": {
-    "async": "^2.1.5",
+    "async": "^2.2.0",
     "busboy": "^0.2.14",
     "chalk": "^1.1.3",
     "chokidar": "^1.6.1",
@@ -48,7 +48,7 @@
     "yazl": "^2.4.2"
   },
   "optionalDependencies": {
-    "uws": "^0.14.0"
+    "uws": "^0.14.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.7",
@@ -65,7 +65,7 @@
     "request": "^2.81.0",
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.8.16",
+    "uglify-js": "^2.8.18",
     "uppie": "^1.0.3"
   },
   "files": [
