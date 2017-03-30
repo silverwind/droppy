@@ -648,7 +648,7 @@ function sendError(sid, vId, text) {
 }
 
 function redirectToRoot(req, res) {
-  res.writeHead(301, {Location: "/", "Cache-Control": "max-age=3600"});
+  res.writeHead(307, {Location: "/", "Cache-Control": "public, max-age=0"});
   res.end();
   log.info(req, res);
   return;
@@ -830,7 +830,7 @@ function handleResourceRequest(req, res, resourceName) {
     headers["Vary"] = "Accept-Encoding";
 
     // Caching
-    headers["Cache-Control"] = "max-age=" + (config.dev ? "0" : "3600");
+    headers["Cache-Control"] = "public, max-age=0";
     if (resource.etag) {
       headers["ETag"] = resource.etag;
     }
