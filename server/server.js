@@ -1256,7 +1256,7 @@ function streamArchive(req, res, zipPath, download) {
 }
 
 function streamFile(req, res, filepath, download, stats) {
-  sendFile(req, decodeURIComponent(req.url).substring("/!/file/".length), {
+  sendFile(req, req.url.substring("/!/file/".length), {
     root: paths.files,
     dotfiles: "allow",
     index: false,
