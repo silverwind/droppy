@@ -5,14 +5,14 @@ var async        = require("async");
 var etag         = require("etag");
 var fs           = require("graceful-fs");
 var jb           = require("json-buffer");
-var mime         = require("mime-types").lookup;
 var mkdirp       = require("mkdirp");
 var path         = require("path");
 var vm           = require("vm");
 var zlib         = require("zlib");
 
-var log          = require("./log");
+var log          = require("./log.js");
 var paths        = require("./paths.js").get();
+var utils        = require("./utils.js");
 
 var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
 var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
@@ -247,15 +247,27 @@ function compile(write, cb) {
     var cache = {res: results[0], themes: {}, modes: {}, lib: {}};
 
     Object.keys(results[1]).forEach(function(theme) {
-      cache.themes[theme] = {data: results[1][theme], etag: etag(results[1][theme]), mime: mime("css")};
+      cache.themes[theme] = {
+        data: results[1][theme],
+        etag: etag(results[1][theme]),
+        mime: utils.contentType("css"),
+      };
     });
 
     Object.keys(results[2]).forEach(function(mode) {
-      cache.modes[mode] = {data: results[2][mode], etag: etag(results[2][mode]), mime: mime("js")};
+      cache.modes[mode] = {
+        data: results[2][mode],
+        etag: etag(results[2][mode]),
+        mime: utils.contentType("js"),
+      };
     });
 
     Object.keys(results[3]).forEach(function(file) {
-      cache.lib[file] = {data: results[3][file], etag: etag(results[3][file]), mime: mime(path.basename(file))};
+      cache.lib[file] = {
+        data: results[3][file],
+        etag: etag(results[3][file]),
+        mime: utils.contentType(file),
+      };
     });
 
     addGzip(cache, function(err, cache) {
@@ -459,7 +471,11 @@ resources.compileJS = function compileJS() {
   // Minify
   js = minifyJS(js);
 
-  return {data: buf(js), etag: etag(js), mime: mime("js")};
+  return {
+    data: buf(js),
+    etag: etag(js),
+    mime: utils.contentType("js"),
+  };
 };
 
 resources.compileCSS = function compileCSS() {
@@ -471,7 +487,11 @@ resources.compileCSS = function compileCSS() {
   // Vendor prefixes and minify
   css = minifyCSS(postcss([autoprefixer(opts.autoprefixer)]).process(css).css);
 
-  return {data: buf(css), etag: etag(css), mime: mime("css")};
+  return {
+    data: buf(css),
+    etag: etag(css),
+    mime: utils.contentType("css"),
+  };
 };
 
 resources.compileHTML = function compileHTML(res) {
@@ -487,21 +507,23 @@ resources.compileHTML = function compileHTML(res) {
   // Add SVGs
   html["base.html"] = html["base.html"].replace("<!-- {{svg}} -->", svg());
 
+  var htmlType = utils.contentType("html");
+
   // Combine pages
   $ = cheerio.load(html["base.html"]);
   $("body").attr("data-type", "m");
   var main = min($("#page").replaceWith(html["main.html"]).end().html());
-  res["main.html"] = {data: buf(main), etag: etag(main), mime: mime("html")};
+  res["main.html"] = {data: buf(main), etag: etag(main), mime: htmlType};
 
   $ = cheerio.load(html["base.html"]);
   $("body").attr("data-type", "a");
   var auth = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: mime("html")};
+  res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: htmlType};
 
   $ = cheerio.load(html["base.html"]);
   $("body").attr("data-type", "f");
   var firstrun = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["firstrun.html"] = {data: buf(firstrun), etag: etag(firstrun), mime: mime("html")};
+  res["firstrun.html"] = {data: buf(firstrun), etag: etag(firstrun), mime: htmlType};
 
   return res;
 };
@@ -525,7 +547,7 @@ function compileAll(callback) {
       callback(err);
     }
 
-    res[name] = {data: data, etag: etag(data), mime: mime(name)};
+    res[name] = {data: data, etag: etag(data), mime: utils.contentType(name)};
   });
   callback(null, res);
 }

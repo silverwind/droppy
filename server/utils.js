@@ -1,22 +1,22 @@
 "use strict";
 
-var utils    = module.exports = {};
-var async    = require("async");
-var cd       = require("content-disposition");
-var cpr      = require("cpr");
-var crypto   = require("crypto");
-var escRe    = require("escape-string-regexp");
-var ext      = require("file-extension");
-var fs       = require("graceful-fs");
-var isBin    = require("isbinaryfile");
-var mimetype = require("mime-types").lookup;
-var mkdirp   = require("mkdirp");
-var mv       = require("mv");
-var path     = require("path");
-var rimraf   = require("rimraf");
-var url      = require("url");
-var util     = require("util");
-var validate = require("valid-filename");
+var utils     = module.exports = {};
+var async     = require("async");
+var cd        = require("content-disposition");
+var cpr       = require("cpr");
+var crypto    = require("crypto");
+var escRe     = require("escape-string-regexp");
+var ext       = require("file-extension");
+var fs        = require("graceful-fs");
+var isBin     = require("isbinaryfile");
+var mimeTypes = require("mime-types");
+var mkdirp    = require("mkdirp");
+var mv        = require("mv");
+var path      = require("path");
+var rimraf    = require("rimraf");
+var url       = require("url");
+var util      = require("util");
+var validate  = require("valid-filename");
 
 var paths  = require("./paths.js").get();
 var log    = require("./log.js");
@@ -33,7 +33,7 @@ var overrideMimeTypes = {
 };
 
 // mkdirp wrapper with array support
-utils.mkdir = function mkdir(dir, cb) {
+utils.mkdir = function(dir, cb) {
   if (Array.isArray(dir)) {
     async.each(dir, function(p, cb) {
       mkdirp(p, {fs: fs, mode: "755"}, cb);
@@ -46,12 +46,12 @@ utils.mkdir = function mkdir(dir, cb) {
 };
 
 // rimraf wrapper with 10 retries
-utils.rm = function rm(p, cb) {
+utils.rm = function(p, cb) {
   rimraf(p, {maxBusyTries: 10, glob: {dot: true}}, cb);
 };
 
 // rimraf.sync wrapper with 10 retries
-utils.rmSync = function rmSync(p) {
+utils.rmSync = function(p) {
   var tries = 10;
   (function run() {
     try {
@@ -62,13 +62,13 @@ utils.rmSync = function rmSync(p) {
   })();
 };
 
-utils.move = function move(src, dst, cb) {
+utils.move = function(src, dst, cb) {
   mv(src, dst, function(err) {
     if (cb) cb(err);
   });
 };
 
-utils.copyFile = function copyFile(src, dst, cb) {
+utils.copyFile = function(src, dst, cb) {
   var cbCalled = false;
   var read     = fs.createReadStream(src);
   var write    = fs.createWriteStream(dst);
@@ -85,7 +85,7 @@ utils.copyFile = function copyFile(src, dst, cb) {
   read.pipe(write);
 };
 
-utils.copyDir = function copyDir(src, dst, cb) {
+utils.copyDir = function(src, dst, cb) {
   cpr(src, dst, {overwrite: true}, function(errs) {
     if (errs) log.error(errs);
     if (cb) cb();
@@ -97,7 +97,7 @@ utils.copyDir = function copyDir(src, dst, cb) {
 utils.linkChars = "abcdefghjkmnpqrstuvwxyz23456789";
 
 // Get a pseudo-random n-character lowercase string.
-utils.getLink = function getLink(links, length) {
+utils.getLink = function(links, length) {
   var link = "";
   do {
     while (link.length < length) {
@@ -108,13 +108,13 @@ utils.getLink = function getLink(links, length) {
   return link;
 };
 
-utils.pretty = function pretty(data) {
+utils.pretty = function(data) {
   return util.inspect(data, {colors: true})
     .replace(/^\s+/gm, " ").replace(/\s+$/gm, "")
     .replace(/[\r\n]+/gm, "");
 };
 
-utils.getNewPath = function getNewPath(origPath, callback) {
+utils.getNewPath = function(origPath, callback) {
   fs.stat(origPath, function(err, stats) {
     if (err) callback(origPath);
     else {
@@ -150,22 +150,22 @@ utils.getNewPath = function getNewPath(origPath, callback) {
   });
 };
 
-utils.normalizePath = function normalizePath(p) {
+utils.normalizePath = function(p) {
   return p.replace(/[\\|/]+/g, "/");
 };
 
-utils.addFilesPath = function addFilesPath(p) {
+utils.addFilesPath = function(p) {
   return p === "/" ? paths.files : path.join(paths.files + "/" + p);
 };
 
-utils.removeFilesPath = function removeFilesPath(p) {
+utils.removeFilesPath = function(p) {
   if (p.length > paths.files.length)
     return utils.normalizePath(p.substring(paths.files.length));
   else if (p === paths.files)
     return "/";
 };
 
-utils.isPathSane = function isPathSane(p, isURL) {
+utils.isPathSane = function(p, isURL) {
   if (isURL) {
     if (/(?:^|[\\/])\.\.(?:[\\/]|$)/.test(p)) return false; // Navigating up/down the tree
     if (/[*{}|<>"]/.test(p)) return false;   // Invalid characters
@@ -178,7 +178,7 @@ utils.isPathSane = function isPathSane(p, isURL) {
   }
 };
 
-utils.isBinary = function isBinary(p, callback) {
+utils.isBinary = function(p, callback) {
   if (forceBinaryTypes.indexOf(ext(p)) !== -1)
     return callback(null, true);
 
@@ -188,27 +188,32 @@ utils.isBinary = function isBinary(p, callback) {
   });
 };
 
-// TODO async/await this in Node.js 8.0
-utils.mime = function mime(p) {
-  var mimeType = mimetype(p);
-  if (overrideMimeTypes[mimeType]) return overrideMimeTypes[mimeType];
-  if (mimeType) return mimeType;
-  try {
-    return isBin.sync(p) ? "application/octet-stream" : "text/plain; charset=utf-8";
-  } catch (err) {
-    return "application/octet-stream";
+// TODO async/await this in Node.js 8
+utils.contentType = function(p) {
+  var type = mimeTypes.lookup(p);
+  if (overrideMimeTypes[type]) return overrideMimeTypes[type];
+
+  if (type) {
+    var charset = mimeTypes.charsets.lookup(type);
+    return type + (charset ? "; charset=" + charset : "");
+  } else {
+    try {
+      return isBin.sync(p) ? "application/octet-stream" : "text/plain";
+    } catch (err) {
+      return "application/octet-stream";
+    }
   }
 };
 
-utils.getDispo = function getDispo(fileName) {
+utils.getDispo = function(fileName) {
   return cd(path.basename(fileName));
 };
 
-utils.createSid = function createSid() {
+utils.createSid = function() {
   return crypto.randomBytes(64).toString("base64").substring(0, 48);
 };
 
-utils.readJsonBody = function readJsonBody(req) {
+utils.readJsonBody = function(req) {
   return new Promise(function(resolve, reject) {
     var body = [];
     req.on("data", function(chunk) {
@@ -224,7 +229,7 @@ utils.readJsonBody = function readJsonBody(req) {
   });
 };
 
-utils.countOccurences = function countOccurences(string, search) {
+utils.countOccurences = function(string, search) {
   var num = 0, pos = 0;
   while (true) {
     pos = string.indexOf(search, pos);
@@ -236,7 +241,7 @@ utils.countOccurences = function countOccurences(string, search) {
   return num;
 };
 
-utils.formatBytes = function formatBytes(num) {
+utils.formatBytes = function(num) {
   if (num < 1) return num + " B";
   var units = ["B", "kB", "MB", "GB", "TB", "PB"];
   var exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
@@ -244,7 +249,7 @@ utils.formatBytes = function formatBytes(num) {
 };
 
 // TODO: https://tools.ietf.org/html/rfc7239
-utils.ip = function ip(req) {
+utils.ip = function(req) {
   return req.headers && req.headers["x-forwarded-for"] &&
       req.headers["x-forwarded-for"].split(",")[0].trim() ||
     req.headers && req.headers["x-real-ip"] ||
@@ -254,7 +259,7 @@ utils.ip = function ip(req) {
     req.remoteAddress && req.remoteAddress;
 };
 
-utils.port = function port(req) {
+utils.port = function(req) {
   return req.headers && req.headers["x-real-port"] ||
     req.connection && req.connection.remotePort ||
     req.connection && req.connection.socket && req.connection.socket.remotePort ||
@@ -262,7 +267,7 @@ utils.port = function port(req) {
     req.remotePort && req.remotePort;
 };
 
-utils.naturalSort = function naturalSort(a, b) {
+utils.naturalSort = function(a, b) {
   var x = [], y = [];
   function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
   a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
@@ -278,7 +283,7 @@ utils.naturalSort = function naturalSort(a, b) {
   return 0;
 };
 
-utils.extensionRe = function extensionRe(arr) {
+utils.extensionRe = function(arr) {
   arr = arr.map(function(ext) {
     return escRe(ext);
   });

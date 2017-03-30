@@ -815,7 +815,7 @@ function handleResourceRequest(req, res, resourceName) {
   } else if (/^\/!\/res\/manifest\.json$/.test(req.url)) {
     resource = {
       data: manifest(req),
-      mime: "application/manifest+json"
+      mime: "application/manifest+json; charset=UTF-8"
     };
   } else {
     resource = cache.res[resourceName];
@@ -866,10 +866,7 @@ function handleResourceRequest(req, res, resourceName) {
     }
 
     // Content-Type
-    if (/\.(js|css|html|svg)$/.test(resourceName))
-      headers["Content-Type"] = resource.mime + "; charset=utf-8";
-    else
-      headers["Content-Type"] = resource.mime;
+    headers["Content-Type"] = resource.mime;
 
     // Encoding, length
     var encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
@@ -1233,7 +1230,7 @@ function streamArchive(req, res, zipPath, download) {
       log.info(req, res);
       log.info("Streaming zip of ", chalk.blue(relPath));
       res.statusCode = 200;
-      res.setHeader("Content-Type", utils.mime(zip));
+      res.setHeader("Content-Type", utils.contentType(zip));
       res.setHeader("Transfer-Encoding", "chunked");
       if (download) res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
       readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
@@ -1261,7 +1258,7 @@ function streamFile(req, res, filepath, download, stats) {
     dotfiles: "allow",
     index: false,
   }).on("headers", function(res) {
-    res.setHeader("Content-Type", utils.mime(filepath));
+    res.setHeader("Content-Type", utils.contentType(filepath));
     if (download) {
       res.setHeader("Content-Disposition", utils.getDispo(filepath));
     }
