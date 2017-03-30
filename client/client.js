@@ -2224,7 +2224,7 @@
         });
 
         function onError() {
-          showError(view, "Your browser probably can't play this file");
+          showError(view, "Your browser can't play this file");
         }
         player.getMedia().onerror = onError;
         player.on("error", onError);

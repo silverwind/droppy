@@ -172,6 +172,7 @@ utils.isPathSane = function(p, isURL) {
     return true;
   } else {
     return p.split(/[\\/]/gm).every(function(name) {
+      if (name === "." || name === "..") return false;
       if (!name) return true;
       return validate(name);
     });
