@@ -13,6 +13,7 @@ var escRe    = require("escape-string-regexp");
 var fs       = require("graceful-fs");
 var imgSize  = require("image-size");
 var readdirp = require("readdirp");
+var sendFile = require("send");
 var schedule = require("node-schedule");
 var ut       = require("untildify");
 var yazl     = require("yazl");
@@ -1255,31 +1256,21 @@ function streamArchive(req, res, zipPath, download) {
 }
 
 function streamFile(req, res, filepath, download, stats) {
-  var status = 200, headers = {
-    "Content-Type": utils.mime(filepath),
-    "Content-Length": stats.size
-  };
-  if (download) {
-    headers["Content-Disposition"] = utils.getDispo(filepath);
-    res.writeHead(status, headers);
-    fs.createReadStream(filepath).pipe(res);
-  } else {
-    headers["Accept-Ranges"] = "bytes"; // advertise ranges support
-    if (req.headers.range) {
-      var parts = req.headers.range.replace(/bytes=/, "").split("-");
-      var start = parseInt(parts[0]);
-      var end   = parts[1] ? parseInt(parts[1]) : stats.size - 1;
-
-      status = 206;
-      headers["Content-Length"] = end - start + 1;
-      headers["Content-Range"]  = "bytes " + start + "-" + end + "/" + stats.size;
-      res.writeHead(status, headers);
-      fs.createReadStream(filepath, {start: start, end: end}).pipe(res);
-    } else {
-      res.writeHead(status, headers);
-      fs.createReadStream(filepath).pipe(res);
+  sendFile(req, decodeURIComponent(req.url).substring("/!/file/".length), {
+    root: paths.files,
+    dotfiles: "allow",
+    index: false,
+  }).on("headers", function(res) {
+    res.setHeader("Content-Type", utils.mime(filepath));
+    if (download) {
+      res.setHeader("Content-Disposition", utils.getDispo(filepath));
     }
-  }
+  }).on("error", function(err) {
+    log.error(err);
+    if (req.headers.range) {
+      log.error("requested:", req.headers.range, "end:" + stats.size);
+    }
+  }).pipe(res);
 }
 
 function validateRequest(req) {

@@ -38,6 +38,7 @@
     "plyr": "^2.0.12",
     "readdirp": "^2.1.0",
     "rimraf": "^2.6.1",
+    "send": "^0.15.1",
     "strip-ansi": "^3.0.1",
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
