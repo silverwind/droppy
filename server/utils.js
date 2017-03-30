@@ -167,8 +167,7 @@ utils.removeFilesPath = function removeFilesPath(p) {
 
 utils.isPathSane = function isPathSane(p, isURL) {
   if (isURL) {
-    if (/[/\\]\.\./.test(p)) return false;      // Navigating down the tree (prefix)
-    if (/\.\.[/\\]/.test(p)) return false;      // Navigating down the tree (postfix)
+    if (/(?:^|[\\/])\.\.(?:[\\/]|$)/.test(p)) return false; // Navigating up/down the tree
     if (/[*{}|<>"]/.test(p)) return false;   // Invalid characters
     return true;
   } else {
