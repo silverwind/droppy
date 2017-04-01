@@ -1268,8 +1268,11 @@ function streamFile(req, res, filepath, download, stats, relpath) {
     root: paths.files,
     dotfiles: "allow",
     index: false,
+    etag: false,
+    cacheControl: false,
   }).on("headers", function(res) {
     res.setHeader("Content-Type", utils.contentType(filepath));
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
     if (download) {
       res.setHeader("Content-Disposition", utils.getDispo(filepath));
     }
