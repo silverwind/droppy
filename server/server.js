@@ -893,7 +893,7 @@ function handleResourceRequest(req, res, resourceName) {
 }
 
 function handleFileRequest(req, res, download) {
-  var URI = decodeURIComponent(req.url), shareLink, filepath;
+  var URI = decodeURIComponent(req.url), shareLink, filepath, relpath;
   var linkRe = new RegExp("^/\\??\\$/([" + utils.linkChars + "]{" + config.linkLength + "})$");
 
   var parts = linkRe.exec(URI);
@@ -903,6 +903,7 @@ function handleFileRequest(req, res, download) {
     shareLink = true;
     download = link.attachement;
     filepath = utils.addFilesPath(link.location);
+    relpath = link.location;
   } else { // it's a direct file request
     parts = /^\/!\/(.+?)\/(.+)$/.exec(URI);
     if (!parts || !parts[1] || !parts[2] || !utils.isPathSane(parts[2])) {
@@ -922,7 +923,7 @@ function handleFileRequest(req, res, download) {
       if (stats.isDirectory() && shareLink) {
         streamArchive(req, res, filepath, download);
       } else {
-        streamFile(req, res, filepath, download, stats);
+        streamFile(req, res, filepath, download, stats, relpath);
       }
     } else {
       if (error.code === "ENOENT")
@@ -1252,8 +1253,18 @@ function streamArchive(req, res, zipPath, download) {
   });
 }
 
-function streamFile(req, res, filepath, download, stats) {
-  sendFile(req, req.url.substring("/!/file/".length), {
+function streamFile(req, res, filepath, download, stats, relpath) {
+  // send exprects a url argument, need to modify it for sharelinks
+  // and all possible request URLs
+  var modifiedURL;
+  if (/^\/!\/file\//.test(req.url))
+    modifiedURL = req.url.substring("/!/file/".length);
+  if (/^\/!\/dl\//.test(req.url))
+    modifiedURL = req.url.substring("/!/dl/".length);
+  else if (relpath)
+    modifiedURL = relpath;
+
+  sendFile(req, modifiedURL, {
     root: paths.files,
     dotfiles: "allow",
     index: false,
