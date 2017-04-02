@@ -167,14 +167,20 @@ utils.removeFilesPath = function(p) {
 
 utils.isPathSane = function(p, isURL) {
   if (isURL) {
-    if (/(?:^|[\\/])\.\.(?:[\\/]|$)/.test(p)) return false; // Navigating up/down the tree
-    if (/[*{}|<>"]/.test(p)) return false;   // Invalid characters
+    // Navigating up/down the tree
+    if (/(?:^|[\\/])\.\.(?:[\\/]|$)/.test(p)) {
+      return false;
+    }
+    // Invalid URL path characters
+    if (!/^[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=%]+$/.test(p)) {
+      return false;
+    }
     return true;
   } else {
     return p.split(/[\\/]/gm).every(function(name) {
       if (name === "." || name === "..") return false;
       if (!name) return true;
-      return validate(name);
+      return validate(name); // will reject invalid filenames on Windows
     });
   }
 };

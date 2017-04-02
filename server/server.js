@@ -117,6 +117,11 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
 function onRequest(req, res) {
   req.time = Date.now();
   if (ready) {
+    if (!utils.isPathSane(req.url, true)) {
+      res.statusCode = 400;
+      res.end();
+      return log.info(req, res, "Invalid GET: " + req.url);
+    }
     if (req.method === "GET") {
       handleGET(req, res);
     } else if (req.method === "POST") {
@@ -677,9 +682,6 @@ function send(ws, data) {
 function handleGET(req, res) {
   var URI = decodeURIComponent(req.url);
 
-  if (!utils.isPathSane(URI, true))
-    return log.info(req, res, "Invalid GET: " + req.url);
-
   if (config.public && !cookies.get(req.headers.cookie))
     cookies.free(req, res);
 
@@ -725,9 +727,6 @@ function handleGET(req, res) {
 var rateLimited = [];
 function handlePOST(req, res) {
   var URI = decodeURIComponent(req.url);
-
-  if (!utils.isPathSane(URI, true))
-    return log.info(req, res, "Invalid POST: " + req.url);
 
   if (/^\/!\/upload/.test(URI)) {
     if (!validateRequest(req)) {
@@ -903,7 +902,6 @@ function handleFileRequest(req, res, download) {
     shareLink = true;
     download = link.attachement;
     filepath = utils.addFilesPath(link.location);
-    relpath = link.location;
   } else { // it's a direct file request
     parts = /^\/!\/(.+?)\/(.+)$/.exec(URI);
     if (!parts || !parts[1] || !parts[2] || !utils.isPathSane(parts[2])) {
@@ -923,7 +921,7 @@ function handleFileRequest(req, res, download) {
       if (stats.isDirectory() && shareLink) {
         streamArchive(req, res, filepath, download);
       } else {
-        streamFile(req, res, filepath, download, stats, relpath);
+        streamFile(req, res, filepath, download, stats);
       }
     } else {
       if (error.code === "ENOENT")
@@ -1253,18 +1251,9 @@ function streamArchive(req, res, zipPath, download) {
   });
 }
 
-function streamFile(req, res, filepath, download, stats, relpath) {
-  // send exprects a url argument, need to modify it for sharelinks
-  // and all possible request URLs
-  var modifiedURL;
-  if (/^\/!\/file\//.test(req.url))
-    modifiedURL = req.url.substring("/!/file/".length);
-  if (/^\/!\/dl\//.test(req.url))
-    modifiedURL = req.url.substring("/!/dl/".length);
-  else if (relpath)
-    modifiedURL = relpath;
-
-  sendFile(req, modifiedURL, {
+function streamFile(req, res, filepath, download, stats) {
+  // send exprects a url-encoded argument
+  sendFile(req, encodeURIComponent(utils.removeFilesPath(filepath).substring(1)), {
     root: paths.files,
     dotfiles: "allow",
     index: false,
