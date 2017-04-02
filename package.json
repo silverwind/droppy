@@ -11,7 +11,8 @@
     "ZombieHippie <cole@zombiehippie.com>"
   ],
   "scripts": {
-    "start": "node droppy.js start"
+    "start": "node droppy.js start",
+    "test": "make lint"
   },
   "dependencies": {
     "async": "^2.2.0",
