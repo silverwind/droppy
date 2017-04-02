@@ -892,7 +892,7 @@ function handleResourceRequest(req, res, resourceName) {
 }
 
 function handleFileRequest(req, res, download) {
-  var URI = decodeURIComponent(req.url), shareLink, filepath, relpath;
+  var URI = decodeURIComponent(req.url), shareLink, filepath;
   var linkRe = new RegExp("^/\\??\\$/([" + utils.linkChars + "]{" + config.linkLength + "})$");
 
   var parts = linkRe.exec(URI);
