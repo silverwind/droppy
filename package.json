@@ -65,7 +65,7 @@
     "request": "^2.81.0",
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.8.20",
+    "uglify-js": "^2.8.21",
     "uppie": "^1.0.3"
   },
   "files": [
