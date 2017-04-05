@@ -228,12 +228,14 @@ function startListeners(callback) {
     });
   });
 
+  var listenerCount = 0;
   async.each(targets, function(target, cb) {
     createListener(onRequest, target.opts, function(err, server) {
       if (err) return cb(err);
 
       server.on("listening", function() {
         server.removeAllListeners("error");
+        listenerCount++;
         setupSocket(server);
         var proto = target.opts.proto.toLowerCase();
 
@@ -271,6 +273,11 @@ function startListeners(callback) {
               chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
               chalk.blue(target.port), chalk.red(". Protocol unsupported.")
             );
+          } else if (err.code === "EADDRNOTAVAIL") {
+            log.info(
+              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
+              chalk.blue(target.port), chalk.red(". Address not available.")
+            );
           } else log.error(err);
         } else log.error(err);
         return cb(err);
@@ -282,7 +289,10 @@ function startListeners(callback) {
         server.listen(target.port, target.host);
       }
     });
-  }, callback);
+  }, function(err) {
+    // don't emit error (and abort) if we have at least 1 listener
+    return callback(listenerCount === 0 ? err : null);
+  });
 }
 
 function createListener(handler, opts, callback) {
