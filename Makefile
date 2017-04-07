@@ -40,8 +40,7 @@ docker-push:
 
 update:
 	ncu --packageFile package.json -ua
-	rm -rf node_modules
-	yarn
+	yarn upgrade
 	touch client/client.js
 
 deploy:
