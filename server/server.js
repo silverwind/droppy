@@ -41,11 +41,24 @@ var ready         = false;
 
 var droppy = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
-    log.logo();
-    log.plain(" ", chalk.blue(pkg.name), " ", chalk.green(pkg.version), " running on ",
-      chalk.blue("node"), " ", chalk.green(process.version.substring(1)), "\n ",
-      chalk.blue("config"), " at ", chalk.green(paths.config), "\n ",
-      chalk.blue("files"), " at ", chalk.green(paths.files), "\n"
+    log.logo(
+      [
+        chalk.blue(pkg.name),
+        chalk.green(pkg.version),
+        "running on",
+        chalk.blue("node"),
+        chalk.green(process.version.substring(1))
+      ].join(" "),
+      [
+        chalk.blue("config"),
+        "at",
+        chalk.green(paths.config)
+      ].join(" "),
+      [
+        chalk.blue("files"),
+        "at",
+        chalk.green(paths.files)
+      ].join(" ")
     );
   }
   setupProcess(isStandalone);

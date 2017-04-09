@@ -111,13 +111,14 @@ log.timestamp = function timestamp() {
   return year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
 };
 
-log.logo = function logo() {
+log.logo = function logo(line1, line2, line3) {
   log.plain(chalk.blue([
-    "           .:.        __                              \n",
-    "    :::  .:::::.   --|  |---- ----- ----- ----- -- -- \n",
-    "  ..:::..  :::    |  _  |   _|  _  |  _  |  _  |  |  |\n",
-    "   ':::'   :::    |_____|__| |_____|   __|   __|___  |\n",
-    "     '                             |__|  |__|  |_____|\n",
+    "\n",
+    "           .:.\n",
+    `    :::  .:::::.   ${line1}\n`,
+    `  ..:::..  :::     ${line2}\n`,
+    `   ':::'   :::     ${line3}\n`,
+    "     '\n",
   ].join("")));
 };
 

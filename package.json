@@ -57,7 +57,7 @@
     "clean-css": "^4.0.11",
     "codemirror": "^5.25.0",
     "handlebars": "^4.0.6",
-    "html-minifier": "^3.4.2",
+    "html-minifier": "^3.4.3",
     "iltorb": "^1.0.13",
     "mousetrap": "^1.6.1",
     "node-zopfli": "^2.0.2",
@@ -66,7 +66,7 @@
     "request": "^2.81.0",
     "screenfull": "^3.1.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^2.8.21",
+    "uglify-js": "^2.8.22",
     "uppie": "^1.0.3"
   },
   "files": [
