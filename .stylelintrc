@@ -39,7 +39,6 @@ rules:
   selector-list-comma-space-after: always-single-line
   selector-list-comma-space-before: never-single-line
   selector-max-empty-lines: 0
-  selector-no-empty: true
   selector-pseudo-class-case: lower
   selector-pseudo-class-no-unknown: true
   selector-pseudo-class-parentheses-space-inside: never

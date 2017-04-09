@@ -746,6 +746,7 @@ function handlePOST(req, res) {
     }
     handleUploadRequest(req, res);
   } else if (/^\/!\/login/.test(URI)) {
+    res.setHeader("Content-Type", "text/plain");
     // Rate-limit login attempts to one attempte every 2 seconds
     if (rateLimited.indexOf(req.socket.remoteAddress) !== -1) {
       res.statusCode = 429;

@@ -23,7 +23,7 @@ build:
 
 publish:
 	if git ls-remote --exit-code origin &>/dev/null; then git push -u -f --tags origin master; fi
-	if git ls-remote --exit-code gogs &>/dev/null; then git push -u -f --tags gogs master; fi
+	if git ls-remote --exit-code git &>/dev/null; then git push -u -f --tags git master; fi
 	npm publish
 
 docker:
