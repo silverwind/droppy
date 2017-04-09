@@ -50,7 +50,7 @@ deploy:
 	git reset --hard HEAD~1
 
 jquery:
-	git clone --depth 1 https://github.com/silverwind/jquery /tmp/jquery
+	git clone --depth 1 https://github.com/jquery/jquery /tmp/jquery
 	cd /tmp/jquery; npm run build; grunt custom:$(JQUERY_FLAGS); grunt remove_map_comment
 	cat /tmp/jquery/dist/jquery.min.js | perl -pe 's|"3\..+?"|"3"|' > $(CURDIR)/client/jquery-custom.min.js
 	rm -rf /tmp/jquery
