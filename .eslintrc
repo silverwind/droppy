@@ -1,5 +1,10 @@
 # https://github.com/eslint/eslint/tree/master/docs/rules
 
+root: true
+
+parserOptions:
+  ecmaVersion: 2017
+
 rules:
   accessor-pairs: [2]
   array-bracket-spacing: [2, never]
@@ -204,9 +209,6 @@ rules:
   wrap-iife: [2, inside]
   yield-star-spacing: [2, {before: true, after: false}]
   yoda: [2, never]
-
-parserOptions:
-  ecmaVersion: 2017
 
 env:
   amd: true
