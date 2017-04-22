@@ -1204,9 +1204,9 @@ video {
   border: 1px solid #383838;
 }
 
-#fields input::-moz-placeholder          { color: #555; opacity: 1 }
-#fields input:-ms-input-placeholder      { color: #555 }
-#fields input::-webkit-input-placeholder { color: #555 }
+#fields input::-moz-placeholder          { color: #666; opacity: 1 }
+#fields input:-ms-input-placeholder      { color: #666 }
+#fields input::-webkit-input-placeholder { color: #666 }
 
 #fields input:focus {
   background: #282828;
