@@ -1,4 +1,4 @@
-# os deps: node npm git jq docker
+# os deps: node npm yarn git jq docker
 # npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates yarn
 
 X86 := $(shell uname -m | grep 86)
@@ -50,8 +50,9 @@ deploy:
 	git reset --hard HEAD~1
 
 jquery:
+	rm -rf /tmp/jquery
 	git clone --depth 1 https://github.com/jquery/jquery /tmp/jquery
-	cd /tmp/jquery; npm run build; grunt custom:$(JQUERY_FLAGS); grunt remove_map_comment
+	cd /tmp/jquery; yarn; grunt; grunt custom:$(JQUERY_FLAGS); grunt remove_map_comment
 	cat /tmp/jquery/dist/jquery.min.js | perl -pe 's|"3\..+?"|"3"|' > $(CURDIR)/client/jquery-custom.min.js
 	rm -rf /tmp/jquery
 
