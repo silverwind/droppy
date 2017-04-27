@@ -2377,36 +2377,26 @@
     }
   }
 
-  function timeDifference(previous) {
-    var msPerMinute = 60 * 1000;
-    var msPerHour   = msPerMinute * 60;
-    var msPerDay    = msPerHour * 24;
-    var msPerMonth  = msPerDay * 30;
-    var msPerYear   = msPerDay * 365;
-    var elapsed     = Date.now() - parseInt(previous);
-    var result      = "";
-
-    if (elapsed < 0) elapsed = 0;
-    if (elapsed < msPerMinute) {
-      result = "just now";
-    } else if (elapsed < msPerHour) {
-      result = Math.round(elapsed / msPerMinute);
-      result += (result === 1) ? " min ago" : " mins ago";
-    } else if (elapsed < msPerDay) {
-      result = Math.round(elapsed / msPerHour);
-      result += (result === 1) ? " hour ago" : " hours ago";
-    } else if (elapsed < msPerMonth) {
-      result = Math.round(elapsed / msPerDay);
-      result += (result === 1) ? " day ago" : " days ago";
-    } else if (elapsed < msPerYear) {
-      result = Math.round(elapsed / msPerMonth);
-      result += (result === 1) ? " month ago" : " months ago";
-    } else {
-      result = Math.round(elapsed / msPerYear);
-      result += (result === 1) ? " year ago" : " years ago";
-    }
-    if (isNaN(elapsed)) result = "unknown";
-    return result;
+  function timeDifference(prev) {
+    if (typeof prev !== "number") return "unknown";
+    var diff = (Date.now() - Number(prev)) / 1000;
+    var future = diff < 0, value, unit;
+    diff = Math.abs(diff);
+    [
+      [60, 1, "sec"], [3600, 60, "min"], [86400, 3600, "hour"],
+      [2592000, 86400, "day"], [31536000, 2592000, "month"],
+      [Infinity, 31536000, "year"]
+    ].some(function(data) {
+      if (diff < data[0]) {
+        value = diff / data[1];
+        unit = data[2];
+        return true;
+      }
+    });
+    value = Math.round(value);
+    if (value === 1) value = "a";
+    unit += (value > 1 ? "s" : "");
+    return [future ? "in" : "", value, unit, !future ? "ago" : ""].join(" ").trim();
   }
 
   function secsToTime(secs) {
