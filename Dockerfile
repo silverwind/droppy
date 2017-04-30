@@ -14,8 +14,10 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   cd /yarn && \
   dmn clean -f && \
   yarn global remove dmn --global-folder /yarn && \
-  # remove yarn
-  rm -rf /root/.cache/yarn && \
+  # remove yarn and various caches
+  rm -rf /usr/local/share/.cache && \
+  rm -rf /tmp/v8* && \
+  rm -rf /root/.config && \
   rm -rf /opt && \
   # fix permissions in /yarn which assumes root will start the app
   find /yarn -type d -exec chmod 0755 {} + && \
