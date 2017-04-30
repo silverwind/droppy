@@ -2394,7 +2394,7 @@
       }
     });
     value = Math.round(value);
-    if (value === 1) value = "a";
+    if (diff <= 20) return "just now"; // acount for 20s clock skew
     unit += (value > 1 ? "s" : "");
     return [future ? "in" : "", value, unit, !future ? "ago" : ""].join(" ").trim();
   }
