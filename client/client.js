@@ -2420,7 +2420,7 @@
     for (var i = 0; i < dates.length; i++) {
       var timestamp = dates[i].getAttribute("data-timestamp");
       if (timestamp) {
-        var reltime = timeDifference(timestamp);
+        var reltime = timeDifference(Number(timestamp));
         if (reltime) dates[i].innerHTML = reltime;
       }
     }
