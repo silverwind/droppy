@@ -2424,7 +2424,7 @@
         if (reltime) dates[i].innerHTML = reltime;
       }
     }
-  }, 5000);
+  }, 1000);
 
   function loadScript(id, url) {
     return new Promise(function(resolve) {
