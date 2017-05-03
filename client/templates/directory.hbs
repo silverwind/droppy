@@ -7,7 +7,7 @@
 {{#each entries}}
   {{#is type "f"}}
     <div class="data-row {{classes}}" data-type="file" data-id="{{id}}" data-name="{{sortname}}">
-      <span class="{{sprite}}">
+      <span class="sprite sprite-{{sprite}}">
         {{#if playable}}
           <span class="icon-play">{{{svg "play"}}}</span>
         {{/if}}
