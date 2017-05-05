@@ -56,7 +56,7 @@
     "cheerio": "^0.22.0",
     "clean-css": "^4.0.12",
     "codemirror": "^5.25.2",
-    "handlebars": "^4.0.7",
+    "handlebars": "^4.0.8",
     "html-minifier": "^3.4.3",
     "iltorb": "^1.2.1",
     "mousetrap": "^1.6.1",
