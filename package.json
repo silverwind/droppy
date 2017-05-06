@@ -7,9 +7,10 @@
   "license": "BSD-2-Clause",
   "preferGlobal": true,
   "bin": "./droppy.js",
-  "contributors": [
-    "ZombieHippie <cole@zombiehippie.com>"
-  ],
+  "browserslist": "> 3%, last 2 firefox versions, last 2 safari versions",
+  "engines": {
+    "node": ">=4"
+  },
   "scripts": {
     "start": "node droppy.js start",
     "test": "make lint"
@@ -52,16 +53,16 @@
     "uws": "^0.14.5"
   },
   "devDependencies": {
-    "autoprefixer": "^6.7.7",
+    "autoprefixer": "^7.0.0",
     "clean-css": "^4.0.12",
     "codemirror": "^5.25.2",
     "handlebars": "^4.0.8",
-    "html-minifier": "^3.4.3",
+    "html-minifier": "^3.4.4",
     "iltorb": "^1.2.1",
     "mousetrap": "^1.6.1",
     "node-zopfli": "^2.0.2",
     "photoswipe": "^4.1.2",
-    "postcss": "^5.2.17",
+    "postcss": "^6.0.0",
     "request": "^2.81.0",
     "screenfull": "^3.2.0",
     "svgstore": "^2.0.2",
@@ -76,9 +77,6 @@
     "index.js",
     "docker-start.sh"
   ],
-  "engines": {
-    "node": ">=4"
-  },
   "keywords": [
     "self-hosted",
     "personal",
