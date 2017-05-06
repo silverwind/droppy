@@ -13,21 +13,21 @@ var escRe    = require("escape-string-regexp");
 var fs       = require("graceful-fs");
 var imgSize  = require("image-size");
 var readdirp = require("readdirp");
-var sendFile = require("send");
 var schedule = require("node-schedule");
+var sendFile = require("send");
 var ut       = require("untildify");
 var yazl     = require("yazl");
 
-var pkg       = require("./../package.json");
-var resources = require("./resources.js");
 var cfg       = require("./cfg.js");
-var csrf      = require("./csrf.js");
 var cookies   = require("./cookies.js");
+var csrf      = require("./csrf.js");
 var db        = require("./db.js");
 var filetree  = require("./filetree.js");
 var log       = require("./log.js");
 var manifest  = require("./manifest.js");
 var paths     = require("./paths.js").get();
+var pkg       = require("./../package.json");
+var resources = require("./resources.js");
 var utils     = require("./utils.js");
 
 var cache         = {};
@@ -708,22 +708,44 @@ function handleGET(req, res) {
   if (config.public && !cookies.get(req.headers.cookie))
     cookies.free(req, res);
 
+  // unauthenticated GETs
   if (URI === "/") {
     if (validateRequest(req)) {
       handleResourceRequest(req, res, "main.html");
-      if (config.public) return;
       var sessions = db.get("sessions");
       sessions[cookies.get(req.headers.cookie)].lastSeen = Date.now();
       db.set("sessions", sessions);
     } else if (firstRun) {
-      handleResourceRequest(req, res, "firstrun.html");
+      handleResourceRequest(req, res, "first.html");
     } else {
       handleResourceRequest(req, res, "auth.html");
     }
+    return;
+  } else if (URI === "/robots.txt") {
+    res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
+    res.end("User-agent: *\nDisallow: /\n");
+    log.info(req, res);
+    return;
+  } else if (URI === "/favicon.ico") {
+    res.statusCode = 404;
+    res.end();
+    log.info(req, res);
+    return;
   } else if (/^\/!\/res\/[\s\S]+/.test(URI)) {
     handleResourceRequest(req, res, URI.substring(7));
-  } else if (/^\/!\/token$/.test(URI)) {
-    if (validateRequest(req) && req.headers["x-app"] === "droppy") {
+    return;
+  }
+
+  // validate requests below
+  if (!validateRequest(req)) {
+    res.statusCode = 401;
+    res.end();
+    log.info(req, res);
+    return;
+  }
+
+  if (/^\/!\/token$/.test(URI)) {
+    if (req.headers["x-app"] === "droppy") {
       res.writeHead(200, {
         "Cache-Control": "private, no-store, max-age=0",
         "Content-Type": "text/plain; charset=utf-8"
@@ -733,7 +755,6 @@ function handleGET(req, res) {
       res.statusCode = 401;
       res.end();
     }
-    log.info(req, res);
   } else if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
     handleFileRequest(req, res, true);
   } else if (/^\/!\/type\/[\s\S]+/.test(URI)) {
@@ -742,9 +763,6 @@ function handleGET(req, res) {
     handleFileRequest(req, res, false);
   } else if (/^\/!\/zip\/[\s\S]+/.test(URI)) {
     streamArchive(req, res, utils.addFilesPath(URI.substring(6)), true);
-  } else if (/^\/robots\.txt$/i.test(URI)) {
-    res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
-    res.end("User-agent: *\nDisallow: /\n");
   } else {
     redirectToRoot(req, res);
   }
@@ -754,19 +772,13 @@ var rateLimited = [];
 function handlePOST(req, res) {
   var URI = decodeURIComponent(req.url);
 
-  if (/^\/!\/upload/.test(URI)) {
-    if (!validateRequest(req)) {
-      res.statusCode = 401;
-      res.end();
-      log.info(req, res);
-    }
-    handleUploadRequest(req, res);
-  } else if (/^\/!\/login/.test(URI)) {
+  // unauthenticated POSTs
+  if (/^\/!\/login/.test(URI)) {
     res.setHeader("Content-Type", "text/plain");
 
-    // Rate-limit login attempts to one attempte every 2 seconds
+    // Rate-limit login attempts to one attempt every 2 seconds
     var ip = utils.ip(req);
-    if (rateLimited.contains(ip)) {
+    if (rateLimited.indexOf(ip) !== -1) {
       res.statusCode = 429;
       res.end();
       return;
@@ -782,29 +794,23 @@ function handlePOST(req, res) {
     utils.readJsonBody(req).then(function(postData) {
       if (db.authUser(postData.username, postData.password)) {
         cookies.create(req, res, postData);
-        endReq(res, true);
+        res.statusCode = 200;
+        res.end();
         log.info(req, res, "User ", "'", postData.username, "'", chalk.green(" authenticated"));
       } else {
-        endReq(res, false);
+        res.statusCode = 401;
+        res.end();
         log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
       }
-    }).catch(function() {
+    }).catch(function(err) {
+      log.error(err);
       res.statusCode = 400;
       res.end();
       log.info(req, res);
     });
-  } else if (/^\/!\/logout$/.test(URI)) {
-    utils.readJsonBody(req).then(function(postData) {
-      res.statusCode = 200;
-      cookies.unset(req, res, postData);
-      res.end();
-      log.info(req, res);
-    }).catch(function() {
-      res.statusCode = 400;
-      res.end();
-      log.info(req, res);
-    });
+    return;
   } else if (firstRun && /^\/!\/adduser/.test(URI)) {
+    res.setHeader("Content-Type", "text/plain");
     utils.readJsonBody(req).then(function(postData) {
       if (postData.username && postData.password &&
           typeof postData.username === "string" &&
@@ -812,13 +818,41 @@ function handlePOST(req, res) {
         db.addOrUpdateUser(postData.username, postData.password, true);
         cookies.create(req, res, postData);
         firstRun = false;
-        endReq(res, true);
-        log.info(req, res, "User ", "'", postData.username, "' added");
+        res.statusCode = 200;
+        res.end();
+        log.info(req, res, "User ", "'", postData.username, "' created");
       } else {
-        endReq(res, false);
+        res.statusCode = 400;
+        res.end();
         log.info(req, res, "Invalid user creation request");
       }
     }).catch(function() {
+      res.statusCode = 400;
+      res.end();
+      log.info(req, res);
+    });
+    return;
+  }
+
+  // validate requests below
+  if (!validateRequest(req)) {
+    res.statusCode = 401;
+    res.end();
+    log.info(req, res);
+    return;
+  }
+
+  if (/^\/!\/upload/.test(URI)) {
+    handleUploadRequest(req, res);
+  } else if (/^\/!\/logout$/.test(URI)) {
+    res.setHeader("Content-Type", "text/plain");
+    utils.readJsonBody(req).then(function(postData) {
+      cookies.unset(req, res, postData);
+      res.statusCode = 200;
+      res.end();
+      log.info(req, res);
+    }).catch(function(err) {
+      log.error(err);
       res.statusCode = 400;
       res.end();
       log.info(req, res);
@@ -827,11 +861,6 @@ function handlePOST(req, res) {
     res.statusCode = 404;
     res.end();
     log.info(req, res);
-  }
-
-  function endReq(res, success) {
-    res.statusCode = success ? 200 : 401;
-    res.end();
   }
 }
 
@@ -988,13 +1017,6 @@ function handleTypeRequest(req, res, file) {
 
 function handleUploadRequest(req, res) {
   var busboy, opts, dstDir, done = false, files = {}, limitHit;
-
-  if (!validateRequest(req)) {
-    res.statusCode = 401;
-    res.end();
-    log.info(req, res, "Aborted unauthorized upload request");
-    return;
-  }
 
   if (config.readOnly) {
     res.statusCode = 403;

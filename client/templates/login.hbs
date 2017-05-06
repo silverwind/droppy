@@ -1,0 +1,27 @@
+<main>
+  <section id="login-box">
+    <div id="login-info-box">
+      <span id="login-info">
+      {{#if first}}
+        Set your login credentials.
+      {{else}}
+        {{{svg "logo"}}}droppy
+      {{/if}}
+      </span>
+    </div>
+    <form id="form">
+      <div id="fields">
+        <input id="user" type="text" aria-label="Username" placeholder="Username" tabindex="0" autofocus>
+        <input id="pass" type="password" aria-label="Password" placeholder="Password" tabindex="0">
+      </div>
+      <div class="bottom">
+        <div id="remember" class="checked" tabindex="0">
+          <svg class="check"><use xlink:href="#i-check"></svg><span>Remember Me</span>
+        </div>
+        <button id="submit" type="submit" tabindex="0">
+          <svg class="signin"><use xlink:href="#i-signin"></svg><span>Sign in</span>
+        </button>
+      </div>
+    </form>
+  </section>
+</main>

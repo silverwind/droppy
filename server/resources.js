@@ -18,7 +18,7 @@ var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
 var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
 var cachePath    = path.join(paths.mod, "dist", "cache.json");
 
-var minify, $;
+var minify;
 
 var opts = {
   uglify: {
@@ -85,12 +85,10 @@ var opts = {
   }
 };
 
-var autoprefixer, cheerio, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli;
-var svg, handlebars;
+var autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli, svg, handlebars;
 try {
   autoprefixer = require("autoprefixer");
   brotli       = require("iltorb").compress;
-  cheerio      = require("cheerio");
   cleanCSS     = new (require("clean-css"))(opts.cleanCSS);
   handlebars   = require("handlebars");
   htmlMinifier = require("html-minifier");
@@ -114,11 +112,6 @@ resources.files = {
     "node_modules/uppie/uppie.js",
     "client/jquery-custom.min.js",
     "client/client.js",
-  ],
-  html: [
-    "client/html/base.html",
-    "client/html/auth.html",
-    "client/html/main.html",
   ],
   other: [
     "client/font.woff",
@@ -477,10 +470,10 @@ function templates() {
   }).join("") + suffix;
 }
 
-resources.compileJS = function compileJS() {
+resources.compileJS = function() {
   var js = "";
   resources.files.js.forEach(function(file) {
-    js += String(fs.readFileSync(path.join(paths.mod, file))) + ";";
+    js += fs.readFileSync(path.join(paths.mod, file), "utf8") + ";";
   });
 
   // Add templates
@@ -496,10 +489,10 @@ resources.compileJS = function compileJS() {
   };
 };
 
-resources.compileCSS = function compileCSS() {
+resources.compileCSS = function() {
   var css = "";
   resources.files.css.forEach(function(file) {
-    css += String(fs.readFileSync(path.join(paths.mod, file))) + "\n";
+    css += fs.readFileSync(path.join(paths.mod, file), "utf8") + "\n";
   });
 
   // Vendor prefixes and minify
@@ -512,37 +505,21 @@ resources.compileCSS = function compileCSS() {
   };
 };
 
-resources.compileHTML = function compileHTML(res) {
-  var html = {};
-  var min = function min(html) {
-    return minify ? htmlMinifier.minify(html, opts.htmlMinifier) : html;
-  };
+resources.compileHTML = function(res) {
+  var html = fs.readFileSync(path.join(paths.mod, "client/index.html"), "utf8");
+  html = html.replace("<!-- {{svg}} -->", svg());
 
-  resources.files.html.forEach(function(file) {
-    html[path.basename(file)] = String(fs.readFileSync(path.join(paths.mod, file)));
-  });
+  var auth = html.replace("{{type}}", "a");
+  auth = minify ? htmlMinifier.minify(auth, opts.htmlMinifier) : auth;
+  res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: utils.contentType("html")};
 
-  // Add SVGs
-  html["base.html"] = html["base.html"].replace("<!-- {{svg}} -->", svg());
+  var first = html.replace("{{type}}", "f");
+  first = minify ? htmlMinifier.minify(auth, opts.htmlMinifier) : first;
+  res["first.html"] = {data: buf(first), etag: etag(first), mime: utils.contentType("html")};
 
-  var htmlType = utils.contentType("html");
-
-  // Combine pages
-  $ = cheerio.load(html["base.html"]);
-  $("body").attr("data-type", "m");
-  var main = min($("#page").replaceWith(html["main.html"]).end().html());
-  res["main.html"] = {data: buf(main), etag: etag(main), mime: htmlType};
-
-  $ = cheerio.load(html["base.html"]);
-  $("body").attr("data-type", "a");
-  var auth = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: htmlType};
-
-  $ = cheerio.load(html["base.html"]);
-  $("body").attr("data-type", "f");
-  var firstrun = min($("#page").replaceWith(html["auth.html"]).end().html());
-  res["firstrun.html"] = {data: buf(firstrun), etag: etag(firstrun), mime: htmlType};
-
+  var main = html.replace("{{type}}", "m");
+  main = minify ? htmlMinifier.minify(main, opts.htmlMinifier) : main;
+  res["main.html"] = {data: buf(main), etag: etag(main), mime: utils.contentType("html")};
   return res;
 };
 

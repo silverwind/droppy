@@ -191,11 +191,17 @@
 // ============================================================================
   var type = document.body.dataset.type;
   if (type === "m") {
+    render("main");
     initMainPage();
   } else {
-    var isFirst = type === "f";
-    if (isFirst) $("#login-info")[0].textContent = "Set your login credentials.";
-    initAuthPage(isFirst);
+    render("login", {first: type === "f"});
+    initAuthPage(type === "f");
+  }
+// ============================================================================
+//  <main> renderer
+// ============================================================================
+  function render(page, args) {
+    $("main").replaceWith(Handlebars.templates[page](args));
   }
 // ============================================================================
 //  View handling
@@ -237,9 +243,7 @@
 // ============================================================================
   function init() {
     droppy.wsRetries = 5; // reset retries on connection loss
-    // Request settings when droppy.debug is uninitialized, could use another variable too.
-    if (droppy.debug === null)
-      sendMessage(null, "REQUEST_SETTINGS");
+    if (!droppy.initialized) sendMessage(null, "REQUEST_SETTINGS");
     if (droppy.queuedData) {
       sendMessage();
     } else {
@@ -269,7 +273,7 @@
         });
       }
     };
-    // Close codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
+    // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
     droppy.socket.onclose = function(event) {
       if (event.code === 4000) return;
       if (event.code === 1011) {
@@ -373,7 +377,9 @@
               url: getRootPath() + "!/logout",
               data: {path: getRootPath()}
             }).then(function() {
-              location.reload(true);
+              droppy.socket.close(4000);
+              render("login");
+              initAuthPage();
             });
           });
         }
@@ -447,11 +453,12 @@
           username: $("#user")[0].value,
           password: $("#pass")[0].value,
           remember: $("#remember").hasClass("checked"),
-          path: path.replace(/\/$/, ""),
+          path: path === "/" ? "/" : path.replace(/\/$/, ""),
         }
       }).then(function(xhr) {
         if (xhr.status === 200) {
-          location.reload(true);
+          render("main");
+          initMainPage();
         } else {
           var info = $("#login-info-box");
           info.textContent = firstrun ? "Please fill both fields." : "Wrong login!";
@@ -470,6 +477,7 @@
 //  Main page
 // ============================================================================
   function initMainPage() {
+    droppy.initialized = false;
     // Open the WebSocket
     openSocket();
 
@@ -1799,7 +1807,12 @@
   }
 
   function updateUsers(userlist) {
-    if (Object.keys(userlist).length === 0) return location.reload(true);
+    if (Object.keys(userlist).length === 0) {
+      toggleCatcher(false);
+      render("login", {first: true});
+      initAuthPage(true);
+      return;
+    }
     var box = $("#prefs-box");
     box.find(".list-user").remove();
     box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
@@ -1817,7 +1830,7 @@
     box.find(".delete-user").reg("click", function(event) {
       event.stopPropagation();
       sendMessage(null, "UPDATE_USER", {
-        name: $(this).parents("li").children(".username").textContent,
+        name: $(this).parents("li").children(".username").text(),
         pass: ""
       });
     });
@@ -2241,8 +2254,8 @@
 
   function initVariables() {
     droppy.activeView = 0;
-    droppy.debug = null;
     droppy.demo = null;
+    droppy.initialized = null;
     droppy.linkCache = [];
     droppy.menuTarget = null;
     droppy.public = null;

@@ -116,8 +116,9 @@ db.authUser = function authUser(user, pass) {
   return false;
 };
 
+// TODO: async
 function write() {
-  fs.writeFile(dbFile, JSON.stringify(database, null, 2), noop);
+  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2), noop);
 }
 
 function getHash(string) {
