@@ -8,6 +8,8 @@ var path     = require("path");
 
 var dbFile   = require("./paths.js").get().db;
 var defaults = {users: {}, sessions: {}, links: {}};
+var noop     = function() {};
+
 var database;
 
 db.init = function init(callback) {
@@ -115,7 +117,7 @@ db.authUser = function authUser(user, pass) {
 };
 
 function write() {
-  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
+  fs.writeFile(dbFile, JSON.stringify(database, null, 2), noop);
 }
 
 function getHash(string) {
