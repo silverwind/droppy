@@ -1603,6 +1603,11 @@
           } else { // image
             imgButtons.removeClass("hidden");
             videoButtons.addClass("hidden");
+
+            // pause invisible videos
+            view.find("video").each(function() {
+              this.pause();
+            });
           }
           setTitle(this.currItem.filename.replace(/\..*/g, ""));
           replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
