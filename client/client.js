@@ -2641,10 +2641,13 @@
     if (typeof opts === "string") opts = {url: opts};
     return new Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
+      xhr.timeout = 20000;
       xhr.open(opts.method || "GET", opts.url);
+      xhr.setRequestHeader("x-app", "droppy");
       if (opts.responseType) xhr.responseType = opts.responseType;
       xhr.onload = function() { resolve(xhr); };
       xhr.onerror = function() { reject(xhr); };
+      xhr.ontimeout = function() { reject(xhr); };
       xhr.send(opts.data ? JSON.stringify(opts.data) : undefined);
     });
   }

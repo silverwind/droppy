@@ -723,14 +723,17 @@ function handleGET(req, res) {
   } else if (/^\/!\/res\/[\s\S]+/.test(URI)) {
     handleResourceRequest(req, res, URI.substring(7));
   } else if (/^\/!\/token$/.test(URI)) {
-    if (validateRequest(req)) {
+    if (validateRequest(req) && req.headers["x-app"] === "droppy") {
       res.writeHead(200, {
         "Cache-Control": "private, no-store, max-age=0",
         "Content-Type": "text/plain; charset=utf-8"
       });
-      res.end(csrf.get(req));
-      log.info(req, res);
+      res.end(csrf.create(req));
+    } else {
+      res.statusCode = 401;
+      res.end();
     }
+    log.info(req, res);
   } else if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
     handleFileRequest(req, res, true);
   } else if (/^\/!\/type\/[\s\S]+/.test(URI)) {
@@ -760,16 +763,21 @@ function handlePOST(req, res) {
     handleUploadRequest(req, res);
   } else if (/^\/!\/login/.test(URI)) {
     res.setHeader("Content-Type", "text/plain");
+
     // Rate-limit login attempts to one attempte every 2 seconds
-    if (rateLimited.indexOf(req.socket.remoteAddress) !== -1) {
+    var ip = utils.ip(req);
+    if (rateLimited.contains(ip)) {
       res.statusCode = 429;
       res.end();
       return;
+    } else {
+      rateLimited.push(ip);
+      setTimeout(function() {
+        rateLimited.some(function(rIp, i) {
+          if (rIp === ip) return rateLimited.splice(i, 1);
+        });
+      }, 2000);
     }
-    rateLimited.push(req.socket.remoteAddress);
-    setTimeout(function() {
-      rateLimited.pop(req.socket.remoteAddress);
-    }, 2000);
 
     utils.readJsonBody(req).then(function(postData) {
       if (db.authUser(postData.username, postData.password)) {
@@ -796,9 +804,11 @@ function handlePOST(req, res) {
       res.end();
       log.info(req, res);
     });
-  } else if (/^\/!\/adduser/.test(URI) && firstRun) {
+  } else if (firstRun && /^\/!\/adduser/.test(URI)) {
     utils.readJsonBody(req).then(function(postData) {
-      if (postData.username !== "" && postData.password !== "") {
+      if (postData.username && postData.password &&
+          typeof postData.username === "string" &&
+          typeof postData.password === "string") {
         db.addOrUpdateUser(postData.username, postData.password, true);
         cookies.create(req, res, postData);
         firstRun = false;
@@ -806,7 +816,7 @@ function handlePOST(req, res) {
         log.info(req, res, "User ", "'", postData.username, "' added");
       } else {
         endReq(res, false);
-        log.info(req, res, "Invalid user creation request for user ", "'", postData.username, "'");
+        log.info(req, res, "Invalid user creation request");
       }
     }).catch(function() {
       res.statusCode = 400;
@@ -866,7 +876,6 @@ function handleResourceRequest(req, res, resourceName) {
 
     // Headers on HTML requests
     if (/\.html$/.test(resourceName)) {
-      // var origin = utils.origin(req).replace(/^.*\/\//, "//");
       headers["Content-Security-Policy"] = [
         "script-src 'self' blob: data:",
         "media-src 'self' blob: data:",
