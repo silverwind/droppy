@@ -193,7 +193,7 @@ To start a live-reloading dev server:
 ````sh
 $ git clone https://github.com/silverwind/droppy && cd droppy
 $ npm i
-$ node droppy --dev
+$ node droppy start --dev
 ````
 The [Makefile](https://github.com/silverwind/droppy/blob/master/Makefile) has a few tasks for updating dependencies, pushing docker images, see the comment above for dependencies of those tasks.
 
