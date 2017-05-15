@@ -22,7 +22,6 @@ var minify;
 
 var opts = {
   uglify: {
-    fromString: true,
     mangle: true,
     compress: {
       booleans: true,
