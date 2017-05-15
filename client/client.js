@@ -1836,7 +1836,7 @@
     box.find(".delete-user").reg("click", function(event) {
       event.stopPropagation();
       sendMessage(null, "UPDATE_USER", {
-        name: $(this).parents("li").children(".username").text(),
+        name: $(this).parents("li").children(".username").text().trim(),
         pass: ""
       });
     });
