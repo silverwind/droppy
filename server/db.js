@@ -57,9 +57,11 @@ db.init = function init(callback) {
           delete database.sharelinks;
         }
 
-        // remove pre-1.7 session tokens
         if (database.sessions) {
           Object.keys(database.sessions).forEach(function(session) {
+            // invalidate session not containing a username
+            if (!database.sessions[session].username) delete database.sessions[session];
+            // invalidate pre-1.7 session tokens
             if (session.length !== 48) delete database.sessions[session];
           });
         }
