@@ -43,6 +43,7 @@ cookies.create = function create(_req, res, postData) {
   res.setHeader("Set-Cookie", headers);
   sessions[sid] = {
     privileged: db.get("users")[postData.username].privileged,
+    username: postData.username,
     lastSeen: Date.now(),
   };
   db.set("sessions", sessions);
