@@ -1098,8 +1098,13 @@ video {
   justify-content: center;
 }
 
-.username { flex: 1 }
-.is-privileged { font-weight: bold }
+.username {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.username svg { margin-right: .5rem }
+
 .delete-user {
   cursor: pointer;
   flex: 0 0 1rem;
