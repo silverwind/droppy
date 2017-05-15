@@ -2513,6 +2513,7 @@
   }
 
   function showError(view, text) {
+    if (!Object.keys(view).length) return alert(text);
     var box = view.find(".info-box");
     clearTimeout(droppy.errorTimer);
     box.find(".icon svg").replaceWith(svg("exclamation"));

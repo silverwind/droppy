@@ -144,7 +144,7 @@ log.formatError = function formatError(err) {
   else if (typeof err === "string")
     output = err;
   else
-    output = new Error("Unknown error type: " + typeof err).stack + "\nerr = " + err;
+    output = err + "\n" + (new Error()).stack;
 
   return output.replace(/^Error: /, "");
 };

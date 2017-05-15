@@ -544,8 +544,10 @@ function setupSocket(server) {
         if (!priv) return;
         if (pass === "") {
           if (!db.get("users")[name]) return;
-          if ((db.get("sessions")[cookie] || {}).username === name) return; // don't delete yourself
-          if (db.delUser(msg.data.name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
+          if ((db.get("sessions")[cookie] || {}).username === name) {
+            return sendError(sid, null, "Cannot delete yourself!");
+          }
+          if (db.delUser(name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
           if (Object.keys(db.get("users")).length === 0) {
             firstRun = true;
             db.set("sessions", {});
