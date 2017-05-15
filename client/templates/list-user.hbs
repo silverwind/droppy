@@ -1,7 +1,7 @@
 <ul class="list-user">
-  {{#each this}}
+  {{#each users}}
     <li>
-      <div class="username">{{this}}</div>
+      <div class="username {{#if this}}is-privileged{{/if}}">{{@key}}</div>
       <div class="delete-user tip tip-w" aria-label="Delete user">{{{svg "trash"}}}</div>
     </li>
   {{/each}}

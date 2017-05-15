@@ -1820,16 +1820,17 @@
     }
     var box = $("#prefs-box");
     box.find(".list-user").remove();
-    box.append(Handlebars.templates["list-user"](Object.keys(userlist)));
+    box.append(Handlebars.templates["list-user"]({users: userlist}));
     box.find(".add-user").reg("click", function() {
       var user = prompt("Username?");
       if (!user) return;
       var pass = prompt("Password?");
       if (!pass) return;
+      var priv = confirm("Privileged User?");
       sendMessage(null, "UPDATE_USER", {
         name: user,
         pass: pass,
-        priv: true
+        priv: priv
       });
     });
     box.find(".delete-user").reg("click", function(event) {

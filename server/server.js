@@ -551,7 +551,7 @@ function setupSocket(server) {
           }
         } else {
           var isNew = !db.get("users")[name];
-          db.addOrUpdateUser(name, pass, msg.data.priv);
+          db.addOrUpdateUser(name, pass, msg.data.priv || false);
           log.info(ws, null, (isNew ? "Added" : "Updated") + " user: ", chalk.magenta(name));
         }
         sendUsers(sid);

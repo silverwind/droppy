@@ -1099,6 +1099,7 @@ video {
 }
 
 .username { flex: 1 }
+.is-privileged { font-weight: bold }
 .delete-user {
   cursor: pointer;
   flex: 0 0 1rem;
