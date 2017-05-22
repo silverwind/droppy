@@ -59,7 +59,7 @@ var opts = {
     collapseBooleanAttributes: true,
     collapseInlineTagWhitespace: true,
     collapseWhitespace: true,
-    customAttrSurround: [[/\{\{#.+?\}\}/, /\{\{\/.+?\}\}/]],
+    customAttrSurround: [[/{{#.+?}}/, /{{\/.+?}}/]],
     decodeEntities: true,
     ignoreCustomComments: [],
     ignoreCustomFragments: [/{{.*?}}/],
@@ -460,7 +460,7 @@ function templates() {
     var data = htmlMinifier.minify(fs.readFileSync(p, "utf8"), opts.htmlMinifier);
 
     // remove whitespace between template tags
-    data = data.replace(/\}\}\s+\{\{/gm, "}}{{");
+    data = data.replace(/}}\s+{{/gm, "}}{{");
 
     var compiled = handlebars.precompile(data, {data: false});
     return "templates['" + name + "']=template(" + compiled + ");";
