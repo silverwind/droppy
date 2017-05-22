@@ -393,12 +393,13 @@ function setupSocket(server) {
       cb(false, 401, "Unauthorized");
     }
   });
-  wss.on("connection", function(ws) {
+  wss.on("connection", function(ws, req) {
+    req = req || ws.upgradeReq; // compat: ws 3.0.0
     ws.addr = ws._socket.remoteAddress;
     ws.port = ws._socket.remotePort;
     log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
     var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
-    var cookie = cookies.get(ws.upgradeReq.headers.cookie);
+    var cookie = cookies.get(req.headers.cookie);
     clients[sid] = {views: [], cookie: cookie, ws: ws};
 
     ws.on("message", function(msg) {
