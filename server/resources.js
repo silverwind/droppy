@@ -72,7 +72,7 @@ var opts = {
     removeComments: true,
     removeOptionalTags: true,
     removeRedundantAttributes: true,
-    removeTagWhitespace: false,
+    removeTagWhitespace: true,
     sortAttributes: true,
     sortClassName: true,
   },
