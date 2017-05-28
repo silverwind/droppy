@@ -83,8 +83,6 @@ var opts = {
     removeOptionalTags: true,
     removeRedundantAttributes: true,
     removeTagWhitespace: true,
-    sortAttributes: true,
-    sortClassName: true,
   },
   brotli: {
     mode: 1,
@@ -476,6 +474,9 @@ function templates() {
     html = html.replace(/({{2,})([\s\S\n]*?)(}{2,})/gm, function(_, p1, p2, p3) {
       return p1 + p2.replace(/\n/gm, " ").replace(/ {2,}/gm, " ").trim() + p3;
     }).trim();
+
+    // remove {{!-- comments --}}
+    html = html.replace(/{{![\s\S]+?..}}/, "");
 
     var compiled = handlebars.precompile(html, {data: false});
     return "templates['" + name + "']=template(" + compiled + ");";
