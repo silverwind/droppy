@@ -48,7 +48,17 @@ var opts = {
     },
   },
   cleanCSS: {
-    specialComments : 0,
+    level: {
+      1: {
+        specialComments : 0,
+      },
+      2: {
+        all: false,
+        mergeMedia: true,
+        removeDuplicateMediaBlocks: true,
+        removeDuplicateRules: true,
+      },
+    },
     rebase: false,
   },
   autoprefixer: {
