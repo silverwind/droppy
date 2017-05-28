@@ -459,8 +459,9 @@ function templates() {
     var name = file.replace(/\..+$/, "");
     var data = htmlMinifier.minify(fs.readFileSync(p, "utf8"), opts.htmlMinifier);
 
-    // remove whitespace between template tags
-    data = data.replace(/}}\s+{{/gm, "}}{{");
+    // remove whitespace around custom fragments
+    // https://github.com/kangax/html-minifier/issues/820
+    data = data.replace(/(>|^|}}) ({{|<|$)/g, "$1$2");
 
     var compiled = handlebars.precompile(data, {data: false});
     return "templates['" + name + "']=template(" + compiled + ");";
