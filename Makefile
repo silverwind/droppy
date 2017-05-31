@@ -1,5 +1,5 @@
-# os deps: node npm yarn git jq docker
-# npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates yarn
+# os deps: node yarn git jq docker
+# npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates
 
 X86 := $(shell uname -m | grep 86)
 ifeq ($(X86),)
@@ -24,7 +24,7 @@ build:
 publish:
 	if git ls-remote --exit-code origin &>/dev/null; then git push -u -f --tags origin master; fi
 	if git ls-remote --exit-code git &>/dev/null; then git push -u -f --tags git master; fi
-	npm publish
+	yarn publish
 
 docker:
 	@echo Preparing docker image $(IMAGE)...
@@ -56,17 +56,17 @@ jquery:
 	cat /tmp/jquery/dist/jquery.min.js | perl -pe 's|"3\..+?"|"3"|' > $(CURDIR)/client/jquery-custom.min.js
 	rm -rf /tmp/jquery
 
-npm-patch:
-	npm version patch
+version-patch:
+	yarn version patch
 
-npm-minor:
-	npm version minor
+version-minor:
+	yarn version minor
 
-npm-major:
-	npm version major
+version-major:
+	yarn version major
 
-patch: lint build npm-patch deploy publish docker docker-push
-minor: lint build npm-minor deploy publish docker docker-push
-major: lint build npm-major deploy publish docker docker-push
+patch: lint build version-patch deploy publish docker docker-push
+minor: lint build version-minor deploy publish docker docker-push
+major: lint build version-major deploy publish docker docker-push
 
-.PHONY: deps lint publish docker update deploy jquery npm-patch npm-minor npm-major patch minor major
+.PHONY: deps lint publish docker update deploy jquery version-patch version-minor version-major patch minor major
