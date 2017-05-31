@@ -8,7 +8,6 @@ var path     = require("path");
 
 var dbFile   = require("./paths.js").get().db;
 var defaults = {users: {}, sessions: {}, links: {}};
-var noop     = function() {};
 
 var database;
 
@@ -120,7 +119,7 @@ db.authUser = function authUser(user, pass) {
 
 // TODO: async
 function write() {
-  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2), noop);
+  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
 }
 
 function getHash(string) {
