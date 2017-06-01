@@ -109,7 +109,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `readOnly` *boolean* - All served files will be treated as being read-only.
 - `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution.
 - `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload.
-- `ignore` *Array* - Array of glob patterns to ignore when indexing files.
+- `ignore` *Array* - Array of glob patterns to ignore when indexing files. Default: `[".git", "node_modules"]`
 
 <a name="listener-options"></a>
 ### Listener Options
