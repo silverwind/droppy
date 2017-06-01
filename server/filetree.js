@@ -25,7 +25,7 @@ var WATCHER_DELAY = 3000;
 filetree.init = function(config) {
   cfg = config;
   walker.init(cfg);
-}
+};
 
 filetree.watch = function() {
   if (cfg.pollingInterval && typeof cfg.pollingInterval !== "number") {

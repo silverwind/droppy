@@ -14,8 +14,7 @@ var cfg = null;
 
 walker.init = function(config) {
   cfg = config;
-  console.log(cfg);
-}
+};
 
 walker.walk = function(dir, cb) {
   var files = [], dirs = [], errs = [];
@@ -52,29 +51,26 @@ walker.walk = function(dir, cb) {
   });
 };
 
-walker.walkSync = function(dir, opts) {
+walker.walkSync = function(dir) {
   var files = [], dirs = [], errs = [], list;
   try {
     list = fs.readdirSync(dir);
     for (var i = 0, l = list.length; i < l; i++) {
       var path = dir + "/" + list[i];
-
-      if (mm(path, cfg.ignore, mmOpts).length) {
-        continue;
-      }
-
-      try {
-        var stat = fs.statSync(path);
-        if (stat.isDirectory()) {
-          dirs.push({path: path, stat: stat});
-          var r = walker.walkSync(path);
-          dirs = dirs.concat(r[1]);
-          files = files.concat(r[2]);
-        } else {
-          files.push({path: path, stat: stat});
+      if (!mm(path, cfg.ignore, mmOpts).length) {
+        try {
+          var stat = fs.statSync(path);
+          if (stat.isDirectory()) {
+            dirs.push({path: path, stat: stat});
+            var r = walker.walkSync(path);
+            dirs = dirs.concat(r[1]);
+            files = files.concat(r[2]);
+          } else {
+            files.push({path: path, stat: stat});
+          }
+        } catch (err) {
+          errs.push(err);
         }
-      } catch (err) {
-        errs.push(err);
       }
     }
   } catch (err) {
