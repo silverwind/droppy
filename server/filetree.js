@@ -18,19 +18,25 @@ var todoDirs = [];
 var initial  = true;
 var watching = true;
 var timer    = null;
+var cfg      = null;
 
 var WATCHER_DELAY = 3000;
 
-filetree.init = function init(pollingInterval) {
-  if (pollingInterval && typeof pollingInterval !== "number") {
+filetree.init = function(config) {
+  cfg = config;
+  walker.init(cfg);
+}
+
+filetree.watch = function() {
+  if (cfg.pollingInterval && typeof cfg.pollingInterval !== "number") {
     throw new TypeError("Expected a number");
   }
   chokidar.watch(paths.files, {
     alwaysStat    : true,
     ignoreInitial : true,
-    usePolling    : Boolean(pollingInterval),
-    interval      : pollingInterval,
-    binaryInterval: pollingInterval
+    usePolling    : Boolean(cfg.pollingInterval),
+    interval      : cfg.pollingInterval,
+    binaryInterval: cfg.pollingInterval
   }).on("error", log.error).on("all", function() {
     if (watching) filetree.updateAll();
   });
@@ -85,7 +91,7 @@ function handleUpdateDirErrs(errs, cb) {
   if (typeof cb === "function") cb();
 }
 
-filetree.updateDir = function updateDir(dir, cb) {
+filetree.updateDir = function(dir, cb) {
   if (dir === null) { dir = "/"; dirs = {}; }
   fs.stat(utils.addFilesPath(dir), function(err, stat) {
     if (err) log.error(err);
@@ -153,7 +159,7 @@ function updateDirSizes() {
   });
 }
 
-filetree.del = function del(dir) {
+filetree.del = function(dir) {
   fs.stat(utils.addFilesPath(dir), function(err, stats) {
     if (err) log.error(err);
     if (!stats) return;
@@ -165,7 +171,7 @@ filetree.del = function del(dir) {
   });
 };
 
-filetree.unlink = function unlink(dir) {
+filetree.unlink = function(dir) {
   lookAway();
   utils.rm(utils.addFilesPath(dir), function(err) {
     if (err) log.error(err);
@@ -174,7 +180,7 @@ filetree.unlink = function unlink(dir) {
   });
 };
 
-filetree.unlinkdir = function unlinkdir(dir) {
+filetree.unlinkdir = function(dir) {
   lookAway();
   utils.rm(utils.addFilesPath(dir), function(err) {
     if (err) log.error(err);
@@ -186,7 +192,7 @@ filetree.unlinkdir = function unlinkdir(dir) {
   });
 };
 
-filetree.clipboard = function clipboard(src, dst, type) {
+filetree.clipboard = function(src, dst, type) {
   fs.stat(utils.addFilesPath(src), function(err, stats) {
     lookAway();
     if (err) log.error(err);
@@ -197,7 +203,7 @@ filetree.clipboard = function clipboard(src, dst, type) {
   });
 };
 
-filetree.mk = function mk(dir, cb) {
+filetree.mk = function(dir, cb) {
   lookAway();
   fs.stat(utils.addFilesPath(dir), function(err) {
     if (err && err.code === "ENOENT") {
@@ -216,7 +222,7 @@ filetree.mk = function mk(dir, cb) {
   });
 };
 
-filetree.mkdir = function mkdir(dir, cb) {
+filetree.mkdir = function(dir, cb) {
   lookAway();
   fs.stat(utils.addFilesPath(dir), function(err) {
     if (err && err.code === "ENOENT") {
@@ -232,7 +238,7 @@ filetree.mkdir = function mkdir(dir, cb) {
   });
 };
 
-filetree.move = function move(src, dst, cb) {
+filetree.move = function(src, dst, cb) {
   lookAway();
   fs.stat(utils.addFilesPath(src), function(err, stats) {
     if (err) log.error(err);
@@ -243,12 +249,12 @@ filetree.move = function move(src, dst, cb) {
   });
 };
 
-filetree.moveTemps = function moveTemps(src, dst, cb) {
+filetree.moveTemps = function(src, dst, cb) {
   lookAway();
   utils.move(src, dst, cb);
 };
 
-filetree.mv = function mv(src, dst, cb) {
+filetree.mv = function(src, dst, cb) {
   lookAway();
   utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function(err) {
     if (err) log.error(err);
@@ -260,7 +266,7 @@ filetree.mv = function mv(src, dst, cb) {
   });
 };
 
-filetree.mvdir = function mvdir(src, dst, cb) {
+filetree.mvdir = function(src, dst, cb) {
   lookAway();
   utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), function(err) {
     if (err) log.error(err);
@@ -280,7 +286,7 @@ filetree.mvdir = function mvdir(src, dst, cb) {
   });
 };
 
-filetree.cp = function cp(src, dst, cb) {
+filetree.cp = function(src, dst, cb) {
   lookAway();
   utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
     dirs[path.dirname(dst)].files[path.basename(dst)] = _.cloneDeep(dirs[path.dirname(src)].files[path.basename(src)]);
@@ -290,7 +296,7 @@ filetree.cp = function cp(src, dst, cb) {
   });
 };
 
-filetree.cpdir = function cpdir(src, dst, cb) {
+filetree.cpdir = function(src, dst, cb) {
   lookAway();
   utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), function() {
     // Basedir
@@ -308,7 +314,7 @@ filetree.cpdir = function cpdir(src, dst, cb) {
   });
 };
 
-filetree.save = function save(dst, data, cb) {
+filetree.save = function(dst, data, cb) {
   lookAway();
   fs.stat(utils.addFilesPath(dst), function(err) {
     if (err && err.code !== "ENOENT") return cb(err);
@@ -320,7 +326,7 @@ filetree.save = function save(dst, data, cb) {
   });
 };
 
-filetree.ls = function ls(p) {
+filetree.ls = function(p) {
   if (!dirs[p]) return;
   var entries = {}, files = dirs[p].files;
   Object.keys(files).forEach(function(file) {
@@ -342,7 +348,7 @@ filetree.ls = function ls(p) {
   return entries;
 };
 
-filetree.lsFilter = function lsFilter(p, re) {
+filetree.lsFilter = function(p, re) {
   if (!dirs[p]) return;
   return Object.keys(dirs[p].files).filter(function(file) {
     return re.test(file);

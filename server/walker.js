@@ -1,21 +1,43 @@
 "use strict";
 
-var fs = require("fs");
+var walker = module.exports = {};
+var fs     = require("fs");
+var mm     = require("multimatch");
 
-module.exports.walk = function walk(dir, cb) {
+var mmOpts = {
+  matchBase: true,
+  dot: true,
+  nocomment: true,
+};
+
+var cfg = null;
+
+walker.init = function(config) {
+  cfg = config;
+  console.log(cfg);
+}
+
+walker.walk = function(dir, cb) {
   var files = [], dirs = [], errs = [];
   fs.readdir(dir, function(err, list) {
     if (err) errs.push(err);
     (function next(i) {
-      if (!list || !list[i]) return cb(errs.length ? errs : null, dirs, files);
+      if (!list || !list[i]) {
+        return cb(errs.length ? errs : null, dirs, files);
+      }
+
       var path = dir + "/" + list[i];
+      if (mm(path, cfg.ignore, mmOpts).length) {
+        return cb(errs.length ? errs : null, dirs, files);
+      }
+
       fs.stat(path, function(err, stat) {
         if (err) {
           errs.push(err);
           next(++i);
         } else if (stat && stat.isDirectory()) {
           dirs.push({path: path, stat: stat});
-          walk(path, function(e, d, f) {
+          walker.walk(path, function(e, d, f) {
             if (e) errs = errs.concat(e);
             dirs = dirs.concat(d);
             files = files.concat(f);
@@ -30,17 +52,22 @@ module.exports.walk = function walk(dir, cb) {
   });
 };
 
-module.exports.walkSync = function walkSync(dir) {
+walker.walkSync = function(dir, opts) {
   var files = [], dirs = [], errs = [], list;
   try {
     list = fs.readdirSync(dir);
     for (var i = 0, l = list.length; i < l; i++) {
       var path = dir + "/" + list[i];
+
+      if (mm(path, cfg.ignore, mmOpts).length) {
+        continue;
+      }
+
       try {
         var stat = fs.statSync(path);
         if (stat.isDirectory()) {
           dirs.push({path: path, stat: stat});
-          var r = walkSync(path);
+          var r = walker.walkSync(path);
           dirs = dirs.concat(r[1]);
           files = files.concat(r[2]);
         } else {

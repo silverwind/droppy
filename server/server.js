@@ -103,8 +103,9 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
     },
     function(cb) { if (isStandalone) { startListeners(cb); } else cb(); },
     function(cb) {
+      filetree.init(config);
       filetree.updateDir(null, function() {
-        filetree.init(config.pollingInterval);
+        filetree.watch();
         cb();
       });
     },
@@ -1130,7 +1131,7 @@ function handleUploadRequest(req, res) {
           cb(null);
         });
       }, function() {
-        filetree.updateDir(dstDir);
+        filetree.updateDir(dstDir, config);
       });
     }
   });
