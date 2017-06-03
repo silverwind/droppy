@@ -1,7 +1,7 @@
 # droppy Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
-#### Version 6.3.0 - ??/??/????
+#### Version 6.4.0 - 03/06/2017
 
 - Added the `ignorePatterns` and `watch` options
 
