@@ -91,25 +91,26 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
   "pollingInterval": 0,
   "keepAlive": 20000,
   "allowFrame": false,
-  "readOnly": false
+  "readOnly": false,
+  "ignoreFiles": []
 }
 ```
 
 ## Options
-- `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module.
-- `public` *boolean* - When enabled, no user authentication is performed.
-- `timestamps` *boolean* - When enabled, adds timestamps to log output.
-- `linkLength` *number* - The amount of characters in a shared link.
-- `logLevel` *number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication).
+- `listeners` *Array* - Defines on which network interfaces, port and protocols the server will listen. See [listener options](#listener-options) below. `listeners` has no effect when droppy is used as a module. The default listens on HTTP port 8989 on all interfaces and protocols.
+- `public` *boolean* - When enabled, no user authentication is performed. Default: `false`.
+- `timestamps` *boolean* - When enabled, adds timestamps to log output. Default: `true`.
+- `linkLength` *number* - The amount of characters in a shared link. Default: `5`.
+- `logLevel` *number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication). Default: `2`.
 - `maxFileSize` *number* - The maximum file size in bytes a user can upload in a single file.
-- `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system.
-- `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling.
-- `keepAlive` *number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages.
-- `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`.
-- `readOnly` *boolean* - All served files will be treated as being read-only.
-- `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution.
-- `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload.
-- `ignore` *Array* - Array of glob patterns to ignore when indexing files. Default: `[".git", "node_modules"]`
+- `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system. Default: `1000`.
+- `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling. Default: `0`.
+- `keepAlive` *number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages. . Default: `20000`.
+- `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`. . Default: `false`.
+- `readOnly` *boolean* - All served files will be treated as being read-only. . Default: `false`.
+- `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution. . Default: `true`.
+- `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. . Default: `false`
+- `ignoreFiles` *Array* - Array of file name glob patterns to ignore when indexing files. Default: `[]`
 
 <a name="listener-options"></a>
 ### Listener Options

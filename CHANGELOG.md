@@ -1,10 +1,9 @@
 # droppy Changelog
-*This changelog only lists breaking and otherwise notable changes. See the commit log for more details
-*
+*This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
 #### Version 6.3.0 - ??/??/????
 
-- Added the `ignore` option
+- Added the `ignoreFiles` option
 
 #### Version 6.3.0 - 22/3/2017
 

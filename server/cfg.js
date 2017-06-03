@@ -26,7 +26,7 @@ var defaults = {
   allowFrame      : false,
   readOnly        : false,
   compression     : true,
-  ignore          : [".git", "node_modules"]
+  ignoreFiles     : []
 };
 
 var hiddenOpts = ["dev", "demo"];

@@ -26,7 +26,7 @@ walker.walk = function(dir, cb) {
       }
 
       var path = dir + "/" + list[i];
-      if (mm(path, cfg.ignore, mmOpts).length) {
+      if (mm(path, cfg.ignoreFiles, mmOpts).length) {
         return cb(errs.length ? errs : null, dirs, files);
       }
 
@@ -57,7 +57,7 @@ walker.walkSync = function(dir) {
     list = fs.readdirSync(dir);
     for (var i = 0, l = list.length; i < l; i++) {
       var path = dir + "/" + list[i];
-      if (!mm(path, cfg.ignore, mmOpts).length) {
+      if (!mm(path, cfg.ignoreFiles, mmOpts).length) {
         try {
           var stat = fs.statSync(path);
           if (stat.isDirectory()) {
