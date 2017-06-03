@@ -3,7 +3,7 @@
 
 #### Version 6.3.0 - ??/??/????
 
-- Added the `ignoreFiles` option
+- Added the `ignorePatterns` and `watch` options
 
 #### Version 6.3.0 - 22/3/2017
 

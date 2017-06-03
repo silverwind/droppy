@@ -26,7 +26,8 @@ var defaults = {
   allowFrame      : false,
   readOnly        : false,
   compression     : true,
-  ignoreFiles     : []
+  ignorePatterns  : [],
+  watch           : true,
 };
 
 var hiddenOpts = ["dev", "demo"];

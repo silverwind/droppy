@@ -92,7 +92,8 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
   "keepAlive": 20000,
   "allowFrame": false,
   "readOnly": false,
-  "ignoreFiles": []
+  "ignorePatterns": [],
+  "watch": true
 }
 ```
 
@@ -106,11 +107,12 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system. Default: `1000`.
 - `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling. Default: `0`.
 - `keepAlive` *number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages. . Default: `20000`.
-- `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`. . Default: `false`.
-- `readOnly` *boolean* - All served files will be treated as being read-only. . Default: `false`.
-- `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution. . Default: `true`.
-- `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. . Default: `false`
-- `ignoreFiles` *Array* - Array of file name glob patterns to ignore when indexing files. Default: `[]`
+- `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`. Default: `false`.
+- `readOnly` *boolean* - All served files will be treated as being read-only. Default: `false`.
+- `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution. Default: `true`.
+- `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. Default: `false`.
+- `ignorePatterns` *Array* - Array of file name glob patterns to ignore when indexing files. Default: `[]`.
+- `watch` *boolean* - Whether to watch the local file system for changes. Can improve performance when dealing with a large number of files. If `watch` is set to `false`, file system changed not done through droppy won't be detected. Default: `true`.
 
 <a name="listener-options"></a>
 ### Listener Options

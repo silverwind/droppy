@@ -105,7 +105,7 @@ var droppy = function droppy(opts, isStandalone, dev, callback) {
     function(cb) {
       filetree.init(config);
       filetree.updateDir(null, function() {
-        filetree.watch();
+        if (config.watch) filetree.watch();
         cb();
       });
     },
