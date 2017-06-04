@@ -24,7 +24,7 @@ build:
 publish:
 	if git ls-remote --exit-code origin &>/dev/null; then git push -u -f --tags origin master; fi
 	if git ls-remote --exit-code git &>/dev/null; then git push -u -f --tags git master; fi
-	yarn publish
+	npm publish
 
 docker:
 	@echo Preparing docker image $(IMAGE)...
@@ -40,7 +40,8 @@ docker-push:
 
 update:
 	ncu --packageFile package.json -ua
-	yarn upgrade
+	rm -rf node_modules
+	yarn
 	touch client/client.js
 
 deploy:
@@ -57,13 +58,13 @@ jquery:
 	rm -rf /tmp/jquery
 
 version-patch:
-	yarn version patch
+	npm version patch
 
 version-minor:
-	yarn version minor
+	npm version minor
 
 version-major:
-	yarn version major
+	npm version major
 
 patch: lint build version-patch deploy publish docker docker-push
 minor: lint build version-minor deploy publish docker docker-push
