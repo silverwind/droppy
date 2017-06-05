@@ -908,6 +908,8 @@ function handleResourceRequest(req, res, resourceName) {
     if ((req.headers["if-none-match"] || "") === resource.etag) {
       res.writeHead(304, headers);
       res.end();
+      log.info(req, res);
+      return;
     }
 
     // Headers on HTML requests
