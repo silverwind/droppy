@@ -718,7 +718,9 @@ function handleGET(req, res) {
     if (validateRequest(req)) {
       handleResourceRequest(req, res, "main.html");
       var sessions = db.get("sessions");
-      sessions[cookies.get(req.headers.cookie)].lastSeen = Date.now();
+      if (sessions[cookies.get(req.headers.cookie)]) {
+        sessions[cookies.get(req.headers.cookie)].lastSeen = Date.now();
+      }
       db.set("sessions", sessions);
     } else if (firstRun) {
       handleResourceRequest(req, res, "first.html");
