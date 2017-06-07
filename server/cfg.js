@@ -1,13 +1,13 @@
 "use strict";
 
-var cfg    = module.exports = {};
-var fs     = require("graceful-fs");
-var mkdirp = require("mkdirp");
-var path   = require("path");
+const cfg    = module.exports = {};
+const fs     = require("graceful-fs");
+const mkdirp = require("mkdirp");
+const path   = require("path");
 
-var configFile = require("./paths.js").get().cfgFile;
+const configFile = require("./paths.js").get().cfgFile;
 
-var defaults = {
+const defaults = {
   listeners : [
     {
       host     : ["0.0.0.0", "::"],
@@ -30,7 +30,7 @@ var defaults = {
   watch           : true,
 };
 
-var hiddenOpts = ["dev", "demo"];
+const hiddenOpts = ["dev", "demo"];
 
 cfg.init = function(config, callback) {
   if (typeof config === "object" && config !== null) {
@@ -86,7 +86,7 @@ function write(config, callback) {
 }
 
 function migrate(config) {
-  var oldProps = [
+  const oldProps = [
     "host",
     "port",
     "useTLS",
@@ -96,7 +96,7 @@ function migrate(config) {
     "maxOpen"
   ];
 
-  var needToMigrate = oldProps.every(function(prop) {
+  const needToMigrate = oldProps.every(function(prop) {
     return config.hasOwnProperty(prop);
   });
 

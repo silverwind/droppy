@@ -1,34 +1,34 @@
 "use strict";
 
-var utils     = module.exports = {};
-var async     = require("async");
-var cd        = require("content-disposition");
-var cpr       = require("cpr");
-var crypto    = require("crypto");
-var escRe     = require("escape-string-regexp");
-var ext       = require("file-extension");
-var fs        = require("graceful-fs");
-var isBin     = require("isbinaryfile");
-var mimeTypes = require("mime-types");
-var mkdirp    = require("mkdirp");
-var mv        = require("mv");
-var path      = require("path");
-var rimraf    = require("rimraf");
-var url       = require("url");
-var util      = require("util");
-var validate  = require("valid-filename");
+const utils     = module.exports = {};
+const async     = require("async");
+const cd        = require("content-disposition");
+const cpr       = require("cpr");
+const crypto    = require("crypto");
+const escRe     = require("escape-string-regexp");
+const ext       = require("file-extension");
+const fs        = require("graceful-fs");
+const isBin     = require("isbinaryfile");
+const mimeTypes = require("mime-types");
+const mkdirp    = require("mkdirp");
+const mv        = require("mv");
+const path      = require("path");
+const rimraf    = require("rimraf");
+const url       = require("url");
+const util      = require("util");
+const validate  = require("valid-filename");
 
-var paths  = require("./paths.js").get();
-var log    = require("./log.js");
+const paths  = require("./paths.js").get();
+const log    = require("./log.js");
 
-var forceBinaryTypes = [
+const forceBinaryTypes = [
   "pdf",
   "ps",
   "eps",
   "ai",
 ];
 
-var overrideMimeTypes = {
+const overrideMimeTypes = {
   "video/x-matroska": "video/webm",
 };
 
@@ -52,7 +52,7 @@ utils.rm = function(p, cb) {
 
 // rimraf.sync wrapper with 10 retries
 utils.rmSync = function(p) {
-  var tries = 10;
+  let tries = 10;
   (function run() {
     try {
       rimraf.sync(p, {glob: {dot: true}});
@@ -69,9 +69,9 @@ utils.move = function(src, dst, cb) {
 };
 
 utils.copyFile = function(src, dst, cb) {
-  var cbCalled = false;
-  var read     = fs.createReadStream(src);
-  var write    = fs.createWriteStream(dst);
+  let cbCalled = false;
+  const read     = fs.createReadStream(src);
+  const write    = fs.createWriteStream(dst);
 
   function done(err) {
     if (cbCalled) return;
@@ -98,7 +98,7 @@ utils.linkChars = "abcdefghjkmnpqrstuvwxyz23456789";
 
 // Get a pseudo-random n-character lowercase string.
 utils.getLink = function(links, length) {
-  var link = "";
+  let link = "";
   do {
     while (link.length < length) {
       link += utils.linkChars.charAt(Math.floor(Math.random() * utils.linkChars.length));
@@ -118,9 +118,9 @@ utils.getNewPath = function(origPath, callback) {
   fs.stat(origPath, function(err, stats) {
     if (err) callback(origPath);
     else {
-      var filename  = path.basename(origPath);
-      var dirname   = path.dirname(origPath);
-      var extension = "";
+      let filename  = path.basename(origPath);
+      const dirname   = path.dirname(origPath);
+      let extension = "";
 
       if (filename.indexOf(".") !== -1 && stats.isFile()) {
         extension = filename.substring(filename.lastIndexOf("."));
@@ -129,13 +129,13 @@ utils.getNewPath = function(origPath, callback) {
 
       if (!/-\d+$/.test(filename)) filename += "-1";
 
-      var canCreate = false;
+      let canCreate = false;
       async.until(
         function() {
           return canCreate;
         },
         function(cb) {
-          var num = parseInt(filename.substring(filename.lastIndexOf("-") + 1));
+          const num = parseInt(filename.substring(filename.lastIndexOf("-") + 1));
           filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
           fs.stat(path.join(dirname, filename + extension), function(err) {
             canCreate = err;
@@ -197,11 +197,11 @@ utils.isBinary = function(p, callback) {
 
 // TODO async/await this in Node.js 8
 utils.contentType = function(p) {
-  var type = mimeTypes.lookup(p);
+  const type = mimeTypes.lookup(p);
   if (overrideMimeTypes[type]) return overrideMimeTypes[type];
 
   if (type) {
-    var charset = mimeTypes.charsets.lookup(type);
+    const charset = mimeTypes.charsets.lookup(type);
     return type + (charset ? "; charset=" + charset : "");
   } else {
     try {
@@ -222,7 +222,7 @@ utils.createSid = function() {
 
 utils.readJsonBody = function(req) {
   return new Promise(function(resolve, reject) {
-    var body = [];
+    let body = [];
     req.on("data", function(chunk) {
       body.push(chunk);
     }).on("end", function() {
@@ -237,7 +237,7 @@ utils.readJsonBody = function(req) {
 };
 
 utils.countOccurences = function(string, search) {
-  var num = 0, pos = 0;
+  let num = 0, pos = 0;
   while (true) {
     pos = string.indexOf(search, pos);
     if (pos >= 0) {
@@ -250,8 +250,8 @@ utils.countOccurences = function(string, search) {
 
 utils.formatBytes = function(num) {
   if (num < 1) return num + " B";
-  var units = ["B", "kB", "MB", "GB", "TB", "PB"];
-  var exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
+  const units = ["B", "kB", "MB", "GB", "TB", "PB"];
+  const exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
   return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
 };
 
@@ -275,14 +275,14 @@ utils.port = function(req) {
 };
 
 utils.naturalSort = function(a, b) {
-  var x = [], y = [];
+  const x = [], y = [];
   function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
   a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
   b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
   while (x.length && y.length) {
-    var xx = x.shift();
-    var yy = y.shift();
-    var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
+    const xx = x.shift();
+    const yy = y.shift();
+    const nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
     if (nn) return nn;
   }
   if (x.length) return -1;
@@ -312,7 +312,7 @@ utils.readFile = function(p, cb) {
 };
 
 utils.origin = function(req) {
-  var u = new url.Url();
+  const u = new url.Url();
   u.protocol = req.headers["x-forwarded-proto"] ||
     (req.connection && req.connection.encrypted) ? "https:" : "http:";
   u.host = req.headers["x-forwarded-host"] || req.headers["host"];
@@ -320,7 +320,7 @@ utils.origin = function(req) {
 };
 
 utils.originPath = function(req) {
-  var u = new url.Url();
+  const u = new url.Url();
   u.protocol = req.headers["x-forwarded-proto"] ||
     (req.connection && req.connection.encrypted) ? "https:" : "http:";
   u.host = req.headers["x-forwarded-host"] || req.headers["host"];

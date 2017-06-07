@@ -2,8 +2,8 @@
 
 // Manifest for web application - https://w3c.github.io/manifest/
 
-var pkg = require("../package.json");
-var utils = require("./utils.js");
+const pkg = require("../package.json");
+const utils = require("./utils.js");
 
 module.exports = function manifest(req) {
   return JSON.stringify({

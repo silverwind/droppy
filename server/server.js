@@ -1,45 +1,45 @@
 "use strict";
 
-var crypto = require("crypto");
-var os     = require("os");
-var path   = require("path");
-var qs     = require("querystring");
+const crypto = require("crypto");
+const os     = require("os");
+const path   = require("path");
+const qs     = require("querystring");
 
-var _        = require("lodash");
-var async    = require("async");
-var Busboy   = require("busboy");
-var chalk    = require("chalk");
-var escRe    = require("escape-string-regexp");
-var fs       = require("graceful-fs");
-var imgSize  = require("image-size");
-var readdirp = require("readdirp");
-var schedule = require("node-schedule");
-var sendFile = require("send");
-var ut       = require("untildify");
-var yazl     = require("yazl");
+const _        = require("lodash");
+const async    = require("async");
+const Busboy   = require("busboy");
+const chalk    = require("chalk");
+const escRe    = require("escape-string-regexp");
+const fs       = require("graceful-fs");
+const imgSize  = require("image-size");
+const readdirp = require("readdirp");
+const schedule = require("node-schedule");
+const sendFile = require("send");
+const ut       = require("untildify");
+const yazl     = require("yazl");
 
-var cfg       = require("./cfg.js");
-var cookies   = require("./cookies.js");
-var csrf      = require("./csrf.js");
-var db        = require("./db.js");
-var filetree  = require("./filetree.js");
-var log       = require("./log.js");
-var manifest  = require("./manifest.js");
-var paths     = require("./paths.js").get();
-var pkg       = require("./../package.json");
-var resources = require("./resources.js");
-var utils     = require("./utils.js");
+const cfg       = require("./cfg.js");
+const cookies   = require("./cookies.js");
+const csrf      = require("./csrf.js");
+const db        = require("./db.js");
+const filetree  = require("./filetree.js");
+const log       = require("./log.js");
+const manifest  = require("./manifest.js");
+const paths     = require("./paths.js").get();
+const pkg       = require("./../package.json");
+const resources = require("./resources.js");
+const utils     = require("./utils.js");
 
-var cache         = {};
-var clients       = {};
-var clientsPerDir = {};
-var config        = null;
-var firstRun      = null;
-var Wss           = null;
-var uwsLogged     = false;
-var ready         = false;
+let cache         = {};
+const clients       = {};
+const clientsPerDir = {};
+let config        = null;
+let firstRun      = null;
+let Wss           = null;
+let uwsLogged     = false;
+let ready         = false;
 
-var droppy = function droppy(opts, isStandalone, dev, callback) {
+const droppy = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
     log.logo(
       [
@@ -154,20 +154,19 @@ droppy._onRequest = onRequest;
 module.exports = droppy;
 
 function startListeners(callback) {
-  var listeners = config.listeners, targets = [];
+  if (!Array.isArray(config.listeners))
+    return callback(new Error("Config Error: 'listeners' option must be an array"));
 
-  if (!Array.isArray(listeners))
-    return callback(new Error("Config Error: 'listeners' must be an array"));
-
-  listeners.forEach(function(listener, i) {
+  const targets = [];
+  config.listeners.forEach(function(listener, i) {
     if (listener.protocol === undefined) {
       listener.protocol = "http";
     }
 
     // arrify and filter `undefined`
-    var hosts = utils.arrify(listener.host).filter(host => Boolean(host));
-    var ports = utils.arrify(listener.port).filter(port => Boolean(port));
-    var sockets = utils.arrify(listener.socket).filter(socket => Boolean(socket));
+    const hosts = utils.arrify(listener.host).filter(host => Boolean(host));
+    const ports = utils.arrify(listener.port).filter(port => Boolean(port));
+    const sockets = utils.arrify(listener.socket).filter(socket => Boolean(socket));
 
     // validate listener options
     hosts.forEach(host => {
@@ -181,7 +180,7 @@ function startListeners(callback) {
       }
 
       if (typeof port === "string") {
-        var num = parseInt(port);
+        const num = parseInt(port);
         if (Number.isNaN(num)) {
           return callback(new Error("Invalid config value: 'port' = " + port));
         }
@@ -212,7 +211,7 @@ function startListeners(callback) {
       hosts.splice(hosts.indexOf("0.0.0.0"), 1);
     }
 
-    var opts = {
+    const opts = {
       proto: listener.protocol,
       hsts: listener.hsts,
       key: listener.key,
@@ -242,7 +241,7 @@ function startListeners(callback) {
     });
   });
 
-  var listenerCount = 0;
+  let listenerCount = 0;
   async.each(targets, function(target, cb) {
     createListener(onRequest, target.opts, function(err, server) {
       if (err) return cb(err);
@@ -251,7 +250,7 @@ function startListeners(callback) {
         server.removeAllListeners("error");
         listenerCount++;
         setupSocket(server);
-        var proto = target.opts.proto.toLowerCase();
+        const proto = target.opts.proto.toLowerCase();
 
         if (target.socket) { // socket
           fs.chmodSync(target.socket, 0o666); // make it rw
@@ -310,7 +309,7 @@ function startListeners(callback) {
 }
 
 function createListener(handler, opts, callback) {
-  var server;
+  let server;
   if (opts.proto === "http") {
     server = require("http").createServer(handler);
     server.on("clientError", function(_err, socket) {
@@ -323,11 +322,11 @@ function createListener(handler, opts, callback) {
     callback(null, server);
   } else {
     // disable client session renegotiation
-    var tls = require("tls");
+    const tls = require("tls");
     tls.CLIENT_RENEG_LIMIT = 0;
     tls.CLIENT_RENEG_WINDOW = Infinity;
 
-    var https = require("https");
+    const https = require("https");
     tlsInit(opts, function(err, tlsOptions) {
       if (err) return callback(err);
 
@@ -335,7 +334,7 @@ function createListener(handler, opts, callback) {
         server = https.createServer(tlsOptions);
       } catch (err) {
         if (/(bad password|bad decrypt)/.test(err)) {
-          var errText;
+          let errText;
           if (!tlsOptions.passphrase) {
             errText = "TLS key '" + opts.key + "' is encrypted with a passphrase. " +
               "You can either decrypt the key using `openssl rsa -in " + opts.key +
@@ -386,7 +385,7 @@ function setupSocket(server) {
     }
     Wss = require("ws").Server;
   }
-  var wss = new Wss({
+  const wss = new Wss({
     server: server,
     verifyClient: function(info, cb) {
       if (validateRequest(info.req)) return cb(true);
@@ -400,8 +399,8 @@ function setupSocket(server) {
     ws.port = ws._socket.remotePort;
     ws.headers = Object.assign({}, req.headers);
     log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
-    var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
-    var cookie = cookies.get(req.headers.cookie);
+    const sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
+    const cookie = cookies.get(req.headers.cookie);
     clients[sid] = {views: [], cookie: cookie, ws: ws};
 
     ws.on("message", function(msg) {
@@ -416,11 +415,10 @@ function setupSocket(server) {
         return;
       }
 
-      var vId = msg.vId;
-      var priv = Boolean((db.get("sessions")[cookie] || {}).privileged);
+      const vId = msg.vId;
+      const priv = Boolean((db.get("sessions")[cookie] || {}).privileged);
 
-      switch (msg.type) {
-      case "REQUEST_SETTINGS":
+      if (msg.type === "REQUEST_SETTINGS") {
         sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
           version       : pkg.version,
           debug         : config.dev,
@@ -434,12 +432,11 @@ function setupSocket(server) {
           themes        : Object.keys(cache.themes).sort().join("|"),
           modes         : Object.keys(cache.modes).sort().join("|"),
         }});
-        break;
-      case "REQUEST_UPDATE":
+      } else if (msg.type === "REQUEST_UPDATE") {
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
         fs.stat(utils.addFilesPath(msg.data), function(err, stats) {
-          var clientDir, clientFile;
+          let clientDir, clientFile;
           if (err) { // Send client back to root when the requested path doesn't exist
             clientDir = "/";
             clientFile = null;
@@ -459,36 +456,32 @@ function setupSocket(server) {
             sendFiles(sid, vId);
           }
         });
-        break;
-      case "DESTROY_VIEW":
+      } else if (msg.type === "DESTROY_VIEW") {
         clients[sid].views[vId] = null;
-        break;
-      case "REQUEST_SHARELINK":
+      } else if (msg.type === "REQUEST_SHARELINK") {
         if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
-        var link, links = db.get("links");
+        const links = db.get("links");
 
         // Check if we already have a link for that file
-        var hadLink = Object.keys(links).some(function(link) {
+        const hadLink = Object.keys(links).some(function(link) {
           if (msg.data.location === links[link].location && msg.data.attachement === links[link].attachement) {
             sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
             return true;
           }
         });
-        if (hadLink) break;
+        if (hadLink) return;
 
-        link = utils.getLink(links, config.linkLength);
+        const link = utils.getLink(links, config.linkLength);
         log.info(ws, null, "Share link created: " + link + " -> " + msg.data.location);
         sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
         links[link] = {location: msg.data.location, attachement: msg.data.attachement};
         db.set("links", links);
-        break;
-      case "DELETE_FILE":
+      } else if (msg.type === "DELETE_FILE") {
         log.info(ws, null, "Deleting: " + msg.data);
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.del(msg.data);
-        break;
-      case "SAVE_FILE":
+      } else if (msg.type === "SAVE_FILE") {
         log.info(ws, null, "Saving: " + msg.data.to);
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
@@ -498,9 +491,10 @@ function setupSocket(server) {
             log.error(err);
           } else sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
         });
-        break;
-      case "CLIPBOARD":
-        var src = msg.data.src, dst = msg.data.dst, type = msg.data.type;
+      } else if (msg.type === "CLIPBOARD") {
+        const src = msg.data.src;
+        const dst = msg.data.dst;
+        const type = msg.data.type;
         log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
@@ -516,20 +510,18 @@ function setupSocket(server) {
             filetree.clipboard(msg.data.src, msg.data.dst, msg.data.type);
           }
         });
-        break;
-      case "CREATE_FOLDER":
+      } else if (msg.type === "CREATE_FOLDER") {
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.mkdir(msg.data);
-        break;
-      case "CREATE_FILE":
+      } else if (msg.type === "CREATE_FILE") {
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
         filetree.mk(msg.data);
-        break;
-      case "RENAME":
+      } else if (msg.type === "RENAME") {
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        var rSrc = msg.data.src, rDst = msg.data.dst;
+        const rSrc = msg.data.src;
+        const rDst = msg.data.dst;
         // Disallow whitespace-only and empty strings in renames
         if (!validatePaths([rSrc, rDst], msg.type, ws, sid, vId) ||
             /^\s*$/.test(rDst) || rDst === "" || rSrc === rDst) {
@@ -538,12 +530,11 @@ function setupSocket(server) {
           return;
         }
         filetree.move(rSrc, rDst);
-        break;
-      case "GET_USERS":
+      } else if (msg.type === "GET_USERS") {
         if (priv && !config.public) sendUsers(sid);
-        break;
-      case "UPDATE_USER":
-        var name = msg.data.name, pass = msg.data.pass;
+      } else if (msg.type === "UPDATE_USER") {
+        const name = msg.data.name;
+        const pass = msg.data.pass;
         if (!priv) return;
         if (pass === "") {
           if (!db.get("users")[name]) return;
@@ -556,13 +547,12 @@ function setupSocket(server) {
             db.set("sessions", {});
           }
         } else {
-          var isNew = !db.get("users")[name];
+          const isNew = !db.get("users")[name];
           db.addOrUpdateUser(name, pass, msg.data.priv || false);
           log.info(ws, null, (isNew ? "Added" : "Updated") + " user: ", chalk.magenta(name));
         }
         sendUsers(sid);
-        break;
-      case "CREATE_FILES":
+      } else if (msg.type === "CREATE_FILES") {
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
         async.each(msg.data.files, function(file, cb) {
@@ -572,8 +562,7 @@ function setupSocket(server) {
         }, function(err) {
           if (err) log.error(ws, null, err);
         });
-        break;
-      case "CREATE_FOLDERS":
+      } else if (msg.type === "CREATE_FOLDERS") {
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
         async.each(msg.data.folders, function(folder, cb) {
@@ -581,11 +570,11 @@ function setupSocket(server) {
         }, function(err) {
           if (err) log.error(ws, null, err);
         });
-        break;
-      case "GET_MEDIA":
-        var dir = msg.data.dir, exts = msg.data.exts;
+      } else if (msg.type === "GET_MEDIA") {
+        const dir = msg.data.dir;
+        const exts = msg.data.exts;
         if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
-        var files = filetree.lsFilter(dir, utils.extensionRe(exts.img.concat(exts.vid)));
+        const files = filetree.lsFilter(dir, utils.extensionRe(exts.img.concat(exts.vid)));
         if (!files) return sendError(sid, vId, "No displayable files in directory");
         async.map(files, function(file, cb) {
           if (utils.extensionRe(exts.img).test(file)) {
@@ -601,15 +590,14 @@ function setupSocket(server) {
         }, function(_, obj) {
           sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
         });
-        break;
       }
     });
 
     ws.on("close", function(code) {
-      var reason;
+      let reason;
       if (code === 4001) {
         reason = "(Logged out)";
-        var sessions = db.get("sessions");
+        const sessions = db.get("sessions");
         delete sessions[cookie];
         db.set("sessions", sessions);
       } else if (code === 1001) {
@@ -643,7 +631,7 @@ function validatePaths(paths, type, ws, sid, vId) {
 // Send a file list update
 function sendFiles(sid, vId) {
   if (!clients[sid] || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws._socket) return;
-  var dir = clients[sid].views[vId].directory;
+  const dir = clients[sid].views[vId].directory;
   sendObj(sid, {
     type   : "UPDATE_DIRECTORY",
     vId    : vId,
@@ -654,8 +642,8 @@ function sendFiles(sid, vId) {
 
 // Send a list of users on the server
 function sendUsers(sid) {
-  var userDB   = db.get("users");
-  var userlist = {};
+  const userDB   = db.get("users");
+  const userlist = {};
 
   Object.keys(userDB).forEach(function(user) {
     userlist[user] = userDB[user].privileged || false;
@@ -694,7 +682,7 @@ function send(ws, data) {
     if (time > 1000) return; // in case the socket hasn't opened after 1 second, cancel the sending
     if (ws && ws.readyState === 1) {
       if (config.logLevel === 3) {
-        var debugData = JSON.parse(data);
+        const debugData = JSON.parse(data);
         // Remove some spammy logging
         if (debugData.type === "RELOAD" && debugData.css) debugData.css = {"...": "..."};
         log.debug(ws, null, chalk.green("SEND "), utils.pretty(debugData));
@@ -709,7 +697,7 @@ function send(ws, data) {
 }
 
 function handleGET(req, res) {
-  var URI = decodeURIComponent(req.url);
+  const URI = decodeURIComponent(req.url);
 
   if (config.public && !cookies.get(req.headers.cookie))
     cookies.free(req, res);
@@ -718,7 +706,7 @@ function handleGET(req, res) {
   if (URI === "/") {
     if (validateRequest(req)) {
       handleResourceRequest(req, res, "main.html");
-      var sessions = db.get("sessions");
+      const sessions = db.get("sessions");
       if (sessions[cookies.get(req.headers.cookie)]) {
         sessions[cookies.get(req.headers.cookie)].lastSeen = Date.now();
       }
@@ -776,16 +764,16 @@ function handleGET(req, res) {
   }
 }
 
-var rateLimited = [];
+const rateLimited = [];
 function handlePOST(req, res) {
-  var URI = decodeURIComponent(req.url);
+  const URI = decodeURIComponent(req.url);
 
   // unauthenticated POSTs
   if (/^\/!\/login/.test(URI)) {
     res.setHeader("Content-Type", "text/plain");
 
     // Rate-limit login attempts to one attempt every 2 seconds
-    var ip = utils.ip(req);
+    const ip = utils.ip(req);
     if (rateLimited.indexOf(ip) !== -1) {
       res.statusCode = 429;
       res.end();
@@ -873,7 +861,7 @@ function handlePOST(req, res) {
 }
 
 function handleResourceRequest(req, res, resourceName) {
-  var resource;
+  let resource;
 
   // Assign filename, must be unique for resource requests
   if (/^\/!\/res\/theme\//.test(req.url)) {
@@ -892,7 +880,9 @@ function handleResourceRequest(req, res, resourceName) {
   }
 
   // Regular resource handling
-  var headers = {}, status = 200, data;
+  const headers = {};
+  let status = 200;
+  let data;
 
   if (resource === undefined) {
     status = 400;
@@ -941,7 +931,7 @@ function handleResourceRequest(req, res, resourceName) {
     headers["Content-Type"] = resource.mime;
 
     // Encoding, length
-    var encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
+    const encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
       return e.trim().toLowerCase();
     }).filter(function(e) {
       return Boolean(e);
@@ -965,12 +955,13 @@ function handleResourceRequest(req, res, resourceName) {
 }
 
 function handleFileRequest(req, res, download) {
-  var URI = decodeURIComponent(req.url), shareLink, filepath;
-  var linkRe = new RegExp("^/\\??\\$/([" + utils.linkChars + "]{" + config.linkLength + "})$");
+  const URI = decodeURIComponent(req.url);
+  let shareLink, filepath;
+  const linkRe = new RegExp("^/\\??\\$/([" + utils.linkChars + "]{" + config.linkLength + "})$");
 
-  var parts = linkRe.exec(URI);
+  let parts = linkRe.exec(URI);
   if (parts && parts[1]) { // check for sharelink
-    var link = db.get("links")[parts[1]];
+    const link = db.get("links")[parts[1]];
     if (!link) return redirectToRoot(req, res);
     shareLink = true;
     download = link.attachement;
@@ -1026,7 +1017,9 @@ function handleTypeRequest(req, res, file) {
 }
 
 function handleUploadRequest(req, res) {
-  var busboy, opts, dstDir, done = false, files = {}, limitHit;
+  const files = {};
+  let done = false;
+  let limitHit;
 
   if (config.readOnly) {
     res.statusCode = 403;
@@ -1054,9 +1047,9 @@ function handleUploadRequest(req, res) {
     }
   });
 
-  dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[req.query.vId].directory;
+  const dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[req.query.vId].directory;
   log.info(req, res, "Upload started");
-  opts = {
+  const opts = {
     preservePath: true,
     headers: req.headers,
     fileHwm: 1024 * 1024,
@@ -1064,14 +1057,14 @@ function handleUploadRequest(req, res) {
   };
   if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
 
-  busboy = new Busboy(opts);
+  const busboy = new Busboy(opts);
   busboy.on("error", log.error);
   busboy.on("file", function(_, file, filePath) {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
 
-    var dst = path.join(paths.files, dstDir, filePath);
-    var tmp = path.join(paths.temp, crypto.randomBytes(32).toString("hex"));
-    var ws  = fs.createWriteStream(tmp, {mode: "644"});
+    const dst = path.join(paths.files, dstDir, filePath);
+    const tmp = path.join(paths.temp, crypto.randomBytes(32).toString("hex"));
+    const ws  = fs.createWriteStream(tmp, {mode: "644"});
     files[filePath] = {src: tmp, dst : dst, ws: ws};
 
     file.on("limit", function() {
@@ -1089,7 +1082,11 @@ function handleUploadRequest(req, res) {
   });
 
   busboy.on("finish", function() {
-    var names = Object.keys(files), total = names.length, added = 0, toMove = [];
+    const names = Object.keys(files);
+    const total = names.length;
+    let added = 0;
+    const toMove = [];
+
     log.info(req, res, "Received " + names.length + " files");
     done = true;
 
@@ -1202,7 +1199,7 @@ function updateClientLocation(dir, sid, vId) {
 
 function removeClientPerDir(sid, vId) {
   Object.keys(clientsPerDir).forEach(function(dir) {
-    var removeAt = [];
+    const removeAt = [];
     clientsPerDir[dir].forEach(function(client, i) {
       if (client.sid === sid && (typeof vId === "number" ? client.vId === vId : true)) {
         removeAt.push(i);
@@ -1249,7 +1246,8 @@ function cleanupTemp() {
 
 // Clean up sharelinks by removing links to nonexistant files
 function cleanupLinks(callback) {
-  var linkcount = 0, cbcount = 0, links = db.get("links");
+  let linkcount = 0, cbcount = 0;
+  const links = db.get("links");
   if (Object.keys(links).length === 0) {
     callback();
   } else {
@@ -1289,9 +1287,9 @@ function streamArchive(req, res, zipPath, download) {
     if (err) {
       log.error(err);
     } else if (stats.isDirectory()) {
-      var zip = new yazl.ZipFile();
-      var relPath = utils.removeFilesPath(zipPath);
-      var targetDir = path.basename(relPath);
+      const zip = new yazl.ZipFile();
+      const relPath = utils.removeFilesPath(zipPath);
+      const targetDir = path.basename(relPath);
       log.info(req, res);
       log.info("Streaming zip of ", chalk.blue(relPath));
       res.statusCode = 200;
@@ -1299,8 +1297,8 @@ function streamArchive(req, res, zipPath, download) {
       res.setHeader("Transfer-Encoding", "chunked");
       if (download) res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
       readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
-        var pathInZip = path.join(targetDir, file.path);
-        var metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
+        const pathInZip = path.join(targetDir, file.path);
+        const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
         if (file.stat.isDirectory())
           zip.addEmptyDirectory(pathInZip, metaData);
         else
@@ -1343,7 +1341,7 @@ function validateRequest(req) {
   return Boolean(cookies.get(req.headers.cookie) || config.public);
 }
 
-var cbs = [];
+const cbs = [];
 function tlsInit(opts, cb) {
   if (!cbs[opts.index]) {
     cbs[opts.index] = [cb];
@@ -1363,16 +1361,16 @@ function tlsSetup(opts, cb) {
   if (typeof opts.cert !== "string")
     return cb(new Error("Missing TLS option 'cert'"));
 
-  var certPaths = [
+  const certPaths = [
     path.resolve(paths.config, ut(opts.key)),
     path.resolve(paths.config, ut(opts.cert)),
     opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
   ];
 
   async.map(certPaths, utils.readFile, function(_, data) {
-    var key     = data[0];
-    var certs   = data[1];
-    var dhparam = data[3];
+    const key     = data[0];
+    const certs   = data[1];
+    const dhparam = data[3];
 
     if (!key) return cb(new Error("Unable to read TLS key: " + certPaths[0]));
     if (!certs) return cb(new Error("Unable to read TLS certificates: " + certPaths[1]));
@@ -1380,7 +1378,7 @@ function tlsSetup(opts, cb) {
 
     function createDH() {
       log.info("Generating 2048 bit Diffie-Hellman parameters. This will take a long time.");
-      var dh = require("dhparam")(2048);
+      const dh = require("dhparam")(2048);
       db.set("dhparam", dh);
       return dh;
     }
@@ -1398,7 +1396,7 @@ function tlsSetup(opts, cb) {
 schedule.scheduleJob("* 0 * * *", function hourly() {
   if (!ready) return;
   // Clean inactive sessions after 1 month of inactivity
-  var sessions = db.get("sessions");
+  const sessions = db.get("sessions");
   Object.keys(sessions).forEach(function(session) {
     if (!sessions[session].lastSeen || (Date.now() - sessions[session].lastSeen >= 2678400000)) {
       delete sessions[session];
@@ -1424,7 +1422,7 @@ function setupProcess(standalone) {
 
 // Process shutdown
 function endProcess(signal) {
-  var count = 0;
+  let count = 0;
   log.info("Received " + chalk.red(signal) + " - Shutting down ...");
   Object.keys(clients).forEach(function(sid) {
     if (!clients[sid] || !clients[sid].ws) return;

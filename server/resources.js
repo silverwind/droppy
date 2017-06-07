@@ -1,26 +1,26 @@
 "use strict";
 
-var resources    = module.exports = {};
-var async        = require("async");
-var etag         = require("etag");
-var fs           = require("graceful-fs");
-var jb           = require("json-buffer");
-var mkdirp       = require("mkdirp");
-var path         = require("path");
-var vm           = require("vm");
-var zlib         = require("zlib");
+const resources    = module.exports = {};
+const async        = require("async");
+const etag         = require("etag");
+const fs           = require("graceful-fs");
+const jb           = require("json-buffer");
+const mkdirp       = require("mkdirp");
+const path         = require("path");
+const vm           = require("vm");
+const zlib         = require("zlib");
 
-var log          = require("./log.js");
-var paths        = require("./paths.js").get();
-var utils        = require("./utils.js");
+const log          = require("./log.js");
+const paths        = require("./paths.js").get();
+const utils        = require("./utils.js");
 
-var themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
-var modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
-var cachePath    = path.join(paths.mod, "dist", "cache.json");
+const themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
+const modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
+const cachePath    = path.join(paths.mod, "dist", "cache.json");
 
-var minify;
+let minify;
 
-var opts = {
+const opts = {
   uglify: {
     mangle: true,
     compress: {
@@ -92,7 +92,7 @@ var opts = {
   }
 };
 
-var autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli, svg, handlebars;
+let autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli, svg, handlebars;
 try {
   autoprefixer = require("autoprefixer");
   brotli       = require("iltorb").compress;
@@ -134,7 +134,7 @@ resources.files = {
 };
 
 // On-demand loadable libs. Will be available as !/res/lib/[prop]
-var libs = {
+const libs = {
   // plyr
   "plyr.js": "node_modules/plyr/src/js/plyr.js",
   "plyr.css": "node_modules/plyr/dist/plyr.css",
@@ -213,7 +213,7 @@ function buf(str) {
 function isCacheFresh(cb) {
   fs.stat(cachePath, function(err, stats) {
     if (err) return cb(false);
-    var files = [];
+    const files = [];
     Object.keys(resources.files).forEach(function(type) {
       resources.files[type].forEach(function(file) {
         files.push(path.join(paths.mod, file));
@@ -245,7 +245,7 @@ function compile(write, cb) {
   }
   async.series([compileAll, readThemes, readModes, readLibs], function(err, results) {
     if (err) return cb(err);
-    var cache = {res: results[0], themes: {}, modes: {}, lib: {}};
+    const cache = {res: results[0], themes: {}, modes: {}, lib: {}};
 
     Object.keys(results[1]).forEach(function(theme) {
       cache.themes[theme] = {
@@ -290,7 +290,7 @@ function compile(write, cb) {
 
 // Create gzip compressed data
 function addGzip(cache, callback) {
-  var types = Object.keys(cache), funcs = [];
+  const types = Object.keys(cache), funcs = [];
   types.forEach(function(type) {
     funcs.push(function(cb) {
       gzipMap(cache[type], cb);
@@ -306,7 +306,7 @@ function addGzip(cache, callback) {
 }
 
 function gzipMap(map, callback) {
-  var names = Object.keys(map), funcs = [];
+  const names = Object.keys(map), funcs = [];
   names.forEach(function(name) {
     funcs.push(function(cb) {
       (minify ? zopfli : zlib).gzip(map[name].data, cb);
@@ -323,7 +323,7 @@ function gzipMap(map, callback) {
 
 // Create brotli compressed data
 function addBrotli(cache, callback) {
-  var types = Object.keys(cache), funcs = [];
+  const types = Object.keys(cache), funcs = [];
   types.forEach(function(type) {
     funcs.push(function(cb) {
       brotliMap(cache[type], cb);
@@ -339,7 +339,7 @@ function addBrotli(cache, callback) {
 }
 
 function brotliMap(map, callback) {
-  var names = Object.keys(map), funcs = [];
+  const names = Object.keys(map), funcs = [];
   names.forEach(function(name) {
     funcs.push(function(cb) {
       brotli(map[name].data, opts.brotli, cb);
@@ -355,11 +355,11 @@ function brotliMap(map, callback) {
 }
 
 function readThemes(callback) {
-  var themes = {};
+  const themes = {};
   fs.readdir(themesPath, function(err, filenames) {
     if (err) return callback(err);
 
-    var files = filenames.map(function(name) {
+    const files = filenames.map(function(name) {
       return path.join(themesPath, name);
     });
 
@@ -367,7 +367,7 @@ function readThemes(callback) {
       if (err) return callback(err);
 
       filenames.forEach(function(name, index) {
-        var css = String(data[index]);
+        const css = String(data[index]);
         themes[name.replace(/\.css$/, "")] = buf(minifyCSS(css));
       });
 
@@ -383,14 +383,14 @@ function readThemes(callback) {
 }
 
 function readModes(callback) {
-  var modes = {};
+  const modes = {};
 
   // parse meta.js from CM for supported modes
   fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function(err, js) {
     if (err) return callback(err);
 
     // Extract modes from CodeMirror
-    var sandbox = {CodeMirror : {}};
+    const sandbox = {CodeMirror : {}};
     vm.runInNewContext(js, sandbox);
     sandbox.CodeMirror.modeInfo.forEach(function(entry) {
       if (entry.mode !== "null") modes[entry.mode] = null;
@@ -410,7 +410,7 @@ function readModes(callback) {
 }
 
 function readLibs(callback) {
-  var out = {};
+  const out = {};
   async.each(Object.keys(libs), function(dest, cb) {
     if (Array.isArray(libs[dest])) {
       async.map(libs[dest], function(p, innercb) {
@@ -458,14 +458,14 @@ function minifyCSS(css) {
 }
 
 function templates() {
-  var prefix = "(function(){var template=Handlebars.template," +
+  const prefix = "(function(){var template=Handlebars.template," +
     "templates=Handlebars.templates=Handlebars.templates||{};";
-  var suffix = "Handlebars.partials=Handlebars.templates})();";
+  const suffix = "Handlebars.partials=Handlebars.templates})();";
 
   return prefix + fs.readdirSync(paths.templates).map(function(file) {
-    var p = path.join(paths.templates, file);
-    var name = file.replace(/\..+$/, "");
-    var html = htmlMinifier.minify(fs.readFileSync(p, "utf8"), opts.htmlMinifier);
+    const p = path.join(paths.templates, file);
+    const name = file.replace(/\..+$/, "");
+    let html = htmlMinifier.minify(fs.readFileSync(p, "utf8"), opts.htmlMinifier);
 
     // remove whitespace around {{fragments}}
     html = html.replace(/(>|^|}}) ({{|<|$)/g, "$1$2");
@@ -478,13 +478,13 @@ function templates() {
     // remove {{!-- comments --}}
     html = html.replace(/{{![\s\S]+?..}}/, "");
 
-    var compiled = handlebars.precompile(html, {data: false});
+    const compiled = handlebars.precompile(html, {data: false});
     return "templates['" + name + "']=template(" + compiled + ");";
   }).join("") + suffix;
 }
 
 resources.compileJS = function() {
-  var js = "";
+  let js = "";
   resources.files.js.forEach(function(file) {
     js += fs.readFileSync(path.join(paths.mod, file), "utf8") + ";";
   });
@@ -503,7 +503,7 @@ resources.compileJS = function() {
 };
 
 resources.compileCSS = function() {
-  var css = "";
+  let css = "";
   resources.files.css.forEach(function(file) {
     css += fs.readFileSync(path.join(paths.mod, file), "utf8") + "\n";
   });
@@ -519,25 +519,25 @@ resources.compileCSS = function() {
 };
 
 resources.compileHTML = function(res) {
-  var html = fs.readFileSync(path.join(paths.mod, "client/index.html"), "utf8");
+  let html = fs.readFileSync(path.join(paths.mod, "client/index.html"), "utf8");
   html = html.replace("<!-- {{svg}} -->", svg());
 
-  var auth = html.replace("{{type}}", "a");
+  let auth = html.replace("{{type}}", "a");
   auth = minify ? htmlMinifier.minify(auth, opts.htmlMinifier) : auth;
   res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: utils.contentType("html")};
 
-  var first = html.replace("{{type}}", "f");
+  let first = html.replace("{{type}}", "f");
   first = minify ? htmlMinifier.minify(auth, opts.htmlMinifier) : first;
   res["first.html"] = {data: buf(first), etag: etag(first), mime: utils.contentType("html")};
 
-  var main = html.replace("{{type}}", "m");
+  let main = html.replace("{{type}}", "m");
   main = minify ? htmlMinifier.minify(main, opts.htmlMinifier) : main;
   res["main.html"] = {data: buf(main), etag: etag(main), mime: utils.contentType("html")};
   return res;
 };
 
 function compileAll(callback) {
-  var res = {};
+  let res = {};
 
   res["client.js"] = resources.compileJS();
   res["style.css"] = resources.compileCSS();
@@ -545,9 +545,9 @@ function compileAll(callback) {
 
   // Read misc files
   resources.files.other.forEach(function(file) {
-    var data;
-    var name = path.basename(file);
-    var fullPath = path.join(paths.mod, file);
+    let data;
+    const name = path.basename(file);
+    const fullPath = path.join(paths.mod, file);
 
     try {
       data = fs.readFileSync(fullPath);

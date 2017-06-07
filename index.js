@@ -8,10 +8,10 @@ module.exports = function droppy(opts) {
   }
 
   if (opts.log) {
-    var ut   = require("untildify");
-    var fs   = require("fs");
-    var path = require("path");
-    var fd;
+    const ut   = require("untildify");
+    const fs   = require("fs");
+    const path = require("path");
+    let fd;
 
     try {
       fd = fs.openSync(ut(path.resolve(opts.log)), "a", "644");
@@ -21,7 +21,7 @@ module.exports = function droppy(opts) {
     require("./server/log.js").setLogFile(fd);
   }
 
-  var server = require("./server/server.js");
+  const server = require("./server/server.js");
   server(opts, false, false, function(err) {
     if (err) throw err;
   });

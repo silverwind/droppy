@@ -1,15 +1,15 @@
 "use strict";
 
-var db       = module.exports = {};
-var fs       = require("graceful-fs");
-var crypto   = require("crypto");
-var mkdirp   = require("mkdirp");
-var path     = require("path");
+const db       = module.exports = {};
+const fs       = require("graceful-fs");
+const crypto   = require("crypto");
+const mkdirp   = require("mkdirp");
+const path     = require("path");
 
-var dbFile   = require("./paths.js").get().db;
-var defaults = {users: {}, sessions: {}, links: {}};
+const dbFile   = require("./paths.js").get().db;
+const defaults = {users: {}, sessions: {}, links: {}};
 
-var database;
+let database;
 
 db.init = function(callback) {
   fs.stat(dbFile, function(err) {
@@ -85,7 +85,7 @@ db.set = function(key, value) {
 };
 
 db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged) {
-  var salt = crypto.randomBytes(4).toString("hex");
+  const salt = crypto.randomBytes(4).toString("hex");
 
   database.users[user] = {
     hash: getHash(password + salt + user) + "$" + salt,
@@ -106,7 +106,7 @@ db.delUser = function(user) {
 };
 
 db.authUser = function(user, pass) {
-  var parts;
+  let parts;
 
   if (database.users[user]) {
     parts = database.users[user].hash.split("$");

@@ -1,12 +1,12 @@
 "use strict";
 
-var paths     = module.exports = {};
-var fs        = require("fs");
-var path      = require("path");
-var untildify = require("untildify");
+const paths     = module.exports = {};
+const fs        = require("fs");
+const path      = require("path");
+const untildify = require("untildify");
 
-var configDir = "~/.droppy/config";
-var filesDir  = "~/.droppy/files";
+let configDir = "~/.droppy/config";
+let filesDir  = "~/.droppy/files";
 
 paths.get = function() {
   return {
@@ -35,7 +35,7 @@ paths.seed = function(config, files) {
 };
 
 function resolve() {
-  var p = path.join.apply(null, arguments);
+  let p = path.join.apply(null, arguments);
   p = path.resolve(/^~/.test(p) ? untildify(p) : p);
   try {
     p = fs.realpathSync(p);

@@ -1,23 +1,23 @@
 "use strict";
 
-var walker = module.exports = {};
-var fs     = require("fs");
-var mm     = require("multimatch");
+const walker = module.exports = {};
+const fs     = require("fs");
+const mm     = require("multimatch");
 
-var mmOpts = {
+const mmOpts = {
   matchBase: true,
   dot: true,
   nocomment: true,
 };
 
-var cfg = null;
+let cfg = null;
 
 walker.init = function(config) {
   cfg = config;
 };
 
 walker.walk = function(dir, cb) {
-  var files = [], dirs = [], errs = [];
+  let files = [], dirs = [], errs = [];
   fs.readdir(dir, function(err, list) {
     if (err) errs.push(err);
     (function next(i) {
@@ -25,7 +25,7 @@ walker.walk = function(dir, cb) {
         return cb(errs.length ? errs : null, dirs, files);
       }
 
-      var path = dir + "/" + list[i];
+      const path = dir + "/" + list[i];
       if (mm(path, cfg.ignorePatterns, mmOpts).length) {
         return cb(errs.length ? errs : null, dirs, files);
       }
@@ -52,17 +52,18 @@ walker.walk = function(dir, cb) {
 };
 
 walker.walkSync = function(dir) {
-  var files = [], dirs = [], errs = [], list;
+  const errs = [];
+  let files = [], dirs = [], list;
   try {
     list = fs.readdirSync(dir);
-    for (var i = 0, l = list.length; i < l; i++) {
-      var path = dir + "/" + list[i];
+    for (let i = 0, l = list.length; i < l; i++) {
+      const path = dir + "/" + list[i];
       if (!mm(path, cfg.ignorePatterns, mmOpts).length) {
         try {
-          var stat = fs.statSync(path);
+          const stat = fs.statSync(path);
           if (stat.isDirectory()) {
             dirs.push({path: path, stat: stat});
-            var r = walker.walkSync(path);
+            const r = walker.walkSync(path);
             dirs = dirs.concat(r[1]);
             files = files.concat(r[2]);
           } else {

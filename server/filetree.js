@@ -1,26 +1,26 @@
 "use strict";
 
-var filetree = module.exports = new (require("events").EventEmitter)();
+const filetree = module.exports = new (require("events").EventEmitter)();
 
-var _        = require("lodash");
-var chokidar = require("chokidar");
-var escRe    = require("escape-string-regexp");
-var fs       = require("graceful-fs");
-var path     = require("path");
+const _        = require("lodash");
+const chokidar = require("chokidar");
+const escRe    = require("escape-string-regexp");
+const fs       = require("graceful-fs");
+const path     = require("path");
 
-var log      = require("./log.js");
-var paths    = require("./paths.js").get();
-var utils    = require("./utils.js");
-var walker   = require("./walker.js");
+const log      = require("./log.js");
+const paths    = require("./paths.js").get();
+const utils    = require("./utils.js");
+const walker   = require("./walker.js");
 
-var dirs     = {};
-var todoDirs = [];
-var initial  = true;
-var watching = true;
-var timer    = null;
-var cfg      = null;
+let dirs     = {};
+let todoDirs = [];
+let initial  = true;
+let watching = true;
+let timer    = null;
+let cfg      = null;
 
-var WATCHER_DELAY = 3000;
+const WATCHER_DELAY = 3000;
 
 filetree.init = function(config) {
   cfg = config;
@@ -69,7 +69,7 @@ function filterDirs(dirs) {
   });
 }
 
-var debouncedUpdate = _.debounce(function() {
+const debouncedUpdate = _.debounce(function() {
   filterDirs(todoDirs).forEach(function(dir) {
     filetree.emit("update", dir);
   });
@@ -98,7 +98,7 @@ filetree.updateDir = function(dir, cb) {
     if (initial) { // use sync walk for performance
       initial = false;
       log.info("Caching files ...");
-      var r = walker.walkSync(utils.addFilesPath(dir));
+      const r = walker.walkSync(utils.addFilesPath(dir));
       if (r[0]) handleUpdateDirErrs(r[0]);
       log.info("Caching files done");
       updateDirInCache(dir, stat, r[1], r[2], cb);
@@ -128,7 +128,7 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
   readFiles.sort(function(a, b) {
     return utils.naturalSort(a.path, b.path);
   }).forEach(function(f) {
-    var parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
+    const parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
     dirs[parentDir].files[normalize(path.basename(f.path))] = {
       size: f.stat.size, mtime: f.stat.mtime.getTime() || 0
     };
@@ -140,7 +140,7 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
 }
 
 function updateDirSizes() {
-  var todo = Object.keys(dirs);
+  const todo = Object.keys(dirs);
 
   todo.sort(function(a, b) {
     return utils.countOccurences(b, "/") - utils.countOccurences(a, "/");
@@ -328,7 +328,8 @@ filetree.save = function(dst, data, cb) {
 
 filetree.ls = function(p) {
   if (!dirs[p]) return;
-  var entries = {}, files = dirs[p].files;
+  const entries = {};
+  const files = dirs[p].files;
   Object.keys(files).forEach(function(file) {
     entries[file] = [
       "f",

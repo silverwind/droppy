@@ -1,19 +1,20 @@
 "use strict";
 
-var fs        = require("graceful-fs");
-var chalk     = require("chalk");
-var format    = require("url-format-lax");
-var stripAnsi = require("strip-ansi");
+const fs        = require("graceful-fs");
+const chalk     = require("chalk");
+const format    = require("url-format-lax");
+const stripAnsi = require("strip-ansi");
 
-var utils     = require("./utils.js");
+const utils     = require("./utils.js");
 
-var logColors = ["reset", "red", "yellow", "cyan"];
-var logLabels = ["", "ERROR", "INFO", "DEBG"];
-var opts, logfile;
+const logColors = ["reset", "red", "yellow", "cyan"];
+const logLabels = ["", "ERROR", "INFO", "DEBG"];
+let opts, logfile;
 
-var log = module.exports = function(req, res, logLevel) {
+const log = module.exports = function(req, res, logLevel) {
   if (opts && opts.logLevel < logLevel) return;
-  var elems = Array.prototype.slice.call(arguments, 3), statusCode;
+  const elems = Array.prototype.slice.call(arguments, 3);
+  let statusCode;
 
   if (req && req.time) elems.unshift("[" + chalk.magenta((Date.now() - req.time) + "ms") + "]");
 
@@ -40,7 +41,7 @@ var log = module.exports = function(req, res, logLevel) {
     if (req.url) elems.unshift(decodeURIComponent(decodeURIComponent(req.url))); // For some reason, this need double decoding for upload URLs
     if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
 
-    var ip = utils.ip(req);
+    const ip = utils.ip(req);
 
     if (ip)
       elems.unshift(log.formatHostPort(ip, utils.port(req) || "0"));
@@ -95,13 +96,13 @@ log.plain = function() {
 };
 
 log.timestamp = function() {
-  var now   = new Date();
-  var day   = now.getDate();
-  var month = now.getMonth() + 1;
-  var year  = now.getFullYear();
-  var hrs   = now.getHours();
-  var mins  = now.getMinutes();
-  var secs  = now.getSeconds();
+  const now   = new Date();
+  let day   = now.getDate();
+  let month = now.getMonth() + 1;
+  const year  = now.getFullYear();
+  let hrs   = now.getHours();
+  let mins  = now.getMinutes();
+  let secs  = now.getSeconds();
 
   if (month < 10) month = "0" + month;
   if (day   < 10) day   = "0" + day;
@@ -123,7 +124,7 @@ log.logo = function(line1, line2, line3) {
 };
 
 log.formatHostPort = function(host, port, proto) {
-  var str = format({hostname: host, port: port});
+  const str = format({hostname: host, port: port});
   host = str.substring(0, str.lastIndexOf(":"));
   port = str.substring(str.lastIndexOf(":") + 1, str.length);
 
@@ -136,7 +137,7 @@ log.formatHostPort = function(host, port, proto) {
 };
 
 log.formatError = function(err) {
-  var output;
+  let output;
   if (err instanceof Error)
     output = err.stack;
   else if (!err)

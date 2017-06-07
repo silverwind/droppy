@@ -1,20 +1,20 @@
 "use strict";
 
-var async = require("async");
-var chalk = require("chalk");
-var fs    = require("graceful-fs");
-var path  = require("path");
+const async = require("async");
+const chalk = require("chalk");
+const fs    = require("graceful-fs");
+const path  = require("path");
 
-var paths = require("./paths.js").get();
-var rm    = require("./utils").rm;
+const paths = require("./paths.js").get();
+const rm    = require("./utils").rm;
 
-var npm;
+let npm;
 
 module.exports = function(pkg, callback) {
   function loadNPM(cb) {
     // obtain a reference to the global npm to avoid having to install npm locally
     require("child_process").exec("npm", function(_, stdout) {
-      var match = /npm@[^ ]+ (.+)\n/i.exec(stdout);
+      const match = /npm@[^ ]+ (.+)\n/i.exec(stdout);
       if (!match) return cb(new Error("Unable to find path in npm help message."));
       cb(null, require(match[1]));
     });
@@ -35,7 +35,7 @@ module.exports = function(pkg, callback) {
   }
 
   function cleanupModules(cb) {
-    var dir = path.join(paths.mod, "/node_modules");
+    const dir = path.join(paths.mod, "/node_modules");
     fs.stat(dir, function(err, stats) {
       if (err || !stats || !stats.isDirectory()) {
         return cb();
@@ -63,7 +63,7 @@ module.exports = function(pkg, callback) {
       if (versions[0] !== versions[1]) {
         fs.readFile(paths.pid, function(err, data) {
           if (!err) {
-            var pid = parseInt(String(data));
+            const pid = parseInt(String(data));
             if (typeof pid === "number") {
               try {
                 console.info("Shutting down active process ...");

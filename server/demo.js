@@ -1,17 +1,17 @@
 "use strict";
 
-var demo     = module.exports = {};
-var async    = require("async");
-var cpr      = require("cpr");
-var chalk    = require("chalk");
-var fs       = require("graceful-fs");
-var path     = require("path");
-var request  = require("request");
-var schedule = require("node-schedule");
+const demo     = module.exports = {};
+const async    = require("async");
+const cpr      = require("cpr");
+const chalk    = require("chalk");
+const fs       = require("graceful-fs");
+const path     = require("path");
+const request  = require("request");
+const schedule = require("node-schedule");
 
-var log      = require("./log.js");
-var paths    = require("./paths.js").get();
-var utils    = require("./utils.js");
+const log      = require("./log.js");
+const paths    = require("./paths.js").get();
+const utils    = require("./utils.js");
 
 demo.init = function(cb) {
   process.title = "droppy-demo";
@@ -81,14 +81,12 @@ demo.refresh = function(doneCallback) {
 
 function get(url, dest) {
   return function(callback) {
-    var stream, temp;
-    temp = path.join(paths.config, "/demoTemp", dest);
+    const temp = path.join(paths.config, "/demoTemp", dest);
     dest = path.join(paths.files, dest);
-
     utils.mkdir([path.dirname(temp), path.dirname(dest)], function() {
       fs.stat(temp, function(err, stats) {
         if (err || !stats.size) {
-          stream = fs.createWriteStream(temp);
+          const stream = fs.createWriteStream(temp);
           stream.on("error", callback);
           stream.on("close", function() {
             utils.copyFile(temp, dest, callback);

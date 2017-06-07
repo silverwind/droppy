@@ -1,12 +1,12 @@
 "use strict";
 
-var svgstore = require("svgstore");
-var fs = require("fs");
-var path = require("path");
-var paths = require("./paths.js").get();
+const svgstore = require("svgstore");
+const fs = require("fs");
+const path = require("path");
+const paths = require("./paths.js").get();
 
 module.exports = function svg() {
-  var sprites = svgstore({
+  const sprites = svgstore({
     svgAttrs: {
       style: "display: none",
     },
