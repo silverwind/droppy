@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-var argv = require("minimist")(process.argv.slice(2), {
+const argv = require("minimist")(process.argv.slice(2), {
   boolean: ["color", "d", "daemon", "dev"]
 });
 
@@ -9,13 +9,13 @@ if (!argv.dev) {
   process.env.NODE_ENV = "production";
 }
 
-var fs   = require("graceful-fs");
-var pkg  = require("./package.json");
+const fs   = require("graceful-fs");
+const pkg  = require("./package.json");
 
 process.title = pkg.name;
 process.chdir(__dirname);
 
-var cmds = {
+const cmds = {
   start     : "start                  Start the server",
   update    : "update                 Self-Update (may require root)",
   config    : "config                 Edit the config",
@@ -26,7 +26,7 @@ var cmds = {
   version   : "version, -v            Print version",
 };
 
-var opts = {
+const opts = {
   configdir : "-c, --configdir <dir>  Config directory. Default: ~/.droppy/config",
   filesdir  : "-f, --filesdir <dir>   Files directory. Default: ~/.droppy/files",
   daemon    : "-d, --daemon           Daemonize (background) process",
@@ -58,8 +58,8 @@ if (argv.configdir || argv.filesdir || argv.c || argv.f) {
 }
 
 if (argv.log || argv.l) {
-  var ut = require("untildify");
-  var path = require("path");
+  const ut = require("untildify");
+  const path = require("path");
   try {
     require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log || argv.l)), "a", "644"));
   } catch (err) {
@@ -73,39 +73,34 @@ if (!argv._.length) {
   process.exit(0);
 }
 
-var cmd  = argv._[0];
-var args = argv._.slice(1);
+const cmd  = argv._[0];
+const args = argv._.slice(1);
 
 if (cmds[cmd]) {
-  var db;
-  switch (cmd) {
-  case "start":
+  let db;
+  if (cmd === "start") {
     require("./server/server.js")(null, true, argv.dev, function(err) {
       if (err) {
         require("./server/log.js").error(err);
         process.exit(1);
       }
     });
-    break;
-  case "version":
+  } else if (cmd === "version") {
     console.info(pkg.version);
-    break;
-  case "update":
+  } else if (cmd === "update") {
     require("./server/update.js")(pkg, function(err, message) {
       if (err) { console.error(new Error(err.message || err).stack); process.exit(1); }
       if (message) { console.info(message); process.exit(0); }
     });
-    break;
-  case "config":
-    var paths = require("./server/paths.js").get();
-    var cfg   = require("./server/cfg.js");
-    var edit = function edit() {
+  } else if (cmd === "config") {
+    const paths = require("./server/paths.js").get();
+    const cfg = require("./server/cfg.js");
+    const edit = function() {
       findEditor(function(editor) {
         if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
       });
     };
-
     fs.stat(paths.cfgFile, function(err) {
       if (err && err.code === "ENOENT") {
         require("mkdirp")(paths.config, function() {
@@ -118,14 +113,12 @@ if (cmds[cmd]) {
         edit();
       }
     });
-    break;
-  case "list":
+  } else if (cmd === "list") {
     db = require("./server/db.js");
     db.init(function() {
       printUsers(db.get("users"));
     });
-    break;
-  case "add":
+  } else if (cmd === "add") {
     if (args.length !== 2) return printHelp();
     db = require("./server/db.js");
     db.init(function() {
@@ -133,8 +126,7 @@ if (cmds[cmd]) {
         printUsers(db.get("users"));
       });
     });
-    break;
-  case "del":
+  } else if (cmd === "del") {
     if (args.length !== 1) return printHelp();
     db = require("./server/db.js");
     db.init(function() {
@@ -142,14 +134,13 @@ if (cmds[cmd]) {
         printUsers(db.get("users"));
       });
     });
-    break;
   }
 } else {
   printHelp();
 }
 
 function printHelp() {
-  var help = "Usage: " + pkg.name + " command [options]\n\n Commands:";
+  let help = "Usage: " + pkg.name + " command [options]\n\n Commands:";
 
   Object.keys(cmds).forEach(function(command) {
     help += "\n   " + cmds[command];
@@ -169,10 +160,10 @@ function printUsers(users) {
 }
 
 function findEditor(cb) {
-  var editors    = ["vim", "nano", "vi", "npp", "pico", "emacs", "notepad"];
-  var basename   = require("path").basename;
-  var which      = require("which");
-  var userEditor = basename(process.env.VISUAL || process.env.EDITOR);
+  const editors    = ["vim", "nano", "vi", "npp", "pico", "emacs", "notepad"];
+  const basename   = require("path").basename;
+  const which      = require("which");
+  const userEditor = basename(process.env.VISUAL || process.env.EDITOR);
 
   if (editors.indexOf(userEditor) === -1)
     editors.unshift(userEditor);
