@@ -398,6 +398,7 @@ function setupSocket(server) {
     req = req || ws.upgradeReq; // compat: ws 3.0.0
     ws.addr = ws._socket.remoteAddress;
     ws.port = ws._socket.remotePort;
+    ws.headers = Object.assign({}, req.headers);
     log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
     var sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
     var cookie = cookies.get(req.headers.cookie);
