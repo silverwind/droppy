@@ -5,7 +5,7 @@
 var pkg = require("../package.json");
 var utils = require("./utils.js");
 
-var manifest = module.exports = function(req) {
+module.exports = function manifest(req) {
   return JSON.stringify({
     name: pkg.name,
     start_url: utils.originPath(req).replace("!/res/manifest.json", ""),

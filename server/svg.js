@@ -5,7 +5,7 @@ var fs = require("fs");
 var path = require("path");
 var paths = require("./paths.js").get();
 
-var svg = module.exports = function() {
+module.exports = function svg() {
   var sprites = svgstore({
     svgAttrs: {
       style: "display: none",
