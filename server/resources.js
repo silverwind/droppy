@@ -168,7 +168,7 @@ var libs = {
   "default-skin.svg": "node_modules/photoswipe/dist/default-skin/default-skin.svg",
 };
 
-resources.load = function load(dev, cb) {
+resources.load = function(dev, cb) {
   minify = !dev;
 
   if (dev) return compile(false, cb);
@@ -186,7 +186,7 @@ resources.load = function load(dev, cb) {
   });
 };
 
-resources.build = function build(cb) {
+resources.build = function(cb) {
   isCacheFresh(function(fresh) {
     if (fresh) {
       fs.readFile(cachePath, function(err, data) {

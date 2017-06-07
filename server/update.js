@@ -10,7 +10,7 @@ var rm    = require("./utils").rm;
 
 var npm;
 
-module.exports = function update(pkg, callback) {
+module.exports = function(pkg, callback) {
   function loadNPM(cb) {
     // obtain a reference to the global npm to avoid having to install npm locally
     require("child_process").exec("npm", function(_, stdout) {

@@ -11,7 +11,7 @@ csrf.create = function() {
   return token;
 };
 
-csrf.validate = function validate(token) {
+csrf.validate = function(token) {
   return tokens.some(function(storedToken) {
     return storedToken === token;
   });

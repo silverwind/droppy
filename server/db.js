@@ -11,7 +11,7 @@ var defaults = {users: {}, sessions: {}, links: {}};
 
 var database;
 
-db.init = function init(callback) {
+db.init = function(callback) {
   fs.stat(dbFile, function(err) {
     if (err) {
       if (err.code === "ENOENT") {
@@ -75,11 +75,11 @@ db.init = function init(callback) {
   });
 };
 
-db.get = function get(key) {
+db.get = function(key) {
   return database[key];
 };
 
-db.set = function set(key, value) {
+db.set = function(key, value) {
   database[key] = value;
   write();
 };
@@ -95,7 +95,7 @@ db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged) {
   write();
 };
 
-db.delUser = function delUser(user) {
+db.delUser = function(user) {
   if (database.users[user]) {
     delete database.users[user];
     write();
@@ -105,7 +105,7 @@ db.delUser = function delUser(user) {
   }
 };
 
-db.authUser = function authUser(user, pass) {
+db.authUser = function(user, pass) {
   var parts;
 
   if (database.users[user]) {

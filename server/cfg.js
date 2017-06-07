@@ -32,7 +32,7 @@ var defaults = {
 
 var hiddenOpts = ["dev", "demo"];
 
-cfg.init = function init(config, callback) {
+cfg.init = function(config, callback) {
   if (typeof config === "object" && config !== null) {
     config = migrate(config);
     config = Object.assign({}, defaults, config);

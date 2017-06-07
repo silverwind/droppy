@@ -8,7 +8,7 @@ var untildify = require("untildify");
 var configDir = "~/.droppy/config";
 var filesDir  = "~/.droppy/files";
 
-paths.get = function get() {
+paths.get = function() {
   return {
     files     : resolve(filesDir),
     config    : resolve(configDir),
@@ -29,7 +29,7 @@ paths.get = function get() {
   };
 };
 
-paths.seed = function seed(config, files) {
+paths.seed = function(config, files) {
   if (config) configDir = config;
   if (files) filesDir = files;
 };

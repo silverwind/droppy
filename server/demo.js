@@ -13,7 +13,7 @@ var log      = require("./log.js");
 var paths    = require("./paths.js").get();
 var utils    = require("./utils.js");
 
-demo.init = function init(cb) {
+demo.init = function(cb) {
   process.title = "droppy-demo";
   log.info("Initializing demo mode ...");
   demo.refresh(function() {
@@ -22,7 +22,7 @@ demo.init = function init(cb) {
   });
 };
 
-demo.refresh = function refresh(doneCallback) {
+demo.refresh = function(doneCallback) {
   async.series([
     function(callback) {
       utils.rm(path.join(paths.files, "**/*"), function(err) {

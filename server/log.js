@@ -11,7 +11,7 @@ var logColors = ["reset", "red", "yellow", "cyan"];
 var logLabels = ["", "ERROR", "INFO", "DEBG"];
 var opts, logfile;
 
-var log = module.exports = function log(req, res, logLevel) {
+var log = module.exports = function(req, res, logLevel) {
   if (opts && opts.logLevel < logLevel) return;
   var elems = Array.prototype.slice.call(arguments, 3), statusCode;
 
@@ -63,38 +63,38 @@ var log = module.exports = function log(req, res, logLevel) {
   }
 };
 
-log.init = function init(o) {
+log.init = function(o) {
   opts = o;
 };
 
-log.setLogFile = function setLogFile(fd) {
+log.setLogFile = function(fd) {
   logfile = fd;
 };
 
-log.debug = function debug(req, res) {
+log.debug = function(req, res) {
   if (req && (req.headers || req.addr))
     log(req, res, 3, Array.prototype.slice.call(arguments, 2).join(""));
   else
     log(null, null, 3, Array.prototype.slice.call(arguments, 0).join(""));
 };
 
-log.info = function info(req, res) {
+log.info = function(req, res) {
   if (req && (req.headers || req.addr))
     log(req, res, 2, Array.prototype.slice.call(arguments, 2).join(""));
   else
     log(null, null, 2, Array.prototype.slice.call(arguments, 0).join(""));
 };
 
-log.error = function error(err) {
+log.error = function(err) {
   log(null, null, 1, chalk.red(log.formatError(err)));
 };
 
-log.plain = function plain() {
+log.plain = function() {
   if (opts && opts.logLevel < 2) return;
   log(null, null, 0, Array.prototype.slice.call(arguments, 0).join(""));
 };
 
-log.timestamp = function timestamp() {
+log.timestamp = function() {
   var now   = new Date();
   var day   = now.getDate();
   var month = now.getMonth() + 1;
@@ -111,7 +111,7 @@ log.timestamp = function timestamp() {
   return year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
 };
 
-log.logo = function logo(line1, line2, line3) {
+log.logo = function(line1, line2, line3) {
   log.plain(chalk.blue([
     "\n",
     "           .:.\n",
@@ -135,7 +135,7 @@ log.formatHostPort = function(host, port, proto) {
   return chalk.cyan(host) + port;
 };
 
-log.formatError = function formatError(err) {
+log.formatError = function(err) {
   var output;
   if (err instanceof Error)
     output = err.stack;

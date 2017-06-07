@@ -7,7 +7,7 @@ var utils   = require("./utils.js");
 // TODO: set secure flag on cookie. Requires X-Forwarded-Proto from the proxy
 var cookieParams = ["HttpOnly", "SameSite=strict"];
 
-cookies.parse = function parse(cookie) {
+cookies.parse = function(cookie) {
   var entries = {};
   if (typeof cookie === "string" && cookie.length) {
     cookie.split("; ").forEach(function(entry) {
@@ -18,14 +18,14 @@ cookies.parse = function parse(cookie) {
   return entries;
 };
 
-cookies.get = function get(cookie) {
+cookies.get = function(cookie) {
   var entries = cookies.parse(cookie);
   if (!entries || !entries.s) return false;
   if (Object.keys(db.get("sessions") || {}).indexOf(entries.s) === -1) return false;
   return entries.s;
 };
 
-cookies.free = function free(_req, res, _postData) {
+cookies.free = function(_req, res, _postData) {
   var sessions = db.get("sessions"), sid = utils.createSid();
   // TODO: obtain path
   res.setHeader("Set-Cookie", cookieHeaders(sid, "/", inOneYear()));
@@ -36,7 +36,7 @@ cookies.free = function free(_req, res, _postData) {
   db.set("sessions", sessions);
 };
 
-cookies.create = function create(_req, res, postData) {
+cookies.create = function(_req, res, postData) {
   var sessions = db.get("sessions"), sid = utils.createSid();
   var expires = postData.remember ? inOneYear() : null;
   var headers = cookieHeaders(sid, postData.path, expires);
@@ -49,7 +49,7 @@ cookies.create = function create(_req, res, postData) {
   db.set("sessions", sessions);
 };
 
-cookies.unset = function unset(req, res, postData) {
+cookies.unset = function(req, res, postData) {
   if (!req.headers.cookie) return;
   var session = cookies.parse(req.headers.cookie).s;
   if (!session) return;
