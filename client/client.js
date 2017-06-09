@@ -268,8 +268,10 @@
       if (droppy.token) {
         init();
       } else {
-        ajax({url: "!/token", responseType: "text"}).then(function(xhr) {
-          droppy.token = xhr.response;
+        ajax({url: "!/token", headers: {"x-app": "droppy"}}).then(function(res) {
+          return res.text();
+        }).then(function(text) {
+          droppy.token = text;
           init();
         });
       }
@@ -456,8 +458,8 @@
           remember: $("#remember").hasClass("checked"),
           path: path === "/" ? "/" : path.replace(/\/$/, ""),
         }
-      }).then(function(xhr) {
-        if (xhr.status === 200) {
+      }).then(function(res) {
+        if (res.status === 200) {
           render("main");
           initMainPage();
         } else {
@@ -1476,8 +1478,10 @@
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
       showSpinner(view);
-      ajax({url: "!/type" + filePath}).then(function(xhr) {
-        if (xhr.response === "text") { // Text content
+      ajax({url: "!/type" + filePath}).then(function(res) {
+        return res.text();
+      }).then(function(text) {
+        if (text === "text") { // Text content
           view[0].currentFile = file;
           view[0].currentFolder = newFolder;
           pushHistory(view, filePath);
@@ -1698,14 +1702,16 @@
         if (!("CodeMirror" in window)) return setTimeout(verify, 200);
         setTitle(basename(entryId));
         setEditorFontSize(droppy.get("editorFontSize"));
-        configCM(values[0].response, basename(entryId));
+        values[0].text().then(function(text) {
+          configCM(text, basename(entryId));
+        });
       })();
     }).catch(function(err) {
       showError(view, err);
       closeDoc(view);
     });
 
-    function configCM(data, filename) {
+    function configCM(text, filename) {
       var html = Handlebars.templates.document({modes: droppy.modes});
       loadContent(view, "document", null, html).then(function() {
         view[0].editorEntryId = entryId;
@@ -1728,7 +1734,7 @@
 
         if (!CodeMirror.autoLoadMode) initModeLoad();
 
-        var mode, fileMode = modeFromShebang(data);
+        var mode, fileMode = modeFromShebang(text);
         if (fileMode) {
           mode = fileMode;
         } else {
@@ -1775,8 +1781,8 @@
         CodeMirror.keyMap.sublime["Cmd-T"] = false;
         CodeMirror.keyMap.sublime["Ctrl-T"] = false;
 
-        view[0].lineEnding = dominantLineEnding(data);
-        editor.setValue(data);
+        view[0].lineEnding = dominantLineEnding(text);
+        editor.setValue(text);
         editor.clearHistory();
 
         view.find(".exit").reg("click", function() {
@@ -2447,34 +2453,33 @@
   }, 1000);
 
   function loadScript(id, url) {
-    return new Promise(function(resolve) {
-      if (!document.getElementById(id)) {
-        var script = document.createElement("script");
-        script.onload = resolve;
-        script.setAttribute("id", id);
-        script.setAttribute("src", url);
-        document.querySelector("head").appendChild(script);
-      } else resolve();
+    if (document.getElementById(id)) return noop;
+    return ajax(url).then(function(res) {
+      return res.text();
+    }).then(function(text) {
+      var script = document.createElement("script");
+      script.setAttribute("id", id);
+      script.textContent = text;
+      document.querySelector("head").appendChild(script);
     });
   }
 
   function loadStyle(id, url) {
-    return new Promise(function(resolve) {
-      if (!document.getElementById(id)) {
-        ajax(url).then(function(xhr) {
-          var style = document.createElement("style");
-          style.setAttribute("id", id);
-          style.textContent = xhr.response;
-          document.querySelector("head").appendChild(style);
-          resolve();
-        });
-      } else resolve();
+    if (document.getElementById(id)) return noop();
+    return ajax(url).then(function(res) {
+      return res.text();
+    }).then(function(text) {
+      var style = document.createElement("style");
+      style.setAttribute("id", id);
+      style.textContent = text;
+      document.querySelector("head").appendChild(style);
     });
   }
 
   function loadTheme(theme) {
     return new Promise(function(resolve) {
-      loadStyle("theme-" + theme.replace(/[^a-z0-9-]/gim, ""), "!/res/theme/" + theme).then(resolve);
+      var p = loadStyle("theme-" + theme.replace(/[^a-z0-9-]/gim, ""), "!/res/theme/" + theme);
+      p.then(resolve);
     });
   }
 
@@ -2660,16 +2665,21 @@
 
   function ajax(opts) {
     if (typeof opts === "string") opts = {url: opts};
-    return new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest();
-      xhr.timeout = 20000;
-      xhr.open(opts.method || "GET", opts.url);
-      xhr.setRequestHeader("x-app", "droppy");
-      if (opts.responseType) xhr.responseType = opts.responseType;
-      xhr.onload = function() { resolve(xhr); };
-      xhr.onerror = function() { reject(xhr); };
-      xhr.ontimeout = function() { reject(xhr); };
-      xhr.send(opts.data ? JSON.stringify(opts.data) : undefined);
+
+    var headers = new Headers(opts.headers);
+    if (opts.data) {
+      headers.append("content-type", "application/json");
+    }
+
+    return fetch(opts.url, {
+      method: opts.method || "GET",
+      headers: headers,
+      body: opts.data ? JSON.stringify(opts.data) : undefined,
+      credentials: "same-origin",
+      mode: "same-origin",
+      redirect: "error",
+    }).catch(function(err) { // request failed
+      showError(getActiveView(), err.message);
     });
   }
 
@@ -2748,5 +2758,9 @@
 
   function normalize(str) {
     return String.prototype.normalize ? str.normalize() : str;
+  }
+
+  function noop() {
+    return Promise.resolve();
   }
 })(jQuery);

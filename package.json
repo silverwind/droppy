@@ -46,6 +46,7 @@
     "untildify": "^3.0.2",
     "url-format-lax": "^1.0.0",
     "valid-filename": "^2.0.1",
+    "whatwg-fetch": "^2.0.3",
     "which": "^1.2.14",
     "ws": "^3.0.0",
     "yazl": "^2.4.2"
