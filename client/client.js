@@ -2252,7 +2252,7 @@
         // skip initial volume set
         setTimeout(function() {
           player.on("volumechange", function() {
-            droppy.set("volume", Math.round(player.getVolume()));
+            droppy.set("volume", Math.round(player.isMuted() ? 0 : player.getVolume()));
           });
         }, 0);
       })();
