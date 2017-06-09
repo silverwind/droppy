@@ -2477,10 +2477,7 @@
   }
 
   function loadTheme(theme) {
-    return new Promise(function(resolve) {
-      var p = loadStyle("theme-" + theme.replace(/[^a-z0-9-]/gim, ""), "!/res/theme/" + theme);
-      p.then(resolve);
-    });
+    return loadStyle("theme-" + theme.replace(/[^a-z0-9-]/gim, ""), "!/res/theme/" + theme);
   }
 
   function setEditorFontSize(size) {
