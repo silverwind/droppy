@@ -224,7 +224,7 @@
     getView(vId).remove();
     view.appendTo("#views");
     view[0].vId = vId;
-    view[0].uId = 0;
+    view[0].uploadId = 0;
     droppy.views[vId] = view[0];
     if (dest) updateLocation(view, dest);
     bindDropEvents(view);
@@ -518,6 +518,30 @@
       toggleButtons(view[0].dataset.type);
     });
 
+    $(document.body).pastableNonInputable().on("pasteImage", function(_, data) {
+      var view = getActiveView();
+      if (view[0].dataset.type !== "directory" || !data.blob) return;
+      var extension;
+      Object.keys(droppy.imageTypes).some(function(ext) {
+        if (data.blob.type === droppy.imageTypes[ext]) {
+          extension = ext;
+          return true;
+        }
+      });
+      uploadBlob(getActiveView(), data.blob, "Image " + dateFilename() + "." + extension);
+    }).on("pasteText", function(_, data) {
+      var view = getActiveView();
+      if (view[0].dataset.type !== "directory" || !data.text) return;
+      var blob = new Blob([data.text], {type: "text/plain"});
+      uploadBlob(view, blob, "Text " + dateFilename() + ".txt");
+    });
+
+    function uploadBlob(view, blob, name) {
+      var fd = new FormData();
+      fd.append("files[]", blob, name);
+      upload(view, fd, [name]);
+    }
+
     screenfull.onchange(function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
@@ -532,7 +556,7 @@
       event.stopPropagation();
       var view = getActiveView();
       if (!validateFiles(files, view)) return;
-      upload(view, fd, files, view[0].uId += 1);
+      upload(view, fd, files);
       fileInput[0].value = "";
     });
 
@@ -644,10 +668,12 @@
   // ============================================================================
   //  Upload functions
   // ============================================================================
-  function upload(view, fd, files, id) {
+  function upload(view, fd, files) {
     if (!files || !files.length) return showError(view, "Unable to upload.");
-    var xhr;
+    var id = view[0].uploadId += 1;
+    var xhr = new XMLHttpRequest();
 
+    // Render upload bar
     $(Handlebars.templates["upload-info"]({
       id: id,
       title: files.length === 1 ? basename(files[0]) : files.length + " files",
@@ -657,7 +683,6 @@
     });
 
     // Create the XHR2 and bind the progress events
-    xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", throttle(function(e) {
       if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     }, 100));
@@ -1294,8 +1319,7 @@
       if (!files.length) return;
       event.stopPropagation();
       if (!validateFiles(files, view)) return;
-      view[0].uId += 1;
-      upload(view, fd, files, view[0].uId);
+      upload(view, fd, files);
     });
 
     // drag between views
@@ -2371,14 +2395,15 @@
       webm : "video/webm", // can be audio/webm too
     };
 
+    /* order is significant for mime -> ext conversion */
     droppy.imageTypes = {
+      png  : "image/png",
       apng : "image/png",
       bmp  : "image/bmp",
       gif  : "image/gif",
       ico  : "image/x-icon",
-      jpeg : "image/jpeg",
       jpg  : "image/jpeg",
-      png  : "image/png",
+      jpeg : "image/jpeg",
       svg  : "image/svg+xml",
     };
   }
@@ -2759,5 +2784,22 @@
 
   function noop() {
     return Promise.resolve();
+  }
+
+  function dateFilename() {
+    var now   = new Date();
+    var day   = now.getDate();
+    var month = now.getMonth() + 1;
+    var year  = now.getFullYear();
+    var hrs   = now.getHours();
+    var mins  = now.getMinutes();
+    var secs  = now.getSeconds();
+
+    if (month < 10) month = "0" + month;
+    if (day   < 10) day   = "0" + day;
+    if (hrs   < 10) hrs   = "0" + hrs;
+    if (mins  < 10) mins  = "0" + mins;
+    if (secs  < 10) secs  = "0" + secs;
+    return year + "-" + month + "-" + day + " " + hrs + "." + mins + "." + secs;
   }
 })(jQuery);
