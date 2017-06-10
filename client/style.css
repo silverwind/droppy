@@ -1434,3 +1434,12 @@ html:not(.mobile) #drop-select span.active {
 
 .shake { animation: shake .3s }
 .no-transition { transition: none !important }
+
+.ce {
+  position: fixed;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  right: -1px;
+  bottom: -1px;
+}

@@ -34,7 +34,8 @@
     })(),
     webp: document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0,
     notification: "Notification" in window,
-    mobile: /Mobi/.test(navigator.userAgent)
+    mobile: /Mobi/.test(navigator.userAgent),
+    safari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
   };
 // ============================================================================
 //  Set up a few more things
@@ -522,26 +523,57 @@
     window.addEventListener("paste", function(e) {
       var view = getActiveView();
       if (view[0].dataset.type !== "directory") return;
-      var cd = e.clipboardData || window.clipboardData;
-      arr(cd.items || []).forEach(function(item) {
-        if (item.kind === "string") {
-          item.getAsString(function(text) {
-            var blob = new Blob([text], {type: "text/plain"});
-            uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
-          });
-        } else if (item.kind === "file" && /^image/.test(item.type)) {
-          var file = item.getAsFile();
-          var extension;
-          Object.keys(droppy.imageTypes).some(function(ext) {
-            if (file.type === droppy.imageTypes[ext]) {
-              extension = ext;
-              return true;
+      var cd = e.clipboardData;
+      if (cd.items) { // modern browsers
+        arr(cd.items).forEach(function(item) {
+          if (item.kind === "string") {
+            item.getAsString(function(text) {
+              var blob = new Blob([text], {type: "text/plain"});
+              uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
+            });
+          } else if (item.kind === "file" && /^image/.test(item.type)) {
+            var ext = imgExtFromMime(item.type);
+            uploadBlob(view, item.getAsFile(), "Pasted Image " + dateFilename() + "." + ext);
+          }
+        });
+      } else { // Safari specific
+        if (cd.types.indexOf("text/plain") !== -1) {
+          var blob = new Blob([cd.getData("Text")], {type: "text/plain"});
+          uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
+          $(".ce").empty();
+        } else {
+          var start = performance.now();
+          (function findImages() {
+            var images = $(".ce img");
+            if (!images.length && performance.now() - start < 5000) {
+              return setTimeout(findImages, 50);
             }
-          });
-          uploadBlob(view, file, "Pasted Image " + dateFilename() + "." + extension);
+            images.each(function() {
+              urlToPngBlob(this.src, function(blob) {
+                var ext = imgExtFromMime(blob.type);
+                uploadBlob(view, blob, "Pasted Image " + dateFilename() + "." + ext);
+                $(".ce").empty();
+              });
+            });
+          })();
+        }
+      }
+    });
+
+    // Hacks for Safari to be able to paste
+    if (droppy.detects.safari) {
+      $("body").append('<div class="ce" contenteditable>');
+      window.addEventListener("beforepaste", function() {
+        return false;
+      });
+      window.addEventListener("keydown", function(e) {
+        if (e.metaKey && e.which === 86 /* V */) {
+          if (e.target.nodeName.toLowerCase() !== "input") {
+            $(".ce")[0].focus();
+          }
         }
       });
-    });
+    }
 
     screenfull.onchange(function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
@@ -2811,7 +2843,36 @@
   }
 
   function arr(arrLike) {
-    if (!arrLike) return null;
+    if (!arrLike) return [];
     return [].slice.call(arrLike);
+  }
+
+  function urlToPngBlob(url, cb) {
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function() {
+      var canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var binary = atob(canvas.toDataURL("image/png").split(",")[1]);
+      var len = binary.length;
+      var bytes = new Uint8Array(len);
+      for (var i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+      cb(new Blob([bytes.buffer], {type: "image/png"}));
+    };
+    img.src = url;
+  }
+
+  function imgExtFromMime(mime) {
+    var ret;
+    Object.keys(droppy.imageTypes).some(function(ext) {
+      if (mime === droppy.imageTypes[ext]) {
+        ret = ext;
+        return true;
+      }
+    });
+    return ret;
   }
 })(jQuery);
