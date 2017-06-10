@@ -540,6 +540,7 @@
           var blob = new Blob([cd.getData("Text")], {type: "text/plain"});
           uploadBlob(view, blob);
           $(".ce").empty();
+          if (droppy.savedFocus) droppy.savedFocus.focus();
         } else {
           var start = performance.now();
           (function findImages() {
@@ -551,6 +552,7 @@
               urlToPngBlob(this.src, function(blob) {
                 uploadBlob(view, blob);
                 $(".ce").empty();
+                if (droppy.savedFocus) droppy.savedFocus.focus();
               });
             });
           })();
@@ -567,6 +569,7 @@
       window.addEventListener("keydown", function(e) {
         if (e.metaKey && e.which === 86 /* V */) {
           if (e.target.nodeName.toLowerCase() !== "input") {
+            droppy.savedFocus = document.activeElement;
             $(".ce")[0].focus();
           }
         }
@@ -2342,6 +2345,7 @@
     droppy.queuedData = null;
     droppy.reopen = null;
     droppy.resizeTimer = null;
+    droppy.savedFocus = null;
     droppy.socket = null;
     droppy.socketWait = null;
     droppy.token = null;
