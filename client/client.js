@@ -518,29 +518,30 @@
       toggleButtons(view[0].dataset.type);
     });
 
-    $(document.body).pastableNonInputable().on("pasteImage", function(_, data) {
+    // handle pasting text and images in directory view
+    window.addEventListener("paste", function(e) {
       var view = getActiveView();
-      if (view[0].dataset.type !== "directory" || !data.blob) return;
-      var extension;
-      Object.keys(droppy.imageTypes).some(function(ext) {
-        if (data.blob.type === droppy.imageTypes[ext]) {
-          extension = ext;
-          return true;
+      if (view[0].dataset.type !== "directory") return;
+      var cd = e.clipboardData || window.clipboardData;
+      arr(cd.items || []).forEach(function(item) {
+        if (item.kind === "string") {
+          item.getAsString(function(text) {
+            var blob = new Blob([text], {type: "text/plain"});
+            uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
+          });
+        } else if (item.kind === "file" && /^image/.test(item.type)) {
+          var file = item.getAsFile();
+          var extension;
+          Object.keys(droppy.imageTypes).some(function(ext) {
+            if (file.type === droppy.imageTypes[ext]) {
+              extension = ext;
+              return true;
+            }
+          });
+          uploadBlob(view, file, "Pasted Image " + dateFilename() + "." + extension);
         }
       });
-      uploadBlob(getActiveView(), data.blob, "Pasted Image " + dateFilename() + "." + extension);
-    }).on("pasteText", function(_, data) {
-      var view = getActiveView();
-      if (view[0].dataset.type !== "directory" || !data.text) return;
-      var blob = new Blob([data.text], {type: "text/plain"});
-      uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
     });
-
-    function uploadBlob(view, blob, name) {
-      var fd = new FormData();
-      fd.append("files[]", blob, name);
-      upload(view, fd, [name]);
-    }
 
     screenfull.onchange(function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
@@ -668,6 +669,12 @@
   // ============================================================================
   //  Upload functions
   // ============================================================================
+  function uploadBlob(view, blob, name) {
+    var fd = new FormData();
+    fd.append("files[]", blob, name);
+    upload(view, fd, [name]);
+  }
+
   function upload(view, fd, files) {
     if (!files || !files.length) return showError(view, "Unable to upload.");
     var id = view[0].uploadId += 1;
@@ -2801,5 +2808,10 @@
     if (mins  < 10) mins  = "0" + mins;
     if (secs  < 10) secs  = "0" + secs;
     return year + "-" + month + "-" + day + " " + hrs + "." + mins + "." + secs;
+  }
+
+  function arr(arrLike) {
+    if (!arrLike) return null;
+    return [].slice.call(arrLike);
   }
 })(jQuery);

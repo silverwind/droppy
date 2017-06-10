@@ -118,8 +118,7 @@ resources.files = {
     "node_modules/mousetrap/mousetrap.min.js",
     "node_modules/whatwg-fetch/fetch.js",
     "node_modules/uppie/uppie.js",
-    "node_modules/jquery/dist/jquery.slim.min.js",
-    "node_modules/paste.js/paste.js",
+    "client/jquery-custom.min.js",
     "client/client.js",
   ],
   other: [
