@@ -3,22 +3,21 @@ MAINTAINER silverwind
 
 # Install and build modules
 RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python git && \
-  # add yarn
-  mkdir -p /opt && \
-  curl -sL https://yarnpkg.com/latest.tar.gz | tar xz -C /opt && \
-  mv /opt/dist /opt/yarn && \
-  ln -s /opt/yarn/bin/yarn /usr/local/bin && \
   # install global modules
-  yarn global add droppy@latest dmn@latest --production --global-folder /yarn && \
-  # cleanup node modules
-  cd /yarn && \
-  dmn clean -f && \
-  yarn global remove dmn --global-folder /yarn && \
-  # remove yarn and various caches
+  yarn global add droppy@latest --production --global-folder /yarn && \
+  # remove yarn
+  rm -rf /usr/local/share/yarn && \
+  rm -rf /usr/local/bin/yarn && \
+  rm -rf /usr/local/bin/yarnpkg && \
   rm -rf /usr/local/share/.cache && \
+  # remove npm
+  npm uninstall -g npm && \
+  rm -rf /root/.npm && \
+  rm -rf /tmp/npm* && \
+  rm -rf /root/.node-gyp && \
+  # remove caches
   rm -rf /tmp/v8* && \
   rm -rf /root/.config && \
-  rm -rf /opt && \
   # fix permissions in /yarn which assumes root will start the app
   find /yarn -type d -exec chmod 0755 {} + && \
   find /yarn -type f -exec chmod 0644 {} + && \
@@ -33,12 +32,7 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   rm -rf /yarn/node_modules/lodash/_* && \
   rm -rf /yarn/node_modules/lodash/*.min.js && \
   rm -rf /yarn/node_modules/lodash/core.js && \
-  # remove npm
-  npm uninstall -g npm && \
-  rm -rf /root/.npm && \
-  rm -rf /tmp/npm* && \
-  rm -rf /root/.node-gyp && \
-  # cleanup apk
+  # cleanup apk cache
   apk del --purge deps && \
   rm -rf /var/cache/apk/*
 
