@@ -2553,9 +2553,9 @@
   }
 
   function setEditorFontSize(size) {
-    [].slice.call(document.styleSheets).some(function(sheet) {
+    arr(document.styleSheets).some(function(sheet) {
       if (sheet.ownerNode.id === "css") {
-        [].slice.call(sheet.cssRules).some(function(rule) {
+        arr(sheet.cssRules).some(function(rule) {
           if (rule.selectorText === ".content div.CodeMirror") {
             rule.style.fontSize = size + "px";
             return true;
