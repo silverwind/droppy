@@ -658,13 +658,13 @@
         if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
         second = newView(dest, 1).addClass("right");
         splitButton[0].setAttribute("aria-label", "Merge views");
-        splitButton[0].childNodes[1].nodeValue = "Merge";
+        splitButton[0].childNodes[1].textContent = "Merge";
         replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
       } else {
         destroyView(1);
         getView(0).removeClass("left");
         splitButton[0].setAttribute("aria-label", "Split view in half");
-        splitButton[0].childNodes[1].nodeValue = "Split";
+        splitButton[0].childNodes[1].textContent = "Split";
         replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
       }
       var interval = setInterval(function() {
