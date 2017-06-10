@@ -563,9 +563,6 @@
     // Hacks for Safari to be able to paste
     if (droppy.detects.safari) {
       $("body").append('<div class="ce" contenteditable>');
-      window.addEventListener("beforepaste", function() {
-        return false;
-      });
       window.addEventListener("keydown", function(e) {
         if (e.metaKey && e.which === 86 /* V */) {
           if (e.target.nodeName.toLowerCase() !== "input") {
