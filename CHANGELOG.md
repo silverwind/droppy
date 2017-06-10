@@ -1,6 +1,10 @@
 # droppy Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
+#### Version 6.5.0 - 10/06/2017
+
+- Pasting images and text from the clipboard to a directory will now automatically upload the contents to a new file.
+
 #### Version 6.4.0 - 03/06/2017
 
 - Added the `ignorePatterns` and `watch` options

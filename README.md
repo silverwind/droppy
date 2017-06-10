@@ -14,7 +14,8 @@ droppy is a self-hosted file storage server with a web interface and capabilites
 * Fully responsive HTML5 interface
 * Realtime updates of file system changes
 * Directory upload support
-* Drag & drop support for file operations
+* Drag & drop support
+* Create image and text files directly from the clipboard
 * Side-by-Side mode
 * Shareable public download links
 * Zip download of directories
