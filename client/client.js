@@ -528,12 +528,12 @@
           return true;
         }
       });
-      uploadBlob(getActiveView(), data.blob, "Image " + dateFilename() + "." + extension);
+      uploadBlob(getActiveView(), data.blob, "Pasted Image " + dateFilename() + "." + extension);
     }).on("pasteText", function(_, data) {
       var view = getActiveView();
       if (view[0].dataset.type !== "directory" || !data.text) return;
       var blob = new Blob([data.text], {type: "text/plain"});
-      uploadBlob(view, blob, "Text " + dateFilename() + ".txt");
+      uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
     });
 
     function uploadBlob(view, blob, name) {
