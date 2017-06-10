@@ -582,8 +582,8 @@ function setupSocket(server) {
               if (err) log.error(err);
               cb(null, {
                 src: file,
-                w: dims.width || 0,
-                h: dims.height || 0,
+                w: dims && dims.width ? dims.width : 0,
+                h: dims && dims.height ? dims.height : 0,
               });
             });
           } else cb(null, {video: true, src: file});

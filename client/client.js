@@ -529,29 +529,27 @@
           if (item.kind === "string") {
             item.getAsString(function(text) {
               var blob = new Blob([text], {type: "text/plain"});
-              uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
+              uploadBlob(view, blob);
             });
           } else if (item.kind === "file" && /^image/.test(item.type)) {
-            var ext = imgExtFromMime(item.type);
-            uploadBlob(view, item.getAsFile(), "Pasted Image " + dateFilename() + "." + ext);
+            uploadBlob(view, item.getAsFile());
           }
         });
       } else { // Safari specific
         if (cd.types.indexOf("text/plain") !== -1) {
           var blob = new Blob([cd.getData("Text")], {type: "text/plain"});
-          uploadBlob(view, blob, "Pasted Text " + dateFilename() + ".txt");
+          uploadBlob(view, blob);
           $(".ce").empty();
         } else {
           var start = performance.now();
           (function findImages() {
             var images = $(".ce img");
             if (!images.length && performance.now() - start < 5000) {
-              return setTimeout(findImages, 50);
+              return setTimeout(findImages, 25);
             }
             images.each(function() {
               urlToPngBlob(this.src, function(blob) {
-                var ext = imgExtFromMime(blob.type);
-                uploadBlob(view, blob, "Pasted Image " + dateFilename() + "." + ext);
+                uploadBlob(view, blob);
                 $(".ce").empty();
               });
             });
@@ -701,8 +699,14 @@
   // ============================================================================
   //  Upload functions
   // ============================================================================
-  function uploadBlob(view, blob, name) {
+  function uploadBlob(view, blob) {
     var fd = new FormData();
+    var name = "Pasted ";
+    if (/^image/.test(blob.type)) {
+      name += "Image " + dateFilename() + "." + imgExtFromMime(blob.type);
+    } else {
+      name += "Text " + dateFilename() + ".txt";
+    }
     fd.append("files[]", blob, name);
     upload(view, fd, [name]);
   }
