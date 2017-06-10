@@ -68,7 +68,7 @@
     "photoswipe": "^4.1.2",
     "postcss": "^6.0.1",
     "request": "^2.81.0",
-    "screenfull": "^3.2.0",
+    "screenfull": "^3.2.1",
     "svgstore": "^2.0.2",
     "uglify-js": "^3.0.15",
     "uppie": "^1.0.4"
