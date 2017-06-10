@@ -524,7 +524,6 @@ nav {
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
   color: #333;
   opacity: 0;
-  overflow: hidden;
   position: absolute;
   user-select: none;
   visibility: hidden;
