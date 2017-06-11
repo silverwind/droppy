@@ -526,13 +526,24 @@
       var cd = e.clipboardData;
       if (cd.items) { // modern browsers
         arr(cd.items).forEach(function(item) {
+          var texts = [];
+          var images = [];
           if (item.kind === "string") {
             item.getAsString(function(text) {
-              var blob = new Blob([text], {type: "text/plain"});
-              uploadBlob(view, blob);
+              texts.push(new Blob([text], {type: "text/plain"}));
             });
           } else if (item.kind === "file" && /^image/.test(item.type)) {
-            uploadBlob(view, item.getAsFile());
+            images.push(item.getAsFile());
+          }
+          // if a image is found, don't upload additional text blobs
+          if (images.length) {
+            images.forEach(function(image) {
+              uploadBlob(view, image);
+            });
+          } else {
+            texts.forEach(function(text) {
+              uploadBlob(view, text);
+            });
           }
         });
       } else { // Safari specific
