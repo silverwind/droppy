@@ -418,7 +418,7 @@ nav {
   white-space: nowrap;
   cursor: pointer;
   display: block; /* needed for ellipsis */
-  padding: .1rem 0;
+  line-height: 1.3 /* fix centering because of display:block */;
 }
 
 .error-link {
@@ -522,9 +522,9 @@ nav {
   background: #eee;
   border-radius: 4px;
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  color: #333;
   opacity: 0;
   position: absolute;
+  overflow: hidden;
   user-select: none;
   visibility: hidden;
   cursor: pointer;
@@ -541,7 +541,8 @@ html:not(.mobile) #entry-menu a.active {
 #entry-menu a {
   padding: .25em .35em;
   color: #333;
-  display: block;
+  display: flex;
+  align-items: center;
 }
 
 #entry-menu svg {
@@ -575,8 +576,8 @@ html:not(.mobile) #entry-menu a.active {
 }
 
 .pswp__top-bar {
-  background: linear-gradient(to bottom, rgba(0,0,0,.6) 0%,rgba(0,0,0,.08) 80%,rgba(0,0,0,.04) 90%,rgba(0,0,0,0) 100%) !important;
-  height: 1.5rem !important;
+  background: rgba(0,0,0,.4);
+  height: 1.4rem !important;
   pointer-events: none;
   color: #e6e6e6;
   z-index: 1;
@@ -625,11 +626,11 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--arrow--left, .pswp__button--arrow--right {
   width: 3em;
   cursor: pointer;
-  color: #fff;
-  stroke: #444;
-  stroke-width: 12;
-  height: calc(100% - 1.75rem) !important;
-  top: 0 !important;
+  color: rgba(255,255,255,.3);
+  stroke: rgba(0,0,0,.3);
+  stroke-width: 8;
+  top: 1.4rem !important;
+  height: calc(100% - 2.8rem) !important;
   margin-top: 0 !important;
 }
 
@@ -642,13 +643,18 @@ html:not(.mobile) #entry-menu a.active {
 
 .pswp__button--arrow--left svg  { transform: rotate(270deg) translateX(50%);  left:  -.25em }
 .pswp__button--arrow--right svg { transform: rotate(90deg)  translateX(-50%); right: -.25em }
-.pswp__button--arrow--left:hover svg  { height: 2.5em; width: 2.5em; left:  -.5em }
-.pswp__button--arrow--right:hover svg { height: 2.5em; width: 2.5em; right: -.5em }
+.pswp__button--arrow--left:hover svg  { height: 2.5em; width: 2.5em; left:  -.5em; color: #fff; stroke: #000 }
+.pswp__button--arrow--right:hover svg { height: 2.5em; width: 2.5em; right: -.5em; color: #fff; stroke: #000 }
 
 /* ================================= Video ================================= */
 
 .plyr__video-wrapper {
   background: none !important;
+}
+
+.plyr--video .plyr__controls {
+  padding: .1rem 0 !important;
+  background: rgba(0,0,0,.4) !important;
 }
 
 video {
