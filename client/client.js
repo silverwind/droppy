@@ -57,10 +57,11 @@
     this.r = this[0].offsetTop;
     delete this.r;
 
-    if (oldClass)
+    if (oldClass) {
       this.replaceClass(oldClass, newClass);
-    else
+    } else {
       this.addClass(newClass);
+    }
 
     return this;
   };
@@ -102,10 +103,11 @@
         else return true;
       });
       if (!hasClass) classes.push(replacement);
-      if (classes.length === 0 || (classes.length === 1 && classes[0] === ""))
+      if (classes.length === 0 || (classes.length === 1 && classes[0] === "")) {
         el.removeAttribute("class");
-      else
+      } else {
         el.className = classes.join(" ");
+      }
     }
     return this;
   };
@@ -129,10 +131,11 @@
   }
   Handlebars.registerHelper("svg", svg);
 
-  if (droppy.detects.mobile)
+  if (droppy.detects.mobile) {
     document.documentElement.classList.add("mobile");
-  if (droppy.detects.webp)
+  } if (droppy.detects.webp) {
     droppy.imageTypes.webp = "image/webp";
+  }
   // ============================================================================
   //  localStorage wrapper functions
   // ============================================================================
@@ -252,9 +255,9 @@
       // Create new view with initializing
       getLocationsFromHash().forEach(function(string, index) {
         var dest = join(decodeURIComponent(string));
-        if (index === 0)
+        if (index === 0) {
           newView(dest, index);
-        else if (index === 1) {
+        } else if (index === 1) {
           droppy.split(dest);
         }
       });
@@ -880,8 +883,9 @@
   function toggleCatcher(show) {
     var cc = $("#overlay"), modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
-    if (show === undefined)
+    if (show === undefined) {
       show = modals.some(function(selector) { return $(selector).hasClass("in"); });
+    }
 
     if (!show) {
       modals.forEach(function(selector) { $(selector)[show ? "addClass" : "removeClass"]("in"); });
@@ -910,18 +914,20 @@
   });
 
   function getViewLocation(view) {
-    if (view[0].currentFolder === undefined)
+    if (view[0].currentFolder === undefined) {
       return ""; // return an empty string so animDirection gets always set to 'forward' on launch
-    else
+    } else {
       return join(view[0].currentFolder, view[0].currentFile);
+    }
   }
 
   function getLocationsFromHash() {
     var locations = location.hash.split("#");
     locations.shift();
 
-    if (locations.length === 0)
+    if (locations.length === 0) {
       locations.push("");
+    }
 
     locations.forEach(function(part, i) {
       locations[i] = part.replace(/\/*$/g, "");
@@ -934,10 +940,11 @@
     var path = location.pathname;
     droppy.views.forEach(function(view) {
       view = $(view);
-      if (modview && modview.is(view))
+      if (modview && modview.is(view)) {
         path += "/#" + dest;
-      else
+      } else {
         path += "/#" + getViewLocation(view);
+      }
     });
     return path.replace(/\/+/g, "/");
   }
@@ -960,12 +967,13 @@
           var viewLoc = getViewLocation(view);
           showSpinner(view);
           // Find the direction in which we should animate
-          if (!viewLoc || viewDest.length === viewLoc.length)
+          if (!viewLoc || viewDest.length === viewLoc.length) {
             view[0].animDirection = "center";
-          else if (viewDest.length > viewLoc.length)
+          } else if (viewDest.length > viewLoc.length) {
             view[0].animDirection = "forward";
-          else
+          } else {
             view[0].animDirection = "back";
+          }
 
           sendMessage(view[0].vId, "REQUEST_UPDATE", viewDest);
 
@@ -977,8 +985,9 @@
     if (view === null) {
       // Only when navigating backwards
       for (var i = destination.length - 1; i >= 0; i--) {
-        if (destination[i].length && getViewLocation(getView(i)) !== destination[i])
+        if (destination[i].length && getViewLocation(getView(i)) !== destination[i]) {
           sendReq(getView(i), destination[i], 0);
+        }
       }
     } else if (droppy.views[view[0].vId]) sendReq(view, destination, 0);
   }
@@ -1177,8 +1186,9 @@
       view.find(".icon-play").reg("click", function() {
         var view = $(this).parents(".view");
 
-        if ($(this).parents(".data-row").hasClass("playing"))
+        if ($(this).parents(".data-row").hasClass("playing")) {
           return;
+        }
 
         play(view, $(this).parents(".data-row"));
       });
@@ -1224,8 +1234,9 @@
         view.find(".content:not(.new)").remove();
         view.find(".new").removeClass("new");
         view.find(".data-row").removeClass("animating");
-        if (view[0].dataset.type === "directory")
+        if (view[0].dataset.type === "directory") {
           bindDragEvents(view);
+        }
         toggleButtons(type);
         resolve();
       }
@@ -1251,12 +1262,13 @@
 
       // Keep the drop-select in view
       var limit = dropSelect[0].offsetWidth / 2 - 20, left;
-      if (x < limit)
+      if (x < limit) {
         left = x + limit;
-      else if (x + limit > innerWidth)
+      } else if (x + limit > innerWidth) {
         left = x - limit;
-      else
+      } else {
         left = x;
+      }
 
       dropSelect[0].style.left = left + "px";
       dropSelect[0].style.top = event.originalEvent.clientY + "px";
@@ -1301,10 +1313,11 @@
     view.reg("dragstart", function(event) {
       var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
 
-      if (event.ctrlKey || event.metaKey || event.altKey)
+      if (event.ctrlKey || event.metaKey || event.altKey) {
         view[0].dragAction = "copy";
-      else if (event.shiftKey)
+      } else if (event.shiftKey) {
         view[0].dragAction = "cut";
+      }
 
       droppy.dragTimer.refresh(row[0].dataset.id);
       event.originalEvent.dataTransfer.setData("text", JSON.stringify({
@@ -1312,8 +1325,9 @@
         path: row[0].dataset.id,
       }));
       event.originalEvent.dataTransfer.effectAllowed = "copyMove";
-      if ("setDragImage" in event.originalEvent.dataTransfer)
+      if ("setDragImage" in event.originalEvent.dataTransfer) {
         event.originalEvent.dataTransfer.setDragImage(row.find(".sprite")[0], 0, 0);
+      }
     });
   }
 
@@ -1330,8 +1344,9 @@
       this.timer = setTimeout(this.clear, 1000);
     };
     this.clear = function() {
-      if (!this.isInternal)
+      if (!this.isInternal) {
         $(".dropzone").removeClass("in");
+      }
       clearTimeout(this.timer);
       this.isInternal = false;
       this.data = "";
@@ -1352,12 +1367,13 @@
       event.stopPropagation();
       droppy.activeView = view[0].vId;
       var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
-      if (view[0].dataset.type === "directory" && isInternal)
+      if (view[0].dataset.type === "directory" && isInternal) {
         icon = "menu";
-      else if (!isInternal)
+      } else if (!isInternal) {
         icon = "upload-cloud";
-      else
+      } else {
         icon = "open";
+      }
 
       view.find(".dropzone svg").replaceWith(svg(icon));
       if (!dropZone.hasClass("in")) dropZone.addClass("in");
@@ -1396,8 +1412,9 @@
           view[0].dataset.type = "directory";
           updateLocation(view, dragData.path);
         } else {
-          if (join(view[0].currentFolder, view[0].currentFile) !== dragData.path)
+          if (join(view[0].currentFolder, view[0].currentFile) !== dragData.path) {
             openFile(view, dirname(dragData.path), basename(dragData.path));
+          }
         }
       }
     });
@@ -1428,10 +1445,11 @@
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
-      if (entry[0].dataset.type === "folder")
+      if (entry[0].dataset.type === "folder") {
         updateLocation(view, entry[0].dataset.id);
-      else
+      } else {
         openFile(view, view[0].currentFolder, entry.find(".file-link")[0].textContent);
+      }
     });
 
     // Rename a file/folder
@@ -1590,8 +1608,9 @@
   function getMediaSrc(view, filename) {
     var encodedId = join(view[0].currentFolder, filename).split("/");
     var i = encodedId.length - 1;
-    for (;i >= 0; i--)
+    for (;i >= 0; i--) {
       encodedId[i] = encodeURIComponent(encodedId[i]);
+    }
     return "!/file" + encodedId.join("/");
   }
 
@@ -1831,8 +1850,9 @@
 
         editor.on("change", function(cm, change) {
           var view = getCMView(cm);
-          if (change.origin !== "setValue")
+          if (change.origin !== "setValue") {
             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
+          }
         });
 
         function getCMView(cm) {
@@ -2003,10 +2023,11 @@
   function play(view, index) {
     var row, source, player = view.find(".audio-player")[0];
 
-    if (typeof index === "number")
+    if (typeof index === "number") {
       row = view.find('.data-row[data-playindex="' + index + '"]');
-    else
+    } else {
       row = index;
+    }
 
     if (!view[0].audioInitialized) {
       initAudio(view);
@@ -2057,8 +2078,9 @@
 
     (function updateBuffer() {
       var progress;
-      if (player.buffered.length)
+      if (player.buffered.length) {
         progress = (player.buffered.end(0) / player.duration) * 100;
+      }
       view[0].querySelector(".seekbar-loaded").style.width = (progress || 0) + "%";
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
@@ -2122,10 +2144,11 @@
     bar.reg("click", function(event) {
       var time = player.duration *
         ((event.pageX - bar[0].getBoundingClientRect().left) / bar[0].clientWidth);
-      if (!isNaN(parseFloat(time)) && isFinite(time))
+      if (!isNaN(parseFloat(time)) && isFinite(time)) {
         player.currentTime = time;
-      else
+      } else {
         endAudio($(this).parents(".view"));
+      }
     });
     bar.find(".previous").reg("click", function(event) {
       playPrev($(event.target).parents(".view"));
@@ -2158,10 +2181,11 @@
       event.stopPropagation();
     });
     function onWheel(event) {
-      if ((event.wheelDelta || -event.detail) > 0)
+      if ((event.wheelDelta || -event.detail) > 0) {
         setVolume(player.volume + 0.1);
-      else
+      } else {
         setVolume(player.volume - 0.1);
+      }
     }
     slider[0].addEventListener("mousewheel", onWheel);
     slider[0].addEventListener("DOMMouseScroll", onWheel);
@@ -2193,17 +2217,19 @@
     }
     function playNext(view) {
       if (view[0].shuffle) return playRandom(view);
-      if (view[0].playlistIndex < view[0].playlistLength - 1)
+      if (view[0].playlistIndex < view[0].playlistLength - 1) {
         play(view, view[0].playlistIndex + 1);
-      else
+      } else {
         play(view, 0);
+      }
     }
     function playPrev(view) {
       if (view[0].shuffle) return playRandom(view);
-      if (view[0].playlistIndex === 0)
+      if (view[0].playlistIndex === 0) {
         play(view, view[0].playlistLength - 1);
-      else
+      } else {
         play(view, view[0].playlistIndex - 1);
+      }
     }
   }
 
@@ -2220,13 +2246,15 @@
       if (!deps) return cont();
       var missing = [];
       for (var i = 0; i < deps.length; ++i) {
-        if (!CodeMirror.modes.hasOwnProperty(deps[i]))
+        if (!CodeMirror.modes.hasOwnProperty(deps[i])) {
           missing.push(deps[i]);
+        }
       }
       if (!missing.length) return cont();
       var split = splitCallback(cont, missing.length);
-      for (var j = 0; j < missing.length; ++j)
+      for (var j = 0; j < missing.length; ++j) {
         CodeMirror.requireMode(missing[j], split);
+      }
     }
 
     CodeMirror.requireMode = function(mode, cont) {
@@ -2469,10 +2497,11 @@
     view[0].sharelinkId = location;
     var found = droppy.linkCache.some(function(entry) {
       if (entry.location === location && entry.attachement === attachement) {
-        if (cb)
+        if (cb) {
           cb(entry.link);
-        else
+        } else {
           showLink(view, entry.link, attachement);
+        }
         return true;
       }
     });
@@ -2577,8 +2606,9 @@
   }
 
   function showSpinner(view) {
-    if (!view.find(".spinner").length)
+    if (!view.find(".spinner").length) {
       view.find(".path").append(svg("spinner"));
+    }
 
     view.find(".spinner")[0].setAttribute("class", "spinner in");
 
@@ -2781,15 +2811,17 @@
   }
 
   function validFilename(name) {
-    if (!name || name.length > 255)
+    if (!name || name.length > 255) {
       return false;
-    if (/[<>:"|?*\x00-\x1F]/.test(name)) // eslint-disable-line no-control-regex
+    } if (/[<>:"|?*\x00-\x1F]/.test(name)) { // eslint-disable-line no-control-regex
       return false;
-    if (/^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i.test(name))
+    } if (/^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i.test(name)) {
       return false;
-    if (/^\.\.?$/.test(name))
+    } if (/^\.\.?$/.test(name)) {
       return false;
-    return true;
+    } else {
+      return true;
+    }
   }
 
   function removeExt(filename) {
@@ -2829,8 +2861,9 @@
       }
     }
     for (i = 0, l = parts.length; i < l; i++) {
-      if ((i === 0 && parts[i] === "") || parts[i] !== "")
+      if ((i === 0 && parts[i] === "") || parts[i] !== "") {
         newParts.push(parts[i]);
+      }
     }
     return newParts.join("/") || "/";
   }

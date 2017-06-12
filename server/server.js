@@ -154,8 +154,9 @@ droppy._onRequest = onRequest;
 module.exports = droppy;
 
 function startListeners(callback) {
-  if (!Array.isArray(config.listeners))
+  if (!Array.isArray(config.listeners)) {
     return callback(new Error("Config Error: 'listeners' option must be an array"));
+  }
 
   const targets = [];
   config.listeners.forEach(function(listener, i) {
@@ -349,8 +350,9 @@ function createListener(handler, opts, callback) {
       }
 
       server.on("request", function(req, res) {
-        if (opts.hsts && opts.hsts > 0)
+        if (opts.hsts && opts.hsts > 0) {
           res.setHeader("Strict-Transport-Security", "max-age=" + opts.hsts);
+        }
         handler(req, res);
       });
 
@@ -498,8 +500,9 @@ function setupSocket(server) {
         log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
         if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
         if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
-        if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst))
+        if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst)) {
           return sendError(sid, vId, "Can't copy directory into itself");
+        }
 
         fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {
           if (!err && stats || msg.data.src === msg.data.dst) {
@@ -605,10 +608,11 @@ function setupSocket(server) {
       }
       removeClientPerDir(sid);
       delete clients[sid];
-      if (code === 1011)
+      if (code === 1011) {
         log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
-      else
+      } else {
         log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
+      }
     });
     ws.on("error", log.error);
   });
@@ -699,8 +703,9 @@ function send(ws, data) {
 function handleGET(req, res) {
   const URI = decodeURIComponent(req.url);
 
-  if (config.public && !cookies.get(req.headers.cookie))
+  if (config.public && !cookies.get(req.headers.cookie)) {
     cookies.free(req, res);
+  }
 
   // unauthenticated GETs
   if (URI === "/") {
@@ -922,10 +927,12 @@ function handleResourceRequest(req, res, resourceName) {
       ].join("; ");
       headers["X-Content-Type-Options"] = "nosniff";
       headers["Referrer-Policy"] = "no-referrer";
-      if (!config.allowFrame)
+      if (!config.allowFrame) {
         headers["X-Frame-Options"] = "DENY";
-      if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0)
+      }
+      if (req.headers["user-agent"] && req.headers["user-agent"].indexOf("MSIE") > 0) {
         headers["X-UA-Compatible"] = "IE=Edge";
+      }
     }
 
     // Content-Type
@@ -989,12 +996,13 @@ function handleFileRequest(req, res, download) {
         streamFile(req, res, filepath, download, stats);
       }
     } else {
-      if (error.code === "ENOENT")
+      if (error.code === "ENOENT") {
         res.statusCode = 404;
-      else if (error.code === "EACCES")
+      } else if (error.code === "EACCES") {
         res.statusCode = 403;
-      else
+      } else {
         res.statusCode = 500;
+      }
       log.error(error);
       res.end();
     }
@@ -1300,10 +1308,11 @@ function streamArchive(req, res, zipPath, download) {
       readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
         const pathInZip = path.join(targetDir, file.path);
         const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
-        if (file.stat.isDirectory())
+        if (file.stat.isDirectory()) {
           zip.addEmptyDirectory(pathInZip, metaData);
-        else
+        } else {
           zip.addFile(file.fullPath, pathInZip, metaData);
+        }
       }).on("warn", log.info).on("error", log.error).on("end", function() {
         zip.outputStream.pipe(res);
         zip.end();
@@ -1357,10 +1366,11 @@ function tlsInit(opts, cb) {
 function tlsSetup(opts, cb) {
   opts.honorCipherOrder = true;
 
-  if (typeof opts.key !== "string")
+  if (typeof opts.key !== "string") {
     return cb(new Error("Missing TLS option 'key'"));
-  if (typeof opts.cert !== "string")
+  } if (typeof opts.cert !== "string") {
     return cb(new Error("Missing TLS option 'cert'"));
+  }
 
   const certPaths = [
     path.resolve(paths.config, ut(opts.key)),

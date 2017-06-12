@@ -110,8 +110,9 @@ db.authUser = function(user, pass) {
 
   if (database.users[user]) {
     parts = database.users[user].hash.split("$");
-    if (parts.length === 2 && parts[0] === getHash(pass + parts[1] + user))
+    if (parts.length === 2 && parts[0] === getHash(pass + parts[1] + user)) {
       return true;
+    }
   }
 
   return false;

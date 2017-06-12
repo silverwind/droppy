@@ -165,17 +165,19 @@ function findEditor(cb) {
   const which      = require("which");
   const userEditor = basename(process.env.VISUAL || process.env.EDITOR);
 
-  if (editors.indexOf(userEditor) === -1)
+  if (editors.indexOf(userEditor) === -1) {
     editors.unshift(userEditor);
+  }
 
   (function find(editor) {
     try {
       cb(which.sync(editor));
     } catch (err) {
-      if (editors.length)
+      if (editors.length) {
         find(editors.shift());
-      else
+      } else {
         cb();
+      }
     }
   })(editors.shift());
 }

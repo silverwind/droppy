@@ -84,9 +84,11 @@ function update(dir) {
 
 function handleUpdateDirErrs(errs, cb) {
   errs.forEach(function(err) {
-    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)])
+    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
       delete dirs[utils.removeFilesPath(err.path)];
-    else log.error(err);
+    } else {
+      log.error(err);
+    }
   });
   if (typeof cb === "function") cb();
 }
@@ -154,8 +156,9 @@ function updateDirSizes() {
   });
 
   todo.forEach(function(d) {
-    if (path.dirname(d) !== "/" && dirs[path.dirname(d)])
+    if (path.dirname(d) !== "/" && dirs[path.dirname(d)]) {
       dirs[path.dirname(d)].size += dirs[d].size;
+    }
   });
 }
 
@@ -196,10 +199,11 @@ filetree.clipboard = function(src, dst, type) {
   fs.stat(utils.addFilesPath(src), function(err, stats) {
     lookAway();
     if (err) log.error(err);
-    if (stats.isFile())
+    if (stats.isFile()) {
       filetree[type === "cut" ? "mv" : "cp"](src, dst);
-    else if (stats.isDirectory())
+    } else if (stats.isDirectory()) {
       filetree[type === "cut" ? "mvdir" : "cpdir"](src, dst);
+    }
   });
 };
 
@@ -242,10 +246,11 @@ filetree.move = function(src, dst, cb) {
   lookAway();
   fs.stat(utils.addFilesPath(src), function(err, stats) {
     if (err) log.error(err);
-    if (stats.isFile())
+    if (stats.isFile()) {
       filetree.mv(src, dst, cb);
-    else if (stats.isDirectory())
+    } else if (stats.isDirectory()) {
       filetree.mvdir(src, dst, cb);
+    }
   });
 };
 

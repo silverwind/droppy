@@ -43,18 +43,23 @@ const log = module.exports = function(req, res, logLevel) {
 
     const ip = utils.ip(req);
 
-    if (ip)
+    if (ip) {
       elems.unshift(log.formatHostPort(ip, utils.port(req) || "0"));
+    }
   }
 
-  if (logLevel > 0)
+  if (logLevel > 0) {
     elems.unshift("[" + chalk[logColors[logLevel]](logLabels[logLevel]) + "]");
+  }
 
-  if (opts && opts.timestamps) elems.unshift(log.timestamp());
+  if (opts && opts.timestamps) {
+    elems.unshift(log.timestamp());
+  }
 
   elems.forEach(function(part, index) {
-    if (part === "")
+    if (part === "") {
       elems.splice(index, 1);
+    }
   });
 
   if (logfile) {
@@ -73,17 +78,19 @@ log.setLogFile = function(fd) {
 };
 
 log.debug = function(req, res) {
-  if (req && (req.headers || req.addr))
+  if (req && (req.headers || req.addr)) {
     log(req, res, 3, Array.prototype.slice.call(arguments, 2).join(""));
-  else
+  } else {
     log(null, null, 3, Array.prototype.slice.call(arguments, 0).join(""));
+  }
 };
 
 log.info = function(req, res) {
-  if (req && (req.headers || req.addr))
+  if (req && (req.headers || req.addr)) {
     log(req, res, 2, Array.prototype.slice.call(arguments, 2).join(""));
-  else
+  } else {
     log(null, null, 2, Array.prototype.slice.call(arguments, 0).join(""));
+  }
 };
 
 log.error = function(err) {
@@ -96,13 +103,13 @@ log.plain = function() {
 };
 
 log.timestamp = function() {
-  const now   = new Date();
-  let day   = now.getDate();
+  const now = new Date();
+  let day = now.getDate();
   let month = now.getMonth() + 1;
-  const year  = now.getFullYear();
-  let hrs   = now.getHours();
-  let mins  = now.getMinutes();
-  let secs  = now.getSeconds();
+  const year = now.getFullYear();
+  let hrs = now.getHours();
+  let mins = now.getMinutes();
+  let secs = now.getSeconds();
 
   if (month < 10) month = "0" + month;
   if (day   < 10) day   = "0" + day;
@@ -128,24 +135,26 @@ log.formatHostPort = function(host, port, proto) {
   host = str.substring(0, str.lastIndexOf(":"));
   port = str.substring(str.lastIndexOf(":") + 1, str.length);
 
-  if (proto === "http" && port === "80" || proto === "https" && port === "443")
+  if (proto === "http" && port === "80" || proto === "https" && port === "443") {
     port = "";
-  else
+  } else {
     port = chalk.blue(":" + port);
+  }
 
   return chalk.cyan(host) + port;
 };
 
 log.formatError = function(err) {
   let output;
-  if (err instanceof Error)
+  if (err instanceof Error) {
     output = err.stack;
-  else if (!err)
+  } else if (!err) {
     output = new Error("Error handler called without an argument").stack + "\nerr = " + err;
-  else if (typeof err === "string")
+  } else if (typeof err === "string") {
     output = err;
-  else
+  } else {
     output = err + "\n" + (new Error()).stack;
+  }
 
   return output.replace(/^Error: /, "");
 };

@@ -159,10 +159,11 @@ utils.addFilesPath = function(p) {
 };
 
 utils.removeFilesPath = function(p) {
-  if (p.length > paths.files.length)
+  if (p.length > paths.files.length) {
     return utils.normalizePath(p.substring(paths.files.length));
-  else if (p === paths.files)
+  } else if (p === paths.files) {
     return "/";
+  }
 };
 
 utils.isPathSane = function(p, isURL) {
@@ -186,8 +187,9 @@ utils.isPathSane = function(p, isURL) {
 };
 
 utils.isBinary = function(p, callback) {
-  if (forceBinaryTypes.indexOf(ext(p)) !== -1)
+  if (forceBinaryTypes.indexOf(ext(p)) !== -1) {
     return callback(null, true);
+  }
 
   isBin(p, function(err, result) {
     if (err) return callback(err);
