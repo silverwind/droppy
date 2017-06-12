@@ -378,8 +378,10 @@
           $("#logout").reg("click", function() {
             ajax({
               method: "POST",
-              url: getRootPath() + "!/logout",
-              data: {path: getRootPath()}
+              url: "!/logout",
+              data: {
+                path: getRootPath(),
+              },
             }).then(function() {
               droppy.socket.close(4000);
               render("login");
@@ -452,7 +454,7 @@
       e.preventDefault();
       ajax({
         method: "POST",
-        url: path + "!/" + (firstrun ? "adduser" : "login"),
+        url: firstrun ? "!/adduser" : "!/login",
         data: {
           username: $("#user")[0].value,
           password: $("#pass")[0].value,
@@ -2748,7 +2750,7 @@
       headers.append("content-type", "application/json");
     }
 
-    return fetch(opts.url, {
+    return fetch(getRootPath() + opts.url, {
       method: opts.method || "GET",
       headers: headers,
       body: opts.data ? JSON.stringify(opts.data) : undefined,
