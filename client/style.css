@@ -29,12 +29,9 @@ button, input { line-height: normal }
 ::-moz-focus-inner { border: none; padding: 0; outline: none }
 ::-moz-focus-outer { border: none }
 
-::selection      { background: #05a; color: #fff }
-::-moz-selection { background: #05a; color: #fff }
+::selection { background: #05a; color: #fff }
 
-input::-moz-placeholder          { color: #999; opacity: 1 }
-input:-ms-input-placeholder      { color: #999 }
-input::-webkit-input-placeholder { color: #999 }
+input::placeholder { color: #999; opacity: 1 }
 
 @media screen and (max-resolution: 1.99dppx) {
   nav, .path, .tip:before {
@@ -661,8 +658,6 @@ video {
   height: calc(100vh - 3rem) !important;
 }
 
-:-moz-full-screen video { height: 100vh !important; }
-:-webkit-full-screen video { height: 100vh !important; }
 :fullscreen video { height: 100vh !important; }
 
 /* ============================ Document  ============================ */
@@ -1215,9 +1210,7 @@ video {
   border: 1px solid #383838;
 }
 
-#fields input::-moz-placeholder          { color: #666; opacity: 1 }
-#fields input:-ms-input-placeholder      { color: #666 }
-#fields input::-webkit-input-placeholder { color: #666 }
+#fields input::placeholder { color: #666; opacity: 1 }
 
 #fields input:focus {
   background: #282828;
