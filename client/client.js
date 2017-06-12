@@ -450,7 +450,6 @@
       $(this).toggleClass("checked");
     });
     $("#form").reg("submit", function(e) {
-      var path = getRootPath();
       e.preventDefault();
       ajax({
         method: "POST",
@@ -459,7 +458,7 @@
           username: $("#user")[0].value,
           password: $("#pass")[0].value,
           remember: $("#remember").hasClass("checked"),
-          path: path === "/" ? "/" : path.replace(/\/$/, ""),
+          path: getRootPath(),
         }
       }).then(function(res) {
         if (res.status === 200) {
