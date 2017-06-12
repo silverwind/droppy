@@ -28,7 +28,7 @@
     "etag": "^1.8.0",
     "file-extension": "^3.1.2",
     "graceful-fs": "^4.1.11",
-    "image-size": "^0.5.4",
+    "image-size": "^0.5.5",
     "isbinaryfile": "^3.0.2",
     "json-buffer": "^2.0.11",
     "lodash": "^4.17.4",
