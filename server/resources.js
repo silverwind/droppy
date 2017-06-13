@@ -1,22 +1,22 @@
 "use strict";
 
-const resources    = module.exports = {};
-const async        = require("async");
-const etag         = require("etag");
-const fs           = require("graceful-fs");
-const jb           = require("json-buffer");
-const mkdirp       = require("mkdirp");
-const path         = require("path");
-const vm           = require("vm");
-const zlib         = require("zlib");
+const resources  = module.exports = {};
+const async      = require("async");
+const etag       = require("etag");
+const fs         = require("graceful-fs");
+const jb         = require("json-buffer");
+const mkdirp     = require("mkdirp");
+const path       = require("path");
+const vm         = require("vm");
+const zlib       = require("zlib");
 
-const log          = require("./log.js");
-const paths        = require("./paths.js").get();
-const utils        = require("./utils.js");
+const log        = require("./log.js");
+const paths      = require("./paths.js").get();
+const utils      = require("./utils.js");
 
-const themesPath   = path.join(paths.mod, "/node_modules/codemirror/theme");
-const modesPath    = path.join(paths.mod, "/node_modules/codemirror/mode");
-const cachePath    = path.join(paths.mod, "dist", "cache.json");
+const themesPath = path.join(paths.mod, "/node_modules/codemirror/theme");
+const modesPath  = path.join(paths.mod, "/node_modules/codemirror/mode");
+const cachePath  = path.join(paths.mod, "dist", "cache.json");
 
 let minify;
 
@@ -95,14 +95,14 @@ const opts = {
 let autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli, svg, handlebars;
 try {
   autoprefixer = require("autoprefixer");
-  brotli       = require("iltorb").compress;
-  cleanCSS     = new (require("clean-css"))(opts.cleanCSS);
-  handlebars   = require("handlebars");
+  brotli = require("iltorb").compress;
+  cleanCSS = new (require("clean-css"))(opts.cleanCSS);
+  handlebars = require("handlebars");
   htmlMinifier = require("html-minifier");
-  postcss      = require("postcss");
-  uglify       = require("uglify-js");
-  zopfli       = require("node-zopfli");
-  svg          = require("./svg.js");
+  postcss = require("postcss");
+  uglify = require("uglify-js");
+  zopfli = require("node-zopfli");
+  svg = require("./svg.js");
 } catch (err) {}
 
 resources.files = {

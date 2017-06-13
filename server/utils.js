@@ -124,7 +124,7 @@ utils.getNewPath = function(origPath, callback) {
 
       if (filename.indexOf(".") !== -1 && stats.isFile()) {
         extension = filename.substring(filename.lastIndexOf("."));
-        filename  = filename.substring(0, filename.lastIndexOf("."));
+        filename = filename.substring(0, filename.lastIndexOf("."));
       }
 
       if (!/-\d+$/.test(filename)) filename += "-1";

@@ -15,7 +15,7 @@ module.exports = function manifest(req) {
     display: "fullscreen",
     orientation: "any",
     icons: [
-      {src: "logo32.png",  sizes: "32x32",   type: "image/png"},
+      {src: "logo32.png", sizes: "32x32", type: "image/png"},
       {src: "logo120.png", sizes: "120x120", type: "image/png"},
       {src: "logo128.png", sizes: "128x128", type: "image/png"},
       {src: "logo152.png", sizes: "152x152", type: "image/png"},

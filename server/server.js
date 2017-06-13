@@ -198,7 +198,7 @@ function startListeners(callback) {
       } catch (err) {
         if (err.code !== "ENOENT") {
           return callback(
-            new Error("Unable to write to unix socket '" +  socket + "': " + err.code)
+            new Error("Unable to write to unix socket '" + socket + "': " + err.code)
           );
         }
       }
@@ -258,7 +258,7 @@ function startListeners(callback) {
           // a unix socket URL should normally percent-encode the path, but
           // we're printing a path-less URL so pretty-print it with slashes.
           log.info("Listening on ",
-            chalk.blue(proto  + "+unix://") +
+            chalk.blue(proto + "+unix://") +
             chalk.cyan(server.address())
           );
         } else { // host + port
@@ -1421,7 +1421,7 @@ function setupProcess(standalone) {
   process.on("exit", cleanupTemp);
 
   if (standalone) {
-    process.on("SIGINT",  endProcess.bind(null, "SIGINT"));
+    process.on("SIGINT", endProcess.bind(null, "SIGINT"));
     process.on("SIGQUIT", endProcess.bind(null, "SIGQUIT"));
     process.on("SIGTERM", endProcess.bind(null, "SIGTERM"));
     process.on("uncaughtException", function(error) {

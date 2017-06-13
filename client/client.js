@@ -2539,11 +2539,11 @@
   function secsToTime(secs) {
     var mins, hrs, time = "";
     secs = parseInt(secs);
-    hrs  = Math.floor(secs / 3600);
+    hrs = Math.floor(secs / 3600);
     mins = Math.floor((secs - (hrs * 3600)) / 60);
     secs = secs - (hrs * 3600) - (mins * 60);
 
-    if (hrs < 10)  hrs  = "0" + hrs;
+    if (hrs < 10) hrs = "0" + hrs;
     if (mins < 10) mins = "0" + mins;
     if (secs < 10) secs = "0" + secs;
 
@@ -2886,10 +2886,10 @@
     var secs  = now.getSeconds();
 
     if (month < 10) month = "0" + month;
-    if (day   < 10) day   = "0" + day;
-    if (hrs   < 10) hrs   = "0" + hrs;
-    if (mins  < 10) mins  = "0" + mins;
-    if (secs  < 10) secs  = "0" + secs;
+    if (day < 10) day = "0" + day;
+    if (hrs < 10) hrs = "0" + hrs;
+    if (mins < 10) mins = "0" + mins;
+    if (secs < 10) secs = "0" + secs;
     return year + "-" + month + "-" + day + " " + hrs + "." + mins + "." + secs;
   }
 

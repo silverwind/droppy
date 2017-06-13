@@ -112,10 +112,10 @@ log.timestamp = function() {
   let secs = now.getSeconds();
 
   if (month < 10) month = "0" + month;
-  if (day   < 10) day   = "0" + day;
-  if (hrs   < 10) hrs   = "0" + hrs;
-  if (mins  < 10) mins  = "0" + mins;
-  if (secs  < 10) secs  = "0" + secs;
+  if (day < 10) day = "0" + day;
+  if (hrs < 10) hrs = "0" + hrs;
+  if (mins < 10) mins = "0" + mins;
+  if (secs < 10) secs = "0" + secs;
   return year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
 };
 
