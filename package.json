@@ -64,7 +64,7 @@
     "mousetrap": "^1.6.1",
     "node-zopfli": "^2.0.2",
     "photoswipe": "^4.1.2",
-    "postcss": "^6.0.1",
+    "postcss": "^6.0.2",
     "request": "^2.81.0",
     "screenfull": "^3.2.1",
     "svgstore": "^2.0.2",
