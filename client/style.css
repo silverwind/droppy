@@ -623,8 +623,8 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--arrow--left, .pswp__button--arrow--right {
   width: 3em;
   cursor: pointer;
-  color: rgba(255,255,255,.3);
-  stroke: rgba(0,0,0,.3);
+  color: rgba(255,255,255,.5);
+  stroke: rgba(0,0,0,.5);
   stroke-width: 8;
   top: 1.4rem !important;
   height: calc(100% - 2.8rem) !important;

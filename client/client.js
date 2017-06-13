@@ -1697,6 +1697,10 @@
           preventObj.prevent = false;
         });
         view[0].ps.listen("afterChange", function() {
+          // clear possible focus on buttons so spacebar works as expected
+          var focused = document.activeElement;
+          if ($(focused).hasClass("pswp__button")) focused.blur();
+
           view[0].currentFile = this.currItem.filename;
           var imgButtons = view.find(".fit-h, .fit-v");
           var videoButtons = view.find(".loop, .autonext");
