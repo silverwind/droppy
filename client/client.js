@@ -2775,7 +2775,7 @@
   function ajax(opts) {
     if (typeof opts === "string") opts = {url: opts};
 
-    var headers = new Headers(opts.headers);
+    var headers = new Headers(opts.headers || {});
     if (opts.data) {
       headers.append("content-type", "application/json");
     }
