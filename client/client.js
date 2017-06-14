@@ -745,7 +745,7 @@
       if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     }, 100));
     xhr.upload.addEventListener("error", function() {
-      showError(view, "An error occured during upload.");
+      showError(view, "An error occurred during upload.");
       uploadCancel(view, id);
     });
     xhr.addEventListener("readystatechange", function() {
@@ -1057,7 +1057,7 @@
     }
   }
 
-  // Check if the path indicator overflows and scroll it if neccessary
+  // Check if the path indicator overflows and scroll it if necessary
   function checkPathOverflow(view) {
     var width = 40, space = view[0].clientWidth;
     view.find(".path li.in").each(function() {
@@ -1167,7 +1167,7 @@
         if (droppy.socketWait) return;
 
         // Some browsers (like IE) think that clicking on an <a> is real navigation
-        // and will close the WebSocket in turn. We'll reconnect if neccessary.
+        // and will close the WebSocket in turn. We'll reconnect if necessary.
         // Firefox is not affected as long as the <a> bears a `download` attribute,
         // if it's missing it will disconnect a WebSocket as long as
         // https://bugzilla.mozilla.org/show_bug.cgi?id=896666 is not fixed.

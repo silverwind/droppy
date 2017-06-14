@@ -21,7 +21,7 @@
 #### Version 6.1.0 - 18/3/2017
 
 - Added the `compression` option which is enabled by default. It very unlikely that this needs to changed, even with a reverse proxy in place as compression does not incur a performance penalty. It is suggested to turn of compression in your reverse proxy's configuration.
-- It is strongly recommended to set `X-Forwarded-Proto` in your reverse proxy configuration (see [the wiki](https://github.com/silverwind/droppy/wiki)) as a future version might explicitely require this header to be present for increased browser security.
+- It is strongly recommended to set `X-Forwarded-Proto` in your reverse proxy configuration (see [the wiki](https://github.com/silverwind/droppy/wiki)) as a future version might explicitly require this header to be present for increased browser security.
 
 #### Version 6.0.0 - 4/2/2017
 
@@ -95,7 +95,7 @@
 
 #### Version 3.5.0 - 10/12/2015
 
-- Fixed a semi-critical CSFR vulnerabilty which allowed a attacker to use an authenticated user's session.
+- Fixed a semi-critical CSFR vulnerability which allowed a attacker to use an authenticated user's session.
 - Increased site security by enabling CSP and making cookies inaccessible for scripts.
 
 #### Version 3.4.0 - 10/11/2015
@@ -109,7 +109,7 @@
 
 #### Version 3.2.0 - 9/21/2015
 
-- Fix a security issue, all users are adviced to upgrade.
+- Fix a security issue, all users are advised to upgrade.
 
 #### Version 3.1.0 - 9/13/2015
 
