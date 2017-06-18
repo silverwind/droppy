@@ -56,7 +56,6 @@ input::placeholder { color: #999; opacity: 1 }
 main {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
-  display: flex;
   flex-direction: column;
 }
 
@@ -70,53 +69,11 @@ nav {
   user-select: none;
 }
 
-/* ============================= Header Buttons ============================ */
-
-.button {
-  color: #888;
-  line-height: 1.5rem;
-  cursor: pointer;
-  flex: 1;
-}
-.button:not(.disabled):hover { color: #fff; background: #1f1f1f }
-
-@media (min-width: 751px) { .button { font-size: .7rem } }
-@media (max-width: 750px) { .button span { display: none } }
-
-.button svg {
-  height: .8rem;
-  width: .8rem;
-  margin-right: .2rem;
-  position: relative;
-  top: .15rem;
-}
-@media (max-width: 750px) { .button svg { margin-right: 0 } }
-
-#af:hover svg                 { fill: rgba(102,166,255,1) }
-#ad:hover svg                 { fill: rgba(255,102,252,1) }
-#cf:hover svg                 { fill: rgba(102,255,235,1) }
-#cd:hover svg                 { fill: rgba(102,255,125,1) }
-#about:hover svg              { fill: rgba(148,102,255,1) }
-#prefs:hover svg              { fill: rgba(255,212,102,1) }
-#logout:hover svg             { fill: rgba(255, 82, 82,1) }
-#split:hover svg.split .left  { fill: rgba(255, 82, 82,1) }
-#split:hover svg.split .right { fill: rgba(102,166,255,1) }
-
-.button.disabled       { color: #444 !important; cursor: not-allowed !important }
-.button.disabled:hover { color: #444 !important; background: transparent !important }
-.button.disabled:hover svg { fill: #444 !important }
-
 /* ================================== View ================================= */
-
-#views {
-  flex: 1 1;
-  order: 2;
-  overflow-y: auto;
-}
 
 .view {
   position: absolute;
-  bottom: 0; left: 0; right: 0; top: 1.5rem;
+  bottom: 0; left: 0; right: 0; top: 0;
   display: flex;
   flex-direction: column;
 }
@@ -512,6 +469,44 @@ nav {
 
 @media (max-width:  639px) { .spinner { height: 1.25rem; width: 1.25rem; top: 0 } }
 
+/* ============================= View Nav ============================== */
+
+.view-nav {
+  display: flex;
+  flex: 0 0 1.5rem;
+  user-select: none;
+  justify-content: space-between;
+}
+
+.view-nav-left, .view-nav-right {
+  display: flex;
+}
+
+.button {
+  width: 2.5rem;
+  background: transparent;
+  color: #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button + .button { border-left: none }
+
+.af:hover      { color: rgb(102,166,255) }
+.ad:hover      { color: rgb(255,102,252) }
+.cf:hover      { color: rgb(102,255,235) }
+.cd:hover      { color: rgb(102,255,125) }
+.about:hover   { color: rgb(148,102,255) }
+.prefs:hover   { color: rgb(255,212,102) }
+.logout:hover  { color: rgb(255, 82, 82) }
+.newview:hover { color: rgb(255,166,100) }
+
+.button.disabled       { color: #444 !important; cursor: not-allowed !important }
+.button.disabled:hover { color: #444 !important; background: transparent !important }
+.button.disabled:hover svg { fill: #444 !important }
+
 /* ============================ Entry Menu ============================ */
 
 #entry-menu {
@@ -865,7 +860,7 @@ video {
   fill: rgba(255,255,255,.55);
   height: 1.125em;
   width: 1.125em;
-  margin: .0625em .25em;
+  margin: .0625em .125em;
   padding: .125em;
   pointer-events: none;
 }
@@ -894,7 +889,6 @@ video {
 
 .audio-title {
   overflow: hidden;
-  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.5em;
@@ -929,7 +923,6 @@ video {
 
 .audio-bar .time {
   z-index: 4;
-  flex: 0 0 7em;
   text-align: right;
   margin-right: .25em;
   display: block;
@@ -937,7 +930,6 @@ video {
   line-height: 1.5em;
   cursor: default;
 }
-@media (max-width: 639px) { .audio-bar .time { flex-basis: 2.8em } }
 
 .time > * { pointer-events: none }
 .time-cur, .time-max { color: #fff }

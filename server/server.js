@@ -1235,10 +1235,10 @@ function debug() {
           type: "RELOAD",
           css: String(cache.res["style.css"].data).replace('"sprites.png"', '"!/res/sprites.png"')
         });
-      } else if (/\.js$/.test(file) || /\.handlebars$/.test(file)) {
+      } else if (/\.(js|hbs)$/.test(file)) {
         cache.res["client.js"] = resources.compileJS();
         sendObjAll({type: "RELOAD"});
-      } else if (/\.html$/.test(file)) {
+      } else if (/\.(html|svg)$/.test(file)) {
         resources.compileHTML(cache.res);
         sendObjAll({type: "RELOAD"});
       }
@@ -1344,6 +1344,8 @@ function streamFile(req, res, filepath, download, stats) {
     if (req.headers.range) {
       log.error("requested:", req.headers.range, "end:" + stats.size);
     }
+  }).on("stream", function() {
+    log.info(req, res);
   }).pipe(res);
 }
 

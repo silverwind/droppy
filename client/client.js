@@ -226,21 +226,46 @@
   function newView(dest, vId) {
     var view = $(Handlebars.templates.view());
     getView(vId).remove();
-    view.appendTo("#views");
+    droppy.views[vId] = view[0];
+
+    if (droppy.views.length > 1) {
+      droppy.views.forEach(function(view) {
+        $(view).addClass(view.vId === 0 ? "left" : "right");
+        $(view).find(".newview svg").replaceWith(svg("trash"));
+        $(view).find(".newview")[0].setAttribute("aria-label", "Close this view");
+      });
+    }
+
+    view.appendTo("main");
     view[0].vId = vId;
     view[0].uploadId = 0;
-    droppy.views[vId] = view[0];
+
     if (dest) updateLocation(view, dest);
+    initButtons(view);
     bindDropEvents(view);
     bindHoverEvents(view);
     allowDrop(view);
     checkClipboard();
+
+    droppy.views.forEach(function(view) {
+      checkPathOverflow($(view));
+      if (view.ps) view.ps.updateSize(true);
+    });
+
     return getView(vId);
   }
 
   function destroyView(vId) {
     getView(vId).remove();
     droppy.views = droppy.views.filter(function(_, i) { return i !== vId; });
+    droppy.views.forEach(function(view) {
+      $(view).removeClass("left right");
+      $(view).find(".newview svg").replaceWith(svg("window"));
+      $(view).find(".newview")[0].setAttribute("aria-label", "Create new view");
+      checkPathOverflow($(view));
+      view.vId = 0;
+      if (view.ps) view.ps.updateSize(true);
+    });
     sendMessage(vId, "DESTROY_VIEW");
   }
   // ============================================================================
@@ -255,11 +280,7 @@
       // Create new view with initializing
       getLocationsFromHash().forEach(function(string, index) {
         var dest = join(decodeURIComponent(string));
-        if (index === 0) {
-          newView(dest, index);
-        } else if (index === 1) {
-          droppy.split(dest);
-        }
+        newView(dest, index);
       });
     }
   }
@@ -596,117 +617,14 @@
       );
     });
 
-    var fileInput = $("#file"), uppie = new Uppie();
-    uppie(fileInput[0], function(event, fd, files) {
+    droppy.fileInput = $("#file")[0];
+    (new Uppie())(droppy.fileInput, function(event, fd, files) {
       event.preventDefault();
       event.stopPropagation();
       var view = getActiveView();
       if (!validateFiles(files, view)) return;
       upload(view, fd, files);
-      fileInput[0].value = "";
-    });
-
-    // File upload button
-    $("#af").reg("click", function() {
-      if ($(this).hasClass("disabled")) return;
-      // Remove the directory attributes so we get a file picker dialog!
-      if (droppy.detects.directoryUpload) {
-        droppy.dir.forEach(function(attr) {
-          fileInput[0].removeAttribute(attr);
-        });
-      }
-      fileInput[0].click();
-    });
-
-    // Folder upload button - check if we support directory uploads
-    if (droppy.detects.directoryUpload) {
-      // Directory uploads supported - enable the button
-      $("#ad").reg("click", function() {
-        if ($(this).hasClass("disabled")) return;
-        // Set the directory attribute so we get a directory picker dialog
-        droppy.dir.forEach(function(attr) {
-          fileInput[0].setAttribute(attr, attr);
-        });
-        if (fileInput[0].isFilesAndDirectoriesSupported) {
-          fileInput[0].click();
-        } else if (fileInput[0].chooseDirectory) {
-          fileInput[0].chooseDirectory();
-        } else {
-          fileInput[0].click();
-        }
-      });
-    } else {
-      // No directory upload support - disable the button
-      $("#ad").addClass("disabled").on("click", function() {
-        showError(getView(0), "Your browser doesn't support directory uploading");
-      });
-    }
-
-    $("#cf, #cd").reg("click", function() {
-      if ($(this).hasClass("disabled")) return;
-      var view = getActiveView();
-      var content = view.find(".content");
-      var isFile = this.id === "cf";
-      var isEmpty = Boolean(view.find(".empty").length);
-      var html = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
-
-      stopEdit(view, view.find(".editing"), isEmpty);
-      if (isEmpty) content.html(Handlebars.templates["file-header"]());
-      content.prepend(html);
-      content[0].scrollTop = 0;
-      var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
-      entryRename(view, dummy, isEmpty, function(success, _oldVal, newVal) {
-        if (!success) return;
-        if (view[0].dataset.type === "directory") showSpinner(view);
-        sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
-      });
-    });
-
-    var splitButton = $("#split"), splitting;
-    droppy.split = function(dest) {
-      var first, second;
-      if (splitting) return;
-      splitting = true;
-      first = getView(0);
-      if (droppy.views.length === 1) {
-        first.addClass("left");
-        if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
-        second = newView(dest, 1).addClass("right");
-        splitButton[0].setAttribute("aria-label", "Merge views");
-        splitButton[0].childNodes[1].textContent = "Merge";
-        replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
-      } else {
-        destroyView(1);
-        getView(0).removeClass("left");
-        splitButton[0].setAttribute("aria-label", "Split view in half");
-        splitButton[0].childNodes[1].textContent = "Split";
-        replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
-      }
-      var interval = setInterval(function() {
-        droppy.views.forEach(function(view) {
-          checkPathOverflow($(view));
-          if (view.ps) view.ps.updateSize(true);
-        });
-      }, 10);
-      first.transitionend(function() {
-        clearInterval(interval);
-        droppy.views.forEach(function(view) {
-          checkPathOverflow($(view));
-          if (view.ps) view.ps.updateSize(true);
-        });
-        splitting = false;
-      });
-    };
-    $("#split").reg("click", droppy.split);
-
-    $("#about").reg("click", function() {
-      $("#about-box").addClass("in");
-      toggleCatcher();
-    });
-
-    $("#prefs").reg("click", function() {
-      showPrefs();
-      if (droppy.priv) sendMessage(null, "GET_USERS");
+      droppy.fileInput.value = "";
     });
 
     initEntryMenu();
@@ -1384,8 +1302,7 @@
 
   function bindDropEvents(view) {
     // file drop
-    var uppie = new Uppie();
-    uppie(view[0], function(event, fd, files) {
+    (new Uppie())(view[0], function(event, fd, files) {
       var view = getActiveView();
       if (droppy.readOnly) return showError(view, "Files are read-only.");
       if (!files.length) return;
@@ -1417,6 +1334,96 @@
           }
         }
       }
+    });
+  }
+
+  function initButtons(view) {
+    // File upload button
+    view.find(".af").reg("click", function() {
+      if ($(this).hasClass("disabled")) return;
+      // Remove the directory attributes so we get a file picker dialog
+      if (droppy.detects.directoryUpload) {
+        droppy.dir.forEach(function(attr) {
+          droppy.fileInput.removeAttribute(attr);
+        });
+      }
+      droppy.fileInput.click();
+    });
+
+    // Folder upload button - check if we support directory uploads
+    if (droppy.detects.directoryUpload) {
+      // Directory uploads supported - enable the button
+      view.find(".ad").reg("click", function() {
+        if ($(this).hasClass("disabled")) return;
+        // Set the directory attribute so we get a directory picker dialog
+        droppy.dir.forEach(function(attr) {
+          droppy.fileInput.setAttribute(attr, attr);
+        });
+        if (droppy.fileInput.isFilesAndDirectoriesSupported) {
+          droppy.fileInput.click();
+        } else if (droppy.fileInput.chooseDirectory) {
+          droppy.fileInput.chooseDirectory();
+        } else {
+          droppy.fileInput.click();
+        }
+      });
+    } else {
+      // No directory upload support - disable the button
+      view.find(".ad").addClass("disabled").on("click", function() {
+        showError(getView(0), "Your browser doesn't support directory uploading");
+      });
+    }
+
+    view.find(".cf, .cd").reg("click", function() {
+      if ($(this).hasClass("disabled")) return;
+      var view = getActiveView();
+      var content = view.find(".content");
+      var isFile = this.id === "cf";
+      var isEmpty = Boolean(view.find(".empty").length);
+      var html = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
+
+      stopEdit(view, view.find(".editing"), isEmpty);
+      if (isEmpty) content.html(Handlebars.templates["file-header"]());
+      content.prepend(html);
+      content[0].scrollTop = 0;
+      var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
+      entryRename(view, dummy, isEmpty, function(success, _oldVal, newVal) {
+        if (!success) return;
+        if (view[0].dataset.type === "directory") showSpinner(view);
+        sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
+      });
+    });
+
+    view.find(".newview").reg("click", function() {
+      if (droppy.views.length === 1) {
+        var dest = join(view[0].currentFolder, view[0].currentFile);
+        replaceHistory(newView(dest, 1), dest);
+      } else {
+        destroyView(view[0].vId);
+        replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
+      }
+
+      // first = getView(0);
+      // if (droppy.views.length === 1) {
+      //   first.addClass("left");
+      //   if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
+      //   second = newView(dest, 1).addClass("right");
+      //   replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
+      // } else {
+      //   destroyView(1);
+      //   getView(0).removeClass("left");
+      //   replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
+      // }
+    });
+
+    view.find(".about").reg("click", function() {
+      $("#about-box").addClass("in");
+      toggleCatcher();
+    });
+
+    view.find(".prefs").reg("click", function() {
+      showPrefs();
+      if (droppy.priv) sendMessage(null, "GET_USERS");
     });
   }
 
@@ -2370,7 +2377,7 @@
         // skip initial volume set
         setTimeout(function() {
           player.on("volumechange", function() {
-            droppy.set("volume", Math.round(player.isMuted() ? 0 : player.getVolume()));
+            droppy.set("volume", player.isMuted() ? 0 : player.getVolume());
           });
         }, 0);
       })();
@@ -2380,6 +2387,7 @@
   function initVariables() {
     droppy.activeView = 0;
     droppy.demo = null;
+    droppy.fileInput = null;
     droppy.initialized = null;
     droppy.linkCache = [];
     droppy.menuTarget = null;
@@ -2495,6 +2503,8 @@
       jpeg : "image/jpeg",
       svg  : "image/svg+xml",
     };
+
+    window.droppy = droppy;
   }
 
   function requestLink(view, location, attachement, cb) {
