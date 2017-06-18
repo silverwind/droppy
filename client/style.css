@@ -116,10 +116,9 @@ nav {
 
 .view {
   position: absolute;
-  bottom: 0; left:0; right:0; top:1.5rem;
+  bottom: 0; left: 0; right: 0; top: 1.5rem;
   display: flex;
   flex-direction: column;
-  transition: left .2s, right .2s;
 }
 
 .content-container {
