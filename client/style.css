@@ -89,6 +89,8 @@ nav {
 .view.right { left:50%; right:0 }
 .view.right .content.directory { border-left: 1px solid #ccc }
 
+.view.left .prefs, .view.left .about, .view.left .logout { display: none }
+
 .content {
   left: 0;
   width: 100%;

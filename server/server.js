@@ -423,7 +423,7 @@ function setupSocket(server) {
       if (msg.type === "REQUEST_SETTINGS") {
         sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
           version       : pkg.version,
-          debug         : config.dev,
+          dev           : config.dev,
           demo          : config.demo,
           public        : config.public,
           readOnly      : config.readOnly,

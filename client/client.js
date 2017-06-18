@@ -231,7 +231,7 @@
     if (droppy.views.length > 1) {
       droppy.views.forEach(function(view) {
         $(view).addClass(view.vId === 0 ? "left" : "right");
-        $(view).find(".newview svg").replaceWith(svg("trash"));
+        $(view).find(".newview svg").replaceWith(svg("window-cross"));
         $(view).find(".newview")[0].setAttribute("aria-label", "Close this view");
       });
     }
@@ -394,24 +394,8 @@
         // Insert plain mode on the top
         droppy.modes.unshift("plain");
 
-        if (droppy.demo || droppy.public) {
-          $("#logout").addClass("disabled").reg("click", function() {
-            showError(getView(0), "Signing out is disabled");
-          });
-        } else {
-          $("#logout").reg("click", function() {
-            ajax({
-              method: "POST",
-              url: "!/logout",
-              data: {
-                path: getRootPath(),
-              },
-            }).then(function() {
-              droppy.socket.close(4000);
-              render("login");
-              initAuthPage();
-            });
-          });
+        if (droppy.dev) {
+          window.droppy = droppy;
         }
 
         if (droppy.readOnly) {
@@ -1402,18 +1386,6 @@
         destroyView(view[0].vId);
         replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
       }
-
-      // first = getView(0);
-      // if (droppy.views.length === 1) {
-      //   first.addClass("left");
-      //   if (typeof dest !== "string") dest = join(first[0].currentFolder, first[0].currentFile);
-      //   second = newView(dest, 1).addClass("right");
-      //   replaceHistory(second, join(second[0].currentFolder, second[0].currentFile));
-      // } else {
-      //   destroyView(1);
-      //   getView(0).removeClass("left");
-      //   replaceHistory(first, join(first[0].currentFolder, first[0].currentFile));
-      // }
     });
 
     view.find(".about").reg("click", function() {
@@ -1425,6 +1397,26 @@
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
+
+    if (droppy.demo || droppy.public) {
+      view.find(".logout").addClass("disabled").reg("click", function() {
+        showError(getView(0), "Signing out is disabled");
+      });
+    } else {
+      view.find(".logout").reg("click", function() {
+        ajax({
+          method: "POST",
+          url: "!/logout",
+          data: {
+            path: getRootPath(),
+          },
+        }).then(function() {
+          droppy.socket.close(4000);
+          render("login");
+          initAuthPage();
+        });
+      });
+    }
   }
 
   function initEntryMenu() {
@@ -2503,8 +2495,6 @@
       jpeg : "image/jpeg",
       svg  : "image/svg+xml",
     };
-
-    window.droppy = droppy;
   }
 
   function requestLink(view, location, attachement, cb) {
