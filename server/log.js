@@ -65,7 +65,7 @@ const log = module.exports = function(req, res, logLevel) {
   if (logfile) {
     fs.write(logfile, stripAnsi(elems.join(" ")) + "\n");
   } else {
-    console.log.apply(console, elems);
+    console.info.apply(console, elems);
   }
 };
 

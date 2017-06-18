@@ -46,9 +46,9 @@ if (argv.daemon || argv.d) {
 }
 
 if (argv._[0] === "build") {
-  console.log("Building resources ...");
+  console.info("Building resources ...");
   require("./server/resources.js").build(function(err) {
-    console.log(err || "Resources built successfully");
+    console.info(err || "Resources built successfully");
     process.exit(err ? 1 : 0);
   });
 }
