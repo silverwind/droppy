@@ -20,7 +20,7 @@ const cmds = {
   update    : "update                 Self-Update (may require root)",
   config    : "config                 Edit the config",
   list      : "list                   List users",
-  add       : "add <user> <pass>      Add a user",
+  add       : "add <user> <pass> [p]  Add or update a user. Specify 'p' for privileged",
   del       : "del <user>             Delete a user",
   build     : "build                  Build client resources",
   version   : "version, -v            Print version",
@@ -119,10 +119,10 @@ if (cmds[cmd]) {
       printUsers(db.get("users"));
     });
   } else if (cmd === "add") {
-    if (args.length !== 2) return printHelp();
+    if (args.length !== 2 && args.length !== 3) return printHelp();
     db = require("./server/db.js");
     db.init(function() {
-      db.addOrUpdateUser(args[0], args[1], true, function() {
+      db.addOrUpdateUser(args[0], args[1], args[2] === "p", function() {
         printUsers(db.get("users"));
       });
     });
