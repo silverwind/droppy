@@ -5,7 +5,7 @@
 
 # echo >> /etc/xxx and not adduser/addgroup because adduser/addgroup
 # won't work if uid/gid already exists.
-echo -e "droppy:x:${UID}:${GID}:droppy:/yarn/node_modules/droppy:/bin/false\n" >> /etc/passwd
+echo -e "droppy:x:${UID}:${GID}:droppy:/droppy:/bin/false\n" >> /etc/passwd
 echo -e "droppy:x:${GID}:droppy\n" >> /etc/group
 
 # it's better to do that (mkdir and chown) here than in the Dockerfile
