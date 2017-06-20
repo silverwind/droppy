@@ -34,7 +34,11 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   rm -rf /yarn/node_modules/lodash/core.js && \
   # cleanup apk cache
   apk del --purge deps && \
-  rm -rf /var/cache/apk/*
+  rm -rf /var/cache/apk/* && \
+  # symlink directories so the CLI works without flags
+  mkdir -p /root/.droppy && \
+  ln -s /config /root/.droppy/config && \
+  ln -s /files /root/.droppy/files
 
 EXPOSE 8989
 VOLUME ["/config", "/files"]
