@@ -4,7 +4,7 @@ MAINTAINER silverwind
 # Install and build modules
 RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python git && \
   # install global modules
-  yarn global add droppy@latest --production --global-folder /yarn && \
+  yarn global add droppy@latest --non-interactive --prod --force --no-lockfile --global-folder /yarn && \
   # remove yarn
   rm -rf /usr/local/share/yarn && \
   rm -rf /usr/local/bin/yarn && \
