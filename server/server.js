@@ -30,14 +30,14 @@ const pkg       = require("./../package.json");
 const resources = require("./resources.js");
 const utils     = require("./utils.js");
 
-let cache         = {};
+let cache           = {};
 const clients       = {};
 const clientsPerDir = {};
-let config        = null;
-let firstRun      = null;
-let Wss           = null;
-let uwsLogged     = false;
-let ready         = false;
+let config          = null;
+let firstRun        = null;
+let Wss             = null;
+let uwsLogged       = false;
+let ready           = false;
 
 const droppy = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
@@ -75,7 +75,7 @@ const droppy = function droppy(opts, isStandalone, dev, callback) {
         cb(err);
       });
     },
-    function(cb) { db.init(cb); },
+    function(cb) { db.init(cfg, cb); },
     function(cb) {
       log.init({logLevel: config.logLevel, timestamps: config.timestamps});
       firstRun = Object.keys(db.get("users")).length === 0;
@@ -1280,7 +1280,9 @@ function cleanupLinks(callback) {
             delete links[shareLink];
           }
           if (++cbcount === linkcount) {
-            db.set("links", links);
+            if (JSON.stringify(links) !== JSON.stringify(db.get("links"))) {
+              db.set("links", links);
+            }
             callback();
           }
         });

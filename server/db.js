@@ -1,51 +1,49 @@
 "use strict";
 
 const db       = module.exports = {};
+
+const chokidar = require("chokidar");
 const fs       = require("graceful-fs");
 const crypto   = require("crypto");
 const mkdirp   = require("mkdirp");
 const path     = require("path");
 
+const log      = require("./log.js");
 const dbFile   = require("./paths.js").get().db;
 const defaults = {users: {}, sessions: {}, links: {}};
 
-let database;
+let database, watching;
+let cfg = null;
 
-db.init = function(callback) {
+db.init = function(config, callback) {
+  if (config) {
+    cfg = config;
+    watch();
+  }
   fs.stat(dbFile, function(err) {
     if (err) {
       if (err.code === "ENOENT") {
         database = defaults;
-        mkdirp(path.dirname(dbFile), function() {
+        mkdirp(path.dirname(dbFile), function(err) {
           write();
-          callback();
+          callback(err);
         });
       } else {
         callback(err);
       }
     } else {
-      fs.readFile(dbFile, function(err, data) {
+      db.parse(function(err) {
         if (err) return callback(err);
-        data = data.toString();
-
-        if (data.trim() !== "") {
-          try {
-            database = JSON.parse(data);
-          } catch (err) {
-            return callback(err);
-          }
-        } else {
-          database = {};
-        }
-
-        database = Object.assign({}, defaults, database);
+        let modified = false;
 
         // migrate old shortlinks
         if (database.shortlinks) {
+          modified = true;
           database.sharelinks = database.shortlinks;
           delete database.shortlinks;
         }
         if (database.sharelinks) {
+          modified = true;
           database.links = {};
           Object.keys(database.sharelinks).forEach(function(hash) {
             database.links[hash] = {
@@ -59,19 +57,46 @@ db.init = function(callback) {
         if (database.sessions) {
           Object.keys(database.sessions).forEach(function(session) {
             // invalidate session not containing a username
-            if (!database.sessions[session].username) delete database.sessions[session];
+            if (!database.sessions[session].username) {
+              modified = true;
+              delete database.sessions[session];
+            }
             // invalidate pre-1.7 session tokens
-            if (session.length !== 48) delete database.sessions[session];
+            if (session.length !== 48) {
+              modified = true;
+              delete database.sessions[session];
+            }
           });
         }
 
         // remove unused values
-        if (database.version) delete database.version;
+        if (database.version) {
+          modified = true;
+          delete database.version;
+        }
 
-        write();
+        if (modified) write();
         callback();
       });
     }
+  });
+};
+
+db.parse = function(cb) {
+  fs.readFile(dbFile, "utf8", function(err, data) {
+    if (err) return cb(err);
+
+    if (data.trim() !== "") {
+      try {
+        database = JSON.parse(data);
+      } catch (err) {
+        return cb(err);
+      }
+    } else {
+      database = {};
+    }
+    database = Object.assign({}, defaults, database);
+    cb();
   });
 };
 
@@ -120,7 +145,30 @@ db.authUser = function(user, pass) {
 
 // TODO: async
 function write() {
+  watching = false;
   fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
+
+  // watch the file 1 second after last write
+  setTimeout(function() {
+    watching = true;
+  }, 1000);
+}
+
+function watch() {
+  chokidar.watch(dbFile, {
+    ignoreInitial: true,
+    usePolling: Boolean(cfg.pollingInterval),
+    interval: cfg.pollingInterval,
+    binaryInterval: cfg.pollingInterval
+  }).on("error", log.error).on("change", function() {
+    if (!watching) return;
+    db.parse(function(err) {
+      if (err) return log.error(err);
+      log.info("db.json reloaded because it was changed");
+    });
+  }).on("ready", function() {
+    watching = true;
+  });
 }
 
 function getHash(string) {

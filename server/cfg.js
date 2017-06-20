@@ -65,6 +65,11 @@ cfg.init = function(config, callback) {
           config = migrate(config);
           config = Object.assign({}, defaults, config);
 
+          // TODO: validate more options
+          if (typeof config.pollingInterval !== "number") {
+            return callback(new TypeError("Expected a number for the 'pollingInterval' option"));
+          }
+
           // Remove options no longer present
           Object.keys(config).forEach(function(key) {
             if (defaults[key] === undefined && hiddenOpts.indexOf(key) === -1) {

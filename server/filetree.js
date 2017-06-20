@@ -28,9 +28,6 @@ filetree.init = function(config) {
 };
 
 filetree.watch = function() {
-  if (cfg.pollingInterval && typeof cfg.pollingInterval !== "number") {
-    throw new TypeError("Expected a number");
-  }
   chokidar.watch(paths.files, {
     alwaysStat    : true,
     ignoreInitial : true,
