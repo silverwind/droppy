@@ -1,13 +1,19 @@
 # droppy Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
+#### Version 6.6.0 - 20/06/2017
+
+- Redesigned top row buttons so each view now has their own set.
+- When creating users on the command line, it's now possibly to specify if they are privileged.
+- Changes users on the command line should be immediately be reflected on running instances.
+
 #### Version 6.5.0 - 10/06/2017
 
 - Pasting images and text from the clipboard to a directory will now automatically upload the contents to a new file.
 
 #### Version 6.4.0 - 03/06/2017
 
-- Added the `ignorePatterns` and `watch` options
+- Added the `ignorePatterns` and `watch` options.
 
 #### Version 6.3.0 - 22/3/2017
 
