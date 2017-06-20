@@ -75,7 +75,12 @@ const droppy = function droppy(opts, isStandalone, dev, callback) {
         cb(err);
       });
     },
-    function(cb) { db.init(cfg, cb); },
+    function(cb) {
+      db.load(function() {
+        db.watch(config);
+        cb();
+      });
+    },
     function(cb) {
       log.init({logLevel: config.logLevel, timestamps: config.timestamps});
       firstRun = Object.keys(db.get("users")).length === 0;

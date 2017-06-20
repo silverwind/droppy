@@ -13,13 +13,8 @@ const dbFile   = require("./paths.js").get().db;
 const defaults = {users: {}, sessions: {}, links: {}};
 
 let database, watching;
-let cfg = null;
 
-db.init = function(config, callback) {
-  if (config) {
-    cfg = config;
-    watch();
-  }
+db.load = function(callback) {
   fs.stat(dbFile, function(err) {
     if (err) {
       if (err.code === "ENOENT") {
@@ -143,23 +138,12 @@ db.authUser = function(user, pass) {
   return false;
 };
 
-// TODO: async
-function write() {
-  watching = false;
-  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
-
-  // watch the file 1 second after last write
-  setTimeout(function() {
-    watching = true;
-  }, 1000);
-}
-
-function watch() {
+db.watch = function(config) {
   chokidar.watch(dbFile, {
     ignoreInitial: true,
-    usePolling: Boolean(cfg.pollingInterval),
-    interval: cfg.pollingInterval,
-    binaryInterval: cfg.pollingInterval
+    usePolling: Boolean(config.pollingInterval),
+    interval: config.pollingInterval,
+    binaryInterval: config.pollingInterval
   }).on("error", log.error).on("change", function() {
     if (!watching) return;
     db.parse(function(err) {
@@ -169,6 +153,17 @@ function watch() {
   }).on("ready", function() {
     watching = true;
   });
+};
+
+// TODO: async
+function write() {
+  watching = false;
+  fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
+
+  // watch the file 1 second after last write
+  setTimeout(function() {
+    watching = true;
+  }, 1000);
 }
 
 function getHash(string) {
