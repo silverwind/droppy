@@ -553,7 +553,7 @@ html:not(.mobile) #entry-menu a.active {
 
 .readonly a.rename, .readonly a.copy, .readonly a.cut, .readonly a.delete,
 .readonly .af, .readonly .ad, .readonly .cf, .readonly .cd,
-.readonly .movefile, .readonly .copyfile,
+.readonly .movefile, .readonly .copyfile, .public .logout,
 .readonly .sidebar .save {
   display: none !important;
 }

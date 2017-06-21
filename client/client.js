@@ -397,9 +397,11 @@
         if (droppy.dev) {
           window.droppy = droppy;
         }
-
         if (droppy.readOnly) {
           document.documentElement.classList.add("readonly");
+        }
+        if (droppy.demo || droppy.public) {
+          document.documentElement.classList.add("public");
         }
         break;
       case "MEDIA_FILES":
@@ -1398,25 +1400,19 @@
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
 
-    if (droppy.demo || droppy.public) {
-      view.find(".logout").addClass("disabled").reg("click", function() {
-        showError(getView(0), "Signing out is disabled");
+    view.find(".logout").reg("click", function() {
+      ajax({
+        method: "POST",
+        url: "!/logout",
+        data: {
+          path: getRootPath(),
+        },
+      }).then(function() {
+        droppy.socket.close(4000);
+        render("login");
+        initAuthPage();
       });
-    } else {
-      view.find(".logout").reg("click", function() {
-        ajax({
-          method: "POST",
-          url: "!/logout",
-          data: {
-            path: getRootPath(),
-          },
-        }).then(function() {
-          droppy.socket.close(4000);
-          render("login");
-          initAuthPage();
-        });
-      });
-    }
+    });
   }
 
   function initEntryMenu() {
