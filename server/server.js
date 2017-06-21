@@ -550,10 +550,6 @@ function setupSocket(server) {
             return sendError(sid, null, "Cannot delete yourself!");
           }
           if (db.delUser(name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
-          if (Object.keys(db.get("users")).length === 0) {
-            firstRun = true;
-            db.set("sessions", {});
-          }
         } else {
           const isNew = !db.get("users")[name];
           db.addOrUpdateUser(name, pass, msg.data.priv || false);

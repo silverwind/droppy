@@ -10,7 +10,7 @@ COPY ["droppy.js", "index.js", "docker-start.sh", "README.md", "LICENSE", "packa
 # Install build dependencies and and build modules
 RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python git && \
   cd /droppy && \
-  yarn install --verbose --non-interactive --no-progress --prod --no-lockfile && \
+  yarn install --non-interactive --no-progress --prod --no-lockfile && \
   # remove yarn
   rm -rf /usr/local/share/yarn && \
   rm -rf /usr/local/bin/yarn && \
