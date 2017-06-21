@@ -156,7 +156,13 @@ function printHelp() {
 }
 
 function printUsers(users) {
-  console.info("Current Users: " + Object.keys(users).join(", "));
+  if (Object.keys(users).length === 0) {
+    console.info("No users defined. Use 'add' to add one.");
+  } else {
+    console.info("Current Users:\n" + Object.keys(users).map(function(user) {
+      return "  - " + user;
+    }).join("\n"));
+  }
 }
 
 function findEditor(cb) {
