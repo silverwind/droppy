@@ -527,7 +527,7 @@
       var view = $(e.target).parents(".view");
       if (!view.length) return;
       droppy.activeView = view[0].vId;
-      toggleButtons(view[0].dataset.type);
+      toggleButtons(view, view[0].dataset.type);
     });
 
     // handle pasting text and images in directory view
@@ -1141,14 +1141,14 @@
         if (view[0].dataset.type === "directory") {
           bindDragEvents(view);
         }
-        toggleButtons(type);
+        toggleButtons(view, type);
         resolve();
       }
     });
   }
 
-  function toggleButtons(type) {
-    $("#af, #ad, #cf, #cd")[type === "directory" ? "removeClass" : "addClass"]("disabled");
+  function toggleButtons(view, type) {
+    view.find(".af, .ad, .cf, .cd")[type === "directory" ? "removeClass" : "addClass"]("disabled");
   }
 
   function handleDrop(view, event, src, dst, spinner) {
