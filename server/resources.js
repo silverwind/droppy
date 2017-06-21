@@ -528,7 +528,7 @@ resources.compileHTML = function(res) {
   res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: utils.contentType("html")};
 
   let first = html.replace("{{type}}", "f");
-  first = minify ? htmlMinifier.minify(auth, opts.htmlMinifier) : first;
+  first = minify ? htmlMinifier.minify(first, opts.htmlMinifier) : first;
   res["first.html"] = {data: buf(first), etag: etag(first), mime: utils.contentType("html")};
 
   let main = html.replace("{{type}}", "m");
