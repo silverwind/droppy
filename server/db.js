@@ -117,7 +117,16 @@ db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged) {
 
 db.delUser = function(user) {
   if (database.users[user]) {
+    // delete user
     delete database.users[user];
+
+    // delete user sessions
+    Object.keys(database.sessions).forEach(function(sid) {
+      if (database.sessions[sid].username === user) {
+        delete database.sessions[sid];
+      }
+    });
+
     write();
     return true;
   } else {
