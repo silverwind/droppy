@@ -1364,7 +1364,7 @@
       if ($(this).hasClass("disabled")) return;
       var view = getActiveView();
       var content = view.find(".content");
-      var isFile = this.id === "cf";
+      var isFile = this.classList.contains("cf");
       var isEmpty = Boolean(view.find(".empty").length);
       var html = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
 
