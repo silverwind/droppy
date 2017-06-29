@@ -485,13 +485,23 @@ nav {
 }
 
 .button {
-  width: 2.5rem;
+  width: 2rem;
   background: transparent;
   color: #ccc;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 800px) {
+  .view.left .button, .view.right .button { width: 1.5rem }
+}
+@media (max-width: 530px) {
+  .view.left .button, .view.right .button { width: auto; margin: 0 1px }
+}
+@media (max-width: 400px) {
+  .button { width: 1.5rem }
 }
 
 .button + .button { border-left: none }
