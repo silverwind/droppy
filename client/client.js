@@ -1672,7 +1672,6 @@
           spacing: 0,
           timeToIdle: 2500,
           timeToIdleOutside: 2500,
-          openZoomed: true,
         });
 
         var autonext = view.find(".autonext");
