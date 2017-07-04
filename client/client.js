@@ -1259,8 +1259,8 @@
   droppy.dragTimer = new DragTimer();
 
   function allowDrop(el) {
-    el.reg("dragover", function(event) {
-      event.preventDefault();
+    el.reg("dragover", function(e) {
+      e.preventDefault();
       droppy.dragTimer.refresh();
     });
   }
@@ -1663,7 +1663,7 @@
           hideAnimationDuration: 0,
           history: false,
           index: startIndex,
-          maxSpreadZoom: 4,
+          maxSpreadZoom: 16,
           modal: false,
           pinchToClose: false,
           shareButtons: [],
@@ -1672,6 +1672,7 @@
           spacing: 0,
           timeToIdle: 2500,
           timeToIdleOutside: 2500,
+          openZoomed: true,
         });
 
         var autonext = view.find(".autonext");
@@ -1688,8 +1689,8 @@
         });
 
         // needed for plyr seeking
-        view[0].ps.listen("preventDragEvent", function(_e, _isDown, preventObj) {
-          preventObj.prevent = false;
+        view[0].ps.listen("preventDragEvent", function(e, _isDown, preventObj) {
+          preventObj.prevent = e.target.classList.contains("pswp__img");
         });
         view[0].ps.listen("afterChange", function() {
           // clear possible focus on buttons so spacebar works as expected
@@ -1724,31 +1725,31 @@
           view[0].ps = null;
           updateLocation(view, view[0].currentFolder);
         });
+
+        var dur = 300;
+        function middle(ps) {
+          return {x: ps.viewportSize.x / 2, y: ps.viewportSize.y / 2};
+        }
         // fit zoom buttons
         view[0].ps.zoomed = {h: false, v: false};
-        function fitH(dur) {
+        function fitH() {
           var vw = view[0].ps.viewportSize.x, iw = view[0].ps.currItem.w;
           var initial = view[0].ps.currItem.initialZoomLevel;
-          var middle = {x: vw / 2, y: view[0].ps.viewportSize.y / 2};
-          view[0].ps.zoomTo(view[0].ps.zoomed.h ? initial : vw / iw, middle, dur);
+          var level = view[0].ps.zoomed.h ? initial : vw / iw;
+          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           view[0].ps.zoomed.v = false;
           view[0].ps.zoomed.h = !view[0].ps.zoomed.h;
-          setZoomed(Boolean(view[0].ps.zoomed.h));
         }
-        function fitV(dur) {
+        function fitV() {
           var vh = view[0].ps.viewportSize.y, ih = view[0].ps.currItem.h;
           var initial = view[0].ps.currItem.initialZoomLevel;
-          var middle = {x: view[0].ps.viewportSize.x / 2, y: vh / 2};
-          view[0].ps.zoomTo(view[0].ps.zoomed.v ? initial : vh / ih, middle, dur);
+          var level = view[0].ps.zoomed.v ? initial : vh / ih;
+          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           view[0].ps.zoomed.h = false;
           view[0].ps.zoomed.v = !view[0].ps.zoomed.v;
-          setZoomed(Boolean(view[0].ps.zoomed.v));
         }
-        function setZoomed(zoomed) {
-          view.find(".pswp__button--zoom").html(svg(zoomed ? "zoomout" : "zoomin"));
-        }
-        view.find(".fit-h").reg("click", fitH.bind(null, 300));
-        view.find(".fit-v").reg("click", fitV.bind(null, 300));
+        view.find(".fit-h").reg("click", fitH);
+        view.find(".fit-v").reg("click", fitV);
         view[0].ps.listen("afterChange", function() {
           if (view[0].ps.zoomed.h) {
             view[0].ps.zoomed.h = false;
@@ -1758,33 +1759,20 @@
             fitV(0);
           }
         });
-        // swap SVGs
-        var rootEl = view.find(".pswp")[0];
-        onClassChange(rootEl, "pswp--zoomed-in", setZoomed);
-        onClassChange(rootEl, "pswp--fs", setZoomed);
+        view.find(".zoom-in").reg("click", function(e) {
+          var level = view[0].ps.getZoomLevel() * 2;
+          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
+          $(e.target).parents(".pswp").addClass("pswp--zoomed-in");
+        });
+        view.find(".zoom-out").reg("click", function() {
+          var level = view[0].ps.getZoomLevel() / 2;
+          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
+        });
+
         view[0].ps.init();
         hideSpinner(view);
       });
     });
-  }
-
-  function onClassChange(target, className, cb) {
-    var hadClass = false;
-    (new MutationObserver(function(muts) {
-      muts.some(function(mut) {
-        if (mut.attributeName !== "class") return;
-        var hasClass = Array.from(target.classList).includes(className);
-        if (hasClass && !hadClass) {
-          hadClass = true;
-          cb(true);
-          return true;
-        } else if (!hasClass && hadClass) {
-          hadClass = false;
-          cb(false);
-          return true;
-        }
-      });
-    })).observe(target, {attributes: true});
   }
 
   function openDoc(view, entryId) {
