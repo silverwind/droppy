@@ -595,7 +595,7 @@
       });
     }
 
-    screenfull.onchange(function() {
+    screenfull.on("change", function() {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
       $("svg.fullscreen, svg.unfullscreen").replaceWith(
