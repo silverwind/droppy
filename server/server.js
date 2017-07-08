@@ -726,16 +726,17 @@ function handleGET(req, res) {
   } else if (URI === "/robots.txt") {
     res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
     res.end("User-agent: *\nDisallow: /\n");
-    log.info(req, res);
-    return;
+    return log.info(req, res);
   } else if (URI === "/favicon.ico") {
     res.statusCode = 404;
     res.end();
-    log.info(req, res);
-    return;
+    return log.info(req, res);
   } else if (/^\/!\/res\/[\s\S]+/.test(URI)) {
-    handleResourceRequest(req, res, URI.substring(7));
-    return;
+    return handleResourceRequest(req, res, URI.substring(7));
+  }
+
+  if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
+    return handleFileRequest(req, res, true);
   }
 
   // validate requests below
@@ -757,8 +758,6 @@ function handleGET(req, res) {
       res.statusCode = 401;
       res.end();
     }
-  } else if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
-    handleFileRequest(req, res, true);
   } else if (/^\/!\/type\/[\s\S]+/.test(URI)) {
     handleTypeRequest(req, res, utils.addFilesPath(URI.substring(7)));
   } else if (/^\/!\/file\/[\s\S]+/.test(URI)) {
@@ -976,17 +975,15 @@ function handleFileRequest(req, res, download) {
     download = link.attachement;
     filepath = utils.addFilesPath(link.location);
   } else { // it's a direct file request
+    if (!validateRequest(req)) {
+      return redirectToRoot(req, res);
+    }
     parts = /^\/!\/(.+?)\/(.+)$/.exec(URI);
     if (!parts || !parts[1] || !parts[2] || !utils.isPathSane(parts[2])) {
       return redirectToRoot(req, res);
     }
     download = parts[1] === "dl";
     filepath = utils.addFilesPath("/" + [parts[2]]);
-  }
-
-  // Validate the cookie for the remaining requests
-  if (!validateRequest(req) && !shareLink) {
-    return redirectToRoot(req, res);
   }
 
   fs.stat(filepath, function(error, stats) {
