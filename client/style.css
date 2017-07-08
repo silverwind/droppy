@@ -219,7 +219,7 @@ nav {
   color: #bbb;
   padding: 0 .25em;
   right: 0;
-  top: 0;
+  top: 1.5rem;
   cursor: pointer;
   transition: opacity .3s, visibility 0s .3s;
   user-select: none;
@@ -228,17 +228,17 @@ nav {
 }
 .paste-button.in  { opacity: 1; visibility: visible; transition: opacity .3s }
 
-@media (max-width: 639px) { .paste-button { line-height: 1.25rem } }
-
 .paste-button .triangle {
   position: absolute;
   transform: rotate(180deg);
   fill: #333;
 }
 
-.paste-button .triangle { position: absolute; height: 1.5rem; width: 1.5rem; left: -.875rem }
-@media (max-width:  639px) {
-  .paste-button .triangle { height: 1.25rem; width: 1.25rem; left: -.74rem }
+.paste-button .triangle {
+  position: absolute;
+  height: 1.5rem;
+  width: 1.5rem;
+  left: -.875rem;
 }
 
 .paste-button svg.paste {
