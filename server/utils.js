@@ -214,8 +214,8 @@ utils.contentType = function(p) {
   }
 };
 
-utils.getDispo = function(fileName) {
-  return cd(path.basename(fileName));
+utils.getDispo = function(fileName, inline) {
+  return cd(path.basename(fileName), {type: inline ? "inline" : "attachment"});
 };
 
 utils.createSid = function() {

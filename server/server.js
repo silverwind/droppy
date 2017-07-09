@@ -1309,7 +1309,7 @@ function streamArchive(req, res, zipPath, download) {
   res.statusCode = 200;
   res.setHeader("Content-Type", utils.contentType(zip));
   res.setHeader("Transfer-Encoding", "chunked");
-  res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip"));
+  res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", !download));
   readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
     const pathInZip = path.join(path.basename(relPath), file.path);
     const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
