@@ -758,6 +758,7 @@ function handleGET(req, res) {
       res.statusCode = 401;
       res.end();
     }
+    log.info(req, res);
   } else if (/^\/!\/type\/[\s\S]+/.test(URI)) {
     handleTypeRequest(req, res, utils.addFilesPath(URI.substring(7)));
   } else if (/^\/!\/file\/[\s\S]+/.test(URI)) {
@@ -765,11 +766,10 @@ function handleGET(req, res) {
   } else if (/^\/!\/zip\/[\s\S]+/.test(URI)) {
     const zipPath = utils.addFilesPath(URI.substring(6));
     fs.stat(zipPath, function(err, stats) {
-      if (err) {
-        log.error(err);
-      } else if (stats.isDirectory()) {
+      if (!err && stats.isDirectory()) {
         streamArchive(req, res, zipPath, true);
       } else {
+        if (err) log.error(err);
         res.statusCode = 404;
         res.end();
         log.info(req, res);
