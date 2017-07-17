@@ -1326,7 +1326,7 @@ function streamArchive(req, res, zipPath, download) {
 }
 
 function streamFile(req, res, filepath, download, stats, shareLink) {
-  var hash = etag(filepath + "/" + stats.mtime);
+  const hash = etag(filepath + "/" + stats.mtime);
 
   // Check Etag
   if ((req.headers["if-none-match"] || "") === hash) {
