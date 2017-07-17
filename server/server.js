@@ -768,7 +768,7 @@ function handleGET(req, res) {
     const zipPath = utils.addFilesPath(URI.substring(6));
     fs.stat(zipPath, function(err, stats) {
       if (!err && stats.isDirectory()) {
-        streamArchive(req, res, zipPath, true);
+        streamArchive(req, res, zipPath, true, stats, false);
       } else {
         if (err) log.error(err);
         res.statusCode = 404;
@@ -1001,7 +1001,7 @@ function handleFileRequest(req, res, download) {
   fs.stat(filepath, function(error, stats) {
     if (!error && stats) {
       if (stats.isDirectory() && shareLink) {
-        streamArchive(req, res, filepath, download);
+        streamArchive(req, res, filepath, download, stats, shareLink);
       } else {
         streamFile(req, res, filepath, download, stats, shareLink);
       }
@@ -1301,8 +1301,23 @@ function cleanupLinks(callback) {
   }
 }
 
+// verify a resource etag, returns the etag if it doesn't match, otherwise
+// returns null indicating the response is handled with a 304
+function checkETag(req, res, path, mtime) {
+  const eTag = etag(path + "/" + mtime);
+  if ((req.headers["if-none-match"] || "") === eTag) {
+    res.statusCode = 304;
+    res.end();
+    log.info(req, res);
+    return null;
+  }
+  return eTag;
+}
+
 // Create a zip file from a directory and stream it to a client
-function streamArchive(req, res, zipPath, download) {
+function streamArchive(req, res, zipPath, download, stats, shareLink) {
+  const eTag = checkETag(req, res, zipPath, stats.mtime);
+  if (!eTag) return;
   const zip = new yazl.ZipFile();
   const relPath = utils.removeFilesPath(zipPath);
   log.info(req, res);
@@ -1311,6 +1326,8 @@ function streamArchive(req, res, zipPath, download) {
   res.setHeader("Content-Type", utils.contentType(zip));
   res.setHeader("Transfer-Encoding", "chunked");
   res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", !download));
+  res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
+  res.setHeader("ETag", eTag);
   readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
     const pathInZip = path.join(path.basename(relPath), file.path);
     const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
@@ -1326,16 +1343,8 @@ function streamArchive(req, res, zipPath, download) {
 }
 
 function streamFile(req, res, filepath, download, stats, shareLink) {
-  const hash = etag(filepath + "/" + stats.mtime);
-
-  // Check Etag
-  if ((req.headers["if-none-match"] || "") === hash) {
-    res.statusCode = 304;
-    res.end();
-    log.info(req, res);
-    return;
-  }
-
+  const eTag = checkETag(req, res, filepath, stats.mtime);
+  if (!eTag) return;
   // send expects a url-encoded argument
   sendFile(req, encodeURIComponent(utils.removeFilesPath(filepath).substring(1)), {
     root: paths.files,
@@ -1346,7 +1355,7 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
   }).on("headers", function(res) {
     res.setHeader("Content-Type", utils.contentType(filepath));
     res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
-    res.setHeader("ETag", hash);
+    res.setHeader("ETag", eTag);
     if (download) {
       res.setHeader("Content-Disposition", utils.getDispo(filepath));
     }
