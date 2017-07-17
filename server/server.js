@@ -10,6 +10,7 @@ const async    = require("async");
 const Busboy   = require("busboy");
 const chalk    = require("chalk");
 const escRe    = require("escape-string-regexp");
+const etag     = require("etag");
 const fs       = require("graceful-fs");
 const imgSize  = require("image-size");
 const readdirp = require("readdirp");
@@ -1002,7 +1003,7 @@ function handleFileRequest(req, res, download) {
       if (stats.isDirectory() && shareLink) {
         streamArchive(req, res, filepath, download);
       } else {
-        streamFile(req, res, filepath, download, stats);
+        streamFile(req, res, filepath, download, stats, shareLink);
       }
     } else {
       if (error.code === "ENOENT") {
@@ -1324,8 +1325,18 @@ function streamArchive(req, res, zipPath, download) {
   });
 }
 
-function streamFile(req, res, filepath, download, stats) {
-  // send exprects a url-encoded argument
+function streamFile(req, res, filepath, download, stats, shareLink) {
+  var hash = etag(filepath + "/" + stats.mtime);
+
+  // Check Etag
+  if ((req.headers["if-none-match"] || "") === hash) {
+    res.statusCode = 304;
+    res.end();
+    log.info(req, res);
+    return;
+  }
+
+  // send expects a url-encoded argument
   sendFile(req, encodeURIComponent(utils.removeFilesPath(filepath).substring(1)), {
     root: paths.files,
     dotfiles: "allow",
@@ -1334,7 +1345,8 @@ function streamFile(req, res, filepath, download, stats) {
     cacheControl: false,
   }).on("headers", function(res) {
     res.setHeader("Content-Type", utils.contentType(filepath));
-    res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
+    res.setHeader("ETag", hash);
     if (download) {
       res.setHeader("Content-Disposition", utils.getDispo(filepath));
     }
