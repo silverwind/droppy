@@ -1361,9 +1361,13 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
     }
   }).on("error", function(err) {
     log.error(err);
-    if (req.headers.range) {
-      log.error("requested:", req.headers.range, "end:" + stats.size);
+    if (err.message === "Range Not Satisfiable") {
+      log.error("requested range:", req.headers.range, ", file size:", stats.size);
+      res.statusCode = 416;
+    } else {
+      res.statusCode = 400;
     }
+    res.end();
   }).on("stream", function() {
     log.info(req, res);
   }).pipe(res);

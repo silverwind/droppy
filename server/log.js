@@ -94,12 +94,16 @@ log.info = function(req, res) {
 };
 
 log.error = function(err) {
-  log(null, null, 1, chalk.red(log.formatError(err)));
+  if (arguments.length === 1) {
+    log(null, null, 1, chalk.red(log.formatError(err)));
+  } else {
+    log(null, null, 1, chalk.red(log.formatError([].slice.call(arguments).join(" "))));
+  }
 };
 
 log.plain = function() {
   if (opts && opts.logLevel < 2) return;
-  log(null, null, 0, Array.prototype.slice.call(arguments, 0).join(""));
+  log(null, null, 0, [].slice.call(arguments).join(""));
 };
 
 log.timestamp = function() {
