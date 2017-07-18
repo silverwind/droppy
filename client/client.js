@@ -1046,7 +1046,7 @@
       view.find(".file-link").reg("click", function(event) {
         if (droppy.socketWait) return;
         var view = $(event.target).parents(".view");
-        openFile(view, view[0].currentFolder, event.target.textContent);
+        openFile(view, view[0].currentFolder, event.target.textContent, this);
         event.preventDefault();
       });
 
@@ -1547,7 +1547,7 @@
     updateLocation(view, view[0].currentFolder);
   }
 
-  function openFile(view, newFolder, file) {
+  function openFile(view, newFolder, file, ref) {
     var e = fileExtension(file);
 
     // Determine filetype and how to open it
@@ -1566,7 +1566,17 @@
         view[0].currentFolder = newFolder;
         pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
         updatePath(view);
+
+        // if there is audio playing, stop it
+        if (view[0].audioInitialized) {
+          endAudio(view);
+        }
+
         openMedia(view);
+      }
+    } else if (Object.keys(droppy.audioTypes).indexOf(e) !== -1) { // Audio
+      if (ref) {
+        play(view, $(ref).parents(".data-row"));
       }
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
