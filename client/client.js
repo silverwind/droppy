@@ -990,16 +990,19 @@
         size    : size,
         psize   : formatBytes(size),
         id      : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
-        sprite  : getSpriteClass(fileExtension(name))
+        sprite  : getSpriteClass(fileExtension(name)),
+        classes : "",
       };
 
       if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
-        var playing = view.find(".playing"), classes = "playable";
-        if (playing.length && name.toLowerCase() === playing[0].dataset.name) {
-          classes += " playable";
-        }
-        entry.classes = classes;
+        entry.classes = "playable";
         entry.playable = true;
+      } else if (Object.keys(droppy.videoTypes).indexOf(fileExtension(name)) !== -1) {
+        entry.classes = "viewable viewable-video";
+        entry.viewableVideo = true;
+      } else if (Object.keys(droppy.imageTypes).indexOf(fileExtension(name)) !== -1) {
+        entry.classes = "viewable viewable-image";
+        entry.viewableImage = true;
       }
 
       entries.push(entry);
@@ -1087,14 +1090,8 @@
         requestLink($(this).parents(".view"), $(this).parents(".data-row")[0].dataset.id, true);
       });
 
-      view.find(".icon-play").reg("click", function() {
-        var view = $(this).parents(".view");
-
-        if ($(this).parents(".data-row").hasClass("playing")) {
-          return;
-        }
-
-        play(view, $(this).parents(".data-row"));
+      view.find(".icon-play, .icon-view").reg("click", function() {
+        $(this).parents(".data-row").find(".file-link")[0].click();
       });
 
       view.find(".header-name, .header-mtime, .header-size").reg("click", function() {

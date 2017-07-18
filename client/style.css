@@ -327,14 +327,21 @@ nav {
 }
 .line-buttons span:hover svg, .line-buttons a:hover svg { fill: #000 }
 
-.playable:not(.playing):hover .sprite { background: none }
-.playable:not(.playing):hover .icon-play svg { visibility: visible }
-
-.icon-play svg {
+.icon-play svg, .icon-view svg {
   width: 24px; height: 24px;
   margin-top: .25rem;
   visibility: hidden;
   cursor: pointer;
+}
+
+.playable:not(.playing):hover .icon-play svg,
+.viewable:hover .icon-view svg  {
+  visibility: visible;
+}
+
+.playable:not(.playing):hover .sprite,
+.viewable:hover .sprite {
+  background: none;
 }
 
 .data-row {

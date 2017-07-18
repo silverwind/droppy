@@ -10,6 +10,10 @@
       <span class="sprite sprite-{{sprite}}">
         {{#if playable}}
           <span class="icon-play">{{{svg "play"}}}</span>
+        {{else if viewableImage}}
+          <span class="icon-view">{{{svg "eye"}}}</span>
+        {{else if viewableVideo}}
+          <span class="icon-view">{{{svg "play"}}}</span>
         {{/if}}
       </span>
       <a class="file-link entry-link" href="!/dl{{id}}" download="{{name}}">{{name}}</a>
