@@ -14,8 +14,8 @@ deps:
 	yarn global add eslint@latest eslint-plugin-unicorn@latest stylelint@latest uglify-js@latest grunt@latest npm-check-updates@latest
 
 lint:
-	eslint --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
-	stylelint client/*.css
+	node_modules/eslint/bin/eslint.js --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
+	node_modules/stylelint/bin/stylelint.js client/*.css
 
 build:
 	touch client/client.js
@@ -39,7 +39,7 @@ docker-push:
 	docker push $(IMAGE):latest
 
 update:
-	ncu --packageFile package.json -ua
+	node_modules/npm-check-updates/bin/ncu --packageFile package.json -ua
 	rm -rf node_modules
 	yarn
 	touch client/client.js
