@@ -125,6 +125,7 @@ nav {
   flex: 0 0 1.5rem;
   order: 1;
   font-size: .9rem;
+  position: relative;
 }
 
 .path .triangle {
@@ -467,6 +468,7 @@ nav {
 .spinner {
   position: absolute;
   right: 0;
+  top: 0;
   z-index: 16;
   height: 1.5rem;
   width: 1.5rem;
