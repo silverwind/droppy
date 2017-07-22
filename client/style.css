@@ -669,6 +669,10 @@ html:not(.mobile) #entry-menu a.active {
   background: rgba(0,0,0,.4) !important;
 }
 
+.plyr__volume {
+  margin-right: .25rem !important;
+}
+
 video {
   height: calc(100vh - 3rem) !important;
 }
