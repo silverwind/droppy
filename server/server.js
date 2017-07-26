@@ -251,7 +251,16 @@ function startListeners(callback) {
   let listenerCount = 0;
   async.each(targets, function(target, cb) {
     createListener(onRequest, target.opts, function(err, server) {
-      if (err) return cb(err);
+      if (err) {
+        log.error(
+          "Error creating listener",
+          target.opts.proto + (target.opts.socket ? "+unix://" : "://") +
+          log.formatHostPort(target.host, target.port, target.opts.proto) +
+          ":",
+        );
+        log.error(err.message);
+        return cb(err);
+      }
 
       server.on("listening", function() {
         server.removeAllListeners("error");
