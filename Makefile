@@ -16,6 +16,7 @@ deps:
 lint:
 	node_modules/eslint/bin/eslint.js --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
 	node_modules/stylelint/bin/stylelint.js client/*.css
+	node_modules/eclint/bin/eclint.js check
 
 build:
 	touch client/client.js

@@ -58,6 +58,7 @@
     "autoprefixer": "^7.1.2",
     "clean-css": "^4.1.7",
     "codemirror": "^5.28.0",
+    "eclint": "^2.3.0",
     "eslint": "^4.3.0",
     "eslint-plugin-unicorn": "^2.1.2",
     "handlebars": "^4.0.10",
