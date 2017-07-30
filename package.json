@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node droppy.js start",
-    "test": "make lint"
+    "test": "make test"
   },
   "dependencies": {
     "async": "^2.5.0",

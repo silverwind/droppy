@@ -1,8 +1,6 @@
 # os deps: node yarn git jq docker
-# npm deps: eslint eslint-plugin-unicorn stylelint uglify-js grunt npm-check-updates
 
-X86 := $(shell uname -m | grep 86)
-ifeq ($(X86),)
+ifeq ($(shell uname -m | grep 86),)
 	IMAGE=silverwind/armhf-droppy
 else
 	IMAGE=silverwind/droppy
@@ -12,6 +10,10 @@ JQUERY_FLAGS=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/
 
 deps:
 	yarn global add eslint@latest eslint-plugin-unicorn@latest stylelint@latest uglify-js@latest grunt@latest npm-check-updates@latest
+
+test:
+	echo $(IMAGE)
+	$(MAKE) lint
 
 lint:
 	node_modules/eslint/bin/eslint.js --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
@@ -67,8 +69,8 @@ version-minor:
 version-major:
 	npm version major
 
-patch: lint build version-patch deploy publish docker docker-push
-minor: lint build version-minor deploy publish docker docker-push
-major: lint build version-major deploy publish docker docker-push
+patch: test build version-patch deploy publish docker docker-push
+minor: test build version-minor deploy publish docker docker-push
+major: test build version-major deploy publish docker docker-push
 
-.PHONY: deps lint publish docker update deploy jquery version-patch version-minor version-major patch minor major
+.PHONY: deps test lint publish docker update deploy jquery version-patch version-minor version-major patch minor major
