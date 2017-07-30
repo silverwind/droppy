@@ -668,8 +668,8 @@
     view[0].uploadStart = performance.now();
 
     xhr.open("POST", getRootPath() + "!/upload?vId=" + view[0].vId +
-     "&to=" + encodeURIComponent(view[0].currentFolder) +
-     "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
+      "&to=" + encodeURIComponent(view[0].currentFolder) +
+      "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
     );
     xhr.responseType = "text";
     xhr.send(fd);
