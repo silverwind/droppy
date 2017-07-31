@@ -149,6 +149,7 @@
     loop: true,
     autonext: false,
     renameExistingOnUpload: false,
+    sharelinkDownload: true,
   };
 
   function savePrefs(prefs) {
@@ -1087,7 +1088,11 @@
       // Request a sharelink
       view.find(".share-file").reg("click", function() {
         if (droppy.socketWait) return;
-        requestLink($(this).parents(".view"), $(this).parents(".data-row")[0].dataset.id, true);
+        requestLink(
+          $(this).parents(".view"),
+          $(this).parents(".data-row")[0].dataset.id,
+          droppy.get("sharelinkDownload")
+        );
       });
 
       view.find(".icon-play, .icon-view").reg("click", function() {
@@ -1951,7 +1956,8 @@
         {name: "indentWithTabs", label: "Editor indent type"},
         {name: "indentUnit", label: "Editor indent width"},
         {name: "lineWrapping", label: "Editor word wrap"},
-        {name: "renameExistingOnUpload", label: "When added file exists"}
+        {name: "renameExistingOnUpload", label: "When added file exists"},
+        {name: "sharelinkDownload", label: "Sharelink download"},
       ];
 
       opts.forEach(function(_, i) {
@@ -1960,10 +1966,11 @@
       });
       droppy.themes.forEach(function(t) { opts[0].values[t] = t; });
       for (i = 10; i <= 30; i += 2) opts[1].values[String(i)] = String(i);
-      opts[2].values = {Tabs: true, Spaces: false};
+      opts[2].values = {"Tabs": true, "Spaces": false};
       for (i = 1; i <= 8; i *= 2) opts[3].values[String(i)] = String(i);
       opts[4].values = {"Wrap": true, "No Wrap": false};
-      opts[5].values = {Rename: true, Replace: false};
+      opts[5].values = {"Rename": true, "Replace": false};
+      opts[6].values = {"Default On": true, "Default Off": false};
       return Handlebars.templates.options({opts: opts});
     });
 
