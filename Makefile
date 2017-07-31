@@ -12,7 +12,6 @@ deps:
 	yarn global add eslint@latest eslint-plugin-unicorn@latest stylelint@latest uglify-js@latest grunt@latest npm-check-updates@latest
 
 test:
-	echo $(IMAGE)
 	$(MAKE) lint
 
 lint:
