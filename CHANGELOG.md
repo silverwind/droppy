@@ -1,7 +1,7 @@
 # droppy Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
-#### Version 6.6.0 - 31/07/2017
+#### Version 6.7.0 - 31/07/2017
 
 - Added an option for the default state of the "Is DL" button on sharelinks.
 
