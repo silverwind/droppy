@@ -150,7 +150,7 @@ rules:
   no-restricted-imports: [0]
   no-restricted-modules: [2, domain, freelist, smalloc, sys]
   no-restricted-syntax: [2, WithStatement]
-  no-return-assign: [2, except-parens]
+  no-return-assign: [0]
   no-return-await: [2]
   no-script-url: [2]
   no-self-assign: [2, {props: true}]
