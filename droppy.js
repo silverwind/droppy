@@ -17,6 +17,7 @@ process.chdir(__dirname);
 
 const cmds = {
   start     : "start                  Start the server",
+  stop      : "stop                   Stop all daemonized servers",
   update    : "update                 Self-Update (may require root)",
   config    : "config                 Edit the config",
   list      : "list                   List users",
@@ -83,6 +84,36 @@ if (cmds[cmd]) {
       if (err) {
         require("./server/log.js").error(err);
         process.exit(1);
+      }
+    });
+  } else if (cmd === "stop") {
+    const ps = require("ps-node");
+    const log = require("./server/log.js");
+    ps.lookup({command: pkg.name}, function(err, procs) {
+      if (err) {
+        if (err) {
+          log.error(err);
+          process.exit(1);
+        }
+      } else {
+        procs = procs.filter(proc => Number(proc.pid) !== process.pid);
+        if (!procs.length) return process.exit(0);
+        require("async").map(procs, function(proc, cb) {
+          ps.kill(proc.pid, function(err) {
+            if (err) return cb(err);
+            cb(null, proc.pid);
+          });
+        }, function(err, pids) {
+          if (err) {
+            log.error(err);
+            process.exit(1);
+          } else {
+            pids.forEach(function(pid) {
+              console.info("Killed PID " + pid);
+              process.exit(0);
+            });
+          }
+        });
       }
     });
   } else if (cmd === "version") {
