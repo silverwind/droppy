@@ -91,13 +91,14 @@ if (cmds[cmd]) {
     const log = require("./server/log.js");
     ps.lookup({command: pkg.name}, function(err, procs) {
       if (err) {
-        if (err) {
-          log.error(err);
-          process.exit(1);
-        }
+        log.error(err);
+        process.exit(1);
       } else {
         procs = procs.filter(proc => Number(proc.pid) !== process.pid);
-        if (!procs.length) return process.exit(0);
+        if (!procs.length) {
+          log.info("No processes found");
+          process.exit(0);
+        }
         require("async").map(procs, function(proc, cb) {
           ps.kill(proc.pid, function(err) {
             if (err) return cb(err);
