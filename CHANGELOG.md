@@ -1,6 +1,10 @@
 # droppy Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
+#### Version 6.8.0 - 10/08/2017
+
+- Added the 'droppy stop' command to kill daemonized droppy processes.
+
 #### Version 6.7.0 - 31/07/2017
 
 - Added an option for the default state of the "Is DL" button on sharelinks.
