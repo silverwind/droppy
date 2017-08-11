@@ -22,7 +22,7 @@
     "chokidar": "^1.7.0",
     "content-disposition": "^0.5.2",
     "cpr": "^2.2.0",
-    "daemon": "github:zipang/daemon.node#48d0977c26fb3a6a44ae99aae3471b9d5a761085",
+    "daemon": "https://github.com/zipang/daemon.node/tarball/48d0977c26fb3a6a44ae99aae3471b9d5a761085",
     "dhparam": "^1.0.3",
     "escape-string-regexp": "^1.0.5",
     "etag": "^1.8.0",
