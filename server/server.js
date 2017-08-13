@@ -1,6 +1,7 @@
 "use strict";
 
 const crypto = require("crypto");
+const os     = require("os");
 const path   = require("path");
 const qs     = require("querystring");
 
@@ -275,10 +276,34 @@ function startListeners(callback) {
             chalk.cyan(server.address())
           );
         } else { // host + port
-          log.info("Listening on ",
-            chalk.blue(proto + "://") +
-            log.formatHostPort(server.address().address, server.address().port, proto)
-          );
+          const addr = server.address().address;
+          const port = server.address().port;
+
+          const addrs = [];
+          if (addr === "::" || addr === "0.0.0.0") {
+            const interfaces = os.networkInterfaces();
+            Object.keys(interfaces).forEach(function(name) {
+              interfaces[name].forEach(function(intf) {
+                if (addr === "::" && intf.address) {
+                  addrs.push(intf.address);
+                } else if (addr === "0.0.0.0" && intf.family === "IPv4" && intf.address) {
+                  addrs.push(intf.address);
+                }
+              });
+            });
+          } else {
+            addrs.push(addr);
+          }
+
+          if (!addrs.length) {
+            addrs.push(addr);
+          }
+
+          addrs.sort();
+
+          addrs.forEach(function(addr) {
+            log.info("Listening on ", chalk.blue(proto + "://") + log.formatHostPort(addr, port, proto));
+          });
         }
         cb();
       });
