@@ -300,7 +300,8 @@ function startListeners(callback) {
           } else if (err.code === "EAFNOSUPPORT") {
             log.info(
               chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
-              chalk.blue(target.port), chalk.red(". Protocol unsupported.")
+              chalk.blue(target.port), chalk.red(". Protocol unsupported. Are you trying to " +
+               "listen on IPv6 while the protocol is disabled?")
             );
           } else if (err.code === "EADDRNOTAVAIL") {
             log.info(
