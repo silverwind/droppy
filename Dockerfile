@@ -11,25 +11,20 @@ COPY ["droppy.js", "index.js", "docker-start.sh", "README.md", "LICENSE", "packa
 RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python git && \
   cd /droppy && \
   yarn install --non-interactive --no-progress --prod --no-lockfile && \
-  # remove yarn
   rm -rf /usr/local/share/yarn && \
   rm -rf /usr/local/bin/yarn && \
   rm -rf /usr/local/bin/yarnpkg && \
   rm -rf /usr/local/share/.cache && \
-  # remove npm
   npm uninstall -g npm && \
   rm -rf /root/.npm && \
   rm -rf /tmp/npm* && \
   rm -rf /root/.node-gyp && \
-  # remove caches
   rm -rf /tmp/v8* && \
   rm -rf /root/.config && \
-  # fix permissions in /droppy
   find /droppy -type d -exec chmod 0755 {} + && \
   find /droppy -type f -exec chmod 0644 {} + && \
   chmod 0755 /droppy/docker-start.sh && \
   chmod 0755 /droppy/droppy.js && \
-  # remove unnecessary module files
   rm -rf /droppy/node_modules/uws/*darwin*.node && \
   rm -rf /droppy/node_modules/uws/*win32*.node && \
   rm -rf /droppy/node_modules/uws/*linux_4*.node && \
@@ -38,10 +33,8 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   rm -rf /droppy/node_modules/lodash/_* && \
   rm -rf /droppy/node_modules/lodash/*.min.js && \
   rm -rf /droppy/node_modules/lodash/core.js && \
-  # cleanup apk cache
   apk del --purge deps && \
   rm -rf /var/cache/apk/* && \
-  # create symlinks so the CLI works
   mkdir -p /root/.droppy && \
   ln -s /config /root/.droppy/config && \
   ln -s /files /root/.droppy/files && \
