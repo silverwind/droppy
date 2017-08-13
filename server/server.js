@@ -258,7 +258,7 @@ function startListeners(callback) {
           ":"
         );
         log.error(err.message);
-        return cb(err);
+        return cb();
       }
 
       server.on("listening", function() {
@@ -312,28 +312,28 @@ function startListeners(callback) {
         if (target.host && target.port) {
           if (err.code === "EADDRINUSE") {
             log.info(
-              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
-              chalk.blue(target.port), chalk.red(". Address already in use.")
+              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+              chalk.red(". Address already in use.")
             );
           } else if (err.code === "EACCES") {
             log.info(
-              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
-              chalk.blue(target.port), chalk.red(". Need permission to bind to ports < 1024.")
+              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+              chalk.red(". Need permission to bind to ports < 1024.")
             );
           } else if (err.code === "EAFNOSUPPORT") {
             log.info(
-              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
-              chalk.blue(target.port), chalk.red(". Protocol unsupported. Are you trying to " +
+              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+              chalk.red(". Protocol unsupported. Are you trying to " +
                 "listen on IPv6 while the protocol is disabled?")
             );
           } else if (err.code === "EADDRNOTAVAIL") {
             log.info(
-              chalk.red("Failed to bind to "), chalk.cyan(target.host), chalk.red(":"),
-              chalk.blue(target.port), chalk.red(". Address not available.")
+              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+              chalk.red(". Address not available.")
             );
           } else log.error(err);
         } else log.error(err);
-        return cb(err);
+        return cb();
       });
 
       if (target.socket) {
@@ -342,9 +342,9 @@ function startListeners(callback) {
         server.listen(target.port, target.host);
       }
     });
-  }, function(err) {
-    // don't emit error (and abort) if we have at least 1 listener
-    return callback(listenerCount === 0 ? err : null);
+  }, function() {
+    // Only emit an error if we have at 0 listeners
+    return callback(listenerCount === 0 ? new Error("No listeners available") : null);
   });
 }
 
