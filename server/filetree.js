@@ -96,10 +96,8 @@ filetree.updateDir = function(dir, cb) {
     if (err) log.error(err);
     if (initial) { // use sync walk for performance
       initial = false;
-      log.info("Caching files ...");
       const r = walker.walkSync(utils.addFilesPath(dir));
       if (r[0]) handleUpdateDirErrs(r[0]);
-      log.info("Caching files done");
       updateDirInCache(dir, stat, r[1], r[2], cb);
     } else {
       log.debug("Updating cache of " + dir);

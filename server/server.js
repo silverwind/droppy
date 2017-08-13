@@ -109,9 +109,11 @@ const droppy = function droppy(opts, isStandalone, dev, callback) {
     },
     function(cb) { if (isStandalone) { startListeners(cb); } else cb(); },
     function(cb) {
+      log.info("Caching files ...");
       filetree.init(config);
       filetree.updateDir(null, function() {
         if (config.watch) filetree.watch();
+        log.info("Caching files done");
         cb();
       });
     },
