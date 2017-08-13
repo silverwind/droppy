@@ -10,7 +10,7 @@ const configFile = require("./paths.js").get().cfgFile;
 const defaults = {
   listeners : [
     {
-      host     : ["0.0.0.0", "::"],
+      host     : "::",
       port     : 8989,
       protocol : "http"
     }

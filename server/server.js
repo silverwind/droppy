@@ -210,11 +210,10 @@ function startListeners(callback) {
       }
     });
 
-    // On Linux, Node.js listens on v4 and v6 when :: is given as host. Don't attempt
-    // to bind to v4 to prevent an misleading error being logged.
-    // https://github.com/nodejs/node/issues/7200
-    if (hosts.length > 1 && os.platform() === "linux" &&
-        hosts.includes("::") && hosts.includes("0.0.0.0")) {
+    // Node.js typically listens on v4 and v6 when '::'' is given as host. Don't
+    // attempt to bind to '0.0.0.0' to prevent an misleading error being logged.
+    // https://github.com/nodejs/node/issues/9390#issuecomment-280394892
+    if (hosts.length > 1 && hosts.includes("::") && hosts.includes("0.0.0.0")) {
       hosts.splice(hosts.indexOf("0.0.0.0"), 1);
     }
 
@@ -398,7 +397,7 @@ function setupSocket(server) {
     Wss = require("uws").Server;
   } catch (err) {
     if (!uwsLogged) {
-      log.info("`uws` module failed to build, falling back to `ws`");
+      log.info("The 'uws' module failed to build, falling back to 'ws'");
       uwsLogged = true;
     }
     Wss = require("ws").Server;

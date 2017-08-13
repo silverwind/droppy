@@ -78,7 +78,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 {
   "listeners" : [
     {
-      "host": ["0.0.0.0", "::"],
+      "host": "::",
       "port": 8989,
       "protocol": "http"
     }
@@ -123,9 +123,9 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 ```javascript
 "listeners": [
   {
-    "host": [ "0.0.0.0", "::" ],
-    "socket": "/tmp/droppy",
+    "host": "::",
     "port": 80,
+    "socket": "/tmp/droppy",
     "protocol": "http"
   },
   {
@@ -146,7 +146,7 @@ The above configuration will result in:
 
 A listener object accepts these options:
 
-- `host` *string/Array* - Network interface(s) to listen on. Required when `port` is given.
+- `host` *string/Array* - Network interface(s) addresses to listen on. Required when `port` is given. Note that "::" will typically bind to both IPv4 and IPv6 on all addresses. See [this comment](https://github.com/nodejs/node/issues/9390#issuecomment-280394892).
 - `port` *number/string/Array* - Network port(s) to listen on. Required when `host` is given.
 - `socket` *string/Array* - Unix domain socket(s) to listen on.
 - `protocol` *string* - Protocol to use, `http` or `https`. Required.
