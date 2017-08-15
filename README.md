@@ -38,13 +38,13 @@ droppy maintains a in-memory representation of the `files` directory. If you're 
 With [`Node.js`](https://nodejs.org) >= 4.0.0 installed, run:
 
 ```sh
-$ sudo npm install -g droppy
+$ sudo npm install -g --production droppy
 $ droppy start -c /srv/droppy/config -f /srv/droppy/files
 ```
 To update, run
 
 ```sh
-$ sudo npm update -g droppy
+$ sudo npm update -g --production droppy
 ```
 
 ### Docker installation :whale:
