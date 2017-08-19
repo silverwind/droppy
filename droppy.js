@@ -33,8 +33,8 @@ const opts = {
   daemon    : "-d, --daemon           Daemonize (background) process",
   log       : "-l, --log <file>       Log to file instead of stdout",
   dev       : "--dev                  Enable developing mode",
-  color     : "--color                Force enable color in terminal",
-  nocolor   : "--no-color             Force disable color in terminal",
+  color     : "--color                Force-enable colored log output",
+  nocolor   : "--no-color             Force-disable colored log output",
 };
 
 if (argv.v || argv.V || argv.version) {
