@@ -60,7 +60,7 @@
     "clean-css": "^4.1.7",
     "codemirror": "^5.28.0",
     "eclint": "^2.4.2",
-    "eslint": "^4.4.1",
+    "eslint": "^4.5.0",
     "eslint-plugin-unicorn": "^2.1.2",
     "handlebars": "^4.0.10",
     "html-minifier": "^3.5.3",
@@ -74,7 +74,7 @@
     "screenfull": "^3.3.1",
     "stylelint": "^8.0.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^3.0.27",
+    "uglify-js": "^3.0.28",
     "uppie": "^1.0.5"
   },
   "files": [
