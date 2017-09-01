@@ -257,9 +257,8 @@ function startListeners(callback) {
           "Error creating listener",
           target.opts.proto + (target.opts.socket ? "+unix://" : "://") +
           log.formatHostPort(target.host, target.port, target.opts.proto) +
-          ":"
+          ": " + err.message
         );
-        log.error(err.message);
         return cb();
       }
 
