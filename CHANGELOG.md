@@ -1,5 +1,9 @@
-# droppy Changelog
+# Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
+
+#### Version 6.9.0 - 05/09/2017
+
+- Added a reload button in the interface when file watching is disabled.
 
 #### Version 6.8.0 - 10/08/2017
 
