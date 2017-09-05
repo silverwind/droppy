@@ -3,7 +3,7 @@
 (function($) {
   "use strict";
 
-  var droppy = {};
+  var droppy = Object.create(null);
 
   /* {{ templates }} */
 
@@ -403,6 +403,9 @@
         }
         if (droppy.demo || droppy.public) {
           document.documentElement.classList.add("public");
+        }
+        if (!droppy.watch) {
+          document.documentElement.classList.add("nowatch");
         }
         break;
       case "MEDIA_FILES":
@@ -1400,6 +1403,14 @@
     view.find(".prefs").reg("click", function() {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
+    });
+
+    view.find(".reload").reg("click", function() {
+      if (droppy.socketWait) return;
+      showSpinner(view);
+      sendMessage(view[0].vId, "RELOAD_DIRECTORY", {
+        dir: view[0].currentFolder
+      });
     });
 
     view.find(".logout").reg("click", function() {

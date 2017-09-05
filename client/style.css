@@ -523,6 +523,10 @@ nav {
 .prefs:hover   { color: rgb(255,212,102) }
 .logout:hover  { color: rgb(255, 82, 82) }
 .newview:hover { color: rgb(255,166,100) }
+.reload:hover  { color: rgb( 70,140,240) }
+
+.reload { display: none; }
+.nowatch .view[data-type="directory"] .reload { display: flex; }
 
 .button.disabled       { color: #444 !important; cursor: not-allowed !important }
 .button.disabled:hover { color: #444 !important; background: transparent !important }

@@ -467,6 +467,7 @@ function setupSocket(server) {
           demo          : config.demo,
           public        : config.public,
           readOnly      : config.readOnly,
+          watch         : config.watch,
           priv          : priv,
           engine        : "node " + process.version.substring(1),
           platform      : process.platform,
@@ -497,6 +498,11 @@ function setupSocket(server) {
             updateClientLocation(clientDir, sid, vId);
             sendFiles(sid, vId);
           }
+        });
+      } else if (msg.type === "RELOAD_DIRECTORY") {
+        if (!validatePaths(msg.data.dir, msg.type, ws, sid, vId)) return;
+        filetree.updateDir(msg.data.dir, function() {
+          sendFiles(sid, vId);
         });
       } else if (msg.type === "DESTROY_VIEW") {
         clients[sid].views[vId] = null;
@@ -1186,7 +1192,7 @@ function handleUploadRequest(req, res) {
           cb(null);
         });
       }, function() {
-        filetree.updateDir(dstDir, config);
+        filetree.updateDir(dstDir);
       });
     }
   });
