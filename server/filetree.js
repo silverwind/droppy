@@ -112,12 +112,24 @@ filetree.updateDir = function(dir, cb) {
 function updateDirInCache(root, stat, readDirs, readFiles, cb) {
   dirs[root] = {files: {}, size: 0, mtime: stat ? stat.mtime.getTime() : Date.now()};
 
+  const readDirObj = {}, readDirKeys = [];
+  readDirs.sort((a, b) => utils.naturalSort(a.path, b.path)).forEach(d => {
+    const path = normalize(utils.removeFilesPath(d.path));
+    readDirObj[path] = d.stat;
+    readDirKeys[path] = path;
+  });
+
+  // Remove deleted dirs
+  Object.keys(dirs).forEach(path => {
+    if (path.indexOf(root) === 0 && readDirKeys.indexOf(path) === -1 && path !== root) {
+      delete dirs[path];
+    }
+  });
+
   // Add dirs
-  readDirs.sort(function(a, b) {
-    return utils.naturalSort(a.path, b.path);
-  }).forEach(function(d) {
-    dirs[normalize(utils.removeFilesPath(d.path))] = {
-      files: {}, size: 0, mtime: d.stat.mtime.getTime() || 0
+  Object.keys(readDirObj).forEach(function(path) {
+    dirs[path] = {
+      files: {}, size: 0, mtime: readDirObj[path].mtime.getTime() || 0
     };
   });
 

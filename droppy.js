@@ -9,6 +9,10 @@ if (!argv.dev) {
   process.env.NODE_ENV = "production";
 }
 
+if (require("util").inspect.defaultOptions) {
+  require("util").inspect.defaultOptions.depth = null;
+}
+
 const fs   = require("graceful-fs");
 const pkg  = require("./package.json");
 
