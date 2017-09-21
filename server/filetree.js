@@ -35,6 +35,7 @@ filetree.watch = function() {
     interval      : cfg.pollingInterval,
     binaryInterval: cfg.pollingInterval
   }).on("error", log.error).on("all", function() {
+    // TODO: only update what's really necessary
     if (watching) filetree.updateAll();
   });
 };
