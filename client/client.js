@@ -1889,6 +1889,7 @@
         // Let Mod-T through to the browser
         CodeMirror.keyMap.sublime["Cmd-T"] = false;
         CodeMirror.keyMap.sublime["Ctrl-T"] = false;
+        CodeMirror.keyMap.sublime["Ctrl-Space"] = "toggleCommentIndented";
 
         view[0].lineEnding = dominantLineEnding(text);
         editor.setValue(text);

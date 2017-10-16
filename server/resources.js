@@ -145,6 +145,7 @@ const libs = {
   "cm.js": [
     "node_modules/codemirror/lib/codemirror.js",
     "node_modules/codemirror/mode/meta.js",
+    "node_modules/codemirror/addon/comment/comment.js",
     "node_modules/codemirror/addon/mode/overlay.js",
     "node_modules/codemirror/addon/dialog/dialog.js",
     "node_modules/codemirror/addon/selection/active-line.js",
