@@ -373,8 +373,8 @@ function createListener(handler, opts, callback) {
 
       try {
         server = https.createServer(tlsOptions);
-      } catch (err) {
-        if (/(bad password|bad decrypt)/.test(err)) {
+      } catch (err2) {
+        if (/(bad password|bad decrypt)/.test(err2)) {
           let errText;
           if (!tlsOptions.passphrase) {
             errText = "TLS key '" + opts.key + "' is encrypted with a passphrase. " +

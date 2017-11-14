@@ -84,8 +84,8 @@ db.parse = function(cb) {
     if (data.trim() !== "") {
       try {
         database = JSON.parse(data);
-      } catch (err) {
-        return cb(err);
+      } catch (err2) {
+        return cb(err2);
       }
     } else {
       database = {};

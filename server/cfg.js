@@ -56,8 +56,8 @@ cfg.init = function(config, callback) {
 
           try {
             config = JSON.parse(String(data));
-          } catch (err) {
-            return callback(err);
+          } catch (err2) {
+            return callback(err2);
           }
 
           if (!config) config = {};

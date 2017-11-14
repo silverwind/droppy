@@ -181,8 +181,8 @@ resources.load = function(dev, cb) {
     }
     try {
       cb(null, jb.parse(data));
-    } catch (err) {
-      log.error(err);
+    } catch (err2) {
+      log.error(err2);
       compile(false, cb);
     }
   });
@@ -196,7 +196,7 @@ resources.build = function(cb) {
         try {
           jb.parse(data);
           cb(null);
-        } catch (err) {
+        } catch (err2) {
           compile(true, cb);
         }
       });

@@ -71,7 +71,7 @@ module.exports = function(pkg, callback) {
                 setTimeout(function() {
                   install(versions, callback);
                 }, 5000);
-              } catch (err) {
+              } catch (err2) {
                 install(versions, callback);
               }
             }
