@@ -212,13 +212,6 @@ function startListeners(callback) {
       }
     });
 
-    // Node.js typically listens on v4 and v6 when '::'' is given as host. Don't
-    // attempt to bind to '0.0.0.0' to prevent an misleading error being logged.
-    // https://github.com/nodejs/node/issues/9390#issuecomment-280394892
-    if (hosts.length > 1 && hosts.includes("::") && hosts.includes("0.0.0.0")) {
-      hosts.splice(hosts.indexOf("0.0.0.0"), 1);
-    }
-
     const opts = {
       proto: listener.protocol,
       hsts: listener.hsts,
@@ -311,22 +304,34 @@ function startListeners(callback) {
 
       server.on("error", function(err) {
         if (target.host && target.port) {
+          // check for other listeners on the same port and surpress misleading errors
+          // from being printed because of Node's weird dual-stack behaviour.
+          let otherListenerFound = false;
+          targets.some(function(t) {
+            if (target.port === t.port && target.host !== t.host && target.host) {
+              otherListenerFound = true;
+            }
+          });
           if (err.code === "EADDRINUSE") {
-            log.info(
-              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-              chalk.red(". Address already in use.")
-            );
+            if (!otherListenerFound && target.host !== "::") {
+              log.info(
+                chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+                chalk.red(". Address already in use.")
+              );
+            }
           } else if (err.code === "EACCES") {
             log.info(
               chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
               chalk.red(". Need permission to bind to ports < 1024.")
             );
           } else if (err.code === "EAFNOSUPPORT") {
-            log.info(
-              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-              chalk.red(". Protocol unsupported. Are you trying to " +
-                "listen on IPv6 while the protocol is disabled?")
-            );
+            if (!otherListenerFound && target.host !== "::") {
+              log.info(
+                chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+                chalk.red(". Protocol unsupported. Are you trying to " +
+                  "listen on IPv6 while the protocol is disabled?")
+              );
+            }
           } else if (err.code === "EADDRNOTAVAIL") {
             log.info(
               chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
