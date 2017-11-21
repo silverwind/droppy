@@ -1,6 +1,10 @@
 # Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
+#### Version 6.10.0 - 21/11/2017
+
+- Changed default listener to `["0.0.0.0", "::"]` in an attempt to workaround a edge-case on machines where IPv6 is disabled. Listening behaviour should be unchanged as Node.js already performed dual-stack listening on the previous `"::"` setting.
+
 #### Version 6.9.0 - 05/09/2017
 
 - Added a reload button in the interface when file watching is disabled.
