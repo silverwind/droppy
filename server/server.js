@@ -307,13 +307,16 @@ function startListeners(callback) {
           // check for other listeners on the same port and surpress misleading errors
           // from being printed because of Node's weird dual-stack behaviour.
           let otherListenerFound = false;
-          targets.some(function(t) {
-            if (target.port === t.port && target.host !== t.host && target.host) {
-              otherListenerFound = true;
-            }
-          });
+          if (target.host === "::" || target.host === "0.0.0.0") {
+            targets.some(function(t) {
+              if (target.port === t.port && target.host !== t.host && target.host) {
+                otherListenerFound = true;
+              }
+            });
+          }
+
           if (err.code === "EADDRINUSE") {
-            if (!otherListenerFound && target.host !== "::") {
+            if (!otherListenerFound) {
               log.info(
                 chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
                 chalk.red(". Address already in use.")
@@ -325,7 +328,7 @@ function startListeners(callback) {
               chalk.red(". Need permission to bind to ports < 1024.")
             );
           } else if (err.code === "EAFNOSUPPORT") {
-            if (!otherListenerFound && target.host !== "::") {
+            if (!otherListenerFound) {
               log.info(
                 chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
                 chalk.red(". Protocol unsupported. Are you trying to " +
