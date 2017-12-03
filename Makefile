@@ -15,9 +15,9 @@ test:
 	$(MAKE) lint
 
 lint:
-	node_modules/eslint/bin/eslint.js --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
-	node_modules/stylelint/bin/stylelint.js client/*.css
-	node_modules/eclint/bin/eclint.js check
+	node_modules/.bin/eslint --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
+	node_modules/.bin/stylelint client/*.css
+	node_modules/.bin/eclint check
 
 build:
 	touch client/client.js
@@ -41,7 +41,7 @@ docker-push:
 	docker push $(IMAGE):latest
 
 update:
-	node_modules/npm-check-updates/bin/ncu --packageFile package.json -ua
+	node_modules/.bin/updates -u
 	rm -rf node_modules
 	yarn
 	touch client/client.js
