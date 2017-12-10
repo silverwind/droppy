@@ -26,7 +26,7 @@
     "dhparam": "^1.0.4",
     "escape-string-regexp": "^1.0.5",
     "etag": "^1.8.1",
-    "file-extension": "^4.0.0",
+    "file-extension": "^4.0.1",
     "graceful-fs": "^4.1.11",
     "image-size": "^0.6.1",
     "isbinaryfile": "^3.0.2",
@@ -74,7 +74,7 @@
     "screenfull": "^3.3.2",
     "stylelint": "^8.3.1",
     "svgstore": "^2.0.2",
-    "uglify-js": "^3.2.1",
+    "uglify-js": "^3.2.2",
     "uppie": "^1.0.8"
   },
   "files": [
