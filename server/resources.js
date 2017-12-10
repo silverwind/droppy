@@ -451,7 +451,12 @@ function readLibs(callback) {
 
 function minifyJS(js) {
   if (!minify) return js;
-  return uglify.minify(js, opts.uglify).code;
+  const min = uglify.minify(js, opts.uglify);
+  if (min.error) {
+    log.error(min.error);
+    process.exit(1);
+  }
+  return min.code;
 }
 
 function minifyCSS(css) {
