@@ -311,6 +311,7 @@ function startListeners(callback) {
             targets.some(function(t) {
               if (target.port === t.port && target.host !== t.host && target.host) {
                 otherListenerFound = true;
+                return true;
               }
             });
           }

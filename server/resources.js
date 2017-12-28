@@ -25,7 +25,6 @@ const opts = {
     mangle: true,
     compress: {
       booleans: true,
-      cascade: true,
       collapse_vars: true,
       conditionals: true,
       comparisons: true,
@@ -428,12 +427,8 @@ function readLibs(callback) {
       });
     }
   }, function(err) {
-    // Prefix PS urls
-    Object.keys(out).some(function(file) {
-      if (file === "ps.css") {
-        out[file] = buf(String(out[file]).replace(/url\(/gm, "url(!/res/lib/"));
-      }
-    });
+    // Prefix hardcoded Photoswipe urls
+    out["ps.css"] = buf(String(out["ps.css"]).replace(/url\(/gm, "url(!/res/lib/"));
 
     if (minify) {
       Object.keys(out).forEach(function(file) {

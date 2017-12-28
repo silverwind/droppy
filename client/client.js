@@ -15,7 +15,7 @@
     directoryUpload: (function() {
       var el = document.createElement("input");
       return droppy.dir.some(function(prop) {
-        if (prop in el) return true;
+        return prop in el;
       });
     })(),
     audioTypes: (function() {
@@ -746,7 +746,7 @@
       var input = this.value;
       var valid = validFilename(input, droppy.platform);
       var exists = activeFiles.some(function(file) {
-        if (file === (droppy.caseSensitive ? input : input.toLowerCase())) return true;
+        return file === (droppy.caseSensitive ? input : input.toLowerCase());
       });
       canSubmit = valid && !exists;
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
