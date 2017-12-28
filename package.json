@@ -74,7 +74,7 @@
     "screenfull": "^3.3.2",
     "stylelint": "^8.4.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^3.3.2",
+    "uglify-js": "3.2.2",
     "uppie": "^1.0.8"
   },
   "files": [
