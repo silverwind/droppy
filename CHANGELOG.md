@@ -1,6 +1,11 @@
 # Changelog
 *This changelog only lists breaking and otherwise notable changes. See the commit log for more details*
 
+#### Version 7.0.0 - 03/01/2017
+
+- Added Search feature
+- No breaking changes, 6.x versions were just getting to high
+
 #### Version 6.10.0 - 21/11/2017
 
 - Changed default listener to `["0.0.0.0", "::"]` in an attempt to workaround a edge-case on machines where IPv6 is disabled. Listening behaviour should be unchanged as Node.js already performed dual-stack listening on the previous `"::"` setting.
