@@ -22,7 +22,6 @@ process.chdir(__dirname);
 const cmds = {
   start     : "start                  Start the server",
   stop      : "stop                   Stop all daemonized servers",
-  update    : "update                 Self-Update (may require root)",
   config    : "config                 Edit the config",
   list      : "list                   List users",
   add       : "add <user> <pass> [p]  Add or update a user. Specify 'p' for privileged",
@@ -123,11 +122,6 @@ if (cmds[cmd]) {
     });
   } else if (cmd === "version") {
     console.info(pkg.version);
-  } else if (cmd === "update") {
-    require("./server/update.js")(pkg, function(err, message) {
-      if (err) { console.error(new Error(err.message || err).stack); process.exit(1); }
-      if (message) { console.info(message); process.exit(0); }
-    });
   } else if (cmd === "config") {
     const paths = require("./server/paths.js").get();
     const cfg = require("./server/cfg.js");
