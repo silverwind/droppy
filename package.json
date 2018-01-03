@@ -19,7 +19,7 @@
     "async": "^2.6.0",
     "busboy": "^0.2.14",
     "chalk": "^2.3.0",
-    "chokidar": "^1.7.0",
+    "chokidar": "^2.0.0",
     "content-disposition": "^0.5.2",
     "cpr": "^3.0.1",
     "daemon": "https://github.com/zipang/daemon.node/tarball/48d0977c26fb3a6a44ae99aae3471b9d5a761085",
@@ -57,7 +57,7 @@
     "uws": "^9.14.0"
   },
   "devDependencies": {
-    "autoprefixer": "^7.2.3",
+    "autoprefixer": "^7.2.4",
     "clean-css": "^4.1.9",
     "codemirror": "^5.33.0",
     "eclint": "^2.5.0",
@@ -69,12 +69,12 @@
     "mousetrap": "^1.6.1",
     "node-zopfli": "^2.0.2",
     "photoswipe": "^4.1.2",
-    "postcss": "^6.0.14",
+    "postcss": "^6.0.15",
     "request": "^2.83.0",
     "screenfull": "^3.3.2",
     "stylelint": "^8.4.0",
     "svgstore": "^2.0.2",
-    "uglify-js": "^3.3.3",
+    "uglify-js": "^3.3.4",
     "uppie": "^1.0.8"
   },
   "files": [
