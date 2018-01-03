@@ -1020,6 +1020,8 @@
   // Convert the received data into HTML
   function openDirectory(view, data, isSearch) {
     var entries = getTemplateEntries(view, data || []);
+    clearSearch(view);
+
     // sorting
     if (!view[0].sortBy) view[0].sortBy = "name";
     if (!view[0].sortAsc) view[0].sortAsc = false;
@@ -1437,23 +1439,18 @@
     });
 
     // Search Box
-    function clearSearch(input) {
-      openDirectory(view, view[0].currentData);
-      $(input).parents(".search").removeClass("toggled-on").addClass("toggled-off");
-      input.value = null;
-    }
     view.reg("click", ".search.toggled-off", function() {
       $(this).removeClass("toggled-off").addClass("toggled-on");
       $(this).find("input")[0].focus();
     });
     view.reg("click", ".search.toggled-on svg", function() {
-      var input = $(this).parents(".search").find("input")[0];
-      $(this).removeClass("toggled-on").addClass("toggled-off");
-      clearSearch(input);
+      var view = $(this).parents(".view");
+      openDirectory(view, view[0].currentData);
     });
     view.reg("keyup", ".search input", function(e) {
       if (e.keyCode === 27/* escape */) {
-        clearSearch(this);
+        var view = $(this).parents(".view");
+        openDirectory(view, view[0].currentData);
       }
     });
     view.reg("input", ".search input", debounce(function(e) {
@@ -1560,6 +1557,13 @@
     }
   }
 
+  function clearSearch(view) {
+    if (!view.find(".search-input").is(":focus")) {
+      view.find(".search").removeClass("toggled-on").addClass("toggled-off");
+      view.find(".search input")[0].value = null;
+    }
+  }
+
   function showEntryMenu(entry, x, y) {
     var menu = $("#entry-menu");
     var maxTop = window.innerHeight - menu[0].clientHeight - 4;
@@ -1604,6 +1608,7 @@
   }
 
   function openFile(view, newFolder, file, ref) {
+    clearSearch(view);
     var e = fileExtension(file);
 
     // Determine filetype and how to open it
