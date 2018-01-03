@@ -1047,43 +1047,38 @@
       });
 
       // Switch into a folder
-      view.find(".folder-link").reg("click", function(event) {
+      view.find(".folder-link").reg("click", function(e) {
         if (droppy.socketWait) return;
         updateLocation(view, $(this).parents(".data-row")[0].dataset.id);
-        event.preventDefault();
+        e.preventDefault();
       });
 
       // Click on a file link
-      view.find(".file-link").reg("click", function(event) {
+      view.find(".file-link").reg("click", function(e) {
         if (droppy.socketWait) return;
-        var view = $(event.target).parents(".view");
-        var path = event.target.textContent;
-        if (path.indexOf("/") !== -1) {
-          openFile(view, join(view[0].currentFolder, dirname(path)), basename(path), this);
-        } else {
-          openFile(view, view[0].currentFolder, path, this);
-        }
-        event.preventDefault();
+        var view = $(e.target).parents(".view");
+        openFile(view, view[0].currentFolder, e.target.textContent.trim(), {ref: this});
+        e.preventDefault();
       });
 
       view.find(".data-row").each(function(index) {
         this.setAttribute("order", index);
       });
 
-      view.find(".data-row").reg("contextmenu", function(event) {
-        var target = $(event.currentTarget);
+      view.find(".data-row").reg("contextmenu", function(e) {
+        var target = $(e.currentTarget);
         if (target[0].dataset.type === "error") return;
-        showEntryMenu(target, event.clientX, event.clientY);
-        event.preventDefault();
+        showEntryMenu(target, e.clientX, e.clientY);
+        e.preventDefault();
       });
 
-      view.find(".data-row .entry-menu").reg("click", function(event) {
-        showEntryMenu($(event.target).parents(".data-row"), event.clientX, event.clientY);
+      view.find(".data-row .entry-menu").reg("click", function(e) {
+        showEntryMenu($(e.target).parents(".data-row"), e.clientX, e.clientY);
       });
 
       // Stop navigation when clicking on an <a>
-      view.find(".data-row .zip, .data-row .download, .entry-link.file").reg("click", function(event) {
-        event.stopPropagation();
+      view.find(".data-row .zip, .data-row .download, .entry-link.file").reg("click", function(e) {
+        e.stopPropagation();
         if (droppy.socketWait) return;
 
         // Some browsers (like IE) think that clicking on an <a> is real navigation
@@ -1481,11 +1476,7 @@
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
-      view[0].currentFile = entry.find(".file-link")[0].textContent;
-      var location = join(view[0].currentFolder, view[0].currentFile);
-      pushHistory(view, location);
-      updatePath(view);
-      openDoc(view, location);
+      openFile(view, view[0].currentFolder, entry.find(".file-link")[0].textContent, {text: true});
     });
 
     // Click on a "open" link
@@ -1607,9 +1598,26 @@
     updateLocation(view, view[0].currentFolder);
   }
 
-  function openFile(view, newFolder, file, ref) {
+  function openFile(view, newFolder, file, opts) {
+    opts = opts || {};
     clearSearch(view);
     var e = fileExtension(file);
+
+    // Fix newFolder and file variables if file includes the dir path
+    if (file.indexOf("/") !== -1) {
+      newFolder = join(view[0].currentFolder, dirname(file));
+      file = basename(file);
+    }
+
+    // Early exit for open-as-text
+    if (opts.text) {
+      view[0].currentFile = file;
+      view[0].currentFolder = newFolder;
+      pushHistory(view, join(newFolder, file));
+      updatePath(view);
+      openDoc(view, join(newFolder, file));
+      return;
+    }
 
     // Determine filetype and how to open it
     if (Object.keys(droppy.imageTypes).indexOf(e) !== -1) { // Image
@@ -1636,8 +1644,8 @@
         openMedia(view);
       }
     } else if (Object.keys(droppy.audioTypes).indexOf(e) !== -1) { // Audio
-      if (ref) {
-        play(view, $(ref).parents(".data-row"));
+      if (opts.ref) {
+        play(view, $(opts.ref).parents(".data-row"));
       }
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
