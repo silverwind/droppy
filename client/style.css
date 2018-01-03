@@ -261,7 +261,7 @@ nav {
   opacity: 0;
   visibility: hidden;
   user-select: none;
-  transition: .2s;
+  transition: .15s;
 }
 #overlay.in { opacity: .4; visibility: visible }
 
@@ -424,7 +424,7 @@ nav {
 
 /* ============================= Empty Folder ============================== */
 
-.empty {
+.empty, .noresults {
   text-align: center;
   cursor: pointer;
   overflow: hidden;
@@ -433,7 +433,6 @@ nav {
 }
 
 .empty svg {
-  fill: #666;
   height: 70px;
   width: 70px;
   transition: .3s;
@@ -443,14 +442,15 @@ nav {
 
 .empty .text {
   position: relative;
-  color: #666;
   top: -25px;
   opacity: 0;
   transition: .3s;
 }
 
-.empty:hover svg   { opacity: 1; bottom: 0; fill:  #000 }
-.empty:hover .text { opacity: 1; top: -5px; color: #000 }
+.noresults { color: #333 }
+.empty { color: #666 }
+.empty:hover svg   { opacity: 1; bottom: 0; fill: #333 }
+.empty:hover .text { opacity: 1; top: -5px; color: #333 }
 
 /* ================================= Icons ================================= */
 
@@ -501,6 +501,43 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.search {
+  display: none;
+  align-items: center;
+  position: relative;
+  color: rgba(255,255,255,.8);
+  font-size: .8rem;
+}
+
+.view[data-type="directory"] .search {
+  display: flex;
+}
+
+.search svg {
+  left: 0;
+  top: .4rem;
+  fill: $greya;
+  cursor: pointer;
+}
+
+.search input {
+  background: transparent;
+  padding: .125rem 0;
+  margin-left: .25rem;
+  width: 0;
+  color: #fff;
+  transition: width .1s;
+}
+.search.toggled-on input {
+  width: 6rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.search:hover svg, .search input:hover + svg, .search input:focus + svg,
+.search input:active + svg {
+  fill: #fff;
 }
 
 @media (max-width: 800px) {
@@ -977,13 +1014,13 @@ video {
   opacity: 0;
   visibility: hidden;
   position: fixed;
-  transition: .4s, visibility 0s .4s;
+  transition: .15s, visibility 0s .15s;
   transform: translate(-50%, -50%);
   width: 300px;
   text-align: center;
   z-index: 64;
 }
-#about-box.in { opacity: 1; visibility: visible; transition: .4s }
+#about-box.in { opacity: 1; visibility: visible; transition: .15s }
 
 #about-title {
   font-size: 1.3em;
@@ -1043,7 +1080,7 @@ video {
   left: 50%;
   top: 50%;
   position: fixed;
-  transition: .4s, visibility 0s .4s;
+  transition: .15s, visibility 0s .15s;
   transform: translate(-50%, -50%);
   z-index: 64;
   padding: .5em;
@@ -1051,7 +1088,7 @@ video {
   opacity: 0;
   visibility: hidden;
 }
-#prefs-box.in { opacity: 1; visibility: visible; transition: .4s }
+#prefs-box.in { opacity: 1; visibility: visible; transition: .15s }
 
 @media (min-width: 800px) { #prefs-box { width: 24em } }
 @media (max-width: 799px) { #prefs-box { width: 80%  } }
@@ -1288,7 +1325,7 @@ video {
   top: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  transition: .4s, visibility 0s .4s;
+  transition: .15s, visibility 0s .15s;
   z-index: 40;
   display: flex;
   opacity: 0;
@@ -1298,11 +1335,11 @@ video {
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
   max-width: 90%;
 }
-.info-box.in { opacity: 1; visibility: visible; transition: .4s }
+.info-box.in { opacity: 1; visibility: visible; transition: .15s }
 
 .info-box .icon {
   display: flex;
-  flex: 0 0 3em;
+  width: 3rem;
   border-radius: 6px 0 0 6px;
   justify-content: center;
   align-items: center;

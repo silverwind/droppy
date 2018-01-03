@@ -13,10 +13,10 @@ droppy is a self-hosted file storage server with a web interface and capabilitie
 ## Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
 * Realtime updates of file system changes
-* Directory upload support
-* Drag & drop support
+* Directory upload and Drag and drop support support
 * Create image and text files directly from the clipboard
 * Side-by-Side mode
+* Fast Search
 * Shareable public download links
 * Zip download of directories
 * Powerful text editor with themes and broad language support

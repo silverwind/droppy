@@ -339,27 +339,59 @@ filetree.save = function(dst, data, cb) {
   });
 };
 
-filetree.ls = function(p) {
-  if (!dirs[p]) return;
+function entries(files, folders, relativePaths, base) {
   const entries = {};
-  const files = dirs[p].files;
-  Object.keys(files).forEach(function(file) {
-    entries[file] = [
-      "f",
-      Math.round(files[file].mtime / 1e3),
-      files[file].size
-    ].join("|");
+  files.forEach(function(file) {
+    const f = dirs[path.dirname(file)].files[path.basename(file)];
+    const mtime = Math.round(f.mtime / 1e3);
+    const name = relativePaths ? path.relative(base, file) : path.basename(file);
+    entries[name] = ["f", mtime, f.size].join("|");
   });
-  Object.keys(dirs).forEach(function(dir) {
-    if (path.dirname(dir) === p && path.basename(dir)) {
-      entries[path.basename(dir)] = [
-        "d",
-        Math.round(dirs[dir].mtime / 1e3),
-        dirs[dir].size
-      ].join("|");
+  folders.forEach(function(folder) {
+    if (dirs[folder]) {
+      const d = dirs[folder];
+      const mtime = Math.round(d.mtime / 1e3);
+      const name = relativePaths ? path.relative(base, folder) : path.basename(folder);
+      entries[name] = ["d", mtime, d.size].join("|");
     }
   });
   return entries;
+}
+
+filetree.search = function(query, p) {
+  if (!dirs[p] || typeof query !== "string" || !query) return null;
+  const files = [];
+  const folders = [];
+  query = query.toLowerCase();
+  Object.keys(dirs).filter(function(dir) {
+    return dir.indexOf(p) === 0;
+  }).forEach(function(dir) {
+    if (dir.toLowerCase().includes(query) && dir !== p) {
+      folders.push(dir);
+    }
+    Object.keys(dirs[dir].files).forEach(function(file) {
+      if (file.toLowerCase().includes(query)) {
+        files.push(path.join(dir, file));
+      }
+    });
+  });
+  const e = entries(files, folders, true, p);
+  if (!Object.keys(e).length) return null;
+  return e;
+};
+
+filetree.ls = function(p) {
+  if (!dirs[p]) return;
+  const files = Object.keys(dirs[p].files).map(function(file) {
+    return path.join(p, file);
+  });
+  const folders = [];
+  Object.keys(dirs).forEach(function(dir) {
+    if (path.dirname(dir) === p && path.basename(dir)) {
+      folders.push(dir);
+    }
+  });
+  return entries(files, folders);
 };
 
 filetree.lsFilter = function(p, re) {

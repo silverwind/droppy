@@ -46,5 +46,12 @@
     </div>
   {{/is}}
 {{else}}
-  <div id="empty" class="empty">{{{svg "upload-cloud"}}}<div class="text">Add files</div></div>
+  {{#if isSearch}}
+    <div class="noresults">No results</div>
+  {{else}}
+    <div id="empty" class="empty">
+      {{{svg "upload-cloud"}}}
+      <div class="text">Add files</div>
+    </div>
+  {{/if}}
 {{/each}}

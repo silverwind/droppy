@@ -644,6 +644,16 @@ function setupSocket(server) {
         }, function(_, obj) {
           sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
         });
+      } else if (msg.type === "SEARCH") {
+        const query = msg.data.query;
+        const dir =  msg.data.dir;
+        if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
+        sendObj(sid, {
+          type: "SEARCH_RESULTS",
+          vId: vId,
+          folder: dir,
+          results: filetree.search(query, dir)
+        });
       }
     });
 

@@ -342,7 +342,7 @@
           }
           view[0].switchRequest = false;
           view[0].currentData = msg.data;
-          openDirectory(view);
+          openDirectory(view, view[0].currentData);
         } else if (view[0].dataset.type === "media") {
           view[0].currentData = msg.data;
           // TODO: Update media array
@@ -410,6 +410,9 @@
         break;
       case "MEDIA_FILES":
         loadMedia(view, msg.files);
+        break;
+      case "SEARCH_RESULTS":
+        openDirectory(view, msg.results, true);
         break;
       case "ERROR":
         showError(view, msg.text);
@@ -1015,13 +1018,12 @@
   }
 
   // Convert the received data into HTML
-  function openDirectory(view) {
-    var entries = getTemplateEntries(view, view[0].currentData), sortBy;
-
+  function openDirectory(view, data, isSearch) {
+    var entries = getTemplateEntries(view, data || []);
     // sorting
     if (!view[0].sortBy) view[0].sortBy = "name";
     if (!view[0].sortAsc) view[0].sortAsc = false;
-    sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
+    var sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
 
     entries = sortArrayByProp(entries, sortBy);
     if (view[0].sortAsc) entries.reverse();
@@ -1029,7 +1031,7 @@
     var sort = {type: "", mtime: "", size: ""};
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
-    var html = Handlebars.templates.directory({entries: entries, sort: sort});
+    var html = Handlebars.templates.directory({entries: entries, sort: sort, isSearch: isSearch});
     loadContent(view, "directory", null, html).then(function() {
       // Upload button on empty page
       view.find(".empty").reg("click", function() {
@@ -1053,7 +1055,12 @@
       view.find(".file-link").reg("click", function(event) {
         if (droppy.socketWait) return;
         var view = $(event.target).parents(".view");
-        openFile(view, view[0].currentFolder, event.target.textContent, this);
+        var path = event.target.textContent;
+        if (path.indexOf("/") !== -1) {
+          openFile(view, join(view[0].currentFolder, dirname(path)), basename(path), this);
+        } else {
+          openFile(view, view[0].currentFolder, path, this);
+        }
         event.preventDefault();
       });
 
@@ -1330,7 +1337,7 @@
 
   function initButtons(view) {
     // File upload button
-    view.find(".af").reg("click", function() {
+    view.reg("click", ".af", function() {
       if ($(this).hasClass("disabled")) return;
       // Remove the directory attributes so we get a file picker dialog
       if (droppy.detects.directoryUpload) {
@@ -1341,15 +1348,22 @@
       droppy.fileInput.click();
     });
 
-    // Folder upload button - check if we support directory uploads
+    // Disable the button when no directory upload is supported
     if (droppy.detects.directoryUpload) {
-      // Directory uploads supported - enable the button
-      view.find(".ad").reg("click", function() {
-        if ($(this).hasClass("disabled")) return;
+      view.find(".ad").addClass("disabled");
+    }
+
+    // Directory upload button
+    view.reg("click", ".ad", function() {
+      if ($(this).hasClass("disabled")) {
+        showError(getView(0), "Your browser doesn't support directory uploading");
+      } else {
         // Set the directory attribute so we get a directory picker dialog
         droppy.dir.forEach(function(attr) {
           droppy.fileInput.setAttribute(attr, attr);
         });
+
+        // Click the button to trigger a dialog
         if (droppy.fileInput.isFilesAndDirectoriesSupported) {
           droppy.fileInput.click();
         } else if (droppy.fileInput.chooseDirectory) {
@@ -1357,15 +1371,10 @@
         } else {
           droppy.fileInput.click();
         }
-      });
-    } else {
-      // No directory upload support - disable the button
-      view.find(".ad").addClass("disabled").on("click", function() {
-        showError(getView(0), "Your browser doesn't support directory uploading");
-      });
-    }
+      }
+    });
 
-    view.find(".cf, .cd").reg("click", function() {
+    view.reg("click", ".cf, .cd", function() {
       if ($(this).hasClass("disabled")) return;
       var view = getActiveView();
       var content = view.find(".content");
@@ -1385,7 +1394,7 @@
       });
     });
 
-    view.find(".newview").reg("click", function() {
+    view.reg("click", ".newview", function() {
       if (droppy.views.length === 1) {
         var dest = join(view[0].currentFolder, view[0].currentFile);
         replaceHistory(newView(dest, 1), dest);
@@ -1395,17 +1404,17 @@
       }
     });
 
-    view.find(".about").reg("click", function() {
+    view.reg("click", ".about", function() {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    view.find(".prefs").reg("click", function() {
+    view.reg("click", ".prefs", function() {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
 
-    view.find(".reload").reg("click", function() {
+    view.reg("click", ".reload", function() {
       if (droppy.socketWait) return;
       showSpinner(view);
       sendMessage(view[0].vId, "RELOAD_DIRECTORY", {
@@ -1413,7 +1422,7 @@
       });
     });
 
-    view.find(".logout").reg("click", function() {
+    view.reg("click", ".logout", function() {
       ajax({
         method: "POST",
         url: "!/logout",
@@ -1425,6 +1434,40 @@
         render("login");
         initAuthPage();
       });
+    });
+
+    // Search Box
+    function clearSearch(input) {
+      openDirectory(view, view[0].currentData);
+      $(input).parents(".search").removeClass("toggled-on").addClass("toggled-off");
+      input.value = null;
+    }
+    view.reg("click", ".search.toggled-off", function() {
+      $(this).removeClass("toggled-off").addClass("toggled-on");
+      $(this).find("input")[0].focus();
+    });
+    view.reg("click", ".search.toggled-on svg", function() {
+      var input = $(this).parents(".search").find("input")[0];
+      $(this).removeClass("toggled-on").addClass("toggled-off");
+      clearSearch(input);
+    });
+    view.reg("keyup", ".search input", function(e) {
+      if (e.keyCode === 27/* escape */) {
+        clearSearch(this);
+      }
+    });
+    view.reg("input", ".search input", debounce(function(e) {
+      if (e.target.value && String(e.target.value).trim()) {
+        sendMessage(view[0].vId, "SEARCH", {
+          query: e.target.value,
+          dir: view[0].currentFolder,
+        });
+      } else {
+        openDirectory(view, view[0].currentData);
+      }
+    }, 150));
+    view.reg("click", ".globalsearch input", function(e) {
+      e.stopPropagation();
     });
   }
 
@@ -1918,7 +1961,8 @@
         });
         view.find(".find").reg("click", function() {
           CodeMirror.commands.find(editor);
-          view.find(".CodeMirror-search-field")[0].focus();
+          var searchField = view.find(".CodeMirror-search-field");
+          if (searchField && searchField[0]) searchField[0].focus();
         });
         view.find(".full").reg("click", function() {
           screenfull.toggle($(this).parents(".content")[0]);
@@ -2719,6 +2763,21 @@
         });
       }
     }
+  }
+
+  function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) func.apply(context, args);
+    };
   }
 
   function throttle(func, threshold) {
