@@ -1019,7 +1019,7 @@
 
   // Convert the received data into HTML
   function openDirectory(view, data, isSearch) {
-    var entries = getTemplateEntries(view, data || []);
+    var entries = view[0].templateEntries = getTemplateEntries(view, data || []);
     clearSearch(view);
 
     // sorting
@@ -1586,7 +1586,7 @@
     view[0].sortAsc = header.hasClass("down");
     header[0].className = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
     header.siblings().removeClass("active up down");
-    var entries = sortArrayByProp(getTemplateEntries(view, view[0].currentData), header[0].dataset.sort);
+    var entries = sortArrayByProp(view[0].templateEntries, header[0].dataset.sort);
     if (view[0].sortAsc) entries = entries.reverse();
     entries.forEach(function(_, i) {
       var entry = view.find('[data-name="' + entries[i].sortname + '"]')[0];
