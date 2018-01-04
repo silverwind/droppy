@@ -1434,6 +1434,16 @@
     });
 
     // Search Box
+    function doSearch(e) {
+      if (e.target.value && String(e.target.value).trim()) {
+        sendMessage(view[0].vId, "SEARCH", {
+          query: e.target.value,
+          dir: view[0].currentFolder,
+        });
+      } else {
+        openDirectory(view, view[0].currentData);
+      }
+    }
     view.reg("click", ".search.toggled-off", function() {
       $(this).removeClass("toggled-off").addClass("toggled-on");
       $(this).find("input")[0].focus();
@@ -1446,18 +1456,11 @@
       if (e.keyCode === 27/* escape */) {
         var view = $(this).parents(".view");
         openDirectory(view, view[0].currentData);
+      } else if (e.keyCode === 13/* return */) {
+        doSearch(e);
       }
     });
-    view.reg("input", ".search input", debounce(function(e) {
-      if (e.target.value && String(e.target.value).trim()) {
-        sendMessage(view[0].vId, "SEARCH", {
-          query: e.target.value,
-          dir: view[0].currentFolder,
-        });
-      } else {
-        openDirectory(view, view[0].currentData);
-      }
-    }, 150));
+    view.reg("input", ".search input", debounce(doSearch, 1000));
     view.reg("click", ".globalsearch input", function(e) {
       e.stopPropagation();
     });
