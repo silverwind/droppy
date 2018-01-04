@@ -610,16 +610,6 @@
       );
     });
 
-    droppy.fileInput = $("#file")[0];
-    (new Uppie())(droppy.fileInput, function(event, fd, files) {
-      event.preventDefault();
-      event.stopPropagation();
-      var view = getActiveView();
-      if (!validateFiles(files, view)) return;
-      upload(view, fd, files);
-      droppy.fileInput.value = "";
-    });
-
     initEntryMenu();
   }
   // ============================================================================
@@ -1297,28 +1287,25 @@
 
   function bindDropEvents(view) {
     // file drop
-    (new Uppie())(view[0], function(event, fd, files) {
-      var view = getActiveView();
+    (new Uppie())(view[0].fileInput, function(e, fd, files) {
       if (droppy.readOnly) return showError(view, "Files are read-only.");
       if (!files.length) return;
-      event.stopPropagation();
+      e.stopPropagation();
       if (!validateFiles(files, view)) return;
       upload(view, fd, files);
     });
 
     // drag between views
-    view.reg("drop", function(event) {
-      var dragData = event.originalEvent.dataTransfer.getData("text");
-      var view = $(event.target).parents(".view");
-      event.preventDefault();
+    view.reg("drop", function(e) {
+      var view = $(e.target).parents(".view");
+      var dragData = e.originalEvent.dataTransfer.getData("text");
+      e.preventDefault();
       $(".dropzone").removeClass("in");
-
       if (!dragData) return;
-
-      event.stopPropagation();
+      e.stopPropagation();
       dragData = JSON.parse(dragData);
       if (view[0].dataset.type === "directory") { // dropping into a directory view
-        handleDrop(view, event, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
+        handleDrop(view, e, dragData.path, join(view[0].currentFolder, basename(dragData.path)), true);
       } else { // dropping into a document/media view
         if (dragData.type === "folder") {
           view[0].dataset.type = "directory";
@@ -1333,16 +1320,28 @@
   }
 
   function initButtons(view) {
+    // Init upload <input>
+    view[0].fileInput = view.find(".file")[0];
+    (new Uppie())(view[0].fileInput, function(e, fd, files) {
+      var view = $(e.target).parents(".view");
+      e.preventDefault();
+      e.stopPropagation();
+      if (!validateFiles(files, view)) return;
+      upload(view, fd, files);
+      view[0].fileInput.value = "";
+    });
+
     // File upload button
-    view.reg("click", ".af", function() {
+    view.reg("click", ".af", function(e) {
       if ($(this).hasClass("disabled")) return;
+      var view = $(e.target).parents(".view");
       // Remove the directory attributes so we get a file picker dialog
       if (droppy.detects.directoryUpload) {
         droppy.dir.forEach(function(attr) {
-          droppy.fileInput.removeAttribute(attr);
+          view[0].fileInput.removeAttribute(attr);
         });
       }
-      droppy.fileInput.click();
+      view[0].fileInput.click();
     });
 
     // Disable the button when no directory upload is supported
@@ -1351,29 +1350,30 @@
     }
 
     // Directory upload button
-    view.reg("click", ".ad", function() {
+    view.reg("click", ".ad", function(e) {
+      var view = $(e.target).parents(".view");
       if ($(this).hasClass("disabled")) {
         showError(getView(0), "Your browser doesn't support directory uploading");
       } else {
         // Set the directory attribute so we get a directory picker dialog
         droppy.dir.forEach(function(attr) {
-          droppy.fileInput.setAttribute(attr, attr);
+          view[0].fileInput.setAttribute(attr, attr);
         });
 
         // Click the button to trigger a dialog
-        if (droppy.fileInput.isFilesAndDirectoriesSupported) {
-          droppy.fileInput.click();
-        } else if (droppy.fileInput.chooseDirectory) {
-          droppy.fileInput.chooseDirectory();
+        if (view[0].fileInput.isFilesAndDirectoriesSupported) {
+          view[0].fileInput.click();
+        } else if (view[0].fileInput.chooseDirectory) {
+          view[0].fileInput.chooseDirectory();
         } else {
-          droppy.fileInput.click();
+          view[0].fileInput.click();
         }
       }
     });
 
-    view.reg("click", ".cf, .cd", function() {
+    view.reg("click", ".cf, .cd", function(e) {
       if ($(this).hasClass("disabled")) return;
-      var view = getActiveView();
+      var view = $(e.target).parents(".view");
       var content = view.find(".content");
       var isFile = this.classList.contains("cf");
       var isEmpty = Boolean(view.find(".empty").length);
@@ -2448,7 +2448,6 @@
   function initVariables() {
     droppy.activeView = 0;
     droppy.demo = null;
-    droppy.fileInput = null;
     droppy.initialized = null;
     droppy.linkCache = [];
     droppy.menuTarget = null;
