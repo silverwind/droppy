@@ -122,7 +122,9 @@ const droppy = function droppy(opts, isStandalone, dev, callback) {
         setInterval(function() {
           Object.keys(clients).forEach(function(client) {
             if (!clients[client].ws) return;
-            clients[client].ws.ping(undefined, undefined, true);
+            try {
+              clients[client].ws.ping();
+            } catch (err) {}
           });
         }, config.keepAlive);
       }
