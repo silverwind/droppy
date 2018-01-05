@@ -46,7 +46,7 @@ if (argv.v || argv.V || argv.version) {
 }
 
 if (argv.daemon || argv.d) {
-  require("daemon")();
+  require("daemonize-process")();
 }
 
 if (argv._[0] === "build") {
