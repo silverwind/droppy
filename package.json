@@ -45,7 +45,6 @@
     "send": "^0.16.1",
     "strip-ansi": "^4.0.0",
     "untildify": "^3.0.2",
-    "updates": "^2.0.3",
     "url-format-lax": "^1.0.0",
     "valid-filename": "^2.0.1",
     "whatwg-fetch": "^2.0.3",
@@ -75,6 +74,7 @@
     "stylelint": "^8.4.0",
     "svgstore": "^2.0.2",
     "uglify-js": "^3.3.4",
+    "updates": "^2.0.3",
     "uppie": "^1.0.8"
   },
   "files": [
