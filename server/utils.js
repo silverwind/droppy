@@ -14,7 +14,6 @@ const mkdirp    = require("mkdirp");
 const mv        = require("mv");
 const path      = require("path");
 const rimraf    = require("rimraf");
-const url       = require("url");
 const util      = require("util");
 const validate  = require("valid-filename");
 
