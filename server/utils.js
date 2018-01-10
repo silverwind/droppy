@@ -313,24 +313,6 @@ utils.readFile = function(p, cb) {
   });
 };
 
-utils.origin = function(req) {
-  const u = new url.Url();
-  u.protocol = req.headers["x-forwarded-proto"] ||
-    (req.connection && req.connection.encrypted) ? "https:" : "http:";
-  u.host = req.headers["x-forwarded-host"] || req.headers["host"];
-  return u.format();
-};
-
-utils.originPath = function(req) {
-  const u = new url.Url();
-  u.protocol = req.headers["x-forwarded-proto"] ||
-    (req.connection && req.connection.encrypted) ? "https:" : "http:";
-  u.host = req.headers["x-forwarded-host"] || req.headers["host"];
-  u.path = req.url;
-  u.pathname = req.url.replace(/[#?].*$/, "");
-  return u.format();
-};
-
 utils.arrify = function(val) {
   return Array.isArray(val) ? val : [val];
 };

@@ -38,6 +38,7 @@
     "multimatch": "^2.1.0",
     "mv": "^2.1.1",
     "node-schedule": "^1.2.5",
+    "original-url": "^1.0.1",
     "plyr": "^2.0.18",
     "ps-node": "^0.1.6",
     "readdirp": "^2.1.0",

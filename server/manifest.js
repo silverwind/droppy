@@ -3,12 +3,12 @@
 // Manifest for web application - https://w3c.github.io/manifest/
 
 const pkg = require("../package.json");
-const utils = require("./utils.js");
+const originalUrl = require("original-url");
 
 module.exports = function manifest(req) {
   return JSON.stringify({
     name: pkg.name,
-    start_url: utils.originPath(req).replace("!/res/manifest.json", ""),
+    start_url: (originalUrl(req).full || "").replace("!/res/manifest.json", ""),
     lang: "en-US",
     background_color: "#181818",
     theme_color: "#181818",
