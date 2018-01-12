@@ -1445,8 +1445,11 @@
       }
     }
     view.reg("click", ".search.toggled-off", function() {
-      $(this).removeClass("toggled-off").addClass("toggled-on");
-      $(this).find("input")[0].focus();
+      var search = $(this);
+      search.removeClass("toggled-off").addClass("toggled-on");
+      setTimeout(function() {
+        search.find("input")[0].focus();
+      }, 0);
     });
     view.reg("click", ".search.toggled-on svg", function() {
       var view = $(this).parents(".view");
