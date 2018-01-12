@@ -1287,7 +1287,7 @@
 
   function bindDropEvents(view) {
     // file drop
-    (new Uppie())(view[0].fileInput, function(e, fd, files) {
+    (new Uppie())(view[0], function(e, fd, files) {
       if (droppy.readOnly) return showError(view, "Files are read-only.");
       if (!files.length) return;
       e.stopPropagation();
