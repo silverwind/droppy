@@ -33,6 +33,17 @@ button, input { line-height: normal }
 
 input::placeholder { color: #999; opacity: 1 }
 
+/* de-style inputs[type=search] in Safari */
+input[type="search"] {
+  -webkit-appearance: textfield;
+}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+
 @media screen and (max-resolution: 1.99dppx) {
   nav, .path, .tip:before {
     -moz-osx-font-smoothing: grayscale;
