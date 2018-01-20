@@ -48,7 +48,7 @@ To update, run
 $ sudo npm update -g --production droppy
 ```
 
-To make droppy run in the background, you can use the `--daemon` options, thought it is advices that you install it as a service in you system. For Linux, see these guides to do so:
+To make droppy run in the background, you can use the `--daemon` options, thought it is adviced that you install it as a persistent service in you system. For Linux, see these guides:
 
 - [Systemd-based distributions](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 - [Debian (Pre-Jessie)](https://github.com/silverwind/droppy/wiki/Debian-Installation-(Pre-Jessie))
