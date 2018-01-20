@@ -908,7 +908,7 @@ video {
 
 .upload-cancel:hover { color: #f44 }
 .upload-cancel:hover svg.remove { fill: #f44 }
-#file { display: none }
+.file { display: none }
 
 /* =============================== Audio Panel =============================== */
 

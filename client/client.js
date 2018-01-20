@@ -1026,8 +1026,9 @@
     var html = Handlebars.templates.directory({entries: entries, sort: sort, isSearch: isSearch});
     loadContent(view, "directory", null, html).then(function() {
       // Upload button on empty page
-      view.find(".empty").reg("click", function() {
-        var inp = $("#file");
+      view.find(".empty").reg("click", function(e) {
+        var view = $(e.target).parents(".view");
+        var inp = view.find(".file");
         if (droppy.detects.directoryUpload) {
           droppy.dir.forEach(function(attr) {
             inp[0].removeAttribute(attr);
