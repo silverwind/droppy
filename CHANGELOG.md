@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 7.1.0 - 2017-01-20
+
+- ARM v6 and v7 docker image is now available as `silverwind/armhf-droppy`
+
 ## Version 7.0.0 - 2017-01-03
 
 - Added Search feature
