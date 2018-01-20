@@ -8,30 +8,31 @@
   <a href="https://travis-ci.org/silverwind/droppy"><img src="https://api.travis-ci.org/silverwind/droppy.svg?style=flat"></a>
 </p>
 
-droppy is a self-hosted file storage server with a web interface and capabilities to edit files and view media directly in the browser. It is particularly well-suited to be run on low-end hardware like the Raspberry Pi.
+**droppy** is a self-hosted file storage server with a web interface and capabilities to edit files and view media directly in the browser. It is particularly well-suited to be run on low-end hardware like the Raspberry Pi.
 
 ## Features (try the <a target="_blank" href="https://droppy.silverwind.io">demo</a>)
 * Fully responsive HTML5 interface
 * Realtime updates of file system changes
-* Directory upload and Drag and drop support support
-* Create image and text files directly from the clipboard
+* Directory and Multi-File upload
+* Drag-and-Drop support
+* Clipboard support to create image/text files
 * Side-by-Side mode
-* Fast Search
+* Simple and fast Search
 * Shareable public download links
 * Zip download of directories
 * Powerful text editor with themes and broad language support
-* Image and video gallery with full touch support
+* Image and video gallery with touch support
 * Audio player with seek support
 * Fullscreen support for editor and gallery
 * Supports installing to the homescreen
 
 ## General Information
-Two directories will be used. droppy is a well-behaved app and will not write anywhere else:
+Two directories will be used, one for configuration and one for the actual files:
 
 - `config`: defaults to `~/.droppy/config`, override with `-c /some/dir`
 - `files`: default `~/.droppy/files` override with `-f /some/dir`
 
-droppy maintains a in-memory representation of the `files` directory. If you're on slow storage and/or serving 100k+ files, the indexing on startup will take some time.
+droppy maintains a in-memory representation of the `files` directory. If you're on slow storage and/or serving 100k or more files, the initial indexing on startup will likely take some time.
 
 ## Installation
 ### Local Installation :package:
@@ -46,6 +47,13 @@ To update, run
 ```sh
 $ sudo npm update -g --production droppy
 ```
+
+To make droppy run in the background, you can use the `--daemon` options, thought it is advices that you install it as a service in you system. For Linux, see these guides to do so:
+
+- [Systemd-based distributions](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
+- [Debian (Pre-Jessie)](https://github.com/silverwind/droppy/wiki/Debian-Installation-(Pre-Jessie))
+- [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
+- [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
 
 ### Docker installation :whale:
 
@@ -179,12 +187,6 @@ See the [express example](https://github.com/silverwind/droppy/blob/master/examp
 - `options` *Object*: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
 
 Returns `function onRequest(req, res)`. All arguments are optional.
-
-## Additional Installation guides
-- [Systemd-based distributions](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
-- [Debian (Pre-Jessie)](https://github.com/silverwind/droppy/wiki/Debian-Installation-(Pre-Jessie))
-- [Nginx reverse proxy](https://github.com/silverwind/droppy/wiki/Nginx-reverse-proxy)
-- [Apache reverse proxy](https://github.com/silverwind/droppy/wiki/Apache-reverse-proxy)
 
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:
