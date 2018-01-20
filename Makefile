@@ -1,11 +1,5 @@
 # os deps: node yarn git jq docker
 
-ifeq ($(shell uname -m | grep 86),)
-	IMAGE=silverwind/armhf-droppy
-else
-	IMAGE=silverwind/droppy
-endif
-
 JQUERY_FLAGS=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
 
 deps:
@@ -29,16 +23,30 @@ publish:
 	npm publish
 
 docker:
+	$(eval IMAGE := silverwind/droppy)
 	@echo Preparing docker image $(IMAGE)...
-	docker pull mhart/alpine-node:latest
+	docker pull alpine:latest
 	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	docker build --no-cache=true --squash -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
 
+docker-arm:
+	$(eval IMAGE := silverwind/armhf-droppy)
+	@echo Preparing docker image $(IMAGE)...
+	docker pull arm32v6/alpine
+	sed -i "s/^FROM.\+/FROM arm32v6\/alpine/g" Dockerfile
+	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
+	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
+	docker build --no-cache=true --squash -t $(IMAGE) .
+	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
+	sed -i "s/^FROM.\+/FROM alpine/g" Dockerfile
+
 docker-push:
-	docker push $(IMAGE):"$$(cat package.json | jq -r .version)"
-	docker push $(IMAGE):latest
+	docker push silverwind/droppy:"$$(cat package.json | jq -r .version)"
+	docker push silverwind/droppy:latest
+	docker push silverwind/armhf-droppy:"$$(cat package.json | jq -r .version)"
+	docker push silverwind/armhf-droppy:latest
 
 update:
 	node_modules/.bin/updates -u
@@ -68,8 +76,8 @@ version-minor:
 version-major:
 	npm version major
 
-patch: test build version-patch deploy publish docker docker-push
-minor: test build version-minor deploy publish docker docker-push
-major: test build version-major deploy publish docker docker-push
+patch: test build version-patch deploy publish docker docker-arm docker-push
+minor: test build version-minor deploy publish docker docker-arm docker-push
+major: test build version-major deploy publish docker docker-arm docker-push
 
-.PHONY: deps test lint publish docker update deploy jquery version-patch version-minor version-major patch minor major
+.PHONY: deps test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major
