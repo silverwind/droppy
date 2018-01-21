@@ -57,13 +57,16 @@ To make droppy run in the background, you can use the `--daemon` option, thought
 
 ### Docker installation :whale:
 
-To pull [the image](https://hub.docker.com/r/silverwind/droppy/) (For ARMv6/v7, the image name is `silverwind/armhf-droppy`) and start the container:
+You can use the [`silverwind/droppy`](https://hub.docker.com/r/silverwind/droppy/) (amd64) or [`silverwind/armhf-droppy`](https://hub.docker.com/r/silverwind/armhf-droppy/) (armv6 and armv7) images. To pull and run, use:
+
 ```sh
 $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy
 ```
+
 This method uses automatic volumes for `/config` and `/files` which can be overridden through `-v /srv/droppy/config:/config` and `-v /srv/droppy/files:/files`. If you're using existing files, it's advisable to use `-e UID=1000 -e GID=1000` to get new files written with correct ownership.
 
 To update a docker installation, run
+
 ```sh
 $ docker pull silverwind/droppy
 $ docker stop droppy && docker rm droppy
