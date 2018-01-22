@@ -1,12 +1,12 @@
 "use strict";
-var app    = require("express")();
-var fs     = require("fs");
+const app = require("express")();
+const fs = require("fs");
 
 // alias the module. replace ".." with "droppy" when used as module
-var droppy = require("..");
+const droppy = require("..");
 
 // initialze droppy with a config object
-var droppyOnRequest = droppy({
+const droppyOnRequest = droppy({
   configdir: "./config",
   filesdir: "./files",
   logLevel: 3,
