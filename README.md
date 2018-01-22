@@ -175,7 +175,7 @@ droppy can be used with frameworks like [express](https://github.com/strongloop/
 ```js
 var app    = require("express")();
 var droppy = require("droppy")({
-  configdir: "~/droppy/config"
+  configdir: "~/droppy/config",
   filesdir: "~/droppy/files",
   log: "~/droppy/log",
   logLevel: 0
