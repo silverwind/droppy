@@ -1,7 +1,7 @@
 # os deps: node yarn git jq docker
 
 JQUERY_FLAGS:=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
-BIN:="node_modules/bin"
+BIN:=node_modules/.bin
 
 test:
 	$(MAKE) lint
