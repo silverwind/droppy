@@ -1,17 +1,15 @@
 # os deps: node yarn git jq docker
 
-JQUERY_FLAGS=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
-
-deps:
-	yarn global add eslint@latest eslint-plugin-unicorn@latest stylelint@latest uglify-js@latest grunt@latest npm-check-updates@latest
+JQUERY_FLAGS:=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
+BIN:="node_modules/bin"
 
 test:
 	$(MAKE) lint
 
 lint:
-	node_modules/.bin/eslint --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
-	node_modules/.bin/stylelint client/*.css
-	node_modules/.bin/eclint check
+	$(BIN)/eslint --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js
+	$(BIN)/stylelint client/*.css
+	$(BIN)/eclint check
 
 build:
 	touch client/client.js
@@ -30,11 +28,9 @@ docker:
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	docker build --no-cache=true --squash -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
-
-docker-arm:
 	$(eval IMAGE := silverwind/armhf-droppy)
 	@echo Preparing docker image $(IMAGE)...
-	docker pull arm32v6/alpine
+	docker pull arm32v6/alpine:latest
 	sed -i "s/^FROM.\+/FROM arm32v6\/alpine/g" Dockerfile
 	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
@@ -49,8 +45,8 @@ docker-push:
 	docker push silverwind/armhf-droppy:latest
 
 update:
-	node_modules/.bin/updates -u
-	rm -rf node_modules
+	$(BIN)/updates -u
+	rm -rf node_modules yarn.lock
 	yarn
 	touch client/client.js
 
@@ -80,4 +76,4 @@ patch: test build version-patch deploy publish docker docker-arm docker-push
 minor: test build version-minor deploy publish docker docker-arm docker-push
 major: test build version-major deploy publish docker docker-arm docker-push
 
-.PHONY: deps test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major
+.PHONY: test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major
