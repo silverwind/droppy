@@ -99,7 +99,7 @@ try {
   handlebars = require("handlebars");
   htmlMinifier = require("html-minifier");
   postcss = require("postcss");
-  uglify = require("uglify-js");
+  uglify = require("uglify-es");
   zopfli = require("node-zopfli");
   svg = require("./svg.js");
 } catch (err) {}
