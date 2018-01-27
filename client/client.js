@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, plyr, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default */
+/* global jQuery, CodeMirror, plyr, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default, PDFJS */
 /* eslint-disable no-var, prefer-const */
 (function($) {
   "use strict";
@@ -1000,6 +1000,9 @@
       } else if (Object.keys(droppy.imageTypes).indexOf(fileExtension(name)) !== -1) {
         entry.classes = "viewable viewable-image";
         entry.viewableImage = true;
+      } else if (fileExtension(name) === "pdf") {
+        entry.classes = "viewable viewable-pdf";
+        entry.viewablePdf = true;
       }
 
       entries.push(entry);
@@ -1654,6 +1657,12 @@
       if (opts.ref) {
         play(view, $(opts.ref).parents(".data-row"));
       }
+    } else if (e === "pdf") {
+      view[0].currentFile = file;
+      view[0].currentFolder = newFolder;
+      pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
+      updatePath(view);
+      openMedia(view);
     } else { // Generic file, ask the server if the file has binary contents
       var filePath = join(newFolder, file);
       showSpinner(view);
@@ -1701,6 +1710,7 @@
       exts: {
         img: Object.keys(droppy.imageTypes),
         vid: Object.keys(droppy.videoTypes),
+        pdf: ["pdf"],
       },
     });
   }
@@ -1719,6 +1729,13 @@
           src: file.src,
         });
         delete file.src;
+      } else if (file.pdf) {
+        delete file.pdf;
+        file.html = Handlebars.templates.pdf({
+          vid: view[0].vId,
+          src: file.src,
+        });
+        delete file.src;
       }
     });
     Promise.all([
@@ -1730,7 +1747,6 @@
         autonext: droppy.get("autonext") ? "on " : "",
         loop: droppy.get("loop") ? "on " : "",
       });
-
       loadContent(view, "media", type, html).then(function() {
         var el = view.find(".pswp")[0];
         view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, {
@@ -1785,19 +1801,34 @@
           view[0].currentFile = this.currItem.filename;
           var imgButtons = view.find(".fit-h, .fit-v");
           var videoButtons = view.find(".loop, .autonext");
-          if (this.currItem.html) { // video
+
+          var type;
+          if (/\.pdf$/.test(this.currItem.filename)) {
+            type = "pdf";
+          } else if (this.currItem.html) {
+            type = "video";
+          } else {
+            type = "image";
+          }
+
+          if (type === "pdf") {
+            initPDF($(this.currItem.container).find(".pdf-container"));
+            imgButtons.addClass("hidden");
+            videoButtons.addClass("hidden");
+            this.currItem.container.parentNode.style.overflow = "auto"; // allow pdf scrolling
+            this.currItem.container.style.transformOrigin = "center top"; // center zoom out
+          } else if (type === "video") {
             initVideo($(this.currItem.container).find("video")[0]);
             imgButtons.addClass("hidden");
             videoButtons.removeClass("hidden");
-          } else { // image
+          } else if (type === "image") {
             imgButtons.removeClass("hidden");
             videoButtons.addClass("hidden");
-
-            // pause invisible videos
             view.find("video").each(function() {
-              this.pause();
+              this.pause(); // pause invisible videos
             });
           }
+
           setTitle(this.currItem.filename.replace(/\..*/g, ""));
           replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
           updatePath(view);
@@ -1856,6 +1887,27 @@
 
         view[0].ps.init();
         hideSpinner(view);
+      });
+    });
+  }
+
+  function initPDF(container) {
+    loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
+      PDFJS.workerSrc = "!/res/lib/pdf.worker.js";
+      PDFJS.getDocument(container.data("src")).then(function(pdf) {
+        for (var i = 1; i <= pdf.numPages; i++) {
+          pdf.getPage(i).then(function(page) {
+            var canvas = document.createElement("canvas");
+            canvas.width = container[0].clientWidth;
+            var viewport = page.getViewport(canvas.width / page.getViewport(1).width);
+            canvas.height = viewport.height;
+            container.append(canvas);
+            page.render({
+              canvasContext: canvas.getContext("2d"),
+              viewport: viewport
+            });
+          });
+        }
       });
     });
   }
@@ -2636,7 +2688,7 @@
   }, 1000);
 
   function loadScript(id, url) {
-    if (document.getElementById(id)) return noop;
+    if (document.getElementById(id)) return Promise.resolve();
     return ajax(url).then(function(res) {
       return res.text();
     }).then(function(text) {
@@ -2648,7 +2700,7 @@
   }
 
   function loadStyle(id, url) {
-    if (document.getElementById(id)) return noop();
+    if (document.getElementById(id)) return Promise.resolve();
     return ajax(url).then(function(res) {
       return res.text();
     }).then(function(text) {

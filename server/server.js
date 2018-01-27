@@ -630,10 +630,13 @@ function setupSocket(server) {
         const dir = msg.data.dir;
         const exts = msg.data.exts;
         if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
-        const files = filetree.lsFilter(dir, utils.extensionRe(exts.img.concat(exts.vid)));
+        const allExts = exts.img.concat(exts.vid).concat(exts.pdf);
+        const files = filetree.lsFilter(dir, utils.extensionRe(allExts));
         if (!files) return sendError(sid, vId, "No displayable files in directory");
         async.map(files, function(file, cb) {
-          if (utils.extensionRe(exts.img).test(file)) {
+          if (utils.extensionRe(exts.pdf).test(file)) {
+            cb(null, {pdf: true, src: file});
+          } else if (utils.extensionRe(exts.img).test(file)) {
             imgSize(path.join(utils.addFilesPath(dir), file), function(err, dims) {
               if (err) log.error(err);
               cb(null, {

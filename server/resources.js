@@ -167,6 +167,8 @@ const libs = {
   // photoswipe skin files included by their CSS
   "default-skin.png": "node_modules/photoswipe/dist/default-skin/default-skin.png",
   "default-skin.svg": "node_modules/photoswipe/dist/default-skin/default-skin.svg",
+  "pdf.js": "node_modules/pdfjs-dist/build/pdf.js",
+  "pdf.worker.js": "node_modules/pdfjs-dist/build/pdf.worker.js",
 };
 
 resources.load = function(dev, cb) {
