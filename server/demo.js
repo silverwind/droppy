@@ -75,7 +75,7 @@ demo.refresh = function(doneCallback) {
     }
   ], function() {
     log.info("Demo files refreshed");
-    if (doneCallback) doneCallback();
+    if (doneCallback && typeof doneCallback === "function") doneCallback();
   });
 };
 
