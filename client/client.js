@@ -1909,12 +1909,8 @@
         if (fileMode) {
           mode = fileMode;
         } else {
-          if (["hbs", "handlebars"].indexOf(fileExtension(filename)) !== -1) {
-            mode = "htmlmixed";
-          } else {
-            var modeInfo = CodeMirror.findModeByFileName(filename);
-            mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
-          }
+          var modeInfo = CodeMirror.findModeByFileName(filename);
+          mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
         }
         if (mode !== "plain") CodeMirror.autoLoadMode(editor, mode);
         editor.setOption("mode", mode);
