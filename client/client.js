@@ -3011,10 +3011,6 @@
     return String.prototype.normalize ? str.normalize() : str;
   }
 
-  function noop() {
-    return Promise.resolve();
-  }
-
   function dateFilename() {
     var now   = new Date();
     var day   = now.getDate();
