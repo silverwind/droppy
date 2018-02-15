@@ -34,6 +34,9 @@ demo.refresh = function(doneCallback) {
     // Text samples
     get("https://silverwind.io/example.html", "example.html"),
 
+    // PDF Sample
+    get("https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf", "example.pdf"),
+
     // Image samples
     get("https://silverwind.io/droppy-samples/sample-1.jpg", "/images/sample-1.jpg"),
     get("https://silverwind.io/droppy-samples/sample-2.jpg", "/images/sample-2.jpg"),
@@ -56,11 +59,11 @@ demo.refresh = function(doneCallback) {
     get("https://raw.githubusercontent.com/silverwind/droppy/master/client/images/readme-logo.svg", "example.svg"),
     get("https://github.com/silverwind/droppy/raw/master/client/images/logo180.png", "example.png"),
 
-    // Video samples - Provided by webmfiles.org
-    get("http://dl1.webmfiles.org/big-buck-bunny_trailer.webm", "example.webm"),
-    get("http://video.blendertestbuilds.de/download.blender.org/peach/trailer_480p.mov", "example.mp4"),
+    // Video samples
+    get("http://wiki.garrysmod.com/images/1/1d/big-buck-bunny_trailer.webm", "example.webm"),
+    get("http://download.blender.org/peach/trailer/trailer_720p.mov", "example.mov"),
 
-    // Audio samples - Provided by sampleswap.org
+    // Audio samples
     get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/258%5Bkb%5D160_roll-to-the-moon-and-back.wav.mp3", "/audio/sample-1.mp3"),
     get("http://sampleswap.org/samples-ghost/MELODIC%20SAMPLES%20and%20LOOPS/GUITARS%20BPM/1380%5Bkb%5D120_a-bleep-odyssey.aif.mp3", "/audio/sample-2.mp3"),
     get("http://sampleswap.org/samples-ghost/DRUM%20LOOPS%20and%20BREAKS/141%20to%20160%20bpm/517%5Bkb%5D160_tricky-bongos.wav.mp3", "/audio/sample-3.mp3"),

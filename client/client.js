@@ -2599,6 +2599,7 @@
       m4v  : "video/mp4",
       mkv  : "video/webm", // video/webm over video/x-matroska for better browser compat
       mp4  : "video/mp4", // can be audio/mp4 too
+      mov  : "video/mp4",
       ogv  : "video/ogg",
       ogx  : "application/ogg",
       webm : "video/webm", // can be audio/webm too

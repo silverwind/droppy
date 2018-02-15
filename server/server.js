@@ -72,6 +72,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
         if (!err) {
           config = conf;
           if (dev) config.dev = dev;
+          if (config.demo) config.readOnly = true;
         }
         cb(err);
       });
