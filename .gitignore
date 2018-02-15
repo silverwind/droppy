@@ -7,3 +7,4 @@ dist/
 .vscode/
 examples/files
 examples/config
+examples/node_modules

@@ -9,7 +9,6 @@ test:
 lint:
 	$(BIN)/eslint --color --ignore-pattern *.min.js --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2' server client *.js examples/*.js
 	$(BIN)/stylelint client/*.css
-	$(BIN)/eclint check
 
 build:
 	touch client/client.js
