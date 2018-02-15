@@ -8,8 +8,8 @@ module.exports = function droppy(opts) {
   }
 
   if (opts.log) {
-    const ut   = require("untildify");
-    const fs   = require("fs");
+    const ut = require("untildify");
+    const fs = require("fs");
     const path = require("path");
     let fd;
 
@@ -22,9 +22,7 @@ module.exports = function droppy(opts) {
   }
 
   const server = require("./server/server.js");
-  server(opts, false, false, function(err) {
+  return server(opts, false, false, function(err) {
     if (err) throw err;
   });
-
-  return server._onRequest;
 };

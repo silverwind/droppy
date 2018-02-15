@@ -40,7 +40,7 @@ let Wss             = null;
 let uwsLogged       = false;
 let ready           = false;
 
-const droppy = function droppy(opts, isStandalone, dev, callback) {
+module.exports = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
     log.logo(
       [
@@ -136,6 +136,11 @@ const droppy = function droppy(opts, isStandalone, dev, callback) {
     log.info(chalk.green("Ready for requests!"));
     callback();
   });
+
+  return {
+    onRequest: onRequest,
+    setupWebSocket: setupWebSocket,
+  };
 };
 
 function onRequest(req, res) {
@@ -159,9 +164,6 @@ function onRequest(req, res) {
     res.end("<!DOCTYPE html><html><head><title>droppy - starting up</title></head><body><h2>Just a second! droppy is starting up ...<h2><script>window.setTimeout(function(){window.location.reload()},2000)</script></body></html>");
   }
 }
-
-droppy._onRequest = onRequest;
-module.exports = droppy;
 
 function startListeners(callback) {
   if (!Array.isArray(config.listeners)) {
@@ -260,7 +262,7 @@ function startListeners(callback) {
       server.on("listening", function() {
         server.removeAllListeners("error");
         listenerCount++;
-        setupSocket(server);
+        setupWebSocket(server);
         const proto = target.opts.proto.toLowerCase();
 
         if (target.socket) { // socket
@@ -427,7 +429,7 @@ function createListener(handler, opts, callback) {
 }
 
 // WebSocket functions
-function setupSocket(server) {
+function setupWebSocket(server) {
   // fall back from uws to ws in case it failed to build
   try {
     Wss = require("uws").Server;
@@ -446,243 +448,245 @@ function setupSocket(server) {
       cb(false, 401, "Unauthorized");
     }
   });
-  wss.on("connection", function(ws, req) {
-    req = req || ws.upgradeReq; // compat: ws 3.0.0
-    ws.addr = ws._socket.remoteAddress;
-    ws.port = ws._socket.remotePort;
-    ws.headers = Object.assign({}, req.headers);
-    log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
-    const sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
-    const cookie = cookies.get(req.headers.cookie);
-    clients[sid] = {views: [], cookie: cookie, ws: ws};
+  wss.on("connection", onWebSocketRequest);
+  wss.on("error", log.error);
+}
 
-    ws.on("message", function(msg) {
-      msg = JSON.parse(msg);
+function onWebSocketRequest(ws, req) {
+  req = req || ws.upgradeReq; // compat: ws 3.0.0
+  ws.addr = ws._socket.remoteAddress;
+  ws.port = ws._socket.remotePort;
+  ws.headers = Object.assign({}, req.headers);
+  log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
+  const sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
+  const cookie = cookies.get(req.headers.cookie);
+  clients[sid] = {views: [], cookie: cookie, ws: ws};
 
-      if (msg.type !== "SAVE_FILE") {
-        log.debug(ws, null, chalk.magenta("RECV "), utils.pretty(msg));
+  ws.on("message", function(msg) {
+    msg = JSON.parse(msg);
+
+    if (msg.type !== "SAVE_FILE") {
+      log.debug(ws, null, chalk.magenta("RECV "), utils.pretty(msg));
+    }
+
+    if (!csrf.validate(msg.token)) {
+      ws.close(1011);
+      return;
+    }
+
+    const vId = msg.vId;
+    const priv = Boolean((db.get("sessions")[cookie] || {}).privileged);
+
+    if (msg.type === "REQUEST_SETTINGS") {
+      sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
+        version       : pkg.version,
+        dev           : config.dev,
+        demo          : config.demo,
+        public        : config.public,
+        readOnly      : config.readOnly,
+        watch         : config.watch,
+        priv          : priv,
+        engine        : "node " + process.version.substring(1),
+        platform      : process.platform,
+        caseSensitive : process.platform === "linux", // TODO: actually test the filesystem
+        themes        : Object.keys(cache.themes).sort().join("|"),
+        modes         : Object.keys(cache.modes).sort().join("|"),
+      }});
+    } else if (msg.type === "REQUEST_UPDATE") {
+      if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
+      if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
+      fs.stat(utils.addFilesPath(msg.data), function(err, stats) {
+        let clientDir, clientFile;
+        if (err) { // Send client back to root when the requested path doesn't exist
+          clientDir = "/";
+          clientFile = null;
+          log.error(err);
+          log.info(ws, null, "Non-existing update request, sending client to / : " + msg.data);
+        } else if (stats.isFile()) {
+          clientDir = path.dirname(msg.data);
+          clientFile = path.basename(msg.data);
+          sendObj(sid, {type: "UPDATE_BE_FILE", file: clientFile, folder: clientDir, isFile: true, vId: vId});
+        } else {
+          clientDir = msg.data;
+          clientFile = null;
+        }
+        clients[sid].views[vId] = {file: clientFile, directory: clientDir};
+        if (!clientFile) {
+          updateClientLocation(clientDir, sid, vId);
+          sendFiles(sid, vId);
+        }
+      });
+    } else if (msg.type === "RELOAD_DIRECTORY") {
+      if (!validatePaths(msg.data.dir, msg.type, ws, sid, vId)) return;
+      filetree.updateDir(msg.data.dir, function() {
+        sendFiles(sid, vId);
+      });
+    } else if (msg.type === "DESTROY_VIEW") {
+      clients[sid].views[vId] = null;
+    } else if (msg.type === "REQUEST_SHARELINK") {
+      if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
+      const links = db.get("links");
+
+      // Check if we already have a link for that file
+      const hadLink = Object.keys(links).some(function(link) {
+        if (msg.data.location === links[link].location && msg.data.attachement === links[link].attachement) {
+          sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
+          return true;
+        }
+      });
+      if (hadLink) return;
+
+      const link = utils.getLink(links, config.linkLength);
+      log.info(ws, null, "Share link created: " + link + " -> " + msg.data.location);
+      sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
+      links[link] = {location: msg.data.location, attachement: msg.data.attachement};
+      db.set("links", links);
+    } else if (msg.type === "DELETE_FILE") {
+      log.info(ws, null, "Deleting: " + msg.data);
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
+      filetree.del(msg.data);
+    } else if (msg.type === "SAVE_FILE") {
+      log.info(ws, null, "Saving: " + msg.data.to);
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
+      filetree.save(msg.data.to, msg.data.value, function(err) {
+        if (err) {
+          sendError(sid, vId, "Error saving " + msg.data.to);
+          log.error(err);
+        } else sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
+      });
+    } else if (msg.type === "CLIPBOARD") {
+      const src = msg.data.src;
+      const dst = msg.data.dst;
+      const type = msg.data.type;
+      log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
+      if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst)) {
+        return sendError(sid, vId, "Can't copy directory into itself");
       }
 
-      if (!csrf.validate(msg.token)) {
-        ws.close(1011);
+      fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {
+        if (!err && stats || msg.data.src === msg.data.dst) {
+          utils.getNewPath(utils.addFilesPath(msg.data.dst), function(newDst) {
+            filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
+          });
+        } else {
+          filetree.clipboard(msg.data.src, msg.data.dst, msg.data.type);
+        }
+      });
+    } else if (msg.type === "CREATE_FOLDER") {
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
+      filetree.mkdir(msg.data);
+    } else if (msg.type === "CREATE_FILE") {
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
+      filetree.mk(msg.data);
+    } else if (msg.type === "RENAME") {
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      const rSrc = msg.data.src;
+      const rDst = msg.data.dst;
+      // Disallow whitespace-only and empty strings in renames
+      if (!validatePaths([rSrc, rDst], msg.type, ws, sid, vId) ||
+          /^\s*$/.test(rDst) || rDst === "" || rSrc === rDst) {
+        log.info(ws, null, "Invalid rename request: " + rSrc + "-> " + rDst);
+        sendError(sid, vId, "Invalid rename request");
         return;
       }
-
-      const vId = msg.vId;
-      const priv = Boolean((db.get("sessions")[cookie] || {}).privileged);
-
-      if (msg.type === "REQUEST_SETTINGS") {
-        sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
-          version       : pkg.version,
-          dev           : config.dev,
-          demo          : config.demo,
-          public        : config.public,
-          readOnly      : config.readOnly,
-          watch         : config.watch,
-          priv          : priv,
-          engine        : "node " + process.version.substring(1),
-          platform      : process.platform,
-          caseSensitive : process.platform === "linux", // TODO: actually test the filesystem
-          themes        : Object.keys(cache.themes).sort().join("|"),
-          modes         : Object.keys(cache.modes).sort().join("|"),
-        }});
-      } else if (msg.type === "REQUEST_UPDATE") {
-        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-        if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
-        fs.stat(utils.addFilesPath(msg.data), function(err, stats) {
-          let clientDir, clientFile;
-          if (err) { // Send client back to root when the requested path doesn't exist
-            clientDir = "/";
-            clientFile = null;
-            log.error(err);
-            log.info(ws, null, "Non-existing update request, sending client to / : " + msg.data);
-          } else if (stats.isFile()) {
-            clientDir = path.dirname(msg.data);
-            clientFile = path.basename(msg.data);
-            sendObj(sid, {type: "UPDATE_BE_FILE", file: clientFile, folder: clientDir, isFile: true, vId: vId});
-          } else {
-            clientDir = msg.data;
-            clientFile = null;
-          }
-          clients[sid].views[vId] = {file: clientFile, directory: clientDir};
-          if (!clientFile) {
-            updateClientLocation(clientDir, sid, vId);
-            sendFiles(sid, vId);
-          }
-        });
-      } else if (msg.type === "RELOAD_DIRECTORY") {
-        if (!validatePaths(msg.data.dir, msg.type, ws, sid, vId)) return;
-        filetree.updateDir(msg.data.dir, function() {
-          sendFiles(sid, vId);
-        });
-      } else if (msg.type === "DESTROY_VIEW") {
-        clients[sid].views[vId] = null;
-      } else if (msg.type === "REQUEST_SHARELINK") {
-        if (!validatePaths(msg.data.location, msg.type, ws, sid, vId)) return;
-        const links = db.get("links");
-
-        // Check if we already have a link for that file
-        const hadLink = Object.keys(links).some(function(link) {
-          if (msg.data.location === links[link].location && msg.data.attachement === links[link].attachement) {
-            sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
-            return true;
-          }
-        });
-        if (hadLink) return;
-
-        const link = utils.getLink(links, config.linkLength);
-        log.info(ws, null, "Share link created: " + link + " -> " + msg.data.location);
-        sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
-        links[link] = {location: msg.data.location, attachement: msg.data.attachement};
-        db.set("links", links);
-      } else if (msg.type === "DELETE_FILE") {
-        log.info(ws, null, "Deleting: " + msg.data);
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-        filetree.del(msg.data);
-      } else if (msg.type === "SAVE_FILE") {
-        log.info(ws, null, "Saving: " + msg.data.to);
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
-        filetree.save(msg.data.to, msg.data.value, function(err) {
-          if (err) {
-            sendError(sid, vId, "Error saving " + msg.data.to);
-            log.error(err);
-          } else sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
-        });
-      } else if (msg.type === "CLIPBOARD") {
-        const src = msg.data.src;
-        const dst = msg.data.dst;
-        const type = msg.data.type;
-        log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
-        if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst)) {
-          return sendError(sid, vId, "Can't copy directory into itself");
+      filetree.move(rSrc, rDst);
+    } else if (msg.type === "GET_USERS") {
+      if (priv && !config.public) sendUsers(sid);
+    } else if (msg.type === "UPDATE_USER") {
+      const name = msg.data.name;
+      const pass = msg.data.pass;
+      if (!priv) return;
+      if (pass === "") {
+        if (!db.get("users")[name]) return;
+        if ((db.get("sessions")[cookie] || {}).username === name) {
+          return sendError(sid, null, "Cannot delete yourself!");
         }
-
-        fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {
-          if (!err && stats || msg.data.src === msg.data.dst) {
-            utils.getNewPath(utils.addFilesPath(msg.data.dst), function(newDst) {
-              filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
-            });
-          } else {
-            filetree.clipboard(msg.data.src, msg.data.dst, msg.data.type);
-          }
-        });
-      } else if (msg.type === "CREATE_FOLDER") {
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-        filetree.mkdir(msg.data);
-      } else if (msg.type === "CREATE_FILE") {
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-        filetree.mk(msg.data);
-      } else if (msg.type === "RENAME") {
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        const rSrc = msg.data.src;
-        const rDst = msg.data.dst;
-        // Disallow whitespace-only and empty strings in renames
-        if (!validatePaths([rSrc, rDst], msg.type, ws, sid, vId) ||
-            /^\s*$/.test(rDst) || rDst === "" || rSrc === rDst) {
-          log.info(ws, null, "Invalid rename request: " + rSrc + "-> " + rDst);
-          sendError(sid, vId, "Invalid rename request");
-          return;
-        }
-        filetree.move(rSrc, rDst);
-      } else if (msg.type === "GET_USERS") {
-        if (priv && !config.public) sendUsers(sid);
-      } else if (msg.type === "UPDATE_USER") {
-        const name = msg.data.name;
-        const pass = msg.data.pass;
-        if (!priv) return;
-        if (pass === "") {
-          if (!db.get("users")[name]) return;
-          if ((db.get("sessions")[cookie] || {}).username === name) {
-            return sendError(sid, null, "Cannot delete yourself!");
-          }
-          if (db.delUser(name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
-        } else {
-          const isNew = !db.get("users")[name];
-          db.addOrUpdateUser(name, pass, msg.data.priv || false);
-          log.info(ws, null, (isNew ? "Added" : "Updated") + " user: ", chalk.magenta(name));
-        }
-        sendUsers(sid);
-      } else if (msg.type === "CREATE_FILES") {
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
-        async.each(msg.data.files, function(file, cb) {
-          filetree.mkdir(utils.addFilesPath(path.dirname(file)), function() {
-            filetree.mk(utils.addFilesPath(file), cb);
-          });
-        }, function(err) {
-          if (err) log.error(ws, null, err);
-        });
-      } else if (msg.type === "CREATE_FOLDERS") {
-        if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
-        if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
-        async.each(msg.data.folders, function(folder, cb) {
-          filetree.mkdir(utils.addFilesPath(folder), cb);
-        }, function(err) {
-          if (err) log.error(ws, null, err);
-        });
-      } else if (msg.type === "GET_MEDIA") {
-        const dir = msg.data.dir;
-        const exts = msg.data.exts;
-        if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
-        const allExts = exts.img.concat(exts.vid).concat(exts.pdf);
-        const files = filetree.lsFilter(dir, utils.extensionRe(allExts));
-        if (!files) return sendError(sid, vId, "No displayable files in directory");
-        async.map(files, function(file, cb) {
-          if (utils.extensionRe(exts.pdf).test(file)) {
-            cb(null, {pdf: true, src: file});
-          } else if (utils.extensionRe(exts.img).test(file)) {
-            imgSize(path.join(utils.addFilesPath(dir), file), function(err, dims) {
-              if (err) log.error(err);
-              cb(null, {
-                src: file,
-                w: dims && dims.width ? dims.width : 0,
-                h: dims && dims.height ? dims.height : 0,
-              });
-            });
-          } else cb(null, {video: true, src: file});
-        }, function(_, obj) {
-          sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
-        });
-      } else if (msg.type === "SEARCH") {
-        const query = msg.data.query;
-        const dir =  msg.data.dir;
-        if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
-        sendObj(sid, {
-          type: "SEARCH_RESULTS",
-          vId: vId,
-          folder: dir,
-          results: filetree.search(query, dir)
-        });
-      }
-    });
-
-    ws.on("close", function(code) {
-      let reason;
-      if (code === 4001) {
-        reason = "(Logged out)";
-        const sessions = db.get("sessions");
-        delete sessions[cookie];
-        db.set("sessions", sessions);
-      } else if (code === 1001) {
-        reason = "(Going away)";
-      }
-      removeClientPerDir(sid);
-      delete clients[sid];
-      if (code === 1011) {
-        log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
+        if (db.delUser(name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
       } else {
-        log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
+        const isNew = !db.get("users")[name];
+        db.addOrUpdateUser(name, pass, msg.data.priv || false);
+        log.info(ws, null, (isNew ? "Added" : "Updated") + " user: ", chalk.magenta(name));
       }
-    });
-    ws.on("error", log.error);
+      sendUsers(sid);
+    } else if (msg.type === "CREATE_FILES") {
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
+      async.each(msg.data.files, function(file, cb) {
+        filetree.mkdir(utils.addFilesPath(path.dirname(file)), function() {
+          filetree.mk(utils.addFilesPath(file), cb);
+        });
+      }, function(err) {
+        if (err) log.error(ws, null, err);
+      });
+    } else if (msg.type === "CREATE_FOLDERS") {
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
+      async.each(msg.data.folders, function(folder, cb) {
+        filetree.mkdir(utils.addFilesPath(folder), cb);
+      }, function(err) {
+        if (err) log.error(ws, null, err);
+      });
+    } else if (msg.type === "GET_MEDIA") {
+      const dir = msg.data.dir;
+      const exts = msg.data.exts;
+      if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
+      const allExts = exts.img.concat(exts.vid).concat(exts.pdf);
+      const files = filetree.lsFilter(dir, utils.extensionRe(allExts));
+      if (!files) return sendError(sid, vId, "No displayable files in directory");
+      async.map(files, function(file, cb) {
+        if (utils.extensionRe(exts.pdf).test(file)) {
+          cb(null, {pdf: true, src: file});
+        } else if (utils.extensionRe(exts.img).test(file)) {
+          imgSize(path.join(utils.addFilesPath(dir), file), function(err, dims) {
+            if (err) log.error(err);
+            cb(null, {
+              src: file,
+              w: dims && dims.width ? dims.width : 0,
+              h: dims && dims.height ? dims.height : 0,
+            });
+          });
+        } else cb(null, {video: true, src: file});
+      }, function(_, obj) {
+        sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
+      });
+    } else if (msg.type === "SEARCH") {
+      const query = msg.data.query;
+      const dir =  msg.data.dir;
+      if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
+      sendObj(sid, {
+        type: "SEARCH_RESULTS",
+        vId: vId,
+        folder: dir,
+        results: filetree.search(query, dir)
+      });
+    }
   });
-  wss.on("error", log.error);
+
+  ws.on("close", function(code) {
+    let reason;
+    if (code === 4001) {
+      reason = "(Logged out)";
+      const sessions = db.get("sessions");
+      delete sessions[cookie];
+      db.set("sessions", sessions);
+    } else if (code === 1001) {
+      reason = "(Going away)";
+    }
+    removeClientPerDir(sid);
+    delete clients[sid];
+    if (code === 1011) {
+      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
+    } else {
+      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
+    }
+  });
+  ws.on("error", log.error);
 }
 
 // Ensure that a given path does not contain invalid file names

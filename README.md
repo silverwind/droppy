@@ -171,25 +171,12 @@ For TLS the following additional options are available. Paths can be given relat
 - `hsts` *number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 
 ## API
-droppy can be used with frameworks like [express](https://github.com/strongloop/express):
-```js
-var app    = require("express")();
-var droppy = require("droppy")({
-  configdir: "~/droppy/config",
-  filesdir: "~/droppy/files",
-  log: "~/droppy/log",
-  logLevel: 0
-});
-
-app.use("/", droppy);
-app.listen(process.env.PORT || 8989);
-```
-See the [express example](https://github.com/silverwind/droppy/blob/master/examples/express.js) for a working example.
+droppy can be used with express, see the [express example](./examples/express.js).
 
 ### droppy([options])
 - `options` *Object*: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
 
-Returns `function onRequest(req, res)`. All arguments are optional.
+Returns a object `{onRequest, setupWebSocket}`.
 
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:
