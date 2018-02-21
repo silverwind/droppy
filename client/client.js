@@ -1893,7 +1893,7 @@
 
   function initPDF(container) {
     loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
-      PDFJS.workerSrc = "!/res/lib/pdf.worker.js";
+      PDFJS.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";
       PDFJS.getDocument(container.data("src")).then(function(pdf) {
         for (var i = 1; i <= pdf.numPages; i++) {
           pdf.getPage(i).then(function(page) {
