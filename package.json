@@ -50,7 +50,7 @@
     "valid-filename": "^2.0.1",
     "whatwg-fetch": "^2.0.3",
     "which": "^1.3.0",
-    "ws": "^4.0.0",
+    "ws": "^4.1.0",
     "yazl": "^2.4.3"
   },
   "optionalDependencies": {
@@ -67,15 +67,15 @@
     "iltorb": "2.0.3",
     "mousetrap": "^1.6.1",
     "node-zopfli": "^2.0.2",
-    "pdfjs-dist": "^2.0.385",
+    "pdfjs-dist": "^2.0.391",
     "photoswipe": "^4.1.2",
     "postcss": "^6.0.19",
     "request": "^2.83.0",
     "screenfull": "^3.3.2",
-    "stylelint": "^9.1.0",
+    "stylelint": "^9.1.1",
     "svgstore": "^2.0.3",
     "uglify-es": "^3.3.10",
-    "updates": "^2.3.0",
+    "updates": "^2.3.1",
     "uppie": "^1.0.8"
   },
   "files": [
