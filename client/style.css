@@ -746,13 +746,16 @@ video {
 }
 
 .CodeMirror {
-  font-family: Consolas, Monaco, "Droid Sans Mono", monospace !important;
   line-height: 1.2em !important;
   height: 100% !important;
   width: 100% !important;
 }
 /* Need some weight to override some themes */
 .content div.CodeMirror { font-size: 16px }
+
+.CodeMirror, .CodeMirror-diaglog input {
+  font-family: SFMono-Regular, "Source Code Pro", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
 
 .CodeMirror-scrollbar-filler { background: transparent !important }
 .CodeMirror-lines { padding: 0 !important }
@@ -777,7 +780,6 @@ video {
   background: transparent;
   width: 20em !important;
   color: #eee;
-  font-family: Consolas, Monaco, "Droid Sans Mono", monospace;
 }
 
 .CodeMirror-dialog button {
