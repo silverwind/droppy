@@ -371,7 +371,7 @@ filetree.search = function(query, p) {
     }
     Object.keys(dirs[dir].files).forEach(function(file) {
       if (file.toLowerCase().includes(query)) {
-        files.push(path.join(dir, file));
+        files.push(path.posix.join(dir, file));
       }
     });
   });
@@ -383,7 +383,7 @@ filetree.search = function(query, p) {
 filetree.ls = function(p) {
   if (!dirs[p]) return;
   const files = Object.keys(dirs[p].files).map(function(file) {
-    return path.join(p, file);
+    return path.posix.join(p, file);
   });
   const folders = [];
   Object.keys(dirs).forEach(function(dir) {
