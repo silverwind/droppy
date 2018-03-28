@@ -1463,6 +1463,8 @@
       if (e.keyCode === 27/* escape */) {
         var view = $(this).parents(".view");
         openDirectory(view, view[0].currentData);
+        this.value = "";
+        $(this).parent().removeClass("toggled-on").addClass("toggled-off");
       } else if (e.keyCode === 13/* return */) {
         doSearch(e);
       }
