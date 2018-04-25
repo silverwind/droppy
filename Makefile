@@ -35,6 +35,14 @@ docker:
 	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	docker build --no-cache=true --squash -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
+	$(eval IMAGE := silverwind/arm64v8-droppy)
+	@echo Preparing docker image $(IMAGE)...
+	docker pull arm64v8/alpine:latest
+	sed -i "s/^FROM.\+/FROM arm64v8\/alpine/g" Dockerfile
+	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
+	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
+	docker build --no-cache=true --squash -t $(IMAGE) .
+	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
 	sed -i "s/^FROM.\+/FROM alpine/g" Dockerfile
 
 docker-push:
@@ -42,6 +50,8 @@ docker-push:
 	docker push silverwind/droppy:latest
 	docker push silverwind/armhf-droppy:"$$(cat package.json | jq -r .version)"
 	docker push silverwind/armhf-droppy:latest
+	docker push silverwind/arm64v8-droppy:"$$(cat package.json | jq -r .version)"
+	docker push silverwind/arm64v8-droppy:latest
 
 update:
 	$(BIN)/updates -u
