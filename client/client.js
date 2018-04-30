@@ -1,5 +1,3 @@
-/* global jQuery, CodeMirror, plyr, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default, pdfjsLib */
-/* eslint-disable no-var, prefer-const */
 (function($) {
   "use strict";
 

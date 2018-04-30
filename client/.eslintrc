@@ -1,0 +1,17 @@
+rules:
+  no-var: [0]
+  prefer-const: [0]
+
+globals:
+  CodeMirror: false
+  fileExtension: false
+  Handlebars: false
+  jQuery: false
+  Mousetrap: false
+  pdfjsLib: false
+  PhotoSwipe: false
+  PhotoSwipeUI_Default: false
+  plyr: false
+  screenfull: false
+  Uppie: false
+

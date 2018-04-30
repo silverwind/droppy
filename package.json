@@ -9,7 +9,7 @@
   "bin": "./droppy.js",
   "browserslist": "> 3%, last 2 firefox versions, last 2 safari versions",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "scripts": {
     "start": "node droppy.js start",
