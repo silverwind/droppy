@@ -1,4 +1,4 @@
-/* global jQuery, CodeMirror, plyr, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default, PDFJS */
+/* global jQuery, CodeMirror, plyr, Mousetrap, fileExtension, Handlebars, Uppie, screenfull, PhotoSwipe, PhotoSwipeUI_Default, pdfjsLib */
 /* eslint-disable no-var, prefer-const */
 (function($) {
   "use strict";
@@ -1895,8 +1895,8 @@
 
   function initPDF(container) {
     loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
-      PDFJS.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";
-      PDFJS.getDocument(container.data("src")).then(function(pdf) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";
+      pdfjsLib.getDocument(container.data("src")).then(function(pdf) {
         for (var i = 1; i <= pdf.numPages; i++) {
           pdf.getPage(i).then(function(page) {
             var canvas = document.createElement("canvas");

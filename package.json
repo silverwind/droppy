@@ -67,7 +67,7 @@
     "iltorb": "2.0.3",
     "mousetrap": "^1.6.1",
     "node-zopfli": "^2.0.2",
-    "pdfjs-dist": "^2.0.391",
+    "pdfjs-dist": "^2.0.489",
     "photoswipe": "^4.1.2",
     "postcss": "^6.0.19",
     "request": "^2.83.0",
