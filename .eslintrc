@@ -202,7 +202,7 @@ rules:
   padded-blocks: [2, never]
   prefer-arrow-callback: [2]
   prefer-const: [2]
-  prefer-destructuring: [2]
+  prefer-destructuring: [0]
   prefer-numeric-literals: [2]
   prefer-promise-reject-errors: [2, {allowEmptyReject: false}]
   prefer-reflect: [0]
