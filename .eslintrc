@@ -154,7 +154,7 @@ rules:
   no-restricted-modules: [2, domain, freelist, smalloc, sys]
   no-restricted-syntax: [2, WithStatement]
   no-return-assign: [0]
-  no-return-await: [2]
+  no-return-await: [0]
   no-script-url: [2]
   no-self-assign: [2, {props: true}]
   no-self-compare: [2]
@@ -200,17 +200,17 @@ rules:
   operator-assignment: [2, always]
   operator-linebreak: [2, after]
   padded-blocks: [2, never]
-  prefer-arrow-callback: [0] # enable for node 6
+  prefer-arrow-callback: [2]
   prefer-const: [2]
-  prefer-destructuring: [0] # enable for node 6
+  prefer-destructuring: [2]
   prefer-numeric-literals: [2]
   prefer-promise-reject-errors: [2, {allowEmptyReject: false}]
   prefer-reflect: [0]
-  prefer-rest-params: [0] # enable for node 6
-  prefer-spread: [0] # enable for node 6
-  prefer-template: [0] # enable for node 6
+  prefer-rest-params: [2]
+  prefer-spread: [2]
+  prefer-template: [2]
   quote-props: [0]
-  quotes: [2, double, avoid-escape]
+  quotes: [2, double, {avoidEscape: true, allowTemplateLiterals: true}]
   radix: [2, as-needed]
   require-await: [2]
   require-jsdoc: [0]
