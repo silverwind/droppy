@@ -208,7 +208,7 @@ rules:
   prefer-reflect: [0]
   prefer-rest-params: [2]
   prefer-spread: [2]
-  prefer-template: [2]
+  prefer-template: [0]
   quote-props: [0]
   quotes: [2, double, {avoidEscape: true, allowTemplateLiterals: true}]
   radix: [2, as-needed]
