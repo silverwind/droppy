@@ -212,7 +212,7 @@ rules:
   quote-props: [0]
   quotes: [2, double, {avoidEscape: true, allowTemplateLiterals: true}]
   radix: [2, as-needed]
-  require-await: [2]
+  require-await: [0]
   require-jsdoc: [0]
   require-yield: [2]
   semi-spacing: [2, {before: false, after: true}]
