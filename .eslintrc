@@ -66,7 +66,7 @@ rules:
   newline-per-chained-call: [0]
   no-alert: [0]
   no-array-constructor: [0]
-  no-await-in-loop: [2]
+  no-await-in-loop: [0]
   no-bitwise: [0]
   no-buffer-constructor: [0] # enable for node 6
   no-caller: [2]
