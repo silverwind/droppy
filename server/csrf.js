@@ -12,7 +12,7 @@ csrf.create = function() {
 };
 
 csrf.validate = function(token) {
-  return tokens.some(function(storedToken) {
+  return tokens.some(storedToken => {
     return storedToken === token;
   });
 };

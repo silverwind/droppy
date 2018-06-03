@@ -11,9 +11,8 @@ const logColors = ["reset", "red", "yellow", "cyan"];
 const logLabels = ["", "ERROR", "INFO", "DEBG"];
 let opts, logfile;
 
-const log = module.exports = function(req, res, logLevel) {
+const log = module.exports = function(req, res, logLevel, ...elems) {
   if (opts && opts.logLevel < logLevel) return;
-  const elems = Array.prototype.slice.call(arguments, 3);
   let statusCode;
 
   if (req && req.time) elems.unshift("[" + chalk.magenta((Date.now() - req.time) + "ms") + "]");
@@ -56,7 +55,7 @@ const log = module.exports = function(req, res, logLevel) {
     elems.unshift(log.timestamp());
   }
 
-  elems.forEach(function(part, index) {
+  elems.forEach((part, index) => {
     if (part === "") {
       elems.splice(index, 1);
     }
@@ -65,7 +64,7 @@ const log = module.exports = function(req, res, logLevel) {
   if (logfile) {
     fs.write(logfile, stripAnsi(elems.join(" ")) + "\n");
   } else {
-    console.info.apply(console, elems);
+    console.info(...elems);
   }
 };
 
@@ -77,33 +76,31 @@ log.setLogFile = function(fd) {
   logfile = fd;
 };
 
-log.debug = function(req, res) {
+log.debug = function(...args) {
+  const [req, res, ...elems] = args;
   if (req && (req.headers || req.addr)) {
-    log(req, res, 3, Array.prototype.slice.call(arguments, 2).join(""));
+    log(req, res, 3, elems.join(""));
   } else {
-    log(null, null, 3, Array.prototype.slice.call(arguments, 0).join(""));
+    log(null, null, 3, args.join(""));
   }
 };
 
-log.info = function(req, res) {
+log.info = function(...args) {
+  const [req, res, ...elems] = args;
   if (req && (req.headers || req.addr)) {
-    log(req, res, 2, Array.prototype.slice.call(arguments, 2).join(""));
+    log(req, res, 2, elems.join(""));
   } else {
-    log(null, null, 2, Array.prototype.slice.call(arguments, 0).join(""));
+    log(null, null, 2, args.join(""));
   }
 };
 
-log.error = function(err) {
-  if (arguments.length === 1) {
-    log(null, null, 1, chalk.red(log.formatError(err)));
-  } else {
-    log(null, null, 1, chalk.red(log.formatError([].slice.call(arguments).join(" "))));
-  }
+log.error = function(...args) {
+  log(null, null, 1, chalk.red(log.formatError(args.length === 1 ? args[0] : args.join(" "))));
 };
 
-log.plain = function() {
+log.plain = function(...args) {
   if (opts && opts.logLevel < 2) return;
-  log(null, null, 0, [].slice.call(arguments).join(""));
+  log(null, null, 0, args.join(""));
 };
 
 log.timestamp = function() {

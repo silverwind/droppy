@@ -34,7 +34,7 @@ const overrideMimeTypes = {
 // mkdirp wrapper with array support
 utils.mkdir = function(dir, cb) {
   if (Array.isArray(dir)) {
-    async.each(dir, function(p, cb) {
+    async.each(dir, (p, cb) => {
       mkdirp(p, {fs: fs, mode: "755"}, cb);
     }, cb);
   } else if (typeof dir === "string") {
@@ -62,7 +62,7 @@ utils.rmSync = function(p) {
 };
 
 utils.move = function(src, dst, cb) {
-  mv(src, dst, function(err) {
+  mv(src, dst, err => {
     if (cb) cb(err);
   });
 };
@@ -85,7 +85,7 @@ utils.copyFile = function(src, dst, cb) {
 };
 
 utils.copyDir = function(src, dst, cb) {
-  cpr(src, dst, {overwrite: true}, function(errs) {
+  cpr(src, dst, {overwrite: true}, errs => {
     if (errs) log.error(errs);
     if (cb) cb();
   });
@@ -114,7 +114,7 @@ utils.pretty = function(data) {
 };
 
 utils.getNewPath = function(origPath, callback) {
-  fs.stat(origPath, function(err, stats) {
+  fs.stat(origPath, (err, stats) => {
     if (err) callback(origPath);
     else {
       let filename  = path.basename(origPath);
@@ -130,18 +130,18 @@ utils.getNewPath = function(origPath, callback) {
 
       let canCreate = false;
       async.until(
-        function() {
+        () => {
           return canCreate;
         },
-        function(cb) {
+        cb => {
           const num = parseInt(filename.substring(filename.lastIndexOf("-") + 1));
           filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
-          fs.stat(path.join(dirname, filename + extension), function(err) {
+          fs.stat(path.join(dirname, filename + extension), err => {
             canCreate = err;
             cb();
           });
         },
-        function() {
+        () => {
           callback(path.join(dirname, filename + extension));
         }
       );
@@ -177,7 +177,7 @@ utils.isPathSane = function(p, isURL) {
     }
     return true;
   } else {
-    return p.split(/[\\/]/gm).every(function(name) {
+    return p.split(/[\\/]/gm).every(name => {
       if (name === "." || name === "..") return false;
       if (!name) return true;
       return validate(name); // will reject invalid filenames on Windows
@@ -190,7 +190,7 @@ utils.isBinary = function(p, callback) {
     return callback(null, true);
   }
 
-  isBin(p, function(err, result) {
+  isBin(p, (err, result) => {
     if (err) return callback(err);
     callback(null, result);
   });
@@ -222,11 +222,11 @@ utils.createSid = function() {
 };
 
 utils.readJsonBody = function(req) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(((resolve, reject) => {
     let body = [];
-    req.on("data", function(chunk) {
+    req.on("data", chunk => {
       body.push(chunk);
-    }).on("end", function() {
+    }).on("end", () => {
       body = String(Buffer.concat(body));
       try {
         resolve(JSON.parse(body));
@@ -234,7 +234,7 @@ utils.readJsonBody = function(req) {
         reject(err);
       }
     });
-  });
+  }));
 };
 
 utils.countOccurences = function(string, search) {
@@ -278,8 +278,8 @@ utils.port = function(req) {
 utils.naturalSort = function(a, b) {
   const x = [], y = [];
   function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
-  a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
-  b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
+  a.replace(/(\d+)|(\D+)/g, (_, a, b) => { x.push([a || 0, b]); });
+  b.replace(/(\d+)|(\D+)/g, (_, a, b) => { y.push([a || 0, b]); });
   while (x.length && y.length) {
     const xx = x.shift();
     const yy = y.shift();
@@ -292,7 +292,7 @@ utils.naturalSort = function(a, b) {
 };
 
 utils.extensionRe = function(arr) {
-  arr = arr.map(function(ext) {
+  arr = arr.map(ext => {
     return escRe(ext);
   });
   return RegExp("\\.(" + arr.join("|") + ")$", "i");
@@ -300,9 +300,9 @@ utils.extensionRe = function(arr) {
 
 utils.readFile = function(p, cb) {
   if (typeof p !== "string") return cb(null);
-  fs.stat(p, function(_, stats) {
+  fs.stat(p, (_, stats) => {
     if (stats && stats.isFile()) {
-      fs.readFile(p, function(err, data) {
+      fs.readFile(p, (err, data) => {
         if (err) return cb(err);
         cb(null, String(data));
       });

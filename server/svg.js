@@ -12,7 +12,7 @@ module.exports = function svg() {
     },
   });
 
-  fs.readdirSync(paths.svg).forEach(function(file) {
+  fs.readdirSync(paths.svg).forEach(file => {
     sprites.add("i-" + file.replace(/\.svg/, ""), fs.readFileSync(path.join(paths.svg, file)));
   });
 

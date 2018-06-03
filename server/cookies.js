@@ -10,7 +10,7 @@ const cookieParams = ["HttpOnly", "SameSite=strict"];
 cookies.parse = function(cookie) {
   const entries = {};
   if (typeof cookie === "string" && cookie.length) {
-    cookie.split("; ").forEach(function(entry) {
+    cookie.split("; ").forEach(entry => {
       const parts = entry.trim().split("=");
       entries[parts[0]] = parts[1];
     });
@@ -82,7 +82,7 @@ function cookieHeaders(sid, path, expires) {
 }
 
 function cookieString(params) {
-  return Object.keys(params).map(function(param) {
+  return Object.keys(params).map(param => {
     return param + "=" + params[param];
   }).concat(cookieParams).join("; ");
 }

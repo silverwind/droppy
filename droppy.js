@@ -51,7 +51,7 @@ if (argv.daemon || argv.d) {
 
 if (argv._[0] === "build") {
   console.info("Building resources ...");
-  require("./server/resources.js").build(function(err) {
+  require("./server/resources.js").build(err => {
     console.info(err || "Resources built successfully");
     process.exit(err ? 1 : 0);
   });
@@ -83,7 +83,7 @@ const args = argv._.slice(1);
 if (cmds[cmd]) {
   let db;
   if (cmd === "start") {
-    require("./server/server.js")(null, true, argv.dev, function(err) {
+    require("./server/server.js")(null, true, argv.dev, err => {
       if (err) {
         require("./server/log.js").error(err);
         process.exit(1);
@@ -92,7 +92,7 @@ if (cmds[cmd]) {
   } else if (cmd === "stop") {
     const ps = require("ps-node");
     const log = require("./server/log.js");
-    ps.lookup({command: pkg.name}, function(err, procs) {
+    ps.lookup({command: pkg.name}, (err, procs) => {
       if (err) {
         log.error(err);
         process.exit(1);
@@ -102,17 +102,17 @@ if (cmds[cmd]) {
           log.info("No processes found");
           process.exit(0);
         }
-        require("async").map(procs, function(proc, cb) {
-          ps.kill(proc.pid, function(err) {
+        require("async").map(procs, (proc, cb) => {
+          ps.kill(proc.pid, err => {
             if (err) return cb(err);
             cb(null, proc.pid);
           });
-        }, function(err, pids) {
+        }, (err, pids) => {
           if (err) {
             log.error(err);
             process.exit(1);
           } else {
-            pids.forEach(function(pid) {
+            pids.forEach(pid => {
               console.info("Killed PID " + pid);
               process.exit(0);
             });
@@ -126,15 +126,15 @@ if (cmds[cmd]) {
     const paths = require("./server/paths.js").get();
     const cfg = require("./server/cfg.js");
     const edit = function() {
-      findEditor(function(editor) {
+      findEditor(editor => {
         if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
       });
     };
-    fs.stat(paths.cfgFile, function(err) {
+    fs.stat(paths.cfgFile, err => {
       if (err && err.code === "ENOENT") {
-        require("mkdirp")(paths.config, function() {
-          cfg.init(null, function(err) {
+        require("mkdirp")(paths.config, () => {
+          cfg.init(null, err => {
             if (err) return console.error(new Error(err.message || err).stack);
             edit();
           });
@@ -145,22 +145,22 @@ if (cmds[cmd]) {
     });
   } else if (cmd === "list") {
     db = require("./server/db.js");
-    db.load(function() {
+    db.load(() => {
       printUsers(db.get("users"));
     });
   } else if (cmd === "add") {
     if (args.length !== 2 && args.length !== 3) return printHelp();
     db = require("./server/db.js");
-    db.load(function() {
-      db.addOrUpdateUser(args[0], args[1], args[2] === "p", function() {
+    db.load(() => {
+      db.addOrUpdateUser(args[0], args[1], args[2] === "p", () => {
         printUsers(db.get("users"));
       });
     });
   } else if (cmd === "del") {
     if (args.length !== 1) return printHelp();
     db = require("./server/db.js");
-    db.load(function() {
-      db.delUser(args[0], function() {
+    db.load(() => {
+      db.delUser(args[0], () => {
         printUsers(db.get("users"));
       });
     });
@@ -172,13 +172,13 @@ if (cmds[cmd]) {
 function printHelp() {
   let help = "Usage: " + pkg.name + " command [options]\n\n Commands:";
 
-  Object.keys(cmds).forEach(function(command) {
+  Object.keys(cmds).forEach(command => {
     help += "\n   " + cmds[command];
   });
 
   help += "\n\n Options:";
 
-  Object.keys(opts).forEach(function(option) {
+  Object.keys(opts).forEach(option => {
     help += "\n   " + opts[option];
   });
 
@@ -189,7 +189,7 @@ function printUsers(users) {
   if (Object.keys(users).length === 0) {
     console.info("No users defined. Use 'add' to add one.");
   } else {
-    console.info("Current Users:\n" + Object.keys(users).map(function(user) {
+    console.info("Current Users:\n" + Object.keys(users).map(user => {
       return "  - " + user;
     }).join("\n"));
   }

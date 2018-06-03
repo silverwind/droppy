@@ -175,7 +175,7 @@ resources.load = function(dev, cb) {
   minify = !dev;
 
   if (dev) return compile(false, cb);
-  fs.readFile(cachePath, function(err, data) {
+  fs.readFile(cachePath, (err, data) => {
     if (err) {
       log.info(err.code, " ", cachePath, ", ", "building cache ...");
       return compile(true, cb);
@@ -190,9 +190,9 @@ resources.load = function(dev, cb) {
 };
 
 resources.build = function(cb) {
-  isCacheFresh(function(fresh) {
+  isCacheFresh(fresh => {
     if (fresh) {
-      fs.readFile(cachePath, function(err, data) {
+      fs.readFile(cachePath, (err, data) => {
         if (err) return compile(true, cb);
         try {
           jb.parse(data);
@@ -214,29 +214,29 @@ function buf(str) {
 }
 
 function isCacheFresh(cb) {
-  fs.stat(cachePath, function(err, stats) {
+  fs.stat(cachePath, (err, stats) => {
     if (err) return cb(false);
     const files = [];
-    Object.keys(resources.files).forEach(function(type) {
-      resources.files[type].forEach(function(file) {
+    Object.keys(resources.files).forEach(type => {
+      resources.files[type].forEach(file => {
         files.push(path.join(paths.mod, file));
       });
     });
-    Object.keys(libs).forEach(function(file) {
+    Object.keys(libs).forEach(file => {
       if (typeof libs[file] === "string") {
         files.push(path.join(paths.mod, libs[file]));
       } else {
-        libs[file].forEach(function(file) {
+        libs[file].forEach(file => {
           files.push(path.join(paths.mod, file));
         });
       }
     });
-    async.map(files, function(file, cb) {
-      fs.stat(file, function(err, stats) {
+    async.map(files, (file, cb) => {
+      fs.stat(file, (err, stats) => {
         cb(null, err ? 0 : stats.mtime.getTime());
       });
-    }, function(_, times) {
-      cb(stats.mtime.getTime() >= Math.max.apply(Math, times));
+    }, (_, times) => {
+      cb(stats.mtime.getTime() >= Math.max(...times));
     });
   });
 }
@@ -246,11 +246,11 @@ function compile(write, cb) {
     return cb(new Error("Missing devDependencies to compile resource cache, " +
                         "please reinstall or run `npm install --only=dev` inside the project directory"));
   }
-  async.series([compileAll, readThemes, readModes, readLibs], function(err, results) {
+  async.series([compileAll, readThemes, readModes, readLibs], (err, results) => {
     if (err) return cb(err);
     const cache = {res: results[0], themes: {}, modes: {}, lib: {}};
 
-    Object.keys(results[1]).forEach(function(theme) {
+    Object.keys(results[1]).forEach(theme => {
       cache.themes[theme] = {
         data: results[1][theme],
         etag: etag(results[1][theme]),
@@ -258,7 +258,7 @@ function compile(write, cb) {
       };
     });
 
-    Object.keys(results[2]).forEach(function(mode) {
+    Object.keys(results[2]).forEach(mode => {
       cache.modes[mode] = {
         data: results[2][mode],
         etag: etag(results[2][mode]),
@@ -266,7 +266,7 @@ function compile(write, cb) {
       };
     });
 
-    Object.keys(results[3]).forEach(function(file) {
+    Object.keys(results[3]).forEach(file => {
       cache.lib[file] = {
         data: results[3][file],
         etag: etag(results[3][file]),
@@ -274,14 +274,14 @@ function compile(write, cb) {
       };
     });
 
-    addGzip(cache, function(err, cache) {
+    addGzip(cache, (err, cache) => {
       if (err) return cb(err);
-      addBrotli(cache, function(err, cache) {
+      addBrotli(cache, (err, cache) => {
         if (err) return cb(err);
         if (write) {
-          mkdirp(path.dirname(cachePath), function(err) {
+          mkdirp(path.dirname(cachePath), err => {
             if (err) return cb(err);
-            fs.writeFile(cachePath, jb.stringify(cache), function(err) {
+            fs.writeFile(cachePath, jb.stringify(cache), err => {
               cb(err, cache);
             });
           });
@@ -294,14 +294,14 @@ function compile(write, cb) {
 // Create gzip compressed data
 function addGzip(cache, callback) {
   const types = Object.keys(cache), funcs = [];
-  types.forEach(function(type) {
-    funcs.push(function(cb) {
+  types.forEach(type => {
+    funcs.push(cb => {
       gzipMap(cache[type], cb);
     });
   });
-  async.parallel(funcs, function(err, results) {
+  async.parallel(funcs, (err, results) => {
     if (err) return callback(err);
-    types.forEach(function(type, index) {
+    types.forEach((type, index) => {
       cache[type] = results[index];
     });
     callback(null, cache);
@@ -310,14 +310,14 @@ function addGzip(cache, callback) {
 
 function gzipMap(map, callback) {
   const names = Object.keys(map), funcs = [];
-  names.forEach(function(name) {
-    funcs.push(function(cb) {
+  names.forEach(name => {
+    funcs.push(cb => {
       (minify ? zopfli : zlib).gzip(map[name].data, cb);
     });
   });
-  async.parallel(funcs, function(err, results) {
+  async.parallel(funcs, (err, results) => {
     if (err) return callback(err);
-    names.forEach(function(name, index) {
+    names.forEach((name, index) => {
       map[name].gzip = results[index];
     });
     callback(null, map);
@@ -327,14 +327,14 @@ function gzipMap(map, callback) {
 // Create brotli compressed data
 function addBrotli(cache, callback) {
   const types = Object.keys(cache), funcs = [];
-  types.forEach(function(type) {
-    funcs.push(function(cb) {
+  types.forEach(type => {
+    funcs.push(cb => {
       brotliMap(cache[type], cb);
     });
   });
-  async.parallel(funcs, function(err, results) {
+  async.parallel(funcs, (err, results) => {
     if (err) return callback(err);
-    types.forEach(function(type, index) {
+    types.forEach((type, index) => {
       cache[type] = results[index];
     });
     callback(null, cache);
@@ -343,14 +343,14 @@ function addBrotli(cache, callback) {
 
 function brotliMap(map, callback) {
   const names = Object.keys(map), funcs = [];
-  names.forEach(function(name) {
-    funcs.push(function(cb) {
+  names.forEach(name => {
+    funcs.push(cb => {
       brotli(map[name].data, opts.brotli, cb);
     });
   });
-  async.parallel(funcs, function(err, results) {
+  async.parallel(funcs, (err, results) => {
     if (err) return callback(err);
-    names.forEach(function(name, index) {
+    names.forEach((name, index) => {
       map[name].brotli = results[index];
     });
     callback(null, map);
@@ -359,23 +359,23 @@ function brotliMap(map, callback) {
 
 function readThemes(callback) {
   const themes = {};
-  fs.readdir(themesPath, function(err, filenames) {
+  fs.readdir(themesPath, (err, filenames) => {
     if (err) return callback(err);
 
-    const files = filenames.map(function(name) {
+    const files = filenames.map(name => {
       return path.join(themesPath, name);
     });
 
-    async.map(files, fs.readFile, function(err, data) {
+    async.map(files, fs.readFile, (err, data) => {
       if (err) return callback(err);
 
-      filenames.forEach(function(name, index) {
+      filenames.forEach((name, index) => {
         const css = String(data[index]);
         themes[name.replace(/\.css$/, "")] = buf(minifyCSS(css));
       });
 
       // add our own theme
-      fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), function(err, css) {
+      fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), (err, css) => {
         css = String(css);
         if (err) return callback(err);
         themes.droppy = buf(minifyCSS(css));
@@ -389,22 +389,22 @@ function readModes(callback) {
   const modes = {};
 
   // parse meta.js from CM for supported modes
-  fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), function(err, js) {
+  fs.readFile(path.join(paths.mod, "/node_modules/codemirror/mode/meta.js"), (err, js) => {
     if (err) return callback(err);
 
     // Extract modes from CodeMirror
     const sandbox = {CodeMirror : {}};
     vm.runInNewContext(js, sandbox);
-    sandbox.CodeMirror.modeInfo.forEach(function(entry) {
+    sandbox.CodeMirror.modeInfo.forEach(entry => {
       if (entry.mode !== "null") modes[entry.mode] = null;
     });
 
-    async.map(Object.keys(modes), function(mode, cb) {
-      fs.readFile(path.join(modesPath, mode, mode + ".js"), function(err, data) {
+    async.map(Object.keys(modes), (mode, cb) => {
+      fs.readFile(path.join(modesPath, mode, mode + ".js"), (err, data) => {
         cb(err, buf(minifyJS(String(data))));
       });
-    }, function(err, result) {
-      Object.keys(modes).forEach(function(mode, i) {
+    }, (err, result) => {
+      Object.keys(modes).forEach((mode, i) => {
         modes[mode] = result[i];
       });
       callback(err, modes);
@@ -414,26 +414,26 @@ function readModes(callback) {
 
 function readLibs(callback) {
   const out = {};
-  async.each(Object.keys(libs), function(dest, cb) {
+  async.each(Object.keys(libs), (dest, cb) => {
     if (Array.isArray(libs[dest])) {
-      async.map(libs[dest], function(p, innercb) {
+      async.map(libs[dest], (p, innercb) => {
         fs.readFile(path.join(paths.mod, p), innercb);
-      }, function(err, data) {
+      }, (err, data) => {
         out[dest] = Buffer.concat(data);
         cb(err);
       });
     } else {
-      fs.readFile(path.join(paths.mod, libs[dest]), function(err, data) {
+      fs.readFile(path.join(paths.mod, libs[dest]), (err, data) => {
         out[dest] = data;
         cb(err);
       });
     }
-  }, function(err) {
+  }, err => {
     // Prefix hardcoded Photoswipe urls
     out["ps.css"] = buf(String(out["ps.css"]).replace(/url\(/gm, "url(!/res/lib/"));
 
     if (minify) {
-      Object.keys(out).forEach(function(file) {
+      Object.keys(out).forEach(file => {
         if (/\.js$/.test(file)) {
           out[file] = buf(minifyJS(String(out[file])));
         } else if (/\.css$/.test(file)) {
@@ -466,7 +466,7 @@ function templates() {
     "templates=Handlebars.templates=Handlebars.templates||{};";
   const suffix = "Handlebars.partials=Handlebars.templates})();";
 
-  return prefix + fs.readdirSync(paths.templates).map(function(file) {
+  return prefix + fs.readdirSync(paths.templates).map(file => {
     const p = path.join(paths.templates, file);
     const name = file.replace(/\..+$/, "");
     let html = htmlMinifier.minify(fs.readFileSync(p, "utf8"), opts.htmlMinifier);
@@ -475,7 +475,7 @@ function templates() {
     html = html.replace(/(>|^|}}) ({{|<|$)/g, "$1$2");
 
     // trim whitespace inside {{fragments}}
-    html = html.replace(/({{2,})([\s\S\n]*?)(}{2,})/gm, function(_, p1, p2, p3) {
+    html = html.replace(/({{2,})([\s\S\n]*?)(}{2,})/gm, (_, p1, p2, p3) => {
       return p1 + p2.replace(/\n/gm, " ").replace(/ {2,}/gm, " ").trim() + p3;
     }).trim();
 
@@ -489,7 +489,7 @@ function templates() {
 
 resources.compileJS = function() {
   let js = "";
-  resources.files.js.forEach(function(file) {
+  resources.files.js.forEach(file => {
     js += fs.readFileSync(path.join(paths.mod, file), "utf8") + ";";
   });
 
@@ -508,7 +508,7 @@ resources.compileJS = function() {
 
 resources.compileCSS = function() {
   let css = "";
-  resources.files.css.forEach(function(file) {
+  resources.files.css.forEach(file => {
     css += fs.readFileSync(path.join(paths.mod, file), "utf8") + "\n";
   });
 
@@ -548,7 +548,7 @@ function compileAll(callback) {
   res = resources.compileHTML(res);
 
   // Read misc files
-  resources.files.other.forEach(function(file) {
+  resources.files.other.forEach(file => {
     let data;
     const name = path.basename(file);
     const fullPath = path.join(paths.mod, file);

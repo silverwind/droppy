@@ -16,7 +16,7 @@ const utils    = require("./utils.js");
 demo.init = function(cb) {
   process.title = "droppy-demo";
   log.info("Initializing demo mode ...");
-  demo.refresh(function() {
+  demo.refresh(() => {
     schedule.scheduleJob("*/10 * * * *", demo.refresh);
     if (cb) cb();
   });
@@ -25,7 +25,7 @@ demo.init = function(cb) {
 demo.refresh = function(doneCallback) {
   async.series([
     function(callback) {
-      utils.rm(path.join(paths.files, "**/*"), function(err) {
+      utils.rm(path.join(paths.files, "**/*"), err => {
         if (err) log.error(err);
         callback();
       });
@@ -76,7 +76,7 @@ demo.refresh = function(doneCallback) {
         function(cb) { utils.rm(path.join(paths.files, "/code/client/svg"), cb); },
       ], callback);
     }
-  ], function() {
+  ], () => {
     log.info("Demo files refreshed");
     if (doneCallback && typeof doneCallback === "function") doneCallback();
   });
@@ -86,12 +86,12 @@ function get(url, dest) {
   return function(callback) {
     const temp = path.join(paths.config, "/demoTemp", dest);
     dest = path.join(paths.files, dest);
-    utils.mkdir([path.dirname(temp), path.dirname(dest)], function() {
-      fs.stat(temp, function(err, stats) {
+    utils.mkdir([path.dirname(temp), path.dirname(dest)], () => {
+      fs.stat(temp, (err, stats) => {
         if (err || !stats.size) {
           const stream = fs.createWriteStream(temp);
           stream.on("error", callback);
-          stream.on("close", function() {
+          stream.on("close", () => {
             utils.copyFile(temp, dest, callback);
           });
           log.info(chalk.yellow("GET ") + url);

@@ -15,11 +15,11 @@ const defaults = {users: {}, sessions: {}, links: {}};
 let database, watching;
 
 db.load = function(callback) {
-  fs.stat(dbFile, function(err) {
+  fs.stat(dbFile, err => {
     if (err) {
       if (err.code === "ENOENT") {
         database = defaults;
-        mkdirp(path.dirname(dbFile), function(err) {
+        mkdirp(path.dirname(dbFile), err => {
           write();
           callback(err);
         });
@@ -27,7 +27,7 @@ db.load = function(callback) {
         callback(err);
       }
     } else {
-      db.parse(function(err) {
+      db.parse(err => {
         if (err) return callback(err);
         let modified = false;
 
@@ -40,7 +40,7 @@ db.load = function(callback) {
         if (database.sharelinks) {
           modified = true;
           database.links = {};
-          Object.keys(database.sharelinks).forEach(function(hash) {
+          Object.keys(database.sharelinks).forEach(hash => {
             database.links[hash] = {
               location: database.sharelinks[hash],
               attachment: false
@@ -50,7 +50,7 @@ db.load = function(callback) {
         }
 
         if (database.sessions) {
-          Object.keys(database.sessions).forEach(function(session) {
+          Object.keys(database.sessions).forEach(session => {
             // invalidate session not containing a username
             if (!database.sessions[session].username) {
               modified = true;
@@ -78,7 +78,7 @@ db.load = function(callback) {
 };
 
 db.parse = function(cb) {
-  fs.readFile(dbFile, "utf8", function(err, data) {
+  fs.readFile(dbFile, "utf8", (err, data) => {
     if (err) return cb(err);
 
     if (data.trim() !== "") {
@@ -121,7 +121,7 @@ db.delUser = function(user) {
     delete database.users[user];
 
     // delete user sessions
-    Object.keys(database.sessions).forEach(function(sid) {
+    Object.keys(database.sessions).forEach(sid => {
       if (database.sessions[sid].username === user) {
         delete database.sessions[sid];
       }
@@ -153,13 +153,13 @@ db.watch = function(config) {
     usePolling: Boolean(config.pollingInterval),
     interval: config.pollingInterval,
     binaryInterval: config.pollingInterval
-  }).on("error", log.error).on("change", function() {
+  }).on("error", log.error).on("change", () => {
     if (!watching) return;
-    db.parse(function(err) {
+    db.parse(err => {
       if (err) return log.error(err);
       log.info("db.json reloaded because it was changed");
     });
-  }).on("ready", function() {
+  }).on("ready", () => {
     watching = true;
   });
 };
@@ -170,7 +170,7 @@ function write() {
   fs.writeFileSync(dbFile, JSON.stringify(database, null, 2));
 
   // watch the file 1 second after last write
-  setTimeout(function() {
+  setTimeout(() => {
     watching = true;
   }, 1000);
 }

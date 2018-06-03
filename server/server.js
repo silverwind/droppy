@@ -68,7 +68,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     function(cb) { utils.mkdir([paths.files, paths.temp, paths.config], cb); },
     function(cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
     function(cb) {
-      cfg.init(opts, function(err, conf) {
+      cfg.init(opts, (err, conf) => {
         if (!err) {
           config = conf;
           if (dev) config.dev = dev;
@@ -78,7 +78,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
       });
     },
     function(cb) {
-      db.load(function() {
+      db.load(() => {
         db.watch(config);
         cb();
       });
@@ -88,11 +88,9 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
       firstRun = Object.keys(db.get("users")).length === 0;
       // clean up old sessions if no users exist
       if (firstRun) db.set("sessions", {});
-      cb();
-    },
-    function(cb) {
+      log.info("Configuration: ", utils.pretty(config));
       log.info("Loading resources ...");
-      resources.load(config.dev, function(err, c) {
+      resources.load(config.dev, (err, c) => {
         log.info("Loading resources done");
         cache = c; cb(err);
       });
@@ -112,7 +110,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     function(cb) {
       log.info("Caching files ...");
       filetree.init(config);
-      filetree.updateDir(null, function() {
+      filetree.updateDir(null, () => {
         if (config.watch) filetree.watch();
         log.info("Caching files done");
         cb();
@@ -120,8 +118,8 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     },
     function(cb) {
       if (typeof config.keepAlive === "number" && config.keepAlive > 0) {
-        setInterval(function() {
-          Object.keys(clients).forEach(function(client) {
+        setInterval(() => {
+          Object.keys(clients).forEach(client => {
             if (!clients[client].ws) return;
             try {
               clients[client].ws.ping();
@@ -131,7 +129,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
       }
       cb();
     },
-  ], function(err) {
+  ], err => {
     if (err) return callback(err);
     ready = true;
     log.info(chalk.green("Ready for requests!"));
@@ -172,7 +170,7 @@ function startListeners(callback) {
   }
 
   const targets = [];
-  config.listeners.forEach(function(listener, i) {
+  config.listeners.forEach((listener, i) => {
     if (listener.protocol === undefined) {
       listener.protocol = "http";
     }
@@ -228,8 +226,8 @@ function startListeners(callback) {
     };
 
     // listen on all host + port combinations
-    hosts.forEach(function(host) {
-      ports.forEach(function(port) {
+    hosts.forEach(host => {
+      ports.forEach(port => {
         targets.push({
           host: host,
           port: port,
@@ -239,7 +237,7 @@ function startListeners(callback) {
     });
 
     // listen on unix socket
-    sockets.forEach(function(socket) {
+    sockets.forEach(socket => {
       targets.push({
         socket: socket,
         opts: opts,
@@ -248,8 +246,8 @@ function startListeners(callback) {
   });
 
   let listenerCount = 0;
-  async.each(targets, function(target, cb) {
-    createListener(onRequest, target.opts, function(err, server) {
+  async.each(targets, (target, cb) => {
+    createListener(onRequest, target.opts, (err, server) => {
       if (err) {
         log.error(
           "Error creating listener",
@@ -260,7 +258,7 @@ function startListeners(callback) {
         return cb();
       }
 
-      server.on("listening", function() {
+      server.on("listening", () => {
         server.removeAllListeners("error");
         listenerCount++;
         setupWebSocket(server);
@@ -281,8 +279,8 @@ function startListeners(callback) {
           const addrs = [];
           if (addr === "::" || addr === "0.0.0.0") {
             const interfaces = os.networkInterfaces();
-            Object.keys(interfaces).forEach(function(name) {
-              interfaces[name].forEach(function(intf) {
+            Object.keys(interfaces).forEach(name => {
+              interfaces[name].forEach(intf => {
                 if (addr === "::" && intf.address) {
                   addrs.push(intf.address);
                 } else if (addr === "0.0.0.0" && intf.family === "IPv4" && intf.address) {
@@ -300,20 +298,20 @@ function startListeners(callback) {
 
           addrs.sort();
 
-          addrs.forEach(function(addr) {
+          addrs.forEach(addr => {
             log.info("Listening on ", chalk.blue(proto + "://") + log.formatHostPort(addr, port, proto));
           });
         }
         cb();
       });
 
-      server.on("error", function(err) {
+      server.on("error", err => {
         if (target.host && target.port) {
           // check for other listeners on the same port and surpress misleading errors
           // from being printed because of Node's weird dual-stack behaviour.
           let otherListenerFound = false;
           if (target.host === "::" || target.host === "0.0.0.0") {
-            targets.some(function(t) {
+            targets.some(t => {
               if (target.port === t.port && target.host !== t.host && target.host) {
                 otherListenerFound = true;
                 return true;
@@ -357,7 +355,7 @@ function startListeners(callback) {
         server.listen(target.port, target.host);
       }
     });
-  }, function() {
+  }, () => {
     // Only emit an error if we have at 0 listeners
     return callback(listenerCount === 0 ? new Error("No listeners available") : null);
   });
@@ -367,7 +365,7 @@ function createListener(handler, opts, callback) {
   let server;
   if (opts.proto === "http") {
     server = require("http").createServer(handler);
-    server.on("clientError", function(_err, socket) {
+    server.on("clientError", (_err, socket) => {
       if (socket.writable) {
         // Node.js 6.0
         socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
@@ -382,7 +380,7 @@ function createListener(handler, opts, callback) {
     tls.CLIENT_RENEG_WINDOW = Infinity;
 
     const https = require("https");
-    tlsInit(opts, function(err, tlsOptions) {
+    tlsInit(opts, (err, tlsOptions) => {
       if (err) return callback(err);
 
       try {
@@ -403,7 +401,7 @@ function createListener(handler, opts, callback) {
         }
       }
 
-      server.on("request", function(req, res) {
+      server.on("request", (req, res) => {
         if (opts.hsts && opts.hsts > 0) {
           res.setHeader("Strict-Transport-Security", "max-age=" + opts.hsts);
         }
@@ -463,7 +461,7 @@ function onWebSocketRequest(ws, req) {
   const cookie = cookies.get(req.headers.cookie);
   clients[sid] = {views: [], cookie: cookie, ws: ws};
 
-  ws.on("message", function(msg) {
+  ws.on("message", msg => {
     msg = JSON.parse(msg);
 
     if (msg.type !== "SAVE_FILE") {
@@ -496,7 +494,7 @@ function onWebSocketRequest(ws, req) {
     } else if (msg.type === "REQUEST_UPDATE") {
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
       if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
-      fs.stat(utils.addFilesPath(msg.data), function(err, stats) {
+      fs.stat(utils.addFilesPath(msg.data), (err, stats) => {
         let clientDir, clientFile;
         if (err) { // Send client back to root when the requested path doesn't exist
           clientDir = "/";
@@ -519,7 +517,7 @@ function onWebSocketRequest(ws, req) {
       });
     } else if (msg.type === "RELOAD_DIRECTORY") {
       if (!validatePaths(msg.data.dir, msg.type, ws, sid, vId)) return;
-      filetree.updateDir(msg.data.dir, function() {
+      filetree.updateDir(msg.data.dir, () => {
         sendFiles(sid, vId);
       });
     } else if (msg.type === "DESTROY_VIEW") {
@@ -529,7 +527,7 @@ function onWebSocketRequest(ws, req) {
       const links = db.get("links");
 
       // Check if we already have a link for that file
-      const hadLink = Object.keys(links).some(function(link) {
+      const hadLink = Object.keys(links).some(link => {
         if (msg.data.location === links[link].location && msg.data.attachement === links[link].attachement) {
           sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
           return true;
@@ -551,7 +549,7 @@ function onWebSocketRequest(ws, req) {
       log.info(ws, null, "Saving: " + msg.data.to);
       if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
       if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
-      filetree.save(msg.data.to, msg.data.value, function(err) {
+      filetree.save(msg.data.to, msg.data.value, err => {
         if (err) {
           sendError(sid, vId, "Error saving " + msg.data.to);
           log.error(err);
@@ -568,9 +566,9 @@ function onWebSocketRequest(ws, req) {
         return sendError(sid, vId, "Can't copy directory into itself");
       }
 
-      fs.stat(utils.addFilesPath(msg.data.dst), function(err, stats) {
+      fs.stat(utils.addFilesPath(msg.data.dst), (err, stats) => {
         if (!err && stats || msg.data.src === msg.data.dst) {
-          utils.getNewPath(utils.addFilesPath(msg.data.dst), function(newDst) {
+          utils.getNewPath(utils.addFilesPath(msg.data.dst), newDst => {
             filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
           });
         } else {
@@ -618,19 +616,19 @@ function onWebSocketRequest(ws, req) {
     } else if (msg.type === "CREATE_FILES") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
       if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
-      async.each(msg.data.files, function(file, cb) {
-        filetree.mkdir(utils.addFilesPath(path.dirname(file)), function() {
+      async.each(msg.data.files, (file, cb) => {
+        filetree.mkdir(utils.addFilesPath(path.dirname(file)), () => {
           filetree.mk(utils.addFilesPath(file), cb);
         });
-      }, function(err) {
+      }, err => {
         if (err) log.error(ws, null, err);
       });
     } else if (msg.type === "CREATE_FOLDERS") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
       if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
-      async.each(msg.data.folders, function(folder, cb) {
+      async.each(msg.data.folders, (folder, cb) => {
         filetree.mkdir(utils.addFilesPath(folder), cb);
-      }, function(err) {
+      }, err => {
         if (err) log.error(ws, null, err);
       });
     } else if (msg.type === "GET_MEDIA") {
@@ -640,11 +638,11 @@ function onWebSocketRequest(ws, req) {
       const allExts = exts.img.concat(exts.vid).concat(exts.pdf);
       const files = filetree.lsFilter(dir, utils.extensionRe(allExts));
       if (!files) return sendError(sid, vId, "No displayable files in directory");
-      async.map(files, function(file, cb) {
+      async.map(files, (file, cb) => {
         if (utils.extensionRe(exts.pdf).test(file)) {
           cb(null, {pdf: true, src: file});
         } else if (utils.extensionRe(exts.img).test(file)) {
-          imgSize(path.join(utils.addFilesPath(dir), file), function(err, dims) {
+          imgSize(path.join(utils.addFilesPath(dir), file), (err, dims) => {
             if (err) log.error(err);
             cb(null, {
               src: file,
@@ -653,7 +651,7 @@ function onWebSocketRequest(ws, req) {
             });
           });
         } else cb(null, {video: true, src: file});
-      }, function(_, obj) {
+      }, (_, obj) => {
         sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
       });
     } else if (msg.type === "SEARCH") {
@@ -669,7 +667,7 @@ function onWebSocketRequest(ws, req) {
     }
   });
 
-  ws.on("close", function(code) {
+  ws.on("close", code => {
     let reason;
     if (code === 4001) {
       reason = "(Logged out)";
@@ -692,7 +690,7 @@ function onWebSocketRequest(ws, req) {
 
 // Ensure that a given path does not contain invalid file names
 function validatePaths(paths, type, ws, sid, vId) {
-  return (Array.isArray(paths) ? paths : [paths]).every(function(p) {
+  return (Array.isArray(paths) ? paths : [paths]).every(p => {
     if (!utils.isPathSane(p)) {
       sendError(sid, vId, "Invalid request");
       log.info(ws, null, "Invalid " + type + " request: " + p);
@@ -720,7 +718,7 @@ function sendUsers(sid) {
   const userDB   = db.get("users");
   const userlist = {};
 
-  Object.keys(userDB).forEach(function(user) {
+  Object.keys(userDB).forEach(user => {
     userlist[user] = userDB[user].privileged || false;
   });
   sendObj(sid, {type: "USER_LIST", users: userlist});
@@ -734,7 +732,7 @@ function sendObj(sid, data) {
 
 // Send js object to all clients
 function sendObjAll(data) {
-  Object.keys(clients).forEach(function(sid) {
+  Object.keys(clients).forEach(sid => {
     send(clients[sid].ws, JSON.stringify(data));
   });
 }
@@ -762,7 +760,7 @@ function send(ws, data) {
         if (debugData.type === "RELOAD" && debugData.css) debugData.css = {"...": "..."};
         log.debug(ws, null, chalk.green("SEND "), utils.pretty(debugData));
       }
-      ws.send(data, function(err) {
+      ws.send(data, err => {
         if (err) log.err(err);
       });
     } else {
@@ -835,7 +833,7 @@ function handleGET(req, res) {
     handleFileRequest(req, res, false);
   } else if (/^\/!\/zip\/[\s\S]+/.test(URI)) {
     const zipPath = utils.addFilesPath(URI.substring(6));
-    fs.stat(zipPath, function(err, stats) {
+    fs.stat(zipPath, (err, stats) => {
       if (!err && stats.isDirectory()) {
         streamArchive(req, res, zipPath, true, stats, false);
       } else {
@@ -866,14 +864,14 @@ function handlePOST(req, res) {
       return;
     } else {
       rateLimited.push(ip);
-      setTimeout(function() {
-        rateLimited.some(function(rIp, i) {
+      setTimeout(() => {
+        rateLimited.some((rIp, i) => {
           if (rIp === ip) return rateLimited.splice(i, 1);
         });
       }, 2000);
     }
 
-    utils.readJsonBody(req).then(function(postData) {
+    utils.readJsonBody(req).then(postData => {
       if (db.authUser(postData.username, postData.password)) {
         cookies.create(req, res, postData);
         res.statusCode = 200;
@@ -884,7 +882,7 @@ function handlePOST(req, res) {
         res.end();
         log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
       }
-    }).catch(function(err) {
+    }).catch(err => {
       log.error(err);
       res.statusCode = 400;
       res.end();
@@ -893,7 +891,7 @@ function handlePOST(req, res) {
     return;
   } else if (firstRun && /^\/!\/adduser/.test(URI)) {
     res.setHeader("Content-Type", "text/plain");
-    utils.readJsonBody(req).then(function(postData) {
+    utils.readJsonBody(req).then(postData => {
       if (postData.username && postData.password &&
           typeof postData.username === "string" &&
           typeof postData.password === "string") {
@@ -908,7 +906,7 @@ function handlePOST(req, res) {
         res.end();
         log.info(req, res, "Invalid user creation request");
       }
-    }).catch(function() {
+    }).catch(() => {
       res.statusCode = 400;
       res.end();
       log.info(req, res);
@@ -928,12 +926,12 @@ function handlePOST(req, res) {
     handleUploadRequest(req, res);
   } else if (/^\/!\/logout$/.test(URI)) {
     res.setHeader("Content-Type", "text/plain");
-    utils.readJsonBody(req).then(function(postData) {
+    utils.readJsonBody(req).then(postData => {
       cookies.unset(req, res, postData);
       res.statusCode = 200;
       res.end();
       log.info(req, res);
-    }).catch(function(err) {
+    }).catch(err => {
       log.error(err);
       res.statusCode = 400;
       res.end();
@@ -1020,9 +1018,9 @@ function handleResourceRequest(req, res, resourceName) {
     headers["Content-Type"] = resource.mime;
 
     // Encoding, length
-    const encodings = (req.headers["accept-encoding"] || "").split(",").map(function(e) {
+    const encodings = (req.headers["accept-encoding"] || "").split(",").map(e => {
       return e.trim().toLowerCase();
-    }).filter(function(e) {
+    }).filter(e => {
       return Boolean(e);
     });
     if (config.compression && encodings.includes("br") && resource.brotli) {
@@ -1067,7 +1065,7 @@ function handleFileRequest(req, res, download) {
     filepath = utils.addFilesPath("/" + [parts[2]]);
   }
 
-  fs.stat(filepath, function(error, stats) {
+  fs.stat(filepath, (error, stats) => {
     if (!error && stats) {
       if (stats.isDirectory() && shareLink) {
         streamArchive(req, res, filepath, download, stats, shareLink);
@@ -1090,7 +1088,7 @@ function handleFileRequest(req, res, download) {
 }
 
 function handleTypeRequest(req, res, file) {
-  utils.isBinary(file, function(err, result) {
+  utils.isBinary(file, (err, result) => {
     if (err) {
       res.statusCode = 500;
       res.end();
@@ -1128,7 +1126,7 @@ function handleUploadRequest(req, res) {
     return;
   }
 
-  Object.keys(clients).some(function(sid) {
+  Object.keys(clients).some(sid => {
     if (clients[sid].cookie === cookies.get(req.headers.cookie)) {
       req.sid = sid;
       return true;
@@ -1147,7 +1145,7 @@ function handleUploadRequest(req, res) {
 
   const busboy = new Busboy(opts);
   busboy.on("error", log.error);
-  busboy.on("file", function(_, file, filePath) {
+  busboy.on("file", (_, file, filePath) => {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
 
     const dst = path.join(paths.files, dstDir, filePath);
@@ -1155,7 +1153,7 @@ function handleUploadRequest(req, res) {
     const ws  = fs.createWriteStream(tmp, {mode: "644"});
     files[filePath] = {src: tmp, dst : dst, ws: ws};
 
-    file.on("limit", function() {
+    file.on("limit", () => {
       log.info(req, res, "Maximum file size reached, cancelling upload");
       sendError(
         req.sid, req.query.vId,
@@ -1169,7 +1167,7 @@ function handleUploadRequest(req, res) {
     file.pipe(ws);
   });
 
-  busboy.on("finish", function() {
+  busboy.on("finish", () => {
     const names = Object.keys(files);
     const total = names.length;
     let added = 0;
@@ -1183,11 +1181,11 @@ function handleUploadRequest(req, res) {
 
     while (names.length > 0) {
       (function(name) {
-        fs.stat(files[name].dst, function(err) {
+        fs.stat(files[name].dst, err => {
           if (err) { // File doesn't exist
-            fs.stat(path.dirname(files[name].dst), function(err) {
+            fs.stat(path.dirname(files[name].dst), err => {
               if (err) { // Dir doesn't exist
-                utils.mkdir(path.dirname(files[name].dst), function() {
+                utils.mkdir(path.dirname(files[name].dst), () => {
                   toMove.push([files[name].src, files[name].dst]);
                   if (++added === total) run();
                 });
@@ -1199,7 +1197,7 @@ function handleUploadRequest(req, res) {
           } else {
             if (req.query.r === "1") { // Rename option from the client
               (function(src, dst) {
-                utils.getNewPath(dst, function(newDst) {
+                utils.getNewPath(dst, newDst => {
                   toMove.push([src, newDst]);
                   if (++added === total) run();
                 });
@@ -1215,18 +1213,18 @@ function handleUploadRequest(req, res) {
     closeConnection();
 
     function run() {
-      async.eachLimit(toMove, 64, function(pair, cb) {
-        filetree.moveTemps(pair[0], pair[1], function(err) {
+      async.eachLimit(toMove, 64, (pair, cb) => {
+        filetree.moveTemps(pair[0], pair[1], err => {
           if (err) log.error(err);
           cb(null);
         });
-      }, function() {
+      }, () => {
         filetree.updateDir(dstDir);
       });
     }
   });
 
-  req.on("close", function() {
+  req.on("close", () => {
     if (!done) log.info(req, res, "Upload cancelled");
     closeConnection();
     removeTempFiles();
@@ -1235,8 +1233,8 @@ function handleUploadRequest(req, res) {
   req.pipe(busboy);
 
   function removeTempFiles() {
-    async.each(Object.keys(files), function(name, cb) {
-      utils.rm(files[name].src, function() {
+    async.each(Object.keys(files), (name, cb) => {
+      utils.rm(files[name].src, () => {
         delete files[name];
         cb();
       });
@@ -1250,18 +1248,18 @@ function handleUploadRequest(req, res) {
   }
 }
 
-filetree.on("updateall", function() {
-  Object.keys(clientsPerDir).forEach(function(dir) {
-    clientsPerDir[dir].forEach(function(client) {
+filetree.on("updateall", () => {
+  Object.keys(clientsPerDir).forEach(dir => {
+    clientsPerDir[dir].forEach(client => {
       client.update();
     });
   });
 });
 
-filetree.on("update", function(dir) {
+filetree.on("update", dir => {
   while (true) {
     if (clientsPerDir[dir]) {
-      clientsPerDir[dir].forEach(function(client) {
+      clientsPerDir[dir].forEach(client => {
         client.update();
       });
     }
@@ -1286,14 +1284,14 @@ function updateClientLocation(dir, sid, vId) {
 }
 
 function removeClientPerDir(sid, vId) {
-  Object.keys(clientsPerDir).forEach(function(dir) {
+  Object.keys(clientsPerDir).forEach(dir => {
     const removeAt = [];
-    clientsPerDir[dir].forEach(function(client, i) {
+    clientsPerDir[dir].forEach((client, i) => {
       if (client.sid === sid && (typeof vId === "number" ? client.vId === vId : true)) {
         removeAt.push(i);
       }
     });
-    removeAt.reverse().forEach(function(pos) {
+    removeAt.reverse().forEach(pos => {
       clientsPerDir[dir].splice(pos, 1);
     });
 
@@ -1306,8 +1304,8 @@ function debug() {
   require("chokidar").watch(paths.client, {
     alwaysStat    : true,
     ignoreInitial : true
-  }).on("change", function(file) {
-    setTimeout(function() { // prevent EBUSY on win32
+  }).on("change", file => {
+    setTimeout(() => { // prevent EBUSY on win32
       if (/\.css$/.test(file)) {
         cache.res["style.css"] = resources.compileCSS();
         sendObjAll({
@@ -1327,7 +1325,7 @@ function debug() {
 
 // Needs to be synchronous for process.on("exit")
 function cleanupTemp() {
-  fs.readdirSync(paths.temp).forEach(function(file) {
+  fs.readdirSync(paths.temp).forEach(file => {
     utils.rmSync(path.join(paths.temp, file));
   });
 }
@@ -1339,7 +1337,7 @@ function cleanupLinks(callback) {
   if (Object.keys(links).length === 0) {
     callback();
   } else {
-    Object.keys(links).forEach(function(link) {
+    Object.keys(links).forEach(link => {
       linkcount++;
       (function(shareLink, location) {
         // check for links not matching the configured length
@@ -1353,7 +1351,7 @@ function cleanupLinks(callback) {
           return;
         }
         // check for links where the target does not exist anymore
-        fs.stat(path.join(paths.files, location), function(error, stats) {
+        fs.stat(path.join(paths.files, location), (error, stats) => {
           if (!stats || error) {
             log.debug("deleting nonexistant link: " + shareLink);
             delete links[shareLink];
@@ -1397,7 +1395,7 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
   res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", !download));
   res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
   res.setHeader("ETag", eTag);
-  readdirp({root: zipPath, entryType: "both"}).on("data", function(file) {
+  readdirp({root: zipPath, entryType: "both"}).on("data", file => {
     const pathInZip = path.join(path.basename(relPath), file.path);
     const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
     if (file.stat.isDirectory()) {
@@ -1405,7 +1403,7 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
     } else {
       zip.addFile(file.fullPath, pathInZip, metaData);
     }
-  }).on("warn", log.info).on("error", log.error).on("end", function() {
+  }).on("warn", log.info).on("error", log.error).on("end", () => {
     zip.outputStream.pipe(res);
     zip.end();
   });
@@ -1421,14 +1419,14 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
     index: false,
     etag: false,
     cacheControl: false,
-  }).on("headers", function(res) {
+  }).on("headers", res => {
     res.setHeader("Content-Type", utils.contentType(filepath));
     res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
     res.setHeader("ETag", eTag);
     if (download) {
       res.setHeader("Content-Disposition", utils.getDispo(filepath));
     }
-  }).on("error", function(err) {
+  }).on("error", err => {
     log.error(err);
     if (err.status === 416) {
       log.error("requested range:", req.headers.range);
@@ -1436,7 +1434,7 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
     }
     res.statusCode = typeof err.status === "number" ? err.status : 400;
     res.end();
-  }).on("stream", function() {
+  }).on("stream", () => {
     log.info(req, res);
   }).pipe(res);
 }
@@ -1449,8 +1447,8 @@ const cbs = [];
 function tlsInit(opts, cb) {
   if (!cbs[opts.index]) {
     cbs[opts.index] = [cb];
-    tlsSetup(opts, function(err, tlsData) {
-      cbs[opts.index].forEach(function(cb) {
+    tlsSetup(opts, (err, tlsData) => {
+      cbs[opts.index].forEach(cb => {
         cb(err, tlsData);
       });
     });
@@ -1472,7 +1470,7 @@ function tlsSetup(opts, cb) {
     opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
   ];
 
-  async.map(certPaths, utils.readFile, function(_, data) {
+  async.map(certPaths, utils.readFile, (_, data) => {
     const key     = data[0];
     const certs   = data[1];
     const dhparam = data[3];
@@ -1498,11 +1496,11 @@ function tlsSetup(opts, cb) {
 }
 
 // Hourly tasks
-schedule.scheduleJob("* 0 * * *", function hourly() {
+schedule.scheduleJob("* 0 * * *", () => {
   if (!ready) return;
   // Clean inactive sessions after 1 month of inactivity
   const sessions = db.get("sessions");
-  Object.keys(sessions).forEach(function(session) {
+  Object.keys(sessions).forEach(session => {
     if (!sessions[session].lastSeen || (Date.now() - sessions[session].lastSeen >= 2678400000)) {
       delete sessions[session];
     }
@@ -1518,7 +1516,7 @@ function setupProcess(standalone) {
     process.on("SIGINT", endProcess.bind(null, "SIGINT"));
     process.on("SIGQUIT", endProcess.bind(null, "SIGQUIT"));
     process.on("SIGTERM", endProcess.bind(null, "SIGTERM"));
-    process.on("uncaughtException", function(error) {
+    process.on("uncaughtException", error => {
       log.error("=============== Uncaught exception! ===============");
       log.error(error);
     });
@@ -1529,7 +1527,7 @@ function setupProcess(standalone) {
 function endProcess(signal) {
   let count = 0;
   log.info("Received " + chalk.red(signal) + " - Shutting down ...");
-  Object.keys(clients).forEach(function(sid) {
+  Object.keys(clients).forEach(sid => {
     if (!clients[sid] || !clients[sid].ws) return;
     if (clients[sid].ws.readyState < 2) {
       count++;

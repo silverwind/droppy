@@ -34,8 +34,8 @@ paths.seed = function(config, files) {
   if (files) filesDir = files;
 };
 
-function resolve() {
-  let p = path.join.apply(null, arguments);
+function resolve(...args) {
+  let p = path.join.apply(null, args);
   p = path.resolve(/^~/.test(p) ? untildify(p) : p);
   try {
     p = fs.realpathSync(p);
