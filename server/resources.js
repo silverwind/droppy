@@ -91,7 +91,7 @@ const opts = {
   }
 };
 
-let autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, zopfli, brotli, svg, handlebars;
+let autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, brotli, svg, handlebars;
 try {
   autoprefixer = require("autoprefixer");
   brotli = require("iltorb").compress;
@@ -100,7 +100,6 @@ try {
   htmlMinifier = require("html-minifier");
   postcss = require("postcss");
   uglify = require("uglify-es");
-  zopfli = require("node-zopfli");
   svg = require("./svg.js");
 } catch (err) {}
 
@@ -312,7 +311,7 @@ function gzipMap(map, callback) {
   const names = Object.keys(map), funcs = [];
   names.forEach(name => {
     funcs.push(cb => {
-      (minify ? zopfli : zlib).gzip(map[name].data, cb);
+      zlib.gzip(map[name].data, cb);
     });
   });
   async.parallel(funcs, (err, results) => {

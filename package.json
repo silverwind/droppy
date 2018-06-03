@@ -67,7 +67,6 @@
     "html-minifier": "^3.5.16",
     "iltorb": "2.3.2",
     "mousetrap": "^1.6.2",
-    "node-zopfli": "^2.0.2",
     "pdfjs-dist": "^2.0.489",
     "photoswipe": "^4.1.2",
     "postcss": "^6.0.22",
