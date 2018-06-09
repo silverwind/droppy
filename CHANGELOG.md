@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 9.0.0 - 2018-04-30
+
+- Node.js 6.0.0 or greater is now required.
+
 ## Version 8.0.0 - 2018-02-15
 
 - The Module API has changed. Now returns a object `{onRequest, setupWebSocket}`.

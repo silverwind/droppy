@@ -37,7 +37,7 @@ droppy maintains a in-memory representation of the `files` directory. If you're 
 
 ## Installation
 ### Local Installation :package:
-With [`Node.js`](https://nodejs.org) >= 4.0.0 installed, run:
+With [`Node.js`](https://nodejs.org) >= 6.0.0 installed, run:
 
 ```sh
 $ sudo npm install -g --production droppy
