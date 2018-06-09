@@ -35,16 +35,6 @@
     mobile: /Mobi/.test(navigator.userAgent),
     safari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
   };
-  // ============================================================================
-  //  Set up a few more things
-  // ============================================================================
-  // Shorthand for safe event listeners
-  $.fn.reg = function() {
-    return this.off.apply(this, arguments).on.apply(this, arguments);
-  };
-  $.fn.regOne = function() {
-    return this.off.apply(this, arguments).one.apply(this, arguments);
-  };
 
   // Transition of freshly inserted elements
   $.fn.transition = function(oldClass, newClass) {
@@ -357,12 +347,11 @@
         break;
       case "SHARELINK":
         hideSpinner(view);
-        droppy.linkCache.push({
-          location: view[0].sharelinkId,
-          link: msg.link,
-          attachement: msg.attachement,
-        });
-        showLink(view, msg.link, msg.attachement);
+        if (view.find(".info-box.link.in").length) {
+          view.find(".link-out")[0].textContent = getFullLink(msg.link);
+        } else {
+          showLink(view, msg.link, msg.attachement);
+        }
         break;
       case "USER_LIST":
         updateUsers(msg.users);
@@ -461,10 +450,10 @@
   //  Authentication page
   // ============================================================================
   function initAuthPage(firstrun) {
-    $("#remember").reg("click", function() {
+    $("#remember").off("click").on("click", function() {
       $(this).toggleClass("checked");
     });
-    $("#form").reg("submit", function(e) {
+    $("#form").off("submit").on("submit", function(e) {
       e.preventDefault();
       ajax({
         method: "POST",
@@ -502,7 +491,7 @@
     openSocket();
 
     // Re-fit path line after 25ms of no resizing
-    $(window).reg("resize", function() {
+    $(window).off("resize").on("resize", function() {
       clearTimeout(droppy.resizeTimer);
       droppy.resizeTimer = setTimeout(function() {
         $(".view").each(function() {
@@ -634,7 +623,7 @@
     $(Handlebars.templates["upload-info"]({
       id: id,
       title: files.length === 1 ? basename(files[0]) : files.length + " files",
-    })).appendTo(view).transition("in").find(".upload-cancel").reg("click", function() {
+    })).appendTo(view).transition("in").find(".upload-cancel").off("click").on("click", function() {
       xhr.abort();
       uploadCancel(view, id);
     });
@@ -733,7 +722,7 @@
     // Add inline element
     var renamer = $('<input type="text" class="inline-namer" value="' + linkText +
                     '" placeholder="' + linkText + '">').insertAfter(link);
-    renamer.reg("input", function() {
+    renamer.off("input").on("input", function() {
       var input = this.value;
       var valid = validFilename(input, droppy.platform);
       var exists = activeFiles.some(function(file) {
@@ -741,7 +730,7 @@
       });
       canSubmit = valid && !exists;
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
-    }).reg("blur focusout", submitEdit.bind(null, view, true, callback));
+    }).off("blur focusout").on("blur focusout", submitEdit.bind(null, view, true, callback));
 
     var nameLength = linkText.lastIndexOf(".");
     renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : linkText.length);
@@ -791,7 +780,7 @@
       $(".data-row.active").removeClass("active");
     }
 
-    cc.reg("click", toggleCatcher.bind(null, false));
+    cc.off("click").on("click", toggleCatcher.bind(null, false));
     cc[show ? "addClass" : "removeClass"]("in");
   }
 
@@ -801,7 +790,7 @@
   }
 
   // Listen for popstate events, which indicate the user navigated back
-  $(window).reg("popstate", function() {
+  $(window).off("popstate").on("popstate", function() {
     if (!droppy.socket) return;
     var locs = getLocationsFromHash();
     droppy.views.forEach(function(view) {
@@ -932,7 +921,7 @@
     function addPart(name, path) {
       var li = $("<li><a>" + name + "</a></li>");
       li[0].dataset.destination = path;
-      li.reg("click", function(event) {
+      li.off("click").on("click", function(event) {
         var view = $(event.target).parents(".view");
         if (droppy.socketWait) return;
         if ($(this).is(":last-child")) {
@@ -1027,7 +1016,7 @@
     var html = Handlebars.templates.directory({entries: entries, sort: sort, isSearch: isSearch});
     loadContent(view, "directory", null, html).then(function() {
       // Upload button on empty page
-      view.find(".empty").reg("click", function(e) {
+      view.find(".empty").off("click").on("click", function(e) {
         var view = $(e.target).parents(".view");
         var inp = view.find(".file");
         if (droppy.detects.directoryUpload) {
@@ -1039,14 +1028,14 @@
       });
 
       // Switch into a folder
-      view.find(".folder-link").reg("click", function(e) {
+      view.find(".folder-link").off("click").on("click", function(e) {
         if (droppy.socketWait) return;
         updateLocation(view, $(this).parents(".data-row")[0].dataset.id);
         e.preventDefault();
       });
 
       // Click on a file link
-      view.find(".file-link").reg("click", function(e) {
+      view.find(".file-link").off("click").on("click", function(e) {
         if (droppy.socketWait) return;
         var view = $(e.target).parents(".view");
         openFile(view, view[0].currentFolder, e.target.textContent.trim(), {ref: this});
@@ -1057,19 +1046,19 @@
         this.setAttribute("order", index);
       });
 
-      view.find(".data-row").reg("contextmenu", function(e) {
+      view.find(".data-row").off("contextmenu").on("contextmenu", function(e) {
         var target = $(e.currentTarget);
         if (target[0].dataset.type === "error") return;
         showEntryMenu(target, e.clientX, e.clientY);
         e.preventDefault();
       });
 
-      view.find(".data-row .entry-menu").reg("click", function(e) {
+      view.find(".data-row .entry-menu").off("click").on("click", function(e) {
         showEntryMenu($(e.target).parents(".data-row"), e.clientX, e.clientY);
       });
 
       // Stop navigation when clicking on an <a>
-      view.find(".data-row .zip, .data-row .download, .entry-link.file").reg("click", function(e) {
+      view.find(".data-row .zip, .data-row .download, .entry-link.file").off("click").on("click", function(e) {
         e.stopPropagation();
         if (droppy.socketWait) return;
 
@@ -1085,7 +1074,7 @@
       });
 
       // Request a sharelink
-      view.find(".share-file").reg("click", function() {
+      view.find(".share-file").off("click").on("click", function() {
         if (droppy.socketWait) return;
         requestLink(
           $(this).parents(".view"),
@@ -1094,11 +1083,11 @@
         );
       });
 
-      view.find(".icon-play, .icon-view").reg("click", function() {
+      view.find(".icon-play, .icon-view").off("click").on("click", function() {
         $(this).parents(".data-row").find(".file-link")[0].click();
       });
 
-      view.find(".header-name, .header-mtime, .header-size").reg("click", function() {
+      view.find(".header-name, .header-mtime, .header-size").off("click").on("click", function() {
         sortByHeader(view, $(this));
       });
 
@@ -1183,15 +1172,15 @@
         $(this).removeClass("active");
       });
       toggleCatcher(true);
-      dropSelect.children(".movefile").regOne("click", function() {
+      dropSelect.children(".movefile").off("click").one("click", function() {
         sendDrop(view, "cut", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".copyfile").regOne("click", function() {
+      dropSelect.children(".copyfile").off("click").one("click", function() {
         sendDrop(view, "copy", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".viewfile").regOne("click", function() {
+      dropSelect.children(".viewfile").off("click").one("click", function() {
         updateLocation(view, src);
         toggleCatcher(false);
       });
@@ -1215,7 +1204,7 @@
     view.find(".data-row .entry-link").each(function() {
       this.setAttribute("draggable", "true");
     });
-    view.reg("dragstart", function(event) {
+    view.off("dragstart").on("dragstart", function(event) {
       var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
 
       if (event.ctrlKey || event.metaKey || event.altKey) {
@@ -1260,7 +1249,7 @@
   droppy.dragTimer = new DragTimer();
 
   function allowDrop(el) {
-    el.reg("dragover", function(e) {
+    el.off("dragover").on("dragover", function(e) {
       e.preventDefault();
       droppy.dragTimer.refresh();
     });
@@ -1268,7 +1257,7 @@
 
   function bindHoverEvents(view) {
     var dropZone = view.find(".dropzone");
-    view.reg("dragenter", function(event) {
+    view.off("dragenter").on("dragenter", function(event) {
       event.stopPropagation();
       droppy.activeView = view[0].vId;
       var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
@@ -1298,7 +1287,7 @@
     });
 
     // drag between views
-    view.reg("drop", function(e) {
+    view.off("drop").on("drop", function(e) {
       var view = $(e.target).parents(".view");
       var dragData = e.originalEvent.dataTransfer.getData("text");
       e.preventDefault();
@@ -1334,7 +1323,7 @@
     });
 
     // File upload button
-    view.reg("click", ".af", function(e) {
+    view.off("click").on("click", ".af", function(e) {
       if ($(this).hasClass("disabled")) return;
       var view = $(e.target).parents(".view");
       // Remove the directory attributes so we get a file picker dialog
@@ -1352,7 +1341,7 @@
     }
 
     // Directory upload button
-    view.reg("click", ".ad", function(e) {
+    view.off("click").on("click", ".ad", function(e) {
       var view = $(e.target).parents(".view");
       if ($(this).hasClass("disabled")) {
         showError(getView(0), "Your browser doesn't support directory uploading");
@@ -1373,7 +1362,7 @@
       }
     });
 
-    view.reg("click", ".cf, .cd", function(e) {
+    view.off("click").on("click", ".cf, .cd", function(e) {
       if ($(this).hasClass("disabled")) return;
       var view = $(e.target).parents(".view");
       var content = view.find(".content");
@@ -1393,7 +1382,7 @@
       });
     });
 
-    view.reg("click", ".newview", function() {
+    view.off("click").on("click", ".newview", function() {
       if (droppy.views.length === 1) {
         var dest = join(view[0].currentFolder, view[0].currentFile);
         replaceHistory(newView(dest, 1), dest);
@@ -1403,17 +1392,17 @@
       }
     });
 
-    view.reg("click", ".about", function() {
+    view.off("click").on("click", ".about", function() {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    view.reg("click", ".prefs", function() {
+    view.off("click").on("click", ".prefs", function() {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
 
-    view.reg("click", ".reload", function() {
+    view.off("click").on("click", ".reload", function() {
       if (droppy.socketWait) return;
       showSpinner(view);
       sendMessage(view[0].vId, "RELOAD_DIRECTORY", {
@@ -1421,7 +1410,7 @@
       });
     });
 
-    view.reg("click", ".logout", function() {
+    view.off("click").on("click", ".logout", function() {
       ajax({
         method: "POST",
         url: "!/logout",
@@ -1446,18 +1435,18 @@
         openDirectory(view, view[0].currentData);
       }
     }
-    view.reg("click", ".search.toggled-off", function() {
+    view.off("click").on("click", ".search.toggled-off", function() {
       var search = $(this);
       search.removeClass("toggled-off").addClass("toggled-on");
       setTimeout(function() {
         search.find("input")[0].focus();
       }, 0);
     });
-    view.reg("click", ".search.toggled-on svg", function() {
+    view.off("click").on("click", ".search.toggled-on svg", function() {
       var view = $(this).parents(".view");
       openDirectory(view, view[0].currentData);
     });
-    view.reg("keyup", ".search input", function(e) {
+    view.off("keyup", ".search input").on("keyup", ".search input", function(e) {
       if (e.keyCode === 27/* escape */) {
         var view = $(this).parents(".view");
         openDirectory(view, view[0].currentData);
@@ -1467,22 +1456,22 @@
         doSearch(e);
       }
     });
-    view.reg("input", ".search input", debounce(doSearch, 1000));
-    view.reg("click", ".globalsearch input", function(e) {
+    view.off("input", ".search input").on("input", ".search input", debounce(doSearch, 1000));
+    view.off("click").on("click", ".globalsearch input", function(e) {
       e.stopPropagation();
     });
   }
 
   function initEntryMenu() {
     // Play an audio file
-    $("#entry-menu .play").reg("click", function(event) {
+    $("#entry-menu .play").off("click").on("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       play(view, entry);
       toggleCatcher(false);
     });
 
-    $("#entry-menu .edit").reg("click", function(event) {
+    $("#entry-menu .edit").off("click").on("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
@@ -1490,7 +1479,7 @@
     });
 
     // Click on a "open" link
-    $("#entry-menu .openfile").reg("click", function(event) {
+    $("#entry-menu .openfile").off("click").on("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
@@ -1502,7 +1491,7 @@
     });
 
     // Rename a file/folder
-    $("#entry-menu .rename").reg("click", function(event) {
+    $("#entry-menu .rename").off("click").on("click", function(event) {
       event.stopPropagation();
       var entry = droppy.menuTarget, view = entry.parents(".view");
       if (droppy.socketWait) return;
@@ -1515,7 +1504,7 @@
     });
 
     // Copy/cut a file/folder
-    $("#entry-menu .copy, #entry-menu .cut").reg("click", function(event) {
+    $("#entry-menu .copy, #entry-menu .cut").off("click").on("click", function(event) {
       event.stopPropagation();
       toggleCatcher(false);
       droppy.clipboard = {
@@ -1526,7 +1515,7 @@
     });
 
     // Delete a file/folder
-    $("#entry-menu .delete").reg("click", function(event) {
+    $("#entry-menu .delete").off("click").on("click", function(event) {
       var entry = droppy.menuTarget, view = entry.parents(".view");
       event.stopPropagation();
       if (droppy.socketWait) return;
@@ -1542,7 +1531,7 @@
     if (droppy.clipboard) {
       $(".view").each(function() {
         var view = $(this), button = view.find(".paste-button");
-        button.addClass("in").regOne("click", function(event) {
+        button.addClass("in").off("click").one("click", function(event) {
           event.stopPropagation();
           if (droppy.socketWait) return;
           droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
@@ -1778,12 +1767,12 @@
 
         var autonext = view.find(".autonext");
         var loop = view.find(".loop");
-        autonext.reg("click", function() {
+        autonext.off("click").on("click", function() {
           var on = !droppy.get("autonext");
           droppy.set("autonext", on);
           autonext[on ? "addClass" : "removeClass"]("on");
         });
-        loop.reg("click", function() {
+        loop.off("click").on("click", function() {
           var on = !droppy.get("loop");
           droppy.set("loop", on);
           loop[on ? "addClass" : "removeClass"]("on");
@@ -1864,8 +1853,8 @@
           view[0].ps.zoomed.h = false;
           view[0].ps.zoomed.v = !view[0].ps.zoomed.v;
         }
-        view.find(".fit-h").reg("click", fitH);
-        view.find(".fit-v").reg("click", fitV);
+        view.find(".fit-h").off("click").on("click", fitH);
+        view.find(".fit-v").off("click").on("click", fitV);
         view[0].ps.listen("afterChange", function() {
           if (view[0].ps.zoomed.h) {
             view[0].ps.zoomed.h = false;
@@ -1875,12 +1864,12 @@
             fitV(0);
           }
         });
-        view.find(".zoom-in").reg("click", function(e) {
+        view.find(".zoom-in").off("click").on("click", function(e) {
           var level = view[0].ps.getZoomLevel() * 2;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           $(e.target).parents(".pswp").addClass("pswp--zoomed-in");
         });
-        view.find(".zoom-out").reg("click", function() {
+        view.find(".zoom-out").off("click").on("click", function() {
           var level = view[0].ps.getZoomLevel() / 2;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
         });
@@ -2006,18 +1995,18 @@
         editor.setValue(text);
         editor.clearHistory();
 
-        view.find(".exit").reg("click", function() {
+        view.find(".exit").off("click").on("click", function() {
           closeDoc($(this).parents(".view"));
           editor = null;
         });
-        view.find(".save").reg("click", function() {
+        view.find(".save").off("click").on("click", function() {
           save($(this).parents(".view")[0].editor);
         });
-        view.find(".ww").reg("click", function() {
+        view.find(".ww").off("click").on("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
           droppy.set("lineWrapping", editor.options.lineWrapping);
         });
-        view.find(".syntax").reg("click", function() {
+        view.find(".syntax").off("click").on("click", function() {
           var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
           view.find(".mode-select").on("change", function() {
@@ -2027,12 +2016,12 @@
             editor.setOption("mode", this.value);
           });
         });
-        view.find(".find").reg("click", function() {
+        view.find(".find").off("click").on("click", function() {
           CodeMirror.commands.find(editor);
           var searchField = view.find(".CodeMirror-search-field");
           if (searchField && searchField[0]) searchField[0].focus();
         });
-        view.find(".full").reg("click", function() {
+        view.find(".full").off("click").on("click", function() {
           screenfull.toggle($(this).parents(".content")[0]);
         });
         hideSpinner(view);
@@ -2050,7 +2039,7 @@
     var box = $("#prefs-box");
     box.find(".list-user").remove();
     box.append(Handlebars.templates["list-user"]({users: userlist}));
-    box.find(".add-user").reg("click", function() {
+    box.find(".add-user").off("click").on("click", function() {
       var user = prompt("Username?");
       if (!user) return;
       var pass = prompt("Password?");
@@ -2062,7 +2051,7 @@
         priv: priv
       });
     });
-    box.find(".delete-user").reg("click", function(event) {
+    box.find(".delete-user").off("click").on("click", function(event) {
       event.stopPropagation();
       sendMessage(null, "UPDATE_USER", {
         name: $(this).parents("li").children(".username").text().trim(),
@@ -2098,7 +2087,7 @@
       return Handlebars.templates.options({opts: opts});
     });
 
-    $("select.theme").reg("change", function() {
+    $("select.theme").off("change").on("change", function() {
       var theme = this.value;
       loadTheme(theme, function() {
         droppy.set("theme", theme);
@@ -2108,7 +2097,7 @@
       });
     });
 
-    $("select.editorFontSize").reg("change", function() {
+    $("select.editorFontSize").off("change").on("change", function() {
       setEditorFontSize(this.value);
     });
 
@@ -2209,7 +2198,7 @@
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
 
-    $(player).reg("timeupdate", function() {
+    $(player).off("timeupdate").on("timeupdate", function() {
       var cur = player.currentTime, max = player.duration;
       if (!cur || !max) return;
       view[0].querySelector(".seekbar-played").style.width = (cur / max) * 100 + "%";
@@ -2250,22 +2239,22 @@
       var right  = slider.getBoundingClientRect().right;
       setVolume((event.pageX - left) / (right - left));
     }, 1000 / 60);
-    slider.reg("mousedown", function(event) {
+    slider.off("mousedown").on("mousedown", function(event) {
       heldVolume = true;
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.reg("mousemove", function(event) {
+    bar.off("mousemove").on("mousemove", function(event) {
       if (heldVolume) updateVolume(event);
     });
-    bar.reg("mouseup", function() {
+    bar.off("mouseup").on("mouseup", function() {
       heldVolume = false;
     });
-    slider.reg("click", function(event) {
+    slider.off("click").on("click", function(event) {
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.reg("click", function(event) {
+    bar.off("click").on("click", function(event) {
       var time = player.duration *
         ((event.pageX - bar[0].getBoundingClientRect().left) / bar[0].clientWidth);
       if (!isNaN(parseFloat(time)) && isFinite(time)) {
@@ -2274,15 +2263,15 @@
         endAudio($(this).parents(".view"));
       }
     });
-    bar.find(".previous").reg("click", function(event) {
+    bar.find(".previous").off("click").on("click", function(event) {
       playPrev($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".next").reg("click", function(event) {
+    bar.find(".next").off("click").on("click", function(event) {
       playNext($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".pause-play").reg("click", function(event) {
+    bar.find(".pause-play").off("click").on("click", function(event) {
       var icon   = $(this).children("svg");
       var player = $(this).parents(".audio-bar").find(".audio-player")[0];
       if (icon[0].className === "play") {
@@ -2295,11 +2284,11 @@
       event.stopPropagation();
     });
 
-    bar.find(".stop").reg("click", function(event) {
+    bar.find(".stop").off("click").on("click", function(event) {
       endAudio($(this).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".shuffle").reg("click", function(event) {
+    bar.find(".shuffle").off("click").on("click", function(event) {
       $(this).toggleClass("active");
       $(this).parents(".view")[0].shuffle = $(this).hasClass("active");
       event.stopPropagation();
@@ -2315,7 +2304,7 @@
     slider[0].addEventListener("DOMMouseScroll", onWheel);
     volumeIcon[0].addEventListener("mousewheel", onWheel);
     volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
-    volumeIcon.reg("click", function(event) {
+    volumeIcon.off("click").on("click", function(event) {
       slider.toggleClass("in");
       volumeIcon.toggleClass("active");
       event.stopPropagation();
@@ -2501,7 +2490,6 @@
     droppy.activeView = 0;
     droppy.demo = null;
     droppy.initialized = null;
-    droppy.linkCache = [];
     droppy.menuTarget = null;
     droppy.public = null;
     droppy.queuedData = null;
@@ -2618,25 +2606,13 @@
     };
   }
 
-  function requestLink(view, location, attachement, cb) {
+  function requestLink(view, location, attachement) {
     view[0].sharelinkId = location;
-    var found = droppy.linkCache.some(function(entry) {
-      if (entry.location === location && entry.attachement === attachement) {
-        if (cb) {
-          cb(entry.link);
-        } else {
-          showLink(view, entry.link, attachement);
-        }
-        return true;
-      }
+    showSpinner(view);
+    sendMessage(view[0].vId, "REQUEST_SHARELINK", {
+      location   : location,
+      attachement: attachement
     });
-    if (!found) {
-      showSpinner(view);
-      sendMessage(view[0].vId, "REQUEST_SHARELINK", {
-        location   : location,
-        attachement: attachement
-      });
-    }
   }
 
   function timeDifference(prev) {
@@ -2780,12 +2756,8 @@
       selection.addRange(range);
     };
 
-    var getFullLink = function(hash) {
-      return location.protocol + "//" + location.host + location.pathname + "$/" + hash;
-    };
-
     out[0].textContent = getFullLink(link);
-    out.reg("copy", function() {
+    out.off("copy").on("copy", function() {
       setTimeout(toggleCatcher.bind(null, false), 100);
     });
     box.find(".icon svg").replaceWith(svg("link"));
@@ -2794,7 +2766,7 @@
       select();
     });
 
-    copy.reg("click", function() {
+    copy.off("click").on("click", function() {
       var done;
       select();
       try { done = document.execCommand("copy"); } catch (err) {}
@@ -2803,11 +2775,9 @@
       copy[0].setAttribute("aria-label", "Copy to clipboard");
     });
 
-    dl.reg("click", function() {
+    dl.off("click").on("click", function() {
       $(this).toggleClass("checked");
-      requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"), function(link) {
-        out[0].textContent = getFullLink(link);
-      });
+      requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"));
     });
   }
 
@@ -2865,6 +2835,10 @@
       }
     };
   }
+
+  function getFullLink(hash) {
+    return location.protocol + "//" + location.host + location.pathname + "$/" + hash;
+  };
 
   function getSpriteClass(extension) {
     for (var type in droppy.iconMap) {

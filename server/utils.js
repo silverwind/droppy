@@ -91,16 +91,14 @@ utils.copyDir = function(src, dst, cb) {
   });
 };
 
-// Valid link character, the characters "l", "1", "i", "o", "0" characters are skipped
-// for easier communication of links.
-utils.linkChars = "abcdefghjkmnpqrstuvwxyz23456789";
-
 // Get a pseudo-random n-character lowercase string.
 utils.getLink = function(links, length) {
+  const linkChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
+
   let link = "";
   do {
     while (link.length < length) {
-      link += utils.linkChars.charAt(Math.floor(Math.random() * utils.linkChars.length));
+      link += linkChars.charAt(Math.floor(Math.random() * linkChars.length));
     }
   } while (links[link]); // In case the RNG generates an existing link, go again
 
@@ -213,8 +211,8 @@ utils.contentType = function(p) {
   }
 };
 
-utils.getDispo = function(fileName, inline) {
-  return cd(path.basename(fileName), {type: inline ? "inline" : "attachment"});
+utils.getDispo = function(fileName, download) {
+  return cd(path.basename(fileName), {type: download ? "attachment" : "inline"});
 };
 
 utils.createSid = function() {

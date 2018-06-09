@@ -529,17 +529,34 @@ function onWebSocketRequest(ws, req) {
       // Check if we already have a link for that file
       const hadLink = Object.keys(links).some(link => {
         if (msg.data.location === links[link].location && msg.data.attachement === links[link].attachement) {
-          sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
+          const ext = links[link].ext || path.extname(links[link].location);
+          sendObj(sid, {
+            type: "SHARELINK",
+            vId: vId,
+            link: (config.linkExtensions && ext) ? (link + ext) : link,
+            attachement: msg.data.attachement,
+          });
           return true;
         }
       });
       if (hadLink) return;
 
       const link = utils.getLink(links, config.linkLength);
+      const ext = path.extname(msg.data.location);
       log.info(ws, null, "Share link created: " + link + " -> " + msg.data.location);
-      sendObj(sid, {type: "SHARELINK", vId: vId, link: link, attachement: msg.data.attachement});
-      links[link] = {location: msg.data.location, attachement: msg.data.attachement};
+
+      links[link] = {
+        location: msg.data.location,
+        attachement: msg.data.attachement,
+        ext: ext,
+      };
       db.set("links", links);
+      sendObj(sid, {
+        type: "SHARELINK",
+        vId: vId,
+        link: config.linkExtensions ? (link + ext) : link,
+        attachement: msg.data.attachement
+      });
     } else if (msg.type === "DELETE_FILE") {
       log.info(ws, null, "Deleting: " + msg.data);
       if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
@@ -851,7 +868,6 @@ function handleGET(req, res) {
 const rateLimited = [];
 function handlePOST(req, res) {
   const URI = decodeURIComponent(req.url);
-
   // unauthenticated POSTs
   if (/^\/!\/login/.test(URI)) {
     res.setHeader("Content-Type", "text/plain");
@@ -1044,9 +1060,8 @@ function handleResourceRequest(req, res, resourceName) {
 function handleFileRequest(req, res, download) {
   const URI = decodeURIComponent(req.url);
   let shareLink, filepath;
-  const linkRe = new RegExp("^/\\??\\$/([" + utils.linkChars + "]{" + config.linkLength + "})$");
 
-  let parts = linkRe.exec(URI);
+  let parts = (new RegExp(`^/\\??\\$/([a-zA-Z0-9]+)\\.?([a-zA-Z0-9.]+)?$`)).exec(URI);
   if (parts && parts[1]) { // check for sharelink
     const link = db.get("links")[parts[1]];
     if (!link) return redirectToRoot(req, res);
@@ -1392,7 +1407,7 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
   res.statusCode = 200;
   res.setHeader("Content-Type", utils.contentType(zip));
   res.setHeader("Transfer-Encoding", "chunked");
-  res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", !download));
+  res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", download));
   res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
   res.setHeader("ETag", eTag);
   readdirp({root: zipPath, entryType: "both"}).on("data", file => {
@@ -1422,10 +1437,8 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
   }).on("headers", res => {
     res.setHeader("Content-Type", utils.contentType(filepath));
     res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
+    res.setHeader("Content-Disposition", utils.getDispo(filepath, download));
     res.setHeader("ETag", eTag);
-    if (download) {
-      res.setHeader("Content-Disposition", utils.getDispo(filepath));
-    }
   }).on("error", err => {
     log.error(err);
     if (err.status === 416) {

@@ -18,6 +18,7 @@ const defaults = {
   public          : false,
   timestamps      : true,
   linkLength      : 5,
+  linkExtensions  : false,
   logLevel        : 2,
   maxFileSize     : 0,
   updateInterval  : 1000,

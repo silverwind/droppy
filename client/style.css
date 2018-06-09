@@ -1346,7 +1346,7 @@ video {
   background: #eee;
   visibility: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  max-width: 90%;
+  max-width: 96%;
 }
 .info-box.in { opacity: 1; visibility: visible; transition: .15s }
 
@@ -1375,14 +1375,14 @@ video {
 
 .link-out {
   white-space: nowrap;
-  padding: .25em;
+  padding: .25em .5rem;
   position: relative;
 }
 .link-out:after {
   content: "";
   position: absolute;
   right: 0; top: 0; bottom: 0;
-  width: 1rem;
+  width: .5rem;
   background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1))
 }
 
