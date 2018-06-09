@@ -1240,8 +1240,10 @@ function handleUploadRequest(req, res) {
   });
 
   req.on("close", () => {
-    if (!done) log.info(req, res, "Upload cancelled");
-    closeConnection();
+    if (!done) {
+      log.info(req, res, "Upload cancelled");
+      closeConnection();
+    }
     removeTempFiles();
   });
 
