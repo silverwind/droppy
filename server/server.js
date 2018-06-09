@@ -820,7 +820,7 @@ function handleGET(req, res) {
     return handleResourceRequest(req, res, URI.substring(7));
   }
 
-  if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\??\$\/[\s\S]+$/.test(URI)) {
+  if (/^\/!\/dl\/[\s\S]+/.test(URI) || /^\/\$\/[\s\S]+$/.test(URI)) {
     return handleFileRequest(req, res, true);
   }
 
@@ -1061,7 +1061,7 @@ function handleFileRequest(req, res, download) {
   const URI = decodeURIComponent(req.url);
   let shareLink, filepath;
 
-  let parts = (new RegExp(`^/\\??\\$/([a-zA-Z0-9]+)\\.?([a-zA-Z0-9.]+)?$`)).exec(URI);
+  let parts = (new RegExp(`^/\\$/([a-zA-Z0-9]+)\\.?([a-zA-Z0-9.]+)?$`)).exec(URI);
   if (parts && parts[1]) { // check for sharelink
     const link = db.get("links")[parts[1]];
     if (!link) return redirectToRoot(req, res);
