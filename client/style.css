@@ -718,7 +718,7 @@ html:not(.mobile) #entry-menu a.active {
 
 .plyr--video .plyr__controls {
   padding: .1rem 0 !important;
-  background: rgba(0,0,0,.4) !important;
+  background: rgba(0,0,0,.7) !important;
 }
 
 .plyr__volume {

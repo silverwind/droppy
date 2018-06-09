@@ -54,7 +54,7 @@ docker-push:
 	docker push silverwind/arm64v8-droppy:latest
 
 update:
-	$(BIN)/updates -u -e plyr
+	$(BIN)/updates -u
 	rm -rf node_modules yarn.lock
 	yarn
 	touch client/client.js

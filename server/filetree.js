@@ -262,11 +262,6 @@ filetree.move = function(src, dst, cb) {
   });
 };
 
-filetree.moveTemps = function(src, dst, cb) {
-  lookAway();
-  utils.move(src, dst, cb);
-};
-
 filetree.mv = function(src, dst, cb) {
   lookAway();
   utils.move(utils.addFilesPath(src), utils.addFilesPath(dst), err => {

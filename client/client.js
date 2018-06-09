@@ -1790,6 +1790,7 @@
           view[0].currentFile = this.currItem.filename;
           var imgButtons = view.find(".fit-h, .fit-v");
           var videoButtons = view.find(".loop, .autonext");
+          var zoomButtons = view.find(".zoom-in, .zoom-out");
 
           var type;
           if (/\.pdf$/.test(this.currItem.filename)) {
@@ -1804,15 +1805,18 @@
             initPDF($(this.currItem.container).find(".pdf-container"));
             imgButtons.addClass("hidden");
             videoButtons.addClass("hidden");
+            zoomButtons.removeClass("hidden");
             this.currItem.container.parentNode.style.overflow = "auto"; // allow pdf scrolling
             this.currItem.container.style.transformOrigin = "center top"; // center zoom out
           } else if (type === "video") {
             initVideo($(this.currItem.container).find("video")[0]);
             imgButtons.addClass("hidden");
             videoButtons.removeClass("hidden");
+            zoomButtons.addClass("hidden");
           } else if (type === "image") {
             imgButtons.removeClass("hidden");
             videoButtons.addClass("hidden");
+            zoomButtons.removeClass("hidden");
             view.find("video").each(function() {
               this.pause(); // pause invisible videos
             });
@@ -2430,7 +2434,7 @@
       loadScript("plyr-js", "!/res/lib/plyr.js"),
     ]).then(function() {
       (function verify() {
-        if (!("plyr" in window)) {
+        if (!("Plyr" in window)) {
           return setTimeout(verify, 200);
         }
 
@@ -2439,19 +2443,20 @@
           if (this !== el) this.pause();
         });
 
-        var player = plyr.setup(el, {
-          controls: ["play", "progress", "current-time", "mute", "volume"],
+        var player = new Plyr(el, {
+          controls: ["play-large", "play", "volume", "progress", "current-time", "mute", "captions"],
           iconUrl: "!/res/lib/plyr.svg",
           blankUrl: "!/res/lib/blank.mp4",
           autoplay: !droppy.detects.mobile,
-          volume: droppy.get("volume") * 10,
+          volume: droppy.get("volume"),
+          muted: droppy.get("volume") === 0,
           keyboardShortcuts: {focused: true, global: true},
           tooltips: {controls: false, seek: true},
           disableContextMenu: false,
           storage: {enabled: false},
           fullscreen: {enable: false},
           hideControls: true,
-        })[0];
+        });
 
         player.on("ready", function() {
           // stop drags from propagating outside the control bar
@@ -2470,18 +2475,14 @@
           }
         });
 
-        function onError() {
+        player.on("error", function(err) {
+          console.error(err);
           showError(view, "Your browser can't play this file");
-        }
-        player.getMedia().onerror = onError;
-        player.on("error", onError);
+        });
 
-        // skip initial volume set
-        setTimeout(function() {
-          player.on("volumechange", function() {
-            droppy.set("volume", player.isMuted() ? 0 : player.getVolume());
-          });
-        }, 0);
+        player.on("volumechange", function() {
+          droppy.set("volume", player.muted ? 0 : player.volume);
+        });
       })();
     });
   }

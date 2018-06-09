@@ -39,7 +39,7 @@
     "mv": "^2.1.1",
     "node-schedule": "^1.3.0",
     "original-url": "^1.2.1",
-    "plyr": "^2.0.18",
+    "plyr": "^3.3.10",
     "ps-node": "^0.1.6",
     "readdirp": "^2.1.0",
     "rimraf": "^2.6.2",

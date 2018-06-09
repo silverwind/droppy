@@ -11,7 +11,7 @@ globals:
   pdfjsLib: false
   PhotoSwipe: false
   PhotoSwipeUI_Default: false
-  plyr: false
+  Plyr: false
   screenfull: false
   Uppie: false
 

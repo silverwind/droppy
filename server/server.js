@@ -65,7 +65,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
   setupProcess(isStandalone);
 
   async.series([
-    function(cb) { utils.mkdir([paths.files, paths.temp, paths.config], cb); },
+    function(cb) { utils.mkdir([paths.files, paths.config], cb); },
     function(cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
     function(cb) {
       cfg.init(opts, (err, conf) => {
@@ -95,7 +95,6 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
         cache = c; cb(err);
       });
     },
-    function(cb) { cleanupTemp(); cb(); },
     function(cb) { cleanupLinks(cb); },
     function(cb) { if (config.dev) debug(); cb(); },
     function(cb) {
@@ -1118,9 +1117,7 @@ function handleTypeRequest(req, res, file) {
 }
 
 function handleUploadRequest(req, res) {
-  const files = {};
   let done = false;
-  let limitHit;
 
   if (config.readOnly) {
     res.statusCode = 403;
@@ -1149,7 +1146,10 @@ function handleUploadRequest(req, res) {
   });
 
   const dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[req.query.vId].directory;
+  let numFiles = 0;
+
   log.info(req, res, "Upload started");
+
   const opts = {
     preservePath: true,
     headers: req.headers,
@@ -1162,11 +1162,7 @@ function handleUploadRequest(req, res) {
   busboy.on("error", log.error);
   busboy.on("file", (_, file, filePath) => {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
-
-    const dst = path.join(paths.files, dstDir, filePath);
-    const tmp = path.join(paths.temp, crypto.randomBytes(32).toString("hex"));
-    const ws  = fs.createWriteStream(tmp, {mode: "644"});
-    files[filePath] = {src: tmp, dst : dst, ws: ws};
+    numFiles++;
 
     file.on("limit", () => {
       log.info(req, res, "Maximum file size reached, cancelling upload");
@@ -1174,69 +1170,30 @@ function handleUploadRequest(req, res) {
         req.sid, req.query.vId,
         "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded."
       );
-      limitHit = true;
       closeConnection();
-      removeTempFiles();
     });
 
-    file.pipe(ws);
+    const dst = path.join(paths.files, dstDir, filePath);
+    utils.mkdir(path.dirname(dst), () => {
+      fs.stat(dst, err => {
+        if (err && err.code === "ENOENT") {
+          file.pipe(fs.createWriteStream(dst, {mode: "644"}));
+        } else if (!err) {
+          utils.getNewPath(dst, newDst => {
+            file.pipe(fs.createWriteStream(newDst, {mode: "644"}));
+          });
+        } else {
+          log.error(req, res, err);
+        }
+      });
+    });
   });
 
   busboy.on("finish", () => {
-    const names = Object.keys(files);
-    const total = names.length;
-    let added = 0;
-    const toMove = [];
-
-    log.info(req, res, "Received " + names.length + " files");
+    log.info(req, res, `Received ${numFiles} files in ${numFiles}`);
     done = true;
-
-    // remove all temporary files if one hit the limit
-    if (limitHit) return removeTempFiles();
-
-    while (names.length > 0) {
-      (function(name) {
-        fs.stat(files[name].dst, err => {
-          if (err) { // File doesn't exist
-            fs.stat(path.dirname(files[name].dst), err => {
-              if (err) { // Dir doesn't exist
-                utils.mkdir(path.dirname(files[name].dst), () => {
-                  toMove.push([files[name].src, files[name].dst]);
-                  if (++added === total) run();
-                });
-              } else {
-                toMove.push([files[name].src, files[name].dst]);
-                if (++added === total) run();
-              }
-            });
-          } else {
-            if (req.query.r === "1") { // Rename option from the client
-              (function(src, dst) {
-                utils.getNewPath(dst, newDst => {
-                  toMove.push([src, newDst]);
-                  if (++added === total) run();
-                });
-              })(files[name].src, files[name].dst);
-            } else {
-              toMove.push([files[name].src, files[name].dst]);
-              if (++added === total) run();
-            }
-          }
-        });
-      })(names.pop());
-    }
+    filetree.updateDir(dstDir);
     closeConnection();
-
-    function run() {
-      async.eachLimit(toMove, 64, (pair, cb) => {
-        filetree.moveTemps(pair[0], pair[1], err => {
-          if (err) log.error(err);
-          cb(null);
-        });
-      }, () => {
-        filetree.updateDir(dstDir);
-      });
-    }
   });
 
   req.on("close", () => {
@@ -1244,19 +1201,9 @@ function handleUploadRequest(req, res) {
       log.info(req, res, "Upload cancelled");
       closeConnection();
     }
-    removeTempFiles();
   });
 
   req.pipe(busboy);
-
-  function removeTempFiles() {
-    async.each(Object.keys(files), (name, cb) => {
-      utils.rm(files[name].src, () => {
-        delete files[name];
-        cb();
-      });
-    });
-  }
 
   function closeConnection() {
     res.statusCode = 200;
@@ -1337,13 +1284,6 @@ function debug() {
         sendObjAll({type: "RELOAD"});
       }
     }, 100);
-  });
-}
-
-// Needs to be synchronous for process.on("exit")
-function cleanupTemp() {
-  fs.readdirSync(paths.temp).forEach(file => {
-    utils.rmSync(path.join(paths.temp, file));
   });
 }
 
@@ -1525,8 +1465,6 @@ schedule.scheduleJob("* 0 * * *", () => {
 
 // Process startup
 function setupProcess(standalone) {
-  process.on("exit", cleanupTemp);
-
   if (standalone) {
     process.on("SIGINT", endProcess.bind(null, "SIGINT"));
     process.on("SIGQUIT", endProcess.bind(null, "SIGQUIT"));
