@@ -2838,7 +2838,7 @@
 
   function getFullLink(hash) {
     return location.protocol + "//" + location.host + location.pathname + "$/" + hash;
-  };
+  }
 
   function getSpriteClass(extension) {
     for (var type in droppy.iconMap) {
