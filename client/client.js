@@ -1738,6 +1738,7 @@
       });
       loadContent(view, "media", type, html).then(function() {
         var el = view.find(".pswp")[0];
+        var fadeTime = droppy.detects.mobile ? 3500 : 2500;  // TODO: match to plyr
         view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, {
           arrowKeys: false,
           barsSize: {top:0, bottom:0},
@@ -1761,8 +1762,8 @@
           shareEl: false,
           showAnimationDuration: 0,
           spacing: 0,
-          timeToIdle: 2500,
-          timeToIdleOutside: 2500,
+          timeToIdle: fadeTime,
+          timeToIdleOutside: fadeTime,
         });
 
         var autonext = view.find(".autonext");
@@ -1808,6 +1809,7 @@
             zoomButtons.removeClass("hidden");
             this.currItem.container.parentNode.style.overflow = "auto"; // allow pdf scrolling
             this.currItem.container.style.transformOrigin = "center top"; // center zoom out
+            view.find("video").each(function() { this.pause(); });
           } else if (type === "video") {
             initVideo($(this.currItem.container).find("video")[0]);
             imgButtons.addClass("hidden");
@@ -1817,9 +1819,7 @@
             imgButtons.removeClass("hidden");
             videoButtons.addClass("hidden");
             zoomButtons.removeClass("hidden");
-            view.find("video").each(function() {
-              this.pause(); // pause invisible videos
-            });
+            view.find("video").each(function() { this.pause(); });
           }
 
           setTitle(this.currItem.filename.replace(/\..*/g, ""));
@@ -2444,7 +2444,7 @@
         });
 
         var player = new Plyr(el, {
-          controls: ["play-large", "play", "volume", "progress", "current-time", "mute", "captions"],
+          controls: ["play", "volume", "progress", "current-time", "mute", "captions"],
           iconUrl: "!/res/lib/plyr.svg",
           blankUrl: "!/res/lib/blank.mp4",
           autoplay: !droppy.detects.mobile,

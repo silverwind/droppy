@@ -640,7 +640,7 @@ html:not(.mobile) #entry-menu a.active {
 }
 
 .pswp__top-bar {
-  background: rgba(0,0,0,.4);
+  background: rgba(0,0,0,.6) !important;
   height: 1.4rem !important;
   pointer-events: none;
   color: #e6e6e6;
@@ -669,6 +669,15 @@ html:not(.mobile) #entry-menu a.active {
   background: none;
   opacity: 1;
 }
+
+.pswp__top-bar, .pswp__ui {
+  transition: all .4s ease-in-out !important;
+}
+
+.pswp__ui--idle {
+  transform: translateY(-1.5rem) !important;
+}
+
 .pswp__top-bar svg {
   height: 34px;
   width: 34px;
@@ -718,7 +727,7 @@ html:not(.mobile) #entry-menu a.active {
 
 .plyr--video .plyr__controls {
   padding: .1rem 0 !important;
-  background: rgba(0,0,0,.7) !important;
+  background: rgba(0,0,0,.6) !important;
 }
 
 .plyr__volume {
