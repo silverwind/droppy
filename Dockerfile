@@ -35,6 +35,7 @@ RUN apk add --update-cache --no-cache --virtual deps curl make gcc g++ python gi
   rm -rf /droppy/node_modules/lodash/_* && \
   rm -rf /droppy/node_modules/lodash/*.min.js && \
   rm -rf /droppy/node_modules/lodash/core.js && \
+  rm -rf /droppy/node_modules/plyr/dist/*.map && \
   apk del --purge deps && \
   rm -rf /var/cache/apk/* && \
   mkdir -p /root/.droppy && \
