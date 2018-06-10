@@ -1323,7 +1323,7 @@
     });
 
     // File upload button
-    view.off("click").on("click", ".af", function(e) {
+    view.off("click", ".af").on("click", ".af", function(e) {
       if ($(this).hasClass("disabled")) return;
       var view = $(e.target).parents(".view");
       // Remove the directory attributes so we get a file picker dialog
@@ -1341,7 +1341,7 @@
     }
 
     // Directory upload button
-    view.off("click").on("click", ".ad", function(e) {
+    view.off("click", ".ad").on("click", ".ad", function(e) {
       var view = $(e.target).parents(".view");
       if ($(this).hasClass("disabled")) {
         showError(getView(0), "Your browser doesn't support directory uploading");
@@ -1362,7 +1362,7 @@
       }
     });
 
-    view.off("click").on("click", ".cf, .cd", function(e) {
+    view.off("click", ".cf, .cd").on("click", ".cf, .cd", function(e) {
       if ($(this).hasClass("disabled")) return;
       var view = $(e.target).parents(".view");
       var content = view.find(".content");
@@ -1382,7 +1382,7 @@
       });
     });
 
-    view.off("click").on("click", ".newview", function() {
+    view.off("click", ".newview").on("click", ".newview", function() {
       if (droppy.views.length === 1) {
         var dest = join(view[0].currentFolder, view[0].currentFile);
         replaceHistory(newView(dest, 1), dest);
@@ -1392,17 +1392,17 @@
       }
     });
 
-    view.off("click").on("click", ".about", function() {
+    view.off("click", ".about").on("click", ".about", function() {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    view.off("click").on("click", ".prefs", function() {
+    view.off("click", ".prefs").on("click", ".prefs", function() {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
 
-    view.off("click").on("click", ".reload", function() {
+    view.off("click", ".reload").on("click", ".reload", function() {
       if (droppy.socketWait) return;
       showSpinner(view);
       sendMessage(view[0].vId, "RELOAD_DIRECTORY", {
@@ -1410,7 +1410,7 @@
       });
     });
 
-    view.off("click").on("click", ".logout", function() {
+    view.off("click", ".logout").on("click", ".logout", function() {
       ajax({
         method: "POST",
         url: "!/logout",
@@ -1435,14 +1435,14 @@
         openDirectory(view, view[0].currentData);
       }
     }
-    view.off("click").on("click", ".search.toggled-off", function() {
+    view.off("click", ".search.toggled-off").on("click", ".search.toggled-off", function() {
       var search = $(this);
       search.removeClass("toggled-off").addClass("toggled-on");
       setTimeout(function() {
         search.find("input")[0].focus();
       }, 0);
     });
-    view.off("click").on("click", ".search.toggled-on svg", function() {
+    view.off("click", ".search.toggled-on svg").on("click", ".search.toggled-on svg", function() {
       var view = $(this).parents(".view");
       openDirectory(view, view[0].currentData);
     });
@@ -1457,7 +1457,7 @@
       }
     });
     view.off("input", ".search input").on("input", ".search input", debounce(doSearch, 1000));
-    view.off("click").on("click", ".globalsearch input", function(e) {
+    view.off("click", ".globalsearch input").on("click", ".globalsearch input", function(e) {
       e.stopPropagation();
     });
   }
