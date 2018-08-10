@@ -17,6 +17,7 @@ const readdirp = require("readdirp");
 const schedule = require("node-schedule");
 const sendFile = require("send");
 const ut       = require("untildify");
+const Wss      = require("ws").Server;
 const yazl     = require("yazl");
 
 const cfg       = require("./cfg.js");
@@ -36,8 +37,6 @@ const clients       = {};
 const clientsPerDir = {};
 let config          = null;
 let firstRun        = null;
-let Wss             = null;
-let uwsLogged       = false;
 let ready           = false;
 
 module.exports = function droppy(opts, isStandalone, dev, callback) {
@@ -428,16 +427,6 @@ function createListener(handler, opts, callback) {
 
 // WebSocket functions
 function setupWebSocket(server) {
-  // fall back from uws to ws in case it failed to build
-  try {
-    Wss = require("uws").Server;
-  } catch (err) {
-    if (!uwsLogged) {
-      log.info("The 'uws' module failed to build, falling back to 'ws'");
-      uwsLogged = true;
-    }
-    Wss = require("ws").Server;
-  }
   const wss = new Wss({
     server: server,
     verifyClient: function(info, cb) {
