@@ -10,7 +10,7 @@
 
 **droppy** is a self-hosted file storage server with a web interface and capabilities to edit files and view media directly in the browser. It is particularly well-suited to be run on low-end hardware like the Raspberry Pi.
 
-## Features
+## Features (try the <a target="_blank" href="https://droppy.silverwind.io/">demo</a>)
 * Responsive, scalable HTML5 interface
 * Realtime updates of file system changes
 * Directory and Multi-File upload
