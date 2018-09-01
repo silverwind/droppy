@@ -6,7 +6,7 @@ const cpr      = require("cpr");
 const chalk    = require("chalk");
 const fs       = require("graceful-fs");
 const path     = require("path");
-const request  = require("request");
+const fetch    = require("make-fetch-happen");
 const schedule = require("node-schedule");
 
 const log      = require("./log.js");
@@ -89,13 +89,15 @@ function get(url, dest) {
     utils.mkdir([path.dirname(temp), path.dirname(dest)], () => {
       fs.stat(temp, (err, stats) => {
         if (err || !stats.size) {
-          const stream = fs.createWriteStream(temp);
-          stream.on("error", callback);
-          stream.on("close", () => {
-            utils.copyFile(temp, dest, callback);
-          });
           log.info(chalk.yellow("GET ") + url);
-          request(url).pipe(stream);
+          fetch(url).then(res => {
+            const stream = fs.createWriteStream(temp);
+            stream.on("error", callback);
+            stream.on("close", () => {
+              utils.copyFile(temp, dest, callback);
+            });
+            res.body.pipe(stream);
+          });
         } else {
           utils.copyFile(temp, dest, callback);
         }
