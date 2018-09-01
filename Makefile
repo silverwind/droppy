@@ -1,14 +1,13 @@
 # os deps: node yarn git jq docker
 
 JQUERY_FLAGS:=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
-BIN:=node_modules/.bin
 
 test:
 	$(MAKE) lint
 
 lint:
-	$(BIN)/eslint --color --ignore-pattern *.min.js server client *.js examples/*.js
-	$(BIN)/stylelint client/*.css
+	npx eslint --color --ignore-pattern *.min.js server client *.js examples/*.js
+	npx stylelint client/*.css
 
 build:
 	touch client/client.js
@@ -54,7 +53,7 @@ docker-push:
 	docker push silverwind/arm64v8-droppy:latest
 
 update:
-	$(BIN)/updates -u -e pdfjs-dist
+	npx updates -u -e pdfjs-dist
 	rm -rf node_modules yarn.lock
 	yarn
 	touch client/client.js
