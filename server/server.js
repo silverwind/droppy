@@ -134,10 +134,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     callback();
   });
 
-  return {
-    onRequest: onRequest,
-    setupWebSocket: setupWebSocket,
-  };
+  return {onRequest, setupWebSocket};
 };
 
 function onRequest(req, res) {
@@ -226,20 +223,13 @@ function startListeners(callback) {
     // listen on all host + port combinations
     hosts.forEach(host => {
       ports.forEach(port => {
-        targets.push({
-          host: host,
-          port: port,
-          opts: opts,
-        });
+        targets.push({host, port, opts});
       });
     });
 
     // listen on unix socket
     sockets.forEach(socket => {
-      targets.push({
-        socket: socket,
-        opts: opts,
-      });
+      targets.push({socket, opts});
     });
   });
 
@@ -428,8 +418,8 @@ function createListener(handler, opts, callback) {
 // WebSocket functions
 function setupWebSocket(server) {
   const wss = new Wss({
-    server: server,
-    verifyClient: function(info, cb) {
+    server,
+    verifyClient: (info, cb) => {
       if (validateRequest(info.req)) return cb(true);
       log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
       cb(false, 401, "Unauthorized");
@@ -447,7 +437,7 @@ function onWebSocketRequest(ws, req) {
   log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
   const sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
   const cookie = cookies.get(req.headers.cookie);
-  clients[sid] = {views: [], cookie: cookie, ws: ws};
+  clients[sid] = {views: [], cookie, ws};
 
   ws.on("message", msg => {
     msg = JSON.parse(msg);
@@ -465,14 +455,14 @@ function onWebSocketRequest(ws, req) {
     const priv = Boolean((db.get("sessions")[cookie] || {}).privileged);
 
     if (msg.type === "REQUEST_SETTINGS") {
-      sendObj(sid, {type: "SETTINGS", vId: vId, settings: {
+      sendObj(sid, {type: "SETTINGS", vId, settings: {
+        priv,
         version       : pkg.version,
         dev           : config.dev,
         demo          : config.demo,
         public        : config.public,
         readOnly      : config.readOnly,
         watch         : config.watch,
-        priv          : priv,
         engine        : "node " + process.version.substring(1),
         platform      : process.platform,
         caseSensitive : process.platform === "linux", // TODO: actually test the filesystem
@@ -481,7 +471,7 @@ function onWebSocketRequest(ws, req) {
       }});
     } else if (msg.type === "REQUEST_UPDATE") {
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-      if (!clients[sid]) clients[sid] = {views: [], ws: ws}; // This can happen when the server restarts
+      if (!clients[sid]) clients[sid] = {views: [], ws}; // This can happen when the server restarts
       fs.stat(utils.addFilesPath(msg.data), (err, stats) => {
         let clientDir, clientFile;
         if (err) { // Send client back to root when the requested path doesn't exist
@@ -492,7 +482,7 @@ function onWebSocketRequest(ws, req) {
         } else if (stats.isFile()) {
           clientDir = path.dirname(msg.data);
           clientFile = path.basename(msg.data);
-          sendObj(sid, {type: "UPDATE_BE_FILE", file: clientFile, folder: clientDir, isFile: true, vId: vId});
+          sendObj(sid, {type: "UPDATE_BE_FILE", file: clientFile, folder: clientDir, isFile: true, vId});
         } else {
           clientDir = msg.data;
           clientFile = null;
@@ -520,7 +510,7 @@ function onWebSocketRequest(ws, req) {
           const ext = links[link].ext || path.extname(links[link].location);
           sendObj(sid, {
             type: "SHARELINK",
-            vId: vId,
+            vId,
             link: (config.linkExtensions && ext) ? (link + ext) : link,
             attachement: msg.data.attachement,
           });
@@ -536,12 +526,12 @@ function onWebSocketRequest(ws, req) {
       links[link] = {
         location: msg.data.location,
         attachement: msg.data.attachement,
-        ext: ext,
+        ext,
       };
       db.set("links", links);
       sendObj(sid, {
         type: "SHARELINK",
-        vId: vId,
+        vId,
         link: config.linkExtensions ? (link + ext) : link,
         attachement: msg.data.attachement
       });
@@ -558,7 +548,7 @@ function onWebSocketRequest(ws, req) {
         if (err) {
           sendError(sid, vId, "Error saving " + msg.data.to);
           log.error(err);
-        } else sendObj(sid, {type: "SAVE_STATUS", vId: vId, status : err ? 1 : 0});
+        } else sendObj(sid, {type: "SAVE_STATUS", vId, status : err ? 1 : 0});
       });
     } else if (msg.type === "CLIPBOARD") {
       const src = msg.data.src;
@@ -657,7 +647,7 @@ function onWebSocketRequest(ws, req) {
           });
         } else cb(null, {video: true, src: file});
       }, (_, obj) => {
-        sendObj(sid, {type: "MEDIA_FILES", vId: vId, files: obj});
+        sendObj(sid, {type: "MEDIA_FILES", vId, files: obj});
       });
     } else if (msg.type === "SEARCH") {
       const query = msg.data.query;
@@ -665,7 +655,7 @@ function onWebSocketRequest(ws, req) {
       if (!validatePaths(dir, msg.type, ws, sid, vId)) return;
       sendObj(sid, {
         type: "SEARCH_RESULTS",
-        vId: vId,
+        vId,
         folder: dir,
         results: filetree.search(query, dir)
       });
@@ -709,12 +699,11 @@ function validatePaths(paths, type, ws, sid, vId) {
 // Send a file list update
 function sendFiles(sid, vId) {
   if (!clients[sid] || !clients[sid].views[vId] || !clients[sid].ws || !clients[sid].ws._socket) return;
-  const dir = clients[sid].views[vId].directory;
+  const folder = clients[sid].views[vId].directory;
   sendObj(sid, {
-    type   : "UPDATE_DIRECTORY",
-    vId    : vId,
-    folder : dir,
-    data   : filetree.ls(dir)
+    type: "UPDATE_DIRECTORY",
+    vId, folder,
+    data: filetree.ls(folder)
   });
 }
 
@@ -743,7 +732,7 @@ function sendObjAll(data) {
 }
 
 function sendError(sid, vId, text) {
-  sendObj(sid, {type: "ERROR", vId: vId, text: text});
+  sendObj(sid, {type: "ERROR", vId, text});
   log.info(clients[sid].ws, null, "Sent error: " + text);
 }
 
@@ -1228,9 +1217,8 @@ function updateClientLocation(dir, sid, vId) {
   // and add client back
   if (!clientsPerDir[dir]) clientsPerDir[dir] = [];
   clientsPerDir[dir].push({
-    sid    : sid,
-    vId    : vId,
-    update : _.throttle(function() {
+    sid, vId,
+    update: _.throttle(function() {
       sendFiles(this.sid, this.vId);
     }, config.updateInterval, {leading: true, trailing: true})
   });
@@ -1432,7 +1420,7 @@ function tlsSetup(opts, cb) {
 
     cb(null, {
       cert: certs,
-      key: key,
+      key,
       dhparam: dhparam || db.get("dhparam") || createDH(),
       passphrase: opts.passphrase,
     });

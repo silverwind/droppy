@@ -207,11 +207,6 @@ resources.build = function(cb) {
   });
 };
 
-// compat: Node.js < 6
-function buf(str) {
-  return "from" in Buffer ? Buffer.from(str) : Buffer(str);
-}
-
 function isCacheFresh(cb) {
   fs.stat(cachePath, (err, stats) => {
     if (err) return cb(false);
@@ -370,14 +365,14 @@ function readThemes(callback) {
 
       filenames.forEach((name, index) => {
         const css = String(data[index]);
-        themes[name.replace(/\.css$/, "")] = buf(minifyCSS(css));
+        themes[name.replace(/\.css$/, "")] = Buffer.from(minifyCSS(css));
       });
 
       // add our own theme
       fs.readFile(path.join(paths.mod, "/client/cmtheme.css"), (err, css) => {
         css = String(css);
         if (err) return callback(err);
-        themes.droppy = buf(minifyCSS(css));
+        themes.droppy = Buffer.from(minifyCSS(css));
         callback(null, themes);
       });
     });
@@ -400,7 +395,7 @@ function readModes(callback) {
 
     async.map(Object.keys(modes), (mode, cb) => {
       fs.readFile(path.join(modesPath, mode, mode + ".js"), (err, data) => {
-        cb(err, buf(minifyJS(String(data))));
+        cb(err, Buffer.from(minifyJS(String(data))));
       });
     }, (err, result) => {
       Object.keys(modes).forEach((mode, i) => {
@@ -429,14 +424,14 @@ function readLibs(callback) {
     }
   }, err => {
     // Prefix hardcoded Photoswipe urls
-    out["ps.css"] = buf(String(out["ps.css"]).replace(/url\(/gm, "url(!/res/lib/"));
+    out["ps.css"] = Buffer.from(String(out["ps.css"]).replace(/url\(/gm, "url(!/res/lib/"));
 
     if (minify) {
       Object.keys(out).forEach(file => {
         if (/\.js$/.test(file)) {
-          out[file] = buf(minifyJS(String(out[file])));
+          out[file] = Buffer.from(minifyJS(String(out[file])));
         } else if (/\.css$/.test(file)) {
-          out[file] = buf(minifyCSS(String(out[file])));
+          out[file] = Buffer.from(minifyCSS(String(out[file])));
         }
       });
     }
@@ -499,7 +494,7 @@ resources.compileJS = function() {
   js = minifyJS(js);
 
   return {
-    data: buf(js),
+    data: Buffer.from(js),
     etag: etag(js),
     mime: utils.contentType("js"),
   };
@@ -515,7 +510,7 @@ resources.compileCSS = function() {
   css = minifyCSS(postcss([autoprefixer(opts.autoprefixer)]).process(css).css);
 
   return {
-    data: buf(css),
+    data: Buffer.from(css),
     etag: etag(css),
     mime: utils.contentType("css"),
   };
@@ -527,15 +522,15 @@ resources.compileHTML = function(res) {
 
   let auth = html.replace("{{type}}", "a");
   auth = minify ? htmlMinifier.minify(auth, opts.htmlMinifier) : auth;
-  res["auth.html"] = {data: buf(auth), etag: etag(auth), mime: utils.contentType("html")};
+  res["auth.html"] = {data: Buffer.from(auth), etag: etag(auth), mime: utils.contentType("html")};
 
   let first = html.replace("{{type}}", "f");
   first = minify ? htmlMinifier.minify(first, opts.htmlMinifier) : first;
-  res["first.html"] = {data: buf(first), etag: etag(first), mime: utils.contentType("html")};
+  res["first.html"] = {data: Buffer.from(first), etag: etag(first), mime: utils.contentType("html")};
 
   let main = html.replace("{{type}}", "m");
   main = minify ? htmlMinifier.minify(main, opts.htmlMinifier) : main;
-  res["main.html"] = {data: buf(main), etag: etag(main), mime: utils.contentType("html")};
+  res["main.html"] = {data: Buffer.from(main), etag: etag(main), mime: utils.contentType("html")};
   return res;
 };
 
@@ -558,7 +553,7 @@ function compileAll(callback) {
       callback(err);
     }
 
-    res[name] = {data: data, etag: etag(data), mime: utils.contentType(name)};
+    res[name] = {data, etag: etag(data), mime: utils.contentType(name)};
   });
   callback(null, res);
 }

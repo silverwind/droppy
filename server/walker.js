@@ -35,7 +35,7 @@ walker.walk = function(dir, cb) {
           errs.push(err);
           next(++i);
         } else if (stat && stat.isDirectory()) {
-          dirs.push({path: path, stat: stat});
+          dirs.push({path, stat});
           walker.walk(path, (e, d, f) => {
             if (e) errs = errs.concat(e);
             dirs = dirs.concat(d);
@@ -43,7 +43,7 @@ walker.walk = function(dir, cb) {
             next(++i);
           });
         } else {
-          files.push({path: path, stat: stat});
+          files.push({path, stat});
           next(++i);
         }
       });
@@ -62,12 +62,12 @@ walker.walkSync = function(dir) {
         try {
           const stat = fs.statSync(path);
           if (stat.isDirectory()) {
-            dirs.push({path: path, stat: stat});
+            dirs.push({path, stat});
             const r = walker.walkSync(path);
             dirs = dirs.concat(r[1]);
             files = files.concat(r[2]);
           } else {
-            files.push({path: path, stat: stat});
+            files.push({path, stat});
           }
         } catch (err) {
           errs.push(err);

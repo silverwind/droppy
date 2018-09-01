@@ -131,9 +131,9 @@ log.logo = function(line1, line2, line3) {
   ].join("")));
 };
 
-log.formatHostPort = function(host, port, proto) {
-  const str = format({hostname: host, port: port});
-  host = str.substring(0, str.lastIndexOf(":"));
+log.formatHostPort = function(hostname, port, proto) {
+  const str = format({hostname, port});
+  hostname = str.substring(0, str.lastIndexOf(":"));
   port = str.substring(str.lastIndexOf(":") + 1, str.length);
 
   if (proto === "http" && port === "80" || proto === "https" && port === "443") {
@@ -142,7 +142,7 @@ log.formatHostPort = function(host, port, proto) {
     port = chalk.blue(":" + port);
   }
 
-  return chalk.cyan(host) + port;
+  return chalk.cyan(hostname) + port;
 };
 
 log.formatError = function(err) {

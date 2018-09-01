@@ -109,7 +109,7 @@ db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged) {
 
   database.users[user] = {
     hash: getHash(password + salt + user) + "$" + salt,
-    privileged: privileged
+    privileged
   };
 
   write();

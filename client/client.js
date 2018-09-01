@@ -148,15 +148,12 @@
     }
   }
   function loadPrefs() {
-    var ret;
+    var prefs;
     try {
-      ret = JSON.parse(localStorage.getItem("prefs"));
-      if (!ret) throw new Error();
-    } catch (err) {
-      // saved will be 'null' for Safari in private browsing mode
-      ret = defaults;
-    }
-    return ret;
+      prefs = JSON.parse(localStorage.getItem("prefs"));
+    } catch (err) {}
+
+    return prefs || defaults;
   }
 
   // Load prefs and set missing ones to their default
@@ -278,7 +275,8 @@
     droppy.socket = new WebSocket(
       location.origin.replace(/^http/, "ws") + location.pathname + "!/socket"
     );
-    droppy.socket.onopen = function() {
+
+    droppy.socket.addEventListener("open", function(_event) {
       if (droppy.token) {
         init();
       } else {
@@ -289,9 +287,9 @@
           init();
         });
       }
-    };
+    });
     // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
-    droppy.socket.onclose = function(event) {
+    droppy.socket.addEventListener("close", function(event) {
       if (event.code === 4000) return;
       if (event.code === 1011) {
         droppy.token = null;
@@ -309,8 +307,8 @@
         droppy.reopen = false;
         openSocket();
       }
-    };
-    droppy.socket.onmessage = function(event) {
+    });
+    droppy.socket.addEventListener("message", function(event) {
       var msg = JSON.parse(event.data), vId = msg.vId, view = getView(vId);
       droppy.socketWait = false;
       msg = JSON.parse(event.data);
@@ -406,7 +404,7 @@
         hideSpinner(view);
         break;
       }
-    };
+    });
   }
   function sendMessage(vId, type, data) {
     var sendObject = {vId: vId, type: type, data: data, token: droppy.token};
@@ -2788,10 +2786,10 @@
         var opts = {icon: "!/res/logo192.png"};
         if (body) opts.body = body;
         var n = new Notification(msg, opts);
-        n.onshow = function() { // Compat: Chrome
+        n.addEventListener("show", function() { // Compat: Chrome
           var self = this;
           setTimeout(function() { self.close(); }, 4000);
-        };
+        });
       };
       if (Notification.permission === "granted") {
         show(msg, body);
@@ -2841,11 +2839,14 @@
     return location.protocol + "//" + location.host + location.pathname + "$/" + hash;
   }
 
-  function getSpriteClass(extension) {
-    for (var type in droppy.iconMap) {
-      if (droppy.iconMap[type.toLowerCase()].indexOf(extension.toLowerCase()) > -1) return type;
-    }
-    return "bin";
+  function getSpriteClass(ext) {
+    var type = "bin";
+    Object.keys(droppy.iconMap).forEach(fileType => {
+      if (droppy.iconMap[fileType].indexOf(ext.toLowerCase()) > -1) {
+        type = fileType;
+      }
+    });
+    return type;
   }
 
   function formatBytes(num) {
@@ -2928,7 +2929,7 @@
   function validFilename(name) {
     if (!name || name.length > 255) {
       return false;
-    } if (/[<>:"|?*\x00-\x1F]/.test(name)) { // eslint-disable-line no-control-regex
+    } if (/[<>:"|?*\x00-\x1F]/.test(name)) {
       return false;
     } if (/^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i.test(name)) {
       return false;
@@ -3012,7 +3013,7 @@
   function urlToPngBlob(url, cb) {
     var img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = function() {
+    img.addEventListener("load", function() {
       var canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
@@ -3023,7 +3024,7 @@
       var bytes = new Uint8Array(len);
       for (var i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
       cb(new Blob([bytes.buffer], {type: "image/png"}));
-    };
+    });
     img.src = url;
   }
 

@@ -36,7 +36,7 @@ paths.seed = function(config, files) {
 
 function resolve(...args) {
   let p = path.join.apply(null, args);
-  p = path.resolve(/^~/.test(p) ? untildify(p) : p);
+  p = path.resolve(p.startsWith("~") ? untildify(p) : p);
   try {
     p = fs.realpathSync(p);
   } catch (err) {}

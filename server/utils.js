@@ -35,10 +35,10 @@ const overrideMimeTypes = {
 utils.mkdir = function(dir, cb) {
   if (Array.isArray(dir)) {
     async.each(dir, (p, cb) => {
-      mkdirp(p, {fs: fs, mode: "755"}, cb);
+      mkdirp(p, {fs, mode: "755"}, cb);
     }, cb);
   } else if (typeof dir === "string") {
-    mkdirp(dir, {fs: fs, mode: "755"}, cb);
+    mkdirp(dir, {fs, mode: "755"}, cb);
   } else {
     cb(new Error("mkdir: Wrong dir type: " + typeof dir));
   }
@@ -251,7 +251,7 @@ utils.formatBytes = function(num) {
   if (num < 1) return num + " B";
   const units = ["B", "kB", "MB", "GB", "TB", "PB"];
   const exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
-  return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
+  return (num / (1000 ** exp)).toPrecision(3) + " " + units[exp];
 };
 
 // TODO: https://tools.ietf.org/html/rfc7239

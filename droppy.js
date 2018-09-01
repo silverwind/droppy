@@ -149,7 +149,7 @@ if (cmds[cmd]) {
       printUsers(db.get("users"));
     });
   } else if (cmd === "add") {
-    if (args.length !== 2 && args.length !== 3) return printHelp();
+    if (args.length !== 2 && args.length !== 3) printHelp();
     db = require("./server/db.js");
     db.load(() => {
       db.addOrUpdateUser(args[0], args[1], args[2] === "p", () => {
@@ -157,7 +157,7 @@ if (cmds[cmd]) {
       });
     });
   } else if (cmd === "del") {
-    if (args.length !== 1) return printHelp();
+    if (args.length !== 1) printHelp();
     db = require("./server/db.js");
     db.load(() => {
       db.delUser(args[0], () => {
@@ -183,6 +183,7 @@ function printHelp() {
   });
 
   console.info(help);
+  process.exit();
 }
 
 function printUsers(users) {

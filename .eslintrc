@@ -1,5 +1,8 @@
 root: true
-extends: eslint-config-silverwind
+
+extends:
+  - eslint-config-silverwind
+  - plugin:unicorn/recommended
 
 overrides:
   - files: ["client/**/*.js"]
@@ -8,3 +11,17 @@ overrides:
       prefer-arrow-callback: [0]
       prefer-spread: [0]
       prefer-rest-params: [0]
+      object-shorthand: [0]
+      unicorn/prefer-starts-ends-with: [0]
+      unicorn/prefer-exponentiation-operator: [0]
+      unicorn/no-hex-escape: [0]
+
+rules:
+  unicorn/explicit-length-check: [0]
+  unicorn/catch-error-name: [2, {name: err}]
+  unicorn/new-for-builtins: [0]
+  unicorn/no-process-exit: [0]
+  unicorn/regex-shorthand: [0]
+
+
+# --plugin unicorn --rule 'unicorn/catch-error-name: [2, {name: err}]' --rule 'unicorn/throw-new-error: 2'
