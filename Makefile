@@ -80,8 +80,8 @@ version-minor:
 version-major:
 	npm version major
 
-patch: test build version-patch deploy publish docker docker-push
-minor: test build version-minor deploy publish docker docker-push
-major: test build version-major deploy publish docker docker-push
+patch: test build version-patch deploy docker docker-push publish
+minor: test build version-minor deploy docker docker-push publish
+major: test build version-major deploy docker docker-push publish
 
 .PHONY: test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major
