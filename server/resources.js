@@ -21,7 +21,7 @@ const cachePath  = path.join(paths.mod, "dist", "cache.json");
 let minify;
 
 const opts = {
-  uglify: {
+  terser: {
     mangle: true,
     compress: {
       booleans: true,
@@ -91,7 +91,7 @@ const opts = {
   }
 };
 
-let autoprefixer, cleanCSS, postcss, uglify, htmlMinifier, brotli, svg, handlebars;
+let autoprefixer, cleanCSS, postcss, terser, htmlMinifier, brotli, svg, handlebars;
 try {
   autoprefixer = require("autoprefixer");
   brotli = require("iltorb").compress;
@@ -99,7 +99,7 @@ try {
   handlebars = require("handlebars");
   htmlMinifier = require("html-minifier");
   postcss = require("postcss");
-  uglify = require("uglify-es");
+  terser = require("terser");
   svg = require("./svg.js");
 } catch (err) {}
 
@@ -447,7 +447,7 @@ function readLibs(callback) {
 
 function minifyJS(js) {
   if (!minify) return js;
-  const min = uglify.minify(js, opts.uglify);
+  const min = terser.minify(js, opts.terser);
   if (min.error) {
     log.error(min.error);
     process.exit(1);

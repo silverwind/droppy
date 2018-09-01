@@ -71,7 +71,7 @@
     "screenfull": "^3.3.2",
     "stylelint": "^9.4.0",
     "svgstore": "^2.0.3",
-    "uglify-es": "^3.3.10",
+    "terser": "^3.8.2",
     "updates": "^4.1.2",
     "uppie": "^1.0.10"
   },
