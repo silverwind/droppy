@@ -1,9 +1,9 @@
 "use strict";
 
-const cfg    = module.exports = {};
-const fs     = require("graceful-fs");
+const cfg = module.exports = {};
+const fs = require("graceful-fs");
 const mkdirp = require("mkdirp");
-const path   = require("path");
+const path = require("path");
 
 const configFile = require("./paths.js").get().cfgFile;
 

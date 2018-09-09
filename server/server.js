@@ -1,43 +1,43 @@
 "use strict";
 
 const crypto = require("crypto");
-const os     = require("os");
-const path   = require("path");
-const qs     = require("querystring");
+const os = require("os");
+const path = require("path");
+const qs = require("querystring");
 
-const _        = require("lodash");
-const async    = require("async");
-const Busboy   = require("busboy");
-const chalk    = require("chalk");
-const escRe    = require("escape-string-regexp");
-const etag     = require("etag");
-const fs       = require("graceful-fs");
-const imgSize  = require("image-size");
+const _ = require("lodash");
+const async = require("async");
+const Busboy = require("busboy");
+const chalk = require("chalk");
+const escRe = require("escape-string-regexp");
+const etag = require("etag");
+const fs = require("graceful-fs");
+const imgSize = require("image-size");
 const readdirp = require("readdirp");
 const schedule = require("node-schedule");
 const sendFile = require("send");
-const ut       = require("untildify");
-const Wss      = require("ws").Server;
-const yazl     = require("yazl");
+const ut = require("untildify");
+const Wss = require("ws").Server;
+const yazl = require("yazl");
 
-const cfg       = require("./cfg.js");
-const cookies   = require("./cookies.js");
-const csrf      = require("./csrf.js");
-const db        = require("./db.js");
-const filetree  = require("./filetree.js");
-const log       = require("./log.js");
-const manifest  = require("./manifest.js");
-const paths     = require("./paths.js").get();
-const pkg       = require("./../package.json");
+const cfg = require("./cfg.js");
+const cookies = require("./cookies.js");
+const csrf = require("./csrf.js");
+const db = require("./db.js");
+const filetree = require("./filetree.js");
+const log = require("./log.js");
+const manifest = require("./manifest.js");
+const paths = require("./paths.js").get();
+const pkg = require("./../package.json");
 const resources = require("./resources.js");
-const utils     = require("./utils.js");
+const utils = require("./utils.js");
 
-let cache           = {};
-const clients       = {};
+let cache = {};
+const clients = {};
 const clientsPerDir = {};
-let config          = null;
-let firstRun        = null;
-let ready           = false;
+let config = null;
+let firstRun = null;
+let ready = false;
 
 module.exports = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
@@ -108,7 +108,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     function(cb) {
       log.info("Caching files ...");
       filetree.init(config);
-      filetree.updateDir(null, () => {
+      filetree.updateDir(null).then(() => {
         if (config.watch) filetree.watch();
         log.info("Caching files done");
         cb();
@@ -495,7 +495,7 @@ function onWebSocketRequest(ws, req) {
       });
     } else if (msg.type === "RELOAD_DIRECTORY") {
       if (!validatePaths(msg.data.dir, msg.type, ws, sid, vId)) return;
-      filetree.updateDir(msg.data.dir, () => {
+      filetree.updateDir(msg.data.dir).then(() => {
         sendFiles(sid, vId);
       });
     } else if (msg.type === "DESTROY_VIEW") {
@@ -709,7 +709,7 @@ function sendFiles(sid, vId) {
 
 // Send a list of users on the server
 function sendUsers(sid) {
-  const userDB   = db.get("users");
+  const userDB = db.get("users");
   const userlist = {};
 
   Object.keys(userDB).forEach(user => {
@@ -1403,8 +1403,8 @@ function tlsSetup(opts, cb) {
   ];
 
   async.map(certPaths, utils.readFile, (_, data) => {
-    const key     = data[0];
-    const certs   = data[1];
+    const key = data[0];
+    const certs = data[1];
     const dhparam = data[3];
 
     if (!key) return cb(new Error("Unable to read TLS key: " + certPaths[0]));

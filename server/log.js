@@ -1,11 +1,11 @@
 "use strict";
 
-const fs        = require("graceful-fs");
-const chalk     = require("chalk");
-const format    = require("url-format-lax");
+const fs = require("graceful-fs");
+const chalk = require("chalk");
+const format = require("url-format-lax");
 const stripAnsi = require("strip-ansi");
 
-const utils     = require("./utils.js");
+const utils = require("./utils.js");
 
 const logColors = ["reset", "red", "yellow", "cyan"];
 const logLabels = ["", "ERROR", "INFO", "DEBG"];

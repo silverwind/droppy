@@ -1,8 +1,8 @@
 "use strict";
 
 const cookies = module.exports = {};
-const db      = require("./db.js");
-const utils   = require("./utils.js");
+const db = require("./db.js");
+const utils = require("./utils.js");
 
 // TODO: set secure flag on cookie. Requires X-Forwarded-Proto from the proxy
 const cookieParams = ["HttpOnly", "SameSite=strict"];

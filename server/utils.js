@@ -1,24 +1,24 @@
 "use strict";
 
-const utils     = module.exports = {};
-const async     = require("async");
-const cd        = require("content-disposition");
-const cpr       = require("cpr");
-const crypto    = require("crypto");
-const escRe     = require("escape-string-regexp");
-const ext       = require("file-extension");
-const fs        = require("graceful-fs");
-const isBin     = require("isbinaryfile");
+const utils = module.exports = {};
+const async = require("async");
+const cd = require("content-disposition");
+const cpr = require("cpr");
+const crypto = require("crypto");
+const escRe = require("escape-string-regexp");
+const ext = require("file-extension");
+const fs = require("graceful-fs");
+const isBin = require("isbinaryfile");
 const mimeTypes = require("mime-types");
-const mkdirp    = require("mkdirp");
-const mv        = require("mv");
-const path      = require("path");
-const rimraf    = require("rimraf");
-const util      = require("util");
-const validate  = require("valid-filename");
+const mkdirp = require("mkdirp");
+const mv = require("mv");
+const path = require("path");
+const rimraf = require("rimraf");
+const util = require("util");
+const validate = require("valid-filename");
 
-const paths  = require("./paths.js").get();
-const log    = require("./log.js");
+const paths = require("./paths.js").get();
+const log = require("./log.js");
 
 const forceBinaryTypes = [
   "pdf",
@@ -69,8 +69,8 @@ utils.move = function(src, dst, cb) {
 
 utils.copyFile = function(src, dst, cb) {
   let cbCalled = false;
-  const read     = fs.createReadStream(src);
-  const write    = fs.createWriteStream(dst);
+  const read = fs.createReadStream(src);
+  const write = fs.createWriteStream(dst);
 
   function done(err) {
     if (cbCalled) return;
@@ -115,8 +115,8 @@ utils.getNewPath = function(origPath, callback) {
   fs.stat(origPath, (err, stats) => {
     if (err) callback(origPath);
     else {
-      let filename  = path.basename(origPath);
-      const dirname   = path.dirname(origPath);
+      let filename = path.basename(origPath);
+      const dirname = path.dirname(origPath);
       let extension = "";
 
       if (filename.indexOf(".") !== -1 && stats.isFile()) {

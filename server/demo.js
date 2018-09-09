@@ -1,17 +1,17 @@
 "use strict";
 
-const demo     = module.exports = {};
-const async    = require("async");
-const cpr      = require("cpr");
-const chalk    = require("chalk");
-const fs       = require("graceful-fs");
-const path     = require("path");
-const fetch    = require("make-fetch-happen");
+const demo = module.exports = {};
+const async = require("async");
+const cpr = require("cpr");
+const chalk = require("chalk");
+const fs = require("graceful-fs");
+const path = require("path");
+const fetch = require("make-fetch-happen");
 const schedule = require("node-schedule");
 
-const log      = require("./log.js");
-const paths    = require("./paths.js").get();
-const utils    = require("./utils.js");
+const log = require("./log.js");
+const paths = require("./paths.js").get();
+const utils = require("./utils.js");
 
 demo.init = function(cb) {
   process.title = "droppy-demo";

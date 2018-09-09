@@ -1,22 +1,22 @@
 "use strict";
 
-const resources  = module.exports = {};
-const async      = require("async");
-const etag       = require("etag");
-const fs         = require("graceful-fs");
-const jb         = require("json-buffer");
-const mkdirp     = require("mkdirp");
-const path       = require("path");
-const vm         = require("vm");
-const zlib       = require("zlib");
+const resources = module.exports = {};
+const async = require("async");
+const etag = require("etag");
+const fs = require("graceful-fs");
+const jb = require("json-buffer");
+const mkdirp = require("mkdirp");
+const path = require("path");
+const vm = require("vm");
+const zlib = require("zlib");
 
-const log        = require("./log.js");
-const paths      = require("./paths.js").get();
-const utils      = require("./utils.js");
+const log = require("./log.js");
+const paths = require("./paths.js").get();
+const utils = require("./utils.js");
 
 const themesPath = path.join(paths.mod, "/node_modules/codemirror/theme");
-const modesPath  = path.join(paths.mod, "/node_modules/codemirror/mode");
-const cachePath  = path.join(paths.mod, "dist", "cache.json");
+const modesPath = path.join(paths.mod, "/node_modules/codemirror/mode");
+const cachePath = path.join(paths.mod, "dist", "cache.json");
 
 let minify;
 

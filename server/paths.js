@@ -1,12 +1,12 @@
 "use strict";
 
-const paths     = module.exports = {};
-const fs        = require("fs");
-const path      = require("path");
+const paths = module.exports = {};
+const fs = require("fs");
+const path = require("path");
 const untildify = require("untildify");
 
 let configDir = "~/.droppy/config";
-let filesDir  = "~/.droppy/files";
+let filesDir = "~/.droppy/files";
 
 paths.get = function() {
   return {

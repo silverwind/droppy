@@ -1,6 +1,6 @@
 "use strict";
 
-const csrf   = module.exports = {};
+const csrf = module.exports = {};
 const crypto = require("crypto");
 let tokens = [];
 

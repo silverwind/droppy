@@ -1,15 +1,14 @@
 "use strict";
 
-const db       = module.exports = {};
-
+const db = module.exports = {};
 const chokidar = require("chokidar");
-const fs       = require("graceful-fs");
-const crypto   = require("crypto");
-const mkdirp   = require("mkdirp");
-const path     = require("path");
+const fs = require("graceful-fs");
+const crypto = require("crypto");
+const mkdirp = require("mkdirp");
+const path = require("path");
 
-const log      = require("./log.js");
-const dbFile   = require("./paths.js").get().db;
+const log = require("./log.js");
+const dbFile = require("./paths.js").get().db;
 const defaults = {users: {}, sessions: {}, links: {}};
 
 let database, watching;

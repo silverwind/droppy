@@ -2,29 +2,31 @@
 
 const filetree = module.exports = new (require("events").EventEmitter)();
 
-const _        = require("lodash");
+const _ = require("lodash");
 const chokidar = require("chokidar");
-const escRe    = require("escape-string-regexp");
-const fs       = require("graceful-fs");
-const path     = require("path");
+const escRe = require("escape-string-regexp");
+const fs = require("graceful-fs");
+const path = require("path");
+const rrdir = require("rrdir");
+const util = require("util");
 
-const log      = require("./log.js");
-const paths    = require("./paths.js").get();
-const utils    = require("./utils.js");
-const walker   = require("./walker.js");
+const log = require("./log.js");
+const paths = require("./paths.js").get();
+const utils = require("./utils.js");
 
-let dirs     = {};
+const lstat = util.promisify(fs.lstat);
+
+let dirs = {};
 let todoDirs = [];
-let initial  = true;
+let initial = true;
 let watching = true;
-let timer    = null;
-let cfg      = null;
+let timer = null;
+let cfg = null;
 
 const WATCHER_DELAY = 3000;
 
 filetree.init = function(config) {
   cfg = config;
-  walker.init(cfg);
 };
 
 filetree.watch = function() {
@@ -80,43 +82,58 @@ function update(dir) {
   debouncedUpdate();
 }
 
-function handleUpdateDirErrs(errs, cb) {
-  errs.forEach(err => {
-    if (err.code === "ENOENT" && dirs[utils.removeFilesPath(err.path)]) {
-      delete dirs[utils.removeFilesPath(err.path)];
-    } else {
+filetree.updateDir = async function(dir) {
+  if (dir === null) {
+    dir = "/";
+    dirs = {};
+  }
+
+  const fullDir = utils.addFilesPath(dir);
+
+  let stats;
+  try {
+    stats = await lstat(fullDir);
+  } catch (err) {
+    log.error(err);
+  }
+
+  let entries = [];
+  if (initial) { // sync walk for performance
+    initial = false;
+    try {
+      entries = rrdir.sync(fullDir, {stats: true});
+    } catch (err) {
       log.error(err);
     }
-  });
-  if (typeof cb === "function") cb();
-}
-
-filetree.updateDir = function(dir, cb) {
-  if (dir === null) { dir = "/"; dirs = {}; }
-  fs.stat(utils.addFilesPath(dir), (err, stat) => {
-    if (err) log.error(err);
-    if (initial) { // use sync walk for performance
-      initial = false;
-      const r = walker.walkSync(utils.addFilesPath(dir));
-      if (r[0]) handleUpdateDirErrs(r[0]);
-      updateDirInCache(dir, stat, r[1], r[2], cb);
-    } else {
-      log.debug("Updating cache of " + dir);
-      walker.walk(utils.addFilesPath(dir), (errs, readDirs, readFiles) => {
-        if (errs) handleUpdateDirErrs(errs, cb);
-        updateDirInCache(dir, stat, readDirs, readFiles, cb);
-      });
+  } else {
+    try {
+      entries = await rrdir(fullDir, {stats: true});
+    } catch (err) {
+      log.error(err);
     }
-  });
+  }
+
+  for (const entry of (entries || [])) {
+    if (entry.err) {
+      if (entry.err.code === "ENOENT" && dirs[utils.removeFilesPath(entry.path)]) {
+        delete dirs[utils.removeFilesPath(entry.path)];
+      }
+    }
+  }
+
+  const readDirs = entries.filter(entry => entry.directory);
+  const readFiles = entries.filter(entry => !entry.directory);
+
+  updateDirInCache(dir, stats, readDirs, readFiles);
 };
 
-function updateDirInCache(root, stat, readDirs, readFiles, cb) {
+function updateDirInCache(root, stat, readDirs, readFiles) {
   dirs[root] = {files: {}, size: 0, mtime: stat ? stat.mtime.getTime() : Date.now()};
 
   const readDirObj = {}, readDirKeys = [];
   readDirs.sort((a, b) => utils.naturalSort(a.path, b.path)).forEach(d => {
     const path = normalize(utils.removeFilesPath(d.path));
-    readDirObj[path] = d.stat;
+    readDirObj[path] = d.stats;
     readDirKeys[path] = path;
   });
 
@@ -140,13 +157,12 @@ function updateDirInCache(root, stat, readDirs, readFiles, cb) {
   }).forEach(f => {
     const parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
     dirs[parentDir].files[normalize(path.basename(f.path))] = {
-      size: f.stat.size, mtime: f.stat.mtime.getTime() || 0
+      size: f.stats.size, mtime: f.stats.mtime.getTime() || 0
     };
-    dirs[parentDir].size += f.stat.size;
+    dirs[parentDir].size += f.stats.size;
   });
 
   update(root);
-  if (typeof cb === "function") cb();
 }
 
 function updateDirSizes() {
