@@ -71,17 +71,17 @@ jquery:
 	cat /tmp/jquery/dist/jquery.min.js | perl -pe 's|"3\..+?"|"3"|' > $(CURDIR)/client/jquery-custom.min.js
 	rm -rf /tmp/jquery
 
-version-patch:
-	npm version patch
+ver-patch:
+	npx ver patch
 
-version-minor:
-	npm version minor
+ver-minor:
+	npx ver minor
 
-version-major:
-	npm version major
+ver-major:
+	npx ver major
 
-patch: test build version-patch deploy docker docker-push publish
-minor: test build version-minor deploy docker docker-push publish
-major: test build version-major deploy docker docker-push publish
+patch: test build ver-patch deploy docker docker-push publish
+minor: test build ver-minor deploy docker docker-push publish
+major: test build ver-major deploy docker docker-push publish
 
 .PHONY: test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major

@@ -73,7 +73,8 @@
     "svgstore": "^2.0.3",
     "terser": "^3.8.2",
     "updates": "^4.2.1",
-    "uppie": "^1.0.10"
+    "uppie": "^1.0.10",
+    "ver": "2.0.1"
   },
   "files": [
     "client",
