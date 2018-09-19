@@ -2276,7 +2276,7 @@
     bar.find(".pause-play").off("click").on("click", function(event) {
       var icon   = $(this).children("svg");
       var player = $(this).parents(".audio-bar").find(".audio-player")[0];
-      if (icon[0].className === "play") {
+      if (icon[0].getAttribute("class") === "play") {
         icon.replaceWith($(svg("pause")));
         player.play();
       } else {
