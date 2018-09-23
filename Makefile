@@ -28,7 +28,7 @@ docker:
 	docker build --no-cache=true --squash -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
 
-	$(eval IMAGE := silverwind/arm32v6-droppy)
+	$(eval IMAGE := silverwind/armhf-droppy)
 	@echo Preparing docker image $(IMAGE)...
 	docker pull arm32v6/node:alpine
 	sed -i "s/^FROM.\+/FROM arm32v6\/node:alpine/g" Dockerfile
@@ -37,7 +37,7 @@ docker:
 	docker build --no-cache=true --squash -t $(IMAGE) .
 	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
 
-	$(eval IMAGE := silverwind/armhf-droppy)
+	$(eval IMAGE := silverwind/arm64v8-droppy)
 	@echo Preparing docker image $(IMAGE)...
 	docker pull arm64v8/node:alpine
 	sed -i "s/^FROM.\+/FROM arm64v8\/node:alpine/g" Dockerfile
