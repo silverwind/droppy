@@ -136,7 +136,6 @@
     lineWrapping: false,
     loop: true,
     autonext: false,
-    renameExistingOnUpload: false,
     sharelinkDownload: true,
   };
 
@@ -613,6 +612,21 @@
   }
 
   function upload(view, fd, files) {
+    let rename = false;
+    if (view[0].currentData && Object.keys(view[0].currentData).length) {
+      let conflict = false;
+      const existingFiles =  Object.keys(view[0].currentData);
+      files.some(function(file) {
+        if (existingFiles.includes(file)) {
+          conflict = true;
+          return true;
+        }
+      });
+      if (conflict) {
+        rename = !window.confirm("Some of the uploaded files already exist. Overwrite them?");
+      }
+    }
+
     if (!files || !files.length) return showError(view, "Unable to upload.");
     var id = view[0].uploadId += 1;
     var xhr = new XMLHttpRequest();
@@ -651,7 +665,7 @@
 
     xhr.open("POST", getRootPath() + "!/upload?vId=" + view[0].vId +
       "&to=" + encodeURIComponent(view[0].currentFolder) +
-      "&r=" + (droppy.get("renameExistingOnUpload") && "1" || "0")
+      "&rename=" + (rename ? "1" : "0")
     );
     xhr.responseType = "text";
     xhr.send(fd);
@@ -2071,7 +2085,6 @@
         {name: "indentWithTabs", label: "Editor indent type"},
         {name: "indentUnit", label: "Editor indent width"},
         {name: "lineWrapping", label: "Editor word wrap"},
-        {name: "renameExistingOnUpload", label: "When added file exists"},
         {name: "sharelinkDownload", label: "Sharelink download"},
       ];
 
@@ -2084,8 +2097,7 @@
       opts[2].values = {"Tabs": true, "Spaces": false};
       for (i = 1; i <= 8; i *= 2) opts[3].values[String(i)] = String(i);
       opts[4].values = {"Wrap": true, "No Wrap": false};
-      opts[5].values = {"Rename": true, "Replace": false};
-      opts[6].values = {"Default On": true, "Default Off": false};
+      opts[5].values = {"Default On": true, "Default Off": false};
       return Handlebars.templates.options({opts: opts});
     });
 
@@ -2631,7 +2643,7 @@
       }
     });
     value = Math.round(value);
-    if (diff <= 20) return "just now"; // acount for 20s clock skew
+    if (diff <= 3) return "just now"; // acount for 3s clock skew
     unit += (value > 1 ? "s" : "");
     return [future ? "in" : "", value, unit, !future ? "ago" : ""].join(" ").trim();
   }

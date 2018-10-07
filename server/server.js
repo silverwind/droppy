@@ -401,8 +401,7 @@ function createListener(handler, opts, callback) {
         if (err && err.message) log.debug(null, null, err.message);
         if (socket.writable) socket.destroy();
       }
-      server.on("clientError", tlsError); // Node.js < 6.0
-      server.on("tlsClientError", tlsError); // Node.js 6.0 (event renamed)
+      server.on("tlsClientError", tlsError);
 
       // TLS tickets - regenerate keys every hour, Node.js 4.0
       (function rotate() {
@@ -430,7 +429,6 @@ function setupWebSocket(server) {
 }
 
 function onWebSocketRequest(ws, req) {
-  req = req || ws.upgradeReq; // compat: ws 3.0.0
   ws.addr = ws._socket.remoteAddress;
   ws.port = ws._socket.remotePort;
   ws.headers = Object.assign({}, req.headers);
@@ -1157,9 +1155,13 @@ function handleUploadRequest(req, res) {
         if (err && err.code === "ENOENT") {
           file.pipe(fs.createWriteStream(dst, {mode: "644"}));
         } else if (!err) {
-          utils.getNewPath(dst, newDst => {
-            file.pipe(fs.createWriteStream(newDst, {mode: "644"}));
-          });
+          if (req.query.rename === "1") {
+            utils.getNewPath(dst, newDst => {
+              file.pipe(fs.createWriteStream(newDst, {mode: "644"}));
+            });
+          } else {
+            file.pipe(fs.createWriteStream(dst, {mode: "644"}));
+          }
         } else {
           log.error(req, res, err);
         }
