@@ -58,8 +58,8 @@ docker-push:
 
 update:
 	npx updates -u -g pdfjs-dist
-	rm -rf node_modules yarn.lock
-	yarn
+	rm -rf node_modules
+	npm i --no-package-lock
 	touch client/client.js
 
 deploy:
