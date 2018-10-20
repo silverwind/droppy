@@ -1881,12 +1881,12 @@
           }
         });
         view.find(".zoom-in").off("click").on("click", function(e) {
-          var level = view[0].ps.getZoomLevel() * 2;
+          var level = view[0].ps.getZoomLevel() * 1.5;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           $(e.target).parents(".pswp").addClass("pswp--zoomed-in");
         });
         view.find(".zoom-out").off("click").on("click", function() {
-          var level = view[0].ps.getZoomLevel() / 2;
+          var level = view[0].ps.getZoomLevel() / 1.5;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
         });
 
