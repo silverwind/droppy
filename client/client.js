@@ -612,10 +612,10 @@
   }
 
   function upload(view, fd, files) {
-    let rename = false;
+    var rename = false;
     if (view[0].currentData && Object.keys(view[0].currentData).length) {
-      let conflict = false;
-      const existingFiles =  Object.keys(view[0].currentData);
+      var conflict = false;
+      var existingFiles =  Object.keys(view[0].currentData);
       files.some(function(file) {
         if (existingFiles.includes(file)) {
           conflict = true;
@@ -1897,22 +1897,51 @@
   }
 
   function initPDF(container) {
+    var quality = 4; // TODO: config option
+
     loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";
       pdfjsLib.getDocument(container.data("src")).then(function(pdf) {
+        var availableWidth = container[0].parentNode.clientWidth;
+        var availableHeight = container[0].parentNode.clientHeight;
+        var maxWidth = 0;
+        var maxHeight = 0;
+
+        var promises = [];
         for (var i = 1; i <= pdf.numPages; i++) {
-          pdf.getPage(i).then(function(page) {
+          promises.push(pdf.getPage(i).then(function(page) {
+            var vp = page.getViewport(1);
+            var ratioX = availableWidth / vp.width;
+            var ratioY = availableHeight / vp.height;
+            var scale = Math.min(ratioX, ratioY);
+            var viewport = page.getViewport(scale * quality);
+            var pageWidth = viewport.width / quality;
+            var pageHeight = viewport.height / quality;
+
             var canvas = document.createElement("canvas");
-            canvas.width = container[0].clientWidth;
-            var viewport = page.getViewport(canvas.width / page.getViewport(1).width);
             canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.style.width = pageWidth + "px";
+            canvas.style.height = pageHeight + "px";
             container.append(canvas);
+
+            if (pageWidth > maxWidth) maxWidth = pageWidth;
+            if (pageHeight > maxHeight) maxHeight = pageHeight;
+
             page.render({
               canvasContext: canvas.getContext("2d"),
               viewport: viewport
             });
-          });
+          }));
         }
+
+        Promise.all(promises).then(function() {
+          container[0].style.width = maxWidth + "px";
+          container[0].style.height = maxHeight + "px";
+          container[0].parentNode.style.display = "flex";
+          container[0].parentNode.style.justifyContent = "center";
+          container[0].parentNode.style.alignItems = "center";
+        });
       });
     });
   }

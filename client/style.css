@@ -1520,3 +1520,12 @@ html:not(.mobile) #drop-select span.active {
   right: -1px;
   bottom: -1px;
 }
+
+.pdf-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-container > canvas {
+  padding: 1px;
+}
