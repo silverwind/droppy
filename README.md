@@ -22,7 +22,7 @@
 * Zip download of directories
 * Powerful text editor with themes and broad language support
 * Image and video gallery with touch support
-* Audio player with seek support
+* Audio player with seeking support
 * Fullscreen support for editor and gallery
 * Supports installing to the homescreen
 * Docker images available for x86-64, ARMv6, ARMv7 and ARMv8
@@ -33,7 +33,7 @@ Two directories will be used, one for configuration and one for the actual files
 - `config`: defaults to `~/.droppy/config`, override with `-c /some/dir`
 - `files`: default `~/.droppy/files` override with `-f /some/dir`
 
-droppy maintains a in-memory representation of the `files` directory. If you're on slow storage and/or serving 100k or more files, the initial indexing on startup will likely take some time.
+droppy maintains an in-memory representation of the `files` directory. If you're on slow storage and/or serving 100k or more files, the initial indexing on startup will likely take some time.
 
 ## Installation
 ### Local Installation :package:
@@ -49,7 +49,7 @@ To update, run
 $ sudo npm update -g --production droppy
 ```
 
-To make droppy run in the background, you can use the `--daemon` option, thought it is adviced that you install it as a persistent service in you system. For Linux, see these guides:
+To make droppy run in the background, you can use the `--daemon` option, thought it is adviced that you install it as a persistent service in your system. For Linux, see these guides:
 
 - [Systemd-based distributions](https://github.com/silverwind/droppy/wiki/Systemd-Installation)
 - [Debian (Pre-Jessie)](https://github.com/silverwind/droppy/wiki/Debian-Installation-(Pre-Jessie))
@@ -122,7 +122,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `public` *boolean* - When enabled, no user authentication is performed. Default: `false`.
 - `timestamps` *boolean* - When enabled, adds timestamps to log output. Default: `true`.
 - `linkLength` *number* - The amount of characters in a shared link. Default: `5`.
-- `linkExtensions` *boolean* - Whether shared links should include the file extension. This can used to allow other software to make a guess on the content of the file without actually retrieving it.
+- `linkExtensions` *boolean* - Whether shared links should include the file extension. This can be used to allow other software to make a guess on the content of the file without actually retrieving it.
 - `logLevel` *number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication). Default: `2`.
 - `maxFileSize` *number* - The maximum file size in bytes a user can upload in a single file.
 - `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system. Default: `1000`.
@@ -175,7 +175,7 @@ For TLS the following additional options are available. Paths can be given relat
 
 - `cert` *string* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. Required.
 - `key` *string* - Path to PEM-encoded TLS private key file. Required.
-- `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will generated on launch and saved for future use.
+- `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will be generated on launch and saved for future use.
 - `passphrase` *string* - Passphrase for the TLS private key in case it is encrypted.
 - `hsts` *number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 
