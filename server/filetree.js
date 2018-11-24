@@ -156,10 +156,10 @@ function updateDirInCache(root, stat, readDirs, readFiles) {
     return utils.naturalSort(a.path, b.path);
   }).forEach(f => {
     const parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
-    dirs[parentDir].files[normalize(path.basename(f.path))] = {
-      size: f.stats.size, mtime: f.stats.mtime.getTime() || 0
-    };
-    dirs[parentDir].size += f.stats.size;
+    const size = (f.stats && f.stats.size) ? f.stats.size : 0;
+    const mtime = (f.stats && f.stats.mtime && f.stats.getTime) ? f.stats.getTime() : 0;
+    dirs[parentDir].files[normalize(path.basename(f.path))] = {size, mtime};
+    dirs[parentDir].size += size;
   });
 
   update(root);
