@@ -983,11 +983,12 @@ function handleResourceRequest(req, res, resourceName) {
     // Headers on HTML requests
     if (/\.html$/.test(resourceName)) {
       headers["Content-Security-Policy"] = [
-        "script-src 'self' 'unsafe-inline' blob: data:",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:",
         "style-src 'self' 'unsafe-inline' blob: data:",
         "media-src 'self' blob: data:",
         "font-src 'self' blob: data:",
-        "child-src 'none'",
+        "worker-src 'self' blob: data:",
+        "frame-src 'self' blob: data:",
         "object-src 'none'",
         "form-action 'self'",
         // connect-src 'self' does not include websockets in Firefox and Safari.
