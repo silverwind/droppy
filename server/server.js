@@ -38,6 +38,7 @@ const clientsPerDir = {};
 let config = null;
 let firstRun = null;
 let ready = false;
+let dieOnError = true;
 
 module.exports = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
@@ -131,6 +132,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     if (err) return callback(err);
     ready = true;
     log.info(chalk.green("Ready for requests!"));
+    dieOnError = false;
     callback();
   });
 
@@ -1448,9 +1450,13 @@ function setupProcess(standalone) {
     process.on("SIGINT", endProcess.bind(null, "SIGINT"));
     process.on("SIGQUIT", endProcess.bind(null, "SIGQUIT"));
     process.on("SIGTERM", endProcess.bind(null, "SIGTERM"));
-    process.on("uncaughtException", error => {
-      log.error("=============== Uncaught exception! ===============");
+    process.on("unhandledRejection", error => {
       log.error(error);
+      if (dieOnError) process.exit(1);
+    });
+    process.on("uncaughtException", error => {
+      log.error(error);
+      if (dieOnError) process.exit(1);
     });
   }
 }
