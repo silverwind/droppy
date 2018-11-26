@@ -120,7 +120,6 @@ resources.files = {
     "client/client.js",
   ],
   other: [
-    "client/font.woff",
     "client/images/logo.svg",
     "client/images/logo32.png",
     "client/images/logo120.png",
