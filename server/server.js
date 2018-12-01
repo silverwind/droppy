@@ -147,8 +147,8 @@ function onRequest(req, res) {
       res.end();
       return log.info(req, res, "Invalid GET: " + req.url);
     }
-    if (req.method === "GET") {
-      handleGET(req, res);
+    if (req.method === "GET" || req.method === "HEAD") {
+      handleGETandHEAD(req, res);
     } else if (req.method === "POST") {
       handlePOST(req, res);
     } else {
@@ -763,7 +763,7 @@ function send(ws, data) {
   })(ws, data, 0);
 }
 
-function handleGET(req, res) {
+function handleGETandHEAD(req, res) {
   const URI = decodeURIComponent(req.url);
 
   if (config.public && !cookies.get(req.headers.cookie)) {
@@ -1031,7 +1031,7 @@ function handleResourceRequest(req, res, resourceName) {
     }
   }
   res.writeHead(status, headers);
-  res.end(data);
+  res.end(req.method === "GET" ? data : undefined);
   log.info(req, res);
 }
 
@@ -1334,6 +1334,12 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
   res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", download));
   res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
   res.setHeader("ETag", eTag);
+
+  if (req.method === "HEAD") {
+    res.end();
+    return;
+  }
+
   readdirp({root: zipPath, entryType: "both"}).on("data", file => {
     const pathInZip = path.join(path.basename(relPath), file.path);
     const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
@@ -1351,6 +1357,20 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
 function streamFile(req, res, filepath, download, stats, shareLink) {
   const eTag = checkETag(req, res, filepath, stats.mtime);
   if (!eTag) return;
+
+  function setHeaders(res) {
+    res.setHeader("Content-Type", utils.contentType(filepath));
+    res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
+    res.setHeader("Content-Disposition", utils.getDispo(filepath, download));
+    res.setHeader("ETag", eTag);
+  }
+
+  if (req.method === "HEAD") {
+    setHeaders(res);
+    res.end();
+    return;
+  }
+
   // send expects a url-encoded argument
   sendFile(req, encodeURIComponent(utils.removeFilesPath(filepath).substring(1)), {
     root: paths.files,
@@ -1359,10 +1379,7 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
     etag: false,
     cacheControl: false,
   }).on("headers", res => {
-    res.setHeader("Content-Type", utils.contentType(filepath));
-    res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
-    res.setHeader("Content-Disposition", utils.getDispo(filepath, download));
-    res.setHeader("ETag", eTag);
+    setHeaders(res);
   }).on("error", err => {
     log.error(err);
     if (err.status === 416) {
