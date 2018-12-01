@@ -122,7 +122,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `public` *boolean* - When enabled, no user authentication is performed. Default: `false`.
 - `timestamps` *boolean* - When enabled, adds timestamps to log output. Default: `true`.
 - `linkLength` *number* - The amount of characters in a shared link. Default: `5`.
-- `linkExtensions` *boolean* - Whether shared links should include the file extension. This can be used to allow other software to make a guess on the content of the file without actually retrieving it.
+- `linkExtensions` *boolean* - Whether shared links should include the file extension. This can be used to allow other software to make a guess on the content of the file without actually retrieving it. Default: `false`.
 - `logLevel` *number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication). Default: `2`.
 - `maxFileSize` *number* - The maximum file size in bytes a user can upload in a single file.
 - `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system. Default: `1000`.
