@@ -101,13 +101,13 @@ filetree.updateDir = async function(dir) {
   if (initial) { // sync walk for performance
     initial = false;
     try {
-      entries = rrdir.sync(fullDir, {stats: true});
+      entries = rrdir.sync(fullDir, {stats: true, exclude: cfg.ignorePatterns});
     } catch (err) {
       log.error(err);
     }
   } else {
     try {
-      entries = await rrdir(fullDir, {stats: true});
+      entries = await rrdir(fullDir, {stats: true, exclude: cfg.ignorePatterns});
     } catch (err) {
       log.error(err);
     }
