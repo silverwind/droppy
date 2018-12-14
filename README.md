@@ -124,16 +124,16 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `linkLength` *number* - The amount of characters in a shared link. Default: `5`.
 - `linkExtensions` *boolean* - Whether shared links should include the file extension. This can be used to allow other software to make a guess on the content of the file without actually retrieving it. Default: `false`.
 - `logLevel` *number* - Logging amount. `0` is no logging, `1` is errors, `2` is info (HTTP requests), `3` is debug (Websocket communication). Default: `2`.
-- `maxFileSize` *number* - The maximum file size in bytes a user can upload in a single file.
+- `maxFileSize` *number* - The maximum file size in bytes a user can upload in a single file. `0` means no limit. Default: `0`.
 - `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system. Default: `1000`.
-- `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which is likely **necessary for files on external or network-mapped drives**. This is CPU-intensive! Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. `0` disables polling. Default: `0`.
-- `keepAlive` *number* - Interval in milliseconds in which the server sends keepalive message over the websocket, which may be necessary with proxies. `0` disables keepalive messages. . Default: `20000`.
+- `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which **may necessary for files on external or network-mapped drives**. Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. This is CPU-intensive. `0` disables polling. Default: `0`.
+- `keepAlive` *number* - Interval in milliseconds in which the server sends websocket keepalive messages, which may be necessary when proxies are involved. `0` disables keepalive messages. Default: `20000`.
 - `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`. Default: `false`.
-- `readOnly` *boolean* - All served files will be treated as being read-only. Default: `false`.
+- `readOnly` *boolean* - Treat all files as being read-only. Default: `false`.
 - `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution. Default: `true`.
 - `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. Default: `false`.
-- `ignorePatterns` *Array* - Array of file name glob patterns to ignore when indexing files. Default: `[]`.
-- `watch` *boolean* - Whether to watch the local file system for changes. Can improve performance when dealing with a large number of files. If `watch` is set to `false`, file system changed not done through droppy won't be detected. Default: `true`.
+- `ignorePatterns` *Array* - Array of file path glob patterns to ignore when indexing files. See [here](https://github.com/isaacs/minimatch#features) for supported patterns. Default: `[]`.
+- `watch` *boolean* - Whether to watch the local file system for changes. Disabling this may improve performance when dealing with a large number of files, but with the downside thta changes not done via droppy won't be detected. Default: `true`.
 
 <a name="listener-options"></a>
 ### Listener Options
