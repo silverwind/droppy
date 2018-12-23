@@ -91,7 +91,7 @@ nav {
 
 .content-container {
   position: relative;
-  overflow-x: hidden;
+  overflow: auto;
   flex: 1;
   order: 2;
 }
@@ -524,6 +524,10 @@ nav {
 
 .view[data-type="directory"] .search {
   display: flex;
+}
+
+.view[data-type="directory"] .content-container {
+  background: #eee;
 }
 
 .search svg {
