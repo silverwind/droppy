@@ -2,6 +2,9 @@
 
 JQUERY_FLAGS:=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event/trigger,-wrap,-core/ready,-deferred,-exports/amd,-sizzle,-offset,-dimensions,-serialize,-queue,-callbacks,-event/support,-event/ajax,-attributes/prop,-attributes/val,-attributes/attr,-attributes/support,-manipulation/setGlobalEval,-manipulation/support,-manipulation/var/rcheckableType,-manipulation/var/rscriptType
 
+dev:
+	node droppy.js start --dev
+
 test:
 	$(MAKE) lint
 
@@ -88,4 +91,4 @@ patch: test build ver-patch docker docker-push deploy publish
 minor: test build ver-minor docker docker-push deploy publish
 major: test build ver-major docker docker-push deploy publish
 
-.PHONY: test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major
+.PHONY: dev test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major

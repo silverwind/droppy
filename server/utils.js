@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const escRe = require("escape-string-regexp");
 const ext = require("file-extension");
 const fs = require("graceful-fs");
-const isBin = require("isbinaryfile");
+const isbinaryfile = require("isbinaryfile");
 const mimeTypes = require("mime-types");
 const mkdirp = require("mkdirp");
 const mv = require("mv");
@@ -183,15 +183,20 @@ utils.isPathSane = function(p, isURL) {
   }
 };
 
-utils.isBinary = function(p, callback) {
+utils.isBinary = async function(p) {
   if (forceBinaryTypes.indexOf(ext(p)) !== -1) {
-    return callback(null, true);
+    return true;
   }
 
-  isBin(p, (err, result) => {
-    if (err) return callback(err);
-    callback(null, result);
-  });
+  return isbinaryfile.isBinaryFile(p);
+};
+
+utils.isBinarySync = function(p) {
+  if (forceBinaryTypes.indexOf(ext(p)) !== -1) {
+    return true;
+  }
+
+  return isbinaryfile.isBinaryFileSync(p);
 };
 
 // TODO async/await this in Node.js 8
@@ -204,7 +209,7 @@ utils.contentType = function(p) {
     return type + (charset ? "; charset=" + charset : "");
   } else {
     try {
-      return isBin.sync(p) ? "application/octet-stream" : "text/plain";
+      return utils.isBinarySync(p) ? "application/octet-stream" : "text/plain";
     } catch (err) {
       return "application/octet-stream";
     }

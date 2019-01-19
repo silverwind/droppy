@@ -1080,18 +1080,20 @@ function handleFileRequest(req, res, download) {
   });
 }
 
-function handleTypeRequest(req, res, file) {
-  utils.isBinary(file, (err, result) => {
-    if (err) {
-      res.statusCode = 500;
-      res.end();
-      log.error(err);
-    } else {
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.end(result ? "binary" : "text");
-    }
-  });
+async function handleTypeRequest(req, res, file) {
+  let isBinary;
+  try {
+    isBinary = await utils.isBinary(file);
+  } catch (err) {
+    res.statusCode = 500;
+    res.end();
+    log.error(err);
+    return;
+  }
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.end(isBinary ? "binary" : "text");
   log.info(req, res);
 }
 
