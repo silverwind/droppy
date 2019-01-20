@@ -537,12 +537,12 @@ function onWebSocketRequest(ws, req) {
       });
     } else if (msg.type === "DELETE_FILE") {
       log.info(ws, null, "Deleting: " + msg.data);
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
       filetree.del(msg.data);
     } else if (msg.type === "SAVE_FILE") {
       log.info(ws, null, "Saving: " + msg.data.to);
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
       filetree.save(msg.data.to, msg.data.value, err => {
         if (err) {
@@ -555,7 +555,7 @@ function onWebSocketRequest(ws, req) {
       const dst = msg.data.dst;
       const type = msg.data.type;
       log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
       if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst)) {
         return sendError(sid, vId, "Can't copy directory into itself");
@@ -571,15 +571,15 @@ function onWebSocketRequest(ws, req) {
         }
       });
     } else if (msg.type === "CREATE_FOLDER") {
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
       filetree.mkdir(msg.data);
     } else if (msg.type === "CREATE_FILE") {
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
       filetree.mk(msg.data);
     } else if (msg.type === "RENAME") {
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       const rSrc = msg.data.src;
       const rDst = msg.data.dst;
       // Disallow whitespace-only and empty strings in renames
@@ -599,7 +599,7 @@ function onWebSocketRequest(ws, req) {
       if (pass === "") {
         if (!db.get("users")[name]) return;
         if ((db.get("sessions")[cookie] || {}).username === name) {
-          return sendError(sid, null, "Cannot delete yourself!");
+          return sendError(sid, null, "Cannot delete yourself");
         }
         if (db.delUser(name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
       } else {
@@ -609,7 +609,7 @@ function onWebSocketRequest(ws, req) {
       }
       sendUsers(sid);
     } else if (msg.type === "CREATE_FILES") {
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
       async.each(msg.data.files, (file, cb) => {
         filetree.mkdir(utils.addFilesPath(path.dirname(file)), () => {
@@ -619,7 +619,7 @@ function onWebSocketRequest(ws, req) {
         if (err) log.error(ws, null, err);
       });
     } else if (msg.type === "CREATE_FOLDERS") {
-      if (config.readOnly) return sendError(sid, vId, "Files are read-only.");
+      if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
       async.each(msg.data.folders, (folder, cb) => {
         filetree.mkdir(utils.addFilesPath(folder), cb);
