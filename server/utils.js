@@ -191,14 +191,6 @@ utils.isBinary = async function(p) {
   return isbinaryfile.isBinaryFile(p);
 };
 
-utils.isBinarySync = function(p) {
-  if (forceBinaryTypes.indexOf(ext(p)) !== -1) {
-    return true;
-  }
-
-  return isbinaryfile.isBinaryFileSync(p);
-};
-
 // TODO async/await this in Node.js 8
 utils.contentType = function(p) {
   const type = mimeTypes.lookup(p);
@@ -209,7 +201,7 @@ utils.contentType = function(p) {
     return type + (charset ? "; charset=" + charset : "");
   } else {
     try {
-      return utils.isBinarySync(p) ? "application/octet-stream" : "text/plain";
+      return isbinaryfile.isBinaryFileSync(p) ? "application/octet-stream" : "text/plain";
     } catch (err) {
       return "application/octet-stream";
     }
