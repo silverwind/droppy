@@ -16,6 +16,8 @@ overrides:
       unicorn/no-hex-escape: [0]
       unicorn/prefer-exponentiation-operator: [0]
       unicorn/prefer-starts-ends-with: [0]
+      unicorn/prefer-node-append: [0]
+      unicorn/prefer-query-selector: [0]
     globals:
       CodeMirror: false
       fileExtension: false
