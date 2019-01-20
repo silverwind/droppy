@@ -44,7 +44,7 @@
     "ps-node": "^0.1.6",
     "readdirp": "^2.2.1",
     "rimraf": "^2.6.3",
-    "rrdir": "1.3.2",
+    "rrdir": "^2.0.0",
     "send": "^0.16.2",
     "strip-ansi": "^5.0.0",
     "untildify": "^3.0.3",
