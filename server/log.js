@@ -95,7 +95,12 @@ log.info = function(...args) {
 };
 
 log.error = function(...args) {
-  log(null, null, 1, chalk.red(log.formatError(args.length === 1 ? args[0] : args.join(" "))));
+  const [req, res, ...elems] = args;
+  if (req && (req.headers || req.addr)) {
+    log(req, res, 1, chalk.red(log.formatError(elems.length === 1 ? elems[0] : elems.join(" "))));
+  } else {
+    log(null, null, 1, chalk.red(log.formatError(args.length === 1 ? args[0] : args.join(" "))));
+  }
 };
 
 log.plain = function(...args) {

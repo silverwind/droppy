@@ -733,7 +733,7 @@ function sendObjAll(data) {
 
 function sendError(sid, vId, text) {
   sendObj(sid, {type: "ERROR", vId, text});
-  log.info(clients[sid].ws, null, "Sent error: " + text);
+  log.error(clients[sid].ws, null, "Sent error: " + text);
 }
 
 function redirectToRoot(req, res) {
@@ -1110,7 +1110,8 @@ function handleUploadRequest(req, res) {
   // Set huge timeout for big file uploads and/or slow connection
   res.setTimeout(24 * 60 * 60 * 1000);
 
-  req.query = qs.parse(req.url.substring("/upload?".length));
+  req.query = qs.parse(req.url.substring("/!/upload?".length));
+  const vId = req.query.vId;
 
   if (!req.query || !req.query.to) {
     res.statusCode = 500;
@@ -1126,7 +1127,7 @@ function handleUploadRequest(req, res) {
     }
   });
 
-  const dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[req.query.vId].directory;
+  const dstDir = decodeURIComponent(req.query.to) || clients[req.sid].views[vId].directory;
   let numFiles = 0;
 
   log.info(req, res, "Upload started");
@@ -1148,27 +1149,38 @@ function handleUploadRequest(req, res) {
     file.on("limit", () => {
       log.info(req, res, "Maximum file size reached, cancelling upload");
       sendError(
-        req.sid, req.query.vId,
+        req.sid, vId,
         "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded."
       );
       closeConnection();
     });
 
+    const onWriteError = err => {
+      log.error(req, res, err);
+      sendError(req.sid, vId, `Error writing the file: ${err.message}`);
+    };
+
     const dst = path.join(paths.files, dstDir, filePath);
     utils.mkdir(path.dirname(dst), () => {
       fs.stat(dst, err => {
         if (err && err.code === "ENOENT") {
-          file.pipe(fs.createWriteStream(dst, {mode: "644"}));
+          const ws = fs.createWriteStream(dst, {mode: "644"});
+          ws.on("error", onWriteError);
+          file.pipe(ws);
         } else if (!err) {
           if (req.query.rename === "1") {
             utils.getNewPath(dst, newDst => {
-              file.pipe(fs.createWriteStream(newDst, {mode: "644"}));
+              const ws = fs.createWriteStream(newDst, {mode: "644"});
+              ws.on("error", onWriteError);
+              file.pipe(ws);
             });
           } else {
-            file.pipe(fs.createWriteStream(dst, {mode: "644"}));
+            const ws = fs.createWriteStream(dst, {mode: "644"});
+            ws.on("error", onWriteError);
+            file.pipe(ws);
           }
         } else {
-          log.error(req, res, err);
+          onWriteError(err);
         }
       });
     });
