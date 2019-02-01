@@ -133,7 +133,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution. Default: `true`.
 - `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. Default: `false`.
 - `ignorePatterns` *Array* - Array of file path glob patterns to ignore when indexing files. See [here](https://github.com/isaacs/minimatch#features) for supported patterns. Default: `[]`.
-- `watch` *boolean* - Whether to watch the local file system for changes. Disabling this may improve performance when dealing with a large number of files, but with the downside thta changes not done via droppy won't be detected. Default: `true`.
+- `watch` *boolean* - Whether to watch the local file system for changes. Disabling this may improve performance when dealing with a large number of files, but with the downside that changes not done via droppy won't be detected. Default: `true`.
 
 <a name="listener-options"></a>
 ### Listener Options
