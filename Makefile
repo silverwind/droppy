@@ -60,7 +60,7 @@ docker-push:
 	docker push silverwind/arm64v8-droppy:latest
 
 update:
-	npx updates -u -g pdfjs-dist
+	npx updates -u
 	rm -rf node_modules
 	npm i --no-package-lock
 	touch client/client.js
