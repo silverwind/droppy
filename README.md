@@ -187,6 +187,13 @@ droppy can be used with express, see the [express example](./examples/express.js
 
 Returns a object `{onRequest, setupWebSocket}`.
 
+### Working with other websocket servers
+
+To use droppy in a server that uses other websocket applications on the same
+port you can pass `false` to `setupWebSocket` instead of a server object. The
+function will return a websocket server object that you can use like normal in
+your application. See [documentation for the ws npm package](https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server) for more information.
+
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:
 ````sh
