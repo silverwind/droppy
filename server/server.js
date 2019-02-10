@@ -5,7 +5,7 @@ const os = require("os");
 const path = require("path");
 const qs = require("querystring");
 
-const _ = require("lodash");
+const throttle = require("lodash.throttle");
 const async = require("async");
 const Busboy = require("busboy");
 const chalk = require("chalk");
@@ -1237,7 +1237,7 @@ function updateClientLocation(dir, sid, vId) {
   if (!clientsPerDir[dir]) clientsPerDir[dir] = [];
   clientsPerDir[dir].push({
     sid, vId,
-    update: _.throttle(function() {
+    update: throttle(function() {
       sendFiles(this.sid, this.vId);
     }, config.updateInterval, {leading: true, trailing: true})
   });
