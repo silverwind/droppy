@@ -22,11 +22,6 @@ RUN cd /droppy && \
     /droppy/node_modules/babel-polyfill \
     /droppy/node_modules/babel-runtime \
     /droppy/node_modules/core-js \
-    /droppy/node_modules/loadjs \
-    /droppy/node_modules/lodash/*.min.js \
-    /droppy/node_modules/lodash/_* \
-    /droppy/node_modules/lodash/core.js  \
-    /droppy/node_modules/lodash/fp \
     /droppy/node_modules/moment/min \
     /droppy/node_modules/plyr/dist/*.map \
     /droppy/node_modules/plyr/src \
