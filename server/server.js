@@ -416,31 +416,23 @@ function createListener(handler, opts, callback) {
   }
 }
 
+const verifyClient = (info, cb) => {
+  if (validateRequest(info.req)) return cb(true);
+  log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
+  cb(false, 401, "Unauthorized");
+};
+
 // WebSocket functions
 function setupWebSocket(server) {
-  var wss
+  let wss;
   if (server !== false) {
-    wss = new Wss({
-      server,
-      verifyClient: (info, cb) => {
-        if (validateRequest(info.req)) return cb(true);
-        log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
-        cb(false, 401, "Unauthorized");
-      }
-    });
+    wss = new Wss({server, verifyClient});
   } else {
-    wss = new Wss({
-      noServer: true,
-      verifyClient: (info, cb) => {
-        if (validateRequest(info.req)) return cb(true);
-        log.info(info.req, {statusCode: 401}, "Unauthorized WebSocket connection rejected.");
-        cb(false, 401, "Unauthorized");
-      }
-    });
+    wss = new Wss({noServer: true, verifyClient});
   }
   wss.on("connection", onWebSocketRequest);
   wss.on("error", log.error);
-  return wss
+  return wss;
 }
 
 function onWebSocketRequest(ws, req) {

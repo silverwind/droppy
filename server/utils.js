@@ -217,34 +217,28 @@ utils.createSid = function() {
 };
 
 utils.readJsonBody = function(req) {
-  if (req.body) {
-    // This is needed if the express application is using body-parser
-    return new Promise(((resolve, reject) => {
-      try {
-        if (typeof req.body === 'object') {
+  return new Promise(((resolve, reject) => {
+    try {
+      if (req.body) {
+        // This is needed if the express application is using body-parser
+        if (typeof req.body === "object") {
           resolve(req.body);
         } else {
-          resolve(JSON.parse(req.body))
+          resolve(JSON.parse(req.body));
         }
-      } catch (err) {
-        reject(err);
-      }
-    }));
-  } else {
-    return new Promise(((resolve, reject) => {
-      let body = [];
-      req.on("data", chunk => {
-        body.push(chunk);
-      }).on("end", () => {
-        body = String(Buffer.concat(body));
-        try {
+      } else {
+        let body = [];
+        req.on("data", chunk => {
+          body.push(chunk);
+        }).on("end", () => {
+          body = String(Buffer.concat(body));
           resolve(JSON.parse(body));
-        } catch (err) {
-          reject(err);
-        }
-      });
-    }));
-  }
+        });
+      }
+    } catch (err) {
+      reject(err);
+    }
+  }));
 };
 
 utils.countOccurences = function(string, search) {
