@@ -1022,8 +1022,8 @@
     const sortings = droppy.get("sortings");
     const savedSorting = sortings[view[0].currentFolder];
 
-    if (!view[0].sortBy) view[0].sortBy = savedSorting ? savedSorting.sortBy : "name";
-    if (!view[0].sortAsc) view[0].sortAsc = savedSorting ? savedSorting.sortAsc : false;
+    view[0].sortBy = savedSorting ? savedSorting.sortBy : "name";
+    view[0].sortAsc = savedSorting ? savedSorting.sortAsc : false;
 
     var sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
 
