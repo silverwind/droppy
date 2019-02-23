@@ -137,6 +137,7 @@
     loop: true,
     autonext: false,
     sharelinkDownload: true,
+    sortings: {},
   };
 
   function savePrefs(prefs) {
@@ -165,15 +166,18 @@
   });
   if (doSave) savePrefs(prefs);
 
-  // Get a variable from localStorage
   droppy.get = function(pref) {
     prefs = loadPrefs();
     return prefs[pref];
   };
 
-  // Save a variable to localStorage
   droppy.set = function(pref, value) {
     prefs[pref] = value;
+    savePrefs(prefs);
+  };
+
+  droppy.del = function(pref) {
+    delete prefs[pref];
     savePrefs(prefs);
   };
   // ============================================================================
@@ -1015,8 +1019,12 @@
     clearSearch(view);
 
     // sorting
-    if (!view[0].sortBy) view[0].sortBy = "name";
-    if (!view[0].sortAsc) view[0].sortAsc = false;
+    const sortings = droppy.get("sortings");
+    const savedSorting = sortings[view[0].currentFolder];
+
+    if (!view[0].sortBy) view[0].sortBy = savedSorting ? savedSorting.sortBy : "name";
+    if (!view[0].sortAsc) view[0].sortAsc = savedSorting ? savedSorting.sortAsc : false;
+
     var sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
 
     entries = sortArrayByProp(entries, sortBy);
@@ -1601,6 +1609,11 @@
       entry.style.order = i;
       entry.setAttribute("order", i);
     });
+
+    // save sorting to localStorage
+    const sortings = droppy.get("sortings");
+    sortings[view[0].currentFolder] = {sortBy: view[0].sortBy, sortAsc: view[0].sortAsc};
+    droppy.set("sortings", sortings);
   }
 
   function closeDoc(view) {
