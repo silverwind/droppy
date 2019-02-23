@@ -1910,7 +1910,7 @@
   }
 
   function initPDF(container) {
-    var quality = 4; // TODO: config option
+    var quality = 8; // TODO: config option
 
     loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";

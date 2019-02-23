@@ -723,6 +723,11 @@ html:not(.mobile) #entry-menu a.active {
 .pswp__button--arrow--left:hover svg  { height: 2.5em; width: 2.5em; left:  -.5em; color: #fff; stroke: #000 }
 .pswp__button--arrow--right:hover svg { height: 2.5em; width: 2.5em; right: -.5em; color: #fff; stroke: #000 }
 
+.pswp__item {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
 /* ================================= Video ================================= */
 
 .plyr__video-wrapper {
