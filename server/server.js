@@ -9,12 +9,12 @@ const throttle = require("lodash.throttle");
 const async = require("async");
 const Busboy = require("busboy");
 const chalk = require("chalk");
+const cron = require("node-cron");
 const escRe = require("escape-string-regexp");
 const etag = require("etag");
 const fs = require("graceful-fs");
 const imgSize = require("image-size");
 const readdirp = require("readdirp");
-const schedule = require("node-schedule");
 const sendFile = require("send");
 const ut = require("untildify");
 const Wss = require("ws").Server;
@@ -1469,7 +1469,7 @@ function tlsSetup(opts, cb) {
 }
 
 // Hourly tasks
-schedule.scheduleJob("* 0 * * *", () => {
+cron.schedule("* 0 * * *", () => {
   if (!ready) return;
   // Clean inactive sessions after 1 month of inactivity
   const sessions = db.get("sessions");
