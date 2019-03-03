@@ -7,7 +7,6 @@ const chalk = require("chalk");
 const fs = require("graceful-fs");
 const path = require("path");
 const fetch = require("make-fetch-happen");
-const cron = require("node-cron");
 
 const log = require("./log.js");
 const paths = require("./paths.js").get();
@@ -17,7 +16,7 @@ demo.init = function(cb) {
   process.title = "droppy-demo";
   log.info("Initializing demo mode ...");
   demo.refresh(() => {
-    cron.schedule("*/10 * * * *", demo.refresh);
+    setInterval(demo.refresh, 600 * 1000);
     if (cb) cb();
   });
 };

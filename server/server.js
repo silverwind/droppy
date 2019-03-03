@@ -9,7 +9,6 @@ const throttle = require("lodash.throttle");
 const async = require("async");
 const Busboy = require("busboy");
 const chalk = require("chalk");
-const cron = require("node-cron");
 const escRe = require("escape-string-regexp");
 const etag = require("etag");
 const fs = require("graceful-fs");
@@ -1468,8 +1467,8 @@ function tlsSetup(opts, cb) {
   });
 }
 
-// Hourly tasks
-cron.schedule("* 0 * * *", () => {
+// Hourly session cleanup
+setTimeout(setInterval(() => {
   if (!ready) return;
   // Clean inactive sessions after 1 month of inactivity
   const sessions = db.get("sessions");
@@ -1479,7 +1478,7 @@ cron.schedule("* 0 * * *", () => {
     }
   });
   db.set("sessions", sessions);
-});
+}, 3600 * 1000), 60 * 1000);
 
 // Process startup
 function setupProcess(standalone) {
