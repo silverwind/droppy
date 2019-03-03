@@ -840,6 +840,7 @@ video {
 .sidebar > li:hover span    { color: #fff; opacity: 1 }
 .sidebar > .exit:hover svg  {  fill: #d44 }
 .sidebar > .save:hover svg  {  fill: #5c5 }
+.sidebar > .dl:hover svg    {  fill: #71f }
 .sidebar > .ww:hover svg    {  fill: #18f }
 .sidebar > .syntax:hover svg, .sidebar > .syntax.in svg { fill: #f82 }
 .sidebar > .syntax.in span  { color: #fff; opacity: 1 }

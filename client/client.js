@@ -1567,6 +1567,21 @@
     }
   }
 
+  function saveFile(text, filename) {
+    const blob = new Blob([text]);
+    if (navigator.msSaveOrOpenBlob) { // compat: IE11
+      navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+      const a = document.createElement("a");
+      a.setAttribute("href", URL.createObjectURL(blob, {type: "text/plain"}));
+      a.setAttribute("download", filename);
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 0);
+    }
+  }
+
   function clearSearch(view) {
     if (!view.find(".search-input").is(":focus")) {
       view.find(".search").removeClass("toggled-on").addClass("toggled-off");
@@ -2063,6 +2078,9 @@
         });
         view.find(".save").off("click").on("click", function() {
           save($(this).parents(".view")[0].editor);
+        });
+        view.find(".dl").off("click").on("click", function() {
+          saveFile(editor.getValue(), view[0].currentFile);
         });
         view.find(".ww").off("click").on("click", function() {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
