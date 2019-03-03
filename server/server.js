@@ -1467,8 +1467,7 @@ function tlsSetup(opts, cb) {
   });
 }
 
-// Hourly session cleanup
-setTimeout(setInterval(() => {
+function cleanupSessions() {
   if (!ready) return;
   // Clean inactive sessions after 1 month of inactivity
   const sessions = db.get("sessions");
@@ -1478,7 +1477,9 @@ setTimeout(setInterval(() => {
     }
   });
   db.set("sessions", sessions);
-}, 3600 * 1000), 60 * 1000);
+}
+
+setTimeout(() => setInterval(cleanupSessions, 3600 * 1000), 60 * 1000);
 
 // Process startup
 function setupProcess(standalone) {
