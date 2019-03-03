@@ -1,7 +1,7 @@
 (function($) {
   "use strict";
 
-  var droppy = Object.create(null);
+  const droppy = Object.create(null);
 
   /* {{ templates }} */
 
@@ -11,21 +11,21 @@
   // ============================================================================
   droppy.detects = {
     directoryUpload: (function() {
-      var el = document.createElement("input");
-      return droppy.dir.some(function(prop) {
+      const el = document.createElement("input");
+      return droppy.dir.some((prop) => {
         return prop in el;
       });
     })(),
     audioTypes: (function() {
-      var types = {}, el = document.createElement("audio");
-      Object.keys(droppy.audioTypes).forEach(function(type) {
+      const types = {}, el = document.createElement("audio");
+      Object.keys(droppy.audioTypes).forEach((type) => {
         types[droppy.audioTypes[type]] = Boolean(el.canPlayType(droppy.audioTypes[type]).replace(/no/, ""));
       });
       return types;
     })(),
     videoTypes: (function() {
-      var types = {}, el = document.createElement("video");
-      Object.keys(droppy.videoTypes).forEach(function(type) {
+      const types = {}, el = document.createElement("video");
+      Object.keys(droppy.videoTypes).forEach((type) => {
         types[droppy.videoTypes[type]] = Boolean(el.canPlayType(droppy.videoTypes[type]).replace(/no/, ""));
       });
       return types;
@@ -57,7 +57,8 @@
   // transitionend helper, makes sure the callback gets fired regardless if the transition gets cancelled
   $.fn.transitionend = function(callback) {
     if (!this.length) return;
-    var duration, called = false, el = this[0];
+    let duration, called = false;
+    const el = this[0];
 
     function doCallback(event) {
       if (called) return;
@@ -68,7 +69,7 @@
     duration = getComputedStyle(el).transitionDuration;
     duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
-    setTimeout(function() { // Call back if "transitionend" hasn't fired in duration + 30
+    setTimeout(() => { // Call back if "transitionend" hasn't fired in duration + 30
       doCallback({target: el}); // Just mimic the event.target property on our fake event
     }, duration + 30);
 
@@ -77,11 +78,11 @@
 
   // Class swapping helper
   $.fn.replaceClass = function(search, replacement) {
-    var el, classes, matches, i = this.length, hasClass = false;
+    let el, classes, matches, i = this.length, hasClass = false;
     while (--i >= 0) {
       el = this[i];
       if (el === undefined) return false;
-      classes = el.className.split(" ").filter(function(className) {
+      classes = el.className.split(" ").filter((className) => {
         if (className === search) return false;
         if (className === replacement) hasClass = true;
 
@@ -109,12 +110,12 @@
 
   function svg(which) {
     // Manually clone instead of <use> because of a weird bug with media arrows in Firefox
-    var svg = document.getElementById("i-" + which).cloneNode(true);
+    const svg = document.getElementById("i-" + which).cloneNode(true);
     svg.setAttribute("class", svg.id.replace("i-", ""));
     svg.removeAttribute("id");
 
     // Edge doesn't support outerHTML on SVG
-    var html = svg.outerHTML || document.createElement("div").appendChild(svg).parentNode.innerHTML;
+    const html = svg.outerHTML || document.createElement("div").appendChild(svg).parentNode.innerHTML;
     return html.replace(/(?!<\/)?symbol/g, "svg");
   }
   Handlebars.registerHelper("svg", svg);
@@ -127,7 +128,8 @@
   // ============================================================================
   //  localStorage wrapper functions
   // ============================================================================
-  var prefs, doSave, defaults = {
+  let prefs, doSave;
+  const defaults = {
     volume: .5,
     theme: "droppy",
     editorFontSize: droppy.detects.mobile ? 12 : 16,
@@ -148,7 +150,7 @@
     }
   }
   function loadPrefs() {
-    var prefs;
+    let prefs;
     try {
       prefs = JSON.parse(localStorage.getItem("prefs"));
     } catch (err) {}
@@ -158,7 +160,7 @@
 
   // Load prefs and set missing ones to their default
   prefs = loadPrefs();
-  Object.keys(defaults).forEach(function(pref) {
+  Object.keys(defaults).forEach((pref) => {
     if (prefs[pref] === undefined) {
       doSave = true;
       prefs[pref] = defaults[pref];
@@ -183,7 +185,7 @@
   // ============================================================================
   //  Entry point
   // ============================================================================
-  var type = document.body.dataset.type;
+  const type = document.body.dataset.type;
   if (type === "m") {
     render("main");
     initMainPage();
@@ -205,7 +207,7 @@
   }
 
   function getOtherViews(id) {
-    return $(droppy.views.filter(function(_, i) { return i !== id; }));
+    return $(droppy.views.filter((_, i) => { return i !== id; }));
   }
 
   function getActiveView() {
@@ -213,12 +215,12 @@
   }
 
   function newView(dest, vId) {
-    var view = $(Handlebars.templates.view());
+    const view = $(Handlebars.templates.view());
     getView(vId).remove();
     droppy.views[vId] = view[0];
 
     if (droppy.views.length > 1) {
-      droppy.views.forEach(function(view) {
+      droppy.views.forEach((view) => {
         $(view).addClass(view.vId === 0 ? "left" : "right");
         $(view).find(".newview svg").replaceWith(svg("window-cross"));
         $(view).find(".newview")[0].setAttribute("aria-label", "Close this view");
@@ -236,7 +238,7 @@
     allowDrop(view);
     checkClipboard();
 
-    droppy.views.forEach(function(view) {
+    droppy.views.forEach((view) => {
       checkPathOverflow($(view));
       if (view.ps) view.ps.updateSize(true);
     });
@@ -246,8 +248,8 @@
 
   function destroyView(vId) {
     getView(vId).remove();
-    droppy.views = droppy.views.filter(function(_, i) { return i !== vId; });
-    droppy.views.forEach(function(view) {
+    droppy.views = droppy.views.filter((_, i) => { return i !== vId; });
+    droppy.views.forEach((view) => {
       $(view).removeClass("left right");
       $(view).find(".newview svg").replaceWith(svg("window"));
       $(view).find(".newview")[0].setAttribute("aria-label", "Create new view");
@@ -267,8 +269,8 @@
       sendMessage();
     } else {
       // Create new view with initializing
-      getLocationsFromHash().forEach(function(string, index) {
-        var dest = join(decodeURIComponent(string));
+      getLocationsFromHash().forEach((string, index) => {
+        const dest = join(decodeURIComponent(string));
         newView(dest, index);
       });
     }
@@ -279,20 +281,20 @@
       location.origin.replace(/^http/, "ws") + location.pathname + "!/socket"
     );
 
-    droppy.socket.addEventListener("open", function(_event) {
+    droppy.socket.addEventListener("open", (_event) => {
       if (droppy.token) {
         init();
       } else {
-        ajax({url: "!/token", headers: {"x-app": "droppy"}}).then(function(res) {
+        ajax({url: "!/token", headers: {"x-app": "droppy"}}).then((res) => {
           return res.text();
-        }).then(function(text) {
+        }).then((text) => {
           droppy.token = text;
           init();
         });
       }
     });
     // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Close_codes
-    droppy.socket.addEventListener("close", function(event) {
+    droppy.socket.addEventListener("close", (event) => {
       if (event.code === 4000) return;
       if (event.code === 1011) {
         droppy.token = null;
@@ -301,7 +303,7 @@
         if (droppy.wsRetries > 0) {
           // Gracefully reconnect on abnormal closure of the socket, 1 retry every 4 seconds, 20 seconds total.
           // TODO: Indicate connection drop in the UI, especially on close code 1006
-          setTimeout(function() {
+          setTimeout(() => {
             openSocket();
             droppy.wsRetries--;
           }, droppy.wsRetryTimeout);
@@ -311,10 +313,14 @@
         openSocket();
       }
     });
-    droppy.socket.addEventListener("message", function(event) {
-      var msg = JSON.parse(event.data), vId = msg.vId, view = getView(vId);
+    droppy.socket.addEventListener("message", (event) => {
+      const msg = JSON.parse(event.data);
+      const vId = msg.vId;
+      const view = getView(vId);
+
       droppy.socketWait = false;
-      msg = JSON.parse(event.data);
+      let file;
+
       switch (msg.type) {
       case "UPDATE_DIRECTORY":
         if (typeof view[0].dataset.type === "undefined" || view[0].switchRequest) {
@@ -359,14 +365,13 @@
         break;
       case "SAVE_STATUS":
         hideSpinner(view);
-        var file = view.find(".path li:last-child");
         file.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
-        setTimeout(function() {
+        setTimeout(() => {
           file.removeClass("saved save-failed");
         }, 3000);
         break;
       case "SETTINGS":
-        Object.keys(msg.settings).forEach(function(setting) {
+        Object.keys(msg.settings).forEach((setting) => {
           droppy[setting] = msg.settings[setting];
         });
 
@@ -410,23 +415,23 @@
     });
   }
   function sendMessage(vId, type, data) {
-    var sendObject = {vId: vId, type: type, data: data, token: droppy.token};
+    const sendObject = {vId, type, data, token: droppy.token};
     if (typeof sendObject.data === "string") {
       sendObject.data = normalize(sendObject.data);
     } else if (typeof sendObject.data === "object") {
-      Object.keys(sendObject.data).forEach(function(key) {
+      Object.keys(sendObject.data).forEach((key) => {
         if (typeof sendObject.data[key] === "string") {
           sendObject.data[key] = normalize(sendObject.data[key]);
         }
       });
     }
-    var json = JSON.stringify(sendObject);
+    const json = JSON.stringify(sendObject);
 
     if (droppy.socket.readyState === 1) { // open
       // Lock the UI while we wait for a socket response
       droppy.socketWait = true;
       // Unlock the UI in case we get no socket resonse after waiting for 1 second
-      setTimeout(function() {
+      setTimeout(() => {
         droppy.socketWait = false;
       }, 1000);
       if (droppy.queuedData) {
@@ -454,7 +459,7 @@
     $("#remember").off("click").on("click", function() {
       $(this).toggleClass("checked");
     });
-    $("#form").off("submit").on("submit", function(e) {
+    $("#form").off("submit").on("submit", (e) => {
       e.preventDefault();
       ajax({
         method: "POST",
@@ -465,16 +470,16 @@
           remember: $("#remember").hasClass("checked"),
           path: getRootPath(),
         }
-      }).then(function(res) {
+      }).then((res) => {
         if (res.status === 200) {
           render("main");
           initMainPage();
         } else {
-          var info = $("#login-info-box");
+          const info = $("#login-info-box");
           info.textContent = firstrun ? "Please fill both fields." : "Wrong login!";
           if (info.hasClass("error")) {
             info.addClass("shake");
-            setTimeout(function() {
+            setTimeout(() => {
               info.removeClass("shake");
             }, 500);
           } else info[0].className = "error";
@@ -492,81 +497,81 @@
     openSocket();
 
     // Re-fit path line after 25ms of no resizing
-    $(window).off("resize").on("resize", function() {
+    $(window).off("resize").on("resize", () => {
       clearTimeout(droppy.resizeTimer);
-      droppy.resizeTimer = setTimeout(function() {
+      droppy.resizeTimer = setTimeout(() => {
         $(".view").each(function() {
           checkPathOverflow($(this));
         });
       }, 25);
     });
 
-    Mousetrap.bind("escape", function() { // escape hides modals
+    Mousetrap.bind("escape", () => { // escape hides modals
       toggleCatcher(false);
-    }).bind("mod+s", function(e) { // stop default browser save behaviour
+    }).bind("mod+s", (e) => { // stop default browser save behaviour
       e.preventDefault();
-    }).bind(["space", "down", "right", "return"], function() {
-      var view = getActiveView();
+    }).bind(["space", "down", "right", "return"], () => {
+      const view = getActiveView();
       if (view[0].dataset.type === "media") view[0].ps.next();
-    }).bind(["shift+space", "up", "left", "backspace"], function() {
-      var view = getActiveView();
+    }).bind(["shift+space", "up", "left", "backspace"], () => {
+      const view = getActiveView();
       if (view[0].dataset.type === "media") view[0].ps.prev();
-    }).bind(["alt+enter", "f"], function() {
-      var view = getActiveView();
+    }).bind(["alt+enter", "f"], () => {
+      const view = getActiveView();
       if (!view || view[0].dataset.type !== "media") return;
       screenfull.toggle(view.find(".content")[0]);
     });
 
     // track active view
-    $(window).on("click dblclick contextmenu", function(e) {
-      var view = $(e.target).parents(".view");
+    $(window).on("click dblclick contextmenu", (e) => {
+      const view = $(e.target).parents(".view");
       if (!view.length) return;
       droppy.activeView = view[0].vId;
       toggleButtons(view, view[0].dataset.type);
     });
 
     // handle pasting text and images in directory view
-    window.addEventListener("paste", function(e) {
-      var view = getActiveView();
+    window.addEventListener("paste", (e) => {
+      const view = getActiveView();
       if (view[0].dataset.type !== "directory") return;
-      var cd = e.clipboardData;
+      const cd = e.clipboardData;
       if (cd.items) { // modern browsers
-        arr(cd.items).forEach(function(item) {
-          var texts = [];
-          var images = [];
+        arr(cd.items).forEach((item) => {
+          const texts = [];
+          const images = [];
           if (item.kind === "string") {
-            item.getAsString(function(text) {
+            item.getAsString((text) => {
               texts.push(new Blob([text], {type: "text/plain"}));
             });
-          } else if (item.kind === "file" && /^image/.test(item.type)) {
+          } else if (item.kind === "file" && item.type.startsWith("image")) {
             images.push(item.getAsFile());
           }
           // if a image is found, don't upload additional text blobs
           if (images.length) {
-            images.forEach(function(image) {
+            images.forEach((image) => {
               uploadBlob(view, image);
             });
           } else {
-            texts.forEach(function(text) {
+            texts.forEach((text) => {
               uploadBlob(view, text);
             });
           }
         });
       } else { // Safari specific
         if (cd.types.indexOf("text/plain") !== -1) {
-          var blob = new Blob([cd.getData("Text")], {type: "text/plain"});
+          const blob = new Blob([cd.getData("Text")], {type: "text/plain"});
           uploadBlob(view, blob);
           $(".ce").empty();
           if (droppy.savedFocus) droppy.savedFocus.focus();
         } else {
-          var start = performance.now();
+          const start = performance.now();
           (function findImages() {
-            var images = $(".ce img");
+            const images = $(".ce img");
             if (!images.length && performance.now() - start < 5000) {
               return setTimeout(findImages, 25);
             }
             images.each(function() {
-              urlToPngBlob(this.src, function(blob) {
+              urlToPngBlob(this.src, (blob) => {
                 uploadBlob(view, blob);
                 $(".ce").empty();
                 if (droppy.savedFocus) droppy.savedFocus.focus();
@@ -580,7 +585,7 @@
     // Hacks for Safari to be able to paste
     if (droppy.detects.safari) {
       $("body").append('<div class="ce" contenteditable>');
-      window.addEventListener("keydown", function(e) {
+      window.addEventListener("keydown", (e) => {
         if (e.metaKey && e.which === 86 /* V */) {
           if (e.target.nodeName.toLowerCase() !== "input") {
             droppy.savedFocus = document.activeElement;
@@ -590,7 +595,7 @@
       });
     }
 
-    screenfull.on("change", function() {
+    screenfull.on("change", () => {
       // unfocus the fullscreen button so the space key won't un-toggle fullscreen
       document.activeElement.blur();
       $("svg.fullscreen, svg.unfullscreen").replaceWith(
@@ -604,9 +609,9 @@
   //  Upload functions
   // ============================================================================
   function uploadBlob(view, blob) {
-    var fd = new FormData();
-    var name = "Pasted ";
-    if (/^image/.test(blob.type)) {
+    const fd = new FormData();
+    let name = "Pasted ";
+    if (blob.type.startsWith("image")) {
       name += "Image " + dateFilename() + "." + imgExtFromMime(blob.type);
     } else {
       name += "Text " + dateFilename() + ".txt";
@@ -616,11 +621,11 @@
   }
 
   function upload(view, fd, files) {
-    var rename = false;
+    let rename = false;
     if (view[0].currentData && Object.keys(view[0].currentData).length) {
-      var conflict = false;
-      var existingFiles =  Object.keys(view[0].currentData);
-      files.some(function(file) {
+      let conflict = false;
+      const existingFiles =  Object.keys(view[0].currentData);
+      files.some((file) => {
         if (existingFiles.includes(file)) {
           conflict = true;
           return true;
@@ -632,27 +637,27 @@
     }
 
     if (!files || !files.length) return showError(view, "Unable to upload.");
-    var id = view[0].uploadId += 1;
-    var xhr = new XMLHttpRequest();
+    const id = view[0].uploadId += 1;
+    const xhr = new XMLHttpRequest();
 
     // Render upload bar
     $(Handlebars.templates["upload-info"]({
-      id: id,
+      id,
       title: files.length === 1 ? basename(files[0]) : files.length + " files",
-    })).appendTo(view).transition("in").find(".upload-cancel").off("click").on("click", function() {
+    })).appendTo(view).transition("in").find(".upload-cancel").off("click").on("click", () => {
       xhr.abort();
       uploadCancel(view, id);
     });
 
     // Create the XHR2 and bind the progress events
-    xhr.upload.addEventListener("progress", throttle(function(e) {
+    xhr.upload.addEventListener("progress", throttle((e) => {
       if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     }, 100));
-    xhr.upload.addEventListener("error", function() {
+    xhr.upload.addEventListener("error", () => {
       showError(view, "An error occurred during upload.");
       uploadCancel(view, id);
     });
-    xhr.addEventListener("readystatechange", function() {
+    xhr.addEventListener("readystatechange", () => {
       if (xhr.readyState !== 4) return;
       if (xhr.status === 200) {
         uploadSuccess(id);
@@ -676,7 +681,7 @@
   }
 
   function uploadSuccess(id) {
-    var info = $('.upload-info[data-id="' + id + '"]');
+    const info = $('.upload-info[data-id="' + id + '"]');
     info.find(".upload-bar")[0].style.width = "100%";
     info.find(".upload-percentage")[0].textContent = "100%";
     info.find(".upload-title")[0].textContent = "Processing ...";
@@ -698,14 +703,12 @@
 
   function uploadProgress(view, id, sent, total) {
     if (!view[0].isUploading) return;
-    var info = $('.upload-info[data-id="' + id + '"]');
-    var progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
-    var now = performance.now();
-    var speed = sent / ((now - view[0].uploadStart) / 1e3);
-    var elapsed, secs;
-
-    elapsed = now - view[0].uploadStart;
-    secs = ((total / (sent / elapsed)) - elapsed) / 1000;
+    const info = $('.upload-info[data-id="' + id + '"]');
+    const progress = (Math.round((sent / total) * 1000) / 10).toFixed(0) + "%";
+    const now = performance.now();
+    const speed = sent / ((now - view[0].uploadStart) / 1e3);
+    const elapsed = now - view[0].uploadStart;
+    const secs = ((total / (sent / elapsed)) - elapsed) / 1000;
 
     if (Number(view.find(".upload-info")[0].dataset.id) === id) setTitle(progress);
     info.find(".upload-bar")[0].style.width = progress;
@@ -721,34 +724,34 @@
   // ============================================================================
   function entryRename(view, entry, wasEmpty, callback) {
     // Populate active files list
-    var activeFiles = []; // TODO: Update when files change
+    const activeFiles = []; // TODO: Update when files change
     entry.siblings(".data-row").each(function() { // exclude existing entry for case-only rename
       $(this).removeClass("editing invalid");
-      var name = droppy.caseSensitive ? this.dataset.name : this.dataset.name.toLowerCase();
+      const name = droppy.caseSensitive ? this.dataset.name : this.dataset.name.toLowerCase();
       if (name) activeFiles.push(name);
     });
 
     // Hide menu, overlay and the original link, stop any previous edits
     toggleCatcher(false);
-    var link = entry.find(".entry-link");
-    var linkText = link[0].textContent;
-    var canSubmit = validFilename(linkText, droppy.platform);
+    const link = entry.find(".entry-link");
+    const linkText = link[0].textContent;
+    let canSubmit = validFilename(linkText, droppy.platform);
     entry.addClass("editing");
 
     // Add inline element
-    var renamer = $('<input type="text" class="inline-namer" value="' + linkText +
+    const renamer = $('<input type="text" class="inline-namer" value="' + linkText +
                     '" placeholder="' + linkText + '">').insertAfter(link);
     renamer.off("input").on("input", function() {
-      var input = this.value;
-      var valid = validFilename(input, droppy.platform);
-      var exists = activeFiles.some(function(file) {
+      const input = this.value;
+      const valid = validFilename(input, droppy.platform);
+      const exists = activeFiles.some((file) => {
         return file === (droppy.caseSensitive ? input : input.toLowerCase());
       });
       canSubmit = valid && !exists;
       entry[canSubmit ? "removeClass" : "addClass"]("invalid");
     }).off("blur focusout").on("blur focusout", submitEdit.bind(null, view, true, callback));
 
-    var nameLength = linkText.lastIndexOf(".");
+    const nameLength = linkText.lastIndexOf(".");
     renamer[0].setSelectionRange(0, nameLength > -1 ? nameLength : linkText.length);
     renamer[0].focus();
 
@@ -757,15 +760,15 @@
       .bind("return", submitEdit.bind(null, view, false, callback));
 
     function submitEdit(view, skipInvalid, callback) {
-      var success;
-      var oldVal = renamer[0].getAttribute("placeholder");
-      var newVal = renamer[0].value;
+      let success;
+      const oldVal = renamer[0].getAttribute("placeholder");
+      const newVal = renamer[0].value;
       if (canSubmit) {
         success = true;
         stopEdit(view, entry, wasEmpty);
       } else if (!skipInvalid) {
         renamer.addClass("shake");
-        setTimeout(function() {
+        setTimeout(() => {
           renamer.removeClass("shake");
         }, 500);
       } else {
@@ -785,14 +788,14 @@
   }
 
   function toggleCatcher(show) {
-    var cc = $("#overlay"), modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
+    const cc = $("#overlay"), modals = ["#prefs-box", "#about-box", "#entry-menu", "#drop-select", ".info-box"];
 
     if (show === undefined) {
-      show = modals.some(function(selector) { return $(selector).hasClass("in"); });
+      show = modals.some((selector) => { return $(selector).hasClass("in"); });
     }
 
     if (!show) {
-      modals.forEach(function(selector) { $(selector)[show ? "addClass" : "removeClass"]("in"); });
+      modals.forEach((selector) => { $(selector)[show ? "addClass" : "removeClass"]("in"); });
       $(".data-row.active").removeClass("active");
     }
 
@@ -806,13 +809,13 @@
   }
 
   // Listen for popstate events, which indicate the user navigated back
-  $(window).off("popstate").on("popstate", function() {
+  $(window).off("popstate").on("popstate", () => {
     if (!droppy.socket) return;
-    var locs = getLocationsFromHash();
-    droppy.views.forEach(function(view) {
-      var dest = locs[view.vId];
+    const locs = getLocationsFromHash();
+    droppy.views.forEach((view) => {
+      const dest = locs[view.vId];
       view.switchRequest = true;
-      setTimeout(function() { view.switchRequest = false; }, 1000);
+      setTimeout(() => { view.switchRequest = false; }, 1000);
       if (dest) updateLocation($(view), dest, true);
     });
   });
@@ -826,14 +829,14 @@
   }
 
   function getLocationsFromHash() {
-    var locations = location.hash.split("#");
+    const locations = location.hash.split("#");
     locations.shift();
 
     if (locations.length === 0) {
       locations.push("");
     }
 
-    locations.forEach(function(part, i) {
+    locations.forEach((part, i) => {
       locations[i] = part.replace(/\/*$/g, "");
       if (locations[i] === "") locations[i] = "/";
     });
@@ -841,8 +844,8 @@
   }
 
   function getHashPaths(modview, dest) {
-    var path = location.pathname;
-    droppy.views.forEach(function(view) {
+    let path = location.pathname;
+    droppy.views.forEach((view) => {
       view = $(view);
       if (modview && modview.is(view)) {
         path += "/#" + dest;
@@ -868,7 +871,7 @@
     function sendReq(view, viewDest, time) {
       (function queue(time) {
         if ((!droppy.socketWait && !view[0].isAnimating) || time > 2000) {
-          var viewLoc = getViewLocation(view);
+          const viewLoc = getViewLocation(view);
           showSpinner(view);
           // Find the direction in which we should animate
           if (!viewLoc || viewDest.length === viewLoc.length) {
@@ -888,7 +891,7 @@
     }
     if (view === null) {
       // Only when navigating backwards
-      for (var i = destination.length - 1; i >= 0; i--) {
+      for (let i = destination.length - 1; i >= 0; i--) {
         if (destination[i].length && getViewLocation(getView(i)) !== destination[i]) {
           sendReq(getView(i), destination[i], 0);
         }
@@ -898,9 +901,10 @@
 
   // Update the path indicator
   function updatePath(view) {
-    var parts, oldParts, pathStr = "";
-    var i = 1; // Skip the first element as it's always the same
-    parts = join(view[0].currentFolder).split("/");
+    let oldParts, pathStr = "";
+    let i = 1; // Skip the first element as it's always the same
+    const parts = join(view[0].currentFolder).split("/");
+
     if (parts[parts.length - 1] === "") parts.pop();
     if (view[0].currentFile !== null) parts.push(view[0].currentFile);
     parts[0] = svg("home"); // Replace empty string with our home icon
@@ -914,7 +918,7 @@
           } else if (!oldParts[i] && oldParts[i] !== parts[i]) { // Add a part
             addPart(parts[i], pathStr);
           } else { // rename part
-            var part = $(view.find(".path li")[i]);
+            const part = $(view.find(".path li")[i]);
             part.html("<a>" + parts[i] + "</a>" + svg("triangle"));
             part[0].dataset.destination = pathStr;
           }
@@ -923,22 +927,22 @@
       }
     } else {
       addPart(parts[0], "/");
-      for (var len = parts.length; i < len; i++) {
+      for (let len = parts.length; i < len; i++) {
         pathStr += "/" + parts[i];
         addPart(parts[i], pathStr);
       }
     }
 
     view.find(".path li:not(.gone)").transition("in");
-    setTimeout(function() {checkPathOverflow(view); }, 400);
+    setTimeout(() => {checkPathOverflow(view); }, 400);
 
     view[0].savedParts = parts;
 
     function addPart(name, path) {
-      var li = $("<li><a>" + name + "</a></li>");
+      const li = $("<li><a>" + name + "</a></li>");
       li[0].dataset.destination = path;
       li.off("click").on("click", function(event) {
-        var view = $(event.target).parents(".view");
+        const view = $(event.target).parents(".view");
         if (droppy.socketWait) return;
         if ($(this).is(":last-child")) {
           if ($(this).parents(".view")[0].dataset.type === "directory") {
@@ -948,7 +952,7 @@
           view[0].switchRequest = true; // This is set so we can switch out of a editor view
           updateLocation(view, this.dataset.destination);
         }
-        setTimeout(function() {checkPathOverflow(view); }, 400);
+        setTimeout(() => {checkPathOverflow(view); }, 400);
       });
       view.find(".path").append(li);
       li.append(svg("triangle"));
@@ -963,7 +967,8 @@
 
   // Check if the path indicator overflows and scroll it if necessary
   function checkPathOverflow(view) {
-    var width = 40, space = view[0].clientWidth;
+    let width = 40;
+    const space = view[0].clientWidth;
     view.find(".path li.in").each(function() {
       width += $(this)[0].clientWidth;
     });
@@ -973,21 +978,21 @@
   }
 
   function getTemplateEntries(view, data) {
-    var entries = [];
-    Object.keys(data).forEach(function(name) {
-      var split = data[name].split("|");
-      var type  = split[0];
-      var mtime = Number(split[1]) * 1e3;
-      var size  = Number(split[2]);
+    const entries = [];
+    Object.keys(data).forEach((name) => {
+      const split = data[name].split("|");
+      const type  = split[0];
+      const mtime = Number(split[1]) * 1e3;
+      const size  = Number(split[2]);
       name = normalize(name);
 
-      var entry = {
-        name    : name,
+      const entry = {
+        name,
         sortname: name.replace(/['"]/g, "_").toLowerCase(),
-        type    : type,
-        mtime   : mtime,
+        type,
+        mtime,
         age     : timeDifference(mtime),
-        size    : size,
+        size,
         psize   : formatBytes(size),
         id      : ((view[0].currentFolder === "/") ? "/" : view[0].currentFolder + "/") + name,
         sprite  : getSpriteClass(fileExtension(name)),
@@ -1015,7 +1020,7 @@
 
   // Convert the received data into HTML
   function openDirectory(view, data, isSearch) {
-    var entries = view[0].templateEntries = getTemplateEntries(view, data || []);
+    let entries = view[0].templateEntries = getTemplateEntries(view, data || []);
     clearSearch(view);
 
     // sorting
@@ -1025,22 +1030,22 @@
     view[0].sortBy = savedSorting ? savedSorting.sortBy : "name";
     view[0].sortAsc = savedSorting ? savedSorting.sortAsc : false;
 
-    var sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
+    const sortBy = view[0].sortBy === "name" ? "type" : view[0].sortBy;
 
     entries = sortArrayByProp(entries, sortBy);
     if (view[0].sortAsc) entries.reverse();
 
-    var sort = {type: "", mtime: "", size: ""};
+    const sort = {type: "", mtime: "", size: ""};
     sort[sortBy] = "active " + (view[0].sortAsc ? "up" : "down");
 
-    var html = Handlebars.templates.directory({entries: entries, sort: sort, isSearch: isSearch});
-    loadContent(view, "directory", null, html).then(function() {
+    const html = Handlebars.templates.directory({entries, sort, isSearch});
+    loadContent(view, "directory", null, html).then(() => {
       // Upload button on empty page
-      view.find(".empty").off("click").on("click", function(e) {
-        var view = $(e.target).parents(".view");
-        var inp = view.find(".file");
+      view.find(".empty").off("click").on("click", (e) => {
+        const view = $(e.target).parents(".view");
+        const inp = view.find(".file");
         if (droppy.detects.directoryUpload) {
-          droppy.dir.forEach(function(attr) {
+          droppy.dir.forEach((attr) => {
             inp[0].removeAttribute(attr);
           });
         }
@@ -1057,7 +1062,7 @@
       // Click on a file link
       view.find(".file-link").off("click").on("click", function(e) {
         if (droppy.socketWait) return;
-        var view = $(e.target).parents(".view");
+        const view = $(e.target).parents(".view");
         openFile(view, view[0].currentFolder, e.target.textContent.trim(), {ref: this});
         e.preventDefault();
       });
@@ -1066,19 +1071,19 @@
         this.setAttribute("order", index);
       });
 
-      view.find(".data-row").off("contextmenu").on("contextmenu", function(e) {
-        var target = $(e.currentTarget);
+      view.find(".data-row").off("contextmenu").on("contextmenu", (e) => {
+        const target = $(e.currentTarget);
         if (target[0].dataset.type === "error") return;
         showEntryMenu(target, e.clientX, e.clientY);
         e.preventDefault();
       });
 
-      view.find(".data-row .entry-menu").off("click").on("click", function(e) {
+      view.find(".data-row .entry-menu").off("click").on("click", (e) => {
         showEntryMenu($(e.target).parents(".data-row"), e.clientX, e.clientY);
       });
 
       // Stop navigation when clicking on an <a>
-      view.find(".data-row .zip, .data-row .download, .entry-link.file").off("click").on("click", function(e) {
+      view.find(".data-row .zip, .data-row .download, .entry-link.file").off("click").on("click", (e) => {
         e.stopPropagation();
         if (droppy.socketWait) return;
 
@@ -1088,7 +1093,7 @@
         // if it's missing it will disconnect a WebSocket as long as
         // https://bugzilla.mozilla.org/show_bug.cgi?id=896666 is not fixed.
         droppy.reopen = true;
-        setTimeout(function() {
+        setTimeout(() => {
           droppy.reopen = false;
         }, 2000);
       });
@@ -1117,12 +1122,12 @@
 
   // Load new view content
   function loadContent(view, type, mediaType, content) {
-    return new Promise(function(resolve) {
+    return new Promise(((resolve) => {
       if (view[0].isAnimating) return; // Ignore mid-animation updates. TODO: queue and update on animation-end
       view[0].dataset.type = type;
       mediaType = mediaType ? " type-" + mediaType : "";
       content = '<div class="new content ' + type + mediaType + " " + view[0].animDirection + '">' + content + "</div>";
-      var navRegex = /(forward|back|center)/;
+      const navRegex = /(forward|back|center)/;
       if (view[0].animDirection === "center") {
         view.find(".content").replaceClass(navRegex, "center").before(content);
         view.find(".new").addClass(type);
@@ -1154,7 +1159,7 @@
         toggleButtons(view, type);
         resolve();
       }
-    });
+    }));
   }
 
   function toggleButtons(view, type) {
@@ -1162,7 +1167,7 @@
   }
 
   function handleDrop(view, event, src, dst, spinner) {
-    var dropSelect = $("#drop-select"), dragAction = view[0].dragAction;
+    const dropSelect = $("#drop-select"), dragAction = view[0].dragAction;
     droppy.dragTimer.clear();
     delete view[0].dragAction;
     $(".dropzone").removeClass("in");
@@ -1172,10 +1177,12 @@
     } else if (dragAction === "cut" || event.shiftKey) {
       sendDrop(view, "cut", src, dst, spinner);
     } else {
-      var x = event.originalEvent.clientX, y = event.originalEvent.clientY;
+      const x = event.originalEvent.clientX, y = event.originalEvent.clientY;
 
       // Keep the drop-select in view
-      var limit = dropSelect[0].offsetWidth / 2 - 20, left;
+      const limit = dropSelect[0].offsetWidth / 2 - 20;
+      let left;
+
       if (x < limit) {
         left = x + limit;
       } else if (x + limit > innerWidth) {
@@ -1192,15 +1199,15 @@
         $(this).removeClass("active");
       });
       toggleCatcher(true);
-      dropSelect.children(".movefile").off("click").one("click", function() {
+      dropSelect.children(".movefile").off("click").one("click", () => {
         sendDrop(view, "cut", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".copyfile").off("click").one("click", function() {
+      dropSelect.children(".copyfile").off("click").one("click", () => {
         sendDrop(view, "copy", src, dst, spinner);
         toggleCatcher(false);
       });
-      dropSelect.children(".viewfile").off("click").one("click", function() {
+      dropSelect.children(".viewfile").off("click").one("click", () => {
         updateLocation(view, src);
         toggleCatcher(false);
       });
@@ -1212,9 +1219,9 @@
     if (src !== dst || type === "copy") {
       if (spinner) showSpinner(view);
       sendMessage(view[0].vId, "CLIPBOARD", {
-        type: type,
-        src: src,
-        dst: dst
+        type,
+        src,
+        dst
       });
     }
   }
@@ -1224,8 +1231,8 @@
     view.find(".data-row .entry-link").each(function() {
       this.setAttribute("draggable", "true");
     });
-    view.off("dragstart").on("dragstart", function(event) {
-      var row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
+    view.off("dragstart").on("dragstart", (event) => {
+      const row = $(event.target).hasClass("data-row") ? $(event.target) : $(event.target).parents(".data-row");
 
       if (event.ctrlKey || event.metaKey || event.altKey) {
         view[0].dragAction = "copy";
@@ -1269,18 +1276,20 @@
   droppy.dragTimer = new DragTimer();
 
   function allowDrop(el) {
-    el.off("dragover").on("dragover", function(e) {
+    el.off("dragover").on("dragover", (e) => {
       e.preventDefault();
       droppy.dragTimer.refresh();
     });
   }
 
   function bindHoverEvents(view) {
-    var dropZone = view.find(".dropzone");
-    view.off("dragenter").on("dragenter", function(event) {
+    const dropZone = view.find(".dropzone");
+    view.off("dragenter").on("dragenter", (event) => {
       event.stopPropagation();
       droppy.activeView = view[0].vId;
-      var icon, isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
+      const isInternal = event.originalEvent.dataTransfer.effectAllowed === "copyMove";
+
+      let icon;
       if (view[0].dataset.type === "directory" && isInternal) {
         icon = "menu";
       } else if (!isInternal) {
@@ -1298,7 +1307,7 @@
 
   function bindDropEvents(view) {
     // file drop
-    (new Uppie())(view[0], function(e, fd, files) {
+    (new Uppie())(view[0], (e, fd, files) => {
       if (!files.length) return;
       if (droppy.readOnly) return showError(view, "Files are read-only.");
       e.stopPropagation();
@@ -1307,9 +1316,9 @@
     });
 
     // drag between views
-    view.off("drop").on("drop", function(e) {
-      var view = $(e.target).parents(".view");
-      var dragData = e.originalEvent.dataTransfer.getData("text");
+    view.off("drop").on("drop", (e) => {
+      const view = $(e.target).parents(".view");
+      let dragData = e.originalEvent.dataTransfer.getData("text");
       e.preventDefault();
       $(".dropzone").removeClass("in");
       if (!dragData) return;
@@ -1333,8 +1342,8 @@
   function initButtons(view) {
     // Init upload <input>
     view[0].fileInput = view.find(".file")[0];
-    (new Uppie())(view[0].fileInput, function(e, fd, files) {
-      var view = $(e.target).parents(".view");
+    (new Uppie())(view[0].fileInput, (e, fd, files) => {
+      const view = $(e.target).parents(".view");
       e.preventDefault();
       e.stopPropagation();
       if (!validateFiles(files, view)) return;
@@ -1345,10 +1354,10 @@
     // File upload button
     view.off("click", ".af").on("click", ".af", function(e) {
       if ($(this).hasClass("disabled")) return;
-      var view = $(e.target).parents(".view");
+      const view = $(e.target).parents(".view");
       // Remove the directory attributes so we get a file picker dialog
       if (droppy.detects.directoryUpload) {
-        droppy.dir.forEach(function(attr) {
+        droppy.dir.forEach((attr) => {
           view[0].fileInput.removeAttribute(attr);
         });
       }
@@ -1362,12 +1371,12 @@
 
     // Directory upload button
     view.off("click", ".ad").on("click", ".ad", function(e) {
-      var view = $(e.target).parents(".view");
+      const view = $(e.target).parents(".view");
       if ($(this).hasClass("disabled")) {
         showError(getView(0), "Your browser doesn't support directory uploading");
       } else {
         // Set the directory attribute so we get a directory picker dialog
-        droppy.dir.forEach(function(attr) {
+        droppy.dir.forEach((attr) => {
           view[0].fileInput.setAttribute(attr, attr);
         });
 
@@ -1384,27 +1393,27 @@
 
     view.off("click", ".cf, .cd").on("click", ".cf, .cd", function(e) {
       if ($(this).hasClass("disabled")) return;
-      var view = $(e.target).parents(".view");
-      var content = view.find(".content");
-      var isFile = this.classList.contains("cf");
-      var isEmpty = Boolean(view.find(".empty").length);
-      var html = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
+      const view = $(e.target).parents(".view");
+      const content = view.find(".content");
+      const isFile = this.classList.contains("cf");
+      const isEmpty = Boolean(view.find(".empty").length);
+      const html = Handlebars.templates[isFile ? "new-file" : "new-folder"]();
 
       stopEdit(view, view.find(".editing"), isEmpty);
       if (isEmpty) content.html(Handlebars.templates["file-header"]());
       content.prepend(html);
       content[0].scrollTop = 0;
-      var dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
-      entryRename(view, dummy, isEmpty, function(success, _oldVal, newVal) {
+      const dummy = $(".data-row.new-" + (isFile ? "file" : "folder"));
+      entryRename(view, dummy, isEmpty, (success, _oldVal, newVal) => {
         if (!success) return;
         if (view[0].dataset.type === "directory") showSpinner(view);
         sendMessage(view[0].vId, "CREATE_" + (isFile ? "FILE" : "FOLDER"), newVal);
       });
     });
 
-    view.off("click", ".newview").on("click", ".newview", function() {
+    view.off("click", ".newview").on("click", ".newview", () => {
       if (droppy.views.length === 1) {
-        var dest = join(view[0].currentFolder, view[0].currentFile);
+        const dest = join(view[0].currentFolder, view[0].currentFile);
         replaceHistory(newView(dest, 1), dest);
       } else {
         destroyView(view[0].vId);
@@ -1412,17 +1421,17 @@
       }
     });
 
-    view.off("click", ".about").on("click", ".about", function() {
+    view.off("click", ".about").on("click", ".about", () => {
       $("#about-box").addClass("in");
       toggleCatcher();
     });
 
-    view.off("click", ".prefs").on("click", ".prefs", function() {
+    view.off("click", ".prefs").on("click", ".prefs", () => {
       showPrefs();
       if (droppy.priv) sendMessage(null, "GET_USERS");
     });
 
-    view.off("click", ".reload").on("click", ".reload", function() {
+    view.off("click", ".reload").on("click", ".reload", () => {
       if (droppy.socketWait) return;
       showSpinner(view);
       sendMessage(view[0].vId, "RELOAD_DIRECTORY", {
@@ -1430,14 +1439,14 @@
       });
     });
 
-    view.off("click", ".logout").on("click", ".logout", function() {
+    view.off("click", ".logout").on("click", ".logout", () => {
       ajax({
         method: "POST",
         url: "!/logout",
         data: {
           path: getRootPath(),
         },
-      }).then(function() {
+      }).then(() => {
         droppy.socket.close(4000);
         render("login");
         initAuthPage();
@@ -1456,19 +1465,19 @@
       }
     }
     view.off("click", ".search.toggled-off").on("click", ".search.toggled-off", function() {
-      var search = $(this);
+      const search = $(this);
       search.removeClass("toggled-off").addClass("toggled-on");
-      setTimeout(function() {
+      setTimeout(() => {
         search.find("input")[0].focus();
       }, 0);
     });
     view.off("click", ".search.toggled-on svg").on("click", ".search.toggled-on svg", function() {
-      var view = $(this).parents(".view");
+      const view = $(this).parents(".view");
       openDirectory(view, view[0].currentData);
     });
     view.off("keyup", ".search input").on("keyup", ".search input", function(e) {
       if (e.keyCode === 27/* escape */) {
-        var view = $(this).parents(".view");
+        const view = $(this).parents(".view");
         openDirectory(view, view[0].currentData);
         this.value = "";
         $(this).parent().removeClass("toggled-on").addClass("toggled-off");
@@ -1477,31 +1486,31 @@
       }
     });
     view.off("input", ".search input").on("input", ".search input", debounce(doSearch, 1000));
-    view.off("click", ".globalsearch input").on("click", ".globalsearch input", function(e) {
+    view.off("click", ".globalsearch input").on("click", ".globalsearch input", (e) => {
       e.stopPropagation();
     });
   }
 
   function initEntryMenu() {
     // Play an audio file
-    $("#entry-menu .play").off("click").on("click", function(event) {
+    $("#entry-menu .play").off("click").on("click", (event) => {
       event.stopPropagation();
-      var entry = droppy.menuTarget, view = entry.parents(".view");
+      const entry = droppy.menuTarget, view = entry.parents(".view");
       play(view, entry);
       toggleCatcher(false);
     });
 
-    $("#entry-menu .edit").off("click").on("click", function(event) {
+    $("#entry-menu .edit").off("click").on("click", (event) => {
       event.stopPropagation();
-      var entry = droppy.menuTarget, view = entry.parents(".view");
+      const entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
       openFile(view, view[0].currentFolder, entry.find(".file-link")[0].textContent, {text: true});
     });
 
     // Click on a "open" link
-    $("#entry-menu .openfile").off("click").on("click", function(event) {
+    $("#entry-menu .openfile").off("click").on("click", (event) => {
       event.stopPropagation();
-      var entry = droppy.menuTarget, view = entry.parents(".view");
+      const entry = droppy.menuTarget, view = entry.parents(".view");
       toggleCatcher(false);
       if (entry[0].dataset.type === "folder") {
         updateLocation(view, entry[0].dataset.id);
@@ -1511,11 +1520,11 @@
     });
 
     // Rename a file/folder
-    $("#entry-menu .rename").off("click").on("click", function(event) {
+    $("#entry-menu .rename").off("click").on("click", (event) => {
       event.stopPropagation();
-      var entry = droppy.menuTarget, view = entry.parents(".view");
+      const entry = droppy.menuTarget, view = entry.parents(".view");
       if (droppy.socketWait) return;
-      entryRename(view, entry, false, function(success, oldVal, newVal) {
+      entryRename(view, entry, false, (success, oldVal, newVal) => {
         if (success && newVal !== oldVal) {
           showSpinner(view);
           sendMessage(view[0].vId, "RENAME", {src: oldVal, dst: newVal});
@@ -1535,8 +1544,8 @@
     });
 
     // Delete a file/folder
-    $("#entry-menu .delete").off("click").on("click", function(event) {
-      var entry = droppy.menuTarget, view = entry.parents(".view");
+    $("#entry-menu .delete").off("click").on("click", (event) => {
+      const entry = droppy.menuTarget, view = entry.parents(".view");
       event.stopPropagation();
       if (droppy.socketWait) return;
 
@@ -1550,8 +1559,8 @@
   function checkClipboard() {
     if (droppy.clipboard) {
       $(".view").each(function() {
-        var view = $(this), button = view.find(".paste-button");
-        button.addClass("in").off("click").one("click", function(event) {
+        const view = $(this), button = view.find(".paste-button");
+        button.addClass("in").off("click").one("click", (event) => {
           event.stopPropagation();
           if (droppy.socketWait) return;
           droppy.clipboard.dst = join(view[0].currentFolder, basename(droppy.clipboard.src));
@@ -1569,17 +1578,13 @@
 
   function saveFile(text, filename) {
     const blob = new Blob([text]);
-    if (navigator.msSaveOrOpenBlob) { // compat: IE11
-      navigator.msSaveOrOpenBlob(blob, filename);
-    } else {
-      const a = document.createElement("a");
-      a.setAttribute("href", URL.createObjectURL(blob, {type: "text/plain"}));
-      a.setAttribute("download", filename);
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => document.body.removeChild(a), 0);
-    }
+    const a = document.createElement("a");
+    a.setAttribute("href", URL.createObjectURL(blob, {type: "text/plain"}));
+    a.setAttribute("download", filename);
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 0);
   }
 
   function clearSearch(view) {
@@ -1590,12 +1595,12 @@
   }
 
   function showEntryMenu(entry, x, y) {
-    var menu = $("#entry-menu");
-    var maxTop = window.innerHeight - menu[0].clientHeight - 4;
-    var maxLeft = window.innerWidth - menu[0].clientWidth - 4;
-    var top = entry[0].getBoundingClientRect().top + document.body.scrollTop;
-    var left = x - menu[0].clientWidth / 2;
-    var spriteClass = entry.find(".sprite")[0].className;
+    const menu = $("#entry-menu");
+    const maxTop = window.innerHeight - menu[0].clientHeight - 4;
+    const maxLeft = window.innerWidth - menu[0].clientWidth - 4;
+    const top = entry[0].getBoundingClientRect().top + document.body.scrollTop;
+    const left = x - menu[0].clientWidth / 2;
+    const spriteClass = entry.find(".sprite")[0].className;
 
     menu[0].className = "type-" + /sprite-(\w+)/.exec(spriteClass)[1];
     entry.addClass("active");
@@ -1605,7 +1610,7 @@
     droppy.menuTarget = entry;
     menu[0].classList.add("in");
 
-    var target = document.elementFromPoint(x, y);
+    let target = document.elementFromPoint(x, y);
     target = target.tagName.toLowerCase() === "a" ? $(target) : $(target).parents("a");
     target.addClass("active").one("mouseleave", function() {
       $(this).removeClass("active");
@@ -1617,10 +1622,10 @@
     view[0].sortAsc = header.hasClass("down");
     header[0].className = "header-" + view[0].sortBy + " " + (view[0].sortAsc ? "up" : "down") + " active";
     header.siblings().removeClass("active up down");
-    var entries = sortArrayByProp(view[0].templateEntries, header[0].dataset.sort);
+    let entries = sortArrayByProp(view[0].templateEntries, header[0].dataset.sort);
     if (view[0].sortAsc) entries = entries.reverse();
-    entries.forEach(function(_, i) {
-      var entry = view.find('[data-name="' + entries[i].sortname + '"]')[0];
+    entries.forEach((_, i) => {
+      const entry = view.find('[data-name="' + entries[i].sortname + '"]')[0];
       entry.style.order = i;
       entry.setAttribute("order", i);
     });
@@ -1640,7 +1645,7 @@
   function openFile(view, newFolder, file, opts) {
     opts = opts || {};
     clearSearch(view);
-    var e = fileExtension(file);
+    const e = fileExtension(file);
 
     // Fix newFolder and file variables if file includes the dir path
     if (file.indexOf("/") !== -1) {
@@ -1693,11 +1698,11 @@
       updatePath(view);
       openMedia(view);
     } else { // Generic file, ask the server if the file has binary contents
-      var filePath = join(newFolder, file);
+      const filePath = join(newFolder, file);
       showSpinner(view);
-      ajax({url: "!/type" + filePath}).then(function(res) {
+      ajax({url: "!/type" + filePath}).then((res) => {
         return res.text();
-      }).then(function(text) {
+      }).then((text) => {
         if (text === "text") { // Text content
           view[0].currentFile = file;
           view[0].currentFolder = newFolder;
@@ -1708,7 +1713,7 @@
           download(filePath);
           hideSpinner(view);
         }
-      }).catch(function() {
+      }).catch(() => {
         showError(view, "Couldn't load the file. Maybe disable your ad-blocker?");
         hideSpinner(view);
       });
@@ -1716,7 +1721,7 @@
   }
 
   function download(path) {
-    var a = document.createElement("a");
+    const a = document.createElement("a");
     a.download = basename(path); // to keep websocket alive
     a.href = "!/dl" + path;
     document.body.appendChild(a);
@@ -1725,8 +1730,8 @@
   }
 
   function getMediaSrc(view, filename) {
-    var encodedId = join(view[0].currentFolder, filename).split("/");
-    var i = encodedId.length - 1;
+    const encodedId = join(view[0].currentFolder, filename).split("/");
+    let i = encodedId.length - 1;
     for (;i >= 0; i--) {
       encodedId[i] = encodeURIComponent(encodedId[i]);
     }
@@ -1745,9 +1750,9 @@
   }
 
   function loadMedia(view, files) {
-    var startIndex;
+    let startIndex;
     // turn filenames into URLs and obtain index of current file
-    files.forEach(function(file, i) {
+    files.forEach((file, i) => {
       if (file.src === view[0].currentFile) startIndex = i;
       file.src = getMediaSrc(view, file.src);
       file.filename = basename(decodeURIComponent(file.src));
@@ -1770,15 +1775,15 @@
     Promise.all([
       loadStyle("ps-css", "!/res/lib/ps.css"),
       loadScript("ps-js", "!/res/lib/ps.js"),
-    ]).then(function() {
+    ]).then(() => {
       view[0].animDirection = "forward";
-      var html = Handlebars.templates.media({
+      const html = Handlebars.templates.media({
         autonext: droppy.get("autonext") ? "on " : "",
         loop: droppy.get("loop") ? "on " : "",
       });
-      loadContent(view, "media", type, html).then(function() {
-        var el = view.find(".pswp")[0];
-        var fadeTime = droppy.detects.mobile ? 3500 : 2500;  // TODO: match to plyr
+      loadContent(view, "media", type, html).then(() => {
+        const el = view.find(".pswp")[0];
+        const fadeTime = droppy.detects.mobile ? 3500 : 2500;  // TODO: match to plyr
         view[0].ps = new PhotoSwipe(el, PhotoSwipeUI_Default, files, {
           arrowKeys: false,
           barsSize: {top:0, bottom:0},
@@ -1789,7 +1794,7 @@
           closeOnScroll: false,
           closeOnVerticalDrag: false,
           escKey: false,
-          getDoubleTapZoom: function(_, item) {
+          getDoubleTapZoom(_, item) {
             return item.initialZoomLevel * 2;
           },
           hideAnimationDuration: 0,
@@ -1806,34 +1811,34 @@
           timeToIdleOutside: fadeTime,
         });
 
-        var autonext = view.find(".autonext");
-        var loop = view.find(".loop");
-        autonext.off("click").on("click", function() {
-          var on = !droppy.get("autonext");
+        const autonext = view.find(".autonext");
+        const loop = view.find(".loop");
+        autonext.off("click").on("click", () => {
+          const on = !droppy.get("autonext");
           droppy.set("autonext", on);
           autonext[on ? "addClass" : "removeClass"]("on");
         });
-        loop.off("click").on("click", function() {
-          var on = !droppy.get("loop");
+        loop.off("click").on("click", () => {
+          const on = !droppy.get("loop");
           droppy.set("loop", on);
           loop[on ? "addClass" : "removeClass"]("on");
         });
 
         // needed for plyr seeking
-        view[0].ps.listen("preventDragEvent", function(e, _isDown, preventObj) {
+        view[0].ps.listen("preventDragEvent", (e, _isDown, preventObj) => {
           preventObj.prevent = e.target.classList.contains("pswp__img");
         });
         view[0].ps.listen("afterChange", function() {
           // clear possible focus on buttons so spacebar works as expected
-          var focused = document.activeElement;
+          const focused = document.activeElement;
           if ($(focused).hasClass("pswp__button")) focused.blur();
 
           view[0].currentFile = this.currItem.filename;
-          var imgButtons = view.find(".fit-h, .fit-v");
-          var videoButtons = view.find(".loop, .autonext");
-          var zoomButtons = view.find(".zoom-in, .zoom-out");
+          const imgButtons = view.find(".fit-h, .fit-v");
+          const videoButtons = view.find(".loop, .autonext");
+          const zoomButtons = view.find(".zoom-in, .zoom-out");
 
-          var type;
+          let type;
           if (/\.pdf$/.test(this.currItem.filename)) {
             type = "pdf";
           } else if (this.currItem.html) {
@@ -1866,40 +1871,40 @@
           replaceHistory(view, join(view[0].currentFolder, view[0].currentFile));
           updatePath(view);
         });
-        view[0].ps.listen("preventDragEvent", function(_, isDown) {
+        view[0].ps.listen("preventDragEvent", (_, isDown) => {
           view.find(".pswp__container")[0].classList[isDown ? "add" : "remove"]("no-transition");
         });
-        view[0].ps.listen("destroy", function() {
+        view[0].ps.listen("destroy", () => {
           view[0].switchRequest = true;
           view[0].ps = null;
           updateLocation(view, view[0].currentFolder);
         });
 
-        var dur = 300;
+        const dur = 300;
         function middle(ps) {
           return {x: ps.viewportSize.x / 2, y: ps.viewportSize.y / 2};
         }
         // fit zoom buttons
         view[0].ps.zoomed = {h: false, v: false};
         function fitH() {
-          var vw = view[0].ps.viewportSize.x, iw = view[0].ps.currItem.w;
-          var initial = view[0].ps.currItem.initialZoomLevel;
-          var level = view[0].ps.zoomed.h ? initial : vw / iw;
+          const vw = view[0].ps.viewportSize.x, iw = view[0].ps.currItem.w;
+          const initial = view[0].ps.currItem.initialZoomLevel;
+          const level = view[0].ps.zoomed.h ? initial : vw / iw;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           view[0].ps.zoomed.v = false;
           view[0].ps.zoomed.h = !view[0].ps.zoomed.h;
         }
         function fitV() {
-          var vh = view[0].ps.viewportSize.y, ih = view[0].ps.currItem.h;
-          var initial = view[0].ps.currItem.initialZoomLevel;
-          var level = view[0].ps.zoomed.v ? initial : vh / ih;
+          const vh = view[0].ps.viewportSize.y, ih = view[0].ps.currItem.h;
+          const initial = view[0].ps.currItem.initialZoomLevel;
+          const level = view[0].ps.zoomed.v ? initial : vh / ih;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           view[0].ps.zoomed.h = false;
           view[0].ps.zoomed.v = !view[0].ps.zoomed.v;
         }
         view.find(".fit-h").off("click").on("click", fitH);
         view.find(".fit-v").off("click").on("click", fitV);
-        view[0].ps.listen("afterChange", function() {
+        view[0].ps.listen("afterChange", () => {
           if (view[0].ps.zoomed.h) {
             view[0].ps.zoomed.h = false;
             fitH(0);
@@ -1908,13 +1913,13 @@
             fitV(0);
           }
         });
-        view.find(".zoom-in").off("click").on("click", function(e) {
-          var level = view[0].ps.getZoomLevel() * 1.5;
+        view.find(".zoom-in").off("click").on("click", (e) => {
+          const level = view[0].ps.getZoomLevel() * 1.5;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
           $(e.target).parents(".pswp").addClass("pswp--zoomed-in");
         });
-        view.find(".zoom-out").off("click").on("click", function() {
-          var level = view[0].ps.getZoomLevel() / 1.5;
+        view.find(".zoom-out").off("click").on("click", () => {
+          const level = view[0].ps.getZoomLevel() / 1.5;
           view[0].ps.zoomTo(level, middle(view[0].ps), dur);
         });
 
@@ -1925,28 +1930,28 @@
   }
 
   function initPDF(container) {
-    var quality = 8; // TODO: config option
+    const quality = 8; // TODO: config option
 
-    loadScript("pdf-js", "!/res/lib/pdf.js").then(function() {
+    loadScript("pdf-js", "!/res/lib/pdf.js").then(() => {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";
-      pdfjsLib.getDocument(container.data("src")).then(function(pdf) {
-        var availableWidth = container[0].parentNode.clientWidth;
-        var availableHeight = container[0].parentNode.clientHeight;
-        var maxWidth = 0;
-        var maxHeight = 0;
+      pdfjsLib.getDocument(container.data("src")).then((pdf) => {
+        const availableWidth = container[0].parentNode.clientWidth;
+        const availableHeight = container[0].parentNode.clientHeight;
+        let maxWidth = 0;
+        let maxHeight = 0;
 
-        var promises = [];
-        for (var i = 1; i <= pdf.numPages; i++) {
-          promises.push(pdf.getPage(i).then(function(page) {
-            var vp = page.getViewport(1);
-            var ratioX = availableWidth / vp.width;
-            var ratioY = availableHeight / vp.height;
-            var scale = Math.min(ratioX, ratioY);
-            var viewport = page.getViewport(scale * quality);
-            var pageWidth = viewport.width / quality;
-            var pageHeight = viewport.height / quality;
+        const promises = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          promises.push(pdf.getPage(i).then((page) => {
+            const vp = page.getViewport(1);
+            const ratioX = availableWidth / vp.width;
+            const ratioY = availableHeight / vp.height;
+            const scale = Math.min(ratioX, ratioY);
+            const viewport = page.getViewport(scale * quality);
+            const pageWidth = viewport.width / quality;
+            const pageHeight = viewport.height / quality;
 
-            var canvas = document.createElement("canvas");
+            const canvas = document.createElement("canvas");
             canvas.height = viewport.height;
             canvas.width = viewport.width;
             canvas.style.width = pageWidth + "px";
@@ -1958,12 +1963,12 @@
 
             page.render({
               canvasContext: canvas.getContext("2d"),
-              viewport: viewport
+              viewport
             });
           }));
         }
 
-        Promise.all(promises).then(function() {
+        Promise.all(promises).then(() => {
           container[0].style.width = maxWidth + "px";
           container[0].style.height = maxHeight + "px";
           container[0].parentNode.style.display = "flex";
@@ -1975,30 +1980,30 @@
   }
 
   function openDoc(view, entryId) {
-    var editor;
+    let editor;
     showSpinner(view);
     Promise.all([
       ajax("!/file" + entryId),
       loadStyle("cm-css", "!/res/lib/cm.css"),
       loadScript("cm-js", "!/res/lib/cm.js"),
       loadTheme(droppy.get("theme")),
-    ]).then(function(values) {
+    ]).then((values) => {
       (function verify() {
         if (!("CodeMirror" in window)) return setTimeout(verify, 200);
         setTitle(basename(entryId));
         setEditorFontSize(droppy.get("editorFontSize"));
-        values[0].text().then(function(text) {
+        values[0].text().then((text) => {
           configCM(text, basename(entryId));
         });
       })();
-    }).catch(function(err) {
+    }).catch((err) => {
       showError(view, err);
       closeDoc(view);
     });
 
     function configCM(text, filename) {
-      var html = Handlebars.templates.document({modes: droppy.modes});
-      loadContent(view, "document", null, html).then(function() {
+      const html = Handlebars.templates.document({modes: droppy.modes});
+      loadContent(view, "document", null, html).then(() => {
         view[0].editorEntryId = entryId;
         view[0].editor = editor = CodeMirror(view.find(".document")[0], {
           autofocus: true,
@@ -2019,19 +2024,21 @@
 
         if (!CodeMirror.autoLoadMode) initModeLoad();
 
-        var mode, fileMode = modeFromShebang(text);
+        const fileMode = modeFromShebang(text);
+
+        let mode;
         if (fileMode) {
           mode = fileMode;
         } else {
-          var modeInfo = CodeMirror.findModeByFileName(filename);
+          const modeInfo = CodeMirror.findModeByFileName(filename);
           mode = (!modeInfo || !modeInfo.mode || modeInfo.mode === "null") ? "plain" : modeInfo.mode;
         }
         if (mode !== "plain") CodeMirror.autoLoadMode(editor, mode);
         editor.setOption("mode", mode);
         view.find(".mode-select")[0].value = mode;
 
-        editor.on("change", function(cm, change) {
-          var view = getCMView(cm);
+        editor.on("change", (cm, change) => {
+          const view = getCMView(cm);
           if (change.origin !== "setValue") {
             view.find(".path li:last-child").removeClass("saved save-failed").addClass("dirty");
           }
@@ -2042,7 +2049,7 @@
         }
 
         function save(cm) {
-          var view = getCMView(cm);
+          const view = getCMView(cm);
           showSpinner(view);
           sendMessage(view[0].vId, "SAVE_FILE", {
             to: view[0].editorEntryId,
@@ -2051,7 +2058,7 @@
         }
 
         editor.setOption("extraKeys", {
-          "Tab": function(cm) {
+          "Tab"(cm) {
             cm.replaceSelection(droppy.get("indentWithTabs") ?
               "\t" : Array(droppy.get("indentUnit") + 1).join(" "));
           },
@@ -2079,15 +2086,15 @@
         view.find(".save").off("click").on("click", function() {
           save($(this).parents(".view")[0].editor);
         });
-        view.find(".dl").off("click").on("click", function() {
+        view.find(".dl").off("click").on("click", () => {
           saveFile(editor.getValue(), view[0].currentFile);
         });
-        view.find(".ww").off("click").on("click", function() {
+        view.find(".ww").off("click").on("click", () => {
           editor.setOption("lineWrapping", !editor.options.lineWrapping);
           droppy.set("lineWrapping", editor.options.lineWrapping);
         });
-        view.find(".syntax").off("click").on("click", function() {
-          var shown = view.find(".mode-select").toggleClass("in").hasClass("in");
+        view.find(".syntax").off("click").on("click", () => {
+          const shown = view.find(".mode-select").toggleClass("in").hasClass("in");
           view.find(".syntax")[shown ? "addClass" : "removeClass"]("in");
           view.find(".mode-select").on("change", function() {
             view.find(".syntax").removeClass("in");
@@ -2096,9 +2103,9 @@
             editor.setOption("mode", this.value);
           });
         });
-        view.find(".find").off("click").on("click", function() {
+        view.find(".find").off("click").on("click", () => {
           CodeMirror.commands.find(editor);
-          var searchField = view.find(".CodeMirror-search-field");
+          const searchField = view.find(".CodeMirror-search-field");
           if (searchField && searchField[0]) searchField[0].focus();
         });
         view.find(".full").off("click").on("click", function() {
@@ -2116,19 +2123,19 @@
       initAuthPage(true);
       return;
     }
-    var box = $("#prefs-box");
+    const box = $("#prefs-box");
     box.find(".list-user").remove();
     box.append(Handlebars.templates["list-user"]({users: userlist}));
-    box.find(".add-user").off("click").on("click", function() {
-      var user = prompt("Username?");
+    box.find(".add-user").off("click").on("click", () => {
+      const user = prompt("Username?");
       if (!user) return;
-      var pass = prompt("Password?");
+      const pass = prompt("Password?");
       if (!pass) return;
-      var priv = confirm("Privileged User?");
+      const priv = confirm("Privileged User?");
       sendMessage(null, "UPDATE_USER", {
         name: user,
-        pass: pass,
-        priv: priv
+        pass,
+        priv
       });
     });
     box.find(".delete-user").off("click").on("click", function(event) {
@@ -2141,9 +2148,9 @@
   }
 
   function showPrefs() {
-    var box = $("#prefs-box");
-    box.empty().append(function() {
-      var i, opts = [
+    const box = $("#prefs-box");
+    box.empty().append(() => {
+      const opts = [
         {name: "theme", label: "Editor theme"},
         {name: "editorFontSize", label: "Editor font size"},
         {name: "indentWithTabs", label: "Editor indent type"},
@@ -2152,22 +2159,23 @@
         {name: "sharelinkDownload", label: "Sharelink download"},
       ];
 
-      opts.forEach(function(_, i) {
+      let i;
+      opts.forEach((_, i) => {
         opts[i].values = {};
         opts[i].selected = droppy.get(opts[i].name);
       });
-      droppy.themes.forEach(function(t) { opts[0].values[t] = t; });
+      droppy.themes.forEach((t) => { opts[0].values[t] = t; });
       for (i = 10; i <= 30; i += 2) opts[1].values[String(i)] = String(i);
       opts[2].values = {"Tabs": true, "Spaces": false};
       for (i = 1; i <= 8; i *= 2) opts[3].values[String(i)] = String(i);
       opts[4].values = {"Wrap": true, "No Wrap": false};
       opts[5].values = {"Default On": true, "Default Off": false};
-      return Handlebars.templates.options({opts: opts});
+      return Handlebars.templates.options({opts});
     });
 
     $("select.theme").off("change").on("change", function() {
-      var theme = this.value;
-      loadTheme(theme, function() {
+      const theme = this.value;
+      loadTheme(theme, () => {
         droppy.set("theme", theme);
         $(".view").each(function() {
           if (this.editor) this.editor.setOption("theme", theme);
@@ -2179,15 +2187,15 @@
       setEditorFontSize(this.value);
     });
 
-    setTimeout(function() {
+    setTimeout(() => {
       box.addClass("in").transitionend(function() {
         this.removeAttribute("style");
       });
       toggleCatcher(true);
-      $("#overlay").one("click", function() {
+      $("#overlay").one("click", () => {
         box.find("select").each(function() {
-          var option = this.className;
-          var value  = this.value;
+          const option = this.className;
+          let value  = this.value;
 
           if (value === "true") value = true;
           else if (value === "false") value = false;
@@ -2212,8 +2220,9 @@
   // ============================================================================
 
   function play(view, index) {
-    var row, source, player = view.find(".audio-player")[0];
+    const player = view.find(".audio-player")[0];
 
+    let row;
     if (typeof index === "number") {
       row = view.find('.data-row[data-playindex="' + index + '"]');
     } else {
@@ -2229,7 +2238,7 @@
       return endAudio(view);
     }
 
-    source = "!/file" + row[0].dataset.id;
+    const source = "!/file" + row[0].dataset.id;
     view.find(".seekbar-played, .seekbar-loaded")[0].style.width = "0%";
 
     if (player.canPlayType(droppy.audioTypes[fileExtension(source)])) {
@@ -2244,13 +2253,13 @@
     row.addClass("playing").siblings().removeClass("playing");
 
     if (row.length) {
-      var content = row.parents(".content-container");
+      const content = row.parents(".content-container");
       if (row[0].offsetTop < content[0].scrollTop ||
           row[0].offsetTop > content[0].scrollTop + content[0].clientHeight) {
         row[0].scrollIntoView();
       }
 
-      var i = 0;
+      let i = 0;
       row.parent().children(".playable").each(function() {
         this.setAttribute("data-playindex", i++);
       });
@@ -2260,15 +2269,15 @@
   }
 
   function onNewAudio(view) {
-    var player = view[0].querySelector(".audio-player");
-    var title  = decodeURIComponent(removeExt(basename(player.src).replace(/_/g, " ").replace(/\s+/, " ")));
+    const player = view[0].querySelector(".audio-player");
+    const title  = decodeURIComponent(removeExt(basename(player.src).replace(/_/g, " ").replace(/\s+/, " ")));
 
     view.find(".audio-bar").addClass("in");
     view.find(".audio-title")[0].textContent = title;
     setTitle(title);
 
     (function updateBuffer() {
-      var progress;
+      let progress;
       if (player.buffered.length) {
         progress = (player.buffered.end(0) / player.duration) * 100;
       }
@@ -2276,8 +2285,8 @@
       if (!progress || progress < 100) setTimeout(updateBuffer, 100);
     })();
 
-    $(player).off("timeupdate").on("timeupdate", function() {
-      var cur = player.currentTime, max = player.duration;
+    $(player).off("timeupdate").on("timeupdate", () => {
+      const cur = player.currentTime, max = player.duration;
       if (!cur || !max) return;
       view[0].querySelector(".seekbar-played").style.width = (cur / max) * 100 + "%";
       view[0].querySelector(".time-cur").textContent = secsToTime(cur);
@@ -2294,46 +2303,46 @@
   }
 
   function initAudio(view) {
-    var heldVolume = false;
-    var bar        = view.find(".audio-bar");
-    var slider     = view.find(".volume-slider");
-    var volumeIcon = view.find(".audio-bar .volume");
-    var player     = view.find(".audio-player")[0];
+    let heldVolume = false;
+    const bar        = view.find(".audio-bar");
+    const slider     = view.find(".volume-slider");
+    const volumeIcon = view.find(".audio-bar .volume");
+    const player     = view.find(".audio-player")[0];
 
     setVolume(droppy.get("volume"));
 
-    player.addEventListener("ended", function(e) {
+    player.addEventListener("ended", (e) => {
       playNext($(e.target).parents(".view"));
     });
-    player.addEventListener("error", function(e) {
+    player.addEventListener("error", (e) => {
       playNext($(e.target).parents(".view"));
     });
-    player.addEventListener("playing", function(e) {
+    player.addEventListener("playing", (e) => {
       onNewAudio($(e.target).parents(".view"));
     });
-    var updateVolume = throttle(function(event) {
-      var slider = $(event.target).parents(".view").find(".volume-slider")[0];
-      var left   = slider.getBoundingClientRect().left;
-      var right  = slider.getBoundingClientRect().right;
+    const updateVolume = throttle((event) => {
+      const slider = $(event.target).parents(".view").find(".volume-slider")[0];
+      const left   = slider.getBoundingClientRect().left;
+      const right  = slider.getBoundingClientRect().right;
       setVolume((event.pageX - left) / (right - left));
     }, 1000 / 60);
-    slider.off("mousedown").on("mousedown", function(event) {
+    slider.off("mousedown").on("mousedown", (event) => {
       heldVolume = true;
       updateVolume(event);
       event.stopPropagation();
     });
-    bar.off("mousemove").on("mousemove", function(event) {
+    bar.off("mousemove").on("mousemove", (event) => {
       if (heldVolume) updateVolume(event);
     });
-    bar.off("mouseup").on("mouseup", function() {
+    bar.off("mouseup").on("mouseup", () => {
       heldVolume = false;
     });
-    slider.off("click").on("click", function(event) {
+    slider.off("click").on("click", (event) => {
       updateVolume(event);
       event.stopPropagation();
     });
     bar.off("click").on("click", function(event) {
-      var time = player.duration *
+      const time = player.duration *
         ((event.pageX - bar[0].getBoundingClientRect().left) / bar[0].clientWidth);
       if (!isNaN(parseFloat(time)) && isFinite(time)) {
         player.currentTime = time;
@@ -2341,17 +2350,17 @@
         endAudio($(this).parents(".view"));
       }
     });
-    bar.find(".previous").off("click").on("click", function(event) {
+    bar.find(".previous").off("click").on("click", (event) => {
       playPrev($(event.target).parents(".view"));
       event.stopPropagation();
     });
-    bar.find(".next").off("click").on("click", function(event) {
+    bar.find(".next").off("click").on("click", (event) => {
       playNext($(event.target).parents(".view"));
       event.stopPropagation();
     });
     bar.find(".pause-play").off("click").on("click", function(event) {
-      var icon   = $(this).children("svg");
-      var player = $(this).parents(".audio-bar").find(".audio-player")[0];
+      const icon   = $(this).children("svg");
+      const player = $(this).parents(".audio-bar").find(".audio-player")[0];
       if (icon[0].getAttribute("class") === "play") {
         icon.replaceWith($(svg("pause")));
         player.play();
@@ -2382,7 +2391,7 @@
     slider[0].addEventListener("DOMMouseScroll", onWheel);
     volumeIcon[0].addEventListener("mousewheel", onWheel);
     volumeIcon[0].addEventListener("DOMMouseScroll", onWheel);
-    volumeIcon.off("click").on("click", function(event) {
+    volumeIcon.off("click").on("click", (event) => {
       slider.toggleClass("in");
       volumeIcon.toggleClass("active");
       event.stopPropagation();
@@ -2399,7 +2408,7 @@
       view.find(".volume-slider-inner")[0].style.width = (volume * 100) + "%";
     }
     function playRandom(view) {
-      var nextIndex;
+      let nextIndex;
       if (view[0].playlistLength === 1) return play(view, 0);
       do {
         nextIndex = Math.floor(Math.random() * view[0].playlistLength);
@@ -2427,23 +2436,23 @@
   // CodeMirror dynamic mode loading
   // based on https://github.com/codemirror/CodeMirror/blob/master/addon/mode/loadmode.js
   function initModeLoad() {
-    var loading = {};
+    const loading = {};
     function splitCallback(cont, n) {
-      var countDown = n;
+      let countDown = n;
       return function() { if (--countDown === 0) cont(); };
     }
     function ensureDeps(mode, cont) {
-      var deps = CodeMirror.modes[mode].dependencies;
+      const deps = CodeMirror.modes[mode].dependencies;
       if (!deps) return cont();
-      var missing = [];
-      for (var i = 0; i < deps.length; ++i) {
+      const missing = [];
+      for (let i = 0; i < deps.length; ++i) {
         if (!CodeMirror.modes.hasOwnProperty(deps[i])) {
           missing.push(deps[i]);
         }
       }
       if (!missing.length) return cont();
-      var split = splitCallback(cont, missing.length);
-      for (var j = 0; j < missing.length; ++j) {
+      const split = splitCallback(cont, missing.length);
+      for (let j = 0; j < missing.length; ++j) {
         CodeMirror.requireMode(missing[j], split);
       }
     }
@@ -2453,19 +2462,19 @@
       if (CodeMirror.modes.hasOwnProperty(mode)) return ensureDeps(mode, cont);
       if (loading.hasOwnProperty(mode)) return loading[mode].push(cont);
 
-      var script = document.createElement("script");
+      const script = document.createElement("script");
       script.src = "!/res/mode/" + mode;
-      var others = document.getElementsByTagName("script")[0];
+      const others = document.getElementsByTagName("script")[0];
       others.parentNode.insertBefore(script, others);
-      var list = loading[mode] = [cont];
-      var count = 0;
-      var poll = setInterval(function() {
+      const list = loading[mode] = [cont];
+      let count = 0;
+      const poll = setInterval(() => {
         if (++count > 100) return clearInterval(poll);
         if (CodeMirror.modes.hasOwnProperty(mode)) {
           clearInterval(poll);
           loading[mode] = null;
-          ensureDeps(mode, function() {
-            for (var i = 0; i < list.length; ++i) list[i]();
+          ensureDeps(mode, () => {
+            for (let i = 0; i < list.length; ++i) list[i]();
           });
         }
       }, 200);
@@ -2473,7 +2482,7 @@
 
     CodeMirror.autoLoadMode = function(instance, mode) {
       if (!CodeMirror.modes.hasOwnProperty(mode)) {
-        CodeMirror.requireMode(mode, function() {
+        CodeMirror.requireMode(mode, () => {
           instance.setOption("mode", instance.getOption("mode"));
         });
       }
@@ -2482,7 +2491,7 @@
 
   function modeFromShebang(text) {
     // extract first line, trim and remove flags
-    text = (text || "").split(/\n/)[0].trim().split(" ").filter(function(e) {
+    text = (text || "").split(/\n/)[0].trim().split(" ").filter((e) => {
       return !/^-+/.test(e);
     }).join(" ");
 
@@ -2490,11 +2499,12 @@
     if (/^#!.*\b(ba|c|da|k|fi|tc|z)?sh$/.test(text)) return "shell";
 
     // map binary name to CodeMirror mode
-    var mode, exes = {
+    let mode;
+    const exes = {
       dart: "dart", lua: "lua", node: "javascript", perl: "perl", php: "php",
       python: "python", ruby: "ruby", swift: "swift", tclsh: "tcl"
     };
-    Object.keys(exes).some(function(exe) {
+    Object.keys(exes).some((exe) => {
       if (new RegExp("^#!.*\\b" + exe + "$").test(text)) return (mode = exes[exe]);
     });
     return mode;
@@ -2502,11 +2512,11 @@
 
   // video.js
   function initVideo(el) {
-    var view = $(el).parents(".view");
+    const view = $(el).parents(".view");
     Promise.all([
       loadStyle("plyr-css", "!/res/lib/plyr.css"),
       loadScript("plyr-js", "!/res/lib/plyr.js"),
-    ]).then(function() {
+    ]).then(() => {
       (function verify() {
         if (!("Plyr" in window)) {
           return setTimeout(verify, 200);
@@ -2517,7 +2527,7 @@
           if (this !== el) this.pause();
         });
 
-        var player = new Plyr(el, {
+        const player = new Plyr(el, {
           controls: ["play", "volume", "progress", "current-time", "mute", "captions"],
           iconUrl: "!/res/lib/plyr.svg",
           blankUrl: "!/res/lib/blank.mp4",
@@ -2532,16 +2542,16 @@
           hideControls: true,
         });
 
-        player.on("ready", function() {
+        player.on("ready", () => {
           // stop drags from propagating outside the control bar
-          $(view).find(".plyr__controls").on("mousemove", function(e) {
+          $(view).find(".plyr__controls").on("mousemove", (e) => {
             if (e.originalEvent && e.originalEvent.buttons !== 0) {
               e.stopPropagation();
             }
           });
         });
 
-        player.on("ended", function() {
+        player.on("ended", () => {
           if (droppy.get("loop")) {
             player.play();
           } else if (droppy.get("autonext")) {
@@ -2549,12 +2559,12 @@
           }
         });
 
-        player.on("error", function(err) {
+        player.on("error", (err) => {
           console.error(err);
           showError(view, "Your browser can't play this file");
         });
 
-        player.on("volumechange", function() {
+        player.on("volumechange", () => {
           droppy.set("volume", player.muted ? 0 : player.volume);
         });
       })();
@@ -2685,21 +2695,22 @@
     view[0].sharelinkId = location;
     showSpinner(view);
     sendMessage(view[0].vId, "REQUEST_SHARELINK", {
-      location   : location,
-      attachement: attachement
+      location,
+      attachement
     });
   }
 
   function timeDifference(prev) {
     if (typeof prev !== "number") return "unknown";
-    var diff = (Date.now() - Number(prev)) / 1000;
-    var future = diff < 0, value, unit;
+    let diff = (Date.now() - Number(prev)) / 1000;
+    const future = diff < 0;
+    let value, unit;
     diff = Math.abs(diff);
     [
       [60, 1, "sec"], [3600, 60, "min"], [86400, 3600, "hour"],
       [2592000, 86400, "day"], [31536000, 2592000, "month"],
       [Infinity, 31536000, "year"]
-    ].some(function(data) {
+    ].some((data) => {
       if (diff < data[0]) {
         value = diff / data[1];
         unit = data[2];
@@ -2713,7 +2724,7 @@
   }
 
   function secsToTime(secs) {
-    var mins, hrs, time = "";
+    let mins, hrs, time = "";
     secs = parseInt(secs);
     hrs = Math.floor(secs / 3600);
     mins = Math.floor((secs - (hrs * 3600)) / 60);
@@ -2727,13 +2738,13 @@
     return time + mins + ":" + secs;
   }
 
-  setInterval(function() {
-    var dates = document.getElementsByClassName("mtime");
+  setInterval(() => {
+    const dates = document.getElementsByClassName("mtime");
     if (!dates) return;
-    for (var i = 0; i < dates.length; i++) {
-      var timestamp = dates[i].getAttribute("data-timestamp");
+    for (let i = 0; i < dates.length; i++) {
+      const timestamp = dates[i].getAttribute("data-timestamp");
       if (timestamp) {
-        var reltime = timeDifference(Number(timestamp));
+        const reltime = timeDifference(Number(timestamp));
         if (reltime) dates[i].innerHTML = reltime;
       }
     }
@@ -2741,10 +2752,10 @@
 
   function loadScript(id, url) {
     if (document.getElementById(id)) return Promise.resolve();
-    return ajax(url).then(function(res) {
+    return ajax(url).then((res) => {
       return res.text();
-    }).then(function(text) {
-      var script = document.createElement("script");
+    }).then((text) => {
+      const script = document.createElement("script");
       script.setAttribute("id", id);
       script.textContent = text;
       document.querySelector("head").appendChild(script);
@@ -2753,10 +2764,10 @@
 
   function loadStyle(id, url) {
     if (document.getElementById(id)) return Promise.resolve();
-    return ajax(url).then(function(res) {
+    return ajax(url).then((res) => {
       return res.text();
-    }).then(function(text) {
-      var style = document.createElement("style");
+    }).then((text) => {
+      const style = document.createElement("style");
       style.setAttribute("id", id);
       style.textContent = text;
       document.querySelector("head").appendChild(style);
@@ -2768,9 +2779,9 @@
   }
 
   function setEditorFontSize(size) {
-    arr(document.styleSheets).some(function(sheet) {
+    arr(document.styleSheets).some((sheet) => {
       if (sheet.ownerNode.id === "css") {
-        arr(sheet.cssRules).some(function(rule) {
+        arr(sheet.cssRules).some((rule) => {
           if (rule.selectorText === ".content div.CodeMirror") {
             rule.style.fontSize = size + "px";
             return true;
@@ -2791,26 +2802,26 @@
     // HACK: Safeguard so a view won't get stuck in loading state
     if (view[0].dataset.type === "directory") {
       if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
-      view[0].stuckTimeout = setTimeout(function() {
+      view[0].stuckTimeout = setTimeout(() => {
         sendMessage(view[0].vId, "REQUEST_UPDATE", getViewLocation(view));
       }, 2000);
     }
   }
 
   function hideSpinner(view) {
-    var spinner = view.find(".spinner");
+    const spinner = view.find(".spinner");
     if (spinner.length) spinner[0].setAttribute("class", "spinner");
     if (view[0].stuckTimeout) clearTimeout(view[0].stuckTimeout);
   }
 
   function showError(view, text) {
     if (!Object.keys(view).length) return alert(text);
-    var box = view.find(".info-box");
+    const box = view.find(".info-box");
     clearTimeout(droppy.errorTimer);
     box.find(".icon svg").replaceWith(svg("exclamation"));
     box.children("span")[0].textContent = text;
     box[0].className = "info-box error in";
-    droppy.errorTimer = setTimeout(function() {
+    droppy.errorTimer = setTimeout(() => {
       box.removeClass("in");
     }, 5000);
   }
@@ -2818,35 +2829,35 @@
   function showLink(view, link, attachement) {
     toggleCatcher(true);
     clearTimeout(droppy.errorTimer);
-    var box  = view.find(".info-box");
-    var out  = box.find(".link-out");
-    var copy = box.find(".copy-link");
-    var dl   = box.find(".dl-link");
+    const box  = view.find(".info-box");
+    const out  = box.find(".link-out");
+    const copy = box.find(".copy-link");
+    const dl   = box.find(".dl-link");
     dl[attachement ? "addClass" : "removeClass"]("checked");
 
-    var select = function() {
-      var range = document.createRange(), selection = getSelection();
+    const select = function() {
+      const range = document.createRange(), selection = getSelection();
       range.selectNodeContents(out[0]);
       selection.removeAllRanges();
       selection.addRange(range);
     };
 
     out[0].textContent = getFullLink(link);
-    out.off("copy").on("copy", function() {
+    out.off("copy").on("copy", () => {
       setTimeout(toggleCatcher.bind(null, false), 100);
     });
     box.find(".icon svg").replaceWith(svg("link"));
     box[0].className = "info-box link in";
-    box.transitionend(function() {
+    box.transitionend(() => {
       select();
     });
 
-    copy.off("click").on("click", function() {
-      var done;
+    copy.off("click").on("click", () => {
+      let done;
       select();
       try { done = document.execCommand("copy"); } catch (err) {}
       copy[0].setAttribute("aria-label", done === true ? "Copied!" : "Copy failed");
-    }).on("mouseleave", function() {
+    }).on("mouseleave", () => {
       copy[0].setAttribute("aria-label", "Copy to clipboard");
     });
 
@@ -2858,19 +2869,19 @@
 
   function showNotification(msg, body) {
     if (droppy.detects.notification && document.hidden) {
-      var show = function(msg, body) {
-        var opts = {icon: "!/res/logo192.png"};
+      const show = function(msg, body) {
+        const opts = {icon: "!/res/logo192.png"};
         if (body) opts.body = body;
-        var n = new Notification(msg, opts);
+        const n = new Notification(msg, opts);
         n.addEventListener("show", function() { // Compat: Chrome
-          var self = this;
-          setTimeout(function() { self.close(); }, 4000);
+          const self = this;
+          setTimeout(() => { self.close(); }, 4000);
         });
       };
       if (Notification.permission === "granted") {
         show(msg, body);
       } else if (Notification.permission !== "denied") {
-        Notification.requestPermission(function(permission) {
+        Notification.requestPermission((permission) => {
           if (!("permission" in Notification)) Notification.permission = permission;
           if (permission === "granted") show(msg, body);
         });
@@ -2879,34 +2890,33 @@
   }
 
   function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-      var context = this, args = arguments;
-      var later = function() {
+    let timeout;
+    return function(...args) {
+      const later = () => {
         timeout = null;
-        if (!immediate) func.apply(context, args);
+        if (!immediate) func.apply(this, ...args);
       };
-      var callNow = immediate && !timeout;
+      const callNow = immediate && !timeout;
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
-      if (callNow) func.apply(context, args);
+      if (callNow) func.apply(this, ...args);
     };
   }
 
   function throttle(func, threshold) {
     if (!threshold) threshold = 250;
-    var last, deferTimer;
-    return function() {
-      var cur = performance.now(), args = arguments;
+    let last, deferTimer;
+    return function(...args) {
+      const cur = performance.now();
       if (last && cur < last + threshold) {
         clearTimeout(deferTimer);
-        deferTimer = setTimeout(function() {
+        deferTimer = setTimeout(() => {
           last = cur;
-          func.apply(this, args);
+          func.apply(this, ...args);
         }, threshold);
       } else {
         last = cur;
-        func.apply(this, args);
+        func.apply(this, ...args);
       }
     };
   }
@@ -2916,7 +2926,7 @@
   }
 
   function getSpriteClass(ext) {
-    var type = "bin";
+    let type = "bin";
     Object.keys(droppy.iconMap).forEach(fileType => {
       if (droppy.iconMap[fileType].indexOf(ext.toLowerCase()) > -1) {
         type = fileType;
@@ -2927,9 +2937,9 @@
 
   function formatBytes(num) {
     if (num < 1000) return num + " B";
-    var units = ["B", "kB", "MB", "GB", "TB", "PB"];
-    var exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
-    return (num / Math.pow(1000, exp)).toPrecision(3) + " " + units[exp];
+    const units = ["B", "kB", "MB", "GB", "TB", "PB"];
+    const exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
+    return (num / (100 ** exp)).toPrecision(3) + " " + units[exp];
   }
 
   function naturalSortWithNumbers(a, b) {
@@ -2940,13 +2950,13 @@
       a = a.replace(/['"]/g, "_").toLowerCase();
       b = b.replace(/['"]/g, "_").toLowerCase();
       // natural sort algorithm start
-      var x = [], y = [];
-      a.replace(/(\d+)|(\D+)/g, function(_, a, b) { x.push([a || 0, b]); });
-      b.replace(/(\d+)|(\D+)/g, function(_, a, b) { y.push([a || 0, b]); });
+      const x = [], y = [];
+      a.replace(/(\d+)|(\D+)/g, (_, a, b) => { x.push([a || 0, b]); });
+      b.replace(/(\d+)|(\D+)/g, (_, a, b) => { y.push([a || 0, b]); });
       while (x.length && y.length) {
-        var xx = x.shift();
-        var yy = y.shift();
-        var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
+        const xx = x.shift();
+        const yy = y.shift();
+        const nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
         if (nn) return nn;
       }
       if (x.length) return -1;
@@ -2957,8 +2967,8 @@
   }
 
   function sortArrayByProp(arr, prop) {
-    return arr.sort(function(a, b) {
-      var result = naturalSortWithNumbers(a[prop], b[prop]);
+    return arr.sort((a, b) => {
+      let result = naturalSortWithNumbers(a[prop], b[prop]);
       if (result === 0) result = naturalSortWithNumbers(a.sortname, b.sortname);
       return result;
     });
@@ -2967,25 +2977,25 @@
   function ajax(opts) {
     if (typeof opts === "string") opts = {url: opts};
 
-    var headers = new Headers(opts.headers || {});
+    const headers = new Headers(opts.headers || {});
     if (opts.data) {
       headers.append("content-type", "application/json");
     }
 
     return fetch(getRootPath() + opts.url, {
       method: opts.method || "GET",
-      headers: headers,
+      headers,
       body: opts.data ? JSON.stringify(opts.data) : undefined,
       credentials: "same-origin",
       mode: "same-origin",
       redirect: "error",
-    }).catch(function(err) { // request failed
+    }).catch((err) => { // request failed
       showError(getActiveView(), err.message);
     });
   }
 
   function validateFiles(files, view) {
-    return files.every(function(file) {
+    return files.every((file) => {
       if (validPath(file)) {
         return true;
       } else {
@@ -2996,7 +3006,7 @@
   }
 
   function validPath(path) {
-    return path.split("/").every(function(name) {
+    return path.split("/").every((name) => {
       if (!name) return true;
       return validFilename(name);
     });
@@ -3022,7 +3032,7 @@
 
   // Get the path to droppy's root, ensuring a trailing slash
   function getRootPath() {
-    var p = location.pathname;
+    const p = location.pathname;
     return p[p.length - 1] === "/" ? p : p + "/";
   }
 
@@ -3038,18 +3048,19 @@
 
   // detect dominant line ending style (CRLF vs LF)
   function dominantLineEnding(str) {
-    var numCRLF = (str.match(/\r\n/gm) || []).length;
+    const numCRLF = (str.match(/\r\n/gm) || []).length;
     // emulating negative lookbehind by reversing the string
-    var numLF = (str.split("").reverse().join("").match(/\n(?!(\r))/gm) || []).length;
+    const numLF = (str.split("").reverse().join("").match(/\n(?!(\r))/gm) || []).length;
     return (numCRLF > numLF) ? "\r\n" : "\n";
   }
 
   // Join and clean up paths (can also take a single argument to just clean it up)
-  function join() {
-    var i, l, parts = [], newParts = [];
-    for (i = 0, l = arguments.length; i < l; i++) {
-      if (typeof arguments[i] === "string") {
-        parts = parts.concat(arguments[i].split("/"));
+  function join(...args) {
+    let i, l, parts = [];
+    const newParts = [];
+    for (i = 0, l = args.length; i < l; i++) {
+      if (typeof args[i] === "string") {
+        parts = parts.concat(args[i].split("/"));
       }
     }
     for (i = 0, l = parts.length; i < l; i++) {
@@ -3065,13 +3076,13 @@
   }
 
   function dateFilename() {
-    var now   = new Date();
-    var day   = now.getDate();
-    var month = now.getMonth() + 1;
-    var year  = now.getFullYear();
-    var hrs   = now.getHours();
-    var mins  = now.getMinutes();
-    var secs  = now.getSeconds();
+    const now   = new Date();
+    let day   = now.getDate();
+    let month = now.getMonth() + 1;
+    const year  = now.getFullYear();
+    let hrs   = now.getHours();
+    let mins  = now.getMinutes();
+    let secs  = now.getSeconds();
 
     if (month < 10) month = "0" + month;
     if (day < 10) day = "0" + day;
@@ -3087,26 +3098,26 @@
   }
 
   function urlToPngBlob(url, cb) {
-    var img = new Image();
+    const img = new Image();
     img.crossOrigin = "anonymous";
-    img.addEventListener("load", function() {
-      var canvas = document.createElement("canvas");
+    img.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
-      var ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      var binary = atob(canvas.toDataURL("image/png").split(",")[1]);
-      var len = binary.length;
-      var bytes = new Uint8Array(len);
-      for (var i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+      const binary = atob(canvas.toDataURL("image/png").split(",")[1]);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
       cb(new Blob([bytes.buffer], {type: "image/png"}));
     });
     img.src = url;
   }
 
   function imgExtFromMime(mime) {
-    var ret;
-    Object.keys(droppy.imageTypes).some(function(ext) {
+    let ret;
+    Object.keys(droppy.imageTypes).some((ext) => {
       if (mime === droppy.imageTypes[ext]) {
         ret = ext;
         return true;
