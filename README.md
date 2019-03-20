@@ -187,6 +187,10 @@ droppy can be used with express, see the [express example](./examples/express.js
 
 Returns a object `{onRequest, setupWebSocket}`.
 
+### Browser support
+
+droppy supports all modern browsers that can run ECMAScript 2015 or newer.
+
 ### Working with other websocket servers
 
 To use droppy in a server that uses other websocket applications on the same
