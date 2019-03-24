@@ -2937,9 +2937,9 @@
 
   function formatBytes(num) {
     if (num < 1000) return num + " B";
-    const units = ["B", "kB", "MB", "GB", "TB", "PB"];
-    const exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
-    return (num / (100 ** exp)).toPrecision(3) + " " + units[exp];
+    const units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const exp = Math.min(Math.floor(Math.log10(num) / 3), units.length - 1);
+    return String((Number((num / (1000 ** exp)).toPrecision(3)))) + " " + units[exp];
   }
 
   function naturalSortWithNumbers(a, b) {
