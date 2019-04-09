@@ -319,7 +319,6 @@
       const view = getView(vId);
 
       droppy.socketWait = false;
-      let file;
 
       switch (msg.type) {
       case "UPDATE_DIRECTORY":
@@ -365,6 +364,7 @@
         break;
       case "SAVE_STATUS":
         hideSpinner(view);
+        const file = view.find(".path li:last-child");
         file.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
         setTimeout(() => {
           file.removeClass("saved save-failed");
