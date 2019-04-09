@@ -28,3 +28,4 @@ rules:
   unicorn/prefer-query-selector: [0]
   unicorn/prefer-node-append: [0]
   unicorn/no-hex-escape: [0]
+  unicorn/prevent-abbreviations: [0]

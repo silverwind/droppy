@@ -73,7 +73,7 @@ cfg.init = function(config, callback) {
 
           // Remove options no longer present
           Object.keys(config).forEach(key => {
-            if (defaults[key] === undefined && hiddenOpts.indexOf(key) === -1) {
+            if (defaults[key] === undefined && !hiddenOpts.includes(key)) {
               delete config[key];
             }
           });

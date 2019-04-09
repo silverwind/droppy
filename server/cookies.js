@@ -21,7 +21,8 @@ cookies.parse = function(cookie) {
 cookies.get = function(cookie) {
   const entries = cookies.parse(cookie);
   if (!entries || !entries.s) return false;
-  if (Object.keys(db.get("sessions") || {}).indexOf(entries.s) === -1) return false;
+  const sessions = Object.keys(db.get("sessions") || {});
+  if (!sessions.includes(entries.s)) return false;
   return entries.s;
 };
 

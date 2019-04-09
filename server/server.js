@@ -855,7 +855,7 @@ function handlePOST(req, res) {
 
     // Rate-limit login attempts to one attempt every 2 seconds
     const ip = utils.ip(req);
-    if (rateLimited.indexOf(ip) !== -1) {
+    if (rateLimited.includes(ip)) {
       res.statusCode = 429;
       res.end();
       return;

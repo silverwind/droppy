@@ -67,7 +67,7 @@
     }
 
     duration = getComputedStyle(el).transitionDuration;
-    duration = (duration.indexOf("ms") > -1) ? parseFloat(duration) : parseFloat(duration) * 1000;
+    duration = (duration.includes("ms")) ? parseFloat(duration) : parseFloat(duration) * 1000;
 
     setTimeout(() => { // Call back if "transitionend" hasn't fired in duration + 30
       doCallback({target: el}); // Just mimic the event.target property on our fake event
@@ -321,7 +321,7 @@
       droppy.socketWait = false;
 
       switch (msg.type) {
-      case "UPDATE_DIRECTORY":
+      case "UPDATE_DIRECTORY": {
         if (typeof view[0].dataset.type === "undefined" || view[0].switchRequest) {
           view[0].dataset.type = "directory"; // For initial loading
         }
@@ -342,16 +342,19 @@
           // TODO: Update media array
         }
         break;
-      case "UPDATE_BE_FILE":
+      }
+      case "UPDATE_BE_FILE": {
         openFile(getView(vId), msg.folder, msg.file);
         break;
-      case "RELOAD":
+      }
+      case "RELOAD": {
         if (msg.css) {
           $("#css").remove();
           $("<style id='css'>" + msg.css + "</style>").appendTo($("head"));
         } else location.reload(true);
         break;
-      case "SHARELINK":
+      }
+      case "SHARELINK": {
         hideSpinner(view);
         if (view.find(".info-box.link.in").length) {
           view.find(".link-out")[0].textContent = getFullLink(msg.link);
@@ -359,10 +362,12 @@
           showLink(view, msg.link, msg.attachement);
         }
         break;
-      case "USER_LIST":
+      }
+      case "USER_LIST": {
         updateUsers(msg.users);
         break;
-      case "SAVE_STATUS":
+      }
+      case "SAVE_STATUS": {
         hideSpinner(view);
         const file = view.find(".path li:last-child");
         file.removeClass("dirty").addClass(msg.status === 0 ? "saved" : "save-failed");
@@ -370,7 +375,8 @@
           file.removeClass("saved save-failed");
         }, 3000);
         break;
-      case "SETTINGS":
+      }
+      case "SETTINGS": {
         Object.keys(msg.settings).forEach((setting) => {
           droppy[setting] = msg.settings[setting];
         });
@@ -401,16 +407,20 @@
           document.documentElement.classList.add("nowatch");
         }
         break;
-      case "MEDIA_FILES":
+      }
+      case "MEDIA_FILES": {
         loadMedia(view, msg.files);
         break;
-      case "SEARCH_RESULTS":
+      }
+      case "SEARCH_RESULTS": {
         openDirectory(view, msg.results, true);
         break;
-      case "ERROR":
+      }
+      case "ERROR": {
         showError(view, msg.text);
         hideSpinner(view);
         break;
+      }
       }
     });
   }
@@ -558,7 +568,7 @@
           }
         });
       } else { // Safari specific
-        if (cd.types.indexOf("text/plain") !== -1) {
+        if (cd.types.includes("text/plain")) {
           const blob = new Blob([cd.getData("Text")], {type: "text/plain"});
           uploadBlob(view, blob);
           $(".ce").empty();
@@ -999,13 +1009,13 @@
         classes : "",
       };
 
-      if (Object.keys(droppy.audioTypes).indexOf(fileExtension(name)) !== -1) {
+      if (Object.keys(droppy.audioTypes).includes(fileExtension(name))) {
         entry.classes = "playable";
         entry.playable = true;
-      } else if (Object.keys(droppy.videoTypes).indexOf(fileExtension(name)) !== -1) {
+      } else if (Object.keys(droppy.videoTypes).includes(fileExtension(name))) {
         entry.classes = "viewable viewable-video";
         entry.viewableVideo = true;
-      } else if (Object.keys(droppy.imageTypes).indexOf(fileExtension(name)) !== -1) {
+      } else if (Object.keys(droppy.imageTypes).includes(fileExtension(name))) {
         entry.classes = "viewable viewable-image";
         entry.viewableImage = true;
       } else if (fileExtension(name) === "pdf") {
@@ -1648,7 +1658,7 @@
     const e = fileExtension(file);
 
     // Fix newFolder and file variables if file includes the dir path
-    if (file.indexOf("/") !== -1) {
+    if (file.includes("/")) {
       newFolder = join(view[0].currentFolder, dirname(file));
       file = basename(file);
     }
@@ -1664,13 +1674,13 @@
     }
 
     // Determine filetype and how to open it
-    if (Object.keys(droppy.imageTypes).indexOf(e) !== -1) { // Image
+    if (Object.keys(droppy.imageTypes).includes(e)) { // Image
       view[0].currentFile = file;
       view[0].currentFolder = newFolder;
       pushHistory(view, join(view[0].currentFolder, view[0].currentFile));
       updatePath(view);
       openMedia(view);
-    } else if (Object.keys(droppy.videoTypes).indexOf(e) !== -1) { // Video
+    } else if (Object.keys(droppy.videoTypes).includes(e)) { // Video
       if (!droppy.detects.videoTypes[droppy.videoTypes[e]]) {
         showError(view, "Your browser can't play this file");
         updateLocation(view, view[0].currentFolder);
@@ -1687,7 +1697,7 @@
 
         openMedia(view);
       }
-    } else if (Object.keys(droppy.audioTypes).indexOf(e) !== -1) { // Audio
+    } else if (Object.keys(droppy.audioTypes).includes(e)) { // Audio
       if (opts.ref) {
         play(view, $(opts.ref).parents(".data-row"));
       }
@@ -2928,7 +2938,7 @@
   function getSpriteClass(ext) {
     let type = "bin";
     Object.keys(droppy.iconMap).forEach(fileType => {
-      if (droppy.iconMap[fileType].indexOf(ext.toLowerCase()) > -1) {
+      if (droppy.iconMap[fileType].includes(ext.toLowerCase())) {
         type = fileType;
       }
     });

@@ -119,7 +119,7 @@ utils.getNewPath = function(origPath, callback) {
       const dirname = path.dirname(origPath);
       let extension = "";
 
-      if (filename.indexOf(".") !== -1 && stats.isFile()) {
+      if (filename.includes(".") && stats.isFile()) {
         extension = filename.substring(filename.lastIndexOf("."));
         filename = filename.substring(0, filename.lastIndexOf("."));
       }
@@ -184,7 +184,7 @@ utils.isPathSane = function(p, isURL) {
 };
 
 utils.isBinary = async function(p) {
-  if (forceBinaryTypes.indexOf(ext(p)) !== -1) {
+  if (forceBinaryTypes.includes(ext(p))) {
     return true;
   }
 

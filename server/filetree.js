@@ -140,7 +140,7 @@ function updateDirInCache(root, stat, readDirs, readFiles) {
 
   // Remove deleted dirs
   Object.keys(dirs).forEach(path => {
-    if (path.indexOf(root) === 0 && readDirKeys.indexOf(path) === -1 && path !== root) {
+    if (path.indexOf(root) === 0 && readDirKeys.includes(path) && path !== root) {
       delete dirs[path];
     }
   });
