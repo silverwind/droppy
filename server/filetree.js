@@ -237,7 +237,11 @@ filetree.mk = function(dir, cb) {
   fs.stat(utils.addFilesPath(dir), err => {
     if (err && err.code === "ENOENT") {
       fs.open(utils.addFilesPath(dir), "wx", (err, fd) => {
-        if (err) log.error(err);
+        if (err) {
+          log.error(err);
+          if (cb) cb(err);
+          return;
+        }
         fs.close(fd, error => {
           if (error) log.error(error);
           dirs[path.dirname(dir)].files[path.basename(dir)] = {size: 0, mtime: Date.now()};
@@ -245,6 +249,9 @@ filetree.mk = function(dir, cb) {
           if (cb) cb();
         });
       });
+    } else if (err) {
+      log.error(err);
+      if (cb) cb(err);
     } else {
       if (cb) cb();
     }
@@ -256,11 +263,18 @@ filetree.mkdir = function(dir, cb) {
   fs.stat(utils.addFilesPath(dir), err => {
     if (err && err.code === "ENOENT") {
       utils.mkdir(utils.addFilesPath(dir), err => {
-        if (err) log.error(err);
+        if (err) {
+          log.error(err);
+          if (cb) cb(err);
+          return;
+        }
         dirs[dir] = {files: {}, size: 0, mtime: Date.now()};
         update(path.dirname(dir));
         if (cb) cb();
       });
+    } else if (err) {
+      log.error(err);
+      if (cb) cb(err);
     } else {
       if (cb) cb();
     }

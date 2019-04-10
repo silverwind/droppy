@@ -550,7 +550,7 @@ function onWebSocketRequest(ws, req) {
       if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
       filetree.save(msg.data.to, msg.data.value, err => {
         if (err) {
-          sendError(sid, vId, "Error saving " + msg.data.to);
+          sendError(sid, vId, `Error saving: ${err.message}`);
           log.error(err);
         } else sendObj(sid, {type: "SAVE_STATUS", vId, status : err ? 1 : 0});
       });
@@ -577,11 +577,15 @@ function onWebSocketRequest(ws, req) {
     } else if (msg.type === "CREATE_FOLDER") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-      filetree.mkdir(msg.data);
+      filetree.mkdir(msg.data, err => {
+        if (err) sendError(sid, vId, `Error creating folder: ${err.message}`);
+      });
     } else if (msg.type === "CREATE_FILE") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
-      filetree.mk(msg.data);
+      filetree.mk(msg.data, err => {
+        if (err) sendError(sid, vId, `Error creating file: ${err.message}`);
+      });
     } else if (msg.type === "RENAME") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       const rSrc = msg.data.src;
@@ -736,6 +740,7 @@ function sendObjAll(data) {
 }
 
 function sendError(sid, vId, text) {
+  text = utils.sanitizePathsInString(text);
   sendObj(sid, {type: "ERROR", vId, text});
   log.error(clients[sid].ws, null, "Sent error: " + text);
 }
@@ -1145,7 +1150,9 @@ function handleUploadRequest(req, res) {
   if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
 
   const busboy = new Busboy(opts);
-  busboy.on("error", log.error);
+  busboy.on("error", err => {
+    log.error(err);
+  });
   busboy.on("file", (_, file, filePath) => {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
     numFiles++;
@@ -1156,12 +1163,13 @@ function handleUploadRequest(req, res) {
         req.sid, vId,
         "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded."
       );
-      closeConnection();
+      closeConnection(400);
     });
 
     const onWriteError = err => {
       log.error(req, res, err);
       sendError(req.sid, vId, `Error writing the file: ${err.message}`);
+      closeConnection(400);
     };
 
     const dst = path.join(paths.files, dstDir, filePath);
@@ -1206,8 +1214,9 @@ function handleUploadRequest(req, res) {
 
   req.pipe(busboy);
 
-  function closeConnection() {
-    res.statusCode = 200;
+  function closeConnection(status) {
+    if (res.finished) return;
+    res.statusCode = status || 200;
     res.setHeader("Connection", "close");
     res.end();
   }

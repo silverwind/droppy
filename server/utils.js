@@ -5,7 +5,7 @@ const async = require("async");
 const cd = require("content-disposition");
 const cpr = require("cpr");
 const crypto = require("crypto");
-const escRe = require("escape-string-regexp");
+const escapeStringRegexp = require("escape-string-regexp");
 const ext = require("file-extension");
 const fs = require("graceful-fs");
 const isbinaryfile = require("isbinaryfile");
@@ -163,6 +163,10 @@ utils.removeFilesPath = function(p) {
   }
 };
 
+utils.sanitizePathsInString = function(str) {
+  return (str || "").replace(RegExp(escapeStringRegexp(paths.files), "g"), "");
+};
+
 utils.isPathSane = function(p, isURL) {
   if (isURL) {
     // Navigating up/down the tree
@@ -297,7 +301,7 @@ utils.naturalSort = function(a, b) {
 
 utils.extensionRe = function(arr) {
   arr = arr.map(ext => {
-    return escRe(ext);
+    return escapeStringRegexp(ext);
   });
   return RegExp("\\.(" + arr.join("|") + ")$", "i");
 };

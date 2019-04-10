@@ -661,7 +661,7 @@
 
     // Create the XHR2 and bind the progress events
     xhr.upload.addEventListener("progress", throttle((e) => {
-      if (e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
+      if (e && e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     }, 100));
     xhr.upload.addEventListener("error", () => {
       showError(view, "An error occurred during upload.");
@@ -671,6 +671,8 @@
       if (xhr.readyState !== 4) return;
       if (xhr.status === 200) {
         uploadSuccess(id);
+      } else if (xhr.status === 400) { // generic client error
+        uploadCancel(view, id);
       } else {
         if (xhr.status === 0) return; // cancelled by user
         showError(view, "Server responded with HTTP " + xhr.status);
