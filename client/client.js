@@ -660,7 +660,7 @@
     });
 
     // Create the XHR2 and bind the progress events
-    xhr.upload.addEventListener("progress", throttle((e) => {
+    xhr.upload.addEventListener("progress", throttle(e => {
       if (e && e.lengthComputable) uploadProgress(view, id, e.loaded, e.total);
     }, 100));
     xhr.upload.addEventListener("error", () => {
@@ -2316,10 +2316,10 @@
 
   function initAudio(view) {
     let heldVolume = false;
-    const bar        = view.find(".audio-bar");
-    const slider     = view.find(".volume-slider");
+    const bar = view.find(".audio-bar");
+    const slider = view.find(".volume-slider");
     const volumeIcon = view.find(".audio-bar .volume");
-    const player     = view.find(".audio-player")[0];
+    const player = view.find(".audio-player")[0];
 
     setVolume(droppy.get("volume"));
 
@@ -2332,10 +2332,10 @@
     player.addEventListener("playing", (e) => {
       onNewAudio($(e.target).parents(".view"));
     });
-    const updateVolume = throttle((event) => {
+    const updateVolume = throttle(event => {
       const slider = $(event.target).parents(".view").find(".volume-slider")[0];
-      const left   = slider.getBoundingClientRect().left;
-      const right  = slider.getBoundingClientRect().right;
+      const left = slider.getBoundingClientRect().left;
+      const right = slider.getBoundingClientRect().right;
       setVolume((event.pageX - left) / (right - left));
     }, 1000 / 60);
     slider.off("mousedown").on("mousedown", (event) => {
@@ -2906,12 +2906,12 @@
     return function(...args) {
       const later = () => {
         timeout = null;
-        if (!immediate) func.apply(this, ...args);
+        if (!immediate) func(...args);
       };
       const callNow = immediate && !timeout;
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
-      if (callNow) func.apply(this, ...args);
+      if (callNow) func(...args);
     };
   }
 
@@ -2924,11 +2924,11 @@
         clearTimeout(deferTimer);
         deferTimer = setTimeout(() => {
           last = cur;
-          func.apply(this, ...args);
+          func(...args);
         }, threshold);
       } else {
         last = cur;
-        func.apply(this, ...args);
+        func(...args);
       }
     };
   }
