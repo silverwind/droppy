@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 11.0.0 - 2019-03-20
+
+- A modern browser with ECMAScript 2015 support is now required.
+
+## Version 10.0.0 - 2018-09-09
+
+- Node.js 8.0.0 or greater is now required.
+
 ## Version 9.0.0 - 2018-04-30
 
 - Node.js 6.0.0 or greater is now required.
