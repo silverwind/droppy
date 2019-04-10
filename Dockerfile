@@ -27,7 +27,7 @@ RUN cd /droppy && \
     /droppy/node_modules/plyr/src \
     /droppy/node_modules/raven-js \
     /root/.config \
-    /root/.node-gy \
+    /root/.node-gyp \
     /root/.npm \
     /tmp/* \
     /usr/lib/node_modules \
