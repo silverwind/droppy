@@ -354,20 +354,16 @@ function createListener(handler, opts, callback) {
   let server;
   if (opts.proto === "http") {
     server = require("http").createServer(handler);
-    server.on("clientError", (_err, socket) => {
+    server.on("clientError", (err, socket) => {
+      // can't get the remote address at this point, just log the error
+      if (err && err.message) log.debug(null, null, err.message);
       if (socket.writable) {
-        // Node.js 6.0
         socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
         socket.destroy();
       }
     });
     callback(null, server);
   } else {
-    // disable client session renegotiation
-    const tls = require("tls");
-    tls.CLIENT_RENEG_LIMIT = 0;
-    tls.CLIENT_RENEG_WINDOW = Infinity;
-
     const https = require("https");
     tlsInit(opts, (err, tlsOptions) => {
       if (err) return callback(err);
@@ -1437,8 +1433,6 @@ function tlsInit(opts, cb) {
 }
 
 function tlsSetup(opts, cb) {
-  opts.honorCipherOrder = true;
-
   if (typeof opts.key !== "string") {
     return cb(new Error("Missing TLS option 'key'"));
   } if (typeof opts.cert !== "string") {
