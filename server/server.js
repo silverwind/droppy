@@ -13,7 +13,7 @@ const escRe = require("escape-string-regexp");
 const etag = require("etag");
 const fs = require("graceful-fs");
 const imgSize = require("image-size");
-const readdirp = require("readdirp");
+const rrdir = require("rrdir");
 const sendFile = require("send");
 const ut = require("untildify");
 const Wss = require("ws").Server;
@@ -1350,7 +1350,7 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
   const zip = new yazl.ZipFile();
   const relPath = utils.removeFilesPath(zipPath);
   log.info(req, res);
-  log.info("Streaming zip of ", chalk.blue(relPath));
+  log.info(req, res, "Streaming zip of ", chalk.blue(relPath));
   res.statusCode = 200;
   res.setHeader("Content-Type", utils.contentType(zip));
   res.setHeader("Transfer-Encoding", "chunked");
@@ -1363,17 +1363,27 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
     return;
   }
 
-  readdirp({root: zipPath, entryType: "both"}).on("data", file => {
-    const pathInZip = path.join(path.basename(relPath), file.path);
-    const metaData = {mtime: file.stat.mtime, mode: file.stat.mode};
-    if (file.stat.isDirectory()) {
-      zip.addEmptyDirectory(pathInZip, metaData);
-    } else {
-      zip.addFile(file.fullPath, pathInZip, metaData);
+  rrdir(zipPath, {stats: true}).then(entries => {
+    for (const entry of entries) {
+      const pathInZip = path.relative(zipPath, entry.path);
+      const metaData = {
+        mtime: (entry.stats && entry.stats.mtime) ? entry.stats.mtime : new Date(),
+        mode: (entry.stats && entry.stats.mode) ? entry.stats.mode : 0o666,
+      };
+
+      if (entry.directory) {
+        zip.addEmptyDirectory(pathInZip, metaData);
+      } else {
+        zip.addFile(entry.path, pathInZip, metaData);
+      }
     }
-  }).on("warn", log.info).on("error", log.error).on("end", () => {
+
     zip.outputStream.pipe(res);
     zip.end();
+  }).catch(err => {
+    log.error(req, res, err);
+    res.statusCode = 500;
+    res.end();
   });
 }
 
