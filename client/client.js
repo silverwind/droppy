@@ -1507,14 +1507,20 @@
     // Play an audio file
     $("#entry-menu .play").off("click").on("click", (event) => {
       event.stopPropagation();
-      const entry = droppy.menuTarget, view = entry.parents(".view");
+
+      const entry = droppy.menuTarget;
+      const view = entry.parents(".view");
+
       play(view, entry);
       toggleCatcher(false);
     });
 
     $("#entry-menu .edit").off("click").on("click", (event) => {
       event.stopPropagation();
-      const entry = droppy.menuTarget, view = entry.parents(".view");
+
+      const entry = droppy.menuTarget;
+      const view = entry.parents(".view");
+
       toggleCatcher(false);
       openFile(view, view[0].currentFolder, entry.find(".file-link")[0].textContent, {text: true});
     });
@@ -1522,7 +1528,9 @@
     // Click on a "open" link
     $("#entry-menu .openfile").off("click").on("click", (event) => {
       event.stopPropagation();
-      const entry = droppy.menuTarget, view = entry.parents(".view");
+      const entry = droppy.menuTarget;
+      const view = entry.parents(".view");
+
       toggleCatcher(false);
       if (entry[0].dataset.type === "folder") {
         updateLocation(view, entry[0].dataset.id);
@@ -1534,14 +1542,33 @@
     // Rename a file/folder
     $("#entry-menu .rename").off("click").on("click", (event) => {
       event.stopPropagation();
-      const entry = droppy.menuTarget, view = entry.parents(".view");
       if (droppy.socketWait) return;
+
+      const entry = droppy.menuTarget;
+      const view = entry.parents(".view");
+
       entryRename(view, entry, false, (success, oldVal, newVal) => {
         if (success && newVal !== oldVal) {
           showSpinner(view);
           sendMessage(view[0].vId, "RENAME", {src: oldVal, dst: newVal});
         }
       });
+    });
+
+    $("#entry-menu .share").off("click").on("click", (event) => {
+      event.stopPropagation();
+      if (droppy.socketWait) return;
+
+      const entry = droppy.menuTarget;
+      const view = entry.parents(".view");
+
+      toggleCatcher(false);
+
+      requestLink(
+        view,
+        entry[0].dataset.id,
+        droppy.get("sharelinkDownload")
+      );
     });
 
     // Copy/cut a file/folder
@@ -1557,9 +1584,11 @@
 
     // Delete a file/folder
     $("#entry-menu .delete").off("click").on("click", (event) => {
-      const entry = droppy.menuTarget, view = entry.parents(".view");
       event.stopPropagation();
       if (droppy.socketWait) return;
+
+      const entry = droppy.menuTarget;
+      const view = entry.parents(".view");
 
       toggleCatcher(false);
       showSpinner(view);
