@@ -594,6 +594,16 @@ function onWebSocketRequest(ws, req) {
         return;
       }
       filetree.move(rSrc, rDst);
+
+      // update sharelinks to new destination
+      const links = db.get("links");
+      for (const link of Object.keys(links)) {
+        if (links[link].location === rSrc) {
+          links[link].location = rDst;
+          log.info(ws, null, "Share link updated: " + link + " -> " + rDst);
+        }
+      }
+      db.set("links", links);
     } else if (msg.type === "GET_USERS") {
       if (priv && !config.public) sendUsers(sid);
     } else if (msg.type === "UPDATE_USER") {
