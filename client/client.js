@@ -120,6 +120,14 @@
   }
   Handlebars.registerHelper("svg", svg);
 
+  function promisify(fn) {
+    return function() {
+      return new Promise(resolve => {
+        fn(result => resolve(result));
+      });
+    };
+  }
+
   if (droppy.detects.mobile) {
     document.documentElement.classList.add("mobile");
   } if (droppy.detects.webp) {
@@ -541,32 +549,36 @@
     });
 
     // handle pasting text and images in directory view
-    window.addEventListener("paste", (e) => {
+    window.addEventListener("paste", async e => {
       const view = getActiveView();
       if (view[0].dataset.type !== "directory") return;
-      const cd = e.clipboardData;
+      const cd = e.clipboardData || e.originalEvent.clipboardData;
       if (cd.items) { // modern browsers
-        arr(cd.items).forEach((item) => {
-          const texts = [];
-          const images = [];
-          if (item.kind === "string") {
-            item.getAsString((text) => {
-              texts.push(new Blob([text], {type: "text/plain"}));
-            });
-          } else if (item.kind === "file" && item.type.startsWith("image")) {
+        const texts = [];
+        const images = [];
+
+        for (const item of cd.items) {
+          if (item.kind === "file" || item.type.includes("image")) {
             images.push(item.getAsFile());
+            console.log(images);
           }
-          // if a image is found, don't upload additional text blobs
-          if (images.length) {
-            images.forEach((image) => {
-              uploadBlob(view, image);
-            });
-          } else {
-            texts.forEach((text) => {
-              uploadBlob(view, text);
-            });
+        }
+
+        // this API is weirdly implemented in Chrome. A pasted image consists of two items,
+        // if the text item is read first, the image item will not be available.
+        for (const item of cd.items) {
+          if (item.kind === "string") {
+            const text = await promisify(item.getAsString.bind(item))();
+            texts.push(new Blob([text], {type: "text/plain"}));
           }
-        });
+        }
+
+        // if a image is found, don't upload additional text blobs
+        if (images.length) {
+          images.forEach(image => uploadBlob(view, image));
+        } else {
+          texts.forEach((text) => uploadBlob(view, text));
+        }
       } else { // Safari specific
         if (cd.types.includes("text/plain")) {
           const blob = new Blob([cd.getData("Text")], {type: "text/plain"});
@@ -620,11 +632,11 @@
   // ============================================================================
   function uploadBlob(view, blob) {
     const fd = new FormData();
-    let name = "Pasted ";
+    let name = "pasted-";
     if (blob.type.startsWith("image")) {
-      name += "Image " + dateFilename() + "." + imgExtFromMime(blob.type);
+      name += "image-" + dateFilename() + "." + imgExtFromMime(blob.type);
     } else {
-      name += "Text " + dateFilename() + ".txt";
+      name += "text-" + dateFilename() + ".txt";
     }
     fd.append("files[]", blob, name);
     upload(view, fd, [name]);
@@ -1589,6 +1601,12 @@
 
       const entry = droppy.menuTarget;
       const view = entry.parents(".view");
+
+      if (!view[0]) {
+        console.log("NOVIEW");
+        console.log(droppy.menuTarget[0]);
+        return;
+      }
 
       toggleCatcher(false);
       showSpinner(view);
@@ -3116,21 +3134,20 @@
     return String.prototype.normalize ? str.normalize() : str;
   }
 
-  function dateFilename() {
-    const now   = new Date();
-    let day   = now.getDate();
-    let month = now.getMonth() + 1;
-    const year  = now.getFullYear();
-    let hrs   = now.getHours();
-    let mins  = now.getMinutes();
-    let secs  = now.getSeconds();
+  function pad(num) {
+    return num < 10 ? `0${num}` : `${num}`;
+  }
 
-    if (month < 10) month = "0" + month;
-    if (day < 10) day = "0" + day;
-    if (hrs < 10) hrs = "0" + hrs;
-    if (mins < 10) mins = "0" + mins;
-    if (secs < 10) secs = "0" + secs;
-    return year + "-" + month + "-" + day + " " + hrs + "." + mins + "." + secs;
+  function dateFilename() {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    const hrs = now.getHours();
+    const mins = now.getMinutes();
+    const secs = now.getSeconds();
+
+    return `${year}-${pad(month)}-${pad(day)}-${pad(hrs)}-${pad(mins)}-${pad(secs)}`;
   }
 
   function arr(arrLike) {
