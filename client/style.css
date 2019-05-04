@@ -327,12 +327,12 @@ nav {
 }
 
 .header-line-buttons, .line-buttons {
-  flex: 0 0 4.25rem;
+  flex: 0 0 4.5rem;
   justify-content: flex-end;
 }
 
 .readonly .header-line-buttons, .readonly .line-buttons {
-  flex: 0 0 3.25rem;
+  flex: 0 0 3.5rem;
 }
 
 .line-buttons svg {
@@ -342,7 +342,7 @@ nav {
   margin: .15rem 0;
 }
 .line-buttons span:hover svg, .line-buttons a:hover svg { fill: #000 }
-.line-buttons svg.menu {width: .5rem}
+.line-buttons svg.menu {width: .75rem}
 
 .icon-play svg, .icon-view svg {
   width: 24px; height: 24px;
