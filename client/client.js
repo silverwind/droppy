@@ -1122,7 +1122,6 @@
         }, 2000);
       });
 
-      // Request a sharelink
       view.find(".share-file").off("click").on("click", function() {
         if (droppy.socketWait) return;
         requestLink(
@@ -1130,6 +1129,12 @@
           $(this).parents(".data-row")[0].dataset.id,
           droppy.get("sharelinkDownload")
         );
+      });
+
+      view.find(".delete-file").off("click").on("click", function() {
+        if (droppy.socketWait) return;
+        showSpinner(view);
+        sendMessage(view[0].vId, "DELETE_FILE", $(this).parents(".data-row")[0].dataset.id);
       });
 
       view.find(".icon-play, .icon-view").off("click").on("click", function() {

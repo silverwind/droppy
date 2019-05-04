@@ -327,17 +327,18 @@ nav {
 }
 
 .header-line-buttons, .line-buttons {
-  flex: 0 0 4.5rem;
+  flex: 0 0 4.25rem;
   justify-content: flex-end;
 }
 
 .line-buttons svg {
   cursor: pointer;
   fill: #555;
-  padding: 0 .1rem;
+  padding: 0 1px;
   margin: .15rem 0;
 }
 .line-buttons span:hover svg, .line-buttons a:hover svg { fill: #000 }
+.line-buttons svg.menu {width: .5rem}
 
 .icon-play svg, .icon-view svg {
   width: 24px; height: 24px;
