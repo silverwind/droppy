@@ -331,6 +331,10 @@ nav {
   justify-content: flex-end;
 }
 
+.readonly .header-line-buttons, .readonly .line-buttons {
+  flex: 0 0 3.25rem;
+}
+
 .line-buttons svg {
   cursor: pointer;
   fill: #555;
@@ -630,7 +634,7 @@ html:not(.mobile) #entry-menu a.active {
 .readonly a.rename, .readonly a.copy, .readonly a.cut, .readonly a.delete,
 .readonly .af, .readonly .ad, .readonly .cf, .readonly .cd,
 .readonly .movefile, .readonly .copyfile, .public .logout,
-.readonly .sidebar .save {
+.readonly .sidebar .save, .readonly .delete-file {
   display: none !important;
 }
 
