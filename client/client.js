@@ -552,21 +552,19 @@
     window.addEventListener("paste", async e => {
       const view = getActiveView();
       if (view[0].dataset.type !== "directory") return;
-      const cd = e.clipboardData || e.originalEvent.clipboardData;
-      if (cd.items) { // modern browsers
+      if (e.clipboardData && e.clipboardData.items) { // modern browsers
         const texts = [];
         const images = [];
 
-        for (const item of cd.items) {
+        for (const item of e.clipboardData.items) {
           if (item.kind === "file" || item.type.includes("image")) {
             images.push(item.getAsFile());
-            console.log(images);
           }
         }
 
         // this API is weirdly implemented in Chrome. A pasted image consists of two items,
         // if the text item is read first, the image item will not be available.
-        for (const item of cd.items) {
+        for (const item of e.clipboardData.items) {
           if (item.kind === "string") {
             const text = await promisify(item.getAsString.bind(item))();
             texts.push(new Blob([text], {type: "text/plain"}));
@@ -579,9 +577,9 @@
         } else {
           texts.forEach((text) => uploadBlob(view, text));
         }
-      } else { // Safari specific
-        if (cd.types.includes("text/plain")) {
-          const blob = new Blob([cd.getData("Text")], {type: "text/plain"});
+      } else if (e.clipboardData.types) { // Safari specific
+        if (e.clipboardData.types.includes("text/plain")) {
+          const blob = new Blob([e.clipboardData.getData("Text")], {type: "text/plain"});
           uploadBlob(view, blob);
           $(".ce").empty();
           if (droppy.savedFocus) droppy.savedFocus.focus();
