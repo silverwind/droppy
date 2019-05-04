@@ -1523,7 +1523,7 @@
     $("#entry-menu .play").off("click").on("click", (event) => {
       event.stopPropagation();
 
-      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"]`);
       const view = entry.parents(".view");
 
       play(view, entry);
@@ -1533,7 +1533,7 @@
     $("#entry-menu .edit").off("click").on("click", (event) => {
       event.stopPropagation();
 
-      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"]`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
@@ -1544,7 +1544,7 @@
     $("#entry-menu .openfile").off("click").on("click", (event) => {
       event.stopPropagation();
 
-      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"]`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
@@ -1560,7 +1560,7 @@
       event.stopPropagation();
       if (droppy.socketWait) return;
 
-      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"]`);
       const view = entry.parents(".view");
 
       entryRename(view, entry, false, (success, oldVal, newVal) => {
@@ -1575,7 +1575,7 @@
       event.stopPropagation();
       if (droppy.socketWait) return;
 
-      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"]`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
@@ -1603,7 +1603,7 @@
       event.stopPropagation();
       if (droppy.socketWait) return;
 
-      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"]`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
