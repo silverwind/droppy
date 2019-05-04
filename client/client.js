@@ -2652,7 +2652,7 @@
     // Extension to icon mappings
     droppy.iconMap = {
       archive  : ["bz2", "tgz"],
-      audio    : ["aac", "aif", "aiff", "flac", "m4a", "m4p", "mid", "mp1", "mp2", "mp3", "mpa", "ra", "ogg", "oga", "opus", "wav", "wma"],
+      audio    : ["aac", "aif", "aiff", "f4a", "flac", "m4a", "m4b", "m4p", "m4p", "m4r", "mka", "mid", "mp1", "mp2", "mp3", "mpa", "mpeg", "ra", "ogg", "oga", "opus", "wav", "wma"],
       authors  : ["authors"],
       bin      : ["class", "o", "so", "pyc", "node"],
       bmp      : ["bmp", "xbm"],
@@ -2705,33 +2705,46 @@
       text     : ["text", "txt"],
       tiff     : ["tiff", "tif"],
       vcal     : ["vcal"],
-      video    : ["avi", "flv", "mkv", "mov", "mp4", "mpg", "mpeg", "m4v", "mpg", "ogv", "ogx", "rm", "swf", "vob", "wmv", "webm", "h264"],
+      video    : ["avi", "flv", "mkv", "mov", "mp4", "mpg", "3g2", "3gp", "f4v", "flv", "m4v", "m4v", "mk3d", "ogv", "ogx", "rm", "swf", "vob", "wmv", "webm", "h264"],
       xml      : ["xml", "wsdl"],
       zip      : ["7z", "bz2", "lzma", "war", "z", "zip", "xz", "xip", "dms", "apk", "xpi", "cab"]
     };
 
     droppy.audioTypes = {
-      aac  : "audio/aac",
-      flac : "audio/flac",
-      m4a  : "audio/mp4",
-      m4p  : "application/mp4",
-      mp1  : "audio/mpeg",
-      mp2  : "audio/mpeg",
-      mp3  : "audio/mpeg",
-      mpa  : "audio/mpeg",
-      mpeg : "audio/mpeg",
-      mpg  : "audio/mpeg",
-      oga  : "audio/ogg",
-      ogg  : "audio/ogg",
-      opus : "audio/ogg",
-      wav  : "audio/wav",
+      aac : "audio/aac",
+      aif : "audio/x-aiff",
+      aifc : "audio/x-aiff",
+      aiff : "audio/x-aiff",
+      f4a : "video/mp4",
+      flac: "audio/flac",
+      m4a : "audio/mp4",
+      m4b : "audio/mpeg",
+      m4p : "application/mp4",
+      m4r : "audio/mpeg",
+      mka : "audio/x-matroska",
+      mp1 : "audio/mpeg",
+      mp2 : "audio/mpeg",
+      mp3 : "audio/mpeg",
+      mpa : "audio/mpeg",
+      mpeg: "audio/mpeg",
+      mpg : "audio/mpeg",
+      oga : "audio/ogg",
+      ogg : "audio/ogg",
+      opus: "audio/ogg",
+      wav : "audio/wav",
+      wma : "audio/mpeg",
     };
 
     droppy.videoTypes = {
+      "3g2": "video/mp4",
+      "3gp": "video/mp4",
+      f4v  : "video/mp4",
+      flv  : "video/mp4",
       m4v  : "video/mp4",
+      mk3d : "video/webm", // video/webm over video/x-matroska for better browser compat
       mkv  : "video/webm", // video/webm over video/x-matroska for better browser compat
-      mp4  : "video/mp4", // can be audio/mp4 too
       mov  : "video/mp4",
+      mp4  : "video/mp4", // can be audio/mp4 too
       ogv  : "video/ogg",
       ogx  : "application/ogg",
       webm : "video/webm", // can be audio/webm too
