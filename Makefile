@@ -59,10 +59,13 @@ docker-push:
 	docker push silverwind/arm64v8-droppy:"$$(cat package.json | jq -r .version)"
 	docker push silverwind/arm64v8-droppy:latest
 
+deps:
+	rm -rf node_modules
+	npm i
+
 update:
 	npx updates -u
-	rm -rf node_modules
-	npm i --no-package-lock
+	$(MAKE) deps
 	touch client/client.js
 
 deploy:
@@ -91,4 +94,4 @@ patch: test build ver-patch docker docker-push deploy publish
 minor: test build ver-minor docker docker-push deploy publish
 major: test build ver-major docker docker-push deploy publish
 
-.PHONY: dev test lint publish docker docker-arm update deploy jquery version-patch version-minor version-major patch minor major
+.PHONY: dev test lint publish docker docker-arm deps update deploy jquery version-patch version-minor version-major patch minor major
