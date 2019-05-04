@@ -1520,7 +1520,7 @@
     $("#entry-menu .play").off("click").on("click", (event) => {
       event.stopPropagation();
 
-      const entry = droppy.menuTarget;
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
       const view = entry.parents(".view");
 
       play(view, entry);
@@ -1530,7 +1530,7 @@
     $("#entry-menu .edit").off("click").on("click", (event) => {
       event.stopPropagation();
 
-      const entry = droppy.menuTarget;
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
@@ -1540,7 +1540,8 @@
     // Click on a "open" link
     $("#entry-menu .openfile").off("click").on("click", (event) => {
       event.stopPropagation();
-      const entry = droppy.menuTarget;
+
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
@@ -1556,7 +1557,7 @@
       event.stopPropagation();
       if (droppy.socketWait) return;
 
-      const entry = droppy.menuTarget;
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
       const view = entry.parents(".view");
 
       entryRename(view, entry, false, (success, oldVal, newVal) => {
@@ -1571,7 +1572,7 @@
       event.stopPropagation();
       if (droppy.socketWait) return;
 
-      const entry = droppy.menuTarget;
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
       const view = entry.parents(".view");
 
       toggleCatcher(false);
@@ -1589,7 +1590,7 @@
       toggleCatcher(false);
       droppy.clipboard = {
         type: this.className,
-        src: droppy.menuTarget[0].dataset.id
+        src: droppy.menuTargetId
       };
       checkClipboard();
     });
@@ -1599,14 +1600,8 @@
       event.stopPropagation();
       if (droppy.socketWait) return;
 
-      const entry = droppy.menuTarget;
+      const entry = $(`.data-row[data-id="${droppy.menuTargetId}"`);
       const view = entry.parents(".view");
-
-      if (!view[0]) {
-        console.log("NOVIEW");
-        console.log(droppy.menuTarget[0]);
-        return;
-      }
 
       toggleCatcher(false);
       showSpinner(view);
@@ -1666,7 +1661,7 @@
     toggleCatcher(true);
     menu[0].style.left = (left > 0 ? (left > maxLeft ? maxLeft : left) : 0) + "px";
     menu[0].style.top = (top > maxTop ? maxTop : top) + "px";
-    droppy.menuTarget = entry;
+    droppy.menuTargetId = entry[0].dataset.id;
     menu[0].classList.add("in");
 
     let target = document.elementFromPoint(x, y);
@@ -2634,7 +2629,7 @@
     droppy.activeView = 0;
     droppy.demo = null;
     droppy.initialized = null;
-    droppy.menuTarget = null;
+    droppy.menuTargetId = null;
     droppy.public = null;
     droppy.queuedData = null;
     droppy.reopen = null;
