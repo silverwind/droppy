@@ -720,7 +720,7 @@
     $('.upload-info[data-id="' + id + '"]').removeClass("in").transitionend(function() {
       $(this).remove();
     });
-    showNotification("Upload finished", "Uploaded to " + view[0].currentFolder + " finished");
+    showNotification("Upload finished", "Upload to " + view[0].currentFolder + " has finished!");
   }
 
   function uploadProgress(view, id, sent, total) {
