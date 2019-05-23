@@ -9,7 +9,7 @@ COPY ["droppy.js", "index.js", "docker-start.sh", "README.md", "LICENSE", "packa
 
 # Install build dependencies and and build modules
 RUN cd /droppy && \
-  npm install --production --no-package-lock --ignore-scripts && \
+  npm install --production --no-package-lock --no-audit --no-bin-links --ignore-scripts && \
   find /droppy -type d -exec chmod 0755 {} + && \
   find /droppy -type f -exec chmod 0644 {} + && \
   chmod 0755 /droppy/docker-start.sh && \
