@@ -1883,6 +1883,7 @@
 
         // needed for plyr seeking
         view[0].ps.listen("preventDragEvent", (e, _isDown, preventObj) => {
+          if (!e || !e.target) return;
           preventObj.prevent = e.target.classList.contains("pswp__img");
         });
         view[0].ps.listen("afterChange", function() {
@@ -1937,7 +1938,6 @@
           updateLocation(view, view[0].currentFolder);
         });
 
-        const dur = 300;
         function middle(ps) {
           return {x: ps.viewportSize.x / 2, y: ps.viewportSize.y / 2};
         }
@@ -1947,7 +1947,7 @@
           const vw = view[0].ps.viewportSize.x, iw = view[0].ps.currItem.w;
           const initial = view[0].ps.currItem.initialZoomLevel;
           const level = view[0].ps.zoomed.h ? initial : vw / iw;
-          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
+          view[0].ps.zoomTo(level, middle(view[0].ps), 0);
           view[0].ps.zoomed.v = false;
           view[0].ps.zoomed.h = !view[0].ps.zoomed.h;
         }
@@ -1955,7 +1955,7 @@
           const vh = view[0].ps.viewportSize.y, ih = view[0].ps.currItem.h;
           const initial = view[0].ps.currItem.initialZoomLevel;
           const level = view[0].ps.zoomed.v ? initial : vh / ih;
-          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
+          view[0].ps.zoomTo(level, middle(view[0].ps), 0);
           view[0].ps.zoomed.h = false;
           view[0].ps.zoomed.v = !view[0].ps.zoomed.v;
         }
@@ -1964,20 +1964,20 @@
         view[0].ps.listen("afterChange", () => {
           if (view[0].ps.zoomed.h) {
             view[0].ps.zoomed.h = false;
-            fitH(0);
+            fitH(true);
           } else if (view[0].ps.zoomed.v) {
             view[0].ps.zoomed.v = false;
-            fitV(0);
+            fitV(true);
           }
         });
         view.find(".zoom-in").off("click").on("click", (e) => {
           const level = view[0].ps.getZoomLevel() * 1.5;
-          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
+          view[0].ps.zoomTo(level, middle(view[0].ps), 250);
           $(e.target).parents(".pswp").addClass("pswp--zoomed-in");
         });
         view.find(".zoom-out").off("click").on("click", () => {
           const level = view[0].ps.getZoomLevel() / 1.5;
-          view[0].ps.zoomTo(level, middle(view[0].ps), dur);
+          view[0].ps.zoomTo(level, middle(view[0].ps), 250);
         });
 
         view[0].ps.init();
