@@ -748,11 +748,18 @@ html:not(.mobile) #entry-menu a.active {
   margin-right: .25rem !important;
 }
 
+:fullscreen .plyr__video-wrapper--fixed-ratio {
+  height: 100vh !important;
+  padding-bottom: 0 !important;
+}
+
 video {
   height: calc(100vh - 3rem) !important;
 }
 
-:fullscreen video { height: 100vh !important; }
+:fullscreen video {
+  height: 100vh !important;
+}
 
 /* ============================ Document  ============================ */
 
