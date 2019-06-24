@@ -6,7 +6,6 @@ const os = require("os");
 const path = require("path");
 const qs = require("querystring");
 const {promisify} = require("util");
-const stat = promisify(fs.stat);
 
 const throttle = require("lodash.throttle");
 const async = require("async");

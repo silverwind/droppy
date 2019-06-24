@@ -2502,16 +2502,16 @@
     function ensureDeps(mode, cont) {
       const deps = CodeMirror.modes[mode].dependencies;
       if (!deps) return cont();
-      const missing = [];
-      for (let i = 0; i < deps.length; ++i) {
-        if (!CodeMirror.modes.hasOwnProperty(deps[i])) {
-          missing.push(deps[i]);
+      const missings = [];
+      for (const dep of deps) {
+        if (!CodeMirror.modes.hasOwnProperty(dep)) {
+          missings.push(dep);
         }
       }
-      if (!missing.length) return cont();
-      const split = splitCallback(cont, missing.length);
-      for (let j = 0; j < missing.length; ++j) {
-        CodeMirror.requireMode(missing[j], split);
+      if (!missings.length) return cont();
+      const split = splitCallback(cont, missings.length);
+      for (const missing of missings) {
+        CodeMirror.requireMode(missing, split);
       }
     }
 
@@ -2812,11 +2812,11 @@
   setInterval(() => {
     const dates = document.getElementsByClassName("mtime");
     if (!dates) return;
-    for (let i = 0; i < dates.length; i++) {
-      const timestamp = dates[i].getAttribute("data-timestamp");
+    for (const date of dates) {
+      const timestamp = date.getAttribute("data-timestamp");
       if (timestamp) {
         const reltime = timeDifference(Number(timestamp));
-        if (reltime) dates[i].innerHTML = reltime;
+        if (reltime) date.innerHTML = reltime;
       }
     }
   }, 1000);

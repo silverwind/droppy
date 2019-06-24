@@ -20,7 +20,7 @@ overrides:
       Uppie: false
 
 rules:
-  unicorn/catch-error-name: [2, {name: err}]
+  unicorn/catch-error-name: [0]
   unicorn/explicit-length-check: [0]
   unicorn/new-for-builtins: [0]
   unicorn/no-process-exit: [0]
@@ -29,3 +29,4 @@ rules:
   unicorn/prefer-node-append: [0]
   unicorn/no-hex-escape: [0]
   unicorn/prevent-abbreviations: [0]
+  unicorn/prefer-event-key: [0]
