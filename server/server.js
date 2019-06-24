@@ -354,14 +354,6 @@ function createListener(handler, opts, callback) {
   let server;
   if (opts.proto === "http") {
     server = require("http").createServer(handler);
-    server.on("clientError", (err, socket) => {
-      // can't get the remote address at this point, just log the error
-      if (err && err.message) log.debug(null, null, err.message);
-      if (socket.writable) {
-        socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
-        socket.destroy();
-      }
-    });
     callback(null, server);
   } else {
     const https = require("https");
