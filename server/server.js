@@ -1,9 +1,12 @@
 "use strict";
 
+const fs = require("graceful-fs");
 const crypto = require("crypto");
 const os = require("os");
 const path = require("path");
 const qs = require("querystring");
+const {promisify} = require("util");
+const stat = promisify(fs.stat);
 
 const throttle = require("lodash.throttle");
 const async = require("async");
@@ -11,7 +14,6 @@ const Busboy = require("busboy");
 const chalk = require("chalk");
 const escRe = require("escape-string-regexp");
 const etag = require("etag");
-const fs = require("graceful-fs");
 const imgSize = require("image-size");
 const rrdir = require("rrdir");
 const sendFile = require("send");
@@ -1148,9 +1150,12 @@ function handleUploadRequest(req, res) {
   if (config.maxFileSize > 0) opts.limits.fileSize = config.maxFileSize;
 
   const busboy = new Busboy(opts);
+  const rootNames = new Set();
+
   busboy.on("error", err => {
     log.error(err);
   });
+
   busboy.on("file", (_, file, filePath) => {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
     numFiles++;
@@ -1170,7 +1175,11 @@ function handleUploadRequest(req, res) {
       closeConnection(400);
     };
 
-    const dst = path.join(paths.files, dstDir, filePath);
+    // store temp names in rootNames for later rename
+    const tmpPath = utils.addUploadTempExt(filePath);
+    rootNames.add(utils.rootname(tmpPath));
+
+    const dst = path.join(paths.files, dstDir, tmpPath);
     utils.mkdir(path.dirname(dst), () => {
       fs.stat(dst, err => {
         if (err && err.code === "ENOENT") {
@@ -1196,16 +1205,31 @@ function handleUploadRequest(req, res) {
     });
   });
 
-  busboy.on("finish", () => {
+  busboy.on("finish", async () => {
     log.info(req, res, `Received ${numFiles} files in ${numFiles}`);
     done = true;
+
+    // move temp files into place
+    await Promise.all([...rootNames].map(async p => {
+      const srcPath = path.join(paths.files, dstDir, p);
+      const dstPath = path.join(paths.files, dstDir, utils.removeUploadTempExt(p));
+      await promisify(utils.move)(srcPath, dstPath);
+    }));
+
     filetree.updateDir(dstDir);
     closeConnection();
   });
 
-  req.on("close", () => {
+  req.on("close", async () => {
     if (!done) {
       log.info(req, res, "Upload cancelled");
+
+      // remove all uploaded temp files on cancel
+      await Promise.all([...rootNames].map(async p => {
+        await promisify(utils.rm)(path.join(paths.files, dstDir, p));
+      }));
+
+      filetree.updateDir(dstDir);
       closeConnection();
     }
   });

@@ -710,17 +710,18 @@
   }
 
   function uploadCancel(view, id) {
-    uploadFinish(view, id);
-    sendMessage(view[0].vId, "REQUEST_UPDATE", view[0].currentFolder);
+    uploadFinish(view, id, true);
   }
 
-  function uploadFinish(view, id) {
+  function uploadFinish(view, id, cancelled) {
     view[0].isUploading = false;
     setTitle(basename(view[0].currentFolder));
     $('.upload-info[data-id="' + id + '"]').removeClass("in").transitionend(function() {
       $(this).remove();
     });
-    showNotification("Upload finished", "Upload to " + view[0].currentFolder + " has finished!");
+    if (!cancelled) {
+      showNotification("Upload finished", "Upload to " + view[0].currentFolder + " has finished!");
+    }
   }
 
   function uploadProgress(view, id, sent, total) {

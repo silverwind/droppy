@@ -323,3 +323,7 @@ utils.readFile = function(p, cb) {
 utils.arrify = function(val) {
   return Array.isArray(val) ? val : [val];
 };
+
+utils.addUploadTempExt = path => path.replace(/(\/?[^/]+)/, (_, p1) => p1 + ".droppy-upload");
+utils.removeUploadTempExt = path => path.replace(/(^\/?[^/]+)(\.droppy-upload)/, (_, p1) => p1);
+utils.rootname = path => path.split("/").filter(p => !!p)[0];
