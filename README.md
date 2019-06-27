@@ -135,7 +135,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. Default: `false`.
 - `ignorePatterns` *Array* - Array of file path glob patterns to ignore when indexing files. See [here](https://github.com/isaacs/minimatch#features) for supported patterns. Default: `[]`.
 - `watch` *boolean* - Whether to watch the local file system for changes. Disabling this may improve performance when dealing with a large number of files, but with the downside that changes not done via droppy won't be detected. Default: `true`.
-- `headers` *Object*: A object with key-value pairs of custom HTTP headers to set on all responses, for example `{"Access-Control-Allow-Origin": "*"}`.
+- `headers` *Object*: A object with key-value pairs of custom HTTP headers to set on all responses, for example `{"Access-Control-Allow-Origin": "*"}`. Default: `{}`.
 
 <a name="listener-options"></a>
 ### Listener Options
