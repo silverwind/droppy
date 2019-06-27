@@ -141,6 +141,11 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
 
 function onRequest(req, res) {
   req.time = Date.now();
+
+  for (const [key, value] of Object.entries(config.headers || {})) {
+    res.setHeader(key, value);
+  }
+
   if (ready) {
     if (!utils.isPathSane(req.url, true)) {
       res.statusCode = 400;

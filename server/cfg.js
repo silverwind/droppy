@@ -29,6 +29,7 @@ const defaults = {
   compression     : true,
   ignorePatterns  : [],
   watch           : true,
+  headers         : {},
 };
 
 const hiddenOpts = ["dev", "demo"];

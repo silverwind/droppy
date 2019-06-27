@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 11.1.0 - 2019-06-27
+
+- Added new `headers` config option.
+
 ## Version 11.0.0 - 2019-03-20
 
 - A modern browser with ECMAScript 2015 support is now required.
