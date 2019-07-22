@@ -89,6 +89,10 @@ $ docker-compose up
 ```
 This example `docker-compose.yml` uses the subdirectories `config` and `files` of the current working directory for storing data.
 
+### Caddy
+
+See the example [Caddyfile](examples/Caddyfile).
+
 ## Configuration
 By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On first startup, a prompt to create login data for the first account will appear. Once it's created, login credentials are enforced. Additional accounts can be created in the options interface or the command line. Configuration is done in `config/config.json`, which is created with these defaults:
 

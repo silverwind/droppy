@@ -1,0 +1,7 @@
+droppy.your.domain {
+  proxy / 127.0.0.1:8989 {
+    websocket
+    transparent
+  }
+  timeouts none
+}
