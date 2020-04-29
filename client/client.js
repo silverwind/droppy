@@ -31,6 +31,7 @@
       return types;
     })(),
     webp: document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0,
+    notification: "Notification" in window,
     mobile: /Mobi/.test(navigator.userAgent),
     safari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
   };
@@ -712,12 +713,15 @@
     uploadFinish(view, id, true);
   }
 
-  function uploadFinish(view, id, _cancelled) {
+  function uploadFinish(view, id, cancelled) {
     view[0].isUploading = false;
     setTitle(basename(view[0].currentFolder));
     $('.upload-info[data-id="' + id + '"]').removeClass("in").transitionend(function() {
       $(this).remove();
     });
+    if (!cancelled) {
+      showNotification("Upload finished", "Upload to " + view[0].currentFolder + " has finished!");
+    }
   }
 
   function uploadProgress(view, id, sent, total) {
@@ -2932,6 +2936,28 @@
       $(this).toggleClass("checked");
       requestLink($(this).parents(".view"), view[0].sharelinkId, $(this).hasClass("checked"));
     });
+  }
+
+  function showNotification(msg, body) {
+    if (droppy.detects.notification && document.hidden) {
+      const show = function(msg, body) {
+        const opts = {icon: "!/res/logo192.png"};
+        if (body) opts.body = body;
+        const n = new Notification(msg, opts);
+        n.addEventListener("show", function() { // Compat: Chrome
+          const self = this;
+          setTimeout(() => { self.close(); }, 4000);
+        });
+      };
+      if (Notification.permission === "granted") {
+        show(msg, body);
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission((permission) => {
+          if (!("permission" in Notification)) Notification.permission = permission;
+          if (permission === "granted") show(msg, body);
+        });
+      }
+    }
   }
 
   function debounce(func, wait, immediate) {
