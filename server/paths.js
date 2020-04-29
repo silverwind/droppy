@@ -10,22 +10,22 @@ let filesDir = "~/.droppy/files";
 
 paths.get = function() {
   return {
-    files     : resolve(filesDir),
-    config    : resolve(configDir),
+    files: resolve(filesDir),
+    config: resolve(configDir),
 
-    pid       : resolve(configDir, "droppy.pid"),
-    temp      : resolve(configDir, "temp"),
-    cfgFile   : resolve(configDir, "config.json"),
-    db        : resolve(configDir, "db.json"),
-    tlsKey    : resolve(configDir, "tls.key"),
-    tlsCert   : resolve(configDir, "tls.cert"),
-    tlsCA     : resolve(configDir, "tls.ca"),
+    pid: resolve(configDir, "droppy.pid"),
+    temp: resolve(configDir, "temp"),
+    cfgFile: resolve(configDir, "config.json"),
+    db: resolve(configDir, "db.json"),
+    tlsKey: resolve(configDir, "tls.key"),
+    tlsCert: resolve(configDir, "tls.cert"),
+    tlsCA: resolve(configDir, "tls.ca"),
 
-    mod       : resolve(__dirname, ".."),
-    server    : resolve(__dirname, "..", "server"),
-    client    : resolve(__dirname, "..", "client"),
-    templates : resolve(__dirname, "..", "client", "templates"),
-    svg       : resolve(__dirname, "..", "client", "svg")
+    mod: resolve(__dirname, ".."),
+    server: resolve(__dirname, "..", "server"),
+    client: resolve(__dirname, "..", "client"),
+    templates: resolve(__dirname, "..", "client", "templates"),
+    svg: resolve(__dirname, "..", "client", "svg")
   };
 };
 
@@ -39,6 +39,6 @@ function resolve(...args) {
   p = path.resolve(p.startsWith("~") ? untildify(p) : p);
   try {
     p = fs.realpathSync(p);
-  } catch (err) {}
+  } catch {}
   return p;
 }

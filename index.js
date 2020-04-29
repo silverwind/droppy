@@ -16,7 +16,7 @@ module.exports = function droppy(opts) {
     try {
       fd = fs.openSync(ut(path.resolve(opts.log)), "a", "644");
     } catch (err) {
-      throw new Error("Unable to open log file for writing: " + err.message);
+      throw new Error(`Unable to open log file for writing: ${err.message}`);
     }
     require("./server/log.js").setLogFile(fd);
   }

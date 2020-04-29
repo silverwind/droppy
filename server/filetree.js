@@ -6,7 +6,7 @@ const debounce = require("lodash.debounce");
 const cloneDeep = require("fast-clone");
 const chokidar = require("chokidar");
 const escRe = require("escape-string-regexp");
-const fs = require("graceful-fs");
+const fs = require("fs");
 const path = require("path");
 const rrdir = require("rrdir");
 const util = require("util");
@@ -32,10 +32,10 @@ filetree.init = function(config) {
 
 filetree.watch = function() {
   chokidar.watch(paths.files, {
-    alwaysStat    : true,
-    ignoreInitial : true,
-    usePolling    : Boolean(cfg.pollingInterval),
-    interval      : cfg.pollingInterval,
+    alwaysStat: true,
+    ignoreInitial: true,
+    usePolling: Boolean(cfg.pollingInterval),
+    interval: cfg.pollingInterval,
     binaryInterval: cfg.pollingInterval
   }).on("error", log.error).on("all", () => {
     // TODO: only update what's really necessary
@@ -63,7 +63,7 @@ function filterDirs(dirs) {
     return utils.countOccurences(a, "/") - utils.countOccurences(b, "/");
   }).filter((path, _, self) => {
     return self.every(another => {
-      return another === path || path.indexOf(another + "/") !== 0;
+      return another === path || path.indexOf(`${another}/`) !== 0;
     });
   }).filter((path, index, self) => {
     return self.indexOf(path) === index;
@@ -108,7 +108,7 @@ filetree.updateDir = async function(dir) {
     }
   } else {
     try {
-      entries = await rrdir(fullDir, {stats: true, exclude: cfg.ignorePatterns});
+      entries = await rrdir.async(fullDir, {stats: true, exclude: cfg.ignorePatterns});
     } catch (err) {
       log.error(err);
     }
@@ -214,7 +214,7 @@ filetree.unlinkdir = function(dir) {
     if (err) log.error(err);
     delete dirs[dir];
     Object.keys(dirs).forEach(d => {
-      if (new RegExp("^" + escRe(dir) + "/").test(d)) delete dirs[d];
+      if (new RegExp(`^${escRe(dir)}/`).test(d)) delete dirs[d];
     });
     update(path.dirname(dir));
   });
@@ -314,8 +314,8 @@ filetree.mvdir = function(src, dst, cb) {
     delete dirs[src];
     // Subdirs
     Object.keys(dirs).forEach(dir => {
-      if (new RegExp("^" + escRe(src) + "/").test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp("^" + escRe(src) + "/"), dst + "/")] = dirs[dir];
+      if (new RegExp(`^${escRe(src)}/`).test(dir) && dir !== src && dir !== dst) {
+        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)] = dirs[dir];
         delete dirs[dir];
       }
     });
@@ -343,9 +343,9 @@ filetree.cpdir = function(src, dst, cb) {
     dirs[dst].mtime = Date.now();
     // Subdirs
     Object.keys(dirs).forEach(dir => {
-      if (new RegExp("^" + escRe(src) + "/").test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp("^" + escRe(src) + "/"), dst + "/")] = cloneDeep(dirs[dir]);
-        dirs[dir.replace(new RegExp("^" + escRe(src) + "/"), dst + "/")].mtime = Date.now();
+      if (new RegExp(`^${escRe(src)}/`).test(dir) && dir !== src && dir !== dst) {
+        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)] = cloneDeep(dirs[dir]);
+        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)].mtime = Date.now();
       }
     });
     update(path.dirname(dst));

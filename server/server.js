@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("graceful-fs");
+const fs = require("fs");
 const crypto = require("crypto");
 const os = require("os");
 const path = require("path");
@@ -28,7 +28,7 @@ const filetree = require("./filetree.js");
 const log = require("./log.js");
 const manifest = require("./manifest.js");
 const paths = require("./paths.js").get();
-const pkg = require("./../package.json");
+const pkg = require("../package.json");
 const resources = require("./resources.js");
 const utils = require("./utils.js");
 
@@ -66,13 +66,18 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
 
   async.series([
     function(cb) { utils.mkdir([paths.files, paths.config], cb); },
-    function(cb) { if (isStandalone) fs.writeFile(paths.pid, process.pid, cb); else cb(); },
+    function(cb) {
+      if (isStandalone) {
+        fs.writeFile(paths.pid, String(process.pid), cb);
+      } else {
+        cb();
+      }
+    },
     function(cb) {
       cfg.init(opts, (err, conf) => {
         if (!err) {
           config = conf;
           if (dev) config.dev = dev;
-          if (config.demo) config.readOnly = true;
         }
         cb(err);
       });
@@ -97,14 +102,6 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
     },
     function(cb) { cleanupLinks(cb); },
     function(cb) { if (config.dev) debug(); cb(); },
-    function(cb) {
-      if (config.demo) {
-        process.title = "droppy-demo";
-        config.demo = true;
-        config.public = true;
-        require("./demo.js").init(cb);
-      } else cb();
-    },
     function(cb) { if (isStandalone) { startListeners(cb); } else cb(); },
     function(cb) {
       log.info("Caching files ...");
@@ -122,7 +119,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
             if (!clients[client].ws) return;
             try {
               clients[client].ws.ping();
-            } catch (err) {}
+            } catch {}
           });
         }, config.keepAlive);
       }
@@ -150,7 +147,7 @@ function onRequest(req, res) {
     if (!utils.isPathSane(req.url, true)) {
       res.statusCode = 400;
       res.end();
-      return log.info(req, res, "Invalid GET: " + req.url);
+      return log.info(req, res, `Invalid GET: ${req.url}`);
     }
     if (req.method === "GET" || req.method === "HEAD") {
       handleGETandHEAD(req, res);
@@ -185,25 +182,25 @@ function startListeners(callback) {
     // validate listener options
     hosts.forEach(host => {
       if (typeof host !== "string") {
-        return callback(new Error("Invalid config value: 'host' = " + hosts[host]));
+        return callback(new Error(`Invalid config value: 'host' = ${hosts[host]}`));
       }
     });
     ports.forEach((port, i) => {
       if (typeof port !== "number" && typeof port !== "string") {
-        return callback(new Error("Invalid config value: 'port' = " + port));
+        return callback(new Error(`Invalid config value: 'port' = ${port}`));
       }
 
       if (typeof port === "string") {
         const num = parseInt(port);
         if (Number.isNaN(num)) {
-          return callback(new Error("Invalid config value: 'port' = " + port));
+          return callback(new Error(`Invalid config value: 'port' = ${port}`));
         }
         ports[i] = num;
       }
     });
     sockets.forEach(socket => {
       if (typeof socket !== "string") {
-        return callback(new Error("Invalid config value: 'socket' = " + socket));
+        return callback(new Error(`Invalid config value: 'socket' = ${socket}`));
       }
 
       try {
@@ -211,7 +208,7 @@ function startListeners(callback) {
       } catch (err) {
         if (err.code !== "ENOENT") {
           return callback(
-            new Error("Unable to write to unix socket '" + socket + "': " + err.code)
+            new Error(`Unable to write to unix socket '${socket}': ${err.code}`)
           );
         }
       }
@@ -246,9 +243,9 @@ function startListeners(callback) {
       if (err) {
         log.error(
           "Error creating listener",
-          target.opts.proto + (target.opts.socket ? "+unix://" : "://") +
-          log.formatHostPort(target.host, target.port, target.opts.proto) +
-          ": " + err.message
+          `${target.opts.proto + (target.opts.socket ? "+unix://" : "://") +
+          log.formatHostPort(target.host, target.port, target.opts.proto)
+          }: ${err.message}`
         );
         return cb();
       }
@@ -264,7 +261,7 @@ function startListeners(callback) {
           // a unix socket URL should normally percent-encode the path, but
           // we're printing a path-less URL so pretty-print it with slashes.
           log.info("Listening on ",
-            chalk.blue(proto + "+unix://") +
+            chalk.blue(`${proto}+unix://`) +
             chalk.cyan(server.address())
           );
         } else { // host + port
@@ -294,7 +291,7 @@ function startListeners(callback) {
           addrs.sort();
 
           addrs.forEach(addr => {
-            log.info("Listening on ", chalk.blue(proto + "://") + log.formatHostPort(addr, port, proto));
+            log.info("Listening on ", chalk.blue(`${proto}://`) + log.formatHostPort(addr, port, proto));
           });
         }
         cb();
@@ -356,6 +353,12 @@ function startListeners(callback) {
   });
 }
 
+function tlsError(err, socket) {
+  // can't get the remote address at this point, just log the error
+  if (err && err.message) log.debug(null, null, err.message);
+  if (socket.writable) socket.destroy();
+}
+
 function createListener(handler, opts, callback) {
   let server;
   if (opts.proto === "http") {
@@ -372,11 +375,11 @@ function createListener(handler, opts, callback) {
         if (/(bad password|bad decrypt)/.test(err2)) {
           let errText;
           if (!tlsOptions.passphrase) {
-            errText = "TLS key '" + opts.key + "' is encrypted with a passphrase. " +
-              "You can either decrypt the key using `openssl rsa -in " + opts.key +
-              " -out " + opts.key + "` or use the `passphrase` option on the listener.";
+            errText = `TLS key '${opts.key}' is encrypted with a passphrase. ` +
+              `You can either decrypt the key using \`openssl rsa -in ${opts.key
+              } -out ${opts.key}\` or use the \`passphrase\` option on the listener.`;
           } else {
-            errText = "Wrong passphrase for TLS key '" + opts.key + "'";
+            errText = `Wrong passphrase for TLS key '${opts.key}'`;
           }
           return callback(new Error(errText));
         } else {
@@ -386,16 +389,11 @@ function createListener(handler, opts, callback) {
 
       server.on("request", (req, res) => {
         if (opts.hsts && opts.hsts > 0) {
-          res.setHeader("Strict-Transport-Security", "max-age=" + opts.hsts);
+          res.setHeader("Strict-Transport-Security", `max-age=${opts.hsts}`);
         }
         handler(req, res);
       });
 
-      function tlsError(err, socket) {
-        // can't get the remote address at this point, just log the error
-        if (err && err.message) log.debug(null, null, err.message);
-        if (socket.writable) socket.destroy();
-      }
       server.on("tlsClientError", tlsError);
 
       // TLS tickets - regenerate keys every hour, Node.js 4.0
@@ -433,7 +431,7 @@ function onWebSocketRequest(ws, req) {
   ws.port = ws._socket.remotePort;
   ws.headers = Object.assign({}, req.headers);
   log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
-  const sid = ws._socket.remoteAddress + " " + ws._socket.remotePort;
+  const sid = `${ws._socket.remoteAddress} ${ws._socket.remotePort}`;
   const cookie = cookies.get(req.headers.cookie);
   clients[sid] = {views: [], cookie, ws};
 
@@ -455,17 +453,16 @@ function onWebSocketRequest(ws, req) {
     if (msg.type === "REQUEST_SETTINGS") {
       sendObj(sid, {type: "SETTINGS", vId, settings: {
         priv,
-        version       : pkg.version,
-        dev           : config.dev,
-        demo          : config.demo,
-        public        : config.public,
-        readOnly      : config.readOnly,
-        watch         : config.watch,
-        engine        : "node " + process.version.substring(1),
-        platform      : process.platform,
-        caseSensitive : process.platform === "linux", // TODO: actually test the filesystem
-        themes        : Object.keys(cache.themes).sort().join("|"),
-        modes         : Object.keys(cache.modes).sort().join("|"),
+        version: pkg.version,
+        dev: config.dev,
+        public: config.public,
+        readOnly: config.readOnly,
+        watch: config.watch,
+        engine: `node ${process.version.substring(1)}`,
+        platform: process.platform,
+        caseSensitive: process.platform === "linux", // TODO: actually test the filesystem
+        themes: Object.keys(cache.themes).sort().join("|"),
+        modes: Object.keys(cache.modes).sort().join("|"),
       }});
     } else if (msg.type === "REQUEST_UPDATE") {
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
@@ -476,7 +473,7 @@ function onWebSocketRequest(ws, req) {
           clientDir = "/";
           clientFile = null;
           log.error(err);
-          log.info(ws, null, "Non-existing update request, sending client to / : " + msg.data);
+          log.info(ws, null, `Non-existing update request, sending client to / : ${msg.data}`);
         } else if (stats.isFile()) {
           clientDir = path.dirname(msg.data);
           clientFile = path.basename(msg.data);
@@ -519,7 +516,7 @@ function onWebSocketRequest(ws, req) {
 
       const link = utils.getLink(links, config.linkLength);
       const ext = path.extname(msg.data.location);
-      log.info(ws, null, "Share link created: " + link + " -> " + msg.data.location);
+      log.info(ws, null, `Share link created: ${link} -> ${msg.data.location}`);
 
       links[link] = {
         location: msg.data.location,
@@ -534,28 +531,28 @@ function onWebSocketRequest(ws, req) {
         attachement: msg.data.attachement
       });
     } else if (msg.type === "DELETE_FILE") {
-      log.info(ws, null, "Deleting: " + msg.data);
+      log.info(ws, null, `Deleting: ${msg.data}`);
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data, msg.type, ws, sid, vId)) return;
       filetree.del(msg.data);
     } else if (msg.type === "SAVE_FILE") {
-      log.info(ws, null, "Saving: " + msg.data.to);
+      log.info(ws, null, `Saving: ${msg.data.to}`);
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data.to, msg.type, ws, sid, vId)) return;
       filetree.save(msg.data.to, msg.data.value, err => {
         if (err) {
           sendError(sid, vId, `Error saving: ${err.message}`);
           log.error(err);
-        } else sendObj(sid, {type: "SAVE_STATUS", vId, status : err ? 1 : 0});
+        } else sendObj(sid, {type: "SAVE_STATUS", vId, status: err ? 1 : 0});
       });
     } else if (msg.type === "CLIPBOARD") {
       const src = msg.data.src;
       const dst = msg.data.dst;
       const type = msg.data.type;
-      log.info(ws, null, "Clipboard " + type + ": " + src + " -> " + dst);
+      log.info(ws, null, `Clipboard ${type}: ${src} -> ${dst}`);
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths([src, dst], msg.type, ws, sid, vId)) return;
-      if (new RegExp("^" + escRe(msg.data.src) + "/").test(msg.data.dst)) {
+      if (new RegExp(`^${escRe(msg.data.src)}/`).test(msg.data.dst)) {
         return sendError(sid, vId, "Can't copy directory into itself");
       }
 
@@ -587,7 +584,7 @@ function onWebSocketRequest(ws, req) {
       // Disallow whitespace-only and empty strings in renames
       if (!validatePaths([rSrc, rDst], msg.type, ws, sid, vId) ||
           /^\s*$/.test(rDst) || rDst === "" || rSrc === rDst) {
-        log.info(ws, null, "Invalid rename request: " + rSrc + "-> " + rDst);
+        log.info(ws, null, `Invalid rename request: ${rSrc}-> ${rDst}`);
         sendError(sid, vId, "Invalid rename request");
         return;
       }
@@ -598,7 +595,7 @@ function onWebSocketRequest(ws, req) {
       for (const link of Object.keys(links)) {
         if (links[link].location === rSrc) {
           links[link].location = rDst;
-          log.info(ws, null, "Share link updated: " + link + " -> " + rDst);
+          log.info(ws, null, `Share link updated: ${link} -> ${rDst}`);
         }
       }
       db.set("links", links);
@@ -617,7 +614,7 @@ function onWebSocketRequest(ws, req) {
       } else {
         const isNew = !db.get("users")[name];
         db.addOrUpdateUser(name, pass, msg.data.priv || false);
-        log.info(ws, null, (isNew ? "Added" : "Updated") + " user: ", chalk.magenta(name));
+        log.info(ws, null, `${isNew ? "Added" : "Updated"} user: `, chalk.magenta(name));
       }
       sendUsers(sid);
     } else if (msg.type === "CREATE_FILES") {
@@ -689,7 +686,7 @@ function onWebSocketRequest(ws, req) {
     if (code === 1011) {
       log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
     } else {
-      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || "(Code: " + (code || "none") + ")");
+      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || `(Code: ${code || "none"})`);
     }
   });
   ws.on("error", log.error);
@@ -700,7 +697,7 @@ function validatePaths(paths, type, ws, sid, vId) {
   return (Array.isArray(paths) ? paths : [paths]).every(p => {
     if (!utils.isPathSane(p)) {
       sendError(sid, vId, "Invalid request");
-      log.info(ws, null, "Invalid " + type + " request: " + p);
+      log.info(ws, null, `Invalid ${type} request: ${p}`);
       return false;
     } else {
       return true;
@@ -746,7 +743,7 @@ function sendObjAll(data) {
 function sendError(sid, vId, text) {
   text = utils.sanitizePathsInString(text);
   sendObj(sid, {type: "ERROR", vId, text});
-  log.error(clients[sid].ws, null, "Sent error: " + text);
+  log.error(clients[sid].ws, null, `Sent error: ${text}`);
 }
 
 function redirectToRoot(req, res) {
@@ -1052,7 +1049,7 @@ function handleFileRequest(req, res, download) {
   const URI = decodeURIComponent(req.url);
   let shareLink, filepath;
 
-  let parts = (new RegExp(`^/\\$/([a-zA-Z0-9]+)\\.?([a-zA-Z0-9.]+)?$`)).exec(URI);
+  let parts = /^\/\$\/([a-z0-9]+)\.?([a-z0-9.]+)?$/i.exec(URI);
   if (parts && parts[1]) { // check for sharelink
     const link = db.get("links")[parts[1]];
     if (!link) return redirectToRoot(req, res);
@@ -1068,7 +1065,7 @@ function handleFileRequest(req, res, download) {
       return redirectToRoot(req, res);
     }
     download = parts[1] === "dl";
-    filepath = utils.addFilesPath("/" + [parts[2]]);
+    filepath = utils.addFilesPath(`/${[parts[2]]}`);
   }
 
   fs.stat(filepath, (error, stats) => {
@@ -1160,6 +1157,12 @@ function handleUploadRequest(req, res) {
     log.error(err);
   });
 
+  const onWriteError = err => {
+    log.error(req, res, err);
+    sendError(req.sid, vId, `Error writing the file: ${err.message}`);
+    closeConnection(400);
+  };
+
   busboy.on("file", (_, file, filePath) => {
     if (!utils.isPathSane(filePath) || !utils.isPathSane(dstDir)) return;
     numFiles++;
@@ -1168,16 +1171,10 @@ function handleUploadRequest(req, res) {
       log.info(req, res, "Maximum file size reached, cancelling upload");
       sendError(
         req.sid, vId,
-        "Maximum upload size of " + utils.formatBytes(config.maxFileSize) + " exceeded."
+        `Maximum upload size of ${utils.formatBytes(config.maxFileSize)} exceeded.`
       );
       closeConnection(400);
     });
-
-    const onWriteError = err => {
-      log.error(req, res, err);
-      sendError(req.sid, vId, `Error writing the file: ${err.message}`);
-      closeConnection(400);
-    };
 
     // store temp names in rootNames for later rename
     const tmpPath = utils.addUploadTempExt(filePath);
@@ -1210,7 +1207,7 @@ function handleUploadRequest(req, res) {
   });
 
   busboy.on("finish", async () => {
-    log.info(req, res, `Received ${numFiles} files in ${numFiles}`);
+    log.info(req, res, `Received ${numFiles} files`);
     done = true;
 
     // move temp files into place
@@ -1301,8 +1298,8 @@ function removeClientPerDir(sid, vId) {
 
 function debug() {
   require("chokidar").watch(paths.client, {
-    alwaysStat    : true,
-    ignoreInitial : true
+    alwaysStat: true,
+    ignoreInitial: true
   }).on("change", file => {
     setTimeout(() => { // prevent EBUSY on win32
       if (/\.css$/.test(file)) {
@@ -1334,7 +1331,7 @@ function cleanupLinks(callback) {
       (function(shareLink, location) {
         // check for links not matching the configured length
         if (shareLink.length !== config.linkLength) {
-          log.debug("deleting link not matching the configured length: " + shareLink);
+          log.debug(`deleting link not matching the configured length: ${shareLink}`);
           delete links[shareLink];
           if (++cbcount === linkcount) {
             db.set("links", links);
@@ -1345,7 +1342,7 @@ function cleanupLinks(callback) {
         // check for links where the target does not exist anymore
         fs.stat(path.join(paths.files, location), (error, stats) => {
           if (!stats || error) {
-            log.debug("deleting nonexistant link: " + shareLink);
+            log.debug(`deleting nonexistant link: ${shareLink}`);
             delete links[shareLink];
           }
           if (++cbcount === linkcount) {
@@ -1363,7 +1360,7 @@ function cleanupLinks(callback) {
 // verify a resource etag, returns the etag if it doesn't match, otherwise
 // returns null indicating the response is handled with a 304
 function checkETag(req, res, path, mtime) {
-  const eTag = etag(path + "/" + mtime);
+  const eTag = etag(`${path}/${mtime}`);
   if ((req.headers["if-none-match"] || "") === eTag) {
     res.statusCode = 304;
     res.end();
@@ -1384,8 +1381,8 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
   res.statusCode = 200;
   res.setHeader("Content-Type", utils.contentType(zip));
   res.setHeader("Transfer-Encoding", "chunked");
-  res.setHeader("Content-Disposition", utils.getDispo(zipPath + ".zip", download));
-  res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
+  res.setHeader("Content-Disposition", utils.getDispo(`${zipPath}.zip`, download));
+  res.setHeader("Cache-Control", `${shareLink ? "public" : "private"}, max-age=0`);
   res.setHeader("ETag", eTag);
 
   if (req.method === "HEAD") {
@@ -1393,7 +1390,7 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
     return;
   }
 
-  rrdir(zipPath, {stats: true}).then(entries => {
+  rrdir.async(zipPath, {stats: true}).then(entries => {
     for (const entry of entries) {
       const pathInZip = path.relative(zipPath, entry.path);
       const metaData = {
@@ -1423,7 +1420,7 @@ function streamFile(req, res, filepath, download, stats, shareLink) {
 
   function setHeaders(res) {
     res.setHeader("Content-Type", utils.contentType(filepath));
-    res.setHeader("Cache-Control", (shareLink ? "public" : "private") + ", max-age=0");
+    res.setHeader("Cache-Control", `${shareLink ? "public" : "private"}, max-age=0`);
     res.setHeader("Content-Disposition", utils.getDispo(filepath, download));
     res.setHeader("ETag", eTag);
   }
@@ -1475,7 +1472,8 @@ function tlsInit(opts, cb) {
 function tlsSetup(opts, cb) {
   if (typeof opts.key !== "string") {
     return cb(new Error("Missing TLS option 'key'"));
-  } if (typeof opts.cert !== "string") {
+  }
+  if (typeof opts.cert !== "string") {
     return cb(new Error("Missing TLS option 'cert'"));
   }
 
@@ -1490,9 +1488,9 @@ function tlsSetup(opts, cb) {
     const certs = data[1];
     const dhparam = data[3];
 
-    if (!key) return cb(new Error("Unable to read TLS key: " + certPaths[0]));
-    if (!certs) return cb(new Error("Unable to read TLS certificates: " + certPaths[1]));
-    if (opts.dhparam && !dhparam) return cb(new Error("Unable to read TLS DH parameter file: " + certPaths[3]));
+    if (!key) return cb(new Error(`Unable to read TLS key: ${certPaths[0]}`));
+    if (!certs) return cb(new Error(`Unable to read TLS certificates: ${certPaths[1]}`));
+    if (opts.dhparam && !dhparam) return cb(new Error(`Unable to read TLS DH parameter file: ${certPaths[3]}`));
 
     function createDH() {
       log.info("Generating 2048 bit Diffie-Hellman parameters. This will take a long time.");
@@ -1544,7 +1542,7 @@ function setupProcess(standalone) {
 // Process shutdown
 function endProcess(signal) {
   let count = 0;
-  log.info("Received " + chalk.red(signal) + " - Shutting down ...");
+  log.info(`Received ${chalk.red(signal)} - Shutting down ...`);
   Object.keys(clients).forEach(sid => {
     if (!clients[sid] || !clients[sid].ws) return;
     if (clients[sid].ws.readyState < 2) {
@@ -1552,7 +1550,7 @@ function endProcess(signal) {
       clients[sid].ws.close(1001);
     }
   });
-  if (count > 0) log.info("Closed " + count + " WebSocket" + (count > 1 ? "s" : ""));
-  try { fs.unlinkSync(paths.pid); } catch (err) {}
+  if (count > 0) log.info(`Closed ${count} WebSocket${count > 1 ? "s" : ""}`);
+  try { fs.unlinkSync(paths.pid); } catch {}
   process.exit(0);
 }

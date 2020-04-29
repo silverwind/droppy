@@ -2,7 +2,7 @@
 
 const db = module.exports = {};
 const chokidar = require("chokidar");
-const fs = require("graceful-fs");
+const fs = require("fs");
 const crypto = require("crypto");
 const mkdirp = require("mkdirp");
 const path = require("path");
@@ -18,10 +18,10 @@ db.load = function(callback) {
     if (err) {
       if (err.code === "ENOENT") {
         database = defaults;
-        mkdirp(path.dirname(dbFile), err => {
+        mkdirp(path.dirname(dbFile)).then(() => {
           write();
-          callback(err);
-        });
+          callback();
+        }).catch(callback);
       } else {
         callback(err);
       }
@@ -107,7 +107,7 @@ db.addOrUpdateUser = function addOrUpdateUser(user, password, privileged) {
   const salt = crypto.randomBytes(4).toString("hex");
 
   database.users[user] = {
-    hash: getHash(password + salt + user) + "$" + salt,
+    hash: `${getHash(password + salt + user)}$${salt}`,
     privileged
   };
 

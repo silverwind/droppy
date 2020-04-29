@@ -1,38 +1,38 @@
 "use strict";
 
 const cfg = module.exports = {};
-const fs = require("graceful-fs");
+const fs = require("fs");
 const mkdirp = require("mkdirp");
 const path = require("path");
 
 const configFile = require("./paths.js").get().cfgFile;
 
 const defaults = {
-  listeners : [
+  listeners: [
     {
-      host     : ["0.0.0.0", "::"],
-      port     : 8989,
-      protocol : "http"
+      host: ["0.0.0.0", "::"],
+      port: 8989,
+      protocol: "http"
     }
   ],
-  public          : false,
-  timestamps      : true,
-  linkLength      : 5,
-  linkExtensions  : false,
-  logLevel        : 2,
-  maxFileSize     : 0,
-  updateInterval  : 1000,
-  pollingInterval : 0,
-  keepAlive       : 20000,
-  allowFrame      : false,
-  readOnly        : false,
-  compression     : true,
-  ignorePatterns  : [],
-  watch           : true,
-  headers         : {},
+  public: false,
+  timestamps: true,
+  linkLength: 5,
+  linkExtensions: false,
+  logLevel: 2,
+  maxFileSize: 0,
+  updateInterval: 1000,
+  pollingInterval: 0,
+  keepAlive: 20000,
+  allowFrame: false,
+  readOnly: false,
+  compression: true,
+  ignorePatterns: [],
+  watch: true,
+  headers: {},
 };
 
-const hiddenOpts = ["dev", "demo"];
+const hiddenOpts = ["dev"];
 
 cfg.init = function(config, callback) {
   if (typeof config === "object" && config !== null) {
@@ -44,7 +44,7 @@ cfg.init = function(config, callback) {
       if (err) {
         if (err.code === "ENOENT") {
           config = defaults;
-          mkdirp(path.dirname(configFile), () => {
+          mkdirp(path.dirname(configFile)).then(() => {
             write(config, err => {
               callback(err || null, config);
             });
@@ -103,16 +103,14 @@ function migrate(config) {
     "maxOpen"
   ];
 
-  const needToMigrate = oldProps.every(prop => {
-    return config.hasOwnProperty(prop);
-  });
+  const needToMigrate = oldProps.every(prop => prop in config);
 
   if (needToMigrate && !config.listeners) {
     config.listeners = [{
-      host     : config.host,
-      port     : config.port,
-      protocol : config.useSPDY || config.useTLS ? "https" : "http",
-      hsts     : config.useHSTS ? 31536000 : 0
+      host: config.host,
+      port: config.port,
+      protocol: config.useSPDY || config.useTLS ? "https" : "http",
+      hsts: config.useHSTS ? 31536000 : 0
     }];
   }
   oldProps.forEach(prop => {

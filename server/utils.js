@@ -7,7 +7,7 @@ const cpr = require("cpr");
 const crypto = require("crypto");
 const escapeStringRegexp = require("escape-string-regexp");
 const ext = require("file-extension");
-const fs = require("graceful-fs");
+const fs = require("fs");
 const isbinaryfile = require("isbinaryfile");
 const mimeTypes = require("mime-types");
 const mkdirp = require("mkdirp");
@@ -34,13 +34,13 @@ const overrideMimeTypes = {
 // mkdirp wrapper with array support
 utils.mkdir = function(dir, cb) {
   if (Array.isArray(dir)) {
-    async.each(dir, (p, cb) => {
-      mkdirp(p, {fs, mode: "755"}, cb);
+    async.each(dir, (p, callback) => {
+      mkdirp(p, {mode: "755"}).then(() => callback()).catch(callback);
     }, cb);
   } else if (typeof dir === "string") {
-    mkdirp(dir, {fs, mode: "755"}, cb);
+    mkdirp(dir, {mode: "755"}).then(() => cb()).catch(cb);
   } else {
-    cb(new Error("mkdir: Wrong dir type: " + typeof dir));
+    cb(new Error(`mkdir: Wrong dir type: ${typeof dir}`));
   }
 };
 
@@ -55,7 +55,7 @@ utils.rmSync = function(p) {
   (function run() {
     try {
       rimraf.sync(p, {glob: {dot: true}});
-    } catch (err) {
+    } catch {
       if (tries-- > 0) run();
     }
   })();
@@ -152,7 +152,7 @@ utils.normalizePath = function(p) {
 };
 
 utils.addFilesPath = function(p) {
-  return p === "/" ? paths.files : path.join(paths.files + "/" + p);
+  return p === "/" ? paths.files : path.join(`${paths.files}/${p}`);
 };
 
 utils.removeFilesPath = function(p) {
@@ -164,7 +164,7 @@ utils.removeFilesPath = function(p) {
 };
 
 utils.sanitizePathsInString = function(str) {
-  return (str || "").replace(RegExp(escapeStringRegexp(paths.files), "g"), "");
+  return (str || "").replace(new RegExp(escapeStringRegexp(paths.files), "g"), "");
 };
 
 utils.isPathSane = function(p, isURL) {
@@ -202,11 +202,11 @@ utils.contentType = function(p) {
 
   if (type) {
     const charset = mimeTypes.charsets.lookup(type);
-    return type + (charset ? "; charset=" + charset : "");
+    return type + (charset ? `; charset=${charset}` : "");
   } else {
     try {
       return isbinaryfile.isBinaryFileSync(p) ? "application/octet-stream" : "text/plain";
-    } catch (err) {
+    } catch {
       return "application/octet-stream";
     }
   }
@@ -258,10 +258,10 @@ utils.countOccurences = function(string, search) {
 };
 
 utils.formatBytes = function(num) {
-  if (num < 1) return num + " B";
+  if (num < 1) return `${num} B`;
   const units = ["B", "kB", "MB", "GB", "TB", "PB"];
   const exp = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1);
-  return (num / (1000 ** exp)).toPrecision(3) + " " + units[exp];
+  return `${(num / (1000 ** exp)).toPrecision(3)} ${units[exp]}`;
 };
 
 // TODO: https://tools.ietf.org/html/rfc7239
@@ -283,9 +283,12 @@ utils.port = function(req) {
     req.remotePort && req.remotePort;
 };
 
+function strcmp(a, b) {
+  return a > b ? 1 : a < b ? -1 : 0;
+}
+
 utils.naturalSort = function(a, b) {
   const x = [], y = [];
-  function strcmp(a, b) { return a > b ? 1 : a < b ? -1 : 0; }
   a.replace(/(\d+)|(\D+)/g, (_, a, b) => { x.push([a || 0, b]); });
   b.replace(/(\d+)|(\D+)/g, (_, a, b) => { y.push([a || 0, b]); });
   while (x.length && y.length) {
@@ -303,7 +306,7 @@ utils.extensionRe = function(arr) {
   arr = arr.map(ext => {
     return escapeStringRegexp(ext);
   });
-  return RegExp("\\.(" + arr.join("|") + ")$", "i");
+  return new RegExp(`\\.(${arr.join("|")})$`, "i");
 };
 
 utils.readFile = function(p, cb) {
@@ -324,6 +327,6 @@ utils.arrify = function(val) {
   return Array.isArray(val) ? val : [val];
 };
 
-utils.addUploadTempExt = path => path.replace(/(\/?[^/]+)/, (_, p1) => p1 + ".droppy-upload");
+utils.addUploadTempExt = path => path.replace(/(\/?[^/]+)/, (_, p1) => `${p1}.droppy-upload`);
 utils.removeUploadTempExt = path => path.replace(/(^\/?[^/]+)(\.droppy-upload)/, (_, p1) => p1);
 utils.rootname = path => path.split("/").filter(p => !!p)[0];

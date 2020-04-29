@@ -10,7 +10,7 @@
 
 **droppy** is a self-hosted file storage server with a web interface and capabilities to edit files and view media directly in the browser. It is particularly well-suited to be run on low-end hardware like the Raspberry Pi.
 
-## Features (try the <a target="_blank" href="https://droppy.silverwind.io/">demo</a>)
+## Features
 * Responsive, scalable HTML5 interface
 * Realtime updates of file system changes
 * Directory and Multi-File upload
@@ -37,7 +37,7 @@ droppy maintains an in-memory representation of the `files` directory. If you're
 
 ## Installation
 ### Local Installation :package:
-With [`Node.js`](https://nodejs.org) >= 8.0.0 installed, run:
+With [`Node.js`](https://nodejs.org) >= 10.0.0 installed, run:
 
 ```sh
 $ sudo npm install -g --production droppy
@@ -137,7 +137,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `readOnly` *boolean* - Treat all files as being read-only. Default: `false`.
 - `compression` *boolean* - Whether to serve brotli/gzip compressed static content. Default: `true`. Note that compression incurs no performance penalty because pre-compressed artifacts are included in the distribution. Default: `true`.
 - `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. Default: `false`.
-- `ignorePatterns` *Array* - Array of file path glob patterns to ignore when indexing files. See [here](https://github.com/isaacs/minimatch#features) for supported patterns. Default: `[]`.
+- `ignorePatterns` *Array* - Array of file path glob patterns to ignore when indexing files. See [here](https://github.com/micromatch/picomatch#globbing-features) for supported patterns. Default: `[]`.
 - `watch` *boolean* - Whether to watch the local file system for changes. Disabling this may improve performance when dealing with a large number of files, but with the downside that changes not done via droppy won't be detected. Default: `true`.
 - `headers` *Object*: A object with key-value pairs of custom HTTP headers to set on all responses, for example `{"Access-Control-Allow-Origin": "*"}`. Default: `{}`.
 

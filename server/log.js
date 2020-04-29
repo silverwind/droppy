@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("graceful-fs");
+const fs = require("fs");
 const chalk = require("chalk");
 const format = require("url-format-lax");
 const stripAnsi = require("strip-ansi");
@@ -15,22 +15,22 @@ const log = module.exports = function(req, res, logLevel, ...elems) {
   if (opts && opts.logLevel < logLevel) return;
   let statusCode;
 
-  if (req && req.time) elems.unshift("[" + chalk.magenta((Date.now() - req.time) + "ms") + "]");
+  if (req && req.time) elems.unshift(`[${chalk.magenta(`${Date.now() - req.time}ms`)}]`);
 
   if (res) {
     if (res.statusCode) {
       statusCode = res.statusCode;
       switch (String(statusCode).charAt(0)) {
-      case "2":
-        statusCode = "[" + chalk.green(statusCode) + "]";
-        break;
-      case "3":
-        statusCode = "[" + chalk.yellow(statusCode) + "]";
-        break;
-      case "4":
-      case "5":
-        statusCode = "[" + chalk.red(statusCode) + "]";
-        break;
+        case "2":
+          statusCode = `[${chalk.green(statusCode)}]`;
+          break;
+        case "3":
+          statusCode = `[${chalk.yellow(statusCode)}]`;
+          break;
+        case "4":
+        case "5":
+          statusCode = `[${chalk.red(statusCode)}]`;
+          break;
       }
       elems.unshift(statusCode);
     }
@@ -48,7 +48,7 @@ const log = module.exports = function(req, res, logLevel, ...elems) {
   }
 
   if (logLevel > 0) {
-    elems.unshift("[" + chalk[logColors[logLevel]](logLabels[logLevel]) + "]");
+    elems.unshift(`[${chalk[logColors[logLevel]](logLabels[logLevel])}]`);
   }
 
   if (opts && opts.timestamps) {
@@ -62,7 +62,7 @@ const log = module.exports = function(req, res, logLevel, ...elems) {
   });
 
   if (logfile) {
-    fs.write(logfile, stripAnsi(elems.join(" ")) + "\n");
+    fs.write(logfile, `${stripAnsi(elems.join(" "))}\n`);
   } else {
     console.info(...elems);
   }
@@ -117,12 +117,12 @@ log.timestamp = function() {
   let mins = now.getMinutes();
   let secs = now.getSeconds();
 
-  if (month < 10) month = "0" + month;
-  if (day < 10) day = "0" + day;
-  if (hrs < 10) hrs = "0" + hrs;
-  if (mins < 10) mins = "0" + mins;
-  if (secs < 10) secs = "0" + secs;
-  return year + "-" + month + "-" + day + " " + hrs + ":" + mins + ":" + secs;
+  if (month < 10) month = `0${month}`;
+  if (day < 10) day = `0${day}`;
+  if (hrs < 10) hrs = `0${hrs}`;
+  if (mins < 10) mins = `0${mins}`;
+  if (secs < 10) secs = `0${secs}`;
+  return `${year}-${month}-${day} ${hrs}:${mins}:${secs}`;
 };
 
 log.logo = function(line1, line2, line3) {
@@ -144,7 +144,7 @@ log.formatHostPort = function(hostname, port, proto) {
   if (proto === "http" && port === "80" || proto === "https" && port === "443") {
     port = "";
   } else {
-    port = chalk.blue(":" + port);
+    port = chalk.blue(`:${port}`);
   }
 
   return chalk.cyan(hostname) + port;
@@ -155,11 +155,11 @@ log.formatError = function(err) {
   if (err instanceof Error) {
     output = err.stack;
   } else if (!err) {
-    output = new Error("Error handler called without an argument").stack + "\nerr = " + err;
+    output = `${new Error("Error handler called without an argument").stack}\nerr = ${err}`;
   } else if (typeof err === "string") {
     output = err;
   } else {
-    output = err + "\n" + (new Error()).stack;
+    output = `${err}\n${(new Error()).stack}`;
   }
 
   return output.replace(/^Error: /, "");

@@ -84,6 +84,6 @@ function cookieHeaders(sid, path, expires) {
 
 function cookieString(params) {
   return Object.keys(params).map(param => {
-    return param + "=" + params[param];
+    return `${param}=${params[param]}`;
   }).concat(cookieParams).join("; ");
 }

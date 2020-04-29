@@ -13,31 +13,31 @@ if (require("util").inspect.defaultOptions) {
   require("util").inspect.defaultOptions.depth = null;
 }
 
-const fs   = require("graceful-fs");
+const fs   = require("fs");
 const pkg  = require("./package.json");
 
 process.title = pkg.name;
 process.chdir(__dirname);
 
 const cmds = {
-  start     : "start                  Start the server",
-  stop      : "stop                   Stop all daemonized servers",
-  config    : "config                 Edit the config",
-  list      : "list                   List users",
-  add       : "add <user> <pass> [p]  Add or update a user. Specify 'p' for privileged",
-  del       : "del <user>             Delete a user",
-  build     : "build                  Build client resources",
-  version   : "version, -v            Print version",
+  start: "start                  Start the server",
+  stop: "stop                   Stop all daemonized servers",
+  config: "config                 Edit the config",
+  list: "list                   List users",
+  add: "add <user> <pass> [p]  Add or update a user. Specify 'p' for privileged",
+  del: "del <user>             Delete a user",
+  build: "build                  Build client resources",
+  version: "version, -v            Print version",
 };
 
 const opts = {
-  configdir : "-c, --configdir <dir>  Config directory. Default: ~/.droppy/config",
-  filesdir  : "-f, --filesdir <dir>   Files directory. Default: ~/.droppy/files",
-  daemon    : "-d, --daemon           Daemonize (background) process",
-  log       : "-l, --log <file>       Log to file instead of stdout",
-  dev       : "--dev                  Enable developing mode",
-  color     : "--color                Force-enable colored log output",
-  nocolor   : "--no-color             Force-disable colored log output",
+  configdir: "-c, --configdir <dir>  Config directory. Default: ~/.droppy/config",
+  filesdir: "-f, --filesdir <dir>   Files directory. Default: ~/.droppy/files",
+  daemon: "-d, --daemon           Daemonize (background) process",
+  log: "-l, --log <file>       Log to file instead of stdout",
+  dev: "--dev                  Enable developing mode",
+  color: "--color                Force-enable colored log output",
+  nocolor: "--no-color             Force-disable colored log output",
 };
 
 if (argv.v || argv.V || argv.version) {
@@ -67,7 +67,7 @@ if (argv.log || argv.l) {
   try {
     require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log || argv.l)), "a", "644"));
   } catch (err) {
-    console.error("Unable to open log file for writing: " + err.message);
+    console.error(`Unable to open log file for writing: ${err.message}`);
     process.exit(1);
   }
 }
@@ -113,7 +113,7 @@ if (cmds[cmd]) {
             process.exit(1);
           } else {
             pids.forEach(pid => {
-              console.info("Killed PID " + pid);
+              console.info(`Killed PID ${pid}`);
               process.exit(0);
             });
           }
@@ -127,13 +127,13 @@ if (cmds[cmd]) {
     const cfg = require("./server/cfg.js");
     const edit = function() {
       findEditor(editor => {
-        if (!editor) return console.error("No suitable editor found, please edit " + paths.cfgFile);
+        if (!editor) return console.error(`No suitable editor found, please edit ${paths.cfgFile}`);
         require("child_process").spawn(editor, [paths.cfgFile], {stdio: "inherit"});
       });
     };
     fs.stat(paths.cfgFile, err => {
       if (err && err.code === "ENOENT") {
-        require("mkdirp")(paths.config, () => {
+        require("mkdirp")(paths.config).then(() => {
           cfg.init(null, err => {
             if (err) return console.error(new Error(err.message || err).stack);
             edit();
@@ -170,16 +170,16 @@ if (cmds[cmd]) {
 }
 
 function printHelp() {
-  let help = "Usage: " + pkg.name + " command [options]\n\n Commands:";
+  let help = `Usage: ${pkg.name} command [options]\n\n Commands:`;
 
   Object.keys(cmds).forEach(command => {
-    help += "\n   " + cmds[command];
+    help += `\n   ${cmds[command]}`;
   });
 
   help += "\n\n Options:";
 
   Object.keys(opts).forEach(option => {
-    help += "\n   " + opts[option];
+    help += `\n   ${opts[option]}`;
   });
 
   console.info(help);
@@ -190,9 +190,9 @@ function printUsers(users) {
   if (Object.keys(users).length === 0) {
     console.info("No users defined. Use 'add' to add one.");
   } else {
-    console.info("Current Users:\n" + Object.keys(users).map(user => {
-      return "  - " + user;
-    }).join("\n"));
+    console.info(`Current Users:\n${Object.keys(users).map(user => {
+      return `  - ${user}`;
+    }).join("\n")}`);
   }
 }
 
@@ -209,7 +209,7 @@ function findEditor(cb) {
   (function find(editor) {
     try {
       cb(which.sync(editor));
-    } catch (err) {
+    } catch {
       if (editors.length) {
         find(editors.shift());
       } else {

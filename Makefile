@@ -6,11 +6,8 @@ dev:
 	node droppy.js start --dev
 
 test:
-	$(MAKE) lint
-
-lint:
-	npx eslint --color --ignore-pattern *.min.js server client *.js examples/*.js
-	npx stylelint client/*.css
+	yarn -s run eslint server client/client.js droppy.js
+	yarn -s run stylelint client/*.css
 
 build:
 	touch client/client.js
@@ -64,15 +61,9 @@ deps:
 	npm i
 
 update:
-	npx updates -u
+	yarn -s run updates -u
 	$(MAKE) deps
 	touch client/client.js
-
-deploy:
-	git commit --allow-empty --allow-empty-message -m ""
-	if git ls-remote --exit-code demo &>/dev/null; then git push -f demo master; fi
-	if git ls-remote --exit-code droppy &>/dev/null; then git push -f droppy master; fi
-	git reset --hard HEAD~1
 
 jquery:
 	rm -rf /tmp/jquery
@@ -82,16 +73,16 @@ jquery:
 	rm -rf /tmp/jquery
 
 ver-patch:
-	npx ver patch
+	yarn -s run versions -C patch
 
 ver-minor:
-	npx ver minor
+	yarn -s run versions -C minor
 
 ver-major:
-	npx ver major
+	yarn -s run versions -C major
 
-patch: test build ver-patch docker docker-push deploy publish
-minor: test build ver-minor docker docker-push deploy publish
-major: test build ver-major docker docker-push deploy publish
+patch: test build ver-patch docker docker-push publish
+minor: test build ver-minor docker docker-push publish
+major: test build ver-major docker docker-push publish
 
-.PHONY: dev test lint publish docker docker-arm deps update deploy jquery version-patch version-minor version-major patch minor major
+.PHONY: dev test publish docker docker-arm deps update jquery version-patch version-minor version-major patch minor major

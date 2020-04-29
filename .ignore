@@ -1,6 +1,3 @@
-# https://github.com/ggreer/the_silver_searcher
-# https://github.com/BurntSushi/ripgrep
-
 node_modules
 *.min.js
 dist

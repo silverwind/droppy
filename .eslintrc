@@ -1,16 +1,18 @@
 root: true
-
-extends:
-  - eslint-config-silverwind
-  - plugin:unicorn/recommended
+extends: silverwind
 
 overrides:
   - files: ["client/**/*.js"]
+    rules:
+      prefer-arrow-callback: [2, {allowNamedFunctions: true, allowUnboundThis: true}]
+    env:
+      browser: true
+      es6: true
+      jquery: true
     globals:
       CodeMirror: false
       fileExtension: false
       Handlebars: false
-      jQuery: false
       Mousetrap: false
       pdfjsLib: false
       PhotoSwipe: false
@@ -18,15 +20,3 @@ overrides:
       Plyr: false
       screenfull: false
       Uppie: false
-
-rules:
-  unicorn/catch-error-name: [0]
-  unicorn/explicit-length-check: [0]
-  unicorn/new-for-builtins: [0]
-  unicorn/no-process-exit: [0]
-  unicorn/regex-shorthand: [0]
-  unicorn/prefer-query-selector: [0]
-  unicorn/prefer-node-append: [0]
-  unicorn/no-hex-escape: [0]
-  unicorn/prevent-abbreviations: [0]
-  unicorn/prefer-event-key: [0]
