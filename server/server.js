@@ -217,7 +217,6 @@ function startListeners(callback) {
       proto: listener.protocol,
       key: listener.key,
       cert: listener.cert,
-      passphrase: listener.passphrase,
       index: i,
     };
 
@@ -369,19 +368,7 @@ function createListener(handler, opts, callback) {
       try {
         server = https.createServer(tlsOptions);
       } catch (err2) {
-        if (/(bad password|bad decrypt)/.test(err2)) {
-          let errText;
-          if (!tlsOptions.passphrase) {
-            errText = `TLS key '${opts.key}' is encrypted with a passphrase. ` +
-              `You can either decrypt the key using \`openssl rsa -in ${opts.key
-              } -out ${opts.key}\` or use the \`passphrase\` option on the listener.`;
-          } else {
-            errText = `Wrong passphrase for TLS key '${opts.key}'`;
-          }
-          return callback(new Error(errText));
-        } else {
-          return callback(err);
-        }
+        return callback(err2);
       }
 
       server.on("request", handler);
@@ -1476,7 +1463,6 @@ function tlsSetup(opts, cb) {
     cb(null, {
       cert: certs,
       key,
-      passphrase: opts.passphrase,
     });
   });
 }

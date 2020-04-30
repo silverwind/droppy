@@ -172,8 +172,7 @@ A listener object accepts these options:
 For TLS the following additional options are available. Paths can be given relative to the configuration directory and `~` is resolved as expected.
 
 - `cert` *string* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. Required.
-- `key` *string* - Path to PEM-encoded TLS private key file. Required.
-- `passphrase` *string* - Passphrase for the TLS private key in case it is encrypted.
+- `key` *string* - Path to PEM-encoded TLS private key file not encrypted with a passphrase. Required.
 
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:
