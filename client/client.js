@@ -109,10 +109,10 @@ $.fn.replaceClass = function(search, replacement) {
   return this;
 };
 
-Handlebars.registerHelper("select", (sel, opts) => {
+Handlebars.registerHelper("select", function(sel, opts) {
   return opts.fn(this).replace(new RegExp(` value="${sel}"`), "$& selected=");
 });
-Handlebars.registerHelper("is", (a, b, opts) => {
+Handlebars.registerHelper("is", function (a, b, opts) {
   return a === b ? opts.fn(this) : opts.inverse(this);
 });
 
