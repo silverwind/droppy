@@ -1,7 +1,5 @@
 "use strict";
 
-// Manifest for web application - https://w3c.github.io/manifest/
-
 const pkg = require("../package.json");
 const originalUrl = require("original-url");
 

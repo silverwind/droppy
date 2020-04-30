@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs");
+const fs = require("fs-extra");
 const {red, blue, yellow, green, cyan, magenta, reset} = require("colorette");
 const format = require("url-format-lax");
 const stripAnsi = require("strip-ansi");

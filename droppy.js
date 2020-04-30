@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
+const fs = require("fs-extra");
+const pkg = require("./package.json");
+const untildify = require("untildify");
+const path = require("path");
+
 const argv = require("minimist")(process.argv.slice(2), {
   boolean: ["color", "d", "daemon", "dev"]
 });
@@ -8,13 +13,6 @@ const argv = require("minimist")(process.argv.slice(2), {
 if (!argv.dev) {
   process.env.NODE_ENV = "production";
 }
-
-if (require("util").inspect.defaultOptions) {
-  require("util").inspect.defaultOptions.depth = null;
-}
-
-const fs   = require("fs");
-const pkg  = require("./package.json");
 
 process.title = pkg.name;
 process.chdir(__dirname);
@@ -62,10 +60,8 @@ if (argv.configdir || argv.filesdir || argv.c || argv.f) {
 }
 
 if (argv.log || argv.l) {
-  const ut = require("untildify");
-  const path = require("path");
   try {
-    require("./server/log.js").setLogFile(fs.openSync(ut(path.resolve(argv.log || argv.l)), "a", "644"));
+    require("./server/log.js").setLogFile(fs.openSync(untildify(path.resolve(argv.log || argv.l)), "a", "644"));
   } catch (err) {
     console.error(`Unable to open log file for writing: ${err.message}`);
     process.exit(1);

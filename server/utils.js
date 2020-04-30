@@ -3,11 +3,10 @@
 const utils = module.exports = {};
 const async = require("async");
 const cd = require("content-disposition");
-const cpr = require("cpr");
 const crypto = require("crypto");
 const escapeStringRegexp = require("escape-string-regexp");
 const ext = require("file-extension");
-const fs = require("fs");
+const fs = require("fs-extra");
 const isbinaryfile = require("isbinaryfile");
 const mimeTypes = require("mime-types");
 const mv = require("mv");
@@ -69,8 +68,8 @@ utils.copyFile = function(src, dst, cb) {
 };
 
 utils.copyDir = function(src, dst, cb) {
-  cpr(src, dst, {overwrite: true}, errs => {
-    if (errs) log.error(errs);
+  fs.copy(src, dst, err => {
+    if (err) log.error(err);
     if (cb) cb();
   });
 };

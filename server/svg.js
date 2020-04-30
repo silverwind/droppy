@@ -1,7 +1,7 @@
 "use strict";
 
 const svgstore = require("svgstore");
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
 const paths = require("./paths.js").get();
 
