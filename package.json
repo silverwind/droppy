@@ -9,7 +9,7 @@
   "bin": "./droppy.js",
   "browserslist": "> 3%, last 2 firefox versions, last 2 safari versions",
   "engines": {
-    "node": ">= 10.16.0"
+    "node": ">= 12.10.0"
   },
   "scripts": {
     "start": "node droppy.js start",
@@ -35,13 +35,11 @@
     "lodash.throttle": "4.1.1",
     "mime-types": "^2.1.27",
     "minimist": "^1.2.5",
-    "mkdirp": "^1.0.4",
     "multimatch": "^4.0.0",
     "mv": "^2.1.1",
     "original-url": "^1.2.3",
     "plyr": "^3.6.1",
     "ps-node": "^0.1.6",
-    "rimraf": "^3.0.2",
     "rrdir": "^8.0.1",
     "send": "^0.17.1",
     "strip-ansi": "^6.0.0",

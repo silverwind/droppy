@@ -10,10 +10,8 @@ const ext = require("file-extension");
 const fs = require("fs");
 const isbinaryfile = require("isbinaryfile");
 const mimeTypes = require("mime-types");
-const mkdirp = require("mkdirp");
 const mv = require("mv");
 const path = require("path");
-const rimraf = require("rimraf");
 const util = require("util");
 const validate = require("valid-filename");
 
@@ -31,34 +29,20 @@ const overrideMimeTypes = {
   "video/x-matroska": "video/webm",
 };
 
-// mkdirp wrapper with array support
 utils.mkdir = function(dir, cb) {
   if (Array.isArray(dir)) {
     async.each(dir, (p, callback) => {
-      mkdirp(p, {mode: "755"}).then(() => callback()).catch(callback);
+      fs.mkdir(p, {mode: "755", recursive: true}, callback);
     }, cb);
   } else if (typeof dir === "string") {
-    mkdirp(dir, {mode: "755"}).then(() => cb()).catch(cb);
+    fs.mkdir(dir, {mode: "755", recursive: true}, cb);
   } else {
     cb(new Error(`mkdir: Wrong dir type: ${typeof dir}`));
   }
 };
 
-// rimraf wrapper with 10 retries
 utils.rm = function(p, cb) {
-  rimraf(p, {maxBusyTries: 10, glob: {dot: true}}, cb);
-};
-
-// rimraf.sync wrapper with 10 retries
-utils.rmSync = function(p) {
-  let tries = 10;
-  (function run() {
-    try {
-      rimraf.sync(p, {glob: {dot: true}});
-    } catch {
-      if (tries-- > 0) run();
-    }
-  })();
+  fs.rmdir(p, {recursive: true}, cb);
 };
 
 utils.move = function(src, dst, cb) {

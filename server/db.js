@@ -4,7 +4,6 @@ const db = module.exports = {};
 const chokidar = require("chokidar");
 const fs = require("fs");
 const crypto = require("crypto");
-const mkdirp = require("mkdirp");
 const path = require("path");
 
 const log = require("./log.js");
@@ -18,10 +17,11 @@ db.load = function(callback) {
     if (err) {
       if (err.code === "ENOENT") {
         database = defaults;
-        mkdirp(path.dirname(dbFile)).then(() => {
+        fs.mkdir(path.dirname(dbFile), {recursive: true}, err => {
+          if (err) return callback(err);
           write();
           callback();
-        }).catch(callback);
+        });
       } else {
         callback(err);
       }

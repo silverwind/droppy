@@ -133,7 +133,7 @@ if (cmds[cmd]) {
     };
     fs.stat(paths.cfgFile, err => {
       if (err && err.code === "ENOENT") {
-        require("mkdirp")(paths.config).then(() => {
+        fs.mkdir(paths.config, {recursive: true}, () => {
           cfg.init(null, err => {
             if (err) return console.error(new Error(err.message || err).stack);
             edit();

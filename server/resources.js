@@ -5,7 +5,6 @@ const async = require("async");
 const etag = require("etag");
 const fs = require("fs");
 const jb = require("json-buffer");
-const mkdirp = require("mkdirp");
 const path = require("path");
 const vm = require("vm");
 const zlib = require("zlib");
@@ -268,7 +267,7 @@ function compile(write, cb) {
       addBrotli(cache, (err, cache) => {
         if (err) return cb(err);
         if (write) {
-          mkdirp(path.dirname(cachePath)).then(() => {
+          fs.mkdir(path.dirname(cachePath), {recursive: true}, err => {
             if (err) return cb(err);
             fs.writeFile(cachePath, jb.stringify(cache), err => {
               cb(err, cache);

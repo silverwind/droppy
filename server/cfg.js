@@ -2,7 +2,6 @@
 
 const cfg = module.exports = {};
 const fs = require("fs");
-const mkdirp = require("mkdirp");
 const path = require("path");
 
 const configFile = require("./paths.js").get().cfgFile;
@@ -44,7 +43,8 @@ cfg.init = function(config, callback) {
       if (err) {
         if (err.code === "ENOENT") {
           config = defaults;
-          mkdirp(path.dirname(configFile)).then(() => {
+          fs.mkdir(path.dirname(configFile), {recursive: true}, (err) => {
+            if (err) return callback(err);
             write(config, err => {
               callback(err || null, config);
             });
