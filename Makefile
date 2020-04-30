@@ -58,7 +58,7 @@ docker-push:
 
 deps:
 	rm -rf node_modules
-	npm i
+	yarn
 
 update:
 	yarn -s run updates -u
