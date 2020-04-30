@@ -1,3 +1,4 @@
 node_modules
 *.min.js
 dist
+client/jquery*
