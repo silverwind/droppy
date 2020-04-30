@@ -3,18 +3,19 @@
 const filetree = module.exports = new (require("events").EventEmitter)();
 
 const debounce = require("lodash.debounce");
-const cloneDeep = require("fast-clone");
 const chokidar = require("chokidar");
 const escRe = require("escape-string-regexp");
 const fs = require("fs-extra");
 const path = require("path");
 const rrdir = require("rrdir");
+const rfdc = require("rfdc");
 const util = require("util");
 
 const log = require("./log.js");
 const paths = require("./paths.js").get();
 const utils = require("./utils.js");
 
+const clone = rfdc();
 const lstat = util.promisify(fs.lstat);
 
 let dirs = {};
@@ -328,7 +329,7 @@ filetree.mvdir = function(src, dst, cb) {
 filetree.cp = function(src, dst, cb) {
   lookAway();
   utils.copyFile(utils.addFilesPath(src), utils.addFilesPath(dst), () => {
-    dirs[path.dirname(dst)].files[path.basename(dst)] = cloneDeep(dirs[path.dirname(src)].files[path.basename(src)]);
+    dirs[path.dirname(dst)].files[path.basename(dst)] = clone(dirs[path.dirname(src)].files[path.basename(src)]);
     dirs[path.dirname(dst)].files[path.basename(dst)].mtime = Date.now();
     update(path.dirname(dst));
     if (cb) cb();
@@ -339,12 +340,12 @@ filetree.cpdir = function(src, dst, cb) {
   lookAway();
   utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), () => {
     // Basedir
-    dirs[dst] = cloneDeep(dirs[src]);
+    dirs[dst] = clone(dirs[src]);
     dirs[dst].mtime = Date.now();
     // Subdirs
     Object.keys(dirs).forEach(dir => {
       if (new RegExp(`^${escRe(src)}/`).test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)] = cloneDeep(dirs[dir]);
+        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)] = clone(dirs[dir]);
         dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)].mtime = Date.now();
       }
     });
