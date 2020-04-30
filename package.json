@@ -43,7 +43,6 @@
     "untildify": "4.0.0",
     "valid-filename": "3.1.0",
     "versions": "8.2.7",
-    "whatwg-fetch": "3.0.0",
     "which": "2.0.2",
     "ws": "7.2.5",
     "yazl": "2.5.1"
@@ -67,7 +66,8 @@
     "svgstore": "3.0.0-2",
     "terser": "4.6.12",
     "updates": "10.2.10",
-    "uppie": "1.1.2"
+    "uppie": "1.1.2",
+    "whatwg-fetch": "3.0.0"
   },
   "files": [
     "client",
