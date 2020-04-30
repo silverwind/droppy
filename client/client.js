@@ -112,7 +112,7 @@ $.fn.replaceClass = function(search, replacement) {
 Handlebars.registerHelper("select", function(sel, opts) {
   return opts.fn(this).replace(new RegExp(` value="${sel}"`), "$& selected=");
 });
-Handlebars.registerHelper("is", function (a, b, opts) {
+Handlebars.registerHelper("is", function(a, b, opts) {
   return a === b ? opts.fn(this) : opts.inverse(this);
 });
 
