@@ -21,7 +21,6 @@
     "colorette": "1.1.0",
     "content-disposition": "0.5.3",
     "daemonize-process": "3.0.0",
-    "dhparam": "2.0.0",
     "escape-string-regexp": "4.0.0",
     "etag": "1.8.1",
     "fast-clone": "1.5.13",

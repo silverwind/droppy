@@ -2,7 +2,7 @@
 
 const cfg = module.exports = {};
 const fs = require("fs-extra");
-const path = require("path");
+const {dirname} = require("path");
 
 const configFile = require("./paths.js").get().cfgFile;
 
@@ -35,7 +35,6 @@ const hiddenOpts = ["dev"];
 
 cfg.init = function(config, callback) {
   if (typeof config === "object" && config !== null) {
-    config = migrate(config);
     config = Object.assign({}, defaults, config);
     callback(null, config);
   } else {
@@ -43,7 +42,7 @@ cfg.init = function(config, callback) {
       if (err) {
         if (err.code === "ENOENT") {
           config = defaults;
-          fs.mkdir(path.dirname(configFile), {recursive: true}, (err) => {
+          fs.mkdir(dirname(configFile), {recursive: true}, (err) => {
             if (err) return callback(err);
             write(config, err => {
               callback(err || null, config);
@@ -64,7 +63,6 @@ cfg.init = function(config, callback) {
 
           if (!config) config = {};
 
-          config = migrate(config);
           config = Object.assign({}, defaults, config);
 
           // TODO: validate more options
@@ -90,31 +88,4 @@ cfg.init = function(config, callback) {
 
 function write(config, callback) {
   fs.writeFile(configFile, JSON.stringify(config, null, 2), callback);
-}
-
-function migrate(config) {
-  const oldProps = [
-    "host",
-    "port",
-    "useTLS",
-    "useSPDY",
-    "useHSTS",
-    "readInterval",
-    "maxOpen"
-  ];
-
-  const needToMigrate = oldProps.every(prop => prop in config);
-
-  if (needToMigrate && !config.listeners) {
-    config.listeners = [{
-      host: config.host,
-      port: config.port,
-      protocol: config.useSPDY || config.useTLS ? "https" : "http",
-      hsts: config.useHSTS ? 31536000 : 0
-    }];
-  }
-  oldProps.forEach(prop => {
-    delete config[prop];
-  });
-  return config;
 }

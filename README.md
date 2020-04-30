@@ -153,16 +153,14 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
     "port": 443,
     "protocol": "https",
     "key": "~/certs/example.com.key",
-    "cert": "~/certs/example.com.crt",
-    "dhparam": "~/certs/example.com.dh",
-    "hsts": 31536000
+    "cert": "~/certs/example.com.crt"
   }
 ]
 ```
 The above configuration will result in:
 
 - HTTP listening on all IPv4 and IPv6 interfaces, port 80 and on the unix domain socket `/tmp/droppy`.
-- HTTPS listening on all IPv4 interfaces, port 443, with 1 year of HSTS duration, using the provided TLS files.
+- HTTPS listening on all IPv4 interfaces, port 443 using the provided TLS files.
 
 A listener object accepts these options:
 
@@ -175,9 +173,7 @@ For TLS the following additional options are available. Paths can be given relat
 
 - `cert` *string* - Path to PEM-encoded TLS certificate file, which can include additional intermediate certificates concatenated after the main certificate. Required.
 - `key` *string* - Path to PEM-encoded TLS private key file. Required.
-- `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will be generated on launch and saved for future use.
 - `passphrase` *string* - Passphrase for the TLS private key in case it is encrypted.
-- `hsts` *number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
 
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:

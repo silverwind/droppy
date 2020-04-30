@@ -1,7 +1,6 @@
 "use strict";
 
 const fs = require("fs-extra");
-const crypto = require("crypto");
 const os = require("os");
 const path = require("path");
 const qs = require("querystring");
@@ -216,10 +215,8 @@ function startListeners(callback) {
 
     const opts = {
       proto: listener.protocol,
-      hsts: listener.hsts,
       key: listener.key,
       cert: listener.cert,
-      dhparam: listener.dhparam,
       passphrase: listener.passphrase,
       index: i,
     };
@@ -387,21 +384,8 @@ function createListener(handler, opts, callback) {
         }
       }
 
-      server.on("request", (req, res) => {
-        if (opts.hsts && opts.hsts > 0) {
-          res.setHeader("Strict-Transport-Security", `max-age=${opts.hsts}`);
-        }
-        handler(req, res);
-      });
-
+      server.on("request", handler);
       server.on("tlsClientError", tlsError);
-
-      // TLS tickets - regenerate keys every hour, Node.js 4.0
-      (function rotate() {
-        server.setTicketKeys(crypto.randomBytes(48));
-        setTimeout(rotate, 60 * 60 * 1000);
-      })();
-
       callback(null, server);
     });
   }
@@ -1480,29 +1464,18 @@ function tlsSetup(opts, cb) {
   const certPaths = [
     path.resolve(paths.config, ut(opts.key)),
     path.resolve(paths.config, ut(opts.cert)),
-    opts.dhparam ? path.resolve(paths.config, opts.dhparam) : undefined
   ];
 
   async.map(certPaths, utils.readFile, (_, data) => {
     const key = data[0];
     const certs = data[1];
-    const dhparam = data[3];
 
     if (!key) return cb(new Error(`Unable to read TLS key: ${certPaths[0]}`));
     if (!certs) return cb(new Error(`Unable to read TLS certificates: ${certPaths[1]}`));
-    if (opts.dhparam && !dhparam) return cb(new Error(`Unable to read TLS DH parameter file: ${certPaths[3]}`));
-
-    function createDH() {
-      log.info("Generating 2048 bit Diffie-Hellman parameters. This will take a long time.");
-      const dh = require("dhparam")(2048);
-      db.set("dhparam", dh);
-      return dh;
-    }
 
     cb(null, {
       cert: certs,
       key,
-      dhparam: dhparam || db.get("dhparam") || createDH(),
       passphrase: opts.passphrase,
     });
   });
