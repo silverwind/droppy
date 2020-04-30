@@ -2,8 +2,8 @@
 
 const fs = require("fs-extra");
 const {red, blue, yellow, green, cyan, magenta, reset} = require("colorette");
-const format = require("url-format-lax");
 const stripAnsi = require("strip-ansi");
+const {isIPv6} = require("net");
 
 const utils = require("./utils.js");
 
@@ -137,17 +137,13 @@ log.logo = function(line1, line2, line3) {
 };
 
 log.formatHostPort = function(hostname, port, proto) {
-  const str = format({hostname, port});
-  hostname = str.substring(0, str.lastIndexOf(":"));
-  port = str.substring(str.lastIndexOf(":") + 1, str.length);
-
   if (proto === "http" && port === "80" || proto === "https" && port === "443") {
     port = "";
   } else {
     port = blue(`:${port}`);
   }
 
-  return cyan(hostname) + port;
+  return cyan(isIPv6(hostname) ? `[${hostname}]` : hostname) + port;
 };
 
 log.formatError = function(err) {

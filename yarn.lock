@@ -3415,11 +3415,6 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-url-format-lax@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/url-format-lax/-/url-format-lax-1.0.0.tgz#7ed9f219dbb9c5b7dfd919fe220b90619a06dfd1"
-  integrity sha1-ftnyGdu5xbff2Rn+IguQYZoG39E=
-
 url-polyfill@^1.1.8:
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/url-polyfill/-/url-polyfill-1.1.8.tgz#21eb58ad61192f52b77dcac8ab5293ae7bc67060"
