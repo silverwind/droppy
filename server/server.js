@@ -10,7 +10,7 @@ const {promisify} = require("util");
 const throttle = require("lodash.throttle");
 const async = require("async");
 const Busboy = require("busboy");
-const chalk = require("chalk");
+const {red, blue, green, cyan, magenta} = require("colorette");
 const escRe = require("escape-string-regexp");
 const etag = require("etag");
 const imgSize = require("image-size");
@@ -44,21 +44,21 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
     log.logo(
       [
-        chalk.blue(pkg.name),
-        chalk.green(pkg.version),
+        blue(pkg.name),
+        green(pkg.version),
         "running on",
-        chalk.blue("node"),
-        chalk.green(process.version.substring(1))
+        blue("node"),
+        green(process.version.substring(1))
       ].join(" "),
       [
-        chalk.blue("config"),
+        blue("config"),
         "at",
-        chalk.green(paths.config)
+        green(paths.config)
       ].join(" "),
       [
-        chalk.blue("files"),
+        blue("files"),
         "at",
-        chalk.green(paths.files)
+        green(paths.files)
       ].join(" ")
     );
   }
@@ -128,7 +128,7 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
   ], err => {
     if (err) return callback(err);
     ready = true;
-    log.info(chalk.green("Ready for requests!"));
+    log.info(green("Ready for requests!"));
     dieOnError = false;
     callback();
   });
@@ -261,8 +261,8 @@ function startListeners(callback) {
           // a unix socket URL should normally percent-encode the path, but
           // we're printing a path-less URL so pretty-print it with slashes.
           log.info("Listening on ",
-            chalk.blue(`${proto}+unix://`) +
-            chalk.cyan(server.address())
+            blue(`${proto}+unix://`) +
+            cyan(server.address())
           );
         } else { // host + port
           const addr = server.address().address;
@@ -291,7 +291,7 @@ function startListeners(callback) {
           addrs.sort();
 
           addrs.forEach(addr => {
-            log.info("Listening on ", chalk.blue(`${proto}://`) + log.formatHostPort(addr, port, proto));
+            log.info("Listening on ", blue(`${proto}://`) + log.formatHostPort(addr, port, proto));
           });
         }
         cb();
@@ -314,27 +314,27 @@ function startListeners(callback) {
           if (err.code === "EADDRINUSE") {
             if (!otherListenerFound) {
               log.info(
-                chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-                chalk.red(". Address already in use.")
+                red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+                red(". Address already in use.")
               );
             }
           } else if (err.code === "EACCES") {
             log.info(
-              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-              chalk.red(". Need permission to bind to ports < 1024.")
+              red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+              red(". Need permission to bind to ports < 1024.")
             );
           } else if (err.code === "EAFNOSUPPORT") {
             if (!otherListenerFound) {
               log.info(
-                chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-                chalk.red(". Protocol unsupported. Are you trying to " +
+                red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+                red(". Protocol unsupported. Are you trying to " +
                   "listen on IPv6 while the protocol is disabled?")
               );
             }
           } else if (err.code === "EADDRNOTAVAIL") {
             log.info(
-              chalk.red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-              chalk.red(". Address not available.")
+              red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+              red(". Address not available.")
             );
           } else log.error(err);
         } else log.error(err);
@@ -430,7 +430,7 @@ function onWebSocketRequest(ws, req) {
   ws.addr = ws._socket.remoteAddress;
   ws.port = ws._socket.remotePort;
   ws.headers = Object.assign({}, req.headers);
-  log.info(ws, null, "WebSocket [", chalk.green("connected"), "]");
+  log.info(ws, null, "WebSocket [", green("connected"), "]");
   const sid = `${ws._socket.remoteAddress} ${ws._socket.remotePort}`;
   const cookie = cookies.get(req.headers.cookie);
   clients[sid] = {views: [], cookie, ws};
@@ -439,7 +439,7 @@ function onWebSocketRequest(ws, req) {
     msg = JSON.parse(msg);
 
     if (msg.type !== "SAVE_FILE") {
-      log.debug(ws, null, chalk.magenta("RECV "), utils.pretty(msg));
+      log.debug(ws, null, magenta("RECV "), utils.pretty(msg));
     }
 
     if (!csrf.validate(msg.token)) {
@@ -610,11 +610,11 @@ function onWebSocketRequest(ws, req) {
         if ((db.get("sessions")[cookie] || {}).username === name) {
           return sendError(sid, null, "Cannot delete yourself");
         }
-        if (db.delUser(name)) log.info(ws, null, "Deleted user: ", chalk.magenta(name));
+        if (db.delUser(name)) log.info(ws, null, "Deleted user: ", magenta(name));
       } else {
         const isNew = !db.get("users")[name];
         db.addOrUpdateUser(name, pass, msg.data.priv || false);
-        log.info(ws, null, `${isNew ? "Added" : "Updated"} user: `, chalk.magenta(name));
+        log.info(ws, null, `${isNew ? "Added" : "Updated"} user: `, magenta(name));
       }
       sendUsers(sid);
     } else if (msg.type === "CREATE_FILES") {
@@ -684,9 +684,9 @@ function onWebSocketRequest(ws, req) {
     removeClientPerDir(sid);
     delete clients[sid];
     if (code === 1011) {
-      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", "(CSFR prevented or server restarted)");
+      log.info(ws, null, "WebSocket [", red("disconnected"), "] ", "(CSFR prevented or server restarted)");
     } else {
-      log.info(ws, null, "WebSocket [", chalk.red("disconnected"), "] ", reason || `(Code: ${code || "none"})`);
+      log.info(ws, null, "WebSocket [", red("disconnected"), "] ", reason || `(Code: ${code || "none"})`);
     }
   });
   ws.on("error", log.error);
@@ -762,7 +762,7 @@ function send(ws, data) {
         const debugData = JSON.parse(data);
         // Remove some spammy logging
         if (debugData.type === "RELOAD" && debugData.css) debugData.css = {"...": "..."};
-        log.debug(ws, null, chalk.green("SEND "), utils.pretty(debugData));
+        log.debug(ws, null, green("SEND "), utils.pretty(debugData));
       }
       ws.send(data, err => {
         if (err) log.err(err);
@@ -879,11 +879,11 @@ function handlePOST(req, res) {
         cookies.create(req, res, postData);
         res.statusCode = 200;
         res.end();
-        log.info(req, res, "User ", "'", postData.username, "'", chalk.green(" authenticated"));
+        log.info(req, res, "User ", "'", postData.username, "'", green(" authenticated"));
       } else {
         res.statusCode = 401;
         res.end();
-        log.info(req, res, "User ", "'", postData.username, "'", chalk.red(" unauthorized"));
+        log.info(req, res, "User ", "'", postData.username, "'", red(" unauthorized"));
       }
     }).catch(err => {
       log.error(err);
@@ -1377,7 +1377,7 @@ function streamArchive(req, res, zipPath, download, stats, shareLink) {
   const zip = new yazl.ZipFile();
   const relPath = utils.removeFilesPath(zipPath);
   log.info(req, res);
-  log.info(req, res, "Streaming zip of ", chalk.blue(relPath));
+  log.info(req, res, "Streaming zip of ", blue(relPath));
   res.statusCode = 200;
   res.setHeader("Content-Type", utils.contentType(zip));
   res.setHeader("Transfer-Encoding", "chunked");
@@ -1542,7 +1542,7 @@ function setupProcess(standalone) {
 // Process shutdown
 function endProcess(signal) {
   let count = 0;
-  log.info(`Received ${chalk.red(signal)} - Shutting down ...`);
+  log.info(`Received ${red(signal)} - Shutting down ...`);
   Object.keys(clients).forEach(sid => {
     if (!clients[sid] || !clients[sid].ws) return;
     if (clients[sid].ws.readyState < 2) {

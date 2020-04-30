@@ -1,13 +1,13 @@
 "use strict";
 
 const fs = require("fs");
-const chalk = require("chalk");
+const {red, blue, yellow, green, cyan, magenta, reset} = require("colorette");
 const format = require("url-format-lax");
 const stripAnsi = require("strip-ansi");
 
 const utils = require("./utils.js");
 
-const logColors = ["reset", "red", "yellow", "cyan"];
+const logColors = [reset, red, yellow, cyan];
 const logLabels = ["", "ERROR", "INFO", "DEBG"];
 let opts, logfile;
 
@@ -15,21 +15,21 @@ const log = module.exports = function(req, res, logLevel, ...elems) {
   if (opts && opts.logLevel < logLevel) return;
   let statusCode;
 
-  if (req && req.time) elems.unshift(`[${chalk.magenta(`${Date.now() - req.time}ms`)}]`);
+  if (req && req.time) elems.unshift(`[${magenta(`${Date.now() - req.time}ms`)}]`);
 
   if (res) {
     if (res.statusCode) {
       statusCode = res.statusCode;
       switch (String(statusCode).charAt(0)) {
         case "2":
-          statusCode = `[${chalk.green(statusCode)}]`;
+          statusCode = `[${green(statusCode)}]`;
           break;
         case "3":
-          statusCode = `[${chalk.yellow(statusCode)}]`;
+          statusCode = `[${yellow(statusCode)}]`;
           break;
         case "4":
         case "5":
-          statusCode = `[${chalk.red(statusCode)}]`;
+          statusCode = `[${red(statusCode)}]`;
           break;
       }
       elems.unshift(statusCode);
@@ -38,7 +38,7 @@ const log = module.exports = function(req, res, logLevel, ...elems) {
 
   if (req) {
     if (req.url) elems.unshift(decodeURIComponent(decodeURIComponent(req.url))); // For some reason, this need double decoding for upload URLs
-    if (req.method) elems.unshift(chalk.yellow(req.method.toUpperCase()));
+    if (req.method) elems.unshift(yellow(req.method.toUpperCase()));
 
     const ip = utils.ip(req);
 
@@ -48,7 +48,7 @@ const log = module.exports = function(req, res, logLevel, ...elems) {
   }
 
   if (logLevel > 0) {
-    elems.unshift(`[${chalk[logColors[logLevel]](logLabels[logLevel])}]`);
+    elems.unshift(`[${logColors[logLevel](logLabels[logLevel])}]`);
   }
 
   if (opts && opts.timestamps) {
@@ -97,9 +97,9 @@ log.info = function(...args) {
 log.error = function(...args) {
   const [req, res, ...elems] = args;
   if (req && (req.headers || req.addr)) {
-    log(req, res, 1, chalk.red(log.formatError(elems.length === 1 ? elems[0] : elems.join(" "))));
+    log(req, res, 1, red(log.formatError(elems.length === 1 ? elems[0] : elems.join(" "))));
   } else {
-    log(null, null, 1, chalk.red(log.formatError(args.length === 1 ? args[0] : args.join(" "))));
+    log(null, null, 1, red(log.formatError(args.length === 1 ? args[0] : args.join(" "))));
   }
 };
 
@@ -126,7 +126,7 @@ log.timestamp = function() {
 };
 
 log.logo = function(line1, line2, line3) {
-  log.plain(chalk.blue([
+  log.plain(blue([
     "\n",
     "           .:.\n",
     `    :::  .:::::.   ${line1}\n`,
@@ -144,10 +144,10 @@ log.formatHostPort = function(hostname, port, proto) {
   if (proto === "http" && port === "80" || proto === "https" && port === "443") {
     port = "";
   } else {
-    port = chalk.blue(`:${port}`);
+    port = blue(`:${port}`);
   }
 
-  return chalk.cyan(hostname) + port;
+  return cyan(hostname) + port;
 };
 
 log.formatError = function(err) {
