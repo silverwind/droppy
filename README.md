@@ -37,16 +37,11 @@ droppy maintains an in-memory representation of the `files` directory. If you're
 
 ## Installation
 ### Local Installation :package:
-With [`Node.js`](https://nodejs.org) >= 10.0.0 installed, run:
+With [`Node.js`](https://nodejs.org) >= 10.16.0 installed, run:
 
 ```sh
-$ sudo npm install -g --production droppy
+$ npm install -g droppy
 $ droppy start -c /srv/droppy/config -f /srv/droppy/files
-```
-To update, run
-
-```sh
-$ sudo npm update -g --production droppy
 ```
 
 To make droppy run in the background, you can use the `--daemon` option, thought it is adviced that you install it as a persistent service in your system. For Linux, see these guides:
@@ -184,25 +179,6 @@ For TLS the following additional options are available. Paths can be given relat
 - `dhparam` *string* - Path to PEM-encoded TLS Diffie-Hellman parameters file. If not provided, new 2048 bit parameters will be generated on launch and saved for future use.
 - `passphrase` *string* - Passphrase for the TLS private key in case it is encrypted.
 - `hsts` *number* - Length of the [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) header in seconds. Set to `0` to disable HSTS.
-
-## API
-droppy can be used with express, see the [express example](./examples/express.js).
-
-### droppy([options])
-- `options` *Object*: [Options](#Options). Extends [config.json](#Configuration). In addition to above listed options, `configdir`, `filesdir` and `log` are present on the API.
-
-Returns a object `{onRequest, setupWebSocket}`.
-
-### Browser support
-
-droppy supports all modern browsers that can run ECMAScript 2015 or newer.
-
-### Working with other websocket servers
-
-To use droppy in a server that uses other websocket applications on the same
-port you can pass `false` to `setupWebSocket` instead of a server object. The
-function will return a websocket server object that you can use like normal in
-your application. See [documentation for the ws npm package](https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server) for more information.
 
 ## Downloading from the command line
 To download shared links with `curl` and `wget` to the correct filename:
