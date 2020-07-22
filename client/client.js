@@ -288,7 +288,7 @@ function init() {
 
 function openSocket() {
   droppy.socket = new WebSocket(
-    `${location.origin.replace(/^http/, "ws") + location.pathname}!/socket`
+    `${window.location.origin.replace(/^http/, "ws") + window.location.pathname}!/socket`
   );
 
   droppy.socket.addEventListener("open", (_event) => {
@@ -361,7 +361,7 @@ function openSocket() {
         if (msg.css) {
           $("#css").remove();
           $(`<style id='css'>${msg.css}</style>`).appendTo($("head"));
-        } else location.reload(true);
+        } else window.location.reload(true);
         break;
       }
       case "SHARELINK": {
@@ -854,7 +854,7 @@ function getViewLocation(view) {
 }
 
 function getLocationsFromHash() {
-  const locations = location.hash.split("#");
+  const locations = window.location.hash.split("#");
   locations.shift();
 
   if (locations.length === 0) {
@@ -869,7 +869,7 @@ function getLocationsFromHash() {
 }
 
 function getHashPaths(modview, dest) {
-  let path = location.pathname;
+  let path = window.location.pathname;
   droppy.views.forEach((view) => {
     view = $(view);
     if (modview && modview.is(view)) {
@@ -882,11 +882,11 @@ function getHashPaths(modview, dest) {
 }
 
 function pushHistory(view, dest) {
-  history.pushState(null, null, getHashPaths(view, dest));
+  window.history.pushState(null, null, getHashPaths(view, dest));
 }
 
 function replaceHistory(view, dest) {
-  history.replaceState(null, null, getHashPaths(view, dest));
+  window.history.replaceState(null, null, getHashPaths(view, dest));
 }
 
 // Update our current location and change the URL to it
@@ -1215,7 +1215,7 @@ function handleDrop(view, event, src, dst, spinner) {
 
     if (x < limit) {
       left = x + limit;
-    } else if (x + limit > innerWidth) {
+    } else if (x + limit > window.innerWidth) {
       left = x - limit;
     } else {
       left = x;
@@ -2192,7 +2192,7 @@ function updateUsers(userlist) {
     if (!user) return;
     const pass = prompt("Password?");
     if (!pass) return;
-    const priv = confirm("Privileged User?");
+    const priv = window.confirm("Privileged User?");
     sendMessage(null, "UPDATE_USER", {
       name: user,
       pass,
@@ -2432,7 +2432,7 @@ function initAudio(view) {
   bar.off("click").on("click", function(event) {
     const time = player.duration *
       ((event.pageX - bar[0].getBoundingClientRect().left) / bar[0].clientWidth);
-    if (!isNaN(parseFloat(time)) && isFinite(time)) {
+    if (!Number.isNaN(parseFloat(time)) && Number.isFinite(time)) {
       player.currentTime = time;
     } else {
       endAudio($(this).parents(".view"));
@@ -3002,7 +3002,7 @@ function throttle(func, threshold) {
 }
 
 function getFullLink(hash) {
-  return `${location.protocol}//${location.host}${location.pathname}$/${hash}`;
+  return `${window.location.origin}${window.location.pathname}$/${hash}`;
 }
 
 function getSpriteClass(ext) {
@@ -3109,7 +3109,7 @@ function removeExt(filename) {
 
 // Get the path to droppy's root, ensuring a trailing slash
 function getRootPath() {
-  const p = location.pathname;
+  const p = window.location.pathname;
   return p[p.length - 1] === "/" ? p : `${p}/`;
 }
 
