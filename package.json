@@ -72,7 +72,6 @@
     "server",
     "dist",
     "droppy.js",
-    "index.js",
     "docker-start.sh"
   ],
   "keywords": [

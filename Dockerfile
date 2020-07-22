@@ -5,7 +5,7 @@ MAINTAINER silverwind
 COPY ["client", "/droppy/client"]
 COPY ["server", "/droppy/server"]
 COPY ["dist", "/droppy/dist"]
-COPY ["droppy.js", "index.js", "docker-start.sh", "README.md", "LICENSE", "package.json", "/droppy/"]
+COPY ["droppy.js", "docker-start.sh", "README.md", "LICENSE", "package.json", "/droppy/"]
 
 # Install build dependencies and and build modules
 RUN cd /droppy && \
