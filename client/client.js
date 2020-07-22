@@ -1995,7 +1995,7 @@ function initPDF(container) {
 
   loadScript("pdf-js", "!/res/lib/pdf.js").then(() => {
     pdfjsLib.GlobalWorkerOptions.workerSrc = "!/res/lib/pdf.worker.js";
-    pdfjsLib.getDocument(container.data("src")).then((pdf) => {
+    pdfjsLib.getDocument(container.data("src")).promise.then((pdf) => {
       const availableWidth = container[0].parentNode.clientWidth;
       const availableHeight = container[0].parentNode.clientHeight;
       let maxWidth = 0;
@@ -2004,11 +2004,11 @@ function initPDF(container) {
       const promises = [];
       for (let i = 1; i <= pdf.numPages; i++) {
         promises.push(pdf.getPage(i).then((page) => {
-          const vp = page.getViewport(1);
+          const vp = page.getViewport({scale: 1});
           const ratioX = availableWidth / vp.width;
           const ratioY = availableHeight / vp.height;
           const scale = Math.min(ratioX, ratioY);
-          const viewport = page.getViewport(scale * quality);
+          const viewport = page.getViewport({scale: scale * quality});
           const pageWidth = viewport.width / quality;
           const pageHeight = viewport.height / quality;
 
