@@ -2,3 +2,5 @@ node_modules
 *.min.js
 dist
 client/jquery*
+yarn.lock
+package-lock.json

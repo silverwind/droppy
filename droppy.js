@@ -6,6 +6,8 @@ const pkg = require("./package.json");
 const untildify = require("untildify");
 const path = require("path");
 
+require("util").inspect.defaultOptions.depth = 4;
+
 const argv = require("minimist")(process.argv.slice(2), {
   boolean: ["color", "d", "daemon", "dev"]
 });
@@ -88,7 +90,7 @@ if (cmds[cmd]) {
   } else if (cmd === "stop") {
     const ps = require("ps-node");
     const log = require("./server/log.js");
-    ps.lookup({command: pkg.name}, (err, procs) => {
+    ps.lookup({command: pkg.name}, async (err, procs) => {
       if (err) {
         log.error(err);
         process.exit(1);
@@ -98,22 +100,23 @@ if (cmds[cmd]) {
           log.info("No processes found");
           process.exit(0);
         }
-        require("async").map(procs, (proc, cb) => {
-          ps.kill(proc.pid, err => {
-            if (err) return cb(err);
-            cb(null, proc.pid);
-          });
-        }, (err, pids) => {
-          if (err) {
-            log.error(err);
-            process.exit(1);
-          } else {
-            pids.forEach(pid => {
-              console.info(`Killed PID ${pid}`);
-              process.exit(0);
+
+        const pids = await Promise.all(procs.map(proc => {
+          return new Promise(resolve => {
+            ps.kill(proc.pid, err => {
+              if (err) {
+                log.error(err);
+                return process.exit(1);
+              }
+              resolve(proc.pid);
             });
-          }
-        });
+          });
+        }));
+
+        if (pids.length) {
+          console.info(`Killed PIDs: ${pids.join(", ")}`);
+        }
+        process.exit(0);
       }
     });
   } else if (cmd === "version") {

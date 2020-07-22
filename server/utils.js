@@ -1,7 +1,6 @@
 "use strict";
 
 const utils = module.exports = {};
-const async = require("async");
 const cd = require("content-disposition");
 const crypto = require("crypto");
 const escapeStringRegexp = require("escape-string-regexp");
@@ -13,6 +12,7 @@ const mv = require("mv");
 const path = require("path");
 const util = require("util");
 const validate = require("valid-filename");
+const {mkdir, stat} = require("fs").promises;
 
 const paths = require("./paths.js").get();
 const log = require("./log.js");
@@ -28,16 +28,11 @@ const overrideMimeTypes = {
   "video/x-matroska": "video/webm",
 };
 
-utils.mkdir = function(dir, cb) {
-  if (Array.isArray(dir)) {
-    async.each(dir, (p, callback) => {
-      fs.mkdir(p, {mode: "755", recursive: true}, callback);
-    }, cb);
-  } else if (typeof dir === "string") {
-    fs.mkdir(dir, {mode: "755", recursive: true}, cb);
-  } else {
-    cb(new Error(`mkdir: Wrong dir type: ${typeof dir}`));
+utils.mkdir = async function(dir, cb) {
+  for (const d of (Array.isArray(dir) ? dir : [dir])) {
+    await mkdir(d, {mode: "755", recursive: true});
   }
+  cb();
 };
 
 utils.rm = function(p, cb) {
@@ -94,40 +89,37 @@ utils.pretty = function(data) {
     .replace(/[\r\n]+/gm, "");
 };
 
-utils.getNewPath = function(origPath, callback) {
-  fs.stat(origPath, (err, stats) => {
-    if (err) callback(origPath);
-    else {
-      let filename = path.basename(origPath);
-      const dirname = path.dirname(origPath);
-      let extension = "";
+utils.getNewPath = async function(origPath, callback) {
+  let stats;
+  try {
+    stats = await fs.stat(origPath);
+  } catch {
+    return callback(origPath);
+  }
 
-      if (filename.includes(".") && stats.isFile()) {
-        extension = filename.substring(filename.lastIndexOf("."));
-        filename = filename.substring(0, filename.lastIndexOf("."));
-      }
+  let filename = path.basename(origPath);
+  const dirname = path.dirname(origPath);
+  let extension = "";
 
-      if (!/-\d+$/.test(filename)) filename += "-1";
+  if (filename.includes(".") && stats.isFile()) {
+    extension = filename.substring(filename.lastIndexOf("."));
+    filename = filename.substring(0, filename.lastIndexOf("."));
+  }
 
-      let canCreate = false;
-      async.until(
-        () => {
-          return canCreate;
-        },
-        cb => {
-          const num = parseInt(filename.substring(filename.lastIndexOf("-") + 1));
-          filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
-          fs.stat(path.join(dirname, filename + extension), err => {
-            canCreate = err;
-            cb();
-          });
-        },
-        () => {
-          callback(path.join(dirname, filename + extension));
-        }
-      );
+  if (!/-\d+$/.test(filename)) filename += "-1";
+
+  let canCreate = false;
+  while (!canCreate) {
+    const num = parseInt(filename.substring(filename.lastIndexOf("-") + 1));
+    filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
+    try {
+      stat(path.join(dirname, filename + extension));
+    } catch {
+      canCreate = true;
     }
-  });
+  }
+
+  callback(path.join(dirname, filename + extension));
 };
 
 utils.normalizePath = function(p) {
@@ -178,7 +170,6 @@ utils.isBinary = async function(p) {
   return isbinaryfile.isBinaryFile(p);
 };
 
-// TODO async/await this in Node.js 8
 utils.contentType = function(p) {
   const type = mimeTypes.lookup(p);
   if (overrideMimeTypes[type]) return overrideMimeTypes[type];

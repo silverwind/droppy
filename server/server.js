@@ -5,9 +5,9 @@ const os = require("os");
 const path = require("path");
 const qs = require("querystring");
 const {promisify} = require("util");
+const {readFile} = require("fs").promises;
 
 const throttle = require("lodash.throttle");
-const async = require("async");
 const Busboy = require("busboy");
 const {red, blue, green, cyan, magenta} = require("colorette");
 const escRe = require("escape-string-regexp");
@@ -39,7 +39,7 @@ let firstRun = null;
 let ready = false;
 let dieOnError = true;
 
-module.exports = function droppy(opts, isStandalone, dev, callback) {
+module.exports = async function droppy(opts, isStandalone, dev, callback) {
   if (isStandalone) {
     log.logo(
       [
@@ -63,16 +63,20 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
   }
   setupProcess(isStandalone);
 
-  async.series([
-    function(cb) { utils.mkdir([paths.files, paths.config], cb); },
-    function(cb) {
+  try {
+    await promisify((cb) => {
+      utils.mkdir([paths.files, paths.config], cb);
+    })();
+
+    await promisify((cb) => {
       if (isStandalone) {
         fs.writeFile(paths.pid, String(process.pid), cb);
       } else {
         cb();
       }
-    },
-    function(cb) {
+    })();
+
+    await promisify((cb) => {
       cfg.init(opts, (err, conf) => {
         if (!err) {
           config = conf;
@@ -80,14 +84,16 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
         }
         cb(err);
       });
-    },
-    function(cb) {
+    })();
+
+    await promisify((cb) => {
       db.load(() => {
         db.watch(config);
         cb();
       });
-    },
-    function(cb) {
+    })();
+
+    await promisify((cb) => {
       log.init({logLevel: config.logLevel, timestamps: config.timestamps});
       firstRun = Object.keys(db.get("users")).length === 0;
       // clean up old sessions if no users exist
@@ -98,11 +104,21 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
         log.info("Loading resources done");
         cache = c; cb(err);
       });
-    },
-    function(cb) { cleanupLinks(cb); },
-    function(cb) { if (config.dev) debug(); cb(); },
-    function(cb) { if (isStandalone) { startListeners(cb); } else cb(); },
-    function(cb) {
+    })();
+
+    await promisify((cb) => {
+      cleanupLinks(cb);
+    })();
+
+    await promisify((cb) => {
+      if (config.dev) debug(); cb();
+    })();
+
+    await promisify((cb) => {
+      if (isStandalone) { startListeners(cb); } else cb();
+    })();
+
+    await promisify((cb) => {
       log.info("Caching files ...");
       filetree.init(config);
       filetree.updateDir(null).then(() => {
@@ -110,8 +126,9 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
         log.info("Caching files done");
         cb();
       });
-    },
-    function(cb) {
+    })();
+
+    await promisify((cb) => {
       if (typeof config.keepAlive === "number" && config.keepAlive > 0) {
         setInterval(() => {
           Object.keys(clients).forEach(client => {
@@ -123,14 +140,15 @@ module.exports = function droppy(opts, isStandalone, dev, callback) {
         }, config.keepAlive);
       }
       cb();
-    },
-  ], err => {
-    if (err) return callback(err);
-    ready = true;
-    log.info(green("Ready for requests!"));
-    dieOnError = false;
-    callback();
-  });
+    })();
+  } catch (err) {
+    return callback(err);
+  }
+
+  ready = true;
+  log.info(green("Ready for requests!"));
+  dieOnError = false;
+  callback();
 
   return {onRequest, setupWebSocket};
 };
@@ -162,7 +180,7 @@ function onRequest(req, res) {
   }
 }
 
-function startListeners(callback) {
+async function startListeners(callback) {
   if (!Array.isArray(config.listeners)) {
     return callback(new Error("Config Error: 'listeners' option must be an array"));
   }
@@ -234,119 +252,122 @@ function startListeners(callback) {
   });
 
   let listenerCount = 0;
-  async.each(targets, (target, cb) => {
-    createListener(onRequest, target.opts, (err, server) => {
-      if (err) {
-        log.error(
-          "Error creating listener",
-          `${target.opts.proto + (target.opts.socket ? "+unix://" : "://") +
-          log.formatHostPort(target.host, target.port, target.opts.proto)
-          }: ${err.message}`
-        );
-        return cb();
-      }
 
-      server.on("listening", () => {
-        server.removeAllListeners("error");
-        listenerCount++;
-        setupWebSocket(server);
-        const proto = target.opts.proto.toLowerCase();
-
-        if (target.socket) { // socket
-          fs.chmodSync(target.socket, 0o666); // make it rw
-          // a unix socket URL should normally percent-encode the path, but
-          // we're printing a path-less URL so pretty-print it with slashes.
-          log.info("Listening on ",
-            blue(`${proto}+unix://`) +
-            cyan(server.address())
+  await Promise.all(targets.map(target => {
+    return new Promise(resolve => {
+      createListener(onRequest, target.opts, (err, server) => {
+        if (err) {
+          log.error(
+            "Error creating listener",
+            `${target.opts.proto + (target.opts.socket ? "+unix://" : "://") +
+            log.formatHostPort(target.host, target.port, target.opts.proto)
+            }: ${err.message}`
           );
-        } else { // host + port
-          const addr = server.address().address;
-          const port = server.address().port;
+          return resolve();
+        }
 
-          const addrs = [];
-          if (addr === "::" || addr === "0.0.0.0") {
-            const interfaces = os.networkInterfaces();
-            Object.keys(interfaces).forEach(name => {
-              interfaces[name].forEach(intf => {
-                if (addr === "::" && intf.address) {
-                  addrs.push(intf.address);
-                } else if (addr === "0.0.0.0" && intf.family === "IPv4" && intf.address) {
-                  addrs.push(intf.address);
+        server.on("listening", () => {
+          server.removeAllListeners("error");
+          listenerCount++;
+          setupWebSocket(server);
+          const proto = target.opts.proto.toLowerCase();
+
+          if (target.socket) { // socket
+            fs.chmodSync(target.socket, 0o666); // make it rw
+            // a unix socket URL should normally percent-encode the path, but
+            // we're printing a path-less URL so pretty-print it with slashes.
+            log.info("Listening on ",
+              blue(`${proto}+unix://`) +
+              cyan(server.address())
+            );
+          } else { // host + port
+            const addr = server.address().address;
+            const port = server.address().port;
+
+            const addrs = [];
+            if (addr === "::" || addr === "0.0.0.0") {
+              const interfaces = os.networkInterfaces();
+              Object.keys(interfaces).forEach(name => {
+                interfaces[name].forEach(intf => {
+                  if (addr === "::" && intf.address) {
+                    addrs.push(intf.address);
+                  } else if (addr === "0.0.0.0" && intf.family === "IPv4" && intf.address) {
+                    addrs.push(intf.address);
+                  }
+                });
+              });
+            } else {
+              addrs.push(addr);
+            }
+
+            if (!addrs.length) {
+              addrs.push(addr);
+            }
+
+            addrs.sort();
+
+            addrs.forEach(addr => {
+              log.info("Listening on ", blue(`${proto}://`) + log.formatHostPort(addr, port, proto));
+            });
+          }
+          resolve();
+        });
+
+        server.on("error", err => {
+          if (target.host && target.port) {
+            // check for other listeners on the same port and surpress misleading errors
+            // from being printed because of Node's weird dual-stack behaviour.
+            let otherListenerFound = false;
+            if (target.host === "::" || target.host === "0.0.0.0") {
+              targets.some(t => {
+                if (target.port === t.port && target.host !== t.host && target.host) {
+                  otherListenerFound = true;
+                  return true;
                 }
               });
-            });
-          } else {
-            addrs.push(addr);
-          }
+            }
 
-          if (!addrs.length) {
-            addrs.push(addr);
-          }
-
-          addrs.sort();
-
-          addrs.forEach(addr => {
-            log.info("Listening on ", blue(`${proto}://`) + log.formatHostPort(addr, port, proto));
-          });
-        }
-        cb();
-      });
-
-      server.on("error", err => {
-        if (target.host && target.port) {
-          // check for other listeners on the same port and surpress misleading errors
-          // from being printed because of Node's weird dual-stack behaviour.
-          let otherListenerFound = false;
-          if (target.host === "::" || target.host === "0.0.0.0") {
-            targets.some(t => {
-              if (target.port === t.port && target.host !== t.host && target.host) {
-                otherListenerFound = true;
-                return true;
+            if (err.code === "EADDRINUSE") {
+              if (!otherListenerFound) {
+                log.info(
+                  red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+                  red(". Address already in use.")
+                );
               }
-            });
-          }
-
-          if (err.code === "EADDRINUSE") {
-            if (!otherListenerFound) {
+            } else if (err.code === "EACCES") {
               log.info(
                 red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-                red(". Address already in use.")
+                red(". Need permission to bind to ports < 1024.")
               );
-            }
-          } else if (err.code === "EACCES") {
-            log.info(
-              red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-              red(". Need permission to bind to ports < 1024.")
-            );
-          } else if (err.code === "EAFNOSUPPORT") {
-            if (!otherListenerFound) {
+            } else if (err.code === "EAFNOSUPPORT") {
+              if (!otherListenerFound) {
+                log.info(
+                  red("Failed to listen on "), log.formatHostPort(target.host, target.port),
+                  red(". Protocol unsupported. Are you trying to " +
+                    "listen on IPv6 while the protocol is disabled?")
+                );
+              }
+            } else if (err.code === "EADDRNOTAVAIL") {
               log.info(
                 red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-                red(". Protocol unsupported. Are you trying to " +
-                  "listen on IPv6 while the protocol is disabled?")
+                red(". Address not available.")
               );
-            }
-          } else if (err.code === "EADDRNOTAVAIL") {
-            log.info(
-              red("Failed to listen on "), log.formatHostPort(target.host, target.port),
-              red(". Address not available.")
-            );
+            } else log.error(err);
           } else log.error(err);
-        } else log.error(err);
-        return cb();
-      });
+          return resolve();
+        });
 
-      if (target.socket) {
-        server.listen(target.socket);
-      } else {
-        server.listen(target.port, target.host);
-      }
+        if (target.socket) {
+          server.listen(target.socket);
+        } else {
+          server.listen(target.port, target.host);
+        }
+      });
     });
-  }, () => {
-    // Only emit an error if we have at 0 listeners
-    return callback(listenerCount === 0 ? new Error("No listeners available") : null);
-  });
+  }));
+
+  // Only emit an error if we have at 0 listeners
+  return callback(listenerCount === 0 ? new Error("No listeners available") : null);
 }
 
 function tlsError(err, socket) {
@@ -406,7 +427,7 @@ function onWebSocketRequest(ws, req) {
   const cookie = cookies.get(req.headers.cookie);
   clients[sid] = {views: [], cookie, ws};
 
-  ws.on("message", msg => {
+  ws.on("message", async msg => {
     msg = JSON.parse(msg);
 
     if (msg.type !== "SAVE_FILE") {
@@ -591,21 +612,30 @@ function onWebSocketRequest(ws, req) {
     } else if (msg.type === "CREATE_FILES") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data.files, msg.type, ws, sid, vId)) return;
-      async.each(msg.data.files, (file, cb) => {
-        filetree.mkdir(utils.addFilesPath(path.dirname(file)), () => {
-          filetree.mk(utils.addFilesPath(file), cb);
+
+      await Promise.all(msg.data.files.map(file => {
+        return new Promise(resolve => {
+          filetree.mkdir(utils.addFilesPath(path.dirname(file)), (err) => {
+            if (err) log.error(ws, null, err);
+            filetree.mk(utils.addFilesPath(file), (err) => {
+              if (err) log.error(ws, null, err);
+              resolve();
+            });
+          });
         });
-      }, err => {
-        if (err) log.error(ws, null, err);
-      });
+      }));
     } else if (msg.type === "CREATE_FOLDERS") {
       if (config.readOnly) return sendError(sid, vId, "Files are read-only");
       if (!validatePaths(msg.data.folders, msg.type, ws, sid, vId)) return;
-      async.each(msg.data.folders, (folder, cb) => {
-        filetree.mkdir(utils.addFilesPath(folder), cb);
-      }, err => {
-        if (err) log.error(ws, null, err);
-      });
+
+      await Promise.all(msg.data.folders.map(folder => {
+        return new Promise(resolve => {
+          filetree.mkdir(utils.addFilesPath(folder), (err) => {
+            if (err) log.error(ws, null, err);
+            resolve();
+          });
+        });
+      }));
     } else if (msg.type === "GET_MEDIA") {
       const dir = msg.data.dir;
       const exts = msg.data.exts;
@@ -613,22 +643,26 @@ function onWebSocketRequest(ws, req) {
       const allExts = exts.img.concat(exts.vid).concat(exts.pdf);
       const files = filetree.lsFilter(dir, utils.extensionRe(allExts));
       if (!files) return sendError(sid, vId, "No displayable files in directory");
-      async.map(files, (file, cb) => {
-        if (utils.extensionRe(exts.pdf).test(file)) {
-          cb(null, {pdf: true, src: file});
-        } else if (utils.extensionRe(exts.img).test(file)) {
-          imgSize(path.join(utils.addFilesPath(dir), file), (err, dims) => {
-            if (err) log.error(err);
-            cb(null, {
-              src: file,
-              w: dims && dims.width ? dims.width : 0,
-              h: dims && dims.height ? dims.height : 0,
+
+      const mediaFiles = await Promise.all(files.map(file => {
+        return new Promise(resolve => {
+          if (utils.extensionRe(exts.pdf).test(file)) {
+            resolve({pdf: true, src: file});
+          } else if (utils.extensionRe(exts.img).test(file)) {
+            imgSize(path.join(utils.addFilesPath(dir), file), (err, dims) => {
+              if (err) log.error(err);
+              resolve({
+                src: file,
+                w: dims && dims.width ? dims.width : 0,
+                h: dims && dims.height ? dims.height : 0,
+              });
             });
-          });
-        } else cb(null, {video: true, src: file});
-      }, (_, obj) => {
-        sendObj(sid, {type: "MEDIA_FILES", vId, files: obj});
-      });
+          } else {
+            resolve({video: true, src: file});
+          }
+        });
+      }));
+      sendObj(sid, {type: "MEDIA_FILES", vId, files: mediaFiles});
     } else if (msg.type === "SEARCH") {
       const query = msg.data.query;
       const dir =  msg.data.dir;
@@ -1440,7 +1474,7 @@ function tlsInit(opts, cb) {
   } else cbs[opts.index].push(cb);
 }
 
-function tlsSetup(opts, cb) {
+async function tlsSetup(opts, cb) {
   if (typeof opts.key !== "string") {
     return cb(new Error("Missing TLS option 'key'"));
   }
@@ -1448,22 +1482,9 @@ function tlsSetup(opts, cb) {
     return cb(new Error("Missing TLS option 'cert'"));
   }
 
-  const certPaths = [
-    path.resolve(paths.config, ut(opts.key)),
-    path.resolve(paths.config, ut(opts.cert)),
-  ];
-
-  async.map(certPaths, utils.readFile, (_, data) => {
-    const key = data[0];
-    const certs = data[1];
-
-    if (!key) return cb(new Error(`Unable to read TLS key: ${certPaths[0]}`));
-    if (!certs) return cb(new Error(`Unable to read TLS certificates: ${certPaths[1]}`));
-
-    cb(null, {
-      cert: certs,
-      key,
-    });
+  cb(null, {
+    cert: await readFile(path.resolve(paths.config, ut(opts.key)), "utf8"),
+    key: await readFile(path.resolve(paths.config, ut(opts.cert)), "utf8"),
   });
 }
 
