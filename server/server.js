@@ -1482,10 +1482,10 @@ async function tlsSetup(opts, cb) {
     return cb(new Error("Missing TLS option 'cert'"));
   }
 
-  cb(null, {
-    cert: await readFile(path.resolve(paths.config, ut(opts.key)), "utf8"),
-    key: await readFile(path.resolve(paths.config, ut(opts.cert)), "utf8"),
-  });
+  const cert = await readFile(path.resolve(paths.config, ut(opts.cert)), "utf8");
+  const key = await readFile(path.resolve(paths.config, ut(opts.key)), "utf8");
+
+  cb(null, {cert, key});
 }
 
 function cleanupSessions() {
