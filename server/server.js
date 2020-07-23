@@ -1032,11 +1032,11 @@ function handleResourceRequest(req, res, resourceName) {
     }).filter(e => {
       return Boolean(e);
     });
-    if (config.compression && encodings.includes("br") && resource.brotli) {
+    if (encodings.includes("br") && resource.brotli) {
       headers["Content-Encoding"] = "br";
       headers["Content-Length"] = resource.brotli.length;
       data = resource.brotli;
-    } else if (config.compression && encodings.includes("gzip") && resource.gzip) {
+    } else if (encodings.includes("gzip") && resource.gzip) {
       headers["Content-Encoding"] = "gzip";
       headers["Content-Length"] = resource.gzip.length;
       data = resource.gzip;

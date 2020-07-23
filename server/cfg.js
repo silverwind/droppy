@@ -25,7 +25,6 @@ const defaults = {
   keepAlive: 20000,
   allowFrame: false,
   readOnly: false,
-  compression: true,
   ignorePatterns: [],
   watch: true,
   headers: {},
