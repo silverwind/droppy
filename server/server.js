@@ -1307,18 +1307,18 @@ function debug() {
     alwaysStat: true,
     ignoreInitial: true
   }).on("change", file => {
-    setTimeout(() => { // prevent EBUSY on win32
+    setTimeout(async () => { // prevent EBUSY on win32
       if (/\.css$/.test(file)) {
-        cache.res["style.css"] = resources.compileCSS();
+        cache.res["style.css"] = await resources.compileCSS();
         sendObjAll({
           type: "RELOAD",
           css: String(cache.res["style.css"].data).replace('"sprites.png"', '"!/res/sprites.png"')
         });
       } else if (/\.(js|hbs)$/.test(file)) {
-        cache.res["client.js"] = resources.compileJS();
+        cache.res["client.js"] = await resources.compileJS();
         sendObjAll({type: "RELOAD"});
       } else if (/\.(html|svg)$/.test(file)) {
-        resources.compileHTML(cache.res);
+        await resources.compileHTML(cache.res);
         sendObjAll({type: "RELOAD"});
       }
     }, 100);

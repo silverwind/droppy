@@ -284,11 +284,11 @@ async function readThemes() {
 
   for (const name of await readdir(themesPath)) {
     const data = await readFile(path.join(themesPath, name));
-    themes[name.replace(/\.css$/, "")] = Buffer.from(minifyCSS(String(data)));
+    themes[name.replace(/\.css$/, "")] = Buffer.from(await minifyCSS(String(data)));
   }
 
   const droppyTheme = await readFile(path.join(paths.mod, "/client/cmtheme.css"));
-  themes.droppy = Buffer.from(minifyCSS(String(droppyTheme)));
+  themes.droppy = Buffer.from(await minifyCSS(String(droppyTheme)));
 
   return themes;
 }
@@ -309,7 +309,7 @@ async function readModes() {
 
   for (const name of Object.keys(modes)) {
     const data = await readFile(path.join(modesPath, name, `${name}.js`));
-    modes[name] = Buffer.from(minifyJS(String(data)));
+    modes[name] = Buffer.from(await minifyJS(String(data)));
   }
 
   return modes;
@@ -330,9 +330,9 @@ async function readLibs() {
   if (minify) {
     for (const [file, data] of (Object.entries(lib))) {
       if (/\.js$/.test(file)) {
-        lib[file] = Buffer.from(minifyJS(String(data)));
+        lib[file] = Buffer.from(await minifyJS(String(data)));
       } else if (/\.css$/.test(file)) {
-        lib[file] = Buffer.from(minifyCSS(String(data)));
+        lib[file] = Buffer.from(await minifyCSS(String(data)));
       }
     }
   }
@@ -340,9 +340,9 @@ async function readLibs() {
   return lib;
 }
 
-function minifyJS(js) {
+async function minifyJS(js) {
   if (!minify) return js;
-  const min = terser.minify(js, opts.terser);
+  const min = await terser.minify(js, opts.terser);
   if (min.error) {
     log.error(min.error);
     process.exit(1);
@@ -350,7 +350,7 @@ function minifyJS(js) {
   return min.code;
 }
 
-function minifyCSS(css) {
+async function minifyCSS(css) {
   if (!minify) return css;
   return cleanCSS.minify(String(css)).styles;
 }
@@ -381,7 +381,7 @@ function templates() {
   }).join("") + suffix;
 }
 
-resources.compileJS = function() {
+resources.compileJS = async function() {
   let js = "";
   resources.files.js.forEach(file => {
     js += `${fs.readFileSync(path.join(paths.mod, file), "utf8")};`;
@@ -391,7 +391,7 @@ resources.compileJS = function() {
   js = js.replace("/* {{ templates }} */", templates());
 
   // Minify
-  js = minifyJS(js);
+  js = await minifyJS(js);
 
   return {
     data: Buffer.from(js),
@@ -400,14 +400,14 @@ resources.compileJS = function() {
   };
 };
 
-resources.compileCSS = function() {
+resources.compileCSS = async function() {
   let css = "";
   resources.files.css.forEach(file => {
     css += `${fs.readFileSync(path.join(paths.mod, file), "utf8")}\n`;
   });
 
   // Vendor prefixes and minify
-  css = minifyCSS(postcss([autoprefixer(opts.autoprefixer)]).process(css).css);
+  css = await minifyCSS(postcss([autoprefixer(opts.autoprefixer)]).process(css).css);
 
   return {
     data: Buffer.from(css),
@@ -416,7 +416,7 @@ resources.compileCSS = function() {
   };
 };
 
-resources.compileHTML = function(res) {
+resources.compileHTML = async function(res) {
   let html = fs.readFileSync(path.join(paths.mod, "client/index.html"), "utf8");
   html = html.replace("<!-- {{svg}} -->", svg());
 
@@ -434,12 +434,12 @@ resources.compileHTML = function(res) {
   return res;
 };
 
-function compileAll() {
+async function compileAll() {
   let res = {};
 
-  res["client.js"] = resources.compileJS();
-  res["style.css"] = resources.compileCSS();
-  res = resources.compileHTML(res);
+  res["client.js"] = await resources.compileJS();
+  res["style.css"] = await resources.compileCSS();
+  res = await resources.compileHTML(res);
 
   // Read misc files
   for (const file of resources.files.other) {

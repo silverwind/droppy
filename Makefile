@@ -5,12 +5,14 @@ JQUERY_FLAGS:=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event
 dev:
 	node droppy.js start --dev
 
-test:
+lint:
 	yarn -s run eslint server client/client.js droppy.js
 	yarn -s run stylelint client/*.css
 
+test: lint
+
 build:
-	touch client/client.js
+	@touch client/client.js
 	node droppy.js build
 
 publish:
@@ -63,7 +65,7 @@ deps:
 update:
 	yarn -s run updates -u
 	$(MAKE) deps
-	touch client/client.js
+	@touch client/client.js
 
 jquery:
 	rm -rf /tmp/jquery
@@ -85,4 +87,4 @@ patch: test build ver-patch docker docker-push publish
 minor: test build ver-minor docker docker-push publish
 major: test build ver-major docker docker-push publish
 
-.PHONY: dev test publish docker docker-arm deps update jquery version-patch version-minor version-major patch minor major
+.PHONY: dev lint test publish docker docker-arm deps update jquery version-patch version-minor version-major patch minor major

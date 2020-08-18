@@ -448,7 +448,20 @@ at-least-node@^1.0.0:
   resolved "https://registry.yarnpkg.com/at-least-node/-/at-least-node-1.0.0.tgz#602cd4b46e844ad4effc92a8011a3c46e0238dc2"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
-autoprefixer@9.8.5, autoprefixer@^9.8.0:
+autoprefixer@9.8.6:
+  version "9.8.6"
+  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.8.6.tgz#3b73594ca1bf9266320c5acf1588d74dea74210f"
+  integrity sha512-XrvP4VVHdRBCdX1S3WXVD8+RyG9qeb1D5Sn1DeLiG2xfSpzellk5k54xbUERJ3M5DggQxes39UGOTP8CFrEGbg==
+  dependencies:
+    browserslist "^4.12.0"
+    caniuse-lite "^1.0.30001109"
+    colorette "^1.2.1"
+    normalize-range "^0.1.2"
+    num2fraction "^1.2.2"
+    postcss "^7.0.32"
+    postcss-value-parser "^4.1.0"
+
+autoprefixer@^9.8.0:
   version "9.8.5"
   resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.8.5.tgz#2c225de229ddafe1d1424c02791d0c3e10ccccaa"
   integrity sha512-C2p5KkumJlsTHoNv9w31NrBRgXhf6eCMteJuHZi2xhkgC+5Vm40MEtCKPhc0qdgAOhox0YPy1SQHTAky05UoKg==
@@ -572,6 +585,11 @@ caniuse-lite@^1.0.30001093, caniuse-lite@^1.0.30001097:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001105.tgz#d2cb0b31e5cf2f3ce845033b61c5c01566549abf"
   integrity sha512-JupOe6+dGMr7E20siZHIZQwYqrllxotAhiaej96y6x00b/48rPt42o+SzOSCPbrpsDWvRja40Hwrj0g0q6LZJg==
 
+caniuse-lite@^1.0.30001109:
+  version "1.0.30001115"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001115.tgz#c04cd828883ba47f6f776312e0817bcc9040cfa4"
+  integrity sha512-NZrG0439ePYna44lJX8evHX2L7Z3/z3qjVLnHgbBb/duNEnGo348u+BQS5o4HTWcrb++100dHFrU36IesIrC1Q==
+
 ccount@^1.0.0:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/ccount/-/ccount-1.0.5.tgz#ac82a944905a65ce204eb03023157edf29425c17"
@@ -644,10 +662,10 @@ cheerio@^0.22.0:
     lodash.reject "^4.4.0"
     lodash.some "^4.4.0"
 
-chokidar@3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.1.tgz#e905bdecf10eaa0a0b1db0c664481cc4cbc22ba1"
-  integrity sha512-TQTJyr2stihpC4Sya9hs2Xh+O2wf+igjL36Y75xx2WdHuiICcn/XJza46Jwt0eT5hVpQOzo3FpY3cj3RVYLX0g==
+chokidar@3.4.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.2.tgz#38dc8e658dec3809741eb3ef7bb0a47fe424232d"
+  integrity sha512-IZHaDeBeI+sZJRX7lGcXsdzgvZqKv6sECqsbErJA4mHWfpRrD8B97kSFN4cQz6nGBGiuFia1MKR4d6c1o8Cv7A==
   dependencies:
     anymatch "~3.1.1"
     braces "~3.0.2"
@@ -719,7 +737,7 @@ color-name@~1.1.4:
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
-colorette@1.2.1, colorette@^1.2.0:
+colorette@1.2.1, colorette@^1.2.0, colorette@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-1.2.1.tgz#4d0b921325c14faf92633086a536db6e89564b1b"
   integrity sha512-puCDz0CzydiSYOrnXpz/PKd69zRrribezjtE9yd4zvytoRc8+RY/KJPvtPFKZS3E3wP6neGyMe0vOTlHO5L3Pw==
@@ -1051,13 +1069,12 @@ eslint-ast-utils@^1.1.0:
     lodash.get "^4.4.2"
     lodash.zip "^4.2.0"
 
-eslint-config-silverwind@17.0.0:
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-silverwind/-/eslint-config-silverwind-17.0.0.tgz#be388b9fc260ce5f073a714517d75ad243179d68"
-  integrity sha512-bXRHQXxEYxE6wuMiMJQf69G7Gzl5WkzbrY1NUFQoz8uOnibF94r0HdkLBfHaVbUQeLWsJBuP0mYu6WWTyGXBSw==
+eslint-config-silverwind@18.0.2:
+  version "18.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-config-silverwind/-/eslint-config-silverwind-18.0.2.tgz#6e0cdf5a4df34064ace4fdd18e3aaade51fe7f2e"
+  integrity sha512-2+jAsQxmKuompNfV7cRsYcWjvvkRe0nJ8J5P7GJRYZnunjfU8juH8yjf4CvF60BsQ60Gz9XxgmhBrtUNdo8HdA==
   dependencies:
     eslint-plugin-import "^2.22.0"
-    eslint-plugin-sonarjs "^0.5.0"
     eslint-plugin-unicorn "^21.0.0"
 
 eslint-import-resolver-node@^0.3.3:
@@ -1094,11 +1111,6 @@ eslint-plugin-import@^2.22.0:
     read-pkg-up "^2.0.0"
     resolve "^1.17.0"
     tsconfig-paths "^3.9.0"
-
-eslint-plugin-sonarjs@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-sonarjs/-/eslint-plugin-sonarjs-0.5.0.tgz#ce17b2daba65a874c2862213a9e38e8986ad7d7d"
-  integrity sha512-XW5MnzlRjhXpIdbULC/qAdJYHWw3rRLws/DyawdlPU/IdVr9AmRK1r2LaCvabwKOAW2XYYSo3kDX58E4MrB7PQ==
 
 eslint-plugin-unicorn@21.0.0, eslint-plugin-unicorn@^21.0.0:
   version "21.0.0"
@@ -1154,10 +1166,10 @@ eslint-visitor-keys@^1.1.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-1.1.0.tgz#e2a82cea84ff246ad6fb57f9bde5b46621459ec2"
   integrity sha512-8y9YjtM1JBJU/A9Kc+SbaOV4y29sSWckBwMHa+FGtVj5gN/sbnKDf6xJUl+8g7FAij9LVaP8C24DUiH/f/2Z9A==
 
-eslint@7.5.0:
-  version "7.5.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.5.0.tgz#9ecbfad62216d223b82ac9ffea7ef3444671d135"
-  integrity sha512-vlUP10xse9sWt9SGRtcr1LAC67BENcQMFeV+w5EvLEoFe3xJ8cF1Skd0msziRx/VMC+72B4DxreCE+OR12OA6Q==
+eslint@7.7.0:
+  version "7.7.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.7.0.tgz#18beba51411927c4b64da0a8ceadefe4030d6073"
+  integrity sha512-1KUxLzos0ZVsyL81PnRN335nDtQ8/vZUD6uMtWbF+5zDtjKcsklIi78XoE0MVL93QvWTu+E5y44VyyCsOMBrIg==
   dependencies:
     "@babel/code-frame" "^7.0.0"
     ajv "^6.10.0"
@@ -3194,10 +3206,10 @@ table@^5.2.3, table@^5.4.6:
     slice-ansi "^2.1.0"
     string-width "^3.0.0"
 
-terser@4.8.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-4.8.0.tgz#63056343d7c70bb29f3af665865a46fe03a0df17"
-  integrity sha512-EAPipTNeWsb/3wLPeup1tVPaXfIaU68xMnVdPafIL1TV05OhASArYyIfFvnvJCNrR2NIOvDVNNTFRa+Re2MWyw==
+terser@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-5.2.0.tgz#e547d0b20926b321d3e524bf9e5bc1b10ba2f360"
+  integrity sha512-nZ9TWhBznZdlww3borgJyfQDrxzpgd0RlRNoxR63tMVry01lIH/zKQDTTiaWRMGowydfvSHMgyiGyn6A9PSkCQ==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
@@ -3369,10 +3381,10 @@ untildify@4.0.0:
   resolved "https://registry.yarnpkg.com/untildify/-/untildify-4.0.0.tgz#2bc947b953652487e4600949fb091e3ae8cd919b"
   integrity sha512-KK8xQ1mkzZeg9inewmFVDNkg3l5LUhoq9kN6iWYB/CC9YMG8HA+c1Q8HwDe6dEX7kErrEVNVBO3fWsVq5iDgtw==
 
-updates@10.3.3:
-  version "10.3.3"
-  resolved "https://registry.yarnpkg.com/updates/-/updates-10.3.3.tgz#3fdc22b301a84576933f8b8246b95fed7e99f1a2"
-  integrity sha512-B+Ti1W9HNCI67/0ilfkhcerbrXdl3GTyUTzERHS73xdODc/obXtnuAtT5K2HM1j/pK5B+EYQTTjeXcXECMxtBA==
+updates@10.3.5:
+  version "10.3.5"
+  resolved "https://registry.yarnpkg.com/updates/-/updates-10.3.5.tgz#0639afcedb90beb5f8289189f55369351f7c2278"
+  integrity sha512-YyRR8hPb4obsFmQlJTEb/WXsyFyTpKqddZHjlaSPahpEBcOcz4qq5TcWjo69+r7qh1xH+DUu6uELGsfr+q7W6Q==
 
 upper-case@^1.1.1:
   version "1.1.3"
@@ -3426,10 +3438,10 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-versions@8.4.2:
-  version "8.4.2"
-  resolved "https://registry.yarnpkg.com/versions/-/versions-8.4.2.tgz#21cc2f2b3807496c8a7b135555ef45004799d645"
-  integrity sha512-hvrprNCFRRlbVtMctZIRhJRHm5MbxNDFN8+KsF+KNfxmjYyD0OqbrbV7PLEKcdPpxSdH0/R6GQ7Dn883HQjAjQ==
+versions@8.4.3:
+  version "8.4.3"
+  resolved "https://registry.yarnpkg.com/versions/-/versions-8.4.3.tgz#9f6f6478676bf73b6b52c5552c2a420d52a6839b"
+  integrity sha512-puIWl35gRtz3w5ExzwjtitYwgVdu7Xh5LTQHbRbv54QnWS3xbsX6b1rs3HkfurO36NNhIkEyePxvSNu2LiVTfA==
 
 vfile-location@^3.0.0:
   version "3.0.1"

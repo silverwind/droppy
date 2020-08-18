@@ -303,4 +303,4 @@ utils.arrify = function(val) {
 
 utils.addUploadTempExt = path => path.replace(/(\/?[^/]+)/, (_, p1) => `${p1}.droppy-upload`);
 utils.removeUploadTempExt = path => path.replace(/(^\/?[^/]+)(\.droppy-upload)/, (_, p1) => p1);
-utils.rootname = path => path.split("/").filter(p => !!p)[0];
+utils.rootname = path => path.split("/").find(p => !!p);
