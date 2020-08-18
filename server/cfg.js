@@ -23,6 +23,7 @@ const defaults = {
   updateInterval: 1000,
   pollingInterval: 0,
   keepAlive: 20000,
+  uploadTimeout: 604800000,
   allowFrame: false,
   readOnly: false,
   ignorePatterns: [],

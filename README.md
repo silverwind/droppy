@@ -127,6 +127,7 @@ By default, the server listens on all IPv4 and IPv6 interfaces on port 8989. On 
 - `updateInterval` *number* - Interval in milliseconds in which a single client can receive update messages through changes in the file system. Default: `1000`.
 - `pollingInterval` *number* - Interval in milliseconds in which the file system is polled for changes, which **may necessary for files on external or network-mapped drives**. Corresponds to chokidar's [usePolling](https://github.com/paulmillr/chokidar#performance) option. This is CPU-intensive. `0` disables polling. Default: `0`.
 - `keepAlive` *number* - Interval in milliseconds in which the server sends websocket keepalive messages, which may be necessary when proxies are involved. `0` disables keepalive messages. Default: `20000`.
+- `uploadTimeout` *number* - Request timeout for upload requests in milliseconds. Default: `604800000` which is 7 days.
 - `allowFrame` *boolean* - Allow the page to be loaded into a `<frame>` or `<iframe>`. Default: `false`.
 - `readOnly` *boolean* - Treat all files as being read-only. Default: `false`.
 - `dev` *boolean* - Enable developer mode, skipping resource minification and enabling live reload. Default: `false`.
