@@ -65,7 +65,7 @@ utils.copyDir = async (src, dest) => {
   await mkdir(dest);
 
   for (const file of await readdir(src)) {
-    if ((await lstat(path.join(src, dest))).isFile()) {
+    if ((await lstat(path.join(src, file))).isFile()) {
       await copyFile(path.join(src, file), path.join(dest, file));
     } else {
       await utils.copyDir(path.join(src, file), path.join(dest, file));
