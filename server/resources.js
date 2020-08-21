@@ -2,7 +2,7 @@
 
 const resources = module.exports = {};
 const etag = require("etag");
-const fs = require("fs-extra");
+const fs = require("fs");
 const jb = require("json-buffer");
 const path = require("path");
 const vm = require("vm");

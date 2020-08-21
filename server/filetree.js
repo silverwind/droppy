@@ -5,7 +5,7 @@ const filetree = module.exports = new (require("events").EventEmitter)();
 const debounce = require("lodash.debounce");
 const chokidar = require("chokidar");
 const escRe = require("escape-string-regexp");
-const fs = require("fs-extra");
+const fs = require("fs");
 const path = require("path");
 const rrdir = require("rrdir");
 const rfdc = require("rfdc");
@@ -336,22 +336,22 @@ filetree.cp = function(src, dst, cb) {
   });
 };
 
-filetree.cpdir = function(src, dst, cb) {
+filetree.cpdir = async function(src, dst, cb) {
   lookAway();
-  utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst), () => {
-    // Basedir
-    dirs[dst] = clone(dirs[src]);
-    dirs[dst].mtime = Date.now();
-    // Subdirs
-    Object.keys(dirs).forEach(dir => {
-      if (new RegExp(`^${escRe(src)}/`).test(dir) && dir !== src && dir !== dst) {
-        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)] = clone(dirs[dir]);
-        dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)].mtime = Date.now();
-      }
-    });
-    update(path.dirname(dst));
-    if (cb) cb();
+  await utils.copyDir(utils.addFilesPath(src), utils.addFilesPath(dst));
+
+  // Basedir
+  dirs[dst] = clone(dirs[src]);
+  dirs[dst].mtime = Date.now();
+  // Subdirs
+  Object.keys(dirs).forEach(dir => {
+    if (new RegExp(`^${escRe(src)}/`).test(dir) && dir !== src && dir !== dst) {
+      dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)] = clone(dirs[dir]);
+      dirs[dir.replace(new RegExp(`^${escRe(src)}/`), `${dst}/`)].mtime = Date.now();
+    }
   });
+  update(path.dirname(dst));
+  if (cb) cb();
 };
 
 filetree.save = function(dst, data, cb) {

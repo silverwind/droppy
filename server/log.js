@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const {red, blue, yellow, green, cyan, magenta, reset} = require("colorette");
 const stripAnsi = require("strip-ansi");
 const {isIPv6} = require("net");

@@ -5,17 +5,16 @@ const cd = require("content-disposition");
 const crypto = require("crypto");
 const escapeStringRegexp = require("escape-string-regexp");
 const ext = require("file-extension");
-const fs = require("fs-extra");
+const fs = require("fs");
 const isbinaryfile = require("isbinaryfile");
 const mimeTypes = require("mime-types");
 const mv = require("mv");
 const path = require("path");
 const util = require("util");
 const validate = require("valid-filename");
-const {mkdir, stat} = require("fs").promises;
+const {mkdir, stat, lstat, copyFile, readdir, access} = require("fs").promises;
 
 const paths = require("./paths.js").get();
-const log = require("./log.js");
 
 const forceBinaryTypes = [
   "pdf",
@@ -62,11 +61,16 @@ utils.copyFile = function(src, dst, cb) {
   read.pipe(write);
 };
 
-utils.copyDir = function(src, dst, cb) {
-  fs.copy(src, dst, err => {
-    if (err) log.error(err);
-    if (cb) cb();
-  });
+utils.copyDir = async (src, dest) => {
+  await mkdir(dest);
+
+  for (const file of await readdir(src)) {
+    if ((await lstat(path.join(src, dest))).isFile()) {
+      await copyFile(path.join(src, file), path.join(dest, file));
+    } else {
+      await utils.copyDir(path.join(src, file), path.join(dest, file));
+    }
+  }
 };
 
 // Get a pseudo-random n-character lowercase string.
@@ -92,7 +96,7 @@ utils.pretty = function(data) {
 utils.getNewPath = async function(origPath, callback) {
   let stats;
   try {
-    stats = await fs.stat(origPath);
+    stats = await stat(origPath);
   } catch {
     return callback(origPath);
   }
@@ -113,8 +117,8 @@ utils.getNewPath = async function(origPath, callback) {
     const num = parseInt(filename.substring(filename.lastIndexOf("-") + 1));
     filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
     try {
-      stat(path.join(dirname, filename + extension));
-    } catch {
+      await access(path.join(dirname, filename + extension));
+    } catch (err) {
       canCreate = true;
     }
   }

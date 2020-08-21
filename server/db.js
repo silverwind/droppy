@@ -2,7 +2,7 @@
 
 const db = module.exports = {};
 const chokidar = require("chokidar");
-const fs = require("fs-extra");
+const fs = require("fs");
 const crypto = require("crypto");
 const path = require("path");
 

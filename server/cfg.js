@@ -1,7 +1,7 @@
 "use strict";
 
 const cfg = module.exports = {};
-const fs = require("fs-extra");
+const fs = require("fs");
 const {dirname} = require("path");
 
 const configFile = require("./paths.js").get().cfgFile;

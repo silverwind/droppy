@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const qs = require("querystring");
@@ -548,7 +548,7 @@ function onWebSocketRequest(ws, req) {
         return sendError(sid, vId, "Can't copy directory into itself");
       }
 
-      fs.stat(utils.addFilesPath(msg.data.dst), (err, stats) => {
+      fs.stat(utils.addFilesPath(msg.data.dst), async (err, stats) => {
         if (!err && stats || msg.data.src === msg.data.dst) {
           utils.getNewPath(utils.addFilesPath(msg.data.dst), newDst => {
             filetree.clipboard(msg.data.src, utils.removeFilesPath(newDst), msg.data.type);
