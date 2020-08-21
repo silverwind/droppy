@@ -118,7 +118,7 @@ utils.getNewPath = async function(origPath, callback) {
     filename = filename.substring(0, filename.lastIndexOf("-") + 1) + (num + 1);
     try {
       await access(path.join(dirname, filename + extension));
-    } catch (err) {
+    } catch {
       canCreate = true;
     }
   }
