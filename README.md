@@ -52,13 +52,7 @@ To make droppy run in the background, you can use the `--daemon` option, thought
 
 ### Docker installation :whale:
 
-The following images are available:
-
-- [`silverwind/droppy`](https://hub.docker.com/r/silverwind/droppy/) for x86-64
-- [`silverwind/armhf-droppy`](https://hub.docker.com/r/silverwind/armhf-droppy/) for ARMv6 and ARMv7
-- [`silverwind/arm64v8-droppy`](https://hub.docker.com/r/silverwind/arm64v8-droppy/) for ARMv8
-
-To pull and run, use:
+The [`silverwind/droppy`](https://hub.docker.com/r/silverwind/droppy/) multi-arch images supports `amd64`, `arm64`, `arm/v7` and `arm/v6` architectures. To pull and run, use:
 
 ```sh
 $ docker run --name droppy -p 127.0.0.1:8989:8989 silverwind/droppy

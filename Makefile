@@ -5,6 +5,9 @@ JQUERY_FLAGS:=-ajax,-css,-deprecated,-effects,-event/alias,-event/focusin,-event
 dev:
 	node droppy.js start --dev
 
+run:
+	node droppy.js start
+
 lint:
 	yarn -s run eslint server client/client.js droppy.js
 	yarn -s run stylelint client/*.css
@@ -21,42 +24,19 @@ publish:
 	npm publish
 
 docker:
+	@rm -rf node_modules
+	yarn -s --production --pure-lockfile
 	$(eval IMAGE := silverwind/droppy)
-	@echo Preparing docker image $(IMAGE)...
-	docker pull node:alpine
-	sed -i "s/^FROM.\+/FROM node:alpine/g" Dockerfile
-	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
-	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
-	docker build --no-cache=true --squash -t $(IMAGE) .
-	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
-
-	$(eval IMAGE := silverwind/armhf-droppy)
-	@echo Preparing docker image $(IMAGE)...
-	docker pull arm32v6/node:alpine
-	sed -i "s/^FROM.\+/FROM arm32v6\/node:alpine/g" Dockerfile
-	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
-	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
-	docker build --no-cache=true --squash -t $(IMAGE) .
-	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
-
-	$(eval IMAGE := silverwind/arm64v8-droppy)
-	@echo Preparing docker image $(IMAGE)...
-	docker pull arm64v8/node:alpine
-	sed -i "s/^FROM.\+/FROM arm64v8\/node:alpine/g" Dockerfile
-	docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
-	docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
-	docker build --no-cache=true --squash -t $(IMAGE) .
-	docker tag "$$(docker images -qa $(IMAGE):latest)" $(IMAGE):"$$(cat package.json | jq -r .version)"
-
-	sed -i "s/^FROM.\+/FROM node:alpine/g" Dockerfile
-
-docker-push:
-	docker push silverwind/droppy:"$$(cat package.json | jq -r .version)"
-	docker push silverwind/droppy:latest
-	docker push silverwind/armhf-droppy:"$$(cat package.json | jq -r .version)"
-	docker push silverwind/armhf-droppy:latest
-	docker push silverwind/arm64v8-droppy:"$$(cat package.json | jq -r .version)"
-	docker push silverwind/arm64v8-droppy:latest
+	$(eval VERSION := $(shell cat package.json | jq -r .version))
+	$(eval ARCHS := "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6")
+	@docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
+	@docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
+	@docker buildx rm builder &>/dev/null || true
+	@docker buildx create --name builder  &>/dev/null || true
+	docker buildx build --pull --push --platform $(ARCHS) -t $(IMAGE):$(VERSION) .
+	docker buildx build --pull --push --platform $(ARCHS) -t $(IMAGE):latest .
+	@docker buildx rm builder  &>/dev/null || true
+	yarn
 
 deps:
 	rm -rf node_modules
@@ -64,7 +44,7 @@ deps:
 
 update:
 	yarn -s run updates -u
-	$(MAKE) deps
+	@$(MAKE) --no-print-directory deps
 	@touch client/client.js
 
 jquery:
@@ -83,8 +63,8 @@ ver-minor:
 ver-major:
 	yarn -s run versions -C major
 
-patch: test build ver-patch docker docker-push publish
-minor: test build ver-minor docker docker-push publish
-major: test build ver-major docker docker-push publish
+patch: test build ver-patch docker publish
+minor: test build ver-minor docker publish
+major: test build ver-major docker publish
 
-.PHONY: dev lint test publish docker docker-arm deps update jquery version-patch version-minor version-major patch minor major
+.PHONY: dev run lint test publish docker deps update jquery version-patch version-minor version-major patch minor major
