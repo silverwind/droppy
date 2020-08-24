@@ -32,7 +32,7 @@ docker:
 	@docker rm -f "$$(docker ps -a -f='ancestor=$(IMAGE)' -q)" 2>/dev/null || true
 	@docker rmi "$$(docker images -qa $(IMAGE))" 2>/dev/null || true
 	@docker buildx rm builder &>/dev/null || true
-	@docker buildx create --name builder  &>/dev/null || true
+	@docker buildx create --name builder --use &>/dev/null || true
 	docker buildx build --pull --push --platform $(ARCHS) -t $(IMAGE):$(VERSION) .
 	docker buildx build --pull --push --platform $(ARCHS) -t $(IMAGE):latest .
 	@docker buildx rm builder  &>/dev/null || true
