@@ -1,3 +1,5 @@
+**Development on droppy has ceased because I don't have enough time or motivation to properly support it and because of its outdated technology stack, it became exceedingly boring to work.**
+
 <p align="center">
   <img src="https://cdn.rawgit.com/silverwind/droppy/master/client/images/readme-logo.svg"/>
 </p>
